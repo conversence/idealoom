@@ -42,6 +42,19 @@
     color: #cccccc;
     font-size: 80%;
   }
+
+  i {
+    vertical-align: top;
+  }
+
+  .debate-title-text {
+    display: inline-block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: top;
+    white-space: nowrap;
+    @include calc(width, "100% - 60px"); /* 60px is the width of both icons to the left of the title, and some margin */
+  }
 }
 
 .navbar {
@@ -49,7 +62,10 @@
     background-color: $theme_header_bg_color;
     color: $theme_header_text_color;
     height: $theme_header_height;
+    max-height: $theme_header_height;
     box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.5);
+    display: table-row;
+    /*overflow: hidden; can't use this because of dropdowns */
   }
 }
 
@@ -63,6 +79,10 @@
 
 #header {
   height: $theme_header_height;
+  max-height: $theme_header_height;
+  display: table;
+  /*overflow: hidden; can't use this because of dropdowns */
+  width: 100%;
 }
 
 .authorization {

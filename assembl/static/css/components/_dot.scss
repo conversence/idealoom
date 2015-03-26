@@ -2,10 +2,12 @@
 // Adds a gray dot before the word
 // ========
 #onlinedot {
-
+    vertical-align: top;
+    width: 100%;
     .dot-offline {
-      display: block;
+      display: inline-block;
       line-height: $theme_header_height;
+      float: left;
     }
 
     .dot-online {
@@ -31,7 +33,7 @@
       white-space: nowrap;
       text-overflow: ellipsis;
       overflow: hidden;
-      width: 290px;
+      width: 100%;
       line-height: $theme_header_height;
     }
 

@@ -1,14 +1,14 @@
 <ul class="man pan">
-    <li class="sub logo-container fl">
+    <li class="sub logo-container">
         <a href="/{{ discussion.slug }}/" class="assembl-logo" class="sign-in"></a>
     </li>
-    <li class="sub fl">
-        <div id="onlinedot" class="onlinedot fl socketIndicator">
+    <li class="sub">
+        <div id="onlinedot" class="onlinedot socketIndicator">
             <small class="dot-offline">{{ gettext('Connecting...') }}</small>
             <div class="dot-online debate-title">
                 <i class="icon-arrowright"></i>
                 <i class="debate-icon icon-discuss"></i>
-                <span>{{ discussion.topic }}</span>
+                <div class="debate-title-text">{{ discussion.topic }}</div>
             </div>
         </div>
     </li>

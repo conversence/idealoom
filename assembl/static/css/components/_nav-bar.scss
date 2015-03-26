@@ -7,19 +7,32 @@ $textProfile: #515151;
   @include box-sizing(border-box);
   display: block;
   position: relative;
-  z-index: 100; /* for dropdowns */
+  /*z-index: 100; /* for dropdowns */
   background-color: $white;
+
+  #navBarLeft {
+    display: table-cell;
+  }
 
   .navbar-left {
     height: $theme_header_height;
-    float: left;
-    position: relative;
+    display: inline-block;
+    width: 100%;
+
 
     ul > li{
       list-style: none;
+      display: inline-block;
+    }
+
+    ul > li:last-child{
+      @include calc(width, "100% - #{$theme_header_logo_width} - 5px");
+      @include calc(max-width, "100vw - 820px");
     }
 
     ul{
+      display: inline-block;
+      width: 100%;
       .sub {
         height: $theme_header_height;
       }
@@ -32,7 +45,7 @@ $textProfile: #515151;
     }
     .logo-container {
       height: $theme_header_height;
-      width: 115px;
+      width: $theme_header_logo_width;
     }
     .socketIndicator {
 
@@ -40,23 +53,33 @@ $textProfile: #515151;
   }
 
   .navbar-center {
+    display: table-cell;
     height: $theme_header_height;
-    margin: 0 auto;
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
+    max-height: $theme_header_height;
     line-height: $theme_header_height;
+    vertical-align: top;
+    min-width: 440px; /* this is the approximate width of both buttons ("add a panel group" and "switch to participant mode") */
     .add-group {
       text-decoration: none;
       cursor: pointer;
     }
+    .navbar-center-content {
+      display: inline-block;
+      height: $theme_header_height;
+      max-height: $theme_header_height;
+      overflow: hidden;
+    }
+  }
+
+  #navBarRight {
+    display: table-cell;
+    min-width: 375px;
   }
 
   .navbar-right {
     height: $theme_header_height;
-    position: absolute;
-    right: 0;
+    max-height: $theme_header_height;
+    /*overflow: hidden; can't use this because of dropdowns */
     line-height: $theme_header_height;
 
     ul > li{

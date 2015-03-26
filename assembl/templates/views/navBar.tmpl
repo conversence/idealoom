@@ -1,4 +1,9 @@
+<div id="navBarLeft">
+	<!-- LOGO -->
+</div>
+
 <div class="navbar-center tac">
+<div class="navbar-center-content">
 <% if( Ctx.canUseExpertInterface() ){ %>
   <% if( Ctx.getCurrentInterfaceType() === Ctx.InterfaceTypes.EXPERT ) { %>
     <a class="btn btn-secondary btn-sm add-group js_addGroup"><i class="icon-add"></i> {{ gettext('Add a new panel group') }}</a>
@@ -8,9 +13,6 @@
   <% } %>
 <% } %>
 </div>
-
-<div id="navBarLeft">
-	<!-- LOGO -->
 </div>
 
 <div id="navBarRight">

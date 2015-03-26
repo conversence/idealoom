@@ -21,6 +21,7 @@
 
   &.img-rounded {
     padding: 0;
+    overflow: hidden; /* so that image alt text does not break visual structure */
 
     img {
       border-radius: 50%;
