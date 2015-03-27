@@ -23,6 +23,7 @@ $textProfile: #515151;
     ul > li{
       list-style: none;
       display: inline-block;
+      vertical-align: top;
     }
 
     ul > li:last-child{
@@ -74,6 +75,7 @@ $textProfile: #515151;
   #navBarRight {
     display: table-cell;
     min-width: $theme_header_nav_bar_right_width; /* this is the approximate width of #navBarRight contents */
+    width: $theme_header_nav_bar_right_width; /* this is the approximate width of #navBarRight contents */
   }
 
   .navbar-right {
