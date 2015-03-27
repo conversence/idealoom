@@ -27,7 +27,7 @@ $textProfile: #515151;
 
     ul > li:last-child{
       @include calc(width, "100% - #{$theme_header_logo_width} - 5px");
-      @include calc(max-width, "100vw - 820px");
+      @include calc(max-width, "100vw - #{theme_header_nav_bar_center_width} - #{theme_header_nav_bar_right_width} - 5px");
     }
 
     ul{
@@ -58,7 +58,7 @@ $textProfile: #515151;
     max-height: $theme_header_height;
     line-height: $theme_header_height;
     vertical-align: top;
-    min-width: 440px; /* this is the approximate width of both buttons ("add a panel group" and "switch to participant mode") */
+    min-width: $theme_header_nav_bar_center_width; /* this is the approximate width of both buttons ("add a panel group" and "switch to participant mode") */
     .add-group {
       text-decoration: none;
       cursor: pointer;
@@ -73,7 +73,7 @@ $textProfile: #515151;
 
   #navBarRight {
     display: table-cell;
-    min-width: 375px;
+    min-width: $theme_header_nav_bar_right_width; /* this is the approximate width of #navBarRight contents */
   }
 
   .navbar-right {
