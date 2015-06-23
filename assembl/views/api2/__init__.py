@@ -18,6 +18,9 @@ but there is a magic URL to obtain the list:
 Another special case is when the collection name is actually a singleton.
 In that case, one is allowed to use `-` instead of a database ID which one may not know.
 
+A final special case is the collection /data/Discussion/<N>/all_users, which has a shortcut to the logged-in user,
+if any: /data/Discussion/<N>/all_users/current
+
 This module defines generic behaviour, but more specific views can be defined
 through new view predicates: Look at `add_view_predicate` in `..traversal`, and there is an example in 
 the widget collection view in `.widget`. 
@@ -54,7 +57,7 @@ from assembl.auth import (
 from assembl.auth.util import get_roles, get_permissions
 from assembl.semantic.virtuoso_mapping import get_virtuoso
 from assembl.models import (
-    AbstractIdeaVote, User, DiscussionBoundBase, Discussion)
+    AbstractIdeaVote, User, DiscussionBoundBase, Discussion, TombstonableMixin)
 from assembl.lib.decl_enums import DeclEnumType
 
 FIXTURE_DIR = os.path.join(
@@ -217,6 +220,8 @@ def instance_post(request):
     raise HTTPBadRequest()
 
 
+@view_config(context=InstanceContext, request_method='PATCH', header=JSON_HEADER,
+             renderer='json')
 @view_config(context=InstanceContext, request_method='PUT', header=JSON_HEADER,
              renderer='json')
 def instance_put_json(request):
@@ -313,7 +318,11 @@ def instance_del(request):
     instance = ctx._instance
     if not instance.user_can(user_id, CrudPermissions.DELETE, permissions):
         return HTTPUnauthorized()
-    instance.db.delete(instance)
+    if isinstance(instance, TombstonableMixin):
+        instance.is_tombstone = True
+    else:
+        instance.db.delete(instance)
+    # maybe instance.tombstone() ?
     return {}
 
 

@@ -1,8 +1,12 @@
 'use strict';
 
-define(['common/context', 'utils/i18n', 'common/collectionManager', 'bluebird'],
-function (Ctx, i18n, CollectionManager, Promise) {
-  var collectionManager = new CollectionManager();
+var Ctx = require('../common/context.js'),
+    i18n = require('../utils/i18n.js'),
+    CollectionManager = require('../common/collectionManager.js'),
+    Promise = require('bluebird');
+
+
+var collectionManager = new CollectionManager();
   
   /** Base interface of all filters */
   function AbstractFilter(){
@@ -140,7 +144,7 @@ function (Ctx, i18n, CollectionManager, Promise) {
         }
       }
       return AbstractFilter.prototype.addValue.call(this, value);
-    },
+    }
     
 
   });
@@ -331,7 +335,7 @@ function (Ctx, i18n, CollectionManager, Promise) {
       return Promise.resolve(i18n.gettext('Replies to'));
     },
     getHelpText: function() {
-      return i18n.gettext('Only include messages that replies to a specific user.');
+      return i18n.gettext('Only include messages that reply to a specific user.');
     },
     getFilterIndividualValueDescriptionStringPromise: function(individualFilterValue) {
       return collectionManager.getAllUsersCollectionPromise(individualFilterValue).then(function(users) {
@@ -537,7 +541,6 @@ function (Ctx, i18n, CollectionManager, Promise) {
     POST_REPONDS_TO: FilterPostReplyToUser,
     POST_REPONDS_TO_ME: FilterPostReplyToMe
   };
-  
-  return availableFilters;
 
-});
+
+  module.exports = availableFilters;

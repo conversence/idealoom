@@ -19,8 +19,21 @@
         "preferred_email": false,
         "was_created_on_current_discussion": false,
         "is_first_visit": false,
-        "email_accounts": [":default"],
-        "identity_accounts": [":default"]
+        "accounts": [":default"]
+    },
+    "Action": {
+        "user": "actor"
+    },
+    "ActionOnPost": {
+        "@extends": "Action",
+        "target": "post",
+        "target_type": "'\"Content\""
+    },
+    "LikedPost": {
+        "@extends": "ActionOnPost"
+    },
+    "ViewPost": {
+        "@extends": "ActionOnPost"
     },
     "User": {
         "@extends": "AgentProfile",
@@ -128,6 +141,7 @@
         "hidden": true,
         "discussion": true,
         "import_date": false,
+        "like_count": true,
         "subject": "&get_title",
         "body": "&get_body",
         "widget_ideas": "&widget_ideas"
@@ -203,12 +217,14 @@
     "Idea": {
         "longTitle": "long_title",
         "shortTitle": "short_title",
+        "original_uri": true,
         "definition": true,
         "creationDate": "creation_date",
         "order": "&get_order_from_first_parent",
         "discussion": false,
         "hidden": true,
         "parents": true,
+        "is_tombstone": true,
         "parentId": "&get_first_parent_uri",
         "inNextSynthesis": "is_in_next_synthesis",
         "numChildIdea": "&get_num_children",
@@ -238,8 +254,10 @@
         "num_synthesis_posts": true
     },
     "IdeaLink": {
+        "original_uri": true,
         "target": true,
         "source": true,
+        "is_tombstone": true,
         "order": true
     },
     "IdeaGraphView": {
@@ -263,7 +281,7 @@
         "conclusion": true,
         "is_next_synthesis": true,
         "published_in_post": true,
-        "ideas": [":id_only"]
+        "ideas": [":tombstones"]
     },
     "IdeaContentLink": {
         "idea": true,
@@ -310,10 +328,6 @@
         "permission": "&permission_name",
         "role": "&role_name"
     },
-    "ViewPost": {
-        "actor": true,
-        "post": true
-    },
     "Widget": {
         "discussion": true,
         "settings": "settings_json",
@@ -349,6 +363,7 @@
         "criterion": true,
         "widget": true,
         "value": true,
+        "original_uri": true,
         "voter": true
     },
     "BinaryIdeaVote": {

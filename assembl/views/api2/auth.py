@@ -10,9 +10,9 @@ from pyramid.httpexceptions import (
 
 from assembl.auth import (
     P_ADMIN_DISC, P_SELF_REGISTER, P_SELF_REGISTER_REQUEST,
-    R_PARTICIPANT, CrudPermissions)
+    R_PARTICIPANT, P_READ, CrudPermissions)
 from assembl.models import (
-    User, Discussion, LocalUserRole, AbstractAgentAccount)
+    User, Discussion, LocalUserRole, AbstractAgentAccount, AgentProfile)
 from assembl.auth.util import get_permissions
 from ..traversal import (CollectionContext, InstanceContext)
 from .. import JSONError
@@ -82,6 +82,14 @@ def add_local_role(request):
             status_code=201)
 
 
+@view_config(
+    context=InstanceContext, request_method="PATCH",
+    ctx_named_collection_instance="Discussion.local_user_roles",
+    header=JSON_HEADER, renderer='json')
+@view_config(
+    context=InstanceContext, request_method="PATCH",
+    ctx_named_collection_instance="User.local_roles",
+    header=JSON_HEADER, renderer='json')
 @view_config(
     context=InstanceContext, request_method="PUT",
     ctx_named_collection_instance="Discussion.local_user_roles",
@@ -207,6 +215,9 @@ def delete_abstract_agent_account(request):
     return {}
 
 
+@view_config(context=InstanceContext, request_method='PATCH',
+             header=JSON_HEADER, ctx_instance_class=AbstractAgentAccount,
+             renderer='json')
 @view_config(context=InstanceContext, request_method='PUT', header=JSON_HEADER,
              ctx_instance_class=AbstractAgentAccount, renderer='json')
 def put_abstract_agent_account(request):

@@ -1,25 +1,28 @@
 'use strict';
 
-define(['common/context', 'utils/i18n', 'common/collectionManager', 'bluebird', 'views/postFilters'],
-    function (Ctx, i18n, CollectionManager, Promise, PostFilters) {
+var Ctx = require('../common/context.js'),
+    i18n = require('../utils/i18n.js'),
+    CollectionManager = require('../common/collectionManager.js'),
+    Promise = require('bluebird'),
+    _ = require('../shims/underscore.js');
 
-  /**
-   * @class PostQuery
-   *
-   * Manages querying, filtering and sorting posts.  Abstracts out client and
-   * server side filtering (The client should re-call execute on the query
-   * to sort or modify filters.  Any client-side processing to optimize should
-   * be done inside this class, to ease unit testing and code clarity.
-   */
-  var PostQuery = function () {
+/**
+* @class PostQuery
+*
+* Manages querying, filtering and sorting posts.  Abstracts out client and
+* server side filtering (The client should re-call execute on the query
+* to sort or modify filters.  Any client-side processing to optimize should
+* be done inside this class, to ease unit testing and code clarity.
+*/
+var PostQuery = function () {
     var collectionManager = new CollectionManager();
 
-    this.availableFilters = PostFilters;
+    this.availableFilters = require('./postFilters.js');
     /**
      * Has a property with the id each active
      * filter, and the filter object as value
      */
-    this._query = {};
+    this._query = undefined;
 
     this._resultIds = [];
 
@@ -93,7 +96,10 @@ define(['common/context', 'utils/i18n', 'common/collectionManager', 'bluebird', 
       var retval = false;
       var filterDef = new filterDef();
       //console.log("isFilterInQuery() called with:", filterDef.getId(), value, this._query)
-      if (filterDef.getId() in this._query) {
+      if(!this.isQueryValid()) {
+        retval = false;
+      }
+      else if (filterDef.getId() in this._query) {
         if (value === null) {
           retval = true;
         }
@@ -115,11 +121,14 @@ define(['common/context', 'utils/i18n', 'common/collectionManager', 'bluebird', 
     this.addFilter = function (filterDef, value) {
       //console.log("addFilter called with: ", filterDef.name, value);
       var retval = true,
-      valueWasReplaced = false,
-      filter = null,
-      candidate_filter = new filterDef(),
-      filterId = candidate_filter.getId();
+          valueWasReplaced = false,
+          filter = null,
+          candidate_filter = new filterDef(),
+          filterId = candidate_filter.getId();
 
+      if(this.isQueryValid() === false) {
+        this.initialize();
+      }
       if(this.isFilterInQuery(filterDef, value)) {
         if (value === null) {
           delete this._query[filterId];
@@ -151,7 +160,9 @@ define(['common/context', 'utils/i18n', 'common/collectionManager', 'bluebird', 
     };
 
     /**
-     * Remove all filter from the query
+     * Remove all filter from the query.  Effectively returns all messages
+     * 
+     * Same as initializing the query.  
      */
     this.clearAllFilters = function () {
       this.invalidateResults();
@@ -176,7 +187,23 @@ define(['common/context', 'utils/i18n', 'common/collectionManager', 'bluebird', 
       //console.log("isFilterConfigSameAsSnapshot returning",retval);
       return retval;
     };
+
+    this.initialize = function () {
+      return this.clearAllFilters();
+    };
     
+    this.uninitialize = function() {
+      this._query = undefined;
+      return true;
+    };
+    
+    /**
+     * Has the query been properly initialized?
+     */
+    this.isQueryValid = function () {
+      return this._query !== undefined;
+    };
+
     /**
      * invalidate the Results
      */
@@ -199,7 +226,10 @@ define(['common/context', 'utils/i18n', 'common/collectionManager', 'bluebird', 
       filterObject = new filterDef(),
       filterId = filterObject.getId();
      // console.log("clearFilter called with ",filterId, valueIndex)
-      if (filterId in this._query) {
+      if(this.isQueryValid() === false) {
+        this.initialize();
+      }
+      else if (filterId in this._query) {
         var filter = this._query[filterId],
             filterValues = filter.getValues();
 
@@ -270,6 +300,9 @@ define(['common/context', 'utils/i18n', 'common/collectionManager', 'bluebird', 
       id = null,
       value = null;
 
+      if (this._query === undefined) {
+        throw new Error("Query isn't initialized");
+      }
       if (this._resultsAreValid) {
         return Promise.resolve(that._resultIds);
 
@@ -468,6 +501,5 @@ define(['common/context', 'utils/i18n', 'common/collectionManager', 'bluebird', 
 
   };
 
-  return PostQuery;
+module.exports = PostQuery;
 
-});

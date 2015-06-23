@@ -434,6 +434,9 @@ class BaseOps(object):
         for cls in cls.mro():
             if cls.__name__ == 'Base':
                 return None
+            if not issubclass(cls, BaseOps):
+                # mixin
+                continue
             my_typename = cls.external_typename()
             local_view = view_def.get(my_typename, None)
             if local_view is False:
@@ -731,7 +734,7 @@ class BaseOps(object):
 
     def _create_subobject_from_json(
             self, json, target_cls, parse_def, aliases,
-            context, user_id, accessor_name):
+            context, user_id, accessor_name, jsonld=None):
         instance = None
         target_type = json.get('@type', None)
         if target_type:
@@ -748,23 +751,24 @@ class BaseOps(object):
             return None
         target_id = json.get('@id', None)
         if target_id is not None:
-            target_id = aliases.get(target_id, target_id)
             if isinstance(target_id, (str, unicode)):
-                instance = get_named_object(
-                    target_cls.external_typename(), target_id)
-            else:
-                instance = target_id
+                instance = aliases.get(target_id, None)
+                if instance is None:
+                    instance = get_named_object(
+                        target_id, target_cls.external_typename())
+                    if instance is not None:
+                        aliases[target_id] = instance
         if instance is not None:
             instance._do_update_from_json(
                 json, parse_def, aliases, context,
-                user_id, False)
-        if instance is None:
+                user_id, False, jsonld)
+        else:
             instance = target_cls._do_create_from_json(
-                json, parse_def, aliases, context, user_id, False)
-        if instance is None:
-            raise HTTPBadRequest(
-                "Could not find or create object %s" % (
-                    dumps(json),))
+                json, parse_def, aliases, context, user_id, False, jsonld)
+            if instance is None:
+                raise HTTPBadRequest(
+                    "Could not find or create object %s" % (
+                        dumps(json),))
         if target_id is not None:
             aliases[target_id] = instance
         return instance
@@ -776,8 +780,10 @@ class BaseOps(object):
     @classmethod
     def create_from_json(
             cls, json, user_id=None, context=None,
+            aliases=None, jsonld=None,
             parse_def_name='default_reverse'):
         from ..auth.util import get_permissions
+        aliases = aliases or {}
         parse_def = get_view_def(parse_def_name)
         context = context or cls.dummy_context
         user_id = user_id or Everyone
@@ -788,12 +794,13 @@ class BaseOps(object):
         with cls.default_db.no_autoflush:
             # We need this to allow db.is_modified to work well
             return cls._do_create_from_json(
-                json, parse_def, {}, context, permissions, user_id)
+                json, parse_def, aliases, context, permissions,
+                user_id, True, jsonld)
 
     @classmethod
     def _do_create_from_json(
             cls, json, parse_def, aliases, context, permissions,
-            user_id, duplicate_error=True):
+            user_id, duplicate_error=True, jsonld=None):
         can_create = cls.user_can_cls(
             user_id, CrudPermissions.CREATE, permissions)
         if duplicate_error and not can_create:
@@ -804,7 +811,7 @@ class BaseOps(object):
         inst = cls()
         result = inst._do_update_from_json(
             json, parse_def, aliases, context, permissions,
-            user_id, duplicate_error)
+            user_id, duplicate_error, jsonld)
         if result is inst and not can_create:
             raise HTTPUnauthorized(
                 "User id <%s> cannot create a <%s> object" % (
@@ -824,7 +831,7 @@ class BaseOps(object):
         return result
 
     def update_from_json(
-                self, json, user_id=None, context=None,
+                self, json, user_id=None, context=None, jsonld=None,
                 parse_def_name='default_reverse'):
         from ..auth.util import get_permissions
         parse_def = get_view_def(parse_def_name)
@@ -842,14 +849,16 @@ class BaseOps(object):
         with self.db.no_autoflush:
             # We need this to allow db.is_modified to work well
             return self._do_update_from_json(
-                json, parse_def, {}, context, permissions, user_id)
+                json, parse_def, {}, context, permissions, user_id,
+                True, jsonld)
 
     # TODO: Add security by attribute?
     # Some attributes may be settable only on create.
     def _do_update_from_json(
             self, json, parse_def, aliases, context, permissions,
-            user_id, duplicate_error=True):
+            user_id, duplicate_error=True, jsonld=None):
         assert isinstance(json, dict)
+        jsonld = jsonld or {}
         is_created = self.id is None
         typename = json.get("@type", None)
         if typename and typename != self.external_typename() and \
@@ -859,7 +868,7 @@ class BaseOps(object):
             recast = self.change_class(new_cls, json)
             return recast._do_update_from_json(
                 json, parse_def, aliases, context, permissions,
-                user_id, duplicate_error)
+                user_id, duplicate_error, jsonld)
         local_view = self.expand_view_def(parse_def)
         # False means it's illegal to get this.
         assert local_view is not False
@@ -924,7 +933,7 @@ class BaseOps(object):
                 if not col.foreign_keys:
                     if isinstance(value, (str, unicode)):
                         target_type = col.type.__class__
-                        if col.type.__class__ == DateTime:
+                        if target_type == DateTime:
                             value = iso8601.parse_date(value, None)
                             assert value
                             setattr(self, key, value)
@@ -1010,12 +1019,21 @@ class BaseOps(object):
             c_context = ChainingContext(context, self)
             if isinstance(value, (str, unicode)):
                 assert not must_be_list
-                target_id = aliases.get(value, value)
+                target_id = value
                 if target_cls is not None and \
                         isinstance(target_id, (str, unicode)):
+                    instance = aliases.get(target_id, None)
                     # TODO: Keys spanning multiple columns
-                    instance = get_named_object(
-                        target_cls.external_typename(), target_id)
+                    if instance is None:
+                        instance = get_named_object(
+                            target_id, target_cls.external_typename())
+                        if instance is not None:
+                            aliases[target_id] = instance
+                    if instance is None and target_id in jsonld:
+                        instance = _create_subobject_from_json(
+                            jsonld[target_id], target_cls, parse_def,
+                            aliases, c_context, user_id, accessor, jsonld)
+                        aliases[target_id] = instance
                     if instance is None:
                         raise HTTPBadRequest("Could not find object "+value)
                 else:
@@ -1025,7 +1043,7 @@ class BaseOps(object):
                 assert not must_be_list
                 instance = self._create_subobject_from_json(
                     value, target_cls, parse_def, aliases,
-                    c_context, user_id, accessor_name)
+                    c_context, user_id, accessor_name, jsonld)
                 if instance is None:
                     if isinstance(accessor, property):
                         # It may not be an object after all
@@ -1036,9 +1054,17 @@ class BaseOps(object):
                 assert can_be_list
                 for subval in value:
                     if isinstance(subval, (str, unicode)):
-                        subval = aliases.get(subval, subval)
-                        instance = get_named_object(
-                            target_cls.external_typename(), subval)
+                        instance = aliases.get(subval, None)
+                        if instance is None:
+                            instance = get_named_object(
+                                subval, target_cls.external_typename())
+                            if instance is not None:
+                                aliases[subval] = instance
+                        if instance is None and subval in jsonld:
+                            instance = _create_subobject_from_json(
+                                jsonld[subval], target_cls, parse_def,
+                                aliases, c_context, user_id, accessor, jsonld)
+                            aliases[subval] = instance
                         if instance is None:
                             raise HTTPBadRequest(
                                 "Could not find object %s" % (
@@ -1047,7 +1073,7 @@ class BaseOps(object):
                     elif isinstance(subval, dict):
                         instance = self._create_subobject_from_json(
                             subval, target_cls, parse_def, aliases,
-                            c_context, user_id, accessor_name)
+                            c_context, user_id, accessor_name, jsonld)
                         if instance is None:
                             raise HTTPBadRequest("No @class in "+dumps(subval))
                     else:
@@ -1182,7 +1208,7 @@ class BaseOps(object):
                     # TODO: Check if there's a risk of infinite recursion here?
                     return other._do_update_from_json(
                         json, parse_def, aliases, context, permissions,
-                        user_id, duplicate_error)
+                        user_id, duplicate_error, jsonld)
         return self
 
     def unique_query(self):
@@ -1512,9 +1538,10 @@ def get_named_class(typename):
 
 
 # In theory, the identifier should be enough... at some point.
-def get_named_object(typename, identifier):
+def get_named_object(identifier, typename=None):
     "Get an object given a typename and identifier"
-    # A numeric identifier will often be accepted.
+    if typename is None:
+        typename = identifier.split('/')[-2]
     cls = get_named_class(typename)
     if cls:
         return cls.get_instance(identifier)

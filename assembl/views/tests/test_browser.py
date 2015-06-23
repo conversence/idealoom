@@ -1,3 +1,4 @@
+import pytest
 
 def test_front_page(browser, test_server, db_default_data):
     """Test using real browser."""
@@ -5,7 +6,8 @@ def test_front_page(browser, test_server, db_default_data):
     assert browser.title == 'Assembl'
 
 
-def test_jasmine(browser, test_server, discussion, test_session):
+@pytest.mark.xfail
+def test_mocha(browser, test_server, discussion, test_session):
     """Test using real browser."""
     from jasmine_runner.commands import run_specs_with_browser
     url = "%s/%s/test" % (test_server.url, discussion.slug)
@@ -30,5 +32,8 @@ def test_load_messages(
     button = accordeon_buttons[u'debate']
     if not button.has_class('active'):
         button.click()
-    assert browser.is_element_present_by_css('.message', wait_time=1)
+    assert browser.is_element_present_by_css('.allMessagesView .idealist-title', wait_time=2)
+    all_messages_button = browser.find_by_css('.allMessagesView .idealist-title')
+    all_messages_button.click()
+    assert browser.is_element_present_by_css('.message', wait_time=2)
     assert 20 == len(browser.find_by_css('.message'))

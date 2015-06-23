@@ -124,6 +124,7 @@
         "topic": true
     },
     "Idea": {
+        "original_uri": true,
         "longTitle": "long_title",
         "shortTitle": "short_title",
         "definition": true,
@@ -157,6 +158,7 @@
         "@extends": "Idea"
     },
     "IdeaLink": {
+        "original_uri": true,
         "target": true,
         "source": true,
         "order": true
@@ -177,7 +179,8 @@
         "introduction": true,
         "conclusion": true,
         "is_next_synthesis": true,
-        "ideas": [":id_only"],
+        "published_in_post": true,
+        "ideas": [":partial"],
         "idea_links": [":partial"]
     },
     "IdeaContentLink": {
@@ -223,10 +226,6 @@
         "discussion": true,
         "permission": "&permission_name",
         "role": "&role_name"
-    },
-    "ViewPost": {
-        "actor": true,
-        "post": true
     },
     "PartnerOrganization": {
             "name": true,

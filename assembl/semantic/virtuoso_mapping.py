@@ -1,5 +1,5 @@
 from os import listdir
-from os.path import join, dirname
+from os.path import join
 from inspect import isabstract
 from threading import Lock
 import re
@@ -11,6 +11,7 @@ from sqlalchemy.orm.properties import RelationshipProperty
 from rdflib import Graph, ConjunctiveGraph, URIRef
 import simplejson as json
 
+from . import (context_url, ontology_dir, local_context_loc)
 from ..lib.config import get_config
 from ..lib.sqla import class_registry, Base
 from .namespaces import (ASSEMBL, QUADNAMES, RDF, OWL, CATALYST, SIOC, FOAF)
@@ -102,10 +103,6 @@ iri_definition_stmts = {
         returns varchar
     """
 }
-
-context_url = 'http://purl.org/catalyst/jsonld'
-ontology_dir = join(dirname(__file__), 'ontology')
-local_context_loc = join(ontology_dir, 'context.jsonld')
 
 
 def load_ontologies(session, reload=None):
@@ -272,7 +269,10 @@ class AssemblClassPatternExtractor(ClassPatternExtractor):
             if isinstance(column, RelationshipProperty):
                 column = self.property_as_reference(column, alias_maker)
             elif column.foreign_keys:
-                column = self.column_as_reference(column)
+                try:
+                    column = self.column_as_reference(column)
+                except AssertionError:
+                    return None
         qmp = qmp.clone_with_defaults(
             subject_pattern, column, for_graph.name, name, None, rdf_sections)
         if not qmp.exclude_base_condition:
@@ -360,7 +360,7 @@ class AssemblQuadStorageManager(object):
     sections = {section.name: section for section in chain(*(
         storage.sections for storage in storages))}
     global_graph = QUADNAMES.global_graph
-    current_discussion_storage_version = 8
+    current_discussion_storage_version = 10
 
     def __init__(self, session=None, nsm=None):
         self.session = session or get_session()

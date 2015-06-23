@@ -317,31 +317,15 @@ def compile_stylesheets():
         with cd('assembl/static/widget/video/app'):
             run('bundle exec compass compile --force --sass-dir scss --css-dir css', shell=True)
 
-
 @task
-def minify_javascript_maybe():
-    config = get_config()
-    try:
-        minify = config.get('app:assembl', 'minified_js')
-        print minify
-        if minify == 'debug':
-            execute(minify_javascript_debug)
-        elif minify and minify != 'false':
-            execute(minify_javascript)
-    except NoOptionError:
-        pass
-
-
-@task
-def minify_javascript():
-    with cd(join(env.projectpath, 'assembl', 'static', 'js')):
-        run('node r.js -o build.js')
-
-
-@task
-def minify_javascript_debug():
-    with cd(join(env.projectpath, 'assembl', 'static', 'js')):
-        run('node r.js -o build_with_map.js')
+def compile_javascript():
+    """
+    Generates and minifies javascript
+    """
+    with cd(env.projectpath):
+        with cd('assembl'):
+            run('../node_modules/gulp/bin/gulp.js browserify:prod')
+            run('../node_modules/gulp/bin/gulp.js libs')
 
 
 def tests():
@@ -447,6 +431,7 @@ def app_update_dependencies():
     execute(update_compass)
     execute(update_bower)
     execute(bower_update)
+    execute(npm_update)
 
 
 @task
@@ -482,8 +467,7 @@ def app_compile_nodbupdate():
     execute(app_setup)
     execute(compile_stylesheets)
     execute(compile_messages)
-    execute(minify_javascript_maybe)
-
+    execute(compile_javascript)
 
 @task
 def webservers_reload():
@@ -608,6 +592,11 @@ def bower_update():
     """ Normally not called manually """
     execute(_bower_foreach_do, 'update')
 
+@task
+def npm_update():
+    """ Normally not called manually """
+    with cd(env.projectpath):
+        run('npm update')
 
 @task
 def install_builddeps():
@@ -624,6 +613,9 @@ def install_builddeps():
         if not run('brew link libevent', quiet=True):
             sudo('brew link libevent')
         run('brew install memcached zeromq redis libtool libmemcached gawk')
+        run('brew tap homebrew/services')
+        sudo('brew services start memcached')
+        sudo('brew services start redis')
         if not exists('/usr/local/bin/node'):
             run('brew install nodejs npm')
         if not exists('/usr/local/bin/autoconf'):
@@ -632,6 +624,11 @@ def install_builddeps():
             run('brew install automake')
         if not exists('/usr/local/bin/pandoc'):
             run('brew install pandoc')
+        if not exists('/usr/local/bin/twopi'):
+            run('brew install graphviz')
+            # may require a sudo
+            if not run('brew link graphviz', quiet=True):
+                sudo('brew link graphviz')
         # glibtoolize, bison, flex, gperf are on osx by default.
         # brew does not know aclocal, autoheader... 
         # They exist on macports, but do we want to install that?
@@ -639,6 +636,7 @@ def install_builddeps():
         sudo('apt-get install -y build-essential python-dev ruby-builder')
         sudo('apt-get install -y nodejs nodejs-legacy npm pandoc')
         sudo('apt-get install -y automake bison flex gperf  libxml2-dev libssl-dev libreadline-dev gawk')
+        sudo('apt-get install -y graphviz libgraphviz-dev pkg-config')
 
         #Runtime requirements (even in develop)
         sudo('apt-get install -y redis-server memcached unixodbc-dev')
@@ -869,6 +867,21 @@ def database_upload():
     """
     if(env.wsginame != 'dev.wsgi'):
         put(get_db_dump_name(), remote_db_path())
+
+
+@task
+def database_delete():
+    """
+    Restores the database backed up on the remote server
+    """
+    if(env.is_production_env is True):
+        abort(red("You are not allowed to delete the database of a production " +
+                "environment.  If this is a server restore situation, you " +
+                "have to temporarily declare env.is_production_env = False " +
+                "in the environment"))
+    execute(ensure_virtuoso_not_running)
+    with cd(virtuoso_db_directory()):
+        run('rm -f *.db *.trx *.lck *.trx *.pxa')
 
 
 @task

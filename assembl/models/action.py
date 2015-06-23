@@ -7,27 +7,25 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     Unicode,
-    UnicodeText,
     DateTime,
-    Time,
-    Binary,
     desc,
-    Index
+    select,
+    func,
 )
 
-from sqlalchemy.orm import relationship, backref
-from sqlalchemy.types import Text
+from sqlalchemy.orm import relationship, backref, column_property
 from virtuoso.vmapping import IriClass
 
-from . import Base, DiscussionBoundBase, DiscussionBoundTombstone
+from . import DiscussionBoundBase, DiscussionBoundTombstone, TombstonableMixin
 from ..semantic.namespaces import (
-    SIOC, ASSEMBL, CATALYST, QUADNAMES, VERSION, FOAF, DCTERMS, RDF, VirtRDF)
-from ..semantic.virtuoso_mapping import QuadMapPatternS, USER_SECTION
-from .auth import User
+    ASSEMBL, QUADNAMES, VERSION, RDF, VirtRDF)
+from ..semantic.virtuoso_mapping import QuadMapPatternS
+from .auth import User, AgentProfile
 from .generic import Content
 from .discussion import Discussion
 
-class Action(DiscussionBoundBase):
+
+class Action(TombstonableMixin, DiscussionBoundBase):
     """
     An action that can be taken by an actor.
     """
@@ -48,7 +46,8 @@ class Action(DiscussionBoundBase):
         Integer,
         ForeignKey('user.id', ondelete='CASCADE', onupdate='CASCADE'),
         nullable=False,
-        info={'rdf': QuadMapPatternS(None, VERSION.who)}
+        info={'rdf': QuadMapPatternS(
+            None, VERSION.who, AgentProfile.agent_as_account_iri.apply(None))}
     )
 
     actor = relationship(
@@ -122,7 +121,19 @@ class ActionOnPost(Action):
         info={'rdf': QuadMapPatternS(None, ASSEMBL.in_conversation)})
 
 
-class ViewPost(ActionOnPost):
+class UniqueActionOnPost(ActionOnPost):
+    "An action that should be unique of its subclass for a post, user pair"
+    def unique_query(self):
+        # inheritance leads in trouble
+        query = self.db.query(self.__class__)
+        actor_id = self.actor_id or self.actor.id
+        post_id = self.post_id or self.post.id
+        return query.filter_by(
+            actor_id=actor_id, type=self.type, post_id=post_id,
+            tombstone_date=self.tombstone_date), True
+
+
+class ViewPost(UniqueActionOnPost):
     """
     A view action on a post.
     """
@@ -144,7 +155,40 @@ class ViewPost(ActionOnPost):
     verb = 'viewed'
 
 
-class ExpandPost(ActionOnPost):
+class LikedPost(UniqueActionOnPost):
+    """
+    A like action on a post.
+    """
+    __mapper_args__ = {
+        'polymorphic_identity': 'vote:BinaryVote'
+    }
+
+    def tombstone(self):
+        from .generic import Content
+        return DiscussionBoundTombstone(
+            self, post=Content.uri_generic(self.post_id),
+            actor=User.uri_generic(self.actor_id))
+
+    post_from_like = relationship(
+        'Content',
+        backref=backref('was_liked'),
+    )
+
+    verb = 'liked'
+
+_lpt = LikedPost.__table__
+_actt = Action.__table__
+Content.like_count = column_property(
+    select([func.count(_actt.c.id)]).where(
+        (_lpt.c.id == _actt.c.id)
+        & (_lpt.c.post_id == Content.__table__.c.id)
+        & (_actt.c.type ==
+           LikedPost.__mapper_args__['polymorphic_identity'])
+        & (_actt.c.tombstone_date == None)
+        ).correlate_except(_actt, _lpt))
+
+
+class ExpandPost(UniqueActionOnPost):
     """
     An expansion action on a post.
     """
@@ -155,7 +199,7 @@ class ExpandPost(ActionOnPost):
     verb = 'expanded'
 
 
-class CollapsePost(ActionOnPost):
+class CollapsePost(UniqueActionOnPost):
     """
     A collapse action on a post.
     """
