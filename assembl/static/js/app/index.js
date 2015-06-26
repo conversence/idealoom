@@ -8,8 +8,6 @@ var App = require('./app.js'),
     CollectionManager = require('./common/collectionManager.js'),
     Raven = require('raven-js');
 
-require('./utils/taketour.js');
-
 if (raven_url.length) {
     Raven.config(raven_url).install();
     Raven.setUserContext({id: Ctx.getCurrentUserId()});
@@ -35,7 +33,10 @@ if(Ctx.getCurrentInterfaceType() === Ctx.InterfaceTypes.SIMPLE){
     if(activate_tour && (currentUser.isUnknownUser() || currentUser.get('is_first_visit'))){
         // start take tour due to the dom latencies
         setTimeout(function(){
-            Taketour.init();
+            // may have been disabled by the router
+            if (activate_tour) {
+                Taketour.init();
+            }
         }, 4000);
     }
 }
