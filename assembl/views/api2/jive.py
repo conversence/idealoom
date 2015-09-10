@@ -67,3 +67,4 @@ def register_jive_addon(request):
     source.settings = json_data
     db.add(source)
     db.flush()  # is this even necessary?
+    return {}

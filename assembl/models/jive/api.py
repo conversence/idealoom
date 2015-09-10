@@ -7,7 +7,7 @@ class __JiveOAuth:
     token_route = '/oauth2/token'
     authorize_route = '/oauth2/authorize'
 
-    def __init__(self, instance_route):
+    def __init__(self, instance_route, client_id, client_secret):
         if not isinstance(instance_route, basestring):
             raise TypeError("Cannot instantiate an OAuthCreator \
                             with input %s" % instance_route)

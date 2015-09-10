@@ -58,6 +58,7 @@ def create_meta_json(**kwargs):
     service_url = kwargs.get('service_url', 'http://localhost:6543')
     register_url = kwargs.get('register_url', "")
     unregister_url = kwargs.get('unregister_url', "")
+    name = kwargs.get('name')
     uuid = kwargs.get('uuid')
     assert uuid
     released_on = now.isoformat() + 'Z'  # Add UTC timezone
@@ -67,7 +68,8 @@ def create_meta_json(**kwargs):
         'service_url': service_url,
         'register_url': register_url,
         'unregister_url': unregister_url,
-        'uuid': uuid
+        'id': uuid,
+        'name': name
     })
     return meta
 
@@ -92,13 +94,6 @@ def write_json_to_file(data, path, name):
 
 
 def create_jive_addon(source, dest_file):
-    # in bin folder, make a new folder for the extension
-    # make a data folder
-    # make an i17n folder
-    # make an extra folder
-    # copy definition.json
-    # copy meta.json
-    # zip the new folder
     current_dir = getcwd()
     context = "%s/data/ContentSource/%d/" % (
         source.discussion.get_base_url(), source.id)
@@ -115,7 +110,8 @@ def create_jive_addon(source, dest_file):
     zipfile.writestr('meta.json', json.dumps(create_meta_json(
         register_url=context + jive_addon_registration_route,
         unregister_url=context + jive_addon_unregistration_route,
-        uuid=source.addon_uuid
+        uuid=source.addon_uuid,
+        name="OAuth Support for Assembl \"%s\"" % (source.discussion.topic, )
     )))
     zipfile.writestr('definition.json', json.dumps(create_definition_json()))
     zipfile.close()
