@@ -29,24 +29,13 @@ class JiveGroupSource(PostSource):
     json_data = Column(Text)
     settings = Column(Text)
     addon_uuid = Column(String(80))
-
-
-class JiveAccessToken(Base):
-    __tablename__ = 'jive_access_token'
-    id = Column(Integer, primary_key=True)
+    # token data
+    user_id = Column(Integer, ForeignKey('agent_profile.id',
+                     onupdate='CASCADE', ondelete='CASCADE'))
     token_type = Column(String(60))
     access_token = Column(String(256), nullable=False)
     refresh_token = Column(String(256))
     expires = Column(DateTime)
     scope = Column(String(60))
 
-
-class JiveUserTokens(Base):
-    __tablename__ = 'jive_user_tokens'
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('agent_profile.id',
-                     onupdate='CASCADE', ondelete='CASCADE'))
     user = relationship('AgentProfile', backref=backref('jive_access_tokens'))
-    token_id = Column(Integer, ForeignKey('jive_access_token.id',
-                      onupdate='CASCADE', ondelete='CASCADE'))
-    token = relationship(JiveAccessToken)
