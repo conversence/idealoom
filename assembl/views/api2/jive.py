@@ -1,12 +1,15 @@
+from cStringIO import StringIO
+
 import simplejson as json
 from pyramid.view import view_config
+from pyramid.response import Response
 from pyramid.security import authenticated_userid
 from pyramid.httpexceptions import HTTPUnauthorized
 
 from assembl.models import JiveGroupSource
 from assembl.models.jive.setup import (jive_addon_registration_route,
                                        jive_addon_creation,
-                                       compress)
+                                       create_jive_addon)
 from assembl.models.jive.api import OAuthCreator
 from assembl.auth import P_READ, Everyone
 from assembl.models.auth import AgentProfile
@@ -26,7 +29,8 @@ def get_auth_code_grant(request):
         jive_oauth = OAuthCreator()
         # incomplete
 
-@view_config(context=InstanceContext, request_method='POST',
+
+@view_config(context=InstanceContext, request_method='GET',
              ctx_instance_class=JiveGroupSource, permission=P_READ,
              renderer='json', name=jive_addon_creation)
 def generate_jive_addon(request):
@@ -38,9 +42,11 @@ def generate_jive_addon(request):
     if P_READ not in permissions:
         raise HTTPUnauthorized("Only a registered user can request for\
             this resource. Please sign up to continue")
-    # get the full URL here and call compress
-    zipfile = compress('full-path-of-resource')
-    return zipfile
+    # get the full URL here and call create_jive_addon
+    output = StringIO()
+    zipfile = create_jive_addon(ctx._instance, output)
+    output.seek(0)
+    return Response(body_file=output, content_type="application/zip")
 
 
 @view_config(context=InstanceContext, request_method='POST',

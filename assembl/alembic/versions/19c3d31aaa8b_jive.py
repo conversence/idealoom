@@ -27,7 +27,8 @@ def upgrade(pyramid_env):
             sa.Column('group_id', sa.String(256), nullable=False),
             sa.Column('place_id', sa.String(256)),
             sa.Column('json_data', sa.Text),
-            sa.Column('settings', sa.Text)
+            sa.Column('settings', sa.Text),
+            sa.Column('addon_uuid', sa.String(80))
         )
 
         # op.create_table('jive_addon_settings',

@@ -28,6 +28,7 @@ class JiveGroupSource(PostSource):
     place_id = Column(String(256))
     json_data = Column(Text)
     settings = Column(Text)
+    addon_uuid = Column(String(80))
 
 
 class JiveAccessToken(Base):

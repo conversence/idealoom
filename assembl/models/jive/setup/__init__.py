@@ -3,10 +3,10 @@ from os.path import exists, join
 from shutil import copyfile, make_archive
 from uuid import uuid4
 from datetime import datetime
+from zipfile import ZipFile
+
 import pytz
 import simplejson as json
-
-from ....lib.config import get_config
 
 
 bin_name = 'bin'
@@ -58,15 +58,16 @@ def create_meta_json(**kwargs):
     service_url = kwargs.get('service_url', 'http://localhost:6543')
     register_url = kwargs.get('register_url', "")
     unregister_url = kwargs.get('unregister_url', "")
+    uuid = kwargs.get('uuid')
+    assert uuid
     released_on = now.isoformat() + 'Z'  # Add UTC timezone
-    uid = uuid4().__str__()
 
     meta.update({
         'released_on': released_on,
         'service_url': service_url,
         'register_url': register_url,
         'unregister_url': unregister_url,
-        'id': uid
+        'uuid': uuid
     })
     return meta
 
@@ -90,7 +91,7 @@ def write_json_to_file(data, path, name):
         json.dump(data, js)
 
 
-def compress(context):
+def create_jive_addon(source, dest_file):
     # in bin folder, make a new folder for the extension
     # make a data folder
     # make an i17n folder
@@ -99,42 +100,22 @@ def compress(context):
     # copy meta.json
     # zip the new folder
     current_dir = getcwd()
-    bin_dir = join(current_dir, bin_name)
+    context = "%s/data/ContentSource/%d/" % (
+        source.discussion.get_base_url(), source.id)
+    zipfile = ZipFile(dest_file, 'w')
+    zipfile.write(
+        join(current_dir, "assembl/models/jive/setup/lightbulb-16.png"),
+        "data/lightbulb-16.png")
+    zipfile.write(
+        join(current_dir, "assembl/models/jive/setup/lightbulb-48.png"),
+        "data/lightbulb-48.png")
 
-    # first check in bin folder created. If not, create it
-    if not exists(bin_dir):
-        mkdir(bin_dir)
-
-    now = datetime.utcnow()
-    ext_name = 'assembl_jive_extension_' + now.strftime("%Y-%m-%d_%H-%M-%S")
-    ext_dir = join(bin_dir, ext_name)
-    mkdir(ext_dir)
-    src_dir = join(ext_dir, 'src')
-    mkdir(src_dir)
-    mkdir(join(src_dir, 'data'))
-    mkdir(join(src_dir, 'i18n'))
-    mkdir(join(src_dir, 'extra'))
-
-    config = get_config()
-    write_json_to_file(
-        create_meta_json(
-            service_url=config.get('jive.service_url'),
-            register_url=service_url_token + context + '/' + jive_addon_registration_route,
-            unregister_url=service_url_token + context + '/' + jive_addon_unregistration_route
-        ),
-        src_dir,
-        'meta.json'
-    )
-
-    write_json_to_file(
-        create_definition_json(),
-        src_dir,
-        'definition.json'
-    )
-
-    copyfile(join(current_dir, "assembl/models/jive/setup/lightbulb-16.png"),
-             join(src_dir, "data/lightbulb-16.png"))
-    copyfile(join(current_dir, "assembl/models/jive/setup/lightbulb-48.png"),
-             join(src_dir, "data/lightbulb-48.png"))
-
-    make_archive(join(ext_dir, zip_name), 'zip', src_dir)
+    source.addon_uuid = source.addon_uuid or str(uuid4())
+    # TODO: add a column
+    zipfile.writestr('meta.json', json.dumps(create_meta_json(
+        register_url=context + jive_addon_registration_route,
+        unregister_url=context + jive_addon_unregistration_route,
+        uuid=source.addon_uuid
+    )))
+    zipfile.writestr('definition.json', json.dumps(create_definition_json()))
+    zipfile.close()
