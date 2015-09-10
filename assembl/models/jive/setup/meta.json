@@ -1,0 +1,14 @@
+{  
+    "package_version": "1.0",  
+    "id": "INSERT_UUID_HERE",  
+    "type": "client-app",  
+    "name": "oauth.support",  
+    "description": "This add-on provides OAuth 2.0 support for the REST API",  
+    "minimum_version": "0070300000",  
+    "icon_16": "lightbulb-16.png",  
+    "icon_48": "lightbulb-48.png",  
+    "released_on": "2015-05-12T19:11:11.234Z",  
+    "register_url": "%serviceURL%/register",  
+    "unregister_url": "%serviceURL%/unregister",  
+    "service_url": "http://INSERT_URL_HERE"  
+}  

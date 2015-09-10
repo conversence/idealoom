@@ -144,6 +144,10 @@
     "FacebookSinglePostSource": {
         "@extends": "FacebookGenericSource"
     },
+    "JiveGroupSource":{
+        "@extends": "PostSource",
+        "group_id": true
+    },
     "AnnotatorSource": {
         "@extends": "ContentSource"
     },

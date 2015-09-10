@@ -1,0 +1,6 @@
+{  
+    "integrationUser": {  
+        "systemAdmin": true,  
+        "jiveServiceSignature": "INSERT_SIGNATURE_HERE"  
+    }  
+}
