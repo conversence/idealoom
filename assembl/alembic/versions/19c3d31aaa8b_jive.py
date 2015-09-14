@@ -20,7 +20,7 @@ from assembl.lib import config
 
 def upgrade(pyramid_env):
     with context.begin_transaction():
-        op.create_table('jive_group_source',
+        op.create_table('jive_source',
             sa.Column('id', sa.Integer, sa.ForeignKey(
                       'post_source.id', onupdate='CASCADE',
                       ondelete='CASCADE'), primary_key=True),
@@ -28,16 +28,18 @@ def upgrade(pyramid_env):
             sa.Column('place_id', sa.String(256)),
             sa.Column('json_data', sa.Text),
             sa.Column('settings', sa.Text),
-            sa.Column('addon_uuid', sa.String(80))
+            sa.Column('addon_uuid', sa.String(80)),
+            sa.Column('user_id', sa.Integer, sa.ForeignKey(
+                      'agent_profile.id', onupdate='CASCADE',
+                      ondelete='CASCADE')),
+            sa.Column('token_type', sa.String(60)),
+            sa.Column('access_token', sa.String(256)),
+            sa.Column('refresh_token', sa.String(256)),
+            sa.Column('expires', sa.DateTime),
+            sa.Column('scope', sa.String(60)),
+            sa.Column('instance_url', sa.String(256), nullable=False),
+            sa.Column('csfr_state', sa.String(256))
         )
-
-        # op.create_table('jive_addon_settings',
-        #     sa.Column('id', sa.Integer, primary_key=True),
-        #     sa.Column('source_id', sa.Integer, sa.ForeignKey(
-        #               'jive_group_source.id', onupdate='CASCADE',
-        #               ondelete='CASCADE'), nullable=False),
-        #     sa.Column('json_data', sa.Text, nullable=False),
-        # )
 
     # Do stuff with the app's models here.
     from assembl import models as m
@@ -49,4 +51,4 @@ def upgrade(pyramid_env):
 def downgrade(pyramid_env):
     with context.begin_transaction():
         # op.drop_table('jive_addon_settings')
-        op.drop_table('jive_group_source')
+        op.drop_table('jive_source')

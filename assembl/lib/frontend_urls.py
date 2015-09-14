@@ -1,7 +1,7 @@
 from urlparse import urljoin
 import urllib
 
-from ..models import Discussion
+from ..models.discussion import Discussion
 
 
 URL_DISCRIMINANTS = {
@@ -67,6 +67,9 @@ class FrontendUrls():
         #Celery didn't like this.  To revisit once we have virtual hosts
         #return req.route_url('home', discussion_slug=self.discussion.slug)
         return urljoin(self.discussion.get_base_url(), self.discussion.slug)
+
+    def get_discussion_source_url(self, source_id):
+        return self.get_discussion_url() + '/sources/' + str(source_id) + '/'
 
     def getUserNotificationSubscriptionsConfigurationUrl(self):
         return self.get_discussion_url() + '/user/notifications'
