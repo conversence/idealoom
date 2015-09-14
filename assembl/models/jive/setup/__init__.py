@@ -1,6 +1,5 @@
-from os import getcwd, mkdir
-from os.path import exists, join
-from shutil import copyfile, make_archive
+from os import getcwd
+from os.path import join
 from uuid import uuid4
 from datetime import datetime
 from zipfile import ZipFile
@@ -22,6 +21,10 @@ jive_addon_unregistration_route = 'unregister_jive_addon'
 # The Un-RESTful verb used by Assembl to create an add-on
 jive_addon_creation = 'create_addon'
 
+##
+# The Un-RESTful verbs used in the OAuth authentication
+jive_addon_creation = 'create_addon'
+jive_redirect_url = 'jive_oauth_redirect'
 ##
 # The barebone for a meta.json file
 # update the INSERT comments upon json creation
