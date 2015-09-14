@@ -7,10 +7,12 @@ from pyramid.security import authenticated_userid
 from pyramid.httpexceptions import HTTPUnauthorized
 
 from assembl.models import JiveGroupSource
-from assembl.models.jive.setup import (jive_addon_registration_route,
-                                       jive_addon_creation,
-                                       create_jive_addon)
-from assembl.models.jive.api import OAuthCreator
+from assembl.models.jive.setup import (
+    jive_addon_registration_route,
+    jive_addon_creation,
+    jive_redirect_url,
+    create_jive_addon,
+)
 from assembl.auth import P_READ, Everyone
 from assembl.models.auth import AgentProfile
 from assembl.auth.util import get_permissions
@@ -20,13 +22,12 @@ from . import JSON_HEADER
 
 @view_config(context=InstanceContext, request_method='GET',
              ctx_instance_class=AgentProfile, permission=P_READ,
-             name='jive_oauth_redirect')
+             name=jive_redirect_url)
 def get_auth_code_grant(request):
     # https://community.jivesoftware.com/docs/DOC-97348#jive_content_id_Obtaining_an_Access_Token_using_Authorization_Code_Grant
     qs = request.GET
     if 'code' in qs:
         auth_code = qs.get('code')
-        jive_oauth = OAuthCreator()
         # incomplete
 
 
