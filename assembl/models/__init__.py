@@ -226,5 +226,6 @@ from .facebook_integration import (
     FacebookPost
 )
 from .jive.models import (
+    JiveSource,
     JiveGroupSource
 )

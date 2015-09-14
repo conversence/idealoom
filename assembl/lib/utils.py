@@ -3,10 +3,6 @@ import unidecode
 import inspect
 from StringIO import StringIO
 
-from pyramid.settings import asbool
-
-from . import config
-
 
 def get_eol(text):
     """Return the EOL character sequence used in the text."""
