@@ -1,6 +1,8 @@
 "use strict";
 
 var Marionette = require('../../shims/marionette.js'),
+    Ctx = require('../../common/context.js'),
+    $ = require('../../shims/jquery.js'),
     i18n = require('../../utils/i18n.js'),
     CollectionManager = require('../../common/collectionManager.js'),
     Promise = require('bluebird');
@@ -148,13 +150,33 @@ var AdminDiscussionSettings = Marionette.LayoutView.extend({
   regions: {
     source: "#source-container"
   },
+  ui: {
+    authorize: '.js_test_jive_oauth' 
+  },
+  events: {
+    'click @ui.authorize': 'jive_oauth'
+  },
+  jive_oauth: function(e){
+    e.preventDefault();
+    var cm = new CollectionManager();
+    cm.getDiscussionSourceCollectionPromise2().then(function(sources){
+      console.log('the OO sources', sources);
+      var jiveSources = sources.filter(function(source){
+        return source.get('@type') === 'JiveSource' || source.get('@type') === 'JiveGroupSource'
+      });
+      if (jiveSources.length > 0) {
+        var firstJive = jiveSources[0]
+        window.open(firstJive.get('authentication_url', '_blank'));
+      }
+    });
+  },
   onBeforeShow: function() {
     var that = this,
         collectionManager = new CollectionManager();
 
     collectionManager.getDiscussionSourceCollectionPromise()
             .then(function(DiscussionSource) {
-
+              console.log('the disucssion source', DiscussionSource);
               var discussionSourceList = new DiscussionSourceList({
                 collection: DiscussionSource
               });
