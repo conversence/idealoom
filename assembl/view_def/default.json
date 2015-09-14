@@ -146,7 +146,9 @@
     },
     "JiveGroupSource":{
         "@extends": "PostSource",
-        "group_id": true
+        "group_id": true,
+        "authentication_url": "oauth_authentication_url",
+        "redirect_url": "oauth_redirect_url"
     },
     "AnnotatorSource": {
         "@extends": "ContentSource"

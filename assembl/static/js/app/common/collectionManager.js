@@ -711,7 +711,7 @@ var CollectionManager = Marionette.Controller.extend({
       return this._allDiscussionSourceCollection2Promise;
     }
 
-    this._allDiscussionSourceCollection2 = new DiscussionSource.Collection();
+    this._allDiscussionSourceCollection2 = new DiscussionSources.Collection();
     this._allDiscussionSourceCollection2.collectionManager = this;
     this._allDiscussionSourceCollection2Promise = Promise.resolve(this._allDiscussionSourceCollection2.fetch())
         .thenReturn(this._allDiscussionSourceCollection2)

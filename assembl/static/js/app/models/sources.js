@@ -27,7 +27,7 @@ var Source = Base.Model.extend({
     'number_of_imported_posts': 0,
     '@type': 'ContentSource',
     'is_content_sink': false // Used by API V2 as flag for side-effectful POST creation only.
-    // DO NOT use for any other scenario than creating facebook content_sinks
+    // DO NOT use for any other scenario than creating content_sinks (For now, until a sink model is made!)
   },
   doReimport: function() {
     var url = this.url() + '/fetch_posts';
@@ -42,8 +42,6 @@ var Source = Base.Model.extend({
 //Lump different email types into one email type??
 var Email = Source.extend({
   defaults: function() {
-    console.log('this', this);
-    console.log('The proto', Source.prototype);
     return _.extend(Source.prototype.defaults, {
       'admin_sender': '',
       'post_email_address': '',
@@ -57,12 +55,20 @@ var Email = Source.extend({
 
 var Facebook = Source.extend({
   defaults: function() {
-    console.log('this', this);
-    console.log('The proto', Source.prototype);
     return _.extend(Source.prototype.defaults, {
       'fb_source_id': null,
       'url_path': null,
       'creator_id': null
+    });
+  }
+});
+
+var Jive = Source.extend({
+  defaults: function() {
+    return _.extend(Source.prototype.defaults, {
+      // This is incomplete
+      'instance_url': null,
+      'group_id': null
     });
   }
 });
@@ -80,20 +86,21 @@ var sourceCollection = Base.Collection.extend({
   url: Ctx.getApiV2DiscussionUrl() + 'sources',
   model: Source,
   parse: function(res) {
-    var that = this;
+    var that = this, 
+        retval = [];
     _.each(res, function(s, i, arr) {
       var t = s["@type"];
       switch (t) {
         case 'ContentSource':
         case 'PostSource':
-          that.add(new Source(s));
+          retval.push(new Source(s));
           break;
         case 'AbstractMailbox':
         case 'IMAPMailbox':
         case 'MailingList':
         case 'AbstractFilesystemMailbox':
         case 'MaildirMailbox':
-          that.add(new Email(s));
+          retval.push(new Email(s));
           break;
         case 'FacebookGenericSource':
         case 'FacebookGroupSource':
@@ -102,13 +109,20 @@ var sourceCollection = Base.Collection.extend({
         case 'FacebookPageFeedSource':
         case 'FacebookPageFeedSource':
         case 'FacebookSinglePostSource':
-          that.add(new Facebook(s));
+          retval.push(new Facebook(s));
+          break;
+        case 'JiveSource':
+        case 'JiveGroupSource':
+          retval.push(new Jive(s));
           break;
         default:
           console.error('Could not add object to source collection', s);
           break;
       }
     });
+
+    console.log('Here is the end of parsing', this);
+    return retval
   }
 });
 
