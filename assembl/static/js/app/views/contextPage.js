@@ -449,6 +449,31 @@ var ContextPage = Marionette.LayoutView.extend({
             }
 
         );
+
+    // this development code instanciates an idea selector so we can user test it
+    if(!that.isViewDestroyed()) {
+      var IdeaSelectorField = require('./reusableDataFields/ideaSelectorField.js'),
+        IdeaModel = require('../models/idea.js');
+      var container = $("<div id=\"context-dev-test\" style=\"max-width: 600px; \
+        padding: 20px; \
+        max-height: 400px; \
+        overflow-y: auto; \
+        margin: 20px; \
+        border: 1px solid #ccc; \
+        border-radius: 5px;\"></div>");
+      that.$el.append(container);
+      that.addRegion("devTest", "#context-dev-test");
+
+      var ideas = new IdeaModel.Collection();
+      ideas.add({"@id": "local:Idea/2371"});
+      ideas.add({"@id": "local:Idea/203"});
+      var tableOfIdeas = new IdeaSelectorField({
+        collection: ideas
+      });
+      that.getRegion('devTest').show(tableOfIdeas);
+    }
+    // end of development code
+
   }
 
 });
