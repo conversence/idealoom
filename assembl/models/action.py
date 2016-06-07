@@ -15,12 +15,12 @@ from sqlalchemy import (
 )
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import relationship, backref, column_property
-from virtuoso.vmapping import IriClass
+from ..semantic import IriClass
 
 from . import DiscussionBoundBase, DiscussionBoundTombstone, TombstonableMixin
 from ..semantic.namespaces import (
     ASSEMBL, QUADNAMES, VERSION, RDF, VirtRDF)
-from ..semantic.virtuoso_mapping import QuadMapPatternS
+from ..semantic import QuadMapPatternS
 from .auth import User, AgentProfile
 from .generic import Content
 from .discussion import Discussion

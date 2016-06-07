@@ -34,7 +34,7 @@ from sqlalchemy.orm.attributes import NO_VALUE
 from sqlalchemy.sql.functions import count
 from pyramid.security import Everyone, Authenticated
 from rdflib import URIRef
-from virtuoso.vmapping import PatternIriClass
+from ..semantic import PatternIriClass
 from ..lib.sqla_types import CoerceUnicode
 import transaction
 
@@ -52,7 +52,7 @@ from assembl.lib.raven_client import capture_exception, capture_message
 from .langstrings import Locale
 from ..semantic.namespaces import (
     SIOC, ASSEMBL, QUADNAMES, FOAF, DCTERMS, RDF)
-from ..semantic.virtuoso_mapping import (
+from ..semantic import (
     QuadMapPatternS, USER_SECTION, PRIVATE_USER_SECTION,
     AssemblQuadStorageManager)
 

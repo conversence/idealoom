@@ -38,7 +38,7 @@ from .auth import (
 from . import Base
 from ..semantic.namespaces import (
     SIOC, ASSEMBL, QUADNAMES, FOAF, DCTERMS, RDF)
-from ..semantic.virtuoso_mapping import (
+from ..semantic import (
     QuadMapPatternS, USER_SECTION, PRIVATE_USER_SECTION,
     AssemblQuadStorageManager)
 

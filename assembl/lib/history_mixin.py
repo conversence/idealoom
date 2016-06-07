@@ -7,7 +7,7 @@ from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.sql.expression import join
 from sqlalchemy.orm import relationship
 
-from ..semantic.virtuoso_mapping import QuadMapPatternS
+from ..semantic import QuadMapPatternS
 from ..semantic.namespaces import ASSEMBL
 from . import config
 

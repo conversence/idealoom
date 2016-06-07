@@ -20,7 +20,7 @@ from sqlalchemy.orm import relationship, backref
 from datetime import datetime
 from ..lib.sqla import DuplicateHandling
 from ..lib.sqla_types import URLString
-from ..semantic.virtuoso_mapping import QuadMapPatternS
+from ..semantic import QuadMapPatternS
 from ..semantic.namespaces import DCTERMS
 from . import DiscussionBoundBase
 from .post import Post

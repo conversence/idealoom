@@ -16,7 +16,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship, backref, aliased
 from ..lib.sqla_types import CoerceUnicode
-from virtuoso.vmapping import PatternIriClass
+from ..semantic import PatternIriClass
 # from virtuoso.textindex import TextIndex, TableWithTextIndex
 from bs4 import BeautifulSoup
 
@@ -24,7 +24,7 @@ from ..lib.sqla import (CrudOperation, get_model_watcher, Base)
 from ..lib.utils import get_global_base_url
 from . import DiscussionBoundBase
 from .langstrings import (LangString, LangStringEntry)
-from ..semantic.virtuoso_mapping import QuadMapPatternS
+from ..semantic import QuadMapPatternS
 from ..auth import (
     CrudPermissions, P_ADD_POST, P_READ, P_ADMIN_DISC, P_EDIT_POST)
 from ..semantic.namespaces import (

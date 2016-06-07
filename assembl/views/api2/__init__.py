@@ -54,7 +54,6 @@ from ..traversal import (
 from assembl.auth import (
     P_READ, IF_OWNED, CrudPermissions)
 from assembl.auth.util import get_permissions
-from assembl.semantic.virtuoso_mapping import get_virtuoso
 from assembl.models import (
     User, Discussion, TombstonableMixin)
 from assembl.lib.decl_enums import DeclEnumType
@@ -123,7 +122,8 @@ def class_view(request):
              request_method='GET', permission=P_READ,
              accept="application/ld+json")
 def instance_view_jsonld(request):
-    from assembl.semantic.virtuoso_mapping import AssemblQuadStorageManager
+    from assembl.semantic.virtuoso_mapping import (
+        get_virtuoso, AssemblQuadStorageManager)
     from rdflib import URIRef, ConjunctiveGraph
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone

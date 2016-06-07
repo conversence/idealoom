@@ -15,10 +15,10 @@ from sqlalchemy import (
     event,
 )
 from rdflib import URIRef
-from virtuoso.vmapping import PatternIriClass
+from ..semantic import PatternIriClass
 
 from . import DiscussionBoundBase
-from ..semantic.virtuoso_mapping import QuadMapPatternS
+from ..semantic import QuadMapPatternS
 from ..lib.sqla import (CrudOperation, get_model_watcher)
 from ..lib.utils import get_global_base_url
 from .discussion import Discussion

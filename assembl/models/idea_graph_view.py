@@ -19,7 +19,7 @@ import lxml.html as htmlt
 
 from . import DiscussionBoundBase
 from .discussion import Discussion
-from ..semantic.virtuoso_mapping import QuadMapPatternS
+from ..semantic import QuadMapPatternS
 from ..auth import (
     CrudPermissions, P_ADMIN_DISC, P_EDIT_SYNTHESIS)
 from .idea import Idea, IdeaLink, RootIdea, IdeaVisitor

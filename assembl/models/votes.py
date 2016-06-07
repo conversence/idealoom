@@ -20,7 +20,7 @@ from .discussion import Discussion
 from .idea import Idea
 from .auth import User
 from ..auth import CrudPermissions, P_VOTE, P_SYSADMIN, P_ADMIN_DISC, P_READ
-from ..semantic.virtuoso_mapping import QuadMapPatternS
+from ..semantic import QuadMapPatternS
 from ..semantic.namespaces import (VOTE, ASSEMBL, DCTERMS, QUADNAMES)
 from ..views.traversal import AbstractCollectionDefinition
 from .langstrings import LangString

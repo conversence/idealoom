@@ -13,7 +13,7 @@ from sqlalchemy import (
 )
 
 from . import DiscussionBoundBase
-from ..semantic.virtuoso_mapping import QuadMapPatternS
+from ..semantic import QuadMapPatternS
 from ..auth import (
     CrudPermissions, P_ADD_POST, P_READ, P_EDIT_POST, P_ADMIN_DISC,
     P_EDIT_POST, P_ADMIN_DISC)

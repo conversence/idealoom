@@ -29,7 +29,7 @@ from ..lib.sqla_types import URLString
 from ..lib.locale import strip_country
 from . import DiscussionBoundBase
 from ..lib.sqla_types import CoerceUnicode
-from ..semantic.virtuoso_mapping import QuadMapPatternS
+from ..semantic import QuadMapPatternS
 from ..auth import (
     P_READ, R_SYSADMIN, P_ADMIN_DISC, R_PARTICIPANT, P_SYSADMIN,
     CrudPermissions, Authenticated, Everyone)

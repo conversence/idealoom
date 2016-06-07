@@ -2,8 +2,9 @@ from rdflib import Graph as _Graph
 from rdflib.namespace import (
     Namespace, NamespaceManager as _NamespaceManager,
     RDF, RDFS, OWL, XSD, DC, DCTERMS, FOAF, SKOS)  # VOID
-from virtuoso.vmapping import VirtRDF
+# from virtuoso.vmapping import VirtRDF
 
+VirtRDF = Namespace('http://www.openlinksw.com/schemas/virtrdf#')
 SIOC = Namespace('http://rdfs.org/sioc/ns#')
 OA = Namespace('http://www.openannotation.org/ns/')
 CATALYST = Namespace('http://purl.org/catalyst/core#')

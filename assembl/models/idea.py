@@ -30,13 +30,13 @@ from sqlalchemy import (
     func,
 )
 from sqlalchemy.ext.associationproxy import association_proxy
-from virtuoso.vmapping import IriClass, PatternIriClass
+from ..semantic import IriClass, PatternIriClass
 
 from ..lib.utils import get_global_base_url
 from ..nlp.wordcounter import WordCounter
 from . import DiscussionBoundBase, HistoryMixin
 from .discussion import Discussion
-from ..semantic.virtuoso_mapping import QuadMapPatternS
+from ..semantic import QuadMapPatternS
 from ..auth import (
     CrudPermissions, P_READ, P_ADMIN_DISC, P_EDIT_IDEA,
     P_ADD_IDEA)

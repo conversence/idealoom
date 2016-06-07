@@ -40,7 +40,7 @@ from .auth import (
     User, Everyone, P_ADMIN_DISC, CrudPermissions, P_READ, UserTemplate)
 from .discussion import Discussion
 from .post import Post, SynthesisPost
-from assembl.semantic.virtuoso_mapping import QuadMapPatternS
+from assembl.semantic import QuadMapPatternS
 from assembl.semantic.namespaces import ASSEMBL
 
 

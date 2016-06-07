@@ -24,7 +24,7 @@ from .auth import User
 from .votes import AbstractVoteSpecification, AbstractIdeaVote
 from ..views.traversal import (
     CollectionDefinition, AbstractCollectionDefinition)
-from ..semantic.virtuoso_mapping import QuadMapPatternS
+from ..semantic import QuadMapPatternS
 from ..semantic.namespaces import (ASSEMBL, QUADNAMES)
 
 
