@@ -1,8 +1,8 @@
 FROM        ubuntu:16.04
 
 ENV         DEBIAN_FRONTEND noninteractive
-ARG	        GITREPO=https://github.com/assembl/assembl.git
-ARG	        GITBRANCH=master
+ARG	GITREPO=https://github.com/assembl/assembl.git
+ARG	GITBRANCH=master
 
 RUN         apt-get update && apt-get install -y \
             fabric \
