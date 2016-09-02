@@ -1,8 +1,18 @@
 #Reference: http://nedbatchelder.com/code/coverage/config.html
 
 [run]
-omit = 
-	*/test_*.py
-	*/tests.py
-	assembl/tests/*
-	assembl/alembic/versions/*
+source = assembl/
+
+omit = */test_*.py
+       */tests.py
+       assembl/tests/*
+       assembl/alembic/versions/*
+       assembl/lib/*
+
+[html]
+
+directory = assembl/.coverage_html/
+
+[xml]
+
+output = coverage.xml

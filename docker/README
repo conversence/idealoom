@@ -1,0 +1,5 @@
+Use the following commands to build and start Assembl's container:
+
+1. docker build .
+2. docker run -p 80:80 -d <image_id>
+ 

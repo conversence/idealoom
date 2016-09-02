@@ -97,3 +97,13 @@ htmlcov/
 .gtm/
 doc/autodoc
 doc/jsdoc
+
+# Sonarqube
+sonar-project.properties
+.sonar/
+
+# Coverage
+coverage.xml
+
+# Ghost Driver
+ghostdriver.log
