@@ -37,9 +37,9 @@ var messageDefaults = {
   //value at first render.
   header: function(creator){
     if (!creator){
-      return i18n.gettext("The following message was posted on Assembl:\n\n\n");
+      return i18n.sprintf(i18n.gettext("The following message was posted on %s:\n\n\n"), platform_name);
     }
-    return i18n.sprintf(i18n.gettext("The following message was posted by %s on Assembl:\n\n\n"), creator.get('name')); 
+    return i18n.sprintf(i18n.gettext("The following message was posted by %1$s on %2$s:\n\n\n"), creator.get('name'), platform_name);
   },
   footer: function(post_model) {
     //This SHOULD be shortened using bit.ly
@@ -548,7 +548,7 @@ var errorView = Marionette.ItemView.extend({
         this.state = options.errorState;
       }
       else if (options.errorState === 'update-permissions') {
-        this.msg = i18n.gettext("It appears that your session was expired. Click below to refresh your session. As always, below are the permissions that Assembl would need to continue.");
+        this.msg = i18n.sprintf(i18n.gettext("It appears that your session was expired. Click below to refresh your session. As always, below are the permissions that %s would need to continue."), platform_name);
         this.subMsg = i18n.gettext('Click here to continue.');
         this.state = options.errorState;
       }
@@ -796,7 +796,7 @@ var exportPostForm = Marionette.LayoutView.extend({
         return cm.getDiscussionModelPromise();
       }).then(function(d){
         that.topic = d.get('topic');
-        that.desc = i18n.gettext('Assembl is a collective intelligence tool designed to enable open, democratic discussions that lead to idea generation and innovation.');
+        that.desc = i18n.sprintf(i18n.gettext('%s is a collective intelligence tool designed to enable open, democratic discussions that lead to idea generation and innovation.'), platform_name);
         that.template = '#tmpl-exportPostModal-fb';
         that.render();
         that.vent.trigger('clearError');
@@ -967,7 +967,7 @@ var exportPostForm = Marionette.LayoutView.extend({
             // 3) POST for a newly created pull source reader
             // 4) Then call success
 
-            errorMsg = i18n.gettext("Something went wrong on Assembl whilst creating your post. Please contact the Discussion administrator for more information.");
+            errorMsg = i18n.sprintf(i18n.gettext("Something went wrong on %s whilst creating your post. Please contact the Discussion administrator for more information."), platform_name);
             cm.getAllUserAccountsPromise().then(function(accounts) {
               var fbAccount = accounts.getFacebookAccount();
               if (!fbAccount) {

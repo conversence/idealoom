@@ -96,7 +96,7 @@
 <pre>full name,email
 James Smith,james.smith@company.com
 Maria Garcia,maria.garcia@company.com</pre>
-<p>{% trans %}The invite message will not be sent to existing users, even if created on another discussion. If you do not get Assembl to "Send an invite message", send one yourself, explaining how to reset password.{% endtrans %}</p>
+<p>{{ gettext("The invite message will not be sent to existing users, even if created on another discussion. If you do not get Assembl to \"Send an invite message\", send one yourself, explaining how to reset password.")|format(platform_name)}}</p>
 <hr>
 <p><label>{% trans %}Role{% endtrans %}:</label>
 <select name="add_with_role" id="add_with_role">
@@ -124,23 +124,23 @@ Maria Garcia,maria.garcia@company.com</pre>
 <p><label>{% trans %}Subject:{% endtrans %}</label></p>
 <input type="text" name="email_subject" id="email_subject" value="{%trans%}Welcome to {discussion_topic}.{% endtrans %}" style="width:50%">
 <p><label>{% trans %}Text email message:{% endtrans %}</label></p>
-<textarea style="width:75%;height:8em;" name="text_email_message" id="text_email_message" >{%trans%}Hello, {name}!
-You have been invited to the Assembl discussion {discussion_topic}.
+<textarea style="width:75%;height:8em;" name="text_email_message" id="text_email_message" >{{gettext("Hello, {name}!
+You have been invited to the %(platform_name)s discussion {discussion_topic}.
 This link will allow you to set your password, after which you can log in.
 <{confirm_url}>
 
 If you did not ask to join please disregard this email.
 
 Best regards,
-The Assembl Team
-{%endtrans%}</textarea>
+The %(platform_name)s Team
+")|format(platform_name=platform_name)}}</textarea>
 <p><label>{% trans %}HTML email message:{% endtrans %}</label></p>
-<textarea style="width:75%;height:8em;" name="html_email_message" id="html_email_message" >{%trans%}<p>Hello, {name}!</p>
-<p>You have been invited to the Assembl discussion <a href="{discussion_url}">{discussion_topic}</a>.
+<textarea style="width:75%;height:8em;" name="html_email_message" id="html_email_message" >{{gettext('<p>Hello, {name}!</p>
+<p>You have been invited to the %(platform_name)s discussion <a href="{discussion_url}">{discussion_topic}</a>.
 Please <a href="{confirm_url}">click here</a> to set your password, after which you can log in.</p>
 <p>If you did not ask to join please disregard this email.</p>
-<p>Best regards,<br />The Assembl Team</p>
-{% endtrans %}</textarea>
+<p>Best regards,<br />The %(platform_name)s Team</p>
+')|format(platform_name=platform_name)}}</textarea>
 <p>
 <label>{% trans %}Re-send to people who did not log in yet (USE SPARINGLY){% endtrans %}:</label>
 <input type="checkbox" name="resend_notloggedin" id="resend_notloggedin"/></p>

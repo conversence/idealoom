@@ -1,11 +1,11 @@
 <div class="popin-header">
-	<h3 class="h3"><i class="icon-reload"></i> {{ gettext('Assembl needs to be reloaded') }}</h3>
+	<h3 class="h3"><i class="icon-reload"></i> {{ gettext('%s needs to be reloaded')|format(platform_name) }}</h3>
 </div>
 
 <div class="popin-body">
   <div class="content-ajaxError">
-    <p class="mbm">{{ gettext('Assembl has encountered a problem and needs to be refreshed. Do not worry, any messages that are in the process of being composed will not be lost.') }}</p>
-    <p class="mbm">{{ gettext('See you in a minute on Assembl!') }}</p>
+    <p class="mbm">{{ gettext('%s has encountered a problem and needs to be refreshed. Do not worry, any messages that are in the process of being composed will not be lost.')|format(platform_name) }}</p>
+    <p class="mbm">{{ gettext('See you in a minute on %s!')|format(platform_name) }}</p>
     <p class="mbxs msg-error">{{ gettext('If you are in contact with the technical team, please let them know about the following message:') }}</p>
     <p class="msg-error"><%= msg %></p>
   </div>

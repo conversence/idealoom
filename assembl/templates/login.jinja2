@@ -8,10 +8,10 @@
   {% if discussion %}
     <meta property="og:title" content="{{ discussion.topic }}" />
   {% else %}
-    <meta property="og:title" content="Assembl" />
+    <meta property="og:title" content="{{platform_name}}" />
   {% endif %}
   <meta property="og:type" content="website" />
-  {#<meta property="og:site_name" content="Assembl" />#}
+  {#<meta property="og:site_name" content="{{platform_name}}" />#}
   {#<meta property="og:locale" content="fr_FR" />#}
   {# not shown because introduction may not be public and has HTML, so it should be filtered. TODO: filter. <meta property="og:description" content="{{ discussion.introduction }}" />#}
   {% if discussion %}
@@ -52,7 +52,7 @@
 
 <div class="loginbox sign-in">
     <header>
-        <h1>{% if discussion %}{{ gettext("Log in to \"%(discussion_title)s\"")|format(discussion_title=discussion.topic) }}{% else %}{{ gettext("Log in to Assembl") }}{% endif %}</h1>
+        <h1>{% if discussion %}{{ gettext("Log in to \"%(discussion_title)s\"")|format(discussion_title=discussion.topic) }}{% else %}{{ gettext("Log in to %s")|format(platform_name) }}{% endif %}</h1>
     </header>
 
     <div class="content">

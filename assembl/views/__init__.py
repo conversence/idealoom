@@ -219,6 +219,7 @@ def get_default_context(request):
         theme_name=theme_name,
         theme_relative_path=theme_relative_path,
         minified_js=config.get('minified_js') or False,
+        platform_name=config.get('platform_name') or "Assembl",
         web_analytics=analytics_settings,
         help_url=help_url,
         socket_url=socket_url,

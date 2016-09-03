@@ -913,14 +913,15 @@ def do_password_change(request):
     slug = discussion.slug if discussion else ""
     slug_prefix = "/" + slug if slug else ""
     if welcome:
+        platform_name = config.get("platform_name")
         if discussion:
             discussion_topic = discussion.topic
             welcome_text = localizer.translate(_(
                 "You will enter the discussion as <b>{name}</b>.")).format(name=user.name)
         else:
-            discussion_topic = "Assembl"
+            discussion_topic = platform_name
             welcome_text = localizer.translate(_(
-                "You will enter Assembl as <b>{name}</b>."))
+                "You will enter %s as <b>{name}</b>.")).format(platform_name)
         welcome_text += "</p><p>" + localizer.translate(_(
             "Please choose your password for security reasons."))
         title = localizer.translate(_('Welcome to {discussion_topic}.')).format(
@@ -1038,7 +1039,7 @@ The {assembl} Team"""))
     data = dict(
         name=email.profile.name,
         email=email.email,
-        assembl="Assembl",
+        assembl=config.get("platform_name"),
         confirm_what=confirm_what,
         confirm_url=maybe_contextual_route(
             request, 'user_confirm_email',
@@ -1060,7 +1061,7 @@ def send_change_password_email(
     mailer = get_mailer(request)
     localizer = request.localizer
     data = dict(
-        assembl="Assembl", name=profile.name,
+        assembl=config.get("platform_name"), name=profile.name,
         confirm_url=maybe_contextual_route(
             request,
             'welcome' if welcome else 'do_password_change',

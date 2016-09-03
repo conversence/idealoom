@@ -221,7 +221,7 @@
     </form>#}
 
     {% if providers %}
-    <p>{{ gettext("Connect other accounts to Assembl")|safe }}</p>
+    <p>{{ gettext("Connect other accounts to %s")|format(platform_name)|safe }}</p>
     {% endif %}
 
     {{form('google', gettext('Login with Google'), true)}}

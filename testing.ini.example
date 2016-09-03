@@ -14,6 +14,8 @@ pyramid.includes =
     pyramid_tm
 sqltap = false
 
+platform_name = Assembl
+
 # Don't let cornice handle exceptions
 handle_exceptions = 
 # Should we show our own view for exceptions? true for production.

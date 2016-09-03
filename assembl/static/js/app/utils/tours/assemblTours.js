@@ -19,7 +19,7 @@ var AssemblTours = [
           stepOnShow: function() {
               $(".hopscotch-next").text(i18n.gettext("Thank you"));
           },
-          content: i18n.gettext("Welcome to this discussion. We’ve created series of hints to help you get started using Assembl.")
+          content: i18n.sprintf(i18n.gettext("Welcome to this discussion. We’ve created series of hints to help you get started using %s."), platform_name),
         }
       ]}},
   {

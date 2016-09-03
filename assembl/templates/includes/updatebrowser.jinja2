@@ -38,7 +38,7 @@
             </a>
         </button>
         <span style="display: block; float: left; color:#ffffff;">
-            {{ gettext("Your version of <strong>{0}</strong> is outdated and may deteriorate your experience on Assembl.")|safe }}&nbsp;
+            {{ gettext("Your version of <strong>{0}</strong> is outdated and may deteriorate your experience on %s.")|format(platform_name)|safe }}&nbsp;
             <a href="http://www.updateyourbrowser.net/" target="_blank" class="btn btn-secondary">{{ gettext("update your browser") }}</a>
             &nbsp; {{ gettext('Thanks!')}}
         </span>

@@ -410,7 +410,7 @@ class Preferences(MutableMapping, Base):
             "value_type": "string",
             "name": _("Authentication key"),
             "description": _(
-                "Key for assembl as a client of the authentication server"),
+                "Key for the platform as a client of the authentication server"),
             "allow_user_override": None,
             "modification_permission": P_SYSADMIN,
             # "frontend_validator_function": func_name...?,
@@ -423,7 +423,7 @@ class Preferences(MutableMapping, Base):
             "value_type": "string",
             "name": _("Authentication secret"),
             "description": _(
-                "Secret for assembl as a client of the authentication server"),
+                "Secret for the platform as a client of the authentication server"),
             "allow_user_override": None,
             "view_permission": P_SYSADMIN,
             "modification_permission": P_SYSADMIN,
