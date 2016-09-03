@@ -8,9 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  Assembl\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2016-09-02 09:44+0200\n"
-"PO-Revision-Date: 2016-06-17 15:56+0000\n"
-"Last-Translator: Marc-Antoine Parent <maparent@acm.org>\n"
+"POT-Creation-Date: 2016-09-02 16:47-0400\n"
+"PO-Revision-Date: 2016-09-02 07:55+0000\n"
+"Last-Translator: Quentin Grimaud <quentin.grimaud@gmail.com>\n"
 "Language: de\n"
 "Language-Team: German "
 "(http://www.transifex.com/assembl/assembl/language/de/)\n"
@@ -153,7 +153,7 @@ msgid "Authentication key"
 msgstr ""
 
 #: assembl/models/preferences.py:412
-msgid "Key for assembl as a client of the authentication server"
+msgid "Key for the platform as a client of the authentication server"
 msgstr ""
 
 #: assembl/models/preferences.py:424
@@ -161,7 +161,7 @@ msgid "Authentication secret"
 msgstr ""
 
 #: assembl/models/preferences.py:425
-msgid "Secret for assembl as a client of the authentication server"
+msgid "Secret for the platform as a client of the authentication server"
 msgstr ""
 
 #: assembl/models/preferences.py:438
@@ -612,12 +612,13 @@ msgid "Thank you"
 msgstr "Dankeschön"
 
 #: assembl/static/js/app/utils/tours/assemblTours.js:22
+#, python-format
 msgid ""
 "Welcome to this discussion. We’ve created series of hints to help you get"
-" started using Assembl."
+" started using %s."
 msgstr ""
 "Herzlich willkommen bei dieser Diskussion. Wir haben eine Reihe von "
-"Hinweisen erstellt, damit Sie gleich mit Assembl loslegen können."
+"Hinweisen erstellt, damit Sie gleich mit %s loslegen können."
 
 #: assembl/static/js/app/utils/tours/assemblTours.js:37
 msgid "Join the discussion"
@@ -775,6 +776,7 @@ msgstr ""
 #: assembl/templates/views/adminPartnerEditForm.tmpl:71
 #: assembl/templates/views/adminPartnerForm.tmpl:63
 #: assembl/templates/views/adminPartnerForm.tmpl:69
+#: assembl/templates/views/base-modal.tmpl:12
 #: assembl/templates/views/ckeditorField.tmpl:10
 #: assembl/templates/views/create-group.tmpl:128
 #: assembl/templates/views/messageModerationOptions.tmpl:32
@@ -808,23 +810,24 @@ msgid "CI Dashboard"
 msgstr "CI-Dashboard"
 
 #: assembl/static/js/app/views/facebookViews.js:40
+#, python-format
 msgid ""
-"The following message was posted on Assembl:\n"
+"The following message was posted on %s:\n"
 "\n"
 "\n"
 msgstr ""
-"Die folgende Nachricht wurde in Assembl gepostet:\n"
+"Die folgende Nachricht wurde in %s gepostet:\n"
 "\n"
 "\n"
 
 #: assembl/static/js/app/views/facebookViews.js:42
-#, python-format
+#
 msgid ""
-"The following message was posted by %s on Assembl:\n"
+"The following message was posted by %1$s on %2$s:\n"
 "\n"
 "\n"
 msgstr ""
-"Die folgende Nachricht wurde von %s in Assembl gepostet:\n"
+"Die folgende Nachricht wurde von %1$s in %2$s gepostet:\n"
 "\n"
 "\n"
 
@@ -872,13 +875,14 @@ msgid "Click here if you agree with these permissions."
 msgstr "Hier klicken, wenn Sie mit diesen Berechtigungen einverstanden sind."
 
 #: assembl/static/js/app/views/facebookViews.js:551
+#, python-format
 msgid ""
 "It appears that your session was expired. Click below to refresh your "
-"session. As always, below are the permissions that Assembl would need to "
+"session. As always, below are the permissions that %s would need to "
 "continue."
 msgstr ""
 "Anscheinend ist Ihre Sitzung abgelaufen. Klicken Sie unten, um sie zu "
-"aktualisieren. Wie immer finden Sie unten die Berechtigungen, die Assembl"
+"aktualisieren. Wie immer finden Sie unten die Berechtigungen, die %s"
 " zum Fortfahren benötigt."
 
 #: assembl/static/js/app/views/facebookViews.js:552
@@ -896,11 +900,12 @@ msgid "Sign in using your Facebook account"
 msgstr "Mit Ihrem Facebook-Konto einloggen"
 
 #: assembl/static/js/app/views/facebookViews.js:799
+#, python-format
 msgid ""
-"Assembl is a collective intelligence tool designed to enable open, "
-"democratic discussions that lead to idea generation and innovation."
+"%s is a collective intelligence tool designed to enable open, democratic "
+"discussions that lead to idea generation and innovation."
 msgstr ""
-"Assembl ist ein kollektives Intelligenz-Tool für offene, demokratische "
+"%s ist ein kollektives Intelligenz-Tool für offene, demokratische "
 "Diskussionen, die zu Ideenfindung und Innovation führen."
 
 #: assembl/static/js/app/views/facebookViews.js:866
@@ -918,11 +923,12 @@ msgstr ""
 "Formulars."
 
 #: assembl/static/js/app/views/facebookViews.js:970
+#, python-format
 msgid ""
-"Something went wrong on Assembl whilst creating your post. Please contact"
-" the Discussion administrator for more information."
+"Something went wrong on %s whilst creating your post. Please contact the "
+"Discussion administrator for more information."
 msgstr ""
-"Beim Erstellen Ihres Beitrags ist etwas schief gegangen. Bitte "
+"Beim Erstellen Ihres Beitrags ist etwas mit %s schief gegangen. Bitte "
 "kontaktieren Sie den Diskussionsadministrator für weitere Informationen."
 
 #: assembl/static/js/app/views/facebookViews.js:1066
@@ -1094,20 +1100,16 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: assembl/static/js/app/views/message.js:1568
-#, fuzzy
-#| msgid "Message source successfully added"
 msgid "Message has been successfully deleted."
-msgstr "Nachrichtenquelle erfolgreich hinzugefügt"
+msgstr ""
 
 #: assembl/static/js/app/views/message.js:1581
 msgid "Error: Message could not be deleted."
 msgstr ""
 
 #: assembl/static/js/app/views/message.js:1587
-#, fuzzy
-#| msgid "Confirm that you want to delete this idea."
 msgid "Are you sure you want to delete this message?"
-msgstr "Bestätigen Sie, dass Sie diese Idee löschen möchten."
+msgstr ""
 
 #: assembl/static/js/app/views/message.js:1588
 msgid "No"
@@ -1615,10 +1617,8 @@ msgid "Only include posts created after the last synthesis."
 msgstr "Nur Beiträge einschließen, die nach der letzten Synthese erstellt wurden."
 
 #: assembl/static/js/app/views/postFilters.js:736
-#, fuzzy
-#| msgid "Complete messages"
 msgid "Deleted messages"
-msgstr "Vollständige Nachrichten"
+msgstr ""
 
 #: assembl/static/js/app/views/postFilters.js:739
 msgid ""
@@ -1627,10 +1627,8 @@ msgid ""
 msgstr ""
 
 #: assembl/static/js/app/views/postFilters.js:776
-#, fuzzy
-#| msgid "Complete messages"
 msgid "Show also deleted messages"
-msgstr "Vollständige Nachrichten"
+msgstr ""
 
 #: assembl/static/js/app/views/postFilters.js:779
 msgid ""
@@ -2110,8 +2108,9 @@ msgid "Log in to \"%(discussion_title)s\""
 msgstr "In \"%(discussion_title)s\" einloggen"
 
 #: assembl/templates/login.jinja2:55
-msgid "Log in to Assembl"
-msgstr "In Assembl einloggen"
+#, python-format
+msgid "Log in to %s"
+msgstr "In %s einloggen"
 
 #: assembl/templates/login.jinja2:61
 msgid "Log in using one of these social networks"
@@ -2243,8 +2242,9 @@ msgid "Save"
 msgstr "Speichern"
 
 #: assembl/templates/profile.jinja2:224
-msgid "Connect other accounts to Assembl"
-msgstr "Andere Konten mit Assembl verbinden"
+#, python-format
+msgid "Connect other accounts to %s"
+msgstr "Andere Konten mit %s verbinden"
 
 #: assembl/templates/profile.jinja2:235
 msgid "Login with OpenID"
@@ -2256,8 +2256,9 @@ msgid "Join \"%(discussion_title)s\""
 msgstr "An \"%(discussion_title)s\" teilnehmen"
 
 #: assembl/templates/register.jinja2:12
-msgid "Join Assembl"
-msgstr "Assembl beitreten"
+#, python-format
+msgid "Join %s"
+msgstr "%s beitreten"
 
 #: assembl/templates/register.jinja2:22
 msgid "This is a closed discussion."
@@ -2321,13 +2322,14 @@ msgid "Add users with a CSV file"
 msgstr "Benutzer mit einer CSV-Datei hinzufügen"
 
 #: assembl/templates/admin/discussion_permissions.jinja2:95
+#, python-format
 msgid ""
 "The CSV file must have two fields, in this order: full name, email.  If "
 "it has a header, it MUST be on the first line. Imported user's email will"
 " be considered validated. The invite message will not be sent to existing"
-" users, even if created on another discussion. If you do not get Assembl "
-"to \"Send an invite message\", send one yourself, explaining how to reset"
-" password."
+" users, even if created on another discussion. If you do not get %s to "
+"\"Send an invite message\", send one yourself, explaining how to reset "
+"password."
 msgstr ""
 
 #: assembl/templates/admin/discussion_permissions.jinja2:96
@@ -2354,7 +2356,7 @@ msgid "Sender name:"
 msgstr ""
 
 #: assembl/templates/admin/discussion_permissions.jinja2:120
-#: assembl/views/auth/views.py:924
+#: assembl/views/auth/views.py:925
 msgid "Welcome to {discussion_topic}."
 msgstr ""
 
@@ -2363,9 +2365,11 @@ msgid "Text email message:"
 msgstr "Text der E-Mail-Nachricht:"
 
 #: assembl/templates/admin/discussion_permissions.jinja2:122
+#, python-format
 msgid ""
 "Hello, {name}!\n"
-"You have been invited to the Assembl discussion {discussion_topic}.\n"
+"You have been invited to the %(platform_name)s discussion "
+"{discussion_topic}.\n"
 "This link will allow you to set your password, after which you can log "
 "in.\n"
 "<{confirm_url}>\n"
@@ -2373,7 +2377,7 @@ msgid ""
 "If you did not ask to join please disregard this email.\n"
 "\n"
 "Best regards,\n"
-"The Assembl Team\n"
+"The %(platform_name)s Team\n"
 msgstr ""
 
 #: assembl/templates/admin/discussion_permissions.jinja2:132
@@ -2381,14 +2385,15 @@ msgid "HTML email message:"
 msgstr "HTML-Version der E-Mail-Nachricht:"
 
 #: assembl/templates/admin/discussion_permissions.jinja2:133
+#, python-format
 msgid ""
 "<p>Hello, {name}!</p>\n"
-"<p>You have been invited to the Assembl discussion <a "
+"<p>You have been invited to the %(platform_name)s discussion <a "
 "href=\"{discussion_url}\">{discussion_topic}</a>.\n"
 "Please <a href=\"{confirm_url}\">click here</a> to set your password, "
 "after which you can log in.</p>\n"
 "<p>If you did not ask to join please disregard this email.</p>\n"
-"<p>Best regards,<br />The Assembl Team</p>\n"
+"<p>Best regards,<br />The %(platform_name)s Team</p>\n"
 msgstr ""
 
 #: assembl/templates/admin/discussion_permissions.jinja2:140
@@ -2400,12 +2405,13 @@ msgid "Global roles"
 msgstr "Globale Rollen"
 
 #: assembl/templates/includes/updatebrowser.jinja2:41
+#, python-format
 msgid ""
 "Your version of <strong>{0}</strong> is outdated and may deteriorate your"
-" experience on Assembl."
+" experience on %s."
 msgstr ""
 "Ihre Version von <strong>{0}</strong> ist veraltet und kann Ihre "
-"Erfahrungen auf Assembl beeinträchtigen."
+"Erfahrungen auf %s beeinträchtigen."
 
 #: assembl/templates/includes/updatebrowser.jinja2:42
 msgid "update your browser"
@@ -2582,7 +2588,7 @@ msgid ""
 msgstr ""
 
 #: assembl/templates/views/adminDiscussion.tmpl:101
-#: assembl/templates/views/emailSource.tmpl:78
+#: assembl/templates/views/emailSource.tmpl:80
 #: assembl/templates/views/userAccountForm.tmpl:42
 #: assembl/templates/views/userProfile.tmpl:74
 msgid "Save changes"
@@ -2627,7 +2633,7 @@ msgstr "Manueller Start"
 
 #: assembl/templates/views/adminDiscussionSettingsGeneralSourceRead.tmpl:15
 #: assembl/templates/views/message.tmpl:37
-#: assembl/templates/views/messageDeletedByUser.tmpl:23
+#: assembl/templates/views/messageDeletedByUser.tmpl:25
 #: assembl/templates/views/messageListHeader.tmpl:4
 msgid "More options"
 msgstr "Weitere Optionen"
@@ -2666,21 +2672,15 @@ msgid "Default notifications"
 msgstr "Standardbenachrichtigungen"
 
 #: assembl/templates/views/adminNotificationSubscriptions.tmpl:18
+#, python-format
 msgid ""
 "These are the notifications which a user gets subscribed to when one of "
 "these conditions is matched: 1. The user clicks on the \"Join this "
-"discussion\" button. 2. The user posts his/her first message, Assembl "
-"shows a subscription pop-in, and the user accepts subscribing. 3. The "
-"discussion parameter \"Auto-subscribe users to default notifications when"
-" they register\" is active and the user confirms their account."
+"discussion\" button. 2. The user posts his/her first message, %s shows a "
+"subscription pop-in, and the user accepts subscribing. 3. The discussion "
+"parameter \"Auto-subscribe users to default notifications when they "
+"register\" is active and the user confirms their account."
 msgstr ""
-"Dies sind die Benachrichtigungen, für die ein Benutzer angemeldet wird, "
-"wenn eine dieser Bedingungen erfüllt ist: 1. Der Benutzer klickt auf die "
-"Schaltfläche \"Dieser Diskussion beitreten\". 2. Der Benutzer postet "
-"seine Nachricht und Assembl blendet ein Abonnement-Popup ein, welches der"
-" Benutzer akzeptiert. 3. Der Diskussionsparameter \"Benutzer bei ihrer "
-"Registrierung automatisch für Standardbenachrichtigungen anmelden\" ist "
-"aktiv und der Benutzer bestätigt sein  Konto."
 
 #: assembl/templates/views/adminNotificationSubscriptions.tmpl:21
 msgid "Auto-subscribe users to default notifications"
@@ -2784,21 +2784,23 @@ msgid "Anonymous"
 msgstr "Anonym"
 
 #: assembl/templates/views/ajaxError.tmpl:2
-msgid "Assembl needs to be reloaded"
-msgstr "Assembl muss neu geladen werden"
+#, python-format
+msgid "%s needs to be reloaded"
+msgstr "%s muss neu geladen werden"
 
 #: assembl/templates/views/ajaxError.tmpl:7
+#, python-format
 msgid ""
-"Assembl has encountered a problem and needs to be refreshed. Do not "
-"worry, any messages that are in the process of being composed will not be"
-" lost."
+"%s has encountered a problem and needs to be refreshed. Do not worry, any"
+" messages that are in the process of being composed will not be lost."
 msgstr ""
-"Assembl hat ein Problem festgestellt und muss aktualisiert werden. "
+"%s hat ein Problem festgestellt und muss aktualisiert werden. "
 "Nachrichten, die gerade verfasst wurden, gehen nicht verloren."
 
 #: assembl/templates/views/ajaxError.tmpl:8
-msgid "See you in a minute on Assembl!"
-msgstr "Wir sehen uns gleich wieder auf Assembl!"
+#, python-format
+msgid "See you in a minute on %s!"
+msgstr "Wir sehen uns gleich wieder auf %s!"
 
 #: assembl/templates/views/ajaxError.tmpl:9
 msgid ""
@@ -2863,8 +2865,8 @@ msgstr "Eine neue Ankündigung zu dieser Idee hinzufügen"
 #: assembl/templates/views/announcementMessage.tmpl:9
 #: assembl/templates/views/message.tmpl:154
 #: assembl/templates/views/message.tmpl:173
-#: assembl/templates/views/messageDeletedByUser.tmpl:50
-#: assembl/templates/views/messageDeletedByUser.tmpl:69
+#: assembl/templates/views/messageDeletedByUser.tmpl:53
+#: assembl/templates/views/messageDeletedByUser.tmpl:72
 #, python-format
 msgid "<time title=\"%(precise_date)s\">%(nice_date)s</time>"
 msgstr "<time title=\"%(precise_date)s\">%(nice_date)s</time>"
@@ -3020,13 +3022,14 @@ msgid "Basic"
 msgstr "Einfach"
 
 #: assembl/templates/views/exportPostModal-fb-token-error.tmpl:6
+#, python-format
 msgid ""
 "We will need your permission to publish the message you are exporting on "
 "your behalf,  as well as permission to read the posts back in order to "
-"import them back into Assembl."
+"import them back into %s."
 msgstr ""
 "Wir benötigen Ihre Erlaubnis, um die in Ihrem Namen exportierte Nachricht"
-" zu veröffentlichen und um die Beiträge zurück nach Assembl zu "
+" zu veröffentlichen und um die Beiträge zurück nach %s zu "
 "importieren."
 
 #: assembl/templates/views/exportPostModal-fb-token-error.tmpl:7
@@ -3466,14 +3469,14 @@ msgstr "Löschen"
 #: assembl/templates/views/message.tmpl:10
 #: assembl/templates/views/message.tmpl:43
 #: assembl/templates/views/messageDeletedByUser.tmpl:10
-#: assembl/templates/views/messageDeletedByUser.tmpl:29
+#: assembl/templates/views/messageDeletedByUser.tmpl:31
 msgid "Mark as unread"
 msgstr "Als ungelesen markieren"
 
 #: assembl/templates/views/message.tmpl:12
 #: assembl/templates/views/message.tmpl:45
 #: assembl/templates/views/messageDeletedByUser.tmpl:12
-#: assembl/templates/views/messageDeletedByUser.tmpl:31
+#: assembl/templates/views/messageDeletedByUser.tmpl:33
 msgid "Mark as read"
 msgstr "Als gelesen markieren"
 
@@ -3523,7 +3526,7 @@ msgid "Show all posts by %s"
 msgstr "Alle Beiträge von %s anzeigen "
 
 #: assembl/templates/views/message.tmpl:78
-#: assembl/templates/views/messageDeletedByUser.tmpl:36
+#: assembl/templates/views/messageDeletedByUser.tmpl:38
 msgid "Send an email to this user"
 msgstr "Eine E-Mail an diesen Benutzer schicken"
 
@@ -3544,10 +3547,8 @@ msgid "Export Post in HTML"
 msgstr "Beitrag in HTML exportieren"
 
 #: assembl/templates/views/message.tmpl:100
-#, fuzzy
-#| msgid "Reply to this message"
 msgid "Delete this message"
-msgstr "Auf diese Nachricht antworten"
+msgstr ""
 
 #: assembl/templates/views/message.tmpl:113
 msgid "View the original message"
@@ -3572,12 +3573,12 @@ msgid ""
 msgstr ""
 
 #: assembl/templates/views/message.tmpl:194
-#: assembl/templates/views/messageDeletedByUser.tmpl:89
+#: assembl/templates/views/messageDeletedByUser.tmpl:92
 msgid "Read more"
 msgstr "Mehr lesen"
 
 #: assembl/templates/views/message.tmpl:203
-#: assembl/templates/views/messageDeletedByUser.tmpl:97
+#: assembl/templates/views/messageDeletedByUser.tmpl:100
 msgid "Read less"
 msgstr "Weniger lesen"
 
@@ -3849,9 +3850,10 @@ msgid "Annotation on the web"
 msgstr "Anmerkung im Web"
 
 #: assembl/templates/views/segmentList.tmpl:5
-msgid "If you desire catching extracts out of assembl (exemple : Wikipedia),"
+#, python-format
+msgid "If you desire catching extracts out of %s (exemple : Wikipedia),"
 msgstr ""
-"Wenn Sie Auszüge von außerhalb Assembls erfassen möchten (Beispiel: "
+"Wenn Sie Auszüge von außerhalb %ss erfassen möchten (Beispiel: "
 "Wikipedia)"
 
 #: assembl/templates/views/segmentList.tmpl:6
@@ -3938,8 +3940,9 @@ msgid "Vote Summary"
 msgstr ""
 
 #: assembl/templates/views/userAccount.tmpl:7
-msgid "Assembl account settings"
-msgstr "Assembl-Kontoeinstellungen"
+#, python-format
+msgid "%s account settings"
+msgstr "%s-Kontoeinstellungen"
 
 #: assembl/templates/views/userAccount.tmpl:18
 msgid "Manage associated accounts"
@@ -4035,7 +4038,7 @@ msgstr "Ihre Nachricht ist leer"
 msgid "The username %s is already used"
 msgstr "Der Benutzername %s wird bereits verwendet"
 
-#: assembl/views/auth/views.py:261 assembl/views/auth/views.py:982
+#: assembl/views/auth/views.py:261 assembl/views/auth/views.py:983
 msgid "The passwords are not identical"
 msgstr "Die Kennwörter sind nicht identisch"
 
@@ -4157,47 +4160,48 @@ msgstr ""
 "Wir haben Ihnen eine E-Mail mit einem temporären Link gesendet. Benutzen "
 "Sie bitte diesen Link, um sich einzuloggen und Ihr Kennwort zu ändern."
 
-#: assembl/views/auth/views.py:897 assembl/views/auth/views.py:966
+#: assembl/views/auth/views.py:897 assembl/views/auth/views.py:967
 msgid "This link is not valid. Do you want us to send another?"
 msgstr ""
 
-#: assembl/views/auth/views.py:900 assembl/views/auth/views.py:969
+#: assembl/views/auth/views.py:900 assembl/views/auth/views.py:970
 msgid "This link has been used. Do you want us to send another?"
 msgstr ""
 
-#: assembl/views/auth/views.py:916
+#: assembl/views/auth/views.py:917
 msgid "You will enter the discussion as <b>{name}</b>."
 msgstr ""
 
-#: assembl/views/auth/views.py:920
-msgid "You will enter Assembl as <b>{name}</b>."
+#: assembl/views/auth/views.py:921
+#, python-format
+msgid "You will enter %s as <b>{name}</b>."
 msgstr ""
 
-#: assembl/views/auth/views.py:922
+#: assembl/views/auth/views.py:923
 msgid "Please choose your password for security reasons."
 msgstr ""
 
-#: assembl/views/auth/views.py:927
+#: assembl/views/auth/views.py:928
 msgid "Change your password"
 msgstr "Ihr Kennwort ändern"
 
-#: assembl/views/auth/views.py:995
+#: assembl/views/auth/views.py:996
 msgid "Password changed"
 msgstr "Kennwort geändert"
 
-#: assembl/views/auth/views.py:1007
+#: assembl/views/auth/views.py:1008
 msgid "email"
 msgstr "E-Mail"
 
-#: assembl/views/auth/views.py:1008
+#: assembl/views/auth/views.py:1009
 msgid "Please confirm your {confirm_what} with {assembl}"
 msgstr ""
 
-#: assembl/views/auth/views.py:1010
+#: assembl/views/auth/views.py:1011
 msgid "account"
 msgstr "Konto"
 
-#: assembl/views/auth/views.py:1011
+#: assembl/views/auth/views.py:1012
 msgid ""
 "Hello, {name}, and welcome to {assembl}!\n"
 "\n"
@@ -4209,7 +4213,7 @@ msgid ""
 "The {assembl} Team"
 msgstr ""
 
-#: assembl/views/auth/views.py:1018
+#: assembl/views/auth/views.py:1019
 msgid ""
 "<p>Hello, {name}, and welcome to {assembl}!</p>\n"
 "<p>Please <a href=\"{confirm_url}\">click here to confirm your email "
@@ -4218,7 +4222,7 @@ msgid ""
 "<p>Best regards,<br />The {assembl} Team</p>"
 msgstr ""
 
-#: assembl/views/auth/views.py:1023
+#: assembl/views/auth/views.py:1024
 msgid ""
 "Hello, {name}!\n"
 "\n"
@@ -4230,7 +4234,7 @@ msgid ""
 "The {assembl} Team"
 msgstr ""
 
-#: assembl/views/auth/views.py:1030
+#: assembl/views/auth/views.py:1031
 msgid ""
 "<p>Hello, {name}!</p>\n"
 "<p>Please <a href=\"{confirm_url}\">click here to confirm your new email "
@@ -4239,11 +4243,11 @@ msgid ""
 "<p>Best regards,<br />The {assembl} Team</p>"
 msgstr ""
 
-#: assembl/views/auth/views.py:1084
+#: assembl/views/auth/views.py:1085
 msgid "Request for password change"
 msgstr "Antrag auf Änderung des Kennworts"
 
-#: assembl/views/auth/views.py:1088
+#: assembl/views/auth/views.py:1089
 msgid ""
 "<p>Hello, {name}!</p>\n"
 "<p>We have received a request to change the password on your {assembl} "
@@ -4255,7 +4259,7 @@ msgid ""
 "<p>Best regards,<br />The {assembl} Team</p>\n"
 msgstr ""
 
-#: assembl/views/auth/views.py:1094
+#: assembl/views/auth/views.py:1095
 msgid ""
 "Hello, {name}!\n"
 "We have received a request to change the password on your {assembl} "
@@ -4273,10 +4277,4 @@ msgstr ""
 #, python-format
 msgid "No discussion found for slug=%s"
 msgstr "Keine Diskussionen gefunden für Slug=%s"
-
-#~ msgid "Make my choice"
-#~ msgstr ""
-
-#~ msgid "About this idea"
-#~ msgstr ""
 
