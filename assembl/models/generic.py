@@ -396,6 +396,9 @@ class Content(TombstonableMixin, DiscussionBoundBase):
             log.error("What is this mimetype?" + mimetype)
             return body
 
+    def get_original_subject(self):
+        return self.subject.first_original().value
+
     def get_original_body_as_html(self):
         mimetype = self.get_body_mime_type()
         body = self.body

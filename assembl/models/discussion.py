@@ -644,6 +644,76 @@ class Discussion(DiscussionBoundBase):
         frontendUrls = FrontendUrls(self)
         return frontendUrls.get_discussion_url()
 
+    def get_bound_extracts(self):
+        from .idea_content_link import Extract
+        return self.db.query(Extract).filter(
+            Extract.discussion==self, Extract.idea != None)
+
+    def get_extract_graphs_cif(self):
+        from .idea import Idea
+        for e in self.get_bound_extracts():
+            yield {
+                "@graph": [
+                    {
+                        "expressesIdea": Idea.uri_generic(e.idea_id),
+                        "@id": e.local_uri_as_resource()
+                    }
+                ],
+                "@id": e.local_uri_as_graph()
+            }
+
+    def get_discussion_graph_cif(self):
+        from . import *
+        yield self.generic_json(view_def_name="cif")
+        for i in chain(
+                self.views, self.ideas, self.idea_links,
+                self.posts, self.local_user_roles):
+            yield i.generic_json(view_def_name="cif")
+        for s in self.sources:
+            yield i.generic_json(
+                view_def_name="cif", permissions=[P_ADMIN_DISC])
+        for action in self.db.query(ActionOnPost).join(Post).filter_by(
+                discussion_id=self.id, tombstone_date=None):
+            yield action.generic_json(
+                view_def_name="cif", permissions=[P_SYSADMIN])
+        for vote in self.db.query(AbstractIdeaVote).join(
+                AbstractIdeaVote.idea).filter_by(
+                discussion_id=self.id, tombstone_date=None):
+            yield vote.generic_json(
+                view_def_name="cif", permissions=[P_ADMIN_DISC])
+            if isinstance(vote, LickertIdeaVote):
+                yield vote.vote_spec.generic_json(view_def_name="cif")
+            elif isinstance(vote, TokenIdeaVote):
+                yield vote.token_category.generic_json(view_def_name="cif")
+        for p in self.get_participants():
+            yield p.generic_json(view_def_name="cif")
+            for acc in p.accounts:
+                yield acc.generic_json(
+                    view_def_name="cif", permissions=[P_SYSADMIN])
+        for e in self.get_bound_extracts():
+            yield e.generic_json(view_def_name="cif")
+            yield e.generic_json(view_def_name="cif2")
+            for t in e.text_fragment_identifiers:
+                yield t.generic_json(view_def_name="cif")
+
+    def get_public_graphs_cif(self):
+        graphs = [x for x in self.get_extract_graphs_cif() if x]
+        graphs.append({
+            "@id": "assembl:discussion_%d_data" % (self.id),
+            "@graph": [x for x in self.get_discussion_graph_cif() if x]
+        })
+        return {
+            "@context": "http://purl.org/catalyst/jsonld",
+            "@graph": graphs
+        }
+
+    def get_user_graph_cif(self):
+        for p in self.get_participants():
+            yield p.generic_json(view_def_name="cif2")
+            for acc in p.accounts:
+                yield acc.generic_json(
+                    view_def_name="cif2", permissions=[P_SYSADMIN])
+
     def count_contributions_per_agent(
             self, start_date=None, end_date=None, as_agent=True):
         from .post import Post

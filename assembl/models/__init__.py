@@ -47,6 +47,10 @@ class DiscussionBoundBase(Base):
         "Get the ID of an associated discussion object, if any."
         return self.discussion_id or self.discussion.id
 
+    def get_discussion(self):
+        from .discussion import Discussion
+        return Discussion.get(self.get_discussion_id())
+
     def send_to_changes(self, connection=None, operation=CrudOperation.UPDATE,
                         discussion_id=None, view_def="changes"):
         if not connection:

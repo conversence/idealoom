@@ -241,6 +241,12 @@ class Extract(IdeaContentPositiveLink):
 
     important = Column('important', Boolean, server_default='0')
 
+    def local_uri_as_graph(self):
+        return 'local:ExcerptGraph/%d' % (self.id,)
+
+    def local_uri_as_resource(self):
+        return 'local:SpecificResource/%d' % (self.id,)
+
     def extract_graph_name(self):
         from pyramid.threadlocal import get_current_registry
         reg = get_current_registry()
@@ -478,7 +484,7 @@ class TextFragmentIdentifier(DiscussionBoundBase):
         r'xpointer\(start-point\(string-range\(([^,]+),([^,]+),([^,]+)\)\)'
         r'/range-to\(string-range\(([^,]+),([^,]+),([^,]+)\)\)\)')
 
-    def __string__(self):
+    def as_xpointer(self):
         return ("xpointer(start-point(string-range(%s,'',%d))/"
                 "range-to(string-range(%s,'',%d)))" % (
                 self.xpath_start, self.offset_start,

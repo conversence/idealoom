@@ -1,0 +1,42 @@
+{
+    "_default": {
+        "id": false,
+        "@id": "self",
+        "_default": false
+    },
+    "Extract": {
+        "@id": "&local_uri_as_resource",
+        "@type": "'\"SpecificResource\"",
+        "hasSource": "content",
+        "hasSelector": "text_fragment_identifiers",
+        "resourceExpressesIdea": "idea"
+    },
+    "AgentProfile": {
+        "fname": "name"
+    },
+    "User": {
+        "@extends": "AgentProfile"
+    },
+    "AbstractAgentAccount": {
+        "@type": "'\"UserAccount\"",
+        "account_of": "profile",
+        "has_function": false
+    },
+    "EmailAccount": {
+        "@extends": "AbstractAgentAccount"
+    },
+    "WebLinkAccount": {
+        "@extends": "AbstractAgentAccount"
+    },
+    "LoomioAccount": {
+        "@extends": "WebLinkAccount"
+    },
+    "SourceSpecificAccount": {
+        "@extends": "AbstractAgentAccount"
+    },
+    "SocialAuthAccount": {
+        "@extends": "AbstractAgentAccount",
+        "foaf:img": "picture_url",
+        "member_of": "identity_provider"
+    }
+}

@@ -45,6 +45,7 @@ from assembl.models import (Discussion, Permission)
 from ..traversal import InstanceContext
 from . import (JSON_HEADER, FORM_HEADER)
 from sqlalchemy.orm.util import aliased
+from assembl.semantic.obfuscation import AESObfuscator
 
 
 @view_config(context=InstanceContext, request_method='GET',
@@ -77,17 +78,14 @@ userprivate_jsonld_cache = get_region(
 
 @discussion_jsonld_cache.cache_on_arguments()
 def discussion_jsonld(discussion_id):
-    from assembl.semantic.virtuoso_mapping import AssemblQuadStorageManager
-    aqsm = AssemblQuadStorageManager()
-    return aqsm.as_jsonld(discussion_id)
+    d = Discussion.get(discussion_id)
+    return json.dumps(d.get_public_graphs_cif())
 
 
 @userprivate_jsonld_cache.cache_on_arguments()
 def userprivate_jsonld(discussion_id):
-    from assembl.semantic.virtuoso_mapping import AssemblQuadStorageManager
-    aqsm = AssemblQuadStorageManager()
-    cg = aqsm.participants_private_as_graph(discussion_id)
-    return aqsm.graph_as_jsonld(cg)
+    d = Discussion.get(discussion_id)
+    return json.dumps(d.get_user_graphs_cif())
 
 
 def read_user_token(request):
@@ -180,12 +178,9 @@ def get_token(request):
         for permissions in permission_sets}
     user_ids = request.GET.getall("user_id")
     if user_ids:
-        from assembl.semantic.virtuoso_mapping import (
-            AssemblQuadStorageManager, AESObfuscator)
         obfuscator = AESObfuscator(random_str)
         user_ids = "\n".join(user_ids)
-        data["user_ids"] = AssemblQuadStorageManager.obfuscate(
-            user_ids, obfuscator.encrypt).split("\n")
+        data["user_ids"] = obfuscator.obfuscate(user_ids).split("\n")
     return data
 
 
@@ -205,10 +200,8 @@ def discussion_instance_view_jsonld(request):
 
     jdata = discussion_jsonld(discussion.id)
     if salt:
-        from assembl.semantic.virtuoso_mapping import (
-            AssemblQuadStorageManager, AESObfuscator)
         obfuscator = AESObfuscator(salt)
-        jdata = AssemblQuadStorageManager.obfuscate(jdata, obfuscator.encrypt)
+        jdata = obfuscator.obfuscate(jdata)
     # TODO: Add age
     if "callback" in request.GET:
         jdata = handle_jsonp(request.GET['callback'], jdata)
@@ -234,10 +227,8 @@ def user_private_view_jsonld(request):
 
     jdata = userprivate_jsonld(discussion_id)
     if salt:
-        from assembl.semantic.virtuoso_mapping import (
-            AssemblQuadStorageManager, AESObfuscator)
         obfuscator = AESObfuscator(salt)
-        jdata = AssemblQuadStorageManager.obfuscate(jdata, obfuscator.encrypt)
+        jdata = obfuscator.obfuscate(jdata)
     if "callback" in request.GET:
         jdata = handle_jsonp(request.GET['callback'], jdata)
         content_type = "application/json-p"
@@ -672,8 +663,6 @@ def as_mind_map(request):
 
 
 def get_analytics_alerts(discussion, user_id, types, all_users=False):
-    from assembl.semantic.virtuoso_mapping import (
-        AssemblQuadStorageManager, AESObfuscator)
     settings = get_config()
     metrics_server_endpoint = settings.get(
         'metrics_server_endpoint',
@@ -704,8 +693,7 @@ def get_analytics_alerts(discussion, user_id, types, all_users=False):
     alerts = requests.post(metrics_server_endpoint, data=dict(
         mapurl=mapurl, requests=json.dumps(metrics_requests), recency=60),
         verify=verify_metrics)
-    result = AssemblQuadStorageManager.deobfuscate(
-        alerts.text, obfuscator.decrypt)
+    obfuscator.deobfuscate(alerts.text)
     # AgentAccount is a pseudo for AgentProfile
     result = re.sub(r'local:AgentAccount\\/', r'local:AgentProfile\\/', result)
     return result

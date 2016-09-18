@@ -246,6 +246,11 @@ class Idea(HistoryMixin, DiscussionBoundBase):
         return [Idea.uri_generic(l.source_id) for l in self.source_links]
 
     @property
+    def children_uris(self):
+        return [Idea.uri_generic(l.target_id) for l in self.target_links]
+
+
+    @property
     def widget_add_post_endpoint(self):
         # Only for api v2
         from pyramid.threadlocal import get_current_request

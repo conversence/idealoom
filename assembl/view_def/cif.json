@@ -1,0 +1,292 @@
+{
+    "_default": {
+        "id": false,
+        "@id": "self",
+        "_default": false
+    },
+    "AgentProfile": {
+        "@type": "'\"Agent\"",
+        "in_conversation": false
+    },
+    "User": {
+        "@extends": "AgentProfile",
+        "created": "creation_date"
+    },
+    "Action": {
+        "@type": "'\"Update\"",
+        "when": "creation_date",
+        "who": "actor",
+        "in_conversation": "&get_discussion"
+    },
+    "ActionOnPost": {
+        "@extends": "Action",
+        "what": "post"
+    },
+    "LikedPost": {
+        "@extends": "ActionOnPost"
+    },
+    "ViewPost": {
+        "@extends": "ActionOnPost",
+        "@type": "'\"ReadStatusChange\""
+    },
+    "ActionOnIdea": {
+        "@extends": "Action",
+        "target": "idea",
+        "target_type": "'\"Idea\""
+    },
+    "ViewIdea": {
+        "@extends": "ActionOnIdea"
+    },
+    "AbstractAgentAccount": {
+        "@type": "'\"UserAccount\"",
+        "account_of": "profile",
+        "has_function": false
+    },
+    "EmailAccount": {
+        "@extends": "AbstractAgentAccount"
+    },
+    "WebLinkAccount": {
+        "@extends": "AbstractAgentAccount"
+    },
+    "LoomioAccount": {
+        "@extends": "WebLinkAccount"
+    },
+    "SourceSpecificAccount": {
+        "@extends": "AbstractAgentAccount"
+    },
+    "SocialAuthAccount": {
+        "@extends": "AbstractAgentAccount"
+    },
+    "IdentityProvider": {
+        "@type": "'\"Usergroup\"",
+        "name": true
+    },
+    "ContentSource": {
+        "@type": "'\"Container\"",
+        "created": "creation_date",
+        "in_conversation": "discussion"
+    },
+    "PostSource": {
+        "@extends": "ContentSource",
+        "@type": "'[\"Container\",\"PostSource\"]"
+    },
+    "FeedPostSource": {
+        "@extends": "PostSource"
+    },
+    "LoomioPostSource": {
+        "@extends": "FeedPostSource"
+    },
+    "FacebookGenericSource": {
+        "@extends": "PostSource"
+    },
+    "FacebookGroupSource": {
+        "@extends": "FacebookGenericSource"
+    },
+    "FacebookGroupSourceFromUser": {
+        "@extends": "FacebookGenericSource"
+    },
+    "FacebookPagePostsSource": {
+        "@extends": "FacebookGenericSource"
+    },
+    "FacebookPageFeedSource": {
+        "@extends": "FacebookGenericSource"
+    },
+    "FacebookSinglePostSource": {
+        "@extends": "FacebookGenericSource"
+    },
+    "AnnotatorSource": {
+        "@extends": "ContentSource"
+    },
+    "EdgeSenseDrupalSource": {
+        "@extends": "PostSource"
+    },
+    "AbstractMailbox": {
+        "@extends": "PostSource"
+    },
+    "IMAPMailbox": {
+        "@extends": "AbstractMailbox"
+    },
+    "MailingList": {
+        "@extends": "IMAPMailbox"
+    },
+    "Content": {
+        "date": "creation_date",
+        "@type": "'\"SPost\"",
+        "created": "creation_date",
+        "in_conversation": "discussion",
+        "title": "&get_original_subject"
+    },
+    "Post": {
+        "@extends": "Content",
+        "reply_of": "parent",
+        "id": "message_id",
+        "has_creator": "creator"
+    },
+    "AssemblPost": {
+        "@extends": "Post"
+    },
+    "WidgetPost": {
+        "@extends": "AssemblPost"
+    },
+    "IdeaProposalPost": {
+        "@extends": "WidgetPost",
+        "proposes_idea": true
+    },
+    "SynthesisPost": {
+        "@extends": "AssemblPost",
+        "publishes_synthesis": true
+    },
+    "ImportedPost": {
+        "@extends": "Post",
+        "has_origin": "source"
+    },
+    "FeedPost": {
+        "@extends": "ImportedPost"
+    },
+    "LoomioFeedPost": {
+        "@extends": "FeedPost"
+    },
+    "SourceSpecificPost": {
+        "@extends": "ImportedPost"
+    },
+    "FacebookPost": {
+        "@extends": "ImportedPost"
+    },
+    "Webpage": {
+        "@extends": "Content",
+        "last_modified_date": true,
+        "url": true
+    },
+    "Email": {
+        "@extends": "ImportedPost",
+        "recipients": true,
+        "sender": true,
+        "full_message": false,
+        "in_reply_to": false
+    },
+    "Discussion": {
+        "@type": "'\"Conversation\"",
+        "created": "creation_date",
+        "title": "topic",
+        "uses_source": ["sources"]
+    },
+    "Idea": {
+        "@type": "'\"GenericIdeaNode\"",
+        "created": "creation_date",
+        "description": "definition",
+        "title": "short_title",
+        "in_conversation": "discussion",
+        "has_container": "discussion",
+        "alternative": "long_title",
+        "ideaInMap": false,
+        "includes": "children_uris"
+    },
+    "RootIdea": {
+        "@extends": "Idea",
+        "@type": "'\"RootIdea\""
+    },
+    "IdeaLink": {
+        "@type": "'\"InclusionRelation\"",
+        "in_conversation": "&get_discussion",
+        "link_order": "order",
+        "target_idea": "target",
+        "source_idea": "source"
+    },
+    "IdeaGraphView": {
+        "@type": "'\"Map\"",
+        "in_conversation": "discussion",
+        "created": "creation_date",
+        "has_container": "discussion"
+    },
+    "ExplicitSubGraphView": {
+        "@extends": "IdeaGraphView"
+    },
+    "TableOfContents": {
+        "@extends": "IdeaGraphView"
+    },
+    "Synthesis": {
+        "@extends": "ExplicitSubGraphView"
+    },
+    "IdeaContentLink": {
+        "idIdea": "idea",
+        "idPost": "content",
+        "created": "creation_date",
+        "idCreator": "creator"
+    },
+    "IdeaContentPositiveLink": {
+        "@extends": "IdeaContentLink"
+    },
+    "IdeaRelatedPostLink": {
+        "@extends": "IdeaContentPositiveLink"
+    },
+    "IdeaContentNegativeLink": {
+        "@extends": "IdeaContentLink"
+    },
+    "IdeaThreadContextBreakLink": {
+        "@extends": "IdeaContentNegativeLink"
+    },
+    "Extract": {
+        "@type": "'\"Excerpt\"",
+        "@extends": "IdeaContentPositiveLink",
+        "hasBody": "&local_uri_as_graph",
+        "hasTarget": "&local_uri_as_resource",
+        "relevantToConversation": "discussion"
+    },
+    "TextFragmentIdentifier": {
+        "@type": "'\"FragmentSelector\"",
+        "conformsTo": "'\"http://tools.ietf.org/rfc/rfc3023\"",
+        "value": "&as_xpointer"
+    },
+    "AbstractIdeaVote": {
+        "subject_node": "idea",
+        "voter": true,
+        "voting_criterion": "criterion"
+    },
+    "BinaryIdeaVote": {
+        "@extends": "AbstractIdeaVote",
+        "@type": "'\"BinaryVote\""
+    },
+    "MultipleChoiceIdeaVote": {
+        "@type": "'\"Vote\"",
+        "@extends": "AbstractIdeaVote"
+    },
+    "LickertIdeaVote": {
+        "@extends": "AbstractIdeaVote",
+        "@type": "'\"LickertVote\"",
+        "lickert_in_range": "vote_spec"
+    },
+    "TokenIdeaVote": {
+        "@extends": "AbstractIdeaVote",
+        "@type": "'\"LickertVote\"",
+        "lickert_in_range": "token_category"
+    },
+    "UserRole": {
+        "@type": "'\"Role\"",
+        "in_conversation": false,
+        "function_of": "user",
+        "name": "&get_role_name"
+    },
+    "LocalUserRole": {
+        "@type": "'\"Role\"",
+        "in_conversation": "discussion",
+        "function_of": "user",
+        "name": "&get_role_name"
+    },
+    "LickertVoteSpecification": {
+        "@extends": "AbstractVoteSpecification",
+        "@type": "'\"LickertRange\"",
+        "min": "minimum",
+        "max": "maximum"
+    },
+    "MultipleChoiceVoteSpecification": {
+        "@extends": "AbstractVoteSpecification",
+        "@type": "'\"LickertRange\"",
+        "min": "'1",
+        "max": "num_choices"
+    },
+    "TokenCategorySpecification": {
+        "@type": "'\"LickertRange\"",
+        "min": "'0",
+        "max": "maximum_per_idea"
+    }
+}

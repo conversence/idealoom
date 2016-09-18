@@ -324,30 +324,6 @@ class AssemblGraphQuadMapPattern(GraphQuadMapPattern):
         self.section = section
 
 
-class AESObfuscator(object):
-    def __init__(self, key=None, blocklen=16):
-        key = key or urandom(blocklen)
-        self.key = self.pad(key, blocklen)
-        self.blocklen = blocklen
-        self.IV = ' ' * blocklen
-
-    def encrypt(self, text):
-        from Crypto.Cipher import AES
-        encoder = AES.new(self.key, AES.MODE_CFB, self.IV)
-        return urlsafe_b64encode(encoder.encrypt(text))
-
-    def decrypt(self, code):
-        from Crypto.Cipher import AES
-        encoder = AES.new(self.key, AES.MODE_CFB, self.IV)
-        code = code.encode('utf-8')
-        code = urlsafe_b64decode(code)
-        return encoder.decrypt(code)
-
-    def pad(self, key, blocklen=16, padding=' '):
-        return key + padding * (blocklen - (len(key) % blocklen))
-
-
-
 class AssemblPatternGraphQuadMapPattern(PatternGraphQuadMapPattern):
     def __init__(
             self, graph_iri_pattern, storage, alias_set, section,
@@ -755,23 +731,6 @@ class AssemblQuadStorageManager(object):
                     if profile in profiles]
         self.add_subject_data(v, cg, accounts)
         return cg
-
-    @staticmethod
-    def obfuscate(serialized_rdf, obfuscator=None):
-        # Work in progress.
-        r = re.compile(r'((?:/data/|local:)(?:AgentProfile|AgentAccount|AbstractAgentAccount)/)(\d+)\b')
-        if not obfuscator:
-            # Random obfuscator
-            obfuscator = AESObfuscator().encrypt
-        return r.sub(lambda matchob: (
-            matchob.group(1) + obfuscator(matchob.group(2))), serialized_rdf)
-
-    @staticmethod
-    def deobfuscate(serialized_rdf, deobfuscator):
-        # Work in progress.
-        r = re.compile(r'((?:/data/|local:)(?:AgentProfile|AgentAccount|AbstractAgentAccount)(?:\\?)/)([-=\w]+)')
-        return r.sub(lambda matchob: (
-            matchob.group(1) + deobfuscator(matchob.group(2))), serialized_rdf)
 
     def discussion_as_quads(self, discussion_id):
         cg = self.discussion_as_graph(discussion_id)
