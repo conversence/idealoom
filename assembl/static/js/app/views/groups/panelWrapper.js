@@ -109,28 +109,28 @@ var PanelWrapper = Marionette.LayoutView.extend({
       if(!isSmallScreen){
         var panelType = this.model.get('type');
         switch(panelType) {
-        case PanelSpecTypes.IDEA_PANEL:
+        case PanelSpecTypes.IDEA_PANEL.id:
             this.model.set('minWidth', 350); // 295
             break;
-        case PanelSpecTypes.NAV_SIDEBAR:
+        case PanelSpecTypes.NAV_SIDEBAR.id:
             this.model.set('minWidth', 350);
             break;
-        case PanelSpecTypes.MESSAGE_LIST:
+        case PanelSpecTypes.MESSAGE_LIST.id:
             this.model.set('minWidth', 500); // 450+offlet
             break;
-        case PanelSpecTypes.IDEA_PANEL:
+        case PanelSpecTypes.IDEA_PANEL.id:
             this.model.set('minWidth', 295);
             break;
-        case PanelSpecTypes.CLIPBOARD:
+        case PanelSpecTypes.CLIPBOARD.id:
             this.model.set('minWidth', 270); // 200
             break;
-        case PanelSpecTypes.SYNTHESIS_EDITOR:
+        case PanelSpecTypes.SYNTHESIS_EDITOR.id:
             this.model.set('minWidth', 200);
             break;
-        case PanelSpecTypes.DISCUSSION_CONTEXT:
+        case PanelSpecTypes.DISCUSSION_CONTEXT.id:
             this.model.set('minWidth', 450); // 200?
             break;
-        case PanelSpecTypes.EXTERNAL_VISUALIZATION_CONTEXT:
+        case PanelSpecTypes.EXTERNAL_VISUALIZATION_CONTEXT.id:
             this.model.set('minWidth', 450);
             break;
         default:
@@ -378,26 +378,26 @@ var PanelWrapper = Marionette.LayoutView.extend({
   getIcon: function() {
     var type = this.contentsView.panelType,
         icon = '';
-    switch (type) {
-      case PanelSpecTypes.IDEA_PANEL:
+    switch (type.id) {
+      case PanelSpecTypes.IDEA_PANEL.id:
         icon = 'icon-idea';
         break;
-      case PanelSpecTypes.NAV_SIDEBAR:
+      case PanelSpecTypes.NAV_SIDEBAR.id:
         icon = 'icon-home';
         break;
-      case PanelSpecTypes.MESSAGE_LIST:
+      case PanelSpecTypes.MESSAGE_LIST.id:
         icon = 'icon-comment';
         break;
-      case PanelSpecTypes.CLIPBOARD:
+      case PanelSpecTypes.CLIPBOARD.id:
         // ne need because of resetTitle - segment
         icon = 'icon-clipboard';
         break;
-      case PanelSpecTypes.SYNTHESIS_EDITOR:
+      case PanelSpecTypes.SYNTHESIS_EDITOR.id:
         icon = 'icon-doc';
         break;
-      case PanelSpecTypes.DISCUSSION_CONTEXT:
+      case PanelSpecTypes.DISCUSSION_CONTEXT.id:
         break;
-      case PanelSpecTypes.TABLE_OF_IDEAS:
+      case PanelSpecTypes.TABLE_OF_IDEAS.id:
         icon = 'icon-discuss';
         break;
       default:
