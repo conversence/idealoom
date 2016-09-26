@@ -96,7 +96,7 @@ var PanelWrapper = Marionette.LayoutView.extend({
     }
   },
   /**
-   * TODO: refactor this function because the min-width is set also in _panel.scss
+   * TODO: refactor this function because the min-width is set also in _panel.scss AND in each panel!!!
    */
   setPanelMinWidth:function(){
     this.$el.addClass(this.model.attributes.type + '-panel');
@@ -109,31 +109,34 @@ var PanelWrapper = Marionette.LayoutView.extend({
       if(!isSmallScreen){
         var panelType = this.model.get('type');
         switch(panelType) {
-        case 'ideaList':
-            this.model.set('minWidth',350);
+        case PanelSpecTypes.IDEA_PANEL:
+            this.model.set('minWidth', 350); // 295
             break;
-        case 'navSidebar':
-            this.model.set('minWidth',350);
+        case PanelSpecTypes.NAV_SIDEBAR:
+            this.model.set('minWidth', 350);
             break;
-        case 'messageList':
-            this.model.set('minWidth',500);
+        case PanelSpecTypes.MESSAGE_LIST:
+            this.model.set('minWidth', 500); // 450+offlet
             break;
-        case 'ideaPanel':
-            this.model.set('minWidth',295);
+        case PanelSpecTypes.IDEA_PANEL:
+            this.model.set('minWidth', 295);
             break;
-        case 'clipboard':
-            this.model.set('minWidth',270);
+        case PanelSpecTypes.CLIPBOARD:
+            this.model.set('minWidth', 270); // 200
             break;
-        case 'synthesisPanel':
-            this.model.set('minWidth',200);
+        case PanelSpecTypes.SYNTHESIS_EDITOR:
+            this.model.set('minWidth', 200);
             break;
-        case 'contextPanel':
-            this.model.set('minWidth',450);
+        case PanelSpecTypes.DISCUSSION_CONTEXT:
+            this.model.set('minWidth', 450); // 200?
+            break;
+        case PanelSpecTypes.EXTERNAL_VISUALIZATION_CONTEXT:
+            this.model.set('minWidth', 450);
             break;
         default:
-            this.model.set('minWidth',0);
+            this.model.set('minWidth', 0);
             break;
-        }        
+        }
       }else{
         this.model.set('minWidth',screenSize);
       }

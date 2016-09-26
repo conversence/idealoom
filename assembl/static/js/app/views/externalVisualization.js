@@ -19,6 +19,7 @@ var externalVisualizationPanel = Marionette.ItemView.extend({
   panelType: PanelSpecTypes.EXTERNAL_VISUALIZATION_CONTEXT,
   className: 'externalViz',
   gridSize: AssemblPanel.prototype.CONTEXT_PANEL_GRID_SIZE,
+  minWidth: 450,
   hideHeader: true,
   getTitle: function() {
     return i18n.gettext('CI Dashboard'); // unused
