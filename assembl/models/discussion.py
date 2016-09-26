@@ -714,6 +714,13 @@ class Discussion(DiscussionBoundBase):
                 yield acc.generic_json(
                     view_def_name="cif2", permissions=[P_SYSADMIN])
 
+    def get_private_graphs_cif(self):
+        graphs = [x for x in self.get_user_graph_cif() if x]
+        return {
+            "@context": "http://purl.org/catalyst/jsonld",
+            "@graph": graphs
+        }
+
     def count_contributions_per_agent(
             self, start_date=None, end_date=None, as_agent=True):
         from .post import Post

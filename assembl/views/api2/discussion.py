@@ -85,7 +85,7 @@ def discussion_jsonld(discussion_id):
 @userprivate_jsonld_cache.cache_on_arguments()
 def userprivate_jsonld(discussion_id):
     d = Discussion.get(discussion_id)
-    return json.dumps(d.get_user_graph_cif())
+    return json.dumps(d.get_private_graphs_cif())
 
 
 def read_user_token(request):
