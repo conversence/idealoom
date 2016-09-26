@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: assembl 0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2016-09-02 16:47-0400\n"
+"POT-Creation-Date: 2016-09-26 15:19-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -318,36 +318,40 @@ msgstr ""
 msgid "Unknown user"
 msgstr ""
 
-#: assembl/static/js/app/models/attachments.js:25
+#: assembl/static/js/app/models/attachments.js:26
 msgid "Do not show anything special"
 msgstr ""
 
-#: assembl/static/js/app/models/attachments.js:29
+#: assembl/static/js/app/models/attachments.js:30
 msgid "Show the following preview at the end of your message"
 msgstr ""
 
-#: assembl/static/js/app/models/idea.js:92
+#: assembl/static/js/app/models/attachments.js:453
+msgid "Sorry, only an image type is supported in this upload. Please try again."
+msgstr ""
+
+#: assembl/static/js/app/models/idea.js:109
 msgid "The root idea will not be in the synthesis"
 msgstr ""
 
-#: assembl/static/js/app/models/idea.js:103
+#: assembl/static/js/app/models/idea.js:120
 msgid "Add a description of this idea"
 msgstr ""
 
-#: assembl/static/js/app/models/idea.js:115
+#: assembl/static/js/app/models/idea.js:132
 msgid "The root idea will never be in the synthesis"
 msgstr ""
 
-#: assembl/static/js/app/models/idea.js:128
+#: assembl/static/js/app/models/idea.js:145
 msgid "You can add an expression for the next synthesis"
 msgstr ""
 
-#: assembl/static/js/app/models/idea.js:139
+#: assembl/static/js/app/models/idea.js:156
 msgid "All posts"
 msgstr ""
 
-#: assembl/static/js/app/models/idea.js:151
-#: assembl/static/js/app/views/ideaPanel.js:408
+#: assembl/static/js/app/models/idea.js:168
+#: assembl/static/js/app/views/ideaPanel.js:517
 msgid "New idea"
 msgstr ""
 
@@ -712,24 +716,28 @@ msgstr ""
 msgid "Please write the content of this announcement here..."
 msgstr ""
 
-#: assembl/static/js/app/views/attachments.js:132
+#: assembl/static/js/app/views/attachments.js:138
 #, python-format
 msgid "For URL %s in the text above"
 msgstr ""
 
-#: assembl/static/js/app/views/attachments.js:251
+#: assembl/static/js/app/views/attachments.js:260
 msgid "Remove"
 msgstr ""
 
-#: assembl/static/js/app/views/attachments.js:258
+#: assembl/static/js/app/views/attachments.js:267
 msgid "For the uploaded file"
 msgstr ""
 
-#: assembl/static/js/app/views/attachments.js:279
+#: assembl/static/js/app/views/attachments.js:336
 #, python-format
 msgid ""
 "We are sorry, there was an error during the upload of the file \"%s\". Please"
 " try again."
+msgstr ""
+
+#: assembl/static/js/app/views/attachments.js:507
+msgid "Upload an Image to the Idea Panel"
 msgstr ""
 
 #: assembl/static/js/app/views/confirmModal.js:32
@@ -764,7 +772,7 @@ msgstr ""
 msgid "Home"
 msgstr ""
 
-#: assembl/static/js/app/views/documents.js:97
+#: assembl/static/js/app/views/documents.js:102
 #, python-format
 msgid "Sorry, we have failed to upload your file \"%s\". Please try again."
 msgstr ""
@@ -937,79 +945,79 @@ msgstr ""
 msgid "You don't have the permission to do this."
 msgstr ""
 
-#: assembl/static/js/app/views/ideaPanel.js:140
+#: assembl/static/js/app/views/ideaPanel.js:204
 msgid "Idea"
 msgstr ""
 
-#: assembl/static/js/app/views/ideaPanel.js:143
+#: assembl/static/js/app/views/ideaPanel.js:207
 msgid "Detailled information about the currently selected idea in the Table of ideas"
 msgstr ""
 
-#: assembl/static/js/app/views/ideaPanel.js:151
+#: assembl/static/js/app/views/ideaPanel.js:215
 msgid "This idea has no sub-ideas"
 msgstr ""
 
-#: assembl/static/js/app/views/ideaPanel.js:154
+#: assembl/static/js/app/views/ideaPanel.js:218
 #, python-format
 msgid "This idea has %d sub-idea"
 msgid_plural "This idea has %d sub-ideas"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assembl/static/js/app/views/ideaPanel.js:171
+#: assembl/static/js/app/views/ideaPanel.js:239
 msgid "No extract was harvested"
 msgstr ""
 
-#: assembl/static/js/app/views/ideaPanel.js:174
+#: assembl/static/js/app/views/ideaPanel.js:242
 msgid "No important nugget was harvested"
 msgstr ""
 
-#: assembl/static/js/app/views/ideaPanel.js:179
+#: assembl/static/js/app/views/ideaPanel.js:247
 #, python-format
 msgid "%d extract was harvested"
 msgid_plural "%d extracts were harvested"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assembl/static/js/app/views/ideaPanel.js:182
+#: assembl/static/js/app/views/ideaPanel.js:250
 #, python-format
 msgid "%d important nugget was harvested"
 msgid_plural "%d important nuggets were harvested"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assembl/static/js/app/views/ideaPanel.js:386
+#: assembl/static/js/app/views/ideaPanel.js:495
 #, python-format
 msgid "%d contributor"
 msgid_plural "%d contributors"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assembl/static/js/app/views/ideaPanel.js:407
+#: assembl/static/js/app/views/ideaPanel.js:516
 msgid "Short expression (only a few words) of the idea in the table of ideas."
 msgstr ""
 
-#: assembl/static/js/app/views/ideaPanel.js:595
+#: assembl/static/js/app/views/ideaPanel.js:707
 msgid "You cannot delete an idea while it has sub-ideas."
 msgstr ""
 
-#: assembl/static/js/app/views/ideaPanel.js:602
+#: assembl/static/js/app/views/ideaPanel.js:714
 msgid "You cannot delete an idea associated to extracts."
 msgstr ""
 
-#: assembl/static/js/app/views/ideaPanel.js:606
+#: assembl/static/js/app/views/ideaPanel.js:718
 msgid "You cannot delete an idea associated to comments."
 msgstr ""
 
-#: assembl/static/js/app/views/ideaPanel.js:610
+#: assembl/static/js/app/views/ideaPanel.js:722
 msgid "Confirm that you want to delete this idea."
 msgstr ""
 
-#: assembl/static/js/app/views/ideaPanel.js:797
+#: assembl/static/js/app/views/ideaPanel.js:909
 msgid "Confirm that you want to send all extracts back to the clipboard."
 msgstr ""
 
-#: assembl/static/js/app/views/ideaPanel.js:865
+#: assembl/static/js/app/views/ideaPanel.js:977
 msgid "You may want to describe this idea for users here..."
 msgstr ""
 
@@ -1026,23 +1034,23 @@ msgid_plural "and %d other ideas</a>"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assembl/static/js/app/views/message.js:1568
+#: assembl/static/js/app/views/message.js:1557
 msgid "Message has been successfully deleted."
 msgstr ""
 
-#: assembl/static/js/app/views/message.js:1581
+#: assembl/static/js/app/views/message.js:1570
 msgid "Error: Message could not be deleted."
 msgstr ""
 
-#: assembl/static/js/app/views/message.js:1587
+#: assembl/static/js/app/views/message.js:1576
 msgid "Are you sure you want to delete this message?"
 msgstr ""
 
-#: assembl/static/js/app/views/message.js:1588
+#: assembl/static/js/app/views/message.js:1577
 msgid "No"
 msgstr ""
 
-#: assembl/static/js/app/views/message.js:1589
+#: assembl/static/js/app/views/message.js:1578
 msgid "Yes"
 msgstr ""
 
@@ -1220,7 +1228,7 @@ msgid "Type your message here..."
 msgstr ""
 
 #: assembl/static/js/app/views/messageSend.js:173
-#: assembl/templates/admin/discussion_permissions.jinja2:119
+#: assembl/templates/admin/discussion_permissions.jinja2:124
 msgid "Subject:"
 msgstr ""
 
@@ -1835,43 +1843,43 @@ msgstr ""
 msgid "Import has begun!"
 msgstr ""
 
-#: assembl/static/js/app/views/groups/panelWrapper.js:176
+#: assembl/static/js/app/views/groups/panelWrapper.js:183
 #: assembl/templates/views/panelWrapper.tmpl:34
 msgid "Maximize panel"
 msgstr ""
 
-#: assembl/static/js/app/views/groups/panelWrapper.js:187
+#: assembl/static/js/app/views/groups/panelWrapper.js:194
 #: assembl/templates/views/navigation.tmpl:5
 #: assembl/templates/views/navigation.tmpl:14
 #: assembl/templates/views/panelWrapper.tmpl:8
 msgid "Minimize panel"
 msgstr ""
 
-#: assembl/static/js/app/views/groups/panelWrapper.js:223
+#: assembl/static/js/app/views/groups/panelWrapper.js:230
 msgid "Unlock panel"
 msgstr ""
 
-#: assembl/static/js/app/views/groups/panelWrapper.js:253
+#: assembl/static/js/app/views/groups/panelWrapper.js:260
 msgid ""
 "We have locked the panel for you, so its content won't change while you're "
 "writing your message. Click here to unlock"
 msgstr ""
 
-#: assembl/static/js/app/views/groups/panelWrapper.js:256
+#: assembl/static/js/app/views/groups/panelWrapper.js:263
 msgid ""
 "We have unlocked the panel for you, so its content can change now that you're"
 " not writing a message anymore. Click here to lock it back"
 msgstr ""
 
-#: assembl/static/js/app/views/groups/panelWrapper.js:260
+#: assembl/static/js/app/views/groups/panelWrapper.js:267
 msgid "We have locked the panel for you. Click here to unlock"
 msgstr ""
 
-#: assembl/static/js/app/views/groups/panelWrapper.js:263
+#: assembl/static/js/app/views/groups/panelWrapper.js:270
 msgid "We have unlocked the panel for you. Click here to lock it back"
 msgstr ""
 
-#: assembl/static/js/app/views/groups/panelWrapper.js:301
+#: assembl/static/js/app/views/groups/panelWrapper.js:308
 #: assembl/templates/views/panelWrapper.tmpl:14
 msgid "Lock panel"
 msgstr ""
@@ -1954,7 +1962,7 @@ msgstr ""
 msgid "Sign out"
 msgstr ""
 
-#: assembl/templates/do_password_change.jinja2:20 assembl/templates/login.jinja2:92
+#: assembl/templates/do_password_change.jinja2:20 assembl/templates/login.jinja2:94
 #: assembl/templates/register.jinja2:28
 msgid "Password"
 msgstr ""
@@ -1984,64 +1992,64 @@ msgstr ""
 msgid "Log in to %s"
 msgstr ""
 
-#: assembl/templates/login.jinja2:61
+#: assembl/templates/login.jinja2:62
 msgid "Log in using one of these social networks"
 msgstr ""
 
-#: assembl/templates/login.jinja2:65 assembl/templates/profile.jinja2:227
+#: assembl/templates/login.jinja2:66 assembl/templates/profile.jinja2:227
 msgid "Login with Google"
 msgstr ""
 
-#: assembl/templates/login.jinja2:66 assembl/templates/profile.jinja2:228
+#: assembl/templates/login.jinja2:67 assembl/templates/profile.jinja2:228
 msgid "Login with Twitter"
 msgstr ""
 
-#: assembl/templates/login.jinja2:67 assembl/templates/profile.jinja2:229
+#: assembl/templates/login.jinja2:68 assembl/templates/profile.jinja2:229
 msgid "Login with Facebook"
 msgstr ""
 
-#: assembl/templates/login.jinja2:68 assembl/templates/profile.jinja2:230
+#: assembl/templates/login.jinja2:69 assembl/templates/profile.jinja2:230
 msgid "Login with Yahoo"
 msgstr ""
 
-#: assembl/templates/login.jinja2:69 assembl/templates/profile.jinja2:232
+#: assembl/templates/login.jinja2:70 assembl/templates/profile.jinja2:232
 msgid "Login with Windows Live"
 msgstr ""
 
-#: assembl/templates/login.jinja2:70 assembl/templates/profile.jinja2:233
+#: assembl/templates/login.jinja2:71 assembl/templates/profile.jinja2:233
 msgid "Login with Github"
 msgstr ""
 
-#: assembl/templates/login.jinja2:71
+#: assembl/templates/login.jinja2:72
 msgid "Login with Yammer"
 msgstr ""
 
-#: assembl/templates/login.jinja2:72 assembl/templates/profile.jinja2:234
+#: assembl/templates/login.jinja2:73 assembl/templates/profile.jinja2:234
 msgid "Login with Bitbucket"
 msgstr ""
 
-#: assembl/templates/login.jinja2:85
+#: assembl/templates/login.jinja2:87
 msgid "Already have an account?"
 msgstr ""
 
-#: assembl/templates/login.jinja2:89
+#: assembl/templates/login.jinja2:91
 #: assembl/templates/request_password_change.jinja2:27
 msgid "Email or username"
 msgstr ""
 
-#: assembl/templates/login.jinja2:98
+#: assembl/templates/login.jinja2:100
 msgid "Log in"
 msgstr ""
 
-#: assembl/templates/login.jinja2:100
+#: assembl/templates/login.jinja2:102
 msgid "Forgot your password?"
 msgstr ""
 
-#: assembl/templates/login.jinja2:104
+#: assembl/templates/login.jinja2:106
 msgid "No account yet?"
 msgstr ""
 
-#: assembl/templates/login.jinja2:107 assembl/templates/register.jinja2:30
+#: assembl/templates/login.jinja2:109 assembl/templates/register.jinja2:30
 msgid "Sign up"
 msgstr ""
 
@@ -2102,7 +2110,7 @@ msgstr ""
 
 #: assembl/templates/admin/discussion_permissions.jinja2:52
 #: assembl/templates/admin/discussion_permissions.jinja2:89
-#: assembl/templates/admin/discussion_permissions.jinja2:144
+#: assembl/templates/admin/discussion_permissions.jinja2:149
 #: assembl/templates/admin/global_permissions.jinja2:37
 #: assembl/templates/profile.jinja2:107
 #: assembl/templates/views/ckeditorField.tmpl:9
@@ -2193,48 +2201,53 @@ msgid "Add users with a CSV file"
 msgstr ""
 
 #: assembl/templates/admin/discussion_permissions.jinja2:95
-#, python-format
 msgid ""
-"The CSV file must have two fields, in this order: full name, email.  If it "
-"has a header, it MUST be on the first line. Imported user's email will be "
-"considered validated. The invite message will not be sent to existing users, "
-"even if created on another discussion. If you do not get %s to \"Send an "
-"invite message\", send one yourself, explaining how to reset password."
+"The CSV file must have two fields, in this order: full name, email. If it has"
+" a header, it MUST be on the first line. Imported user's email will be "
+"considered validated. Here is an example of CSV file:"
 msgstr ""
 
-#: assembl/templates/admin/discussion_permissions.jinja2:96
+#: assembl/templates/admin/discussion_permissions.jinja2:99
+#, python-format
+msgid ""
+"The invite message will not be sent to existing users, even if created on "
+"another discussion. If you do not get %(platform_name)s to \"Send an invite "
+"message\", send one yourself, explaining how to reset password."
+msgstr ""
+
+#: assembl/templates/admin/discussion_permissions.jinja2:101
 msgid "Role"
 msgstr ""
 
-#: assembl/templates/admin/discussion_permissions.jinja2:108
+#: assembl/templates/admin/discussion_permissions.jinja2:113
 msgid "CSV File"
 msgstr ""
 
-#: assembl/templates/admin/discussion_permissions.jinja2:112
+#: assembl/templates/admin/discussion_permissions.jinja2:117
 msgid "Send an invite message"
 msgstr ""
 
-#: assembl/templates/admin/discussion_permissions.jinja2:115
+#: assembl/templates/admin/discussion_permissions.jinja2:120
 msgid ""
 "Note that this email will only be sent to new users. In the message, you can "
 "use the following placeholders: {name}, {confirm_url}, {discussion_topic}, "
 "{discussion_url}"
 msgstr ""
 
-#: assembl/templates/admin/discussion_permissions.jinja2:117
+#: assembl/templates/admin/discussion_permissions.jinja2:122
 msgid "Sender name:"
 msgstr ""
 
-#: assembl/templates/admin/discussion_permissions.jinja2:120
-#: assembl/views/auth/views.py:925
+#: assembl/templates/admin/discussion_permissions.jinja2:125
+#: assembl/views/auth/views.py:927
 msgid "Welcome to {discussion_topic}."
 msgstr ""
 
-#: assembl/templates/admin/discussion_permissions.jinja2:121
+#: assembl/templates/admin/discussion_permissions.jinja2:126
 msgid "Text email message:"
 msgstr ""
 
-#: assembl/templates/admin/discussion_permissions.jinja2:122
+#: assembl/templates/admin/discussion_permissions.jinja2:127
 #, python-format
 msgid ""
 "Hello, {name}!\n"
@@ -2249,11 +2262,11 @@ msgid ""
 "The %(platform_name)s Team\n"
 msgstr ""
 
-#: assembl/templates/admin/discussion_permissions.jinja2:132
+#: assembl/templates/admin/discussion_permissions.jinja2:137
 msgid "HTML email message:"
 msgstr ""
 
-#: assembl/templates/admin/discussion_permissions.jinja2:133
+#: assembl/templates/admin/discussion_permissions.jinja2:138
 #, python-format
 msgid ""
 "<p>Hello, {name}!</p>\n"
@@ -2265,7 +2278,7 @@ msgid ""
 "<p>Best regards,<br />The %(platform_name)s Team</p>\n"
 msgstr ""
 
-#: assembl/templates/admin/discussion_permissions.jinja2:140
+#: assembl/templates/admin/discussion_permissions.jinja2:145
 msgid "Re-send to people who did not log in yet (USE SPARINGLY)"
 msgstr ""
 
@@ -2716,6 +2729,10 @@ msgstr ""
 msgid "Associated accounts"
 msgstr ""
 
+#: assembl/templates/views/attachmentText.tmpl:2
+msgid "Add Cover Image"
+msgstr ""
+
 #: assembl/templates/views/bookmarket.tmpl:3
 msgid "activate web annotation"
 msgstr ""
@@ -3131,81 +3148,81 @@ msgstr ""
 msgid "Share"
 msgstr ""
 
-#: assembl/templates/views/ideaPanel.tmpl:7
+#: assembl/templates/views/ideaPanel.tmpl:12
 msgid "The name of this idea in the table of ideas"
 msgstr ""
 
-#: assembl/templates/views/ideaPanel.tmpl:15
+#: assembl/templates/views/ideaPanel.tmpl:20
 msgid "Voting session"
 msgstr ""
 
-#: assembl/templates/views/ideaPanel.tmpl:22
+#: assembl/templates/views/ideaPanel.tmpl:27
 msgid "What you need to know"
 msgstr ""
 
-#: assembl/templates/views/ideaPanel.tmpl:27
+#: assembl/templates/views/ideaPanel.tmpl:33
 msgid "Expression in next synthesis"
 msgstr ""
 
-#: assembl/templates/views/ideaPanel.tmpl:30
+#: assembl/templates/views/ideaPanel.tmpl:36
 msgid ""
 "Expression of this idea in the next synthesis.  You may want to edit them all"
 " together in the synthesis panel rather than here."
 msgstr ""
 
-#: assembl/templates/views/ideaPanel.tmpl:34
+#: assembl/templates/views/ideaPanel.tmpl:40
 msgid "Description of this idea"
 msgstr ""
 
-#: assembl/templates/views/ideaPanel.tmpl:37
+#: assembl/templates/views/ideaPanel.tmpl:43
 msgid "A description of this idea"
 msgstr ""
 
-#: assembl/templates/views/ideaPanel.tmpl:42
+#: assembl/templates/views/ideaPanel.tmpl:48
 msgid "Announcement for this idea"
 msgstr ""
 
-#: assembl/templates/views/ideaPanel.tmpl:56
+#: assembl/templates/views/ideaPanel.tmpl:67
 msgid ""
 "Number of participants who contributed messages about this idea or it's sub-"
 "ideas."
 msgstr ""
 
-#: assembl/templates/views/ideaPanel.tmpl:75
+#: assembl/templates/views/ideaPanel.tmpl:86
 msgid "Expressions of this idea in messages or on the web"
 msgstr ""
 
-#: assembl/templates/views/ideaPanel.tmpl:80
+#: assembl/templates/views/ideaPanel.tmpl:91
 msgid "Nuggets are important expressions of this idea in messages or on the web"
 msgstr ""
 
-#: assembl/templates/views/ideaPanel.tmpl:88
+#: assembl/templates/views/ideaPanel.tmpl:99
 msgid "Add extracts by dragging them in this panel from the clipboard or messages"
 msgstr ""
 
-#: assembl/templates/views/ideaPanel.tmpl:98
+#: assembl/templates/views/ideaPanel.tmpl:109
 msgid ""
 "Remove all extracts from this idea.  Removed extracts will be available in "
 "your clipboard"
 msgstr ""
 
-#: assembl/templates/views/ideaPanel.tmpl:98
+#: assembl/templates/views/ideaPanel.tmpl:109
 msgid "Remove all extracts"
 msgstr ""
 
-#: assembl/templates/views/ideaPanel.tmpl:103
+#: assembl/templates/views/ideaPanel.tmpl:114
 msgid "Delete this idea completely"
 msgstr ""
 
-#: assembl/templates/views/ideaPanel.tmpl:103
+#: assembl/templates/views/ideaPanel.tmpl:114
 msgid "Delete idea"
 msgstr ""
 
-#: assembl/templates/views/ideaPanel.tmpl:116
+#: assembl/templates/views/ideaPanel.tmpl:127
 msgid "No idea selected"
 msgstr ""
 
-#: assembl/templates/views/ideaPanel.tmpl:117
+#: assembl/templates/views/ideaPanel.tmpl:128
 msgid ""
 "Choose an idea in the Table of ideas to explore the discussion or close this "
 "panel as you will have open"
@@ -3797,7 +3814,7 @@ msgstr ""
 msgid "The username %s is already used"
 msgstr ""
 
-#: assembl/views/auth/views.py:261 assembl/views/auth/views.py:983
+#: assembl/views/auth/views.py:261 assembl/views/auth/views.py:985
 msgid "The passwords are not identical"
 msgstr ""
 
@@ -3823,8 +3840,8 @@ msgid ""
 "that does not exist."
 msgstr ""
 
-#: assembl/views/auth/views.py:463 assembl/views/auth/views.py:767
-#: assembl/views/auth/views.py:773
+#: assembl/views/auth/views.py:463 assembl/views/auth/views.py:769
+#: assembl/views/auth/views.py:775
 msgid "This user cannot be found"
 msgstr ""
 
@@ -3840,11 +3857,11 @@ msgstr ""
 msgid "You do not need to confirm this email address, it is already confirmed."
 msgstr ""
 
-#: assembl/views/auth/views.py:548 assembl/views/auth/views.py:734
+#: assembl/views/auth/views.py:548 assembl/views/auth/views.py:735
 msgid "Confirmation requested"
 msgstr ""
 
-#: assembl/views/auth/views.py:549 assembl/views/auth/views.py:735
+#: assembl/views/auth/views.py:549 assembl/views/auth/views.py:736
 msgid ""
 "A confirmation e-mail has been sent to your account and should be in your "
 "inbox in a few minutes. It contains a confirmation link, please click on it "
@@ -3852,104 +3869,104 @@ msgid ""
 "confirmation e-mail (check your spams), click here."
 msgstr ""
 
-#: assembl/views/auth/views.py:592 assembl/views/auth/views.py:612
-#: assembl/views/auth/views.py:635
+#: assembl/views/auth/views.py:593 assembl/views/auth/views.py:613
+#: assembl/views/auth/views.py:636
 #, python-format
 msgid "Email <%s> already confirmed"
 msgstr ""
 
-#: assembl/views/auth/views.py:600
+#: assembl/views/auth/views.py:601
 msgid "This link was not valid. We sent another."
 msgstr ""
 
-#: assembl/views/auth/views.py:603
+#: assembl/views/auth/views.py:604
 msgid "This link has been used. We sent another."
 msgstr ""
 
-#: assembl/views/auth/views.py:616
+#: assembl/views/auth/views.py:617
 msgid "This link is not valid. Please attempt to login to get another one."
 msgstr ""
 
-#: assembl/views/auth/views.py:656
+#: assembl/views/auth/views.py:657
 #, python-format
 msgid ""
 "Your email address %s has been confirmed, and you are now subscribed to "
 "discussion's default notifications."
 msgstr ""
 
-#: assembl/views/auth/views.py:661
+#: assembl/views/auth/views.py:662
 #, python-format
 msgid "Your email address %s has been confirmed."
 msgstr ""
 
-#: assembl/views/auth/views.py:681
+#: assembl/views/auth/views.py:682
 msgid "Login failed, try again"
 msgstr ""
 
-#: assembl/views/auth/views.py:721
+#: assembl/views/auth/views.py:722
 msgid "This email is already confirmed."
 msgstr ""
 
-#: assembl/views/auth/views.py:742
+#: assembl/views/auth/views.py:744
 msgid "We do not know about this email."
 msgstr ""
 
-#: assembl/views/auth/views.py:783
+#: assembl/views/auth/views.py:785
 msgid "I forgot my password"
 msgstr ""
 
-#: assembl/views/auth/views.py:827
+#: assembl/views/auth/views.py:829
 msgid "Password change requested"
 msgstr ""
 
-#: assembl/views/auth/views.py:828
+#: assembl/views/auth/views.py:830
 msgid ""
 "We have sent you an email with a temporary connection link. Please use that "
 "link to log in and change your password."
 msgstr ""
 
-#: assembl/views/auth/views.py:897 assembl/views/auth/views.py:967
+#: assembl/views/auth/views.py:899 assembl/views/auth/views.py:969
 msgid "This link is not valid. Do you want us to send another?"
 msgstr ""
 
-#: assembl/views/auth/views.py:900 assembl/views/auth/views.py:970
+#: assembl/views/auth/views.py:902 assembl/views/auth/views.py:972
 msgid "This link has been used. Do you want us to send another?"
 msgstr ""
 
-#: assembl/views/auth/views.py:917
+#: assembl/views/auth/views.py:919
 msgid "You will enter the discussion as <b>{name}</b>."
 msgstr ""
 
-#: assembl/views/auth/views.py:921
+#: assembl/views/auth/views.py:923
 #, python-format
 msgid "You will enter %s as <b>{name}</b>."
 msgstr ""
 
-#: assembl/views/auth/views.py:923
+#: assembl/views/auth/views.py:925
 msgid "Please choose your password for security reasons."
 msgstr ""
 
-#: assembl/views/auth/views.py:928
+#: assembl/views/auth/views.py:930
 msgid "Change your password"
 msgstr ""
 
-#: assembl/views/auth/views.py:996
+#: assembl/views/auth/views.py:998
 msgid "Password changed"
 msgstr ""
 
-#: assembl/views/auth/views.py:1008
+#: assembl/views/auth/views.py:1010
 msgid "email"
 msgstr ""
 
-#: assembl/views/auth/views.py:1009
+#: assembl/views/auth/views.py:1011
 msgid "Please confirm your {confirm_what} with {assembl}"
 msgstr ""
 
-#: assembl/views/auth/views.py:1011
+#: assembl/views/auth/views.py:1013
 msgid "account"
 msgstr ""
 
-#: assembl/views/auth/views.py:1012
+#: assembl/views/auth/views.py:1014
 msgid ""
 "Hello, {name}, and welcome to {assembl}!\n"
 "\n"
@@ -3961,7 +3978,7 @@ msgid ""
 "The {assembl} Team"
 msgstr ""
 
-#: assembl/views/auth/views.py:1019
+#: assembl/views/auth/views.py:1021
 msgid ""
 "<p>Hello, {name}, and welcome to {assembl}!</p>\n"
 "<p>Please <a href=\"{confirm_url}\">click here to confirm your email "
@@ -3970,7 +3987,7 @@ msgid ""
 "<p>Best regards,<br />The {assembl} Team</p>"
 msgstr ""
 
-#: assembl/views/auth/views.py:1024
+#: assembl/views/auth/views.py:1026
 msgid ""
 "Hello, {name}!\n"
 "\n"
@@ -3982,7 +3999,7 @@ msgid ""
 "The {assembl} Team"
 msgstr ""
 
-#: assembl/views/auth/views.py:1031
+#: assembl/views/auth/views.py:1033
 msgid ""
 "<p>Hello, {name}!</p>\n"
 "<p>Please <a href=\"{confirm_url}\">click here to confirm your new email "
@@ -3991,11 +4008,11 @@ msgid ""
 "<p>Best regards,<br />The {assembl} Team</p>"
 msgstr ""
 
-#: assembl/views/auth/views.py:1085
+#: assembl/views/auth/views.py:1087
 msgid "Request for password change"
 msgstr ""
 
-#: assembl/views/auth/views.py:1089
+#: assembl/views/auth/views.py:1091
 msgid ""
 "<p>Hello, {name}!</p>\n"
 "<p>We have received a request to change the password on your {assembl} "
@@ -4007,7 +4024,7 @@ msgid ""
 "<p>Best regards,<br />The {assembl} Team</p>\n"
 msgstr ""
 
-#: assembl/views/auth/views.py:1095
+#: assembl/views/auth/views.py:1097
 msgid ""
 "Hello, {name}!\n"
 "We have received a request to change the password on your {assembl} account.\n"
