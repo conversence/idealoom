@@ -367,13 +367,13 @@ var IdeaPanel = AssemblPanel.extend({
         });
       }
 
-      this.renderAttachments();
-      
       this.checkContentHeight();
 
       this.getExtractslist();
 
       this.renderShortTitle();
+
+      this.renderAttachments();
 
       this.renderAnnouncement();
 
