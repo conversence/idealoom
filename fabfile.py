@@ -764,7 +764,8 @@ def _install_builddeps():
         # may require a sudo
         if not run('brew link libevent', quiet=True):
             sudo('brew link libevent')
-        run('brew install memcached zeromq redis libtool libmemcached gawk postgres')
+        run('brew install memcached zeromq redis libtool libmemcached gawk')
+        run('brew install postgres libxmlsec1')
         run('brew tap homebrew/services')
         run('brew services start memcached')
         run('brew services start redis')
@@ -795,7 +796,7 @@ def _install_builddeps():
     else:
         sudo('apt-get install -y build-essential python-dev pandoc')
         sudo('apt-get install -y automake bison flex gperf  libxml2-dev libssl-dev libreadline-dev gawk')
-        sudo('apt-get install -y graphviz libgraphviz-dev pkg-config')
+        sudo('apt-get install -y graphviz libgraphviz-dev pkg-config libxmlsec1-dev')
         sudo('apt-get install -y liblapack-dev libatlas-dev libblas-dev gfortran')
         print "We are still trying to get some requirements right for linux,"\
             "See http://www.scipy.org/scipylib/building/linux.html for details."
