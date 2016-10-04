@@ -8,6 +8,7 @@ from time import sleep, strftime
 import pipes
 from ConfigParser import ConfigParser, SafeConfigParser, NoOptionError
 from StringIO import StringIO
+
 # Importing the "safe" os.path commands
 from os.path import join, dirname, split, normpath
 # Other calls to os.path rarely mostly don't work remotely. Use locally only.
@@ -1115,7 +1116,7 @@ def database_restore_postgres(postgres_dump_file, use_gpg):
     else:
         if use_gpg:
             absolute_path = postgres_dump_file[:-4]
-            run('gpg -d --output %s %s && rm -f %s' % (absolute_path, postgres_dump_file, postgres_dump_file)
+            run('gpg -d --output %s %s && rm -f %s' % (absolute_path, postgres_dump_file, postgres_dump_file))
 
     # Restore data
     with prefix(venv_prefix()), cd(env.projectpath):
