@@ -1145,10 +1145,11 @@ def database_restore_postgres(postgres_dump_file, use_gpg):
     if not os.path.isfile(postgres_dump_file):
         print("%s is not a valid postgres dump file or does not exist")
         exit()
-    else:
-        if use_gpg:
-            absolute_path = postgres_dump_file[:-4]
-            run('gpg -d --output %s %s && rm -f %s' % (absolute_path, postgres_dump_file, postgres_dump_file))
+
+    absolute_path = postgres_dump_file
+    if use_gpg:
+        absolute_path = postgres_dump_file[:-4]
+        run('gpg -d --output %s %s && rm -f %s' % (absolute_path, postgres_dump_file, postgres_dump_file))
 
     # Restore data
     with prefix(venv_prefix()), cd(env.projectpath):
