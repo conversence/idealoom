@@ -251,8 +251,11 @@ Start as a user with sudo access
 
     sudo apt-get install fabric git openssh-server
     sudo apt-get install nginx uwsgi uwsgi-plugin-python
+    sudo apt-get install postgresql postgresql-server-dev-all
     sudo adduser assembl_user #assembl_user is the name of a user dedicated to this instance
     sudo usermod -G www-data assembl_user
+    cd / # the next command needs to be run from a folder where any user has enough permissions (for example, do not run it from /root, otherwise you will get a 'could not change directory to "/root": Permission denied' error)
+    sudo -u postgres createuser --createdb your_assembl_databaseuser
 
     # By default, postgres will not use passwords from postgres users who connect through the Unix socket domain (versus a network connection).
     # So if you want to make your database to be safer and ask for password anyway, edit your /etc/postgresql/9.1/main/pg_hba.conf file and replace
@@ -276,9 +279,7 @@ Start as a user with sudo access
     find assembl/static -type f -print|xargs chmod g+r
     cp production.ini local.ini
 
-Change the values for:
-
-If you use sentry to monitor:
+If you use sentry to monitor your Assembl instance, then in your local.ini, change the values of these properties:
 
 * ``pipeline``
 * ``raven_url``
