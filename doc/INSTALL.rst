@@ -255,7 +255,7 @@ Start as a user with sudo access
     sudo adduser assembl_user #assembl_user is the name of a user dedicated to this instance
     sudo usermod -G www-data assembl_user
     cd / # the next command needs to be run from a folder where any user has enough permissions (for example, do not run it from /root, otherwise you will get a 'could not change directory to "/root": Permission denied' error)
-    sudo -u postgres createuser --createdb your_assembl_databaseuser
+    sudo -u postgres createuser --createdb your_assembl_databaseuser # your_assembl_databaseuser (you can change it) is a postgres user we create as well as its own database
 
     # By default, postgres will not use passwords from postgres users who connect through the Unix socket domain (versus a network connection).
     # So if you want to make your database to be safer and ask for password anyway, edit your /etc/postgresql/9.1/main/pg_hba.conf file and replace
