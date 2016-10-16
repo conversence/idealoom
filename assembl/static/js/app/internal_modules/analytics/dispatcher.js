@@ -9,16 +9,16 @@ var moduleName = 'Analytics_Dispatcher',
     dependencies = ['underscore', 'abstract', 'piwik'];
 
 (function(root, factory){
-  if (typeof define === 'function' && define.amd){
-    // AMD. Register as an anonymous module.
-    define(dependencies, function(_, Wrapper, Piwik){ //Update list of args. eg. function($, _, someModule) 
-      return (root[moduleName] = factory(_, Wrapper)); 
-    });
-  } else if (typeof module === 'object' && module.exports) {
+  if (typeof module === 'object' && module.exports) {
     // Node-like environments. Not strict CommonJS but CommonJS-like env.
     // Update arguments here by adding require('dependency') as paramter to factory().
     // eg. module.exports = factory(require('jquery'));
     module.exports = factory(require('underscore'), require('./abstract.js'), require('./piwik.js'));
+  } else if(typeof define === 'function' && define.amd) {
+    // AMD. Register as an anonymous module.
+    define(dependencies, function() {
+      return (root[moduleName] = factory(arguments));
+    });
   } else {
     // Browser global
     // Update arguments here by adding root.Dependecy as parameter to factory()
