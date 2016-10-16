@@ -4,7 +4,7 @@
  * @module app.router
  */
 
-var Marionette = require('./shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     routeManager = require('./routeManager.js'),
     Ctx = require('./common/context.js'),
     message = require('./models/message.js'),

@@ -4,7 +4,9 @@
  * @module app.views.groups.modalGroup
  */
 
-var Marionette = require('../../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
+    Backbone = require('backbone'),
+    BackboneModal = require('backbone-modal'),
     _ = require('underscore'),
     Assembl = require('../../app.js'),
     Ctx = require('../../common/context.js'),

@@ -4,7 +4,7 @@
  * @module app.views.contextPage
  */
 
-var Marionette = require('../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     Assembl = require('../app.js'),
     Ctx = require('../common/context.js'),
     CollectionManager = require('../common/collectionManager.js'),
@@ -13,6 +13,7 @@ var Marionette = require('../shims/marionette.js'),
     d3 = require('d3'),
     i18n = require('../utils/i18n.js'),
     Moment = require('moment'),
+    BackboneSubset = require("Backbone.Subset"),
     Permissions = require('../utils/permissions.js'),
     PanelSpecTypes = require('../utils/panelSpecTypes.js'),
     AssemblPanel = require('./assemblPanel.js'),

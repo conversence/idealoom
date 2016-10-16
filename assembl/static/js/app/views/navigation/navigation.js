@@ -4,7 +4,7 @@
  * @module app.views.navigation.navigation
  */
 
-var Marionette = require('../../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     Jed = require('jed'),
     $ = require('jquery'),
     _ = require('underscore'),

@@ -4,10 +4,13 @@
  * @module app.views.reusableDataFields.ckeditorField
  */
 
-var Marionette = require('../../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     _ = require('underscore'),
     $ = require('jquery'),
+    dotdotdot = require('jquery.dotdotdot'),
     Assembl = require('../../app.js'),
+    Backbone = require('backbone'),
+    BackboneModal = require('backbone-modal'),
     Permissions = require('../../utils/permissions.js'),
     CK = require('ckeditor'),
     Ctx = require('../../common/context.js');

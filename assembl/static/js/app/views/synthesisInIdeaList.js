@@ -4,7 +4,8 @@
  * @module app.views.synthesisInIdeaList
  */
 
-var Ctx = require('../common/context.js'),
+var $ = require('jquery'),
+    Ctx = require('../common/context.js'),
     Assembl = require('../app.js'),
     PanelSpecTypes = require('../utils/panelSpecTypes.js'),
     ideaInIdeaList = require('./ideaInIdeaList.js');

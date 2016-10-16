@@ -4,7 +4,8 @@
  * @module app.views.groups.groupContainer
  */
 
-var Marionette = require('../../shims/marionette.js'),
+var $ = require('jquery'),
+    Marionette = require('backbone.marionette'),
     ctx = require('../../common/context.js'),
     Assembl = require('../../app.js'),
     GroupContent = require('./groupContent.js'),

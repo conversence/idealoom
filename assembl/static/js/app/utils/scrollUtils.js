@@ -5,6 +5,7 @@
  */
 
 var jQuery = require('jquery'),
+    $ = jQuery,
     Raven = require('raven-js');
 
 var debugScrollUtils = false;

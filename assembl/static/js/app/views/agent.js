@@ -4,7 +4,7 @@
  * @module app.views.agent
  */
 
-var Marionette = require('../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     Assembl = require('../app.js'),
     _ = require('underscore'),
     $ = require('jquery'),

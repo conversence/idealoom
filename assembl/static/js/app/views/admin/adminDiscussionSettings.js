@@ -4,7 +4,7 @@
  * @module app.views.admin.adminDiscussionSettings
  */
 
-var Marionette = require('../../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     i18n = require('../../utils/i18n.js'),
     CollectionManager = require('../../common/collectionManager.js'),
     Sources = require('../../models/sources.js'),

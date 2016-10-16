@@ -4,7 +4,7 @@
  * @module app.views.ideaClassificationOnMessage
  */
 
-var Marionette = require('../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
   $ = require('jquery'),
   _ = require('underscore'),
   Assembl = require('../app.js'),
@@ -15,6 +15,8 @@ var Marionette = require('../shims/marionette.js'),
   IdeaModel = require('../models/idea.js'),
   i18n = require('../utils/i18n.js'),
   openIdeaInModal = require('./modals/ideaInModal.js'),
+  Backbone=require('backbone'),
+  BackboneModal = require('backbone-modal'),
   Analytics = require('../internal_modules/analytics/dispatcher.js');
 
 // // root class

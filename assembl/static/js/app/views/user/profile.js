@@ -4,7 +4,7 @@
  * @module app.views.user.profile
  */
 
-var Marionette = require('../../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     $ = require('jquery'),
     Agents = require('../../models/agents.js'),
     i18n = require('../../utils/i18n.js'),

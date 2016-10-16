@@ -4,7 +4,7 @@
  * @module app.views.statistics
  */
 
-var Marionette = require('../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     Assembl = require('../app.js'),
     Ctx = require('../common/context.js'),
     CollectionManager = require('../common/collectionManager.js'),

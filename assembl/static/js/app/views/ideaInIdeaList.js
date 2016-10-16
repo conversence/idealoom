@@ -14,6 +14,7 @@ var Backbone = require('backbone'),
     UserCustomData = require('../models/userCustomData.js'),
     PanelSpecTypes = require('../utils/panelSpecTypes.js'),
     scrollUtils = require('../utils/scrollUtils.js'),
+    Marionette = require('backbone.marionette'),
     Analytics = require('../internal_modules/analytics/dispatcher.js');
 
 var IdeaInIdeaListView = Marionette.LayoutView.extend({

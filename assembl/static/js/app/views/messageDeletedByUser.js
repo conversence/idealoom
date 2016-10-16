@@ -4,7 +4,7 @@
  * @module app.views.message
  */
 
-var Marionette = require('../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     Ctx = require('../common/context.js'),
     i18n = require('../utils/i18n.js'),
     Permissions = require('../utils/permissions.js'),

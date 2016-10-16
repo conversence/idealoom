@@ -3,7 +3,8 @@
  * @module app.views.messageExportModal
  */
 var Backbone = require('backbone'),
-    Marionette = require('../shims/marionette.js'),
+    Marionette = require('backbone.marionette'),
+    BackboneModal = require('backbone-modal'),
     i18n = require('../utils/i18n.js'),
     $ = require('jquery'),
     _ = require('underscore'),

@@ -4,10 +4,12 @@
  * @module app.views.segmentList
  */
 
-var Marionette = require('../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     Backbone = require('backbone'),
+    BackboneModal = require('backbone-modal'),
     _ = require('underscore'),
     $ = require('jquery'),
+    highlight = require('jquery-highlight/jquery.highlight.js'),
     Assembl = require('../app.js'),
     Ctx = require('../common/context.js'),
     Segment = require('../models/segment.js'),
@@ -18,8 +20,7 @@ var Marionette = require('../shims/marionette.js'),
     PanelSpecTypes = require('../utils/panelSpecTypes.js'),
     AssemblPanel = require('./assemblPanel.js'),
     AgentViews = require('./agent.js'),
-
-    //Subset = require('backbone.subset'),
+    BackboneSubset = require("Backbone.Subset"),
     Promise = require('bluebird');
 
 var SegmentView = Marionette.LayoutView.extend({

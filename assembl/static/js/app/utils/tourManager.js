@@ -4,12 +4,13 @@
  * @module app.utils.tourManager
  */
 
-var Marionette = require('../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     i18n =  require('./i18n.js'),
     TourModel = require('../models/tour.js'),
     Ctx = require('../common/context.js'),
     _ = require('underscore'),
     AssemblTours = require('./tours/assemblTours.js'),
+    hopscotch = require('hopscotch'),
     Raven = require('raven-js');
 
 

@@ -4,7 +4,9 @@
  * @module app.views.infobar
  */
 
-var Marionette = require('../shims/marionette.js'),
+var Backbone=require('backbone'),
+    BackboneModal = require('backbone-modal'),
+    Marionette = require('backbone.marionette'),
     Assembl = require('../app.js'),
     CookiesManager = require("../utils/cookiesManager.js"),
     Widget = require('../models/widget.js'),

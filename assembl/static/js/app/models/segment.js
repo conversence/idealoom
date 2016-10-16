@@ -9,6 +9,7 @@ var _ = require('underscore'),
     Promise = require('bluebird'),
     Ctx = require('../common/context.js'),
     Agents = require('./agents.js'),
+    Annotator = require('annotator/annotator-full.js').Annotator,
     Message = require('./message.js'),
     Types = require('../utils/types.js'),
     i18n = require('../utils/i18n.js');

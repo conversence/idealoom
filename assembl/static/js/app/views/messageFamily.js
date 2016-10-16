@@ -4,7 +4,7 @@
  * @module app.views.messageFamily
  */
 
-var Marionette = require('../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     _ = require('underscore'),
     i18n = require('../utils/i18n.js'),
     Assembl = require('../app.js'),

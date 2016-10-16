@@ -4,12 +4,14 @@
  * @module app.views.groups.panelWrapper
  */
 
-var Marionette = require('../../shims/marionette.js'),
+var $ = require('jquery'),
+    Marionette = require('backbone.marionette'),
     panelViewByPanelSpec = require('../../objects/viewsFactory.js'),
     Ctx = require('../../common/context.js'),
     AssemblPanel = require('../assemblPanel.js'),
     i18n = require('../../utils/i18n.js'),
     panelSpec = require('../../models/panelSpec.js'),
+    tooltip = require('bootstrap-tooltip'),
     PanelSpecTypes = require('../../utils/panelSpecTypes.js');
 
 /**

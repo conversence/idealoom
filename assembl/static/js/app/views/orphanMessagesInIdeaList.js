@@ -4,7 +4,8 @@
  * @module app.views.orphanMessagesInIdeaList
  */
 
-var Assembl = require('../app.js'),
+var $ = require('jquery'),
+    Assembl = require('../app.js'),
     Ctx = require('../common/context.js'),
     PanelSpecTypes = require('../utils/panelSpecTypes.js'),
     ideaInIdeaList = require('./ideaInIdeaList.js');

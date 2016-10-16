@@ -13,9 +13,22 @@ var $ = require('jquery'),
     Roles =  require('../utils/roles.js'),
     i18n =  require('../utils/i18n.js'),
     Raven = require('raven-js'),
+    Backbone=require('backbone'),
+    BackboneModal = require('backbone-modal'),
+    upload = require('backbone-model-file-upload'), // why here?
     Analytics = require('../internal_modules/analytics/dispatcher.js');
 require('linkifyjs');
 require('linkifyjs/jquery')($);
+
+window.jQuery = $;
+window._ = _;
+// the following require window.jQuery
+var tooltip = require('bootstrap-tooltip'),
+    dropdown = require('bootstrap-dropdown'),
+    oembed = require('jquery-oembed-all/jquery.oembed'),
+    highlight = require('jquery-highlight/jquery.highlight.js');
+    // require('ckeditor-sharedcontainer/plugin'); // where is this anyway?
+
 
 /**
  *

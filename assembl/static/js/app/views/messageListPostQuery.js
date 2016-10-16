@@ -4,7 +4,8 @@
  * @module app.views.messageListPostQuery
  */
 
-var Ctx = require('../common/context.js'),
+var $ = require('jquery'),
+    Ctx = require('../common/context.js'),
     i18n = require('../utils/i18n.js'),
     CollectionManager = require('../common/collectionManager.js'),
     Promise = require('bluebird'),

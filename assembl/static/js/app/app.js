@@ -4,7 +4,7 @@
  * @module app.app
  */
 
-var Marionette = require('./shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     $ = require('jquery'),
     classlist = require('classlist-polyfill'),
     Raven = require('raven-js'),

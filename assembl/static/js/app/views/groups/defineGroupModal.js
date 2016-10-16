@@ -4,9 +4,11 @@
  * @module app.views.groups.defineGroupModal
  */
 
-var Marionette = require('../../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     $ = require('jquery'),
     _ = require('underscore'),
+    Backbone = require('backbone'),
+    BackboneModal = require('backbone-modal'),
     Assembl = require('../../app.js'),
     Ctx = require('../../common/context.js'),
     GroupSpec = require('../../models/groupSpec.js'),

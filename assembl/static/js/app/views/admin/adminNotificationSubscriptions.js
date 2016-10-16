@@ -4,7 +4,7 @@
  * @module app.views.admin.adminNotificationSubscriptions
  */
 
-var Marionette = require('../../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     CollectionManager = require('../../common/collectionManager.js'),
     Permissions = require('../../utils/permissions.js'),
     Ctx = require('../../common/context.js'),

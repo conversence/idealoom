@@ -4,7 +4,7 @@
  * @module app.objects.storage
  */
 
-var Marionette = require('../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     groupSpec = require('../models/groupSpec.js'),
     Ctx = require('../common/context.js');
 

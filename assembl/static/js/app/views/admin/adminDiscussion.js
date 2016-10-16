@@ -4,7 +4,7 @@
  * @module app.views.admin.adminDiscussion
  */
 
-var Marionette = require('../../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     $ = require('jquery'),
     _ = require('underscore'),
     autosize = require('jquery-autosize'),

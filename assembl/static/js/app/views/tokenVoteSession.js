@@ -4,9 +4,11 @@
  * @module app.views.tokenVoteSession
  */
 
-var Marionette = require('../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
   $ = require('jquery'),
   _ = require('underscore'),
+  BackboneSubset = require("Backbone.Subset"),
+  BackboneModal = require('backbone-modal'),
   Promise = require('bluebird'),
   Assembl = require('../app.js'),
   classlist = require('classlist-polyfill'),

@@ -4,9 +4,10 @@
  * @module app.views.documents
  */
 
-var Marionette = require('../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     _ = require('underscore'),
     $ = require('jquery'),
+    oembed = require('jquery-oembed-all/jquery.oembed'),
     Assembl = require('../app.js'),
     Promise = require('bluebird'),
     Ctx = require('../common/context.js'),

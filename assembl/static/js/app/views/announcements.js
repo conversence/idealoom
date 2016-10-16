@@ -4,7 +4,7 @@
  * @module app.views.announcements
  */
 
-var Marionette = require('../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     _ = require('underscore'),
     $ = require('jquery'),
     i18n = require('../utils/i18n.js'),

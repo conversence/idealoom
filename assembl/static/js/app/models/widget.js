@@ -6,6 +6,7 @@
 
 var _ = require('underscore'),
     Backbone = require("backbone"),
+    BackboneSubset = require("Backbone.Subset"),
     Base = require("./base.js"),
     i18n = require('../utils/i18n.js'),
     Moment = require('moment'),

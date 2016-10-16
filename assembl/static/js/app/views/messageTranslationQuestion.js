@@ -2,7 +2,7 @@
  * 
  * @module app.views.messageTranslationQuestion
  */
-var Marionette = require('../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     Backbone = require('backbone'),
     Ctx = require('../common/context.js'),
     CollectionManager = require('../common/collectionManager.js'),

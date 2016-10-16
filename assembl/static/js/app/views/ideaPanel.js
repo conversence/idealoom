@@ -20,12 +20,14 @@ var Assembl = require('../app.js'),
     WidgetButtons = require('./widgetButtons.js'),
     CollectionManager = require('../common/collectionManager.js'),
     AssemblPanel = require('./assemblPanel.js'),
-    Marionette = require('../shims/marionette.js'),
+    Marionette = require('backbone.marionette'),
     AttachmentViews = require('./attachments.js'),
     ConfirmModal = require('./confirmModal.js'),
     AttachmentModels = require('../models/attachments.js'),
     $ = require('jquery'),
     _ = require('underscore'),
+    highlight = require('jquery-highlight/jquery.highlight.js'),
+    BackboneSubset = require("Backbone.Subset"),
     Promise = require('bluebird');
 
 var IdeaPanel = AssemblPanel.extend({

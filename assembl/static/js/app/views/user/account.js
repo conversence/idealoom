@@ -4,7 +4,7 @@
  * @module app.views.user.account
  */
 
-var Marionette = require('../../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     $ = require('jquery'),
     _ = require('underscore'),
     Accounts = require('../../models/accounts.js'),

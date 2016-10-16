@@ -3,9 +3,10 @@
  * @module app.views.preferencesView
  */
 
-var Marionette = require("../shims/marionette.js"),
+var Marionette = require('backbone.marionette'),
     Backbone = require("backbone"),
     _ = require("underscore"),
+    BackboneSubset = require("Backbone.Subset"),
     i18n = require("../utils/i18n.js"),
     Types = require("../utils/types.js"),
     Ctx = require("../common/context.js"),

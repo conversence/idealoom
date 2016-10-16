@@ -4,7 +4,7 @@
  * @module app.views.groups.groupContent
  */
 
-var Marionette = require('../../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     Ctx = require('../../common/context.js'),
     i18n = require('../../utils/i18n.js'),
     panelSpec = require('../../models/panelSpec.js'),

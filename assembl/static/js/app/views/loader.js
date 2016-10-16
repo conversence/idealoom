@@ -4,7 +4,7 @@
  * @module app.views.loader
  */
 
-var Marionette = require('../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     _ = require('underscore'),
     Assembl = require('../app.js'),
     Ctx = require('../common/context.js');

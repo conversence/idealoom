@@ -4,7 +4,8 @@
  * @module app.views.allMessagesInIdeaList
  */
 
-var ideaInIdeaList = require('./ideaInIdeaList.js'),
+var $ = require('jquery'),
+    ideaInIdeaList = require('./ideaInIdeaList.js'),
     Ctx = require('../common/context.js'),
     PanelSpecTypes = require('../utils/panelSpecTypes.js');
 

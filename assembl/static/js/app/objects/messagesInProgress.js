@@ -4,7 +4,7 @@
  * @module app.objects.messagesInProgress
  */
 
-var Marionette = require('../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     Ctx = require('../common/context.js');
 
 var messagesInProgress = Marionette.Object.extend({

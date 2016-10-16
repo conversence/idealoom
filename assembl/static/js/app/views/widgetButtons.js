@@ -5,7 +5,7 @@
  */
 
 var Backbone = require("backbone"),
-    Marionette = require("../shims/marionette.js"),
+    Marionette = require('backbone.marionette'),
     _ = require("underscore"),
     i18n = require('../utils/i18n.js'),
     Moment = require('moment'),

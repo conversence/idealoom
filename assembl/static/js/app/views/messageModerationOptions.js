@@ -5,7 +5,7 @@
  */
 
 var Backbone = require('backbone'),
-    Marionette = require('../shims/marionette.js'),
+    Marionette = require('backbone.marionette'),
     Assembl = require('../app.js'),
     _ = require('underscore'),
     $ = require('jquery'),

@@ -4,7 +4,7 @@
  * @module app.views.facebookViews
  */
 
-var Marionette = require('../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     Backbone = require('backbone'),
     _ = require('underscore'),
     Ctx = require('../common/context.js'),

@@ -4,7 +4,7 @@
  * @module app.views.admin.adminNavigationMenu
  */
 
-var Marionette = require('../../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     $ = require('jquery'),
     i18n = require('../../utils/i18n.js'),
     Permissions = require('../../utils/permissions.js'),

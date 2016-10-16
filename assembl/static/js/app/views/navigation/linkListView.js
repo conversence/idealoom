@@ -7,7 +7,7 @@
 var _ = require('underscore'),
     $ = require('jquery'),
     Promise = require('bluebird'),
-    Marionette = require('../../shims/marionette.js'),
+    Marionette = require('backbone.marionette'),
     Ctx = require('../../common/context.js'),
     Permissions = require('../../utils/permissions.js');
 

@@ -2,7 +2,7 @@
  * 
  * @module app.views.admin.generalSource
  */
-var Marionette = require('../../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     $ = require('jquery'),
     _ = require('underscore'),
     i18n = require('../../utils/i18n.js'),

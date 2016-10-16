@@ -4,7 +4,7 @@
  * @module app.views.user.userNotificationSubscriptions
  */
 
-var Marionette = require('../../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     Assembl = require('../../app.js'),
     $ = require('jquery'),
     _ = require('underscore'),

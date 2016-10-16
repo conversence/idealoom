@@ -4,7 +4,7 @@
  * @module app.views.assemblPanel
  */
 
-var Marionette = require('../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     _ = require('underscore');
 
 /**

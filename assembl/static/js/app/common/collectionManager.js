@@ -4,7 +4,7 @@
  * @module app.common.collectionManager
  */
 
-var Marionette = require('../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     Promise = require('bluebird'),
     Raven = require('raven-js'),
     $ = require('jquery'),

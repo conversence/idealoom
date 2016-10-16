@@ -4,9 +4,10 @@
  * @module app.views.message
  */
 
-var Marionette = require('../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     Raven = require('raven-js'),
     Backbone = require('backbone'),
+    BackboneModal = require('backbone-modal'),
     _ = require('underscore'),
     Assembl = require('../app.js'),
     Ctx = require('../common/context.js'),
@@ -18,7 +19,10 @@ var Marionette = require('../shims/marionette.js'),
     CollectionManager = require('../common/collectionManager.js'),
     PanelSpecTypes = require('../utils/panelSpecTypes.js'),
     $ = require('jquery'),
+    highlight = require('jquery-highlight/jquery.highlight.js'),
+    dropdown = require('bootstrap-dropdown'),
     Promise = require('bluebird'),
+    dotdotdot = require('jquery.dotdotdot'),
     messageExport = require('./messageExportModal.js'),
     AgentViews = require('./agent.js'),
     Types = require('../utils/types.js'),

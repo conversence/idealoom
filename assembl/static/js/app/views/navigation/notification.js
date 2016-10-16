@@ -4,7 +4,7 @@
  * @module app.views.navigation.notification
  */
 
-var Marionette = require('../../shims/marionette.js');
+var Marionette = require('marionette.js');
 
 var sidebarNotification = Marionette.ItemView.extend({
   constructor: function sidebarNotification() {

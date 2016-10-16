@@ -4,7 +4,7 @@
  * @module app.routeManager
  */
 
-var Marionette = require('./shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     Assembl = require('./app.js'),
     Promise = require('bluebird'),
     Ctx = require('./common/context.js'),
@@ -34,7 +34,8 @@ var Marionette = require('./shims/marionette.js'),
     PreferencesView = require('./views/preferencesView.js'),
     FirstIdeaToShowVisitor = require('./views/visitors/firstIdeaToShowVisitor.js'),
     i18n = require('./utils/i18n.js'),
-    Analytics = require('./internal_modules/analytics/dispatcher.js')
+    Analytics = require('./internal_modules/analytics/dispatcher.js'),
+    Marionette = require('backbone.marionette'),
     $ = require('jquery');
 
 var QUERY_STRINGS = {

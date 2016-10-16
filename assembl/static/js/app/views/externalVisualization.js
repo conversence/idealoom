@@ -4,7 +4,7 @@
  * @module app.views.externalVisualization
  */
 
-var Marionette = require('../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     i18n = require('../utils/i18n.js'),
     Ctx = require('../common/context.js'),
     PanelSpecTypes = require('../utils/panelSpecTypes.js'),

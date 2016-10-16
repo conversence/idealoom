@@ -4,7 +4,7 @@
  * @module app.views.user.userNavigationMenu
  */
 
-var Marionette = require('../../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     $ = require('jquery'),
     i18n = require('../../utils/i18n.js'),
     Ctx = require('../../common/context.js'),

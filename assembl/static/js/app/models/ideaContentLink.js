@@ -3,7 +3,7 @@
  * The link between an idea and a message.
  * @module app.models.ideaContentLink
  */
-var Marionette = require('../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     Backbone = require('backbone'),
     _ = require('underscore'),
     $ = require('jquery'),

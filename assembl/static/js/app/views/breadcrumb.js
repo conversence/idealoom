@@ -4,7 +4,7 @@
  * @module app.views.breadcrumb
  */
 
-var Marionette = require('../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
   $ = require('jquery'),
   _ = require('underscore'),
   CollectionManager = require('../common/collectionManager.js');

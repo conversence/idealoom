@@ -4,7 +4,7 @@
  * @module app.views.authorization
  */
 
-var Marionette = require('../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     Ctx = require('../common/context.js');
 
 var authorization = Marionette.ItemView.extend({

@@ -4,15 +4,18 @@
  * @module app.views.attachments
  */
 
-var Marionette = require('../shims/marionette.js'),
+var Marionette = require('backbone.marionette'),
     _ = require('underscore'),
     $ = require('jquery'),
+    dropdown = require('bootstrap-dropdown'),
     i18n = require('../utils/i18n.js'),
     Assembl = require('../app.js'),
     Ctx = require('../common/context.js'),
     Types = require('../utils/types.js'),
     Attachments = require('../models/attachments.js'),
     Documents = require('../models/documents.js'),
+    Backbone=require('backbone'),
+    BackboneModal = require('backbone-modal'),
     DocumentViews = require('./documents.js');
 
 

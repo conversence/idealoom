@@ -4,7 +4,7 @@
  * @module app.views.flipSwitchButton
  */
 
-var Marionette = require('../shims/marionette.js');
+var Marionette = require('backbone.marionette');
 
 var FlipSwitchButton = Marionette.ItemView.extend({
   constructor: function FlipSwitchButton() {

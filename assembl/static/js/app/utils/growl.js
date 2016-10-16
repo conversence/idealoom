@@ -3,7 +3,9 @@
  * @module app.utils.growl
  */
 var $ = require('jquery'),
-    _ = require('underscore');
+    _ = require('underscore'),
+    growl = require('bootstrap-growl/jquery.bootstrap-growl');
+
 
 /*
     An easy to use growling function for use in Assembl
