@@ -34,7 +34,15 @@
     "sockjs-client": "~1.1.1",
     "vinyl-buffer": "~1.0.0",
     "vinyl-source-stream": "~1.1.0",
-    "linkifyjs": "~2.1.3"
+    "linkifyjs": "~2.1.3",
+    "backbone": "~1.3.3",
+    "backbone.babysitter": "1.0.0-pre.2",
+    "backbone-model-file-upload": "~1.0.0",
+    "hopscotch": "~0.2.4",
+    "jquery": "~2.1.4",
+    "backbone.marionette": "~2.4.7",
+    "mocha": "~2.2.5",
+    "underscore": "~1.8.3"
   },
   "devDependencies": {
     "autoprefixer": "~6.5.1",
@@ -70,7 +78,8 @@
     "postcss": "~5.2.4",
     "sinon": "~1.17.3",
     "uglify-js": "~2.7.3",
-    "watchify": "~3.7.0"
+    "watchify": "~3.7.0",
+    "webpack": "1.13.2"
   },
   "browserify-shim": {
     "jquery": "global:$",
