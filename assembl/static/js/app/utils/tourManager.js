@@ -9,6 +9,7 @@ var Marionette = require('backbone.marionette'),
     TourModel = require('../models/tour.js'),
     Ctx = require('../common/context.js'),
     _ = require('underscore'),
+    $ = require('jquery'),
     AssemblTours = require('./tours/assemblTours.js'),
     hopscotch = require('hopscotch'),
     Raven = require('raven-js');

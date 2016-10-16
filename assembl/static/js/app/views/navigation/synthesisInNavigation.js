@@ -6,6 +6,7 @@
 
 var Marionette = require('backbone.marionette'),
     _ = require('underscore'),
+    $ = require('jquery'),
     Promise = require('bluebird'),
     AssemblPanel = require('../assemblPanel.js'),
     CollectionManager = require('../../common/collectionManager.js'),
