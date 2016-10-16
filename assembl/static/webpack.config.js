@@ -1,8 +1,31 @@
-var path = require('path');
-var webpack = require('webpack');
+var path = require('path'),
+    glob = require('glob'),
+    webpack = require('webpack'),
+    _ = require('underscore'),
+    ExtractTextPlugin = require("extract-text-webpack-plugin");
+
+function theme_entries() {
+  var entries = {},
+      paths = glob.sync('./css/themes/**/*_web.scss'),
+      i, path, parts, name;
+  for (i = 0; i < paths.length; i++) {
+    path = paths[i];
+    parts = path.split('/');
+    name = 'theme_' + parts[parts.length - 2] + '_web';
+    entries[name] = path;
+  }
+  paths = glob.sync('./css/themes/**/*_notifications.scss');
+  for (i = 0; i < paths.length; i++) {
+    path = paths[i];
+    parts = path.split('/');
+    name = 'theme_' + parts[parts.length - 2] + '_notifications';
+    entries[name] = path;
+  }
+  return entries;
+}
 
 module.exports = {
-  entry: {
+  entry: _.extend(theme_entries(), {
     app: './js/app/index.js',
     infrastructure: [
       'jquery',
@@ -30,14 +53,7 @@ module.exports = {
       'lolex',
       'sinon',
     ],
-    assembl_web_css: [
-      './node_modules/hopscotch/dist/css/hopscotch.css',
-      './css/themes/default/assembl_web.scss',
-    ],
-    assembl_notifications_css: [
-      './css/themes/default/assembl_notifications.scss',
-    ],
-  },
+  }),
   output: {
     path: './js/build',
     filename: '[name].js',
@@ -67,11 +83,12 @@ module.exports = {
       },
       {
         test: /\.scss$/,
-        loaders: ["style", "css", 'sass?includePaths[]='+ path.resolve(__dirname, 'node_modules/bourbon/app/assets/stylesheets')]
+        loader: ExtractTextPlugin.extract(
+          'style-loader', 'css-loader!sass-loader?includePaths[]=' + path.resolve(__dirname, 'node_modules/bourbon/app/assets/stylesheets')),
       },
       {
         test: /\.css$/,
-        loaders: ["style", "css"]
+        loader: ExtractTextPlugin.extract('style-loader', 'css-loader'),
       },
       {
         test: /\.(jpg|png|woff|woff2|eot|ttf|svg)$/,
@@ -84,5 +101,7 @@ module.exports = {
       new webpack.ResolverPlugin(
           new webpack.ResolverPlugin.DirectoryDescriptionFilePlugin('.bower.json', ['main'])
       ),
+      new ExtractTextPlugin("[name].css"),
   ],
 };
+
