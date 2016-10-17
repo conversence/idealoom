@@ -852,7 +852,7 @@ def update_python_package_builddeps():
         sudo('apt-get install -y libpq-dev libmemcached-dev libzmq3-dev '
              'libxslt1-dev libffi-dev libhiredis-dev libxml2-dev libssl-dev '
              'libreadline-dev liblapack-dev libatlas-dev libblas-dev '
-             'libxmlsec1-dev')
+             'libxmlsec1-dev libgraphviz-dev')
         print ("We are still trying to get some requirements right for linux, "
                "See http://www.scipy.org/scipylib/building/linux.html "
                "for details.")
