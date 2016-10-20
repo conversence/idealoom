@@ -8,9 +8,9 @@
 Description=idealoom supervisord
 
 [Service]
-# These are the lines you have to modify for your environment
+# These are the lines you have to modify for your environment. This Idealoom Assembl is running under the ubuntu user.
 Environment=IDEALOOM_PATH=/home/ubuntu/idealoom
-User=www-data
+User=ubuntu
 Group=www-data
 
 Type=simple
