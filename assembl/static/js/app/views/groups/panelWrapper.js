@@ -109,7 +109,7 @@ var PanelWrapper = Marionette.LayoutView.extend({
       if(!isSmallScreen){
         var panelType = this.model.get('type');
         switch(panelType) {
-        case PanelSpecTypes.IDEA_PANEL.id:
+        case PanelSpecTypes.TABLE_OF_IDEAS.id:
             this.model.set('minWidth', 350); // 295
             break;
         case PanelSpecTypes.NAV_SIDEBAR.id:
