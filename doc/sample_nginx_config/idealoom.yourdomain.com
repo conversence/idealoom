@@ -4,15 +4,15 @@ server {
     #listen   443 ssl;
     #listen   [::]:443 ssl;
 
-    # This is the server name, assuming you're running multiple servers
-    server_name idealoom.yourdomain.com;
+    # This is the server name, if you're running multiple servers
+    # server_name idealoom.yourdomain.com;
 
     #ssl_certificate     /etc/ssl/idealoom.yourdomain.com/idealoom.yourdomain.com.crt;
     #ssl_certificate_key /etc/ssl/idealoom.yourdomain.com/idealoom.yourdomain.com.key;
 
-    location /something_or_other.html {
-        #This is for domain verification
-        alias /var/www/idealoom/something_or_other.html;
+    location /.well-known {
+        #This is for domain verification with let's encrypt
+        alias /var/www/html/.well-known;
     }
 
     location /socket {
@@ -28,13 +28,14 @@ server {
         autoindex on;
 
         alias /var/www/idealoom/assembl/static;
+        alias /home/ubuntu/idealoom/assembl/static;
     }
 
     location / {
 
         include uwsgi_params;
         uwsgi_read_timeout 5m;
-        uwsgi_pass unix:///var/www/idealoom/var/run/uwsgi.sock;
+        uwsgi_pass unix:///home/ubuntu/idealoom/var/run/uwsgi.sock;
     }
 
 # So files uploaded to the database are not artificailly limited by nginx

@@ -9,7 +9,7 @@ Description=idealoom supervisord
 
 [Service]
 # These are the lines you have to modify for your environment
-Environment=IDEALOOM_PATH=/var/www/idealoom
+Environment=IDEALOOM_PATH=/home/ubuntu/idealoom
 User=www-data
 Group=www-data
 
