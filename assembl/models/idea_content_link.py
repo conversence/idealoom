@@ -465,6 +465,10 @@ class TextFragmentIdentifier(DiscussionBoundBase):
         'text_fragment_identifiers', cascade="all, delete-orphan"))
 
     @classmethod
+    def generate_post_xpath(cls, post, prefix=''):
+        return "%s//div[@id='message-body-local:Content/%d']" % (prefix, post.id)
+
+    @classmethod
     def special_quad_patterns(cls, alias_maker, discussion_id):
         return [
             QuadMapPatternS(
