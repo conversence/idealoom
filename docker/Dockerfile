@@ -1,7 +1,7 @@
 FROM    ubuntu:16.04
 
 ENV     DEBIAN_FRONTEND noninteractive
-ARG	GITREPO=https://github.com/imaginationforpeople/assembl.git
+ARG	GITREPO=https://github.com/conversence/idealoom.git
 ARG	GITBRANCH=master
 
 RUN     apt-get update && apt-get install -y \
@@ -18,7 +18,7 @@ RUN     apt-get update && apt-get install -y \
 RUN     ssh-keygen -P '' -f ~/.ssh/id_rsa && \
             cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 RUN     cd /opt ; set -x ; git clone -b $GITBRANCH $GITREPO
-WORKDIR /opt/assembl
+WORKDIR /opt/idealoom
 RUN     /etc/init.d/ssh start && \
            ssh-keyscan localhost && \
            cp production.ini local.ini && \
