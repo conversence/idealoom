@@ -4292,9 +4292,6 @@ msgstr ""
 msgid "No discussion found for slug=%s"
 msgstr "Keine Diskussionen gefunden für Slug=%s"
 
-#~ msgid ""
-#~ msgstr ""
-
 #~ msgid "Getting non-orphan posts isn't supported."
 #~ msgstr "Das Einholen von nicht verwaisten Beiträgen wird nicht unterstützt."
 
