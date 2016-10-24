@@ -239,6 +239,11 @@ class AgentProfile(Base):
         if offline_mode == "true":
             return default
 
+        acc = self.get_preferred_email_account()
+        url = acc.avatar_url(size)
+        if url:
+            return url
+
         for acc in self.identity_accounts:
             url = acc.avatar_url(size)
             if url:
