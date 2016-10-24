@@ -1,17 +1,19 @@
-# English translations for assembl.
+# Spanish translations for assembl.
 # Copyright (C) 2016 ORGANIZATION
 # This file is distributed under the same license as the assembl project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2016.
 #
+# Translators:
+# Xavier Llairo <xavier.llairo@bluenove.com>, 2016
 msgid ""
 msgstr ""
-"Project-Id-Version: assembl 0.0\n"
+"Project-Id-Version:  Assembl\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2016-10-24 11:17-0400\n"
-"PO-Revision-Date: 2014-07-24 17:38-0500\n"
-"Last-Translator: Benoit Grégoire <benoitg@coeus.ca>\n"
-"Language: en\n"
-"Language-Team: en <LL@li.org>\n"
+"PO-Revision-Date: 2016-10-13 12:38+0000\n"
+"Last-Translator: Xavier Llairo <xavier.llairo@bluenove.com>\n"
+"Language: es\n"
+"Language-Team: Spanish "
+"(http://www.transifex.com/assembl/assembl/language/es/)\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -20,109 +22,109 @@ msgstr ""
 
 #: assembl/auth/util.py:435
 msgid "The CSV file must have two columns"
-msgstr ""
+msgstr "El archivo CSV debe tener dos columnas"
 
 #: assembl/auth/util.py:442
 #, python-format
 msgid "Not an email: <%s> at line %d"
-msgstr ""
+msgstr "No es un correo electrónico: <%s> a la linea %d"
 
 #: assembl/auth/util.py:445
 #, python-format
 msgid "Name too short: <%s> at line %d"
-msgstr ""
+msgstr "Nombre demasiado corto: <%s> a la linea %d"
 
 #: assembl/lib/colander.py:174
 msgid "${val} cannot be serialized: ${err}"
-msgstr ""
+msgstr "${val} no puede ser serializado: ${err}"
 
 #: assembl/lib/colander.py:193
 msgid "${val} is not a string: ${err}"
-msgstr ""
+msgstr "${val} no es una cadena: ${err}"
 
 #: assembl/models/edgesense_drupal.py:173
 msgid "Unknown User ${uid}"
-msgstr ""
+msgstr "Usuario Desconocido ${uid}"
 
 #: assembl/models/notification.py:588
 msgid "A synthesis is posted"
-msgstr ""
+msgstr "Una síntesis ha sido publicada"
 
 #: assembl/models/notification.py:616
 msgid "Any message is posted to the discussion"
-msgstr ""
+msgstr "Un mensaje se publica en la discusion"
 
 #: assembl/models/notification.py:644
 msgid "Someone directly responds to one of your messages"
-msgstr ""
+msgstr "Alguien responde directamente a uno de tus mensajes"
 
 #: assembl/models/notification.py:1028
 msgid "SYNTHESIS: "
-msgstr ""
+msgstr "Síntesis:"
 
 #: assembl/models/preferences.py:311
 msgid "Languages used"
-msgstr ""
+msgstr "Lenguas utilizadas"
 
 #: assembl/models/preferences.py:312
 msgid "All languages expected in the discussion"
-msgstr ""
+msgstr "Todas las lenguas de la discusión"
 
 #: assembl/models/preferences.py:321 assembl/models/preferences.py:335
 msgid "Translation service"
-msgstr ""
+msgstr "Servicio de traducción"
 
 #: assembl/models/preferences.py:324
 msgid "No translation"
-msgstr ""
+msgstr "Sin traducción"
 
 #: assembl/models/preferences.py:326
 msgid "Dummy translation service (two steps)"
-msgstr ""
+msgstr "Servicio de traducción para tontos (dos etapas)"
 
 #: assembl/models/preferences.py:328
 msgid "Dummy translation service (one step)"
-msgstr ""
+msgstr "Servicio de traducción para tontos (una etapa)"
 
 #: assembl/models/preferences.py:330
 msgid "Dummy translation service (two steps) with errors"
-msgstr ""
+msgstr "Servicio de traducción para tontos (dos etapas) con errores"
 
 #: assembl/models/preferences.py:332
 msgid "Dummy translation service (one step) with errors"
-msgstr ""
+msgstr "Servicio de traducción para tontos (una etapa) con errores"
 
 #: assembl/models/preferences.py:334
 msgid "Google Translate"
-msgstr ""
+msgstr "Google Traducción"
 
 #: assembl/models/preferences.py:347
 msgid "Panel order in simple view"
-msgstr ""
+msgstr "Órden de panel en vista simple"
 
 #: assembl/models/preferences.py:350
 msgid "Navigation, Idea, Messages"
-msgstr ""
+msgstr "Navegación, Idea, Mensajes"
 
 #: assembl/models/preferences.py:351
 msgid "Navigation, Messages, Idea"
-msgstr ""
+msgstr "Navegación, Mensajes, Idea"
 
 #: assembl/models/preferences.py:352
 msgid "Order of panels"
-msgstr ""
+msgstr "Orden de los paneles"
 
 #: assembl/models/preferences.py:363
 msgid "Social sharing"
-msgstr ""
+msgstr "Compartir en redes sociales"
 
 #: assembl/models/preferences.py:366
 msgid "Show the share button on posts and ideas"
-msgstr ""
+msgstr "Mostrar el botón compartir en las publicaciones y las ideas "
 
 #: assembl/models/preferences.py:377
 msgid "Private authentication server"
-msgstr ""
+msgstr "Servidor de autentificación privada"
 
 #: assembl/models/preferences.py:379
 msgid ""
@@ -132,11 +134,11 @@ msgstr ""
 
 #: assembl/models/preferences.py:393
 msgid "No special authentication"
-msgstr ""
+msgstr "Sin autentificación especial"
 
 #: assembl/models/preferences.py:395
 msgid "WordPress OAuth Server"
-msgstr ""
+msgstr "Servidor WordPress OAuth"
 
 #: assembl/models/preferences.py:397
 msgid "Authentication service type"
@@ -148,41 +150,43 @@ msgstr ""
 
 #: assembl/models/preferences.py:411
 msgid "Authentication key"
-msgstr ""
+msgstr "Clave de autentificación"
 
 #: assembl/models/preferences.py:412
 msgid "Key for the platform as a client of the authentication server"
-msgstr ""
+msgstr "Clave para la plataforma cómo cliente del servidor de autentificación"
 
 #: assembl/models/preferences.py:424
 msgid "Authentication secret"
-msgstr ""
+msgstr "Secreto de autentificación"
 
 #: assembl/models/preferences.py:425
 msgid "Secret for the platform as a client of the authentication server"
-msgstr ""
+msgstr "Secreto para la plataforma cómo cliente al servidor de autentificación"
 
 #: assembl/models/preferences.py:438
 msgid "Allow access to moderated text"
-msgstr ""
+msgstr "Permitir acceso al texto moderado"
 
 #: assembl/models/preferences.py:441
 msgid "Are moderated posts simply hidden or made inaccessible by default?"
-msgstr ""
+msgstr "Las publicaciones moderadas son inaccesibles o sólo están escondidas?"
 
 #: assembl/models/preferences.py:454
 msgid "Idea panel opens automatically"
-msgstr ""
+msgstr "El panel Idea se abre automaticamente"
 
 #: assembl/models/preferences.py:457
 msgid ""
 "Does the Idea panel automatically open when an idea is clicked ? (and "
 "close when a special section is clicked)"
 msgstr ""
+"El panel Idea se abre automaticamente cuando se hace click sobre una "
+"idea? (y se cierra cuando se hace click sobre una sección?)"
 
 #: assembl/models/preferences.py:469
 msgid "Require Email Domain"
-msgstr ""
+msgstr "Se requiere un correo electrónico"
 
 #: assembl/models/preferences.py:472
 msgid ""
@@ -191,18 +195,23 @@ msgid ""
 " self-register to this discussion. Anyone can self-register if this is "
 "empty."
 msgstr ""
+"Lista necesaria para autoinscribirse de los dominios de correo "
+"electrónico de los usuarios. Unicamente las cuentas con al menos un "
+"correo electrónico contenido en estos dominios pueden autoinscribirse en "
+"esta discusión. Si este apartado está vacío, cualquier usuario puede "
+"autoinscribirse."
 
 #: assembl/models/preferences.py:488
 msgid "Show CI Dashboard"
-msgstr ""
+msgstr "Mostrar el tablero de indicadores CI"
 
 #: assembl/models/preferences.py:491
 msgid "Show the CI Dashboard in the panel group window"
-msgstr ""
+msgstr "Mostrar el tablero de indicadores CI en el panel de ventanas grupales"
 
 #: assembl/models/preferences.py:503
 msgid "URL of CI Dashboard"
-msgstr ""
+msgstr "URL del tablero de indicadores CI"
 
 #: assembl/models/preferences.py:505
 msgid "Configuration of the visualizations shown in the CI Dashboard"
@@ -210,7 +219,7 @@ msgstr ""
 
 #: assembl/models/preferences.py:523
 msgid "Catalyst Visualizations"
-msgstr ""
+msgstr "Visualizaciones "
 
 #: assembl/models/preferences.py:526
 msgid "A JSON description of available Catalyst visualizations"
@@ -218,7 +227,7 @@ msgstr ""
 
 #: assembl/models/preferences.py:538
 msgid "Navigation sections"
-msgstr ""
+msgstr "Secciones de navegación"
 
 #: assembl/models/preferences.py:541
 msgid ""
@@ -228,15 +237,17 @@ msgstr ""
 
 #: assembl/models/preferences.py:554
 msgid "Catalyst translations"
-msgstr ""
+msgstr "Traducción catalyst"
 
 #: assembl/models/preferences.py:557
 msgid "Translations applicable to Catalyst visualizations, in Jed (JSON) format"
 msgstr ""
+"Traducciones applicables a las visualizaciones Catalyst, en formato Jed "
+"(JSON)"
 
 #: assembl/models/preferences.py:573
 msgid "Default Table of Ideas Collapsed state"
-msgstr ""
+msgstr "Panel de Ideas plegado por defecto"
 
 #: assembl/models/preferences.py:576
 msgid ""
@@ -246,15 +257,15 @@ msgstr ""
 
 #: assembl/models/preferences.py:591
 msgid "Preference data"
-msgstr ""
+msgstr "Datos de preferencia"
 
 #: assembl/models/preferences.py:594
 msgid "The preference configuration; override only with care"
-msgstr ""
+msgstr "Configuración de preferencia; pasar a modo manual con cuidado"
 
 #: assembl/models/preferences.py:606
 msgid "Cookies banner"
-msgstr ""
+msgstr "Cookies banner"
 
 #: assembl/models/preferences.py:609
 msgid "Show the banner offering to disable Piwik cookies"
@@ -262,44 +273,44 @@ msgstr ""
 
 #: assembl/static/js/app/routeManager.js:510
 msgid "You must be logged in to access this page."
-msgstr ""
+msgstr "Debe conectarse para acceder a esta página"
 
 #: assembl/static/js/app/routeManager.js:532
 msgid "Your level of permissions do not allow you to see the rest of this content"
-msgstr ""
+msgstr "No ti"
 
 #: assembl/static/js/app/common/context.js:156
 msgid "Message titles"
-msgstr ""
+msgstr "Títulos de los mensajes"
 
 #: assembl/static/js/app/common/context.js:160
 msgid "Message previews"
-msgstr ""
+msgstr "Vista previa de los mensajes"
 
 #: assembl/static/js/app/common/context.js:164
 msgid "Complete messages"
-msgstr ""
+msgstr "Mensajes completos"
 
 #: assembl/static/js/app/common/context.js:878
 msgid "Extract"
-msgstr ""
+msgstr "Extracto"
 
 #: assembl/static/js/app/common/context.js:1240
 msgid "ajax error message:"
-msgstr ""
+msgstr "Mensaje de error ajax:"
 
 #: assembl/static/js/app/models/agents.js:132
 msgid "need no additional permissions"
-msgstr ""
+msgstr "No se necesitan permisos especiales"
 
 #: assembl/static/js/app/models/agents.js:147
 #, python-format
 msgid "you must first <a href='%s'>Sign in</a>"
-msgstr ""
+msgstr "Antes debe <a href='%s'> conectarse</a>"
 
 #: assembl/static/js/app/models/agents.js:153
 msgid "you must first join this discussion"
-msgstr ""
+msgstr "Debe unirse a la discussión"
 
 #: assembl/static/js/app/models/agents.js:158
 #, python-format
@@ -350,12 +361,12 @@ msgstr ""
 
 #: assembl/static/js/app/models/idea.js:156
 msgid "All posts"
-msgstr ""
+msgstr "Todas las publicaciones"
 
 #: assembl/static/js/app/models/idea.js:168
 #: assembl/static/js/app/views/ideaPanel.js:518
 msgid "New idea"
-msgstr ""
+msgstr "Nueva idea"
 
 #: assembl/static/js/app/models/segment.js:114
 msgid "You must be logged in to create segments"
@@ -1485,7 +1496,6 @@ msgid "Only include messages you haven't read yet, or you manually marked unread
 msgstr ""
 
 #: assembl/static/js/app/views/postFilters.js:564
-#
 msgid "Read messages"
 msgstr ""
 
@@ -4068,1121 +4078,13 @@ msgstr ""
 msgid "No discussion found for slug=%s"
 msgstr ""
 
-#~ msgid " "
-#~ msgstr ""
-
-#~ msgid "No extracts were harvested for this idea"
-#~ msgstr ""
-
-#~ msgid "Harvested in %d extract"
-#~ msgid_plural "Harvested in %d extracts"
-#~ msgstr[0] ""
-#~ msgstr[1] ""
-
-#~ msgid "comment"
-#~ msgstr ""
-
-#~ msgid "Table of ideas"
-#~ msgstr ""
-
-#~ msgid "New idea"
-#~ msgstr ""
-
-#~ msgid "The root idea will not be in the synthesis"
-#~ msgstr ""
-
-#~ msgid "Add a description of this idea"
-#~ msgstr ""
-
-#~ msgid "The root idea will never be in the synthesis"
-#~ msgstr ""
-
-#~ msgid "Add and expression for the next synthesis"
-#~ msgstr ""
-
-#~ msgid "All posts"
-#~ msgstr ""
-
-#~ msgid "You must be logged in to create segments"
-#~ msgstr ""
-
-#~ msgid "Add a title"
-#~ msgstr ""
-
-#~ msgid "Add an introduction"
-#~ msgstr ""
-
-#~ msgid "Add a conclusion"
-#~ msgstr ""
-
-#~ msgid "Unknown user"
-#~ msgstr ""
-
-#~ msgid "Message titles"
-#~ msgstr ""
-
-#~ msgid "Message previews"
-#~ msgstr ""
-
-#~ msgid "Complete messages"
-#~ msgstr ""
-
-#~ msgid "Extract"
-#~ msgstr ""
-
-#~ msgid "ajax error message:"
-#~ msgstr ""
-
-#~ msgid "last week"
-#~ msgstr ""
-
-#~ msgid "last 2 weeks"
-#~ msgstr ""
-
-#~ msgid "last month"
-#~ msgstr ""
-
-#~ msgid "last 3 months"
-#~ msgstr ""
-
-#~ msgid "last 6 months"
-#~ msgstr ""
-
-#~ msgid "last year"
-#~ msgstr ""
-
-#~ msgid "%d participants have contributed in the %s"
-#~ msgstr ""
-
-#~ msgid "%d new participants started contributing in the %s"
-#~ msgstr ""
-
-#~ msgid "%d active participants had contributed before %s"
-#~ msgstr ""
-
-#~ msgid "%d participants' last contribution was prior to %s"
-#~ msgstr ""
-
-#~ msgid "%d participants have contributed since the beginning of the debate"
-#~ msgstr ""
-
-#~ msgid "Contributors active recently"
-#~ msgstr ""
-
-#~ msgid "Contributors inactive recently"
-#~ msgstr ""
-
-#~ msgid "Evolution of the total number of messages"
-#~ msgstr ""
-
-#~ msgid "Evolution of the number of messages posted"
-#~ msgstr ""
-
-#~ msgid "messages"
-#~ msgstr ""
-
-#~ msgid "messages, posted by"
-#~ msgstr ""
-
-#~ msgid "Type your response here..."
-#~ msgstr ""
-
-#~ msgid "Send your reply"
-#~ msgstr ""
-
-#~ msgid "You did not type a response yet..."
-#~ msgstr ""
-
-#~ msgid "Idea"
-#~ msgstr ""
-
 #~ msgid ""
 #~ msgstr ""
 
-#~ msgid "This idea has no sub-ideas"
-#~ msgstr ""
-
-#~ msgid "This idea has %d sub-idea"
-#~ msgstr ""
-
-#~ msgid "This idea has %d sub-ideas"
-#~ msgstr ""
-
-#~ msgid "No extract was harvested"
-#~ msgstr ""
-
-#~ msgid "No important nugget was harvested"
-#~ msgstr ""
-
-#~ msgid "%d extract was harvested"
-#~ msgstr ""
-
-#~ msgid "%d extracts were harvested"
-#~ msgstr ""
-
-#~ msgid "%d important nugget was harvested"
-#~ msgstr ""
-
-#~ msgid "%d important nuggets were harvested"
-#~ msgstr ""
-
-#~ msgid "Short expression (only a few words) of the idea in the table of ideas."
-#~ msgstr ""
-
-#~ msgid "Comment on this idea here..."
-#~ msgstr ""
-
-#~ msgid "Send your comment"
-#~ msgstr ""
-
-#~ msgid "You need to type a comment first..."
-#~ msgstr ""
-
-#~ msgid "You cannot delete an idea while it has sub-ideas."
-#~ msgstr ""
-
-#~ msgid "You cannot delete an idea associated to extracts."
-#~ msgstr ""
-
-#~ msgid "Confirm that you want to delete this idea."
-#~ msgstr ""
-
-#~ msgid "Confirm that you want to send all extracts back to the clipboard."
-#~ msgstr ""
-
-#~ msgid "You can drag the segment above directly to the table of ideas"
-#~ msgstr ""
-
-#~ msgid "Conversations"
-#~ msgstr ""
-
-#~ msgid "Threaded"
-#~ msgstr ""
-
-#~ msgid "Chronological"
-#~ msgstr ""
-
-#~ msgid "Reverse-Chronological"
-#~ msgstr ""
-
-#~ msgid "New Messages"
-#~ msgstr ""
-
-#~ msgid "No messages"
-#~ msgstr ""
-
-#~ msgid "Start a new topic in this discussion"
-#~ msgstr ""
-
-#~ msgid "Subject"
-#~ msgstr ""
-
-#~ msgid "Add a subject above and start a new topic here"
-#~ msgstr ""
-
-#~ msgid "You need to set a subject to add a new topic..."
-#~ msgstr ""
-
-#~ msgid "All %s"
-#~ msgstr ""
-
-#~ msgid "Unread %s"
-#~ msgstr ""
-
-#~ msgid "Send to clipboard"
-#~ msgstr ""
-
-#~ msgid "Discuss idea %s"
-#~ msgstr ""
-
-#~ msgid "Discuss ideas: %s"
-#~ msgstr ""
-
-#~ msgid " AND "
-#~ msgstr ""
-
-#~ msgid "Are in the conversation that follows post %s"
-#~ msgstr ""
-
-#~ msgid "Are in the conversation that follows posts: %s"
-#~ msgstr ""
-
-#~ msgid "%s %s"
-#~ msgstr ""
-
-#~ msgid "You've already read"
-#~ msgstr ""
-
-#~ msgid "Posts with specific ids"
-#~ msgstr ""
-
-#~ msgid "Only include posts that are in a range of specific ids"
-#~ msgstr ""
-
-#~ msgid "Post thread"
-#~ msgstr ""
-
-#~ msgid "Only include messages that are in the specified post reply thread."
-#~ msgstr ""
-
-#~ msgid "Are orphan (not relevent to any idea so far)"
-#~ msgstr ""
-
-#~ msgid "Only include messages that are not found in any idea."
-#~ msgstr ""
-
-#~ msgid "Publish a synthesis of the discussion"
-#~ msgstr ""
-
-#~ msgid "Only include messages that publish a synthesis of a discussion."
-#~ msgstr ""
-
-#~ msgid "not read yet"
-#~ msgstr ""
-
-#~ msgid "Only include unread messages."
-#~ msgstr ""
-
-#~ msgid "Threaded view"
-#~ msgstr ""
-
-#~ msgid "Activity feed (reverse chronological)"
-#~ msgstr ""
-
-#~ msgid "No query has been executed yet"
-#~ msgstr ""
-
-#~ msgid "Found no message in the discussion that:"
-#~ msgstr ""
-
-#~ msgid "There are no messages in the discussion."
-#~ msgstr ""
-
-#~ msgid "(%d unread)"
-#~ msgstr ""
-
-#~ msgid "Found %d messages %s that:"
-#~ msgstr ""
-
-#~ msgid "Found %d messages %s:"
-#~ msgstr ""
-
-#~ msgid "%s"
-#~ msgstr ""
-
-#~ msgid "NOT %s"
-#~ msgstr ""
-
-#~ msgid "%s for values %s"
-#~ msgstr ""
-
-#~ msgid "Clear filters"
-#~ msgstr ""
-
-#~ msgid "Type your message here..."
-#~ msgstr ""
-
-#~ msgid "Subject:"
-#~ msgstr ""
-
-#~ msgid "You need to set a subject before you can send your message..."
-#~ msgstr ""
-
-#~ msgid "You need to type a message before you can send your message..."
-#~ msgstr ""
-
-#~ msgid "Sending..."
-#~ msgstr ""
-
-#~ msgid "Message posted!"
-#~ msgstr ""
-
-#~ msgid "empty"
-#~ msgstr ""
-
-#~ msgid "Are you sure you want to empty your entire clipboard?"
-#~ msgstr ""
-
-#~ msgid "Do you want to publish the synthesis?"
-#~ msgstr ""
-
-#~ msgid "Synthesis published!"
-#~ msgstr ""
-
-#~ msgid "Unlock panel"
-#~ msgstr ""
-
-#~ msgid "No synthesis of the discussion has been published yet"
-#~ msgstr ""
-
-#~ msgid "Confirm and fuse accounts"
-#~ msgstr ""
-
-#~ msgid "unconfirmed"
-#~ msgstr ""
-
-#~ msgid "Send confirmation message"
+#~ msgid "Log in to Assembl"
 #~ msgstr ""
 
 #~ msgid "Connect other accounts to Assembl"
-#~ msgstr ""
-
-#~ msgid "You must be logged in to add a comment."
-#~ msgstr ""
-
-#~ msgid "Click here to log in"
-#~ msgstr ""
-
-#~ msgid "SubscriptionFollowAllMessages"
-#~ msgstr ""
-
-#~ msgid "SubscriptionFollowSyntheses"
-#~ msgstr ""
-
-#~ msgid "SubscriptionOnPost"
-#~ msgstr ""
-
-#~ msgid "SubscriptionOnExtract"
-#~ msgstr ""
-
-#~ msgid "SubscriptionOnUserAccount"
-#~ msgstr ""
-
-#~ msgid "SubscriptionFollowOwnMessageDirectReplies"
-#~ msgstr ""
-
-#~ msgid "Caravan"
-#~ msgstr ""
-
-#~ msgid "Imagination for people"
-#~ msgstr ""
-
-#~ msgid "Designed by %(caravan)s and %(imaginationForPeople)s"
-#~ msgstr ""
-
-#~ msgid "Edit discussion "
-#~ msgstr ""
-
-#~ msgid "Configure this widget"
-#~ msgstr ""
-
-#~ msgid "edit profile"
-#~ msgstr ""
-
-#~ msgid "edit notification"
-#~ msgstr ""
-
-#~ msgid "Expressions of this idea in segments of posts or on the web"
-#~ msgstr ""
-
-#~ msgid "highlights for"
-#~ msgstr ""
-
-#~ msgid "Expression in next synthesis:"
-#~ msgstr ""
-
-#~ msgid "Description of idea"
-#~ msgstr ""
-
-#~ msgid "Configure this creativity widget"
-#~ msgstr ""
-
-#~ msgid "Featured ({0})"
-#~ msgstr ""
-
-#~ msgid "In next Synthesis ({0})"
-#~ msgstr ""
-
-#~ msgid "Graph of ideas"
-#~ msgstr ""
-
-#~ msgid "save change"
-#~ msgstr ""
-
-#~ msgid "Congratulations for your first contribution!"
-#~ msgstr ""
-
-#~ msgid "receive notifications when participants respond to your messages"
-#~ msgstr ""
-
-#~ msgid "Avatar for"
-#~ msgstr ""
-
-#~ msgid "your partners has been posted"
-#~ msgstr ""
-
-#~ msgid "Publish a synthesis"
-#~ msgstr ""
-
-#~ msgid "Show in original text"
-#~ msgstr ""
-
-#~ msgid "marked as a nugget"
-#~ msgstr ""
-
-#~ msgid "see you in a minute on Assembl!"
-#~ msgstr ""
-
-#~ msgid "dismiss"
-#~ msgstr ""
-
-#~ msgid "reload"
-#~ msgstr ""
-
-#~ msgid "show or hide this extract to participants"
-#~ msgstr ""
-
-#~ msgid "follow the discussion"
-#~ msgstr ""
-
-#~ msgid "Receive notifications when participants respond to your messages"
-#~ msgstr ""
-
-#~ msgid "Currently you will be informed when :"
-#~ msgstr ""
-
-#~ msgid "unsubscribe"
-#~ msgstr ""
-
-#~ msgid "invalid idPost: "
-#~ msgstr ""
-
-#~ msgid "A periodic synthesis of the discussion is posted by the moderator"
-#~ msgstr ""
-
-#~ msgid "Someone directly responds to any message you posted"
-#~ msgstr ""
-
-#~ msgid "not now"
-#~ msgstr ""
-
-#~ msgid "yes, thanks"
-#~ msgstr ""
-
-#~ msgid "Table of idea"
-#~ msgstr ""
-
-#~ msgid "Subscribe to discussion"
-#~ msgstr ""
-
-#~ msgid "Found %d messages%s that:"
-#~ msgstr ""
-
-#~ msgid "Found %d messages%s:"
-#~ msgstr ""
-
-#~ msgid "no notifications"
-#~ msgstr ""
-
-#~ msgid "name of partner"
-#~ msgstr ""
-
-#~ msgid "description"
-#~ msgstr ""
-
-#~ msgid "homepage partners"
-#~ msgstr ""
-
-#~ msgid "authorized url syntax: http://hompage.com or http://www.hompage.com"
-#~ msgstr ""
-
-#~ msgid "url partner logo"
-#~ msgstr ""
-
-#~ msgid "there are no instigator for this discussion"
-#~ msgstr ""
-
-#~ msgid "there are no partners for this discussion"
-#~ msgstr ""
-
-#~ msgid "profile"
-#~ msgstr ""
-
-#~ msgid "You have been unsubscribed"
-#~ msgstr ""
-
-#~ msgid "Currently you will be informed when:"
-#~ msgstr ""
-
-#~ msgid "Back to discussion"
-#~ msgstr ""
-
-#~ msgid "Email <%s> confirmed"
-#~ msgstr ""
-
-#~ msgid "Objectives"
-#~ msgstr ""
-
-#~ msgid "dissociate"
-#~ msgstr ""
-
-#~ msgid "Display name"
-#~ msgstr ""
-
-#~ msgid "A periodic synthesis of the discussion is posted"
-#~ msgstr ""
-
-#~ msgid "edit discussion"
-#~ msgstr ""
-
-#~ msgid "discussion settings"
-#~ msgstr ""
-
-#~ msgid "edit notifications"
-#~ msgstr ""
-
-#~ msgid "back to discussion"
-#~ msgstr ""
-
-#~ msgid "partners"
-#~ msgstr ""
-
-#~ msgid "partners added"
-#~ msgstr ""
-
-#~ msgid "add partner"
-#~ msgstr ""
-
-#~ msgid "Your username is used log in."
-#~ msgstr ""
-
-#~ msgid "Partners added"
-#~ msgstr ""
-
-#~ msgid "Join the debate"
-#~ msgstr ""
-
-#~ msgid "notifications"
-#~ msgstr ""
-
-#~ msgid "subscribe to discussion"
-#~ msgstr ""
-
-#~ msgid "Please confirm your ${confirm_what} with <${assembl}>"
-#~ msgstr ""
-
-#~ msgid "Thank you for creating an account with Assembl! "
-#~ msgstr ""
-
-#~ msgid "Click here to login."
-#~ msgstr ""
-
-#~ msgid "Welcome on the debate!"
-#~ msgstr ""
-
-#~ msgid "Continue to the debate"
-#~ msgstr ""
-
-#~ msgid "Read the debate"
-#~ msgstr ""
-
-#~ msgid "you do not have permission to post"
-#~ msgstr ""
-
-#~ msgid "Switch to participant mode"
-#~ msgstr ""
-
-#~ msgid "Switch to expert mode"
-#~ msgstr ""
-
-#~ msgid "Debate objectives"
-#~ msgstr ""
-
-#~ msgid "Expand all"
-#~ msgstr ""
-
-#~ msgid "Collapse all"
-#~ msgstr ""
-
-#~ msgid "Under the idea \"%s\""
-#~ msgstr ""
-
-#~ msgid "In the general conversation"
-#~ msgstr ""
-
-#~ msgid "Copy the link to share this message"
-#~ msgstr ""
-
-#~ msgid "Debate"
-#~ msgstr ""
-
-#~ msgid "Discussion dashboard"
-#~ msgstr ""
-
-#~ msgid "Your username is used to log in."
-#~ msgstr ""
-
-#~ msgid "View all posts in this discussion"
-#~ msgstr ""
-
-#~ msgid "View posts not yet sorted anywhere"
-#~ msgstr ""
-
-#~ msgid "View syntheses"
-#~ msgstr ""
-
-#~ msgid "Expert view"
-#~ msgstr ""
-
-#~ msgid "Activity feed %s"
-#~ msgstr ""
-
-#~ msgid "Your browser is out of date"
-#~ msgstr ""
-
-#~ msgid "You're using an old version of <strong>{0}</strong>."
-#~ msgstr ""
-
-#~ msgid "Conversation"
-#~ msgstr ""
-
-#~ msgid "Edit your profile"
-#~ msgstr ""
-
-#~ msgid "About this discussion"
-#~ msgstr ""
-
-#~ msgid "Discussion statistics"
-#~ msgstr ""
-
-#~ msgid "Number of posts"
-#~ msgstr ""
-
-#~ msgid "Number of syntheses in the discussion"
-#~ msgstr ""
-
-#~ msgid "edit"
-#~ msgstr ""
-
-#~ msgid "delete partner"
-#~ msgstr ""
-
-#~ msgid "Please select an idea in the table of ideas to open the idea panel."
-#~ msgstr ""
-
-#~ msgid "Please select an idea in the table of ideas"
-#~ msgstr ""
-
-#~ msgid "this synthesis"
-#~ msgstr ""
-
-#~ msgid "this %s"
-#~ msgstr ""
-
-#~ msgid "posted since last synthesis"
-#~ msgstr ""
-
-#~ msgid "Jump to this message's parent"
-#~ msgstr ""
-
-#~ msgid "Are a synthesis"
-#~ msgstr ""
-
-#~ msgid "Are not read yet"
-#~ msgstr ""
-
-#~ msgid "Only include messages you haven't read yet."
-#~ msgstr ""
-
-#~ msgid "Are already read"
-#~ msgstr ""
-
-#~ msgid "Only include messages you have read already."
-#~ msgstr ""
-
-#~ msgid "Are posted since last synthesis"
-#~ msgstr ""
-
-#~ msgid "Show this message in it's entire thread (clears all filters)"
-#~ msgstr ""
-
-#~ msgid "Orphan messages"
-#~ msgstr ""
-
-#~ msgid "Posted since last synthesis"
-#~ msgstr ""
-
-#~ msgid "Only include messages that replies to a specific user."
-#~ msgstr ""
-
-#~ msgid "valided your account"
-#~ msgstr ""
-
-#~ msgid "WRITEME:  Group title..."
-#~ msgstr ""
-
-#~ msgid "Access to the creativity session widget on this idea"
-#~ msgstr ""
-
-#~ msgid "you must Join this group"
-#~ msgstr ""
-
-#~ msgid "Join this group"
-#~ msgstr ""
-
-#~ msgid "You must create an account. Warning: This will refersh the page"
-#~ msgstr ""
-
-#~ msgid "View Idea"
-#~ msgstr ""
-
-#~ msgid "Configure the creativity widget associated to this idea"
-#~ msgstr ""
-
-#~ msgid "Create a vote widget on this idea"
-#~ msgstr ""
-
-#~ msgid "Create a creativity widget on this idea"
-#~ msgstr ""
-
-#~ msgid "Create a creativity session widget on this idea"
-#~ msgstr ""
-
-#~ msgid "Access to creativity session"
-#~ msgstr ""
-
-#~ msgid "Configure the creativity widget associated to the discussion"
-#~ msgstr ""
-
-#~ msgid "Create a creativity widget on the discussion"
-#~ msgstr ""
-
-#~ msgid "Found %d message%s:"
-#~ msgstr ""
-
-#~ msgid "Inspire me!"
-#~ msgstr ""
-
-#~ msgid "%d message are available under this idea"
-#~ msgstr ""
-
-#~ msgid "; You have until %(end_date_moment)s to vote"
-#~ msgstr ""
-
-#~ msgid "Join the session"
-#~ msgstr ""
-
-#~ msgid "Vote on these ideas"
-#~ msgstr ""
-
-#~ msgid "Configure this voting widget"
-#~ msgstr ""
-
-#~ msgid "Configure the creativity session"
-#~ msgstr ""
-
-#~ msgid "Access the creativity session"
-#~ msgstr ""
-
-#~ msgid "Configure the Inspiration tool"
-#~ msgstr ""
-
-#~ msgid "Vote on the '%s' idea"
-#~ msgstr ""
-
-#~ msgid "Vote on this idea"
-#~ msgstr ""
-
-#~ msgid "Create a vote on this idea"
-#~ msgstr ""
-
-#~ msgid "Access to creativity session on this idea"
-#~ msgstr ""
-
-#~ msgid "Create an inspirtion module on the discussion"
-#~ msgstr ""
-
-#~ msgid "Create an inspiration module on the discussion"
-#~ msgstr ""
-
-#~ msgid "A vote session is ongoing"
-#~ msgstr ""
-
-#~ msgid "; You have %s to vote"
-#~ msgstr ""
-
-#~ msgid "Join the creativity session on this idea"
-#~ msgstr ""
-
-#~ msgid "A creativity session is ongoing"
-#~ msgstr ""
-
-#~ msgid "; You have %s to participate"
-#~ msgstr ""
-
-#~ msgid "You have %s"
-#~ msgstr ""
-
-#~ msgid "assembl need to be reload"
-#~ msgstr ""
-
-#~ msgid "This widget is not fully configured."
-#~ msgstr ""
-
-#~ msgid "you must <a href='%s'>Sign in</a>"
-#~ msgstr ""
-
-#~ msgid "you must join this discussion"
-#~ msgstr ""
-
-#~ msgid "an administrator must open this discussion to contributions"
-#~ msgstr ""
-
-#~ msgid "contributors"
-#~ msgstr ""
-
-#~ msgid "User"
-#~ msgstr ""
-
-#~ msgid "%(user)s"
-#~ msgstr ""
-
-#~ msgid "Welcome! welcome"
-#~ msgstr ""
-
-#~ msgid "Find messages easily"
-#~ msgstr ""
-
-#~ msgid "Navigate quickly through the conversations"
-#~ msgstr ""
-
-#~ msgid "xxx"
-#~ msgstr ""
-
-#~ msgid "Please read the rest of this synthesis online"
-#~ msgstr ""
-
-#~ msgid "Generic content source"
-#~ msgstr ""
-
-#~ msgid "Could not create the source"
-#~ msgstr ""
-
-#~ msgid "There was an error creating the source"
-#~ msgstr ""
-
-#~ msgid "Create a source:"
-#~ msgstr ""
-
-#~ msgid "Select a source type"
-#~ msgstr ""
-
-#~ msgid "Source successfully added"
-#~ msgstr ""
-
-#~ msgid "Add a source"
-#~ msgstr ""
-
-#~ msgid "Edit Source"
-#~ msgstr ""
-
-#~ msgid "Manual Start"
-#~ msgstr ""
-
-#~ msgid "More Options"
-#~ msgstr ""
-
-#~ msgid "Quentin, tu commence ici..."
-#~ msgstr ""
-
-#~ msgid "Online version of this synthesis"
-#~ msgstr ""
-
-#~ msgid "Events from a Facebook page to which you're subscribed"
-#~ msgstr ""
-
-#~ msgid "Title:"
-#~ msgstr ""
-
-#~ msgid "Caption (URL):"
-#~ msgstr ""
-
-#~ msgid "Description:"
-#~ msgstr ""
-
-#~ msgid "There was an error with loading the type"
-#~ msgstr ""
-
-#~ msgid "List of allowed domain names for user email address"
-#~ msgstr ""
-
-#~ msgid "Allow users to see the original content of moderated messages"
-#~ msgstr ""
-
-#~ msgid "React to the ongoing discussion"
-#~ msgstr ""
-
-#~ msgid "New messages threaded"
-#~ msgstr ""
-
-#~ msgid "Dashboard"
-#~ msgstr ""
-
-#~ msgid "Standard threads"
-#~ msgstr ""
-
-#~ msgid "Most recently active threads"
-#~ msgstr ""
-
-#~ msgid "Most recent thread starters (Facebook style)"
-#~ msgstr ""
-
-#~ msgid "Standard threads, jump to oldest unread message"
-#~ msgstr ""
-
-#~ msgid "Your settings fail to update."
-#~ msgstr ""
-
-#~ msgid "Your settings fail to update"
-#~ msgstr ""
-
-#~ msgid "All message by %s"
-#~ msgstr ""
-
-#~ msgid "Reimport failed"
-#~ msgstr ""
-
-#~ msgid "add a new partner"
-#~ msgstr ""
-
-#~ msgid "Add in inspiring quote"
-#~ msgstr ""
-
-#~ msgid "Deactivate"
-#~ msgstr ""
-
-#~ msgid "Activate"
-#~ msgstr ""
-
-#~ msgid "Other messages"
-#~ msgstr ""
-
-#~ msgid "Unselect"
-#~ msgstr ""
-
-#~ msgid "Select"
-#~ msgstr ""
-
-#~ msgid "View to translated message"
-#~ msgstr ""
-
-# | msgid "%d message is available under this idea"
-# | msgid_plural "%d messages are available under this idea"
-#~ msgid "This message is visible in the following idea because: "
-#~ msgstr ""
-
-#~ msgid "This message is visible in the following %s ideas because: "
-#~ msgstr ""
-
-#~ msgid "Links between this message and ideas"
-#~ msgstr ""
-
-#~ msgid "Homepage Url (optional)"
-#~ msgstr ""
-
-#~ msgid "Add a description"
-#~ msgstr ""
-
-#~ msgid "Contributors"
-#~ msgstr ""
-
-#~ msgid "Visualizations"
-#~ msgstr ""
-
-#~ msgid "Translations"
-#~ msgstr ""
-
-#~ msgid "Allow access to moderated_text"
-#~ msgstr ""
-
-#~ msgid "Moderation template"
-#~ msgstr ""
-
-#~ msgid "Text template for default moderation text"
-#~ msgstr ""
-
-#~ msgid "Failed to save your settings."
-#~ msgstr ""
-
-#~ msgid "Translated by Google Translate"
-#~ msgstr ""
-
-#~ msgid "Reset"
-#~ msgstr ""
-
-#~ msgid "Authorization service type"
-#~ msgstr ""
-
-#~ msgid "Private authorization server"
-#~ msgstr ""
-
-#~ msgid "Authorization server URL endpoint for a private discussion"
-#~ msgstr ""
-
-#~ msgid "Authorization key"
-#~ msgstr ""
-
-#~ msgid "Key for assembl as a client of the authorization server"
-#~ msgstr ""
-
-#~ msgid "Authorization secret"
-#~ msgstr ""
-
-#~ msgid "Secret for assembl as a client of the authorization server"
-#~ msgstr ""
-
-#~ msgid "The CSV file must have three columns"
-#~ msgstr ""
-
-#~ msgid "Password too short: <%s> at line %d"
-#~ msgstr ""
-
-#~ msgid "Need more room for messages? Click here to minimize the Idea panel."
-#~ msgstr ""
-
-#~ msgid "For URL %s in the text above:"
-#~ msgstr ""
-
-#~ msgid "Wrong password token."
-#~ msgstr ""
-
-#~ msgid "This token is expired. Do you want us to send another?"
-#~ msgstr ""
-
-#~ msgid "Wrong email token."
-#~ msgstr ""
-
-#~ msgid "Your email address %s has been confirmed, you can now log in."
-#~ msgstr ""
-
-#~ msgid "Your account is now active!"
-#~ msgstr ""
-
-#~ msgid "This token is not valid. Do you want us to send another?"
-#~ msgstr ""
-
-#~ msgid "This token has been used. Do you want us to send another?"
-#~ msgstr ""
-
-#~ msgid "Welcome to ${discussion_topic}."
-#~ msgstr ""
-
-#~ msgid "Please confirm your ${confirm_what} with ${assembl}"
-#~ msgstr ""
-
-#~ msgid "Hide Description"
-#~ msgstr ""
-
-#~ msgid "Token vote"
-#~ msgstr ""
-
-#~ msgid "<span class='available-tokens-number'>%d</span> remaining %s tokens"
-#~ msgstr ""
-
-#~ msgid "OK"
-#~ msgstr ""
-
-#~ msgid "Log in to Assembl"
 #~ msgstr ""
 
 #~ msgid "Join Assembl"
@@ -5194,22 +4096,16 @@ msgstr ""
 #~ msgid "See you in a minute on Assembl!"
 #~ msgstr ""
 
-#~ msgid "Assembl account settings"
-#~ msgstr ""
-
-#~ msgid "You will enter Assembl as <b>{name}</b>."
-#~ msgstr ""
-
-#~ msgid "Key for assembl as a client of the authentication server"
-#~ msgstr ""
-
-#~ msgid "Secret for assembl as a client of the authentication server"
-#~ msgstr ""
-
 #~ msgid "If you desire catching extracts out of assembl (exemple : Wikipedia),"
 #~ msgstr ""
 
+#~ msgid "Assembl account settings"
+#~ msgstr ""
+
 #~ msgid "Getting non-orphan posts isn't supported."
+#~ msgstr ""
+
+#~ msgid "You will enter Assembl as <b>{name}</b>."
 #~ msgstr ""
 
 #~ msgid ""

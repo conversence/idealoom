@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: assembl 0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2016-09-26 15:19-0400\n"
+"POT-Creation-Date: 2016-10-24 11:17-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -351,7 +351,7 @@ msgid "All posts"
 msgstr ""
 
 #: assembl/static/js/app/models/idea.js:168
-#: assembl/static/js/app/views/ideaPanel.js:517
+#: assembl/static/js/app/views/ideaPanel.js:518
 msgid "New idea"
 msgstr ""
 
@@ -360,20 +360,21 @@ msgid "You must be logged in to create segments"
 msgstr ""
 
 #: assembl/static/js/app/models/segment.js:125
+#, python-format
 msgid ""
-"invalid extract: the extract must have a valid idPost (here ) or a valid uri "
-"(here )"
+"invalid extract: the extract must have a valid idPost (here %s) or a valid "
+"uri (here %s)"
 msgstr ""
 
-#: assembl/static/js/app/models/segment.js:129
+#: assembl/static/js/app/models/segment.js:131
 msgid "invalid creationDate: "
 msgstr ""
 
-#: assembl/static/js/app/models/segment.js:133
+#: assembl/static/js/app/models/segment.js:135
 msgid "invalid idIdea: "
 msgstr ""
 
-#: assembl/static/js/app/models/segment.js:137
+#: assembl/static/js/app/models/segment.js:139
 msgid "invalid idCreator: "
 msgstr ""
 
@@ -759,6 +760,9 @@ msgid "Cancel"
 msgstr ""
 
 #: assembl/static/js/app/views/confirmModal.js:33
+#: assembl/static/js/app/views/ideaPanel.js:710
+#: assembl/static/js/app/views/ideaPanel.js:721
+#: assembl/static/js/app/views/ideaPanel.js:730
 msgid "OK"
 msgstr ""
 
@@ -777,7 +781,7 @@ msgstr ""
 msgid "Sorry, we have failed to upload your file \"%s\". Please try again."
 msgstr ""
 
-#: assembl/static/js/app/views/externalVisualization.js:24
+#: assembl/static/js/app/views/externalVisualization.js:25
 #: assembl/templates/views/create-group.tmpl:107
 msgid "CI Dashboard"
 msgstr ""
@@ -945,79 +949,89 @@ msgstr ""
 msgid "You don't have the permission to do this."
 msgstr ""
 
-#: assembl/static/js/app/views/ideaPanel.js:204
+#: assembl/static/js/app/views/ideaPanel.js:205
 msgid "Idea"
 msgstr ""
 
-#: assembl/static/js/app/views/ideaPanel.js:207
+#: assembl/static/js/app/views/ideaPanel.js:208
 msgid "Detailled information about the currently selected idea in the Table of ideas"
 msgstr ""
 
-#: assembl/static/js/app/views/ideaPanel.js:215
+#: assembl/static/js/app/views/ideaPanel.js:216
 msgid "This idea has no sub-ideas"
 msgstr ""
 
-#: assembl/static/js/app/views/ideaPanel.js:218
+#: assembl/static/js/app/views/ideaPanel.js:219
 #, python-format
 msgid "This idea has %d sub-idea"
 msgid_plural "This idea has %d sub-ideas"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assembl/static/js/app/views/ideaPanel.js:239
+#: assembl/static/js/app/views/ideaPanel.js:240
 msgid "No extract was harvested"
 msgstr ""
 
-#: assembl/static/js/app/views/ideaPanel.js:242
+#: assembl/static/js/app/views/ideaPanel.js:243
 msgid "No important nugget was harvested"
 msgstr ""
 
-#: assembl/static/js/app/views/ideaPanel.js:247
+#: assembl/static/js/app/views/ideaPanel.js:248
 #, python-format
 msgid "%d extract was harvested"
 msgid_plural "%d extracts were harvested"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assembl/static/js/app/views/ideaPanel.js:250
+#: assembl/static/js/app/views/ideaPanel.js:251
 #, python-format
 msgid "%d important nugget was harvested"
 msgid_plural "%d important nuggets were harvested"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assembl/static/js/app/views/ideaPanel.js:495
+#: assembl/static/js/app/views/ideaPanel.js:496
 #, python-format
 msgid "%d contributor"
 msgid_plural "%d contributors"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assembl/static/js/app/views/ideaPanel.js:516
+#: assembl/static/js/app/views/ideaPanel.js:517
 msgid "Short expression (only a few words) of the idea in the table of ideas."
 msgstr ""
 
-#: assembl/static/js/app/views/ideaPanel.js:707
+#: assembl/static/js/app/views/ideaPanel.js:709
 msgid "You cannot delete an idea while it has sub-ideas."
 msgstr ""
 
-#: assembl/static/js/app/views/ideaPanel.js:714
+#: assembl/static/js/app/views/ideaPanel.js:720
 msgid "You cannot delete an idea associated to extracts."
 msgstr ""
 
-#: assembl/static/js/app/views/ideaPanel.js:718
+#: assembl/static/js/app/views/ideaPanel.js:729
 msgid "You cannot delete an idea associated to comments."
 msgstr ""
 
-#: assembl/static/js/app/views/ideaPanel.js:722
+#: assembl/static/js/app/views/ideaPanel.js:748
 msgid "Confirm that you want to delete this idea."
 msgstr ""
 
-#: assembl/static/js/app/views/ideaPanel.js:909
+#: assembl/static/js/app/views/ideaPanel.js:749
+#: assembl/static/js/app/views/message.js:1581
+msgid "No"
+msgstr ""
+
+#: assembl/static/js/app/views/ideaPanel.js:750
+#: assembl/static/js/app/views/message.js:1582
+msgid "Yes"
+msgstr ""
+
+#: assembl/static/js/app/views/ideaPanel.js:925
 msgid "Confirm that you want to send all extracts back to the clipboard."
 msgstr ""
 
-#: assembl/static/js/app/views/ideaPanel.js:977
+#: assembl/static/js/app/views/ideaPanel.js:993
 msgid "You may want to describe this idea for users here..."
 msgstr ""
 
@@ -1034,24 +1048,16 @@ msgid_plural "and %d other ideas</a>"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assembl/static/js/app/views/message.js:1557
+#: assembl/static/js/app/views/message.js:1563
 msgid "Message has been successfully deleted."
 msgstr ""
 
-#: assembl/static/js/app/views/message.js:1570
+#: assembl/static/js/app/views/message.js:1574
 msgid "Error: Message could not be deleted."
 msgstr ""
 
-#: assembl/static/js/app/views/message.js:1576
+#: assembl/static/js/app/views/message.js:1580
 msgid "Are you sure you want to delete this message?"
-msgstr ""
-
-#: assembl/static/js/app/views/message.js:1577
-msgid "No"
-msgstr ""
-
-#: assembl/static/js/app/views/message.js:1578
-msgid "Yes"
 msgstr ""
 
 #: assembl/static/js/app/views/messageDeletedByAdmin.js:20
@@ -1843,43 +1849,43 @@ msgstr ""
 msgid "Import has begun!"
 msgstr ""
 
-#: assembl/static/js/app/views/groups/panelWrapper.js:183
+#: assembl/static/js/app/views/groups/panelWrapper.js:186
 #: assembl/templates/views/panelWrapper.tmpl:34
 msgid "Maximize panel"
 msgstr ""
 
-#: assembl/static/js/app/views/groups/panelWrapper.js:194
+#: assembl/static/js/app/views/groups/panelWrapper.js:197
 #: assembl/templates/views/navigation.tmpl:5
 #: assembl/templates/views/navigation.tmpl:14
 #: assembl/templates/views/panelWrapper.tmpl:8
 msgid "Minimize panel"
 msgstr ""
 
-#: assembl/static/js/app/views/groups/panelWrapper.js:230
+#: assembl/static/js/app/views/groups/panelWrapper.js:233
 msgid "Unlock panel"
 msgstr ""
 
-#: assembl/static/js/app/views/groups/panelWrapper.js:260
+#: assembl/static/js/app/views/groups/panelWrapper.js:263
 msgid ""
 "We have locked the panel for you, so its content won't change while you're "
 "writing your message. Click here to unlock"
 msgstr ""
 
-#: assembl/static/js/app/views/groups/panelWrapper.js:263
+#: assembl/static/js/app/views/groups/panelWrapper.js:266
 msgid ""
 "We have unlocked the panel for you, so its content can change now that you're"
 " not writing a message anymore. Click here to lock it back"
 msgstr ""
 
-#: assembl/static/js/app/views/groups/panelWrapper.js:267
+#: assembl/static/js/app/views/groups/panelWrapper.js:270
 msgid "We have locked the panel for you. Click here to unlock"
 msgstr ""
 
-#: assembl/static/js/app/views/groups/panelWrapper.js:270
+#: assembl/static/js/app/views/groups/panelWrapper.js:273
 msgid "We have unlocked the panel for you. Click here to lock it back"
 msgstr ""
 
-#: assembl/static/js/app/views/groups/panelWrapper.js:308
+#: assembl/static/js/app/views/groups/panelWrapper.js:311
 #: assembl/templates/views/panelWrapper.tmpl:14
 msgid "Lock panel"
 msgstr ""
@@ -3788,24 +3794,20 @@ msgstr ""
 msgid "No file given."
 msgstr ""
 
-#: assembl/views/api/post.py:69 assembl/views/api/post.py:603
+#: assembl/views/api/post.py:70 assembl/views/api/post.py:601
 #, python-format
 msgid "No discussion found with id=%s"
 msgstr ""
 
-#: assembl/views/api/post.py:155
+#: assembl/views/api/post.py:223
 msgid "Getting orphan posts of a specific idea isn't supported."
 msgstr ""
 
-#: assembl/views/api/post.py:163
-msgid "Getting non-orphan posts isn't supported."
-msgstr ""
-
-#: assembl/views/api/post.py:340
+#: assembl/views/api/post.py:353
 msgid "You must be logged in to view which posts are read"
 msgstr ""
 
-#: assembl/views/api/post.py:587
+#: assembl/views/api/post.py:585
 msgid "Your message is empty"
 msgstr ""
 

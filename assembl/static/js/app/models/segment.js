@@ -122,19 +122,21 @@ var SegmentModel = Base.Model.extend({
     }
     */
     if ((attrs.idPost === null || typeof attrs.idPost !== 'string') && (attrs.uri === null || typeof attrs.uri !== 'string')) {
-      return i18n.gettext('invalid extract: the extract must have a valid idPost (here ' + attrs.idPost + ') or a valid uri (here ' + attrs.uri + ')');
+      return i18n.sprintf(i18n.gettext(
+        'invalid extract: the extract must have a valid idPost (here %s) or a valid uri (here %s)'),
+        attrs.idPost, attrs.uri);
     }
 
     if (attrs.creationDate === null) {
-      return i18n.gettext('invalid creationDate: ' + attrs.creationDate);
+      return i18n.gettext('invalid creationDate: ') + attrs.creationDate;
     }
 
     if (attrs.idIdea !== null && typeof attrs.idIdea !== 'string') {
-      return i18n.gettext('invalid idIdea: ' + attrs.idIdea);
+      return i18n.gettext('invalid idIdea: ') + attrs.idIdea;
     }
 
     if (attrs.idCreator === null || typeof attrs.idCreator !== 'string') {
-      return i18n.gettext('invalid idCreator: ' + attrs.idCreator);
+      return i18n.gettext('invalid idCreator: ') + attrs.idCreator;
     }
 
   },
