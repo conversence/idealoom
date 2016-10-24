@@ -1,7 +1,7 @@
 [main]
 host = https://www.transifex.com
 
-[assembl.assembl]
+[idealoom.idealoom]
 file_filter = assembl/locale/<lang>/LC_MESSAGES/assembl.po
 source_file = assembl/locale/assembl.pot
 source_lang = en
