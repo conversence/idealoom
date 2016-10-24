@@ -1,4 +1,4 @@
-#!env python
+#!/usr/bin/env python
 """Clone a discussion, either within or between databases."""
 
 # Put something like this in the crontab:
@@ -32,7 +32,7 @@ from assembl.lib.model_watcher import configure_model_watcher
 from assembl.lib.raven_client import setup_raven, capture_exception
 
 
-def find_or_create_object_by_keys(db, keys, obj, columns):
+def find_or_create_object_by_keys(db, keys, obj, columns=None):
     args = {key: getattr(obj, key) for key in keys}
     eq = db.query(obj.__class__).filter_by(**args).first()
     if eq is None:
@@ -55,7 +55,7 @@ def init_key_for_classes(db):
     from assembl.models import (
         AgentProfile, User, Permission, Role, Webpage, Action, LocalUserRole,
         IdentityProvider, EmailAccount, WebLinkAccount, Locale,
-        NotificationSubscription)
+        NotificationSubscription, DiscussionPerUserNamespacedKeyValue)
     fn_for_classes = {
         AgentProfile: partial(find_or_create_agent_profile, db),
         User: partial(find_or_create_agent_profile, db),
@@ -74,6 +74,7 @@ def init_key_for_classes(db):
         Action: 'actor',
         NotificationSubscription: 'user',
         LocalUserRole: 'user',
+        DiscussionPerUserNamespacedKeyValue: 'user',
     }
 
 
@@ -98,16 +99,16 @@ def find_or_create_provider_account(db, account):
     from assembl.models import SocialAuthAccount
     assert isinstance(account, SocialAuthAccount)
     # Note: need a similar one for SourceSpecificAccount
-    provider = find_or_create_object(account.provider)
+    identity_provider = find_or_create_object(account.identity_provider)
     args = {
-        "provider": provider,
+        "identity_provider": identity_provider,
         "uid": account.uid,
         "username": account.username,
         "provider_domain": account.provider_domain
     }
     to_account = db.query(SocialAuthAccount).filter_by(**args).first()
     if to_account is None:
-        for k in ['profile_info', 'picture_url']:
+        for k in ['extra_data', 'picture_url']:
             args[k] = getattr(account, k)
         to_account = account.__class__(**args)
         db.add(to_account)
@@ -383,7 +384,8 @@ def delete_discussion(session, discussion_id):
 def clone_discussion(
         from_session, discussion_id, to_session=None, new_slug=None):
     from assembl.models import (
-        DiscussionBoundBase, Discussion, Post, User, Preferences, HistoryMixin)
+        DiscussionBoundBase, Discussion, Post, User, Preferences, HistoryMixin,
+        BaseIdeaWidget)
     global user_refs
     discussion = from_session.query(Discussion).get(discussion_id)
     assert discussion
@@ -511,6 +513,11 @@ def clone_discussion(
             copy.table_of_contents = None
             for ut in copy.user_templates:
                 to_session.expunge(ut)
+        elif isinstance(copy, BaseIdeaWidget):
+            to_session.expunge(copy.base_idea_link)
+            copy.base_idea_link = None
+            while copy.idea_links:
+                copy.idea_links.pop()
         # Now add the object
         to_session.add(copy)
         to_session.flush()
