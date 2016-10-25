@@ -31,7 +31,7 @@ practice.
 Contributing translation
 ------------------------
 
-Go to https://www.transifex.com/assembl/assembl/dashboard/ and start 
+Go to https://www.transifex.com/conversence/idealoom/dashboard/ and start 
 translating.
 
 Updating translation files
