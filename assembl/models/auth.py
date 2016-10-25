@@ -760,6 +760,8 @@ class User(AgentProfile):
                 for lp in self.language_preference
             }
             for lang_pref in other_user.language_preference:
+                # TODO: there's been a case here resulting in
+                # two cookie instances
                 if ((lang_pref.locale_id, lang_pref.source_of_evidence) in
                         my_lang_pref_signatures):
                     # First rough implementation: One has priority.
