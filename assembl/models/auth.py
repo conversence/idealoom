@@ -240,9 +240,10 @@ class AgentProfile(Base):
             return default
 
         acc = self.get_preferred_email_account()
-        url = acc.avatar_url(size)
-        if url:
-            return url
+        if acc:
+            url = acc.avatar_url(size)
+            if url:
+                return url
 
         for acc in self.identity_accounts:
             url = acc.avatar_url(size)
