@@ -1,5 +1,5 @@
-Contributing to Assembl translations
-====================================
+Contributing to IdeaLoom translations
+=====================================
 
 Transifex
 ---------

@@ -1,5 +1,5 @@
-Setting-up backups for an Assembl server
-========================================
+Setting-up backups for an IdeaLoom server
+=========================================
 
 Scripts are included to use Borg Backup (en encrypting, deduplicating archiver)
 
@@ -19,33 +19,33 @@ Installing an up to date Borg Backup
 Using
 -----
 
-The script is in ``doc/borg_backup_script/assembl_borg_backup.sh``
+The script is in ``doc/borg_backup_script/idealoom_borg_backup.sh``
 
 It assumes:
 
- - borgbackup is installed on both the assembl server and the backup server
+ - borgbackup is installed on both the IdeaLoom server and the backup server
  - The user running the script has access over ssh to the
    backup server with key authentication (no passphrase). Typically, this
    will be the ``www-data`` user.
- - The user running the script has access over ssh to itself 
+ - The user running the script has access over ssh to itself
    with key authentication (no passphrase).
-   
+
 
 The script takes two environment variables:
 
-``ASSEMBL_PATH``: the path to the assembl installation to backup
+``IDEALOOM_PATH``: the path to the idealoom installation to backup
 ``REPOSITORY``: the address of the borg backup repository to backup to
 
 Create a script such as:
-/home/backups/backup_all_assembl.sh
+/home/backups/backup_all_idealoom.sh
 
 ::
     #!/bin/bash
 
     export PATH=$PATH:/usr/local/bin
-    export ASSEMBL_PATH=/home/www/assembl_discussions_bluenove_com
-    export REPOSITORY=www-data@coeus.ca:/media/backup/assembl_backups_bluenove_discussions.borg
-    bash ${ASSEMBL_PATH}/doc/borg_backup_script/assembl_borg_backup.sh > $ASSEMBL_PATH/var/log/assembl_backup.log 2>&1
+    export IDEALOOM_PATH=/home/www/idealoom_discussions_conversence_com
+    export REPOSITORY=www-data@coeus.ca:/media/backup/idealoom_backups_conversence_discussions.borg
+    bash ${IDEALOOM_PATH}/doc/borg_backup_script/idealoom_borg_backup.sh > $IDEALOOM_PATH/var/log/idealoom_backup.log 2>&1
 
 
 You can then automate with cron. For example:
@@ -54,7 +54,7 @@ You can then automate with cron. For example:
 
     sudo su - www-data
     crontab -e
-    0 3 * * * /bin/bash /home/backups/backup_all_assembl.sh
+    0 3 * * * /bin/bash /home/backups/backup_all_idealoom.sh
 
 All backups are encrypted. Make SURE you backup the keys (normally in
 ``~/.borg/keys/``) somewhere safe, otherwise your backups will be

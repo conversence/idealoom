@@ -5,7 +5,7 @@ Writing tests
 Overview
 ========
 
-Assembl makes use of both backend and front-end testing technologies in order to
+IdeaLoom makes use of both backend and front-end testing technologies in order to
 conduct tests. However, historically, the project suffered from the lack of
 adoption of modern testing patterns such as TDD_ or BDD_. As a result, it did
 not become developer culture to create tests for every new business logic added.
@@ -15,10 +15,10 @@ be written by developers.
 Front-end
 =========
 
-Assembl takes advantage of modern javascript testing frameworks in order to run
+IdeaLoom takes advantage of modern javascript testing frameworks in order to run
 front-end tests. The front-end test runner is the Mocha_ framework. It is 
 understood that Mocha was chosen solely because it allows for the test reporter to
-be set to `Nyan Cat`_ colors. Mocha is initalized on Assembl start-up in
+be set to `Nyan Cat`_ colors. Mocha is initalized on IdeaLoom start-up in
 `assembl/templates/tests/index.jinja2`.
 
 Firstly, Mocha is loaded in the `tests/index.jinja2` by:
@@ -109,12 +109,12 @@ setUp and tearDown:
 TODO
 ^^^^
 
-Mocha also allows for asynchronous testing, specifically promisified test cases. As Assembl
+Mocha also allows for asynchronous testing, specifically promisified test cases. As IdeaLoom
 heavily uses Bluebird_ promises, it would be ideal to use an assertion library that supports
 assertion. Mocha already allows for asynchronous testing (refer to Mocha_ documentation).
 
 A well known and compatible promise-based assertion library is the `Chai as Promised`_, which
-should be added to Assembl's package.json once a developer writes asynchronous tests.
+should be added to IdeaLoom's package.json once a developer writes asynchronous tests.
 
 
 Assertion
@@ -160,7 +160,7 @@ backend as json files to be consumed by front-end tests.
 
 Gulp
 ----
-Assembl's front-end tests are divided into multiples files in the ``js/app/tests`` directory.
+IdeaLoom's front-end tests are divided into multiples files in the ``js/app/tests`` directory.
 However, they are served to a single file. This is thanks to a the gulp process ``build:test``
 which is used to bundle the tests. This means that Browserify_ can be used in the testing
 process as well.
@@ -171,7 +171,7 @@ How to Run
 Front-end tests can be run for each discussion in the ``/test`` API point. For example, the mocha
 tests can be run on the browser at the location::
 
-    https://assembl2.coeus.ca/sandbox/test 
+    https://demo.idealoom.org/about_idealoom/test
 
 Currently, there is no command-line tool to run the tests on the CLI. This is currently in the works
 to be added.
@@ -185,11 +185,11 @@ the fixture generator. Pytest allows for a level of flexibility in writing tests
 Python unittest_ library simply doesn't have. It allows to write tests similarly to unittest allows,
 with a TestCase class created with multiple `test_method`\s written inside.
 
-Assembl uses py.test's fixture's in order to mock objects for testing.
+IdeaLoom uses py.test's fixture's in order to mock objects for testing.
 
 Fixtures
 --------
-Assembl fixtures are defined in the `/assembl/tests/fixtures/` directory. Fixtures can be divided into
+IdeaLoom fixtures are defined in the `/assembl/tests/fixtures/` directory. Fixtures can be divided into
 multiple files for ease of use.
 
 The fixtures are read into the py.test test-runner by the use of the ``conftest.py``. All fixtures
@@ -206,7 +206,7 @@ will not be available to the test runner.
 How To Write A Fixture
 ^^^^^^^^^^^^^^^^^^^^^^
 
-Writing test fixtures in Assembl is extremely simple. Within the fixture folder, in either a new file or an
+Writing test fixtures in IdeaLoom is extremely simple. Within the fixture folder, in either a new file or an
 existing one, simply create a function with the py.test fixture decorator, like such:
 
 .. code-block:: python
@@ -222,7 +222,7 @@ They are all loaded into the conftest namespace.
 Core Fixtures
 ^^^^^^^^^^^^^
 
-Assembl has several core fixtures that are important to note, in order to run them.
+IdeaLoom has several core fixtures that are important to note, in order to run them.
 
 - default_db_data
     * A fixture that is rarely explicitly called in a test, however, is vital for successfully
@@ -236,13 +236,13 @@ Assembl has several core fixtures that are important to note, in order to run th
     session maker. A ``test_session`` depends on a ``default_db_data``
 
 - test_server
-    * A uWSGI server fixture that refers to an Assembl instance
+    * A uWSGI server fixture that refers to an IdeaLoom instance
 
 - test_app
-    * An Assembl instance fixture, built on WebTest's TestApp_ testing tool. This fixture
+    * An IdeaLoom instance fixture, built on WebTest's TestApp_ testing tool. This fixture
     builds on ``test_app_no_perm`` and gives the ``admin_user`` fixture administrative permissions,
     based on Pyramid's authorization policy. User this fixture to make API calls, as it best
-    mocks an Assembl interface
+    mocks an IdeaLoom interface
 
 - admin_user
     * A user fixture that has administrative priveledges
@@ -258,7 +258,7 @@ Assembl has several core fixtures that are important to note, in order to run th
 
 
 For more information regarding testing a Pyramid application, see the `Pyramid Documentation`_ on testing.
-Assembl uses WebTest_ to conduct it's integration testing of a Pyramid application.
+IdeaLoom uses WebTest_ to conduct it's integration testing of a Pyramid application.
 
 Integration
 ===========

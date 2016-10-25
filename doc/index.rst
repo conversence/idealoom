@@ -1,10 +1,10 @@
-.. Assembl documentation master file, created by
+.. IdeaLoom documentation master file, created by
    sphinx-quickstart on Tue Apr  8 17:15:05 2014.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Assembl's documentation!
-===================================
+Welcome to IdeaLoom's documentation!
+====================================
 
 Installation and administration
 -------------------------------
@@ -24,10 +24,10 @@ Stack and architecture
    permissions_and_roles
    panel_architecture
    synchronization
-* `Target login and authentication flowchart <https://github.com/assembl/assembl/blob/develop/doc/login_flowchart.pdf>`_
+* `Target login and authentication flowchart <https://github.com/conversence/idealoom/blob/develop/doc/login_flowchart.pdf>`_
 
-Developping and contributing to Assembl
----------------------------------------
+Developping and contributing to IdeaLoom
+----------------------------------------
 
 .. toctree::
    :maxdepth: 2

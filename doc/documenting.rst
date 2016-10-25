@@ -1,7 +1,7 @@
-Writing documentation for Assembl
-=================================
+Writing documentation for IdeaLoom
+==================================
 
-The documentation of Assembl's backend is written using Sphinx_. Writing python documentation requires being familiar with `Restructured Text`_ and the `Sphinx python domain`_, especially how to make `python cross-references`_ .
+The documentation of IdeaLoom's backend is written using Sphinx_. Writing python documentation requires being familiar with `Restructured Text`_ and the `Sphinx python domain`_, especially how to make `python cross-references`_ .
 
 The existing Frontend documentation should follows the JSDoc3_ standard, but does so loosely at this point. We are connecting it with Javascript using jsdoc_rst_template_. It should be possible to cross-reference python and javascript using the `Sphinx javascript domain`_. Examples forthcoming.
 

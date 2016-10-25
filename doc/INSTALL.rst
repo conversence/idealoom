@@ -1,5 +1,5 @@
-Installing Assembl
-==================
+Installing IdeaLoom
+===================
 
 Prerequisites
 -------------
@@ -59,17 +59,17 @@ You can run either:
 
 .. code:: sh
 
-    wget https://raw.github.com/assembl/assembl/develop/fabfile.py
+    wget https://raw.github.com/conversence/idealoom/develop/fabfile.py
     fab install_builddeps
-    fab bootstrap:projectpath=~/assembl
-    cd ~/assembl
+    fab bootstrap:projectpath=~/idealoom
+    cd ~/idealoom
 
 or:
 
 .. code:: sh
 
-    git clone https://github.com/assembl/assembl.git
-    cd assembl
+    git clone https://github.com/conversence/idealoom.git
+    cd idealoom
     fab env_dev install_builddeps
     fab env_dev bootstrap_from_checkout
 
@@ -85,7 +85,7 @@ Note: memcached and redis must be running already.
 
 .. code:: sh
 
-    cd ~/assembl
+    cd ~/idealoom
 
 Only the first time you run it:
 
@@ -94,7 +94,7 @@ Only the first time you run it:
     source venv/bin/activate
     supervisord
 
-Creating a user the first time you run assembl (so you have a
+Creating a user the first time you run IdeaLoom (so you have a
 superuser):
 
 .. code:: sh
@@ -168,7 +168,7 @@ Updating an environment
 
 .. code:: sh
 
-    cd ~/assembl
+    cd ~/idealoom
     #Any git operations (ex:  git pull)
     fab env_dev app_compile
     $venv/bin/supervisorctl start dev:*
@@ -199,7 +199,7 @@ Updating an environment to it's specified branch, tag or revision:
 
 .. code:: sh
 
-    cd ~/assembl
+    cd ~/idealoom
     fab env_dev app_fullupdate
 
 Schema migrations
@@ -240,8 +240,8 @@ Start as a user with sudo access
 
     sudo apt-get install fabric git openssh-server
     sudo apt-get install nginx uwsgi uwsgi-plugin-python
-    sudo adduser assembl_user #assembl_user is the name of a user dedicated to this instance
-    sudo usermod -G www-data assembl_user
+    sudo adduser idealoom_user #idealoom_user is the name of a user dedicated to this instance
+    sudo usermod -G www-data idealoom_user
 
     # By default, postgres will not use passwords from postgres users who connect through the Unix socket domain (versus a network connection).
     # So if you want to make your database to be safer and ask for password anyway, edit your /etc/postgresql/9.1/main/pg_hba.conf file and replace
@@ -251,10 +251,10 @@ Start as a user with sudo access
     # and then run
     # sudo service postgresql restart
 
-    sudo -u assembl_user -i
+    sudo -u idealoom_user -i
     
-    git clone https://github.com/assembl/assembl.git
-    cd assembl
+    git clone https://github.com/conversence/idealoom.git
+    cd idealoom
     #Secure and give nginx access
     chmod -R o-rwx .
     chmod -R g-rw .
@@ -306,10 +306,10 @@ The following must all be unique to the instance.  If you only have one instance
 The ``public_port`` field (located in ``app:assembl`` section) is the actual port used by the UWSGI server which is rerouted through the reverse proxy served by nginx. For production context, use 80.
 There is also a ``port`` field in ``server:main`` section, which defaults to 6543. If not proxied by nginx or something, ``port`` needs to match ``public_port``.
 
-Also, set the ``uid`` field of your ini file to the username of the unix user you created above. For example: ``uid = assembl_user``
+Also, set the ``uid`` field of your ini file to the username of the unix user you created above. For example: ``uid = idealoom_user``
 If you have not added this user to the www-data group as advised previously (or to a group which is common with the ngnix user), then you also have to set the ``gid`` field to a common group name.
 
-If you do not have an SSL certificate, then you have to set ``accept_secure_connection = false`` and ``require_secure_connection = false`` (because if you set ``accept_secure_connection = true``, then the login page on assembl will try to show using https, which will not work).
+If you do not have an SSL certificate, then you have to set ``accept_secure_connection = false`` and ``require_secure_connection = false`` (because if you set ``accept_secure_connection = true``, then the login page on IdeaLoom will try to show using https, which will not work).
 
 
 (exit to sudoer account)
@@ -321,11 +321,11 @@ If you do not have an SSL certificate, then you have to set ``accept_secure_conn
     source venv/bin/activate
     assembl-add-user --email your_email@email.com --name "Your Name" --username desiredusername --password yourpassword local.ini
 
-Copy the content of ``doc/sample_nginx_config/assembl.yourdomain.com`` into a new nginx config file, at ``/etc/nginx/sites-available/{{assembl.yourdomain.com}}`` (and replace its filename by your own domain):
+Copy the content of ``doc/sample_nginx_config/idealoom.yourdomain.com`` into a new nginx config file, at ``/etc/nginx/sites-available/{{idealoom.yourdomain.com}}`` (and replace its filename by your own domain):
 
 .. code:: sh
 
-    cp doc/sample_nginx_config/assembl.yourdomain.com /etc/nginx/sites-available/{{assembl.yourdomain.com}}
+    cp doc/sample_nginx_config/idealoom.yourdomain.com /etc/nginx/sites-available/{{idealoom.yourdomain.com}}
 
 Edit this file using your favorite editor to match your domain and architecture (including SSL settings if any).
 Activate this site, using:
@@ -333,7 +333,7 @@ Activate this site, using:
 .. code:: sh
 
     cd /etc/nginx/sites-enabled/
-    ln -s /etc/nginx/sites-available/{{assembl.yourdomain.com}} .
+    ln -s /etc/nginx/sites-available/{{idealoom.yourdomain.com}} .
 
 Test that your configuration file works, by running:
 
@@ -347,12 +347,12 @@ Restart nginx:
 
     /etc/init.d/nginx restart
 
-Copy the content of ``doc/sample_systemd_script/assembl.service`` into ``/etc/systemd/system/assembl.service``, and modify fields ASSEMBL_PATH, User and Description.
+Copy the content of ``doc/sample_systemd_script/idealoom.service`` into ``/etc/systemd/system/idealoom.service``, and modify fields IDEALOOM_PATH, User and Description.
 
 .. code:: sh
 
-    systemctl enable assembl
-    service assembl restart
+    systemctl enable idealoom
+    service idealoom restart
 
 ensuite comme d'habitude
 (fichier nginx, domaine dans bluehost et dans ovh, courriels, raven, piwik...)

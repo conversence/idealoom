@@ -1,7 +1,7 @@
-The Assembl technology stack
-============================
+The IdeaLoom technology stack
+=============================
 
-These are some of the main elements of the stack used by Assembl. Some of these 
+These are some of the main elements of the stack used by IdeaLoom. Some of these 
 choices are not always the most mainstream, but were meanstream at the start of 
 the project in mid-2012.
 
@@ -20,7 +20,7 @@ back from the transition to Python 3.
 Packages and libraries we use directly
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-This is a list of every backend dependency used *directly* in assembl code.
+This is a list of every backend dependency used *directly* in IdeaLoom code.
 The packages you would need to know about first are described in subsequent paragraphs.
 
 This comes from :file:`requirements.txt`, but indirect dependencies are not listed.
@@ -242,7 +242,7 @@ Pyramid
 We have chosen Pyramid_ as the main Web application server. It is both quite 
 complete, more so than some micro-frameworks; and quite configurable, less 
 opinonated than some other frameworks. Notably, it allows either a classical, 
-route-based URL configuration and a data-driven "traversal API"; Assembl uses 
+route-based URL configuration and a data-driven "traversal API"; IdeaLoom uses 
 both in  `hybrid app`_ mode.
 
 In particular, application web pages are defined along classical URL routes; 
@@ -276,7 +276,7 @@ which was historically done with Virtuoso_'s `Linked Data Views`_, by our
 Database layer
 ^^^^^^^^^^^^^^
 
-The issue of data persistence in Assembl has a long history, which is still 
+The issue of data persistence in IdeaLoom has a long history, which is still 
 being written.
 
 Because of recursive queries on the graph data structure of ideas, we were 
@@ -355,7 +355,7 @@ Essentially, this comes from :file:`package.json` and :file:`bower.json`, as
 well as the content of js/app/lib
 
 Underscore_
-  The basis of backbone, but also used extensively in assembl code.  
+  The basis of backbone, but also used extensively in IdeaLoom code.  
   It is a wery usefull Javascript utility library
 
 Backbone_
@@ -365,7 +365,7 @@ Marionette_
   A thicker framework built on top of backbone.
 
 Annotator_
-  A fundamental dependency of Assembl, included in the git of Assembl in 
+  A fundamental dependency of IdeaLoom, included in the git of IdeaLoom in 
   js/lib.
   
   Actually generated from our own fork of annotator available at
@@ -437,12 +437,12 @@ linkifyjs_
 
 `Bootstrap dropdown <http://getbootstrap.com/javascript/#dropdowns>`_
   Used in the messagelist header and attachment view to implement dropdown.  
-  Included in Assembl source code in js/lib/bootstrap-dropdown.js. Deprecated.
+  Included in IdeaLoom source code in js/lib/bootstrap-dropdown.js. Deprecated.
 
 `Bootstrap tooltip <http://getbootstrap.com/javascript/#tooltips>`_
   Used everywhere to implement tooltips
 
-  Included in Assembl source code in js/lib/bootstrap-tooltip.js.
+  Included in IdeaLoom source code in js/lib/bootstrap-tooltip.js.
 
 
 
@@ -463,15 +463,15 @@ First, we want to update the UI whenever the user takes an action, without
 blocking on backend requests. The solution has been to use Promises (aka 
 futures) for most API calls, abstracted with the Bluebird_ library.
 
-Second, since the Assembl data model is built collectively, we push all model 
+Second, since the IdeaLoom data model is built collectively, we push all model 
 changes from the backend to the frontend through a websocket using SockJS_, so 
-that Assembl participants get live updates of data.
+that IdeaLoom participants get live updates of data.
 
 
 Templating, HTML and CSS
 ------------------------
 
-Assembl is unusual in that the template files are double-compiled.
+IdeaLoom is unusual in that the template files are double-compiled.
 They are first compiled by Jinja2_ and subsquently by Underscore_ templates.
 
 
@@ -496,7 +496,7 @@ Build system
 ------------
 Fabric_
   Used as main orchestrator of the build.  To see available commands, 
-type fab list for the assembl virtualenv
+type fab list for the IdeaLoom virtualenv
 
 Pip_
   Used for python package management
@@ -517,7 +517,7 @@ Gulp_:
 Translation
 -----------
 
-Assembl uses a gettext style translation pipeline.  It goes through the pyramid 
+IdeaLoom uses a gettext style translation pipeline.  It goes through the pyramid 
 machinery to extract the stransatable strings, including the strings from the 
 frontend in ``fab env_dev make_messages``
 

@@ -5,14 +5,14 @@ server {
     #listen   [::]:443 ssl;
 
     # This is the server name, assuming you're running multiple servers
-    server_name assembl.yourdomain.com;
+    server_name idealoom.yourdomain.com;
 
-    #ssl_certificate     /etc/ssl/assembl.yourdomain.com/assembl.yourdomain.com.crt;
-    #ssl_certificate_key /etc/ssl/assembl.yourdomain.com/assembl.yourdomain.com.key;
+    #ssl_certificate     /etc/ssl/idealoom.yourdomain.com/idealoom.yourdomain.com.crt;
+    #ssl_certificate_key /etc/ssl/idealoom.yourdomain.com/idealoom.yourdomain.com.key;
 
     location /something_or_other.html {
         #This is for domain verification
-        alias /var/www/assembl/something_or_other.html;
+        alias /var/www/idealoom/something_or_other.html;
     }
 
     location /socket {
@@ -27,14 +27,14 @@ server {
         #Nor will it help your performance after the first hour...
         autoindex on;
 
-        alias /var/www/assembl/assembl/static;
+        alias /var/www/idealoom/assembl/static;
     }
 
     location / {
 
         include uwsgi_params;
         uwsgi_read_timeout 5m;
-        uwsgi_pass unix:///var/www/assembl/var/run/uwsgi.sock;
+        uwsgi_pass unix:///var/www/idealoom/var/run/uwsgi.sock;
     }
 
 # So files uploaded to the database are not artificailly limited by nginx

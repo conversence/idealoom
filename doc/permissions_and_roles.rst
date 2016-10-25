@@ -1,12 +1,12 @@
 Permissions and roles architecture
 ==================================
 
-How the roles & permissions system works in Assembl
----------------------------------------------------
+How the roles & permissions system works in IdeaLoom
+----------------------------------------------------
 
 A **role** is a named set of permissions. Some roles exist by default in
 the discussion. You can assign a role to a user. A user can have a role
-either globally in Assembl or in the context of a given discussion. You
+either globally in IdeaLoom or in the context of a given discussion. You
 can change a role’s permissions and so change what it allows to do and
 its meaning. You can create a role which gives a given set of
 permissions you choose, and choose its name. And then you can assign
@@ -23,7 +23,7 @@ Explanation of each permission
 
 -  ``read``: Allows generic access to the discussion, reading ideas and
    messages
--  ``add_post``: Allows the user to post a new message from the Assembl
+-  ``add_post``: Allows the user to post a new message from the IdeaLoom
    interface (reply to someone, comment on an idea)
 -  ``edit_post``: No one should have this yet, Post objects are supposed
    to be immutable. (It will make sense when we have mutable posts.)

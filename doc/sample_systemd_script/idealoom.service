@@ -1,0 +1,27 @@
+# Sample supervisord service file
+# On Ubuntu 15.10 and later you need to drop it in 
+# /etc/systemd/system/idealoom.service
+# And then run
+# systemctl enable idealoom
+
+[Unit]
+Description=idealoom supervisord
+
+[Service]
+# These are the lines you have to modify for your environment
+Environment=IDEALOOM_PATH=/var/www/idealoom
+User=www-data
+Group=www-data
+
+Type=simple
+Restart=on-failure
+ExecStart=/bin/bash -c '. $IDEALOOM_PATH/venv/bin/activate; exec supervisord -c $IDEALOOM_PATH/supervisord.conf --nodaemon'
+ExecStartPost=/bin/bash -c 'sleep 5; . $IDEALOOM_PATH/venv/bin/activate; supervisorctl -c $IDEALOOM_PATH/supervisord.conf start prod:uwsgi >/tmp/supervisordebug.txt'
+ExecStop=/bin/bash -c '. $IDEALOOM_PATH/venv/bin/activate; supervisorctl -c $IDEALOOM_PATH/supervisord.conf shutdown'
+
+KillMode=control-group
+TimeoutStopSec=120
+
+[Install]
+WantedBy=multi-user.target
+
