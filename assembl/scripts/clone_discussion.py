@@ -249,20 +249,24 @@ def assign_dict(values, r, subob):
             fkcol = next(iter(col.foreign_keys)).column
             k = next(iter(r.local_columns))
             values[col.key] = getattr(subob, fkcol.key)
+            return
+    print "assign_dict: missing foreign key?"
 
 
 def assign_ob(ob, r, subob):
-    from assembl.models import LangStringEntry
-    if r.mapper != ob.__class__.__mapper__:
-        "DISCARDING", r
-        # Handled by the reverse connection
-        return
+    if r.direction.name != 'MANYTOONE':
+        if r.mapper != ob.__class__.__mapper__:
+            "DISCARDING", r
+            # Handled by the reverse connection
+            return
     setattr(ob, r.key, subob)
     for col in r.local_columns:
         if col.foreign_keys:
             fkcol = next(iter(col.foreign_keys)).column
             k = next(iter(r.local_columns))
             setattr(ob, col.key, getattr(subob, fkcol.key))
+            return
+    print "assign_ob: missing foreign key?"
 
 
 class JoinColumnsVisitor(ClauseVisitor):
@@ -511,8 +515,9 @@ def clone_discussion(
                 copy.views.pop()
             to_session.expunge(copy.table_of_contents)
             copy.table_of_contents = None
-            for ut in copy.user_templates:
-                to_session.expunge(ut)
+            # lingering reln
+            while copy.user_templates:
+                copy.user_templates.pop()
         elif isinstance(copy, BaseIdeaWidget):
             to_session.expunge(copy.base_idea_link)
             copy.base_idea_link = None
@@ -538,6 +543,7 @@ def clone_discussion(
                         print "resolving promise", reln.key, result.__class__, result.id
                         assign_ob(copy, reln, result)
             elif subob in in_process:
+                print "promising", subob.__class__, subob.id, reln.key
                 promises[subob].append((copy, reln))
             else:
                 print 'recurse 0', reln.key, subob.id
@@ -710,9 +716,11 @@ if __name__ == '__main__':
                         help="Add a role+permission pair to the copy "
                         "(eg system.Authenticated+admin_discussion)")
     args = parser.parse_args()
+    new_name = args.new_name or (
+        args.discussion + ("" if args.source_db_configuration else "_copy"))
     with transaction.manager:
         session = copy_discussion(
             args.source_db_configuration or args.configuration,
             args.configuration,
-            args.discussion, args.new_name or args.discussion + "_copy",
+            args.discussion, new_name,
             args.delete, args.debug, args.permissions)
