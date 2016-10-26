@@ -1418,8 +1418,9 @@ class BaseOps(object):
             # and many downstream usage tests for None in a way that would.
             # fail with True. TODO: Cleanup must_define_uniqueness
             return None
-        other = query.first()
-        if other is not None and other is not self:
+        for other in query:
+            if other is self:
+                continue
             if expunge and inspect(self).pending:
                 other.db.expunge(self)
             return other
