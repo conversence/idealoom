@@ -389,7 +389,7 @@ def clone_discussion(
         from_session, discussion_id, to_session=None, new_slug=None):
     from assembl.models import (
         DiscussionBoundBase, Discussion, Post, User, Preferences, HistoryMixin,
-        BaseIdeaWidget)
+        BaseIdeaWidget, TombstonableMixin)
     global user_refs
     discussion = from_session.query(Discussion).get(discussion_id)
     assert discussion
@@ -444,17 +444,14 @@ def clone_discussion(
         in_process.add(ob)
         for r in non_nullable_reln:
             subob = getattr(ob, r.key, None)
-            if subob is None:
-                from assembl.models import Idea, IdeaLink
-                # Those might be None because the underlying idea is tombstoned
-                if isinstance(ob, IdeaLink):
-                    subob_id = None
-                    if r.key == 'source':
-                        subob_id = ob.source_id
-                    elif r.key == 'target':
-                        subob_id = ob.target_id
-                    if subob_id:
-                        subob = from_session.query(Idea).get(subob_id)
+            # Special case for tombstones
+            if (subob is None and isinstance(ob, TombstonableMixin) and
+                    ob.is_tombstone):
+                key = next(iter(r._calculated_foreign_keys)).key
+                subob_id = getattr(ob, key)
+                if subob_id:
+                    target_cls = r._dependency_processor.mapper.class_
+                    subob = from_session.query(target_cls).get(subob_id)
             assert subob is not None
             assert subob not in in_process
             print 'recurse ^0', r.key, subob.id
@@ -519,8 +516,9 @@ def clone_discussion(
             while copy.user_templates:
                 copy.user_templates.pop()
         elif isinstance(copy, BaseIdeaWidget):
-            to_session.expunge(copy.base_idea_link)
-            copy.base_idea_link = None
+            if copy.base_idea_link:
+                to_session.expunge(copy.base_idea_link)
+                copy.base_idea_link = None
             while copy.idea_links:
                 copy.idea_links.pop()
         # Now add the object
