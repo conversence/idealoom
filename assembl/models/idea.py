@@ -793,6 +793,7 @@ class Idea(HistoryMixin, DiscussionBoundBase):
             IdeaRelatedPostLink, IdeaContentWidgetLink)
         from .generic import Content
         from .post import Post
+        from ..views.traversal import NsDictCollection
 
         class ChildIdeaCollectionDefinition(AbstractCollectionDefinition):
             def __init__(self, cls):
@@ -974,6 +975,7 @@ class Idea(HistoryMixin, DiscussionBoundBase):
         return {'children': ChildIdeaCollectionDefinition(cls),
                 'linkedposts': LinkedPostCollectionDefinition(cls),
                 'widgetposts': WidgetPostCollectionDefinition(cls),
+                'ns_kv': NsDictCollection(cls),
                 'ancestor_widgets': AncestorWidgetsCollectionDefinition(cls),
                 'ancestor_inspiration_widgets': AncestorWidgetsCollectionDefinition(
                     cls, InspirationWidget),
