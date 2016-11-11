@@ -1,9 +1,8 @@
-pip==8.1.2
-setuptools==28.6.1
+pip==9.0.1
+setuptools==28.8.0
 alabaster==0.7.9
 alembic==0.8.8
-# Until new kombu release
-amqp==1.4.9  # rq.filter: <2
+amqp==2.1.1
 anyjson==0.3.3
 anykeystore==0.2
 # Do not specify argparse, jenkins chokes on system version.
@@ -12,21 +11,21 @@ Babel==2.3.4
 backports.ssl-match-hostname==3.5.0.1
 -e git+https://github.com/assembl/Beaker.git@assembl#egg=Beaker
 beautifulsoup4==4.5.1
-billiard==3.3.0.23
+billiard==3.5.0.2
 boto==2.43.0
 bz2file==0.98
-celery==3.1.24
+celery==4.0.0
 cffi==1.8.3
 Chameleon==2.25
 colander==1.3.1
 ColanderAlchemy==0.3.3
 colors.py==0.2.2
 contextlib2==0.5.4
-cornice==2.0.2
+cornice==2.1.0
 -e git+https://github.com/Cornices/cornice.ext.sphinx.git@361-erase-services-after#egg=cornice_sphinx
 cov-core==1.15.0
 coverage==4.2
-cryptography==1.5.2
+cryptography==1.5.3
 DateTime==4.1.1
 defusedxml==0.4.1
 # distribute==0.7.3 # This fails with latest pip. Installed properly as a dependency.
@@ -42,10 +41,10 @@ Fabric==1.12.0
 flaky==3.3.0
 #Because mock 2.0.0 requires it, but it isn't always detected properly
 funcsigs==1.0.2
-future==0.15.2
+future==0.16.0
 -e git+https://github.com/maparent/fuxi.git#egg=fuxi
 gensim==0.12.3
-google-api-python-client==1.5.4
+google-api-python-client==1.5.5
 greenlet==0.4.10
 hiredis==0.2.0
 html5lib==0.999999999
@@ -59,17 +58,17 @@ ipykernel==4.5.0
 ipython-genutils==0.1.0
 ipython==5.1.0
 iso639==0.1.4  # failure with 0.1.3
-isodate==0.5.4
+isodate==0.5.0
 -e git+https://github.com/assembl/jasmine-splinter-runner.git#egg=jasmine-splinter-runner
 Jinja2==2.8
 jupyter-client==4.4.0
 jupyter-core==4.2.0
 -e git+https://github.com/benoitg/jwzthreading.git@master#egg=jwzthreading
-kombu==3.0.37
+kombu==4.0.0
 langdetect==1.0.7
 lingua==4.11
 lxml==3.6.4
-Mako==1.0.4
+Mako==1.0.6
 MarkupSafe==0.23
 meld3==1.0.2
 mock==2.0.0
@@ -88,7 +87,7 @@ premailer==3.0.1
 py==1.4.31
 pyasn1==0.1.9
 pyasn1_modules==0.0.8
-pycparser==2.16
+pycparser==2.17
 pycrypto==2.6.1
 pydot==1.2.3
 Pygments==2.1.3
@@ -103,7 +102,7 @@ pyparsing==2.1.10
 pyramid-autodoc==1.0.0
 -e git+https://github.com/assembl/pyramid_beaker.git@assembl#egg=pyramid_beaker
 pyramid-debugtoolbar-ajax==0.0.4
-pyramid-debugtoolbar==3.0.4
+pyramid-debugtoolbar==3.0.5
 pyramid-dogpile-cache==0.0.4
 pyramid-ipython==0.2
 pyramid-jinja2==2.6.2
@@ -114,15 +113,15 @@ pyramid==1.7.3
 PyStemmer==1.3.0
 pytest-cov==2.4.0
 pytest-localserver==0.3.6
-pytest-mock==1.2
-pytest-splinter==1.7.6
+pytest-mock==1.4.0
+pytest-splinter==1.7.7
 pytest==3.0.3
-python-dateutil==2.5.3
+python-dateutil==2.6.0
 python-openid==2.2.5
 python-saml==2.1.9
 -e git+https://github.com/assembl/python-social-auth.git@assembl#egg=python_social_auth
 pytz==2016.7
-pyzmq==16.0.0
+pyzmq==16.0.1
 raven==5.31.0
 rdflib-jsonld==0.4.0
 rdflib==4.2.1
@@ -136,7 +135,7 @@ rsa==3.4.2
 scikit-learn==0.18
 scipy==0.18.1
 selenium==3.0.1
-simplejson==3.9.0
+simplejson==3.10.0
 six==1.10.0
 smart-open==1.3.5
 snowballstemmer==1.2.1
@@ -145,7 +144,7 @@ SPARQLWrapper==1.7.6
 sphinxcontrib-httpdomain==1.5.0
 sphinxcontrib-zopeext==0.2.1
 Sphinx==1.4.8
-splinter==0.7.4
+splinter==0.7.5
 SQLAlchemy==1.0.15  # rq.filter: <1.1
 sqlalchemy-schemadisplay==1.3
 sqlparse==0.2.2
@@ -153,7 +152,7 @@ sqlparse==0.2.2
 supervisor==3.3.1
 tornado==4.4.2
 traitlets==4.3.1
-transaction==1.6.1
+transaction==1.7.0
 translationstring==1.3
 Unidecode==0.4.19
 uritemplate==3.0.0
@@ -167,7 +166,7 @@ WebOb==1.6.2
 WebTest==2.0.23
 Werkzeug==0.11.11
 zope.component==4.3.0
-zope.deprecation==4.1.2
+zope.deprecation==4.2.0
 zope.event==4.2.0
 zope.interface==4.3.2
 zope.sqlalchemy==0.7.7
