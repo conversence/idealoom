@@ -22,7 +22,7 @@ ColanderAlchemy==0.3.3
 colors.py==0.2.2
 contextlib2==0.5.4
 cornice==2.1.0
--e git+https://github.com/Cornices/cornice.ext.sphinx.git@361-erase-services-after#egg=cornice_sphinx
+-e git+https://github.com/maparent/cornice.ext.sphinx.git@cornice_sphinx_services#egg=cornice_sphinx
 cov-core==1.15.0
 coverage==4.2
 cryptography==1.5.3
