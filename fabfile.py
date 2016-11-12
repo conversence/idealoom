@@ -1561,7 +1561,7 @@ def skeleton_env(projectpath, venvpath=None):
     if len(env.hosts) == 0:
         env.hosts = ['localhost']
     env.projectpath = projectpath
-    env.gitrepo = getenv("GITREPO", "https://github.com/assembl/assembl.git")
+    env.gitrepo = getenv("GITREPO", "https://github.com/conversence/idealoom.git")
     env.gitbranch = getenv("GITBRANCH", "master")
 
     #Are we on localhost
@@ -1581,7 +1581,7 @@ def commonenv(projectpath, venvpath=None):
     Base environment
     """
     execute(skeleton_env, projectpath, venvpath)
-    env.projectname = "assembl"
+    env.projectname = "idealoom"
     assert env.ini_file, "Define env.ini_file before calling common_env"
     # Production env will be protected from accidental database restores
     env.is_production_env = False
