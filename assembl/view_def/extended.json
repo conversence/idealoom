@@ -243,10 +243,10 @@
         "text": "annotation_text"
     },
     "TextFragmentIdentifier": {
-        "end": "xpath_end",
+        "end": "xpath_end_calc",
         "endOffset": "offset_end",
         "extract_id": false,
-        "start": "xpath_start",
+        "start": "xpath_start_calc",
         "startOffset": "offset_start"
     },
     "DiscussionPermission": {

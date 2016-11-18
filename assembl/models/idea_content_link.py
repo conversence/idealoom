@@ -488,11 +488,25 @@ class TextFragmentIdentifier(DiscussionBoundBase):
         r'xpointer\(start-point\(string-range\(([^,]+),([^,]+),([^,]+)\)\)'
         r'/range-to\(string-range\(([^,]+),([^,]+),([^,]+)\)\)\)')
 
+    @property
+    def xpath_start_calc(self):
+        if isinstance(self.extract.extract_source, Post):
+            return self.generate_post_xpath(self.extract.extract_source)
+        else:
+            return self.xpath_start
+
+    @property
+    def xpath_end_calc(self):
+        if isinstance(self.extract.extract_source, Post):
+            return self.generate_post_xpath(self.extract.extract_source)
+        else:
+            return self.xpath_end
+
     def as_xpointer(self):
         return ("xpointer(start-point(string-range(%s,'',%d))/"
                 "range-to(string-range(%s,'',%d)))" % (
-                self.xpath_start, self.offset_start,
-                self.xpath_end, self.offset_end))
+                self.xpath_start_calc, self.offset_start,
+                self.xpath_end_calc, self.offset_end))
 
     def __json__(self):
         return {"start": self.xpath_start, "startOffset": self.offset_start,
