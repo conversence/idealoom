@@ -25,7 +25,7 @@ $th_local_grey2: #ecf0f1; // almost white (cyan) $theme_messagelist_bg_color, $t
 $th_local_grey3: #CCCCCC; // $theme_box_border_color, theme_navigation_idea_total_count
 $th_local_grey4: #999999; // $theme_inactivelink_color, theme_navigation_options, theme_navigation_idea_header_text_color
 $th_local_grey5: #7F8C8D; // grey, slightly cyan. $theme_btn_cancel_text_color
-$th_local_grey6: #484848; // $theme_header_text_color, theme_navigation_idea_hover_unread_count, theme_navigation_selected_idea_unread_count
+$th_local_grey6: #484848; // $theme_header_text_color, theme_navigation_idea_hover_unread_count, theme_navigation_selected_idea_unread_count, theme_message_reply_btn_color
 $th_local_grey_01: #EEEEEE; // almost white. unused
 $th_local_grey_02: #888888; // like th_local_grey5, less cyan. unused.
 
@@ -49,6 +49,7 @@ $th_local_green_03: #CCEFDB; // almost white. unused
 
 //Global to the entire scss infrastructure, mandatory variables for EVERY theme
 $theme_activelink_color: $th_local_green4;
+$theme_activelinkFilter_color: $th_local_green4;
 $theme_inactivelink_color: $th_local_grey4;
 $theme_checkbox_color: $th_local_green3;
 $theme_form_field_active_border_color: $th_local_green3;
@@ -131,6 +132,7 @@ $theme_messagesend_bg_color: $th_local_grey1;
 //The color of the icons of the action buttons on messages
 $theme_message_icon_color: $th_local_green3;
 $theme_message_highlight_background: $theme_item_selected_color; // in a message, background color of an extract (extracts are harvested sections of a message, which are highlighted in this color)
+$theme_message_reply_btn_color:$th_local_gray6;
 
 //Panel groups
 //$theme_panel_group_header_bg_color: $th_local_grey_01;
