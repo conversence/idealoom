@@ -36,17 +36,17 @@ debugtoolbar.intercept_exc = false
 
 # This database will be cleared! Be careful.
 # For postgres:
-sqlalchemy.url = postgresql+psycopg2://assembl_test:assembl_test@localhost/assembl_test?sslmode=disable
+sqlalchemy.url = postgresql+psycopg2://idealoom_test:idealoom_test@localhost/idealoom_test?sslmode=disable
 # For virtuoso:
-#sqlalchemy.url = virtuoso://assembl_test:assembl_test@VOSU
+#sqlalchemy.url = virtuoso://idealoom_test:idealoom_test@VOSU
 sqlalchemy.echo = True
-db_user = assembl_test
-db_password = assembl_test
+db_user = idealoom_test
+db_password = idealoom_test
 # For postgres:
 db_schema = public
 # For virtuoso:
-#db_schema = assembl_test
-db_database = assembl_test
+#db_schema = idealoom_test
+db_database = idealoom_test
 # db_host = localhost
 
 jinja2.directories = assembl:templates
@@ -258,9 +258,9 @@ transaction = transaction
 script_location = assembl/alembic
 # This database will be cleared! Be careful.
 # For postgres:
-sqlalchemy.url = postgresql+psycopg2://assembl_test:assembl_test@localhost/assembl_test?sslmode=disable
+sqlalchemy.url = postgresql+psycopg2://idealoom_test:idealoom_test@localhost/idealoom_test?sslmode=disable
 # For virtuoso:
-#sqlalchemy.url = virtuoso://assembl_test:assembl_test@VOSU
+#sqlalchemy.url = virtuoso://idealoom_test:idealoom_test@VOSU
 transaction_per_migration = true
 
 # Template used to generate migration files
