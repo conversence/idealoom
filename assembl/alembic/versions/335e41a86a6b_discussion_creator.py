@@ -1,14 +1,14 @@
 """discussion creator
 
 Revision ID: 335e41a86a6b
-Revises: c6789ae35f6f
+Revises: 33b361960ee7
 Create Date: 2016-11-14 12:32:52.653637
 
 """
 
 # revision identifiers, used by Alembic.
 revision = '335e41a86a6b'
-down_revision = 'c6789ae35f6f'
+down_revision = '33b361960ee7'
 
 from alembic import context, op
 import sqlalchemy as sa
