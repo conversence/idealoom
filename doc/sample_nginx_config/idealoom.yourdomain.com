@@ -27,15 +27,14 @@ server {
         #Nor will it help your performance after the first hour...
         autoindex on;
 
-        alias /var/www/idealoom/assembl/static;
-        alias /home/ubuntu/idealoom/assembl/static;
+        alias /home/idealoom_user/idealoom/assembl/static;
     }
 
     location / {
 
         include uwsgi_params;
         uwsgi_read_timeout 5m;
-        uwsgi_pass unix:///home/ubuntu/idealoom/var/run/uwsgi.sock;
+        uwsgi_pass unix:///home/idealoom_user/idealoom/var/run/uwsgi.sock;
     }
 
 # So files uploaded to the database are not artificailly limited by nginx
