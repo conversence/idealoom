@@ -25,7 +25,7 @@ from assembl.models import Preferences, Locale
 from assembl import locale_negotiator
 from assembl.lib.utils import get_global_base_url
 from assembl.nlp.translation_service import DummyGoogleTranslationService
-from ..backbone.views import process_locale
+from ..discussion.views import process_locale
 
 
 _ = TranslationStringFactory('assembl')
