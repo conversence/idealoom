@@ -339,7 +339,7 @@ def includeme(config):
     config.include('.api')
     config.include('.api2')
 
-    config.include('.home')
+    config.include('.discussion_list')
     config.include('.admin')
 
     config.add_route('home-auto', '/{discussion_slug}/')

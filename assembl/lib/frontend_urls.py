@@ -48,7 +48,7 @@ class FrontendUrls(object):
     The list of frontend discussion routes.
 
     Important:  This should match with :js:class:`Router`
-    Used by :py:func:`assembl.views.backbone.views.home_view`, these routes
+    Used by :py:func:`assembl.views.discussion.views.home_view`, these routes
     will all give the same view and further routing will happen
     in the frontend."""
 
@@ -59,13 +59,13 @@ class FrontendUrls(object):
     The list of frontend discussion routes.
 
     Important:  This should match with :js:class:`Router`
-    Used by :py:func:`assembl.views.backbone.views.home_view`, these routes
+    Used by :py:func:`assembl.views.discussion.views.home_view`, these routes
     will all give the same view and further routing will happen
     in the frontend."""
 
     @classmethod
     def register_frontend_routes(cls, config):
-        from assembl.views.backbone.views import home_view
+        from assembl.views.discussion.views import home_view
         for name, route in cls.frontend_discussion_routes.iteritems():
             config.add_route(name, route)
             config.add_view(
