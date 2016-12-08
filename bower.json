@@ -18,8 +18,6 @@
   ],
   "dependencies": {
     "Backbone.Subset": "https://github.com/assembl/Backbone.Subset.git#~0.1.1",
-    "backbone-modal": "~1.1.5",
-    "bootstrap-growl": "~1.1.0",
     "ink": "~1.0.5",
     "jquery-oembed-all": "https://github.com/assembl/jquery-oembed-all.git#f0fe241934f3bbfe2c27d1fa7054b2518a1b5b53",
     "jquery.dotdotdot": "https://github.com/assembl/jQuery.dotdotdot.git#fix-paragraph-and-read-more-not-showing"

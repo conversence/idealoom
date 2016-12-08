@@ -4,7 +4,7 @@
  */
 var $ = require('jquery'),
     _ = require('underscore'),
-    growl = require('bootstrap-growl/jquery.bootstrap-growl');
+    growl = require('bootstrap-notify');
 
 
 /*
@@ -19,13 +19,16 @@ var GrowlReason = {
 };
 
 var defaultGrowlSettings = {
-    ele: 'body',
-    // type: either 'success' or 'error' 
-    offset: {from: 'bottom', amount:20},
-    align: 'right',
+    element: 'body',
+    // type: either 'success' or 'error'
+    placement: {
+        from:"bottom",
+        align: 'right',
+    },
+    offset: 20,
     delay: 4000,
     allow_dismiss: true,
-    stackup_spacing: 10
+    spacing: 10
 };
 
 var showBottomGrowl = function(growl_reason, msg, settings){
@@ -33,7 +36,7 @@ var showBottomGrowl = function(growl_reason, msg, settings){
     type: growl_reason
   });
   mergedSettings = _.extend(mergedSettings, settings);
-  $.bootstrapGrowl(msg, mergedSettings);
+  $.notify({message: msg}, mergedSettings);
 };
 
 module.exports = {
