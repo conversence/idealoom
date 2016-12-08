@@ -11,7 +11,7 @@
 
 var _ = require('underscore'),
   Backbone=require('backbone'),
-  BackboneModal = require('backbone-modal'),
+  BackboneModal = require('backbone.modal'),
   i18n = require('../utils/i18n.js');
 
 

@@ -15,7 +15,7 @@ var Marionette = require('backbone.marionette'),
     Attachments = require('../models/attachments.js'),
     Documents = require('../models/documents.js'),
     Backbone=require('backbone'),
-    BackboneModal = require('backbone-modal'),
+    BackboneModal = require('backbone.modal'),
     DocumentViews = require('./documents.js');
 
 

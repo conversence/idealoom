@@ -6,7 +6,7 @@
 
 var Marionette = require('backbone.marionette'),
     Backbone = require('backbone'),
-    BackboneModal = require('backbone-modal'),
+    BackboneModal = require('backbone.modal'),
     Assembl = require('../../app.js'),
     $ = require('jquery'),
     CollectionManager = require('../../common/collectionManager.js'),

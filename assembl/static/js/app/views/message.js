@@ -7,7 +7,7 @@
 var Marionette = require('backbone.marionette'),
     Raven = require('raven-js'),
     Backbone = require('backbone'),
-    BackboneModal = require('backbone-modal'),
+    BackboneModal = require('backbone.modal'),
     _ = require('underscore'),
     Assembl = require('../app.js'),
     Ctx = require('../common/context.js'),

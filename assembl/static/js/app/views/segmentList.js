@@ -6,7 +6,7 @@
 
 var Marionette = require('backbone.marionette'),
     Backbone = require('backbone'),
-    BackboneModal = require('backbone-modal'),
+    BackboneModal = require('backbone.modal'),
     _ = require('underscore'),
     $ = require('jquery'),
     highlight = require('jquery-highlight'),

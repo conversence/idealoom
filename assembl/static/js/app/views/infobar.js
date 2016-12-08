@@ -5,7 +5,7 @@
  */
 
 var Backbone=require('backbone'),
-    BackboneModal = require('backbone-modal'),
+    BackboneModal = require('backbone.modal'),
     Marionette = require('backbone.marionette'),
     Assembl = require('../app.js'),
     CookiesManager = require("../utils/cookiesManager.js"),

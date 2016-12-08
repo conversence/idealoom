@@ -16,7 +16,7 @@ var Marionette = require('backbone.marionette'),
   i18n = require('../utils/i18n.js'),
   openIdeaInModal = require('./modals/ideaInModal.js'),
   Backbone=require('backbone'),
-  BackboneModal = require('backbone-modal'),
+  BackboneModal = require('backbone.modal'),
   Analytics = require('../internal_modules/analytics/dispatcher.js');
 
 // // root class

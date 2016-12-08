@@ -14,7 +14,7 @@ var $ = require('jquery'),
     i18n =  require('../utils/i18n.js'),
     Raven = require('raven-js'),
     Backbone=require('backbone'),
-    BackboneModal = require('backbone-modal'),
+    BackboneModal = require('backbone.modal'),
     upload = require('backbone-model-file-upload'), // why here?
     Analytics = require('../internal_modules/analytics/dispatcher.js');
 require('linkifyjs');
