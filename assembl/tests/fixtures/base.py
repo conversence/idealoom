@@ -243,7 +243,7 @@ def browser(request):
     from os.path import dirname
     # interference from system phantomjs
     phantomjs = dirname(dirname(dirname(dirname(__file__)))) +\
-        "/assembl/static/js/node_modules/.bin/phantomjs"
+        "/assembl/static/node_modules/.bin/phantomjs"
     browser = Browser('phantomjs', executable_path=phantomjs)
 
     def fin():

@@ -26,7 +26,7 @@ window._ = _;
 var tooltip = require('bootstrap-tooltip'),
     dropdown = require('bootstrap-dropdown'),
     oembed = require('jquery-oembed-all/jquery.oembed'),
-    highlight = require('jquery-highlight/jquery.highlight.js');
+    highlight = require('jquery-highlight');
     // require('ckeditor-sharedcontainer/plugin'); // where is this anyway?
 
 

@@ -26,7 +26,7 @@ var Assembl = require('../app.js'),
     AttachmentModels = require('../models/attachments.js'),
     $ = require('jquery'),
     _ = require('underscore'),
-    highlight = require('jquery-highlight/jquery.highlight.js'),
+    highlight = require('jquery-highlight'),
     BackboneSubset = require("Backbone.Subset"),
     Promise = require('bluebird');
 

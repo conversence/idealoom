@@ -26,32 +26,47 @@ function theme_entries() {
 
 module.exports = {
   entry: _.extend(theme_entries(), {
-    app: './js/app/index.js',
+    main: './js/app/index.js',
     infrastructure: [
       'jquery',
       'underscore',
       'backbone',
-      'backbone.marionette',
       'backbone-modal',
-      'Backbone.Subset',
       'backbone-model-file-upload',
-      'sockjs-client',
-      'jquery.dotdotdot',
-      'jquery-oembed-all/jquery.oembed',
-      'bootstrap-growl/jquery.bootstrap-growl',
-      'jquery-highlight/jquery.highlight.js',
+      'backbone.babysitter',
+      'backbone.marionette',
+      'backbone.modal',
+      'bootstrap-notify',
+      'bluebird',
+      'ckeditor',
+      'd3',
       'hopscotch',
-      'bootstrap-tooltip',
-      'bootstrap-dropdown',
-      'annotator/annotator-full.js',
+      'hopscotch',
+      'jed',
+      'linkifyjs',
+      'moment',
+      'raven-js',
+      'sockjs-client',
+
+      // Those choke because they expect jquery in namespace.
+      // 'jquery.dotdotdot',
+      // 'annotator/annotator-full.js',
+      // 'Backbone.Subset',
+      // 'bootstrap-dropdown',
+      // 'bootstrap-tooltip',
+      // 'jquery-highlight/jquery.highlight.js',
+      // 'jquery-oembed-all/jquery.oembed',
+      // 'jquery-autosize',
+    ],
+    testInfra: [
+      'mocha',
     ],
     tests: [
-      './js/app/tests.js',
-      'mocha',
       'chai',
       'chai-as-promised',
       'lolex',
       'sinon',
+      './js/app/tests.js',
     ],
   }),
   output: {
@@ -61,14 +76,16 @@ module.exports = {
   },
   resolve: {
     modulesDirectories: [
-      'node_modules',
+      __dirname + '/node_modules',
       __dirname + '/js/bower',
       __dirname + '/js/app',
       __dirname + '/js/lib',
     ],
     alias: {
       sinon: 'sinon/pkg/sinon',
-      bourbon: __dirname + '/node_modules/bourbon/app/assets/stylesheets/_bourbon.scss',
+      bourbon: 'bourbon/app/assets/stylesheets/_bourbon.scss',
+      'jquery.dotdotdot': 'jquery.dotdotdot/src/js/jquery.dotdotdot.js',
+      'jquery-highlight': 'jquery-highlight/jquery.highlight.js',
     },
   },
   module: {
@@ -99,8 +116,11 @@ module.exports = {
   },
   plugins: [
       new webpack.ResolverPlugin(
-          new webpack.ResolverPlugin.DirectoryDescriptionFilePlugin('.bower.json', ['main'])
+        new webpack.ResolverPlugin.DirectoryDescriptionFilePlugin('../../bower.json', ['main'])
       ),
+      new webpack.optimize.CommonsChunkPlugin({
+        names: ['infrastructure', 'manifest'] // Specify the common bundle's name.
+      }),
       new ExtractTextPlugin("[name].css"),
   ],
 };
