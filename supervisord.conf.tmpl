@@ -114,7 +114,7 @@ startretries = 3
 startsecs = 5
 
 [group:dev]
-programs = pserve, gulp
+programs = pserve, webpack
 
 [group:prod]
 programs = uwsgi
@@ -125,10 +125,10 @@ command = %(VIRTUAL_ENV)s/bin/pserve --reload %(CONFIG_FILE)s
 autostart = %(autostart_pserve)s
 autorestart = false
 
-[program:gulp]
-directory = %(here)s/assembl/static/js
-command = %(VIRTUAL_ENV)s/bin/node %(here)s/assembl/static/js/node_modules/.bin/gulp
-autostart = %(autostart_gulp)s
+[program:webpack]
+directory = %(here)s/assembl/static
+command = %(here)s/assembl/static/node_modules/.bin/webpack -d -w
+autostart = %(autostart_webpack)s
 autorestart = true
 
 [program:uwsgi]

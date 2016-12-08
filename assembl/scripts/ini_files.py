@@ -48,7 +48,7 @@ def main():
         'autostart_changes_router': 'true',
         'autostart_pserve': 'false',
         'autostart_nodesass': 'false',
-        'autostart_gulp': 'false',
+        'autostart_webpack': 'false',
         'autostart_uwsgi': 'false',
         'autostart_metrics_server': 'false',
         'autostart_edgesense_server': 'false',
@@ -123,7 +123,7 @@ def main():
             'supervisor', 'autostart_changes_router'),
         'autostart_pserve': config.get('supervisor', 'autostart_pserve'),
         'autostart_nodesass': config.get('supervisor', 'autostart_nodesass'),
-        'autostart_gulp': config.get('supervisor', 'autostart_gulp'),
+        'autostart_webpack': config.get('supervisor', 'autostart_webpack'),
         'autostart_uwsgi': config.get('supervisor', 'autostart_uwsgi'),
         'autostart_metrics_server': (config.get(
             'supervisor', 'autostart_metrics_server')

@@ -27,7 +27,7 @@ def is_js(msg):
             return True
 
 po2json_script = join(dirname(dirname(__file__)),
-                      'static','js','node_modules', '.bin', 'po2json')
+                      'static','node_modules', '.bin', 'po2json')
 
 
 def po2json(fname):

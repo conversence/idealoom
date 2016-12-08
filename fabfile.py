@@ -426,39 +426,26 @@ def compile_messages():
 
 
 @task
-def compile_stylesheets():
+def compile_widget_stylesheets():
     """
-    Generate *.css files from *.scss
+    Generate *.css files from *.scss in widgets
     """
     sanitize_env()
     with cd(env.projectpath):
-        with cd('assembl/static/js'):
-            venvcmd('./node_modules/.bin/gulp sass', chdir=False)
-        venvcmd('./assembl/static/js/node_modules/.bin/node-sass --source-map -r -o assembl/static/widget/card/app/css --source-map assembl/static/widget/card/app/css assembl/static/widget/card/app/scss', shell=True)
-        venvcmd('./assembl/static/js/node_modules/.bin/node-sass --source-map -r -o assembl/static/widget/video/app/css --source-map assembl/static/widget/video/app/css assembl/static/widget/video/app/scss', shell=True)
-        venvcmd('./assembl/static/js/node_modules/.bin/node-sass --source-map -r -o assembl/static/widget/session/css --source-map assembl/static/widget/session/css assembl/static/widget/session/scss', shell=True)
+        venvcmd(get_node_bin_path()+'/node-sass --source-map -r -o assembl/static/widget/card/app/css --source-map assembl/static/widget/card/app/css assembl/static/widget/card/app/scss', shell=True)
+        venvcmd(get_node_bin_path()+'/node-sass --source-map -r -o assembl/static/widget/video/app/css --source-map assembl/static/widget/video/app/css assembl/static/widget/video/app/scss', shell=True)
+        venvcmd(get_node_bin_path()+'/node-sass --source-map -r -o assembl/static/widget/session/css --source-map assembl/static/widget/session/css assembl/static/widget/session/scss', shell=True)
 
 
 @task
-def compile_javascript():
+def compile_stylesheets_and_js():
     """
-    Generates and minifies javascript
+    Generates and minifies stylesheets and javascript
     """
     sanitize_env()
     with cd(env.projectpath):
-        with cd('assembl/static/js'):
-            venvcmd('./node_modules/.bin/gulp libs', chdir=False)
-            venvcmd('./node_modules/.bin/gulp browserify:prod', chdir=False)
-            venvcmd('./node_modules/.bin/gulp build:test', chdir=False)
-
-
-@task
-def compile_javascript_tests():
-    """Generates unified javascript test file"""
-    sanitize_env()
-    with cd(env.projectpath):
-        with cd('assembl/static/js'):
-            venvcmd('./node_modules/.bin/gulp build:test', chdir=False)
+        with cd('assembl/static'):
+            venvcmd('./node_modules/.bin/webpack -p', chdir=False)
 
 
 def tests():
@@ -644,9 +631,9 @@ def app_compile_nodbupdate():
     if using_virtuoso():
         execute(install_or_updgrade_virtuoso)
     execute(app_setup)
-    execute(compile_stylesheets)
+    execute(compile_stylesheets_and_js)
+    execute(compile_widget_stylesheets)
     execute(compile_messages)
-    execute(compile_javascript)
 
 
 @task
@@ -723,7 +710,7 @@ def update_bower():
 
 def get_node_base_path():
     return normpath(join(
-            env.projectpath, 'assembl', 'static', 'js'))
+            env.projectpath, 'assembl', 'static'))
 
 def get_node_modules_path():
     return normpath(join(
@@ -1829,7 +1816,7 @@ def build_doc():
     sanitize_env()
     with cd(env.projectpath):
         run('rm -rf doc/autodoc doc/jsdoc')
-        venvcmd('./assembl/static/js/node_modules/.bin/jsdoc -t ./assembl/static/js/node_modules/jsdoc-rst-template/template/ --recurse assembl/static/js/app -d ./doc/jsdoc/')
+        venvcmd(get_node_bin_path() + '/jsdoc -t '+get_node_modules_path()+'/jsdoc-rst-template/template/ --recurse assembl/static/js/app -d ./doc/jsdoc/')
         venvcmd('env SPHINX_APIDOC_OPTIONS="members,show-inheritance" sphinx-apidoc -e -f -o doc/autodoc assembl')
         venvcmd('python assembl/scripts/make_er_diagram.py %s -o doc/er_diagram' % (env.ini_file))
         venvcmd('sphinx-build doc assembl/static/techdocs')
