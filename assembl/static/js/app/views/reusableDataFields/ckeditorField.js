@@ -228,7 +228,7 @@ var cKEditorField = Marionette.ItemView.extend({
       sharedSpaces: { top: this.topId, bottom: this.bottomId }
     });
 
-    //CKEDITOR.basePath = window.location.origin +'/static/js/bower/ckeditor/';
+    //CKEDITOR.basePath = static_url + '/node_modules/ckeditor/';
     this.ckInstance = CKEDITOR.inline(editingArea, config);
 
     setTimeout(function() {

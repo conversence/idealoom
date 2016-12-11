@@ -319,7 +319,7 @@ var IdeaPanel = AssemblPanel.extend({
         },
         relative: true
       });
-      share_link_url = Ctx.appendExtraURLParams("/static/widget/share/index.html",
+      share_link_url = Ctx.appendExtraURLParams(static_url + "/widget/share/index.html",
         [
           {'u': Ctx.getAbsoluteURLFromRelativeURL(direct_link_relative_url) },
           {'t': this.model.get('shortTitle')},

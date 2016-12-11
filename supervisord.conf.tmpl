@@ -127,7 +127,7 @@ autorestart = false
 
 [program:webpack]
 directory = %(here)s/assembl/static
-command = %(here)s/assembl/static/node_modules/.bin/webpack -d -w
+command = %(here)s/assembl/static/node_modules/.bin/webpack-dev-server -d --config webpack.dev.config.js
 autostart = %(autostart_webpack)s
 autorestart = true
 

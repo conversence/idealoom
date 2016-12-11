@@ -95,7 +95,7 @@ App.on('start', function() {
   var link = document.createElement('link');
   link.type = 'image/x-icon';
   link.rel = 'shortcut icon';
-  link.href = '/static/img/icon/infinite-1.png';
+  link.href = static_url + '/img/icon/infinite-1.png';
   document.getElementsByTagName('head')[0].appendChild(link);
 
 });

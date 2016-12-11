@@ -28,7 +28,6 @@ from ..lib.raven_client import capture_exception
 from ..auth import R_PARTICIPANT
 
 default_context = {
-    'STATIC_URL': '/static'
 }
 
 
@@ -201,9 +200,13 @@ def get_default_context(request):
             'script': web_analytics_piwik_script
         }
 
+    use_webpack_server = asbool(config.get("use_webpack_server"))
+    static_url = 'http://localhost:8080' if use_webpack_server else '/static'
+
     (theme_name, theme_relative_path)=get_theme_info(discussion)
     return dict(
         default_context,
+        STATIC_URL=static_url,
         request=request,
         user=user,
         templates=get_template_views(),

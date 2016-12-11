@@ -1491,8 +1491,8 @@ return cls.extend({
 
   annotator_config: {
         externals: {
-          "jQuery": "/static/js/bower/jquery/jquery.js",
-          "styles": "/static/css/lib/annotator.min.css"
+          "jQuery": static_url + "/node_modules/jquery/dist/jquery.min.js",
+          "styles": static_url + "/css/lib/annotator.min.css"
         }
       },
 

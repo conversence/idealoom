@@ -19,10 +19,10 @@
   {% else %}
     <meta property="og:url" content="{{ request.application_url }}/login" />
   {% endif %}
-  <meta property="og:image" content="{{ request.application_url }}/static/css/themes/default/img/crowd2.jpg" />
+  <meta property="og:image" content="{{ STATIC_URL }}/css/themes/default/img/crowd2.jpg" />
   <meta property="og:image:width" content="1600" />
   <meta property="og:image:height" content="222" />
-  <meta property="og:image" content="{{ request.application_url }}/static/css/themes/default/img/logo.png" />
+  <meta property="og:image" content="{{ STATIC_URL }}/css/themes/default/img/logo.png" />
   <meta property="og:image:width" content="111" />
   <meta property="og:image:height" content="35" />
 {% endblock meta_tags %}

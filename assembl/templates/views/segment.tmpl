@@ -58,7 +58,7 @@ data-segmentid="<%= segment.cid %>">
 
       <% } else { %>
         <% if (type == "Webpage") { %>
-          <img src="/static/img/icon/search_document.svg" width="35" height="35" class="image-rounded fl prxs" alt="{{ gettext('Document extracted from the web') }}" />
+          <img src="{{ STATIC_URL }}/img/icon/search_document.svg" width="35" height="35" class="image-rounded fl prxs" alt="{{ gettext('Document extracted from the web') }}" />
           {{ gettext('Harvested from webpage') }}
         <% } else { %>
           {{ gettext('Unknown segment type: ') }}<%= type %>

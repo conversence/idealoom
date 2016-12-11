@@ -11,22 +11,22 @@
     <meta property="og:title" content="Assembl" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="{{ request.application_url }}" />
-    <meta property="og:image" content="{{ request.application_url }}/static/css/themes/default/img/crowd2.jpg" />
+    <meta property="og:image" content="{{ STATIC_URL }}/css/themes/default/img/crowd2.jpg" />
     <meta property="og:image:width" content="1600" />
     <meta property="og:image:height" content="222" />
-    <meta property="og:image" content="{{ request.application_url }}/static/css/themes/default/img/logo.png" />
+    <meta property="og:image" content="{{ STATIC_URL }}/css/themes/default/img/logo.png" />
     <meta property="og:image:width" content="111" />
     <meta property="og:image:height" content="35" />
     <meta name="robots" content="noindex" />
     <meta name="googlebot" content="noindex" />
     {% endblock meta_tags %}
 
-    {#<link rel="icon" href="/static/img/icon/infinite-1.png" type="image/x-icon">#}
+    {#<link rel="icon" href="{{ STATIC_URL }}/img/icon/infinite-1.png" type="image/x-icon">#}
     <link href='//fonts.googleapis.com/css?family=Open+Sans:400,300,600,700' rel='stylesheet' type='text/css'>
-    <link type="text/css" rel="stylesheet" href="/static/js/build/theme_{{theme_relative_path}}_web.css" />
-    <link type="text/css" rel="stylesheet" href="/static/js/bower/jquery-oembed-all/jquery.oembed.css" />
+    <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}/js/build/theme_{{theme_relative_path}}_web.css" />
+    <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}/js/bower/jquery-oembed-all/jquery.oembed.css" />
 
-    <link type="text/css" rel="stylesheet" href="/static/node_modules/hopscotch/dist/css/hopscotch.min.css" />
+    <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}/node_modules/hopscotch/dist/css/hopscotch.min.css" />
 
     {% block extra_css %}{% endblock extra_css %}
     {% include 'includes/feature_detection.jinja2' %}

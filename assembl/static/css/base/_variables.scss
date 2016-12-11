@@ -1,10 +1,10 @@
 /*** New design variable ***/
 
 // Image dir
-$img-dir: "/static/img";
+$img-dir: $static_url + "img";
 
 // Fonts
-$fonts-dir: "/static/css/fonts";
+$fonts-dir: $static_url + "css/fonts";
 
 // Spacing
 $spacingXs: 5px !default;

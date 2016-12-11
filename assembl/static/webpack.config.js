@@ -70,9 +70,9 @@ module.exports = {
     ],
   }),
   output: {
-    path: './js/build',
+    path: path.join(__dirname, 'js/build'),
     filename: '[name].js',
-    publicPath: '/static/js/build/',
+    publicPath: '/js/build/',
   },
   resolve: {
     modulesDirectories: [
@@ -123,5 +123,8 @@ module.exports = {
       }),
       new ExtractTextPlugin("[name].css"),
   ],
+  sassLoader: {
+    data: '$static_url: "~/static/";',
+  }
 };
 

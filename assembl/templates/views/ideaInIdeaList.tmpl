@@ -47,7 +47,7 @@
     </div>
         <%= Ctx.stripHtml(shortTitle) %>
         <% if (typeof showLabel !== "undefined" && showLabel == "new") { %>
-            <img width="26px" height="13px" title="{{ gettext('This idea has been created recently') }}" src="/static/img/icon/tag_new_horizontal_right.png" alt="{{ gettext('new!') }}" />
+            <img width="26px" height="13px" title="{{ gettext('This idea has been created recently') }}" src="{{ STATIC_URL }}/img/icon/tag_new_horizontal_right.png" alt="{{ gettext('new!') }}" />
         <% } %>
         <% if (!Ctx.getCurrentUser().isUnknownUser()) { %>
           <% if (Ctx.getCurrentInterfaceType() === Ctx.InterfaceTypes.SIMPLE) { %>

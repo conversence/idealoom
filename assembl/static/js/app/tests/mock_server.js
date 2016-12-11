@@ -66,7 +66,7 @@ function ajaxMock(url, settings) {
   } else {
     console.log('invalid')
   }
-  url = '/static/js/app/tests/fixtures' + dirname + fname + '.json';
+  url = static_url + '/js/app/tests/fixtures' + dirname + fname + '.json';
   console.log('fetching ' + url);
   return $.get(url, null, settings.success);
 }
