@@ -3,10 +3,11 @@ var path = require('path'),
     webpack = require('webpack'),
     _ = require('underscore'),
     ExtractTextPlugin = require("extract-text-webpack-plugin"),
-    base_config = require('./webpack.config.js');
+    base_config = require('./webpack.config.js'),
+    webpack_port = parseInt(process.env.WEBPACK_URL.split(':')[2]);
 
 base_config.entry.main = [
-  'webpack-dev-server/client?http://localhost:'+process.env.WEBPACK_PORT,
+  'webpack-dev-server/client?'+process.env.WEBPACK_URL,
   'webpack/hot/only-dev-server',
   './js/app/index.js',
 ];
@@ -19,7 +20,7 @@ module.exports = _.extend(base_config, {
         "Access-Control-Allow-Origin": process.env.ASSEMBL_URL,
         "Access-Control-Allow-Credentials":true
     },
-    port: process.env.WEBPACK_PORT,
+    port: webpack_port,
     host: "0.0.0.0",
   },
   plugins: [
