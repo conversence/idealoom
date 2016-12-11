@@ -1,8 +1,8 @@
 pip==9.0.1
-setuptools==30.2.0
+setuptools==30.4.0
 alabaster==0.7.9
 alembic==0.8.9
-amqp==2.1.1
+amqp==2.1.3
 anyjson==0.3.3
 anykeystore==0.2
 # Do not specify argparse, jenkins chokes on system version.
@@ -12,9 +12,9 @@ backports.ssl-match-hostname==3.5.0.1
 -e git+https://github.com/assembl/Beaker.git@assembl#egg=Beaker
 beautifulsoup4==4.5.1
 billiard==3.5.0.2
-boto==2.43.0
+boto==2.44.0
 bz2file==0.98
-celery==4.0.0
+celery==4.0.1
 cffi==1.9.1
 Chameleon==3.0
 colander==1.3.1
@@ -30,13 +30,13 @@ DateTime==4.1.1
 defusedxml==0.4.1
 # distribute==0.7.3 # This fails with latest pip. Installed properly as a dependency.
 dm.xmlsec.binding==1.3.2
-docutils==0.12
+docutils==0.13.1
 dogpile.cache==0.6.2
 dogpile.core==0.4.1
 ecdsa==0.13
 enum34==1.1.6
 et-xmlfile==1.0.1
-Fabric==1.12.1
+Fabric==1.13.1
 -e git+https://github.com/pythonforfacebook/facebook-sdk.git@ddc911f54d6136e149c03d145fd3760751a7d50d#egg=facebook_sdk
 -e git+https://github.com/kurtmckee/feedparser.git@5.2.0#egg=feedparser
 flaky==3.3.0
@@ -46,7 +46,7 @@ future==0.16.0
 -e git+https://github.com/maparent/fuxi.git#egg=fuxi
 gensim==0.12.3
 google-api-python-client==1.5.5
-greenlet==0.4.10
+greenlet==0.4.11
 hiredis==0.2.0
 html5lib==0.999999999
 httplib2==0.9.2
@@ -66,10 +66,10 @@ Jinja2==2.8
 jupyter-client==4.4.0
 jupyter-core==4.2.1
 -e git+https://github.com/benoitg/jwzthreading.git@master#egg=jwzthreading
-kombu==4.0.0
+kombu==4.0.1
 langdetect==1.0.7
 lingua==4.11
-lxml==3.6.4
+lxml==3.7.0
 Mako==1.0.6
 MarkupSafe==0.23
 meld3==1.0.2
@@ -80,7 +80,7 @@ numpy==1.11.2
 #oauthlib==2.0.0
 oauth2client==4.0.0
 openpyxl==2.4.1
-paramiko==1.17.2 # rq.filter: <2
+paramiko==2.1.0
 PasteDeploy==1.5.2
 PdbSublimeTextSupport==0.2
 pexpect==4.2.1
@@ -91,7 +91,6 @@ py==1.4.31
 pyasn1==0.1.9
 pyasn1_modules==0.0.8
 pycparser==2.17
-pycrypto==2.6.1
 pydot==1.2.3
 Pygments==2.1.3
 pygraphviz==1.3.1
