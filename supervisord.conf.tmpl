@@ -130,6 +130,7 @@ directory = %(here)s/assembl/static
 command = %(here)s/assembl/static/node_modules/.bin/webpack-dev-server -d --config webpack.dev.config.js
 autostart = %(autostart_webpack)s
 autorestart = true
+environment = VIRTUAL_ENV="%(VIRTUAL_ENV)s",PATH="%(VIRTUAL_ENV)s/bin:%%(ENV_PATH)s",ASSEMBL_URL="%(ASSEMBL_URL)s",WEBPACK_PORT="%(WEBPACK_PORT)d"
 
 [program:uwsgi]
 directory = %(here)s

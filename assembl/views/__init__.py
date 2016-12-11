@@ -201,7 +201,11 @@ def get_default_context(request):
         }
 
     use_webpack_server = asbool(config.get("use_webpack_server"))
-    static_url = 'http://localhost:8080' if use_webpack_server else '/static'
+    static_url = '/static'
+    if use_webpack_server:
+        static_url = 'http://%s:%d' % (
+            config.get('public_hostname', 'localhost'),
+            int(config.get('webpack_port', 8080)))
 
     (theme_name, theme_relative_path)=get_theme_info(discussion)
     return dict(
