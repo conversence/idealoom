@@ -31,6 +31,6 @@ module.exports = _.extend(base_config, {
       new ExtractTextPlugin("[name].css"),
   ],
   sassLoader: {
-    data: '$root: "~/";',
+    data: '$static_url: "~/";',
   },
 });
