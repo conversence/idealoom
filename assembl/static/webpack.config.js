@@ -115,11 +115,13 @@ module.exports = {
     noParse: [/sinon/],
   },
   plugins: [
-      new webpack.DefinePlugin({
-        'process.env': {
-          NODE_ENV: JSON.stringify('production')
-        }
-      }),
+      // this makes mocha choke on requiring supports-color for very obscure reasons.
+      // Revisit.
+      // new webpack.DefinePlugin({
+      //   'process.env': {
+      //     NODE_ENV: JSON.stringify('production')
+      //   }
+      // }),
       new webpack.ResolverPlugin(
         new webpack.ResolverPlugin.DirectoryDescriptionFilePlugin('../../bower.json', ['main'])
       ),
