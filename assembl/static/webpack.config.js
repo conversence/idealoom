@@ -115,6 +115,11 @@ module.exports = {
     noParse: [/sinon/],
   },
   plugins: [
+      new webpack.DefinePlugin({
+        'process.env': {
+          NODE_ENV: JSON.stringify('production')
+        }
+      }),
       new webpack.ResolverPlugin(
         new webpack.ResolverPlugin.DirectoryDescriptionFilePlugin('../../bower.json', ['main'])
       ),
@@ -127,4 +132,3 @@ module.exports = {
     data: '$static_url: "~/static/";',
   }
 };
-
