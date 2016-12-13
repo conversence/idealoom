@@ -25,6 +25,7 @@ from pyramid.i18n import default_locale_negotiator
 from pyramid.settings import asbool
 from pyramid.path import DottedNameResolver
 from zope.component import getGlobalSiteManager
+from sqlalchemy.ext.baked import bake_lazy_loaders
 import sqltap.wsgi
 
 from .lib.sqla import (
@@ -70,6 +71,7 @@ def main(global_config, **settings):
 
     config.include('.auth')
     config.include('.models')
+    bake_lazy_loaders()
     # Tasks first, because it includes ZCA registration (for now)
     config.include('.tasks')
 
