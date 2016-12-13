@@ -108,11 +108,15 @@ module.exports = {
         loader: ExtractTextPlugin.extract('style-loader', 'css-loader'),
       },
       {
-        test: /\.(jpg|png|woff|woff2|eot|ttf|svg)$/,
+        test: /\.(jpg|png|woff|woff2|eot|ttf|svg|html)$/,
         loader: 'url-loader',
       },
     ],
     noParse: [/sinon/],
+  },
+  node: {
+    fs: "empty",
+    child_process: "empty",
   },
   plugins: [
       // this makes mocha choke on requiring supports-color for very obscure reasons.
