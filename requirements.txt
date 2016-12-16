@@ -1,8 +1,8 @@
 pip==9.0.1
-setuptools==31.0.0
+setuptools==32.1.0
 alabaster==0.7.9
 alembic==0.8.9
-amqp==2.1.3
+amqp==2.1.4
 anyjson==0.3.3
 anykeystore==0.2
 # Do not specify argparse, jenkins chokes on system version.
@@ -12,16 +12,16 @@ backports.ssl-match-hostname==3.5.0.1
 -e git+https://github.com/assembl/Beaker.git@assembl#egg=Beaker
 beautifulsoup4==4.5.1
 billiard==3.5.0.2
-boto==2.44.0
+boto==2.45.0
 bz2file==0.98
-celery==4.0.1
+celery==4.0.2
 cffi==1.9.1
 Chameleon==3.0
 colander==1.3.1
 ColanderAlchemy==0.3.3
 colors.py==0.2.2
 contextlib2==0.5.4
-cornice==2.2.0
+cornice==2.3.0
 -e git+https://github.com/maparent/cornice.ext.sphinx.git@cornice_sphinx_services#egg=cornice_sphinx
 cov-core==1.15.0
 coverage==4.2
@@ -30,15 +30,15 @@ DateTime==4.1.1
 defusedxml==0.4.1
 # distribute==0.7.3 # This fails with latest pip. Installed properly as a dependency.
 dm.xmlsec.binding==1.3.2
-docutils==0.12  # rq.filter: <1.13
+docutils==0.13.1
 dogpile.cache==0.6.2
 dogpile.core==0.4.1
 ecdsa==0.13
 enum34==1.1.6
 et-xmlfile==1.0.1
 Fabric==1.13.1
--e git+https://github.com/pythonforfacebook/facebook-sdk.git@ddc911f54d6136e149c03d145fd3760751a7d50d#egg=facebook_sdk
--e git+https://github.com/kurtmckee/feedparser.git@5.2.0#egg=feedparser
+facebook-sdk==1.0.0  # rq.filter: <2
+feedparser==5.2.1
 flaky==3.3.0
 #Because mock 2.0.0 requires it, but it isn't always detected properly
 funcsigs==1.0.2
@@ -66,7 +66,7 @@ Jinja2==2.8
 jupyter-client==4.4.0
 jupyter-core==4.2.1
 -e git+https://github.com/benoitg/jwzthreading.git@master#egg=jwzthreading
-kombu==4.0.1
+kombu==4.0.2
 langdetect==1.0.7
 lingua==4.11
 lxml==3.7.0
@@ -75,7 +75,7 @@ MarkupSafe==0.23
 meld3==1.0.2
 mock==2.0.0
 ndg_httpsclient==0.4.2
--e git+https://github.com/ekalinin/nodeenv.git@master#egg=nodeenv
+nodeenv==1.0.0
 numpy==1.11.2
 #oauthlib==2.0.0
 oauth2client==4.0.0
@@ -87,7 +87,7 @@ pexpect==4.2.1
 pickleshare==0.7.4
 polib==1.0.8
 premailer==3.0.1
-py==1.4.31
+py==1.4.32
 pyasn1==0.1.9
 pyasn1_modules==0.0.8
 pycparser==2.17
@@ -108,7 +108,7 @@ pyramid-debugtoolbar==3.0.5
 pyramid-dogpile-cache==0.0.4
 pyramid-ipython==0.2
 pyramid-jinja2==2.7
-pyramid-mailer==0.15
+pyramid-mailer==0.15.1
 pyramid-mako==1.0.2
 pyramid-tm==1.1.1
 pyramid==1.7.3
@@ -116,7 +116,7 @@ PyStemmer==1.3.0
 pytest-cov==2.4.0
 pytest-localserver==0.3.6
 pytest-mock==1.5.0
-pytest-splinter==1.7.8
+pytest-splinter==1.8.1
 pytest==3.0.5
 python-dateutil==2.6.0
 python-openid==2.2.5
@@ -129,10 +129,9 @@ rdflib-jsonld==0.4.0
 rdflib==4.2.1
 redis==2.10.5
 repoze.lru==0.6
-# Wait for 4.3 to get back on tagged releases.
--e git+https://github.com/repoze/repoze.sendmail.git#egg=repoze.sendmail
+repoze.sendmail==4.3
 requests-oauthlib==0.7.0
-requests==2.12.3
+requests==2.12.4
 rsa==3.4.2
 scikit-learn==0.18.1
 scipy==0.18.1
@@ -145,7 +144,7 @@ snowballstemmer==1.2.1
 SPARQLWrapper==1.8.0
 sphinxcontrib-httpdomain==1.5.0
 sphinxcontrib-zopeext==0.2.1
-Sphinx==1.5
+Sphinx==1.5.1
 splinter==0.7.5
 SQLAlchemy==1.1.4
 sqlalchemy-schemadisplay==1.3
@@ -165,12 +164,12 @@ psycopg2==2.6.2
 waitress==1.0.1
 webencodings==0.5
 WebOb==1.6.3
-WebTest==2.0.23
+WebTest==2.0.24
 Werkzeug==0.11.11
 zope.component==4.3.0
 zope.deprecation==4.2.0
 zope.event==4.2.0
-zope.interface==4.3.2
+zope.interface==4.3.3
 zope.sqlalchemy==0.7.7
 # To be watched:
 # https://github.com/elliotpeele/pyramid_oauth2_provider
