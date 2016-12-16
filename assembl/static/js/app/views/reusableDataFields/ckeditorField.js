@@ -15,20 +15,6 @@ var Marionette = require('backbone.marionette'),
     CK = require('ckeditor'),
     Ctx = require('../../common/context.js');
 
-CKEDITOR.editorConfig = function( config ) {
-  // Define changes to default configuration here.
-  // For complete reference see:
-  // http://docs.ckeditor.com/#!/api/CKEDITOR.config
-
-  // The toolbar groups arrangement, optimized for a single toolbar row.
-  config.toolbar = [
-    { name: 'base', items: [ 'Bold', 'Italic', 'Outdent', 'Indent','NumberedList', 'BulletedList', 'Link', 'Unlink', 'Anchor', 'PasteText' ] },
-  ];
-
-  // Dialog windows are also simplified.
-  config.removeDialogTabs = 'link:advanced';
-};
-
 
 var cKEditorField = Marionette.ItemView.extend({
   constructor: function cKEditorField() {
@@ -38,6 +24,8 @@ var cKEditorField = Marionette.ItemView.extend({
   template: '#tmpl-ckeditorField',
   /**
    * Ckeditor default configuration
+   * For complete reference see:
+   * http://docs.ckeditor.com/#!/api/CKEDITOR.config
    * @type {object}
    */
   CKEDITOR_CONFIG: {
@@ -49,6 +37,7 @@ var cKEditorField = Marionette.ItemView.extend({
     removePlugins: 'floatingspace,resize',
     sharedSpaces: { top: 'ckeditor-toptoolbar', bottom: 'ckeditor-bottomtoolbar' },
     disableNativeSpellChecker: false,
+    language: Ctx.getLocale(),
     title: false //Removes the annoying tooltip in the middle of the main textarea
   },
 
