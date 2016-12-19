@@ -16,8 +16,6 @@ import numpy as np
 from scipy.sparse import lil_matrix
 import sklearn.cluster
 from sklearn.metrics.pairwise import pairwise_distances
-from sklearn.metrics.cluster.unsupervised import (
-    _intra_cluster_distance, _nearest_cluster_distance)
 from sklearn import metrics
 from .optics import Optics
 
@@ -1760,3 +1758,60 @@ class OpticsSemanticsAnalysisWithSuggestions(OpticsSemanticsAnalysis):
                     suggestion['new_posts'] = ','.join((
                         str(x) for x in suggestion['new_posts']))
                 print "cluster: %(num_cluster)d (size %(num_posts_cluster)d) idea: %(idea_id)d incluster: %(count)d / %(num_posts_idea)d, score=%(score)f > %(original_score)f, cluster=%(cl_score)f\n%(cluster_posts)s" % suggestion
+
+
+# Taken from sklearn.metrics.cluster.unsupervised
+
+def _intra_cluster_distance(distances_row, labels, i):
+    """Calculate the mean intra-cluster distance for sample i.
+
+    Parameters
+    ----------
+    distances_row : array, shape = [n_samples]
+        Pairwise distance matrix between sample i and each sample.
+
+    labels : array, shape = [n_samples]
+        label values for each sample
+
+    i : int
+        Sample index being calculated. It is excluded from calculation and
+        used to determine the current label
+
+    Returns
+    -------
+    a : float
+        Mean intra-cluster distance for sample i
+    """
+    mask = labels == labels[i]
+    mask[i] = False
+    if not np.any(mask):
+        # cluster of size 1
+        return 0
+    a = np.mean(distances_row[mask])
+    return a
+
+
+def _nearest_cluster_distance(distances_row, labels, i):
+    """Calculate the mean nearest-cluster distance for sample i.
+
+    Parameters
+    ----------
+    distances_row : array, shape = [n_samples]
+        Pairwise distance matrix between sample i and each sample.
+
+    labels : array, shape = [n_samples]
+        label values for each sample
+
+    i : int
+        Sample index being calculated. It is used to determine the current
+        label.
+
+    Returns
+    -------
+    b : float
+        Mean nearest-cluster distance for sample i
+    """
+    label = labels[i]
+    b = np.min([np.mean(distances_row[labels == cur_label])
+               for cur_label in set(labels) if not cur_label == label])
+    return b
