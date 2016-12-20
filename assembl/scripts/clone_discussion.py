@@ -290,10 +290,18 @@ class JoinColumnsVisitor(ClauseVisitor):
                 self.classes.add(cls)
                 return True
 
+    def base_class_for_table(self, table):
+        classes = self.classes_by_table[table]
+        cls = classes[0]
+        for other in classes[1:]:
+            if issubclass(cls, other):
+                cls = other
+        return cls
+
     def process_column(self, column):
         from assembl.lib.history_mixin import TombstonableMixin
-        source_cls = self.classes_by_table[column.table]
-        classes = [self.classes_by_table[foreign_key.column.table]
+        source_cls = self.base_class_for_table(column.table)
+        classes = [self.base_class_for_table(foreign_key.column.table)
                    for foreign_key in getattr(column, 'foreign_keys', ())]
         if not classes:
             return self.is_known_class(source_cls)
@@ -312,8 +320,9 @@ class JoinColumnsVisitor(ClauseVisitor):
             orm_relns = [
                 r for r in orm_relns
                 if "tombstone_date" not in str(r.primaryjoin)]
-        assert len(orm_relns) == 1, "wrong orm_relns for %s.%s : %s" % (
-            column.table.name, column.name, str(orm_relns))
+        if len(orm_relns) != 1:
+            print "wrong orm_relns for %s.%s : %s" % (
+                column.table.name, column.name, str(orm_relns))
         rattrib = getattr(source_cls, orm_relns[0].key)
         self.query = self.query.join(dest_cls, rattrib)
         self.classes.add(source_cls)
@@ -342,14 +351,15 @@ def delete_discussion(session, discussion_id):
         Discussion, DiscussionBoundBase, Preferences, LangStringEntry)
     # delete anything related first
     classes = DiscussionBoundBase._decl_class_registry.itervalues()
-    classes_by_table = {
-        cls.__dict__.get('__table__', None): cls for cls in classes
-        if isinstance(cls, type)}
+    classes_by_table = defaultdict(list)
+    for cls in classes:
+        if isinstance(cls, type):
+            classes_by_table[getattr(cls, '__table__', None)].append(cls)
     # Only direct subclass of abstract
     concrete_classes = set(filter(lambda cls:
         issubclass(cls, DiscussionBoundBase) and (not isabstract(cls))
         and isabstract(cls.mro()[1]),
-        classes_by_table.values()))
+        itertools.chain(*classes_by_table.values())))
     concrete_classes.add(Preferences)
     concrete_classes.add(LangStringEntry)
     tables = DiscussionBoundBase.metadata.sorted_tables
@@ -361,28 +371,28 @@ def delete_discussion(session, discussion_id):
     for table in tables:
         if table not in classes_by_table:
             continue
-        cls = classes_by_table[table]
-        if cls not in concrete_classes:
-            continue
-        print 'deleting', cls.__name__
-        query = session.query(cls.id)
-        if hasattr(cls, "get_discussion_conditions"):
-            conds = cls.get_discussion_conditions(discussion_id)
-        else:
-            continue
-        assert conds
-        cond = and_(*conds)
-        v = JoinColumnsVisitor(cls, query, classes_by_table)
-        v.traverse(cond)
-        query = v.final_query().filter(cond)
-        if query.count():
-            print "*" * 20, "Not all deleted!"
-            ids = query.all()
-            for subcls in cls.mro():
-                if getattr(subcls, '__tablename__', None):
-                    session.query(subcls).filter(
-                        subcls.id.in_(ids)).delete(False)
-        session.flush()
+        for cls in classes_by_table[table]:
+            if cls not in concrete_classes:
+                continue
+            print 'deleting', cls.__name__
+            query = session.query(cls.id)
+            if hasattr(cls, "get_discussion_conditions"):
+                conds = cls.get_discussion_conditions(discussion_id)
+            else:
+                continue
+            assert conds
+            cond = and_(*conds)
+            v = JoinColumnsVisitor(cls, query, classes_by_table)
+            v.traverse(cond)
+            query = v.final_query().filter(cond)
+            if query.count():
+                print "*" * 20, "Not all deleted!"
+                ids = query.all()
+                for subcls in cls.mro():
+                    if getattr(subcls, '__tablename__', None):
+                        session.query(subcls).filter(
+                            subcls.id.in_(ids)).delete(False)
+            session.flush()
 
 
 def clone_discussion(
