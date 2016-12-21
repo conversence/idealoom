@@ -16,9 +16,9 @@ var Marionette = require('backbone.marionette'),
     Ctx = require('../../common/context.js');
 
 
-var cKEditorField = Marionette.ItemView.extend({
+var cKEditorField = Marionette.View.extend({
   constructor: function cKEditorField() {
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-ckeditorField',
@@ -124,9 +124,8 @@ var cKEditorField = Marionette.ItemView.extend({
     if(this.hideSeeMoreButton){
       this.$(this.ui.seeMore).hide();
     }
-  },
 
-  onShow: function() {
+    // from onShow
     this.requestEllipsis();
     this._viewIsAlreadyShown = true;
   },
@@ -170,7 +169,7 @@ var cKEditorField = Marionette.ItemView.extend({
     }else{
       //Open ckeditor in modal when click on seeMore button
       var modalView = new CkeditorFieldInModal({model:this.model, modelProp:this.modelProp, canEdit:this.canEdit});
-      Assembl.slider.show(modalView);
+      Assembl.rootView.showChildView('slider', modalView);
     }
   },
 

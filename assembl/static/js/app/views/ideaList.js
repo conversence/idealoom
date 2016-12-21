@@ -100,7 +100,7 @@ var IdeaList = AssemblPanel.extend({
 
     var requestRender = function() {
       setTimeout(function(){
-        if(!that.isViewDestroyed()) {
+        if(!that.isDestroyed()) {
           //console.log("Render from ideaList requestRender");
           that.render();
         }
@@ -124,7 +124,7 @@ var IdeaList = AssemblPanel.extend({
       collectionManager.getAllIdeasCollectionPromise(),
       collectionManager.getAllIdeaLinksCollectionPromise(),
       function(allIdeasCollection, allIdeaLinksCollection, collapsedState) {
-        if(!that.isViewDestroyed()) {
+        if(!that.isDestroyed()) {
           var events = ['reset', 'change:parentId', 'change:@id', 'change:hidden', 'remove', 'add', 'destroy'];
           that.listenTo(allIdeasCollection, events.join(' '), requestRender);
           that.allIdeasCollection = allIdeasCollection;
@@ -132,9 +132,6 @@ var IdeaList = AssemblPanel.extend({
           var events = ['reset', 'change:source', 'change:target', 'change:order', 'remove', 'add', 'destroy'];
           that.listenTo(allIdeaLinksCollection, events.join(' '), requestRender);
           that.allIdeaLinksCollection = allIdeaLinksCollection;
-
-          that.template = '#tmpl-ideaList';
-          //that.render();
         }
       }
     );
@@ -145,7 +142,8 @@ var IdeaList = AssemblPanel.extend({
       tableOfIdeasCollapsedStateFetchPromise,
       defaultTableOfIdeasCollapsedStateFetchPromise, // now that we have the collapsed state of each idea, we can (re)render the table of ideas
       function(allIdeasCollection, allIdeaLinksCollection, collapsedState, defaultCollapsedState) {
-        if(!that.isViewDestroyed()) {
+        if(!that.isDestroyed()) {
+          that.template = '#tmpl-ideaList';
           that.render();
         }
       }
@@ -159,24 +157,24 @@ var IdeaList = AssemblPanel.extend({
               //that.listenTo(allExtractsCollection, 'add change reset', that.render);
             });
 
-    if(!this.isViewDestroyed()) {
+    if(!this.isDestroyed()) {
       //Yes, it IS possible the view is already destroyed in initialize, so we check
-      this.listenTo(Assembl.vent, 'ideaList:removeIdea', function(idea) {
-        if(!that.isViewDestroyed()) {
+      this.listenTo(Assembl.idea_vent, 'ideaList:removeIdea', function(idea) {
+        if(!that.isDestroyed()) {
             that.removeIdea(idea);
         }
       });
 
-      this.listenTo(Assembl.vent, 'ideaList:addChildToSelected', function() {
-        if(!that.isViewDestroyed()) {
+      this.listenTo(Assembl.idea_vent, 'ideaList:addChildToSelected', function() {
+        if(!that.isDestroyed()) {
             that.addChildToSelected();
         }
       });
 
-      this.listenTo(Assembl.vent, 'idea:dragOver', function() {
+      this.listenTo(Assembl.idea_vent, 'idea:dragOver', function() {
         that.mouseIsOutside = false;
       });
-      this.listenTo(Assembl.vent, 'idea:dragStart', function() {
+      this.listenTo(Assembl.idea_vent, 'idea:dragStart', function() {
         that.lastScrollTime = new Date().getTime();
         that.scrollLastSpeed = 0;
         that.scrollableElement = that.$('.panel-body');
@@ -187,15 +185,15 @@ var IdeaList = AssemblPanel.extend({
           that.scrollTowardsMouseIfNecessary();
         }, 10);
       });
-      this.listenTo(Assembl.vent, 'idea:dragEnd', function() {
+      this.listenTo(Assembl.idea_vent, 'idea:dragEnd', function() {
         clearInterval(that.scrollInterval);
         that.scrollInterval = null;
       });
 
-      this.listenTo(Assembl.vent, 'DEPRECATEDideaList:selectIdea', function(ideaId, reason, doScroll) {
+      this.listenTo(Assembl.idea_vent, 'DEPRECATEDideaList:selectIdea', function(ideaId, reason, doScroll) {
         collectionManager.getAllIdeasCollectionPromise()
         .done(function(allIdeasCollection) {
-          if(that.isViewDestroyed()){
+          if(that.isDestroyed()){
             return;
           }
           var idea = allIdeasCollection.get(ideaId);
@@ -228,7 +226,7 @@ var IdeaList = AssemblPanel.extend({
 
       this.listenTo(this.getGroupState(), "change:currentIdea", function(state, currentIdea) {
         //console.log("ideaList heard a change:currentIdea event");
-        if (currentIdea && !that.isViewDestroyed()) {
+        if (currentIdea && !that.isDestroyed()) {
           that.onScrollToIdea(currentIdea);
         }
       });
@@ -361,7 +359,7 @@ var IdeaList = AssemblPanel.extend({
         this.addLabelToMostRecentIdeas(this.allIdeasCollection, view_data);
 
 
-        that.ideaView.show(new LoaderView());
+        that.showChildView('ideaView', new LoaderView());
 
         Ctx.getCurrentSynthesisDraftPromise().then(function(synthesis) {
           //console.log("About to set ideas on ideaList",that.cid, "with panelWrapper",that.getPanelWrapper().cid, "with group",that.getContainingGroup().cid);
@@ -376,7 +374,7 @@ var IdeaList = AssemblPanel.extend({
               synthesis: synthesis
           };
 
-          that.ideaView.show(ideaFamilies);
+          that.showChildView('ideaView', ideaFamilies);
 
           Ctx.initTooltips(that.$el);
           if (Ctx.debugRender) {
@@ -392,7 +390,7 @@ var IdeaList = AssemblPanel.extend({
           parentPanel: that,
           groupContent: that.getContainingGroup()
         });
-        that.getRegion('otherView').show(OtherView);
+        that.showChildView('otherView', OtherView);
 
         // Synthesis posts pseudo-idea
         var synthesisView = new SynthesisInIdeaListView({
@@ -400,7 +398,7 @@ var IdeaList = AssemblPanel.extend({
           parentPanel: that,
           groupContent: that.getContainingGroup()
         });
-        that.getRegion('synthesisView').show(synthesisView);
+        that.showChildView('synthesisView', synthesisView);
 
         // Orphan messages pseudo-idea
         var orphanView = new OrphanMessagesInIdeaListView({
@@ -408,7 +406,7 @@ var IdeaList = AssemblPanel.extend({
           parentPanel: that,
           groupContent: that.getContainingGroup()
         });
-        that.getRegion('orphanView').show(orphanView);
+        that.showChildView('orphanView', orphanView);
 
         // All posts pseudo-idea
         var allMessagesInIdeaListView = new AllMessagesInIdeaListView({
@@ -416,8 +414,8 @@ var IdeaList = AssemblPanel.extend({
           parentPanel: that,
           groupContent: that.getContainingGroup()
         });
-        that.getRegion('allMessagesView').show(allMessagesInIdeaListView);
-        Assembl.vent.trigger("requestTour", "idea_list");
+        that.showChildView('allMessagesView', allMessagesInIdeaListView);
+        Assembl.tour_vent.trigger("requestTour", "idea_list");
       }
     },
 

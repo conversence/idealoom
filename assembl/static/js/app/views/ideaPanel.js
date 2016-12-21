@@ -63,30 +63,30 @@ var IdeaPanel = AssemblPanel.extend({
      */
     this.attachmentLoaded = undefined;
 
-    if(!this.isViewDestroyed()) {
+    if(!this.isDestroyed()) {
       //Yes, it IS possible the view is already destroyed in initialize, so we check
       this.listenTo(this.getGroupState(), "change:currentIdea", function(state, currentIdea) {
-        if (!this.isViewDestroyed()) {
+        if (!this.isDestroyed()) {
           that.setIdeaModel(currentIdea);
         }
       });
 
       this.listenTo(this.getContainingGroup(), "change:pseudoIdea", function(currentIdea) {
         //console.log("Pseudo-idea listen hack fired on ideaPanel");
-        if (!this.isViewDestroyed()) {
+        if (!this.isDestroyed()) {
           that.setIdeaModel(currentIdea);
         }
       }
       );
 
-      this.listenTo(Assembl.vent, 'DEPRECATEDideaPanel:showSegment', function(segment) {
-        if (!this.isViewDestroyed()) {
+      this.listenTo(Assembl.other_vent, 'DEPRECATEDideaPanel:showSegment', function(segment) {
+        if (!this.isDestroyed()) {
           that.showSegment(segment);
         }
       });
 
       this.listenTo(this.getAttachmentCollection(), 'sync destroy', function(e){
-        if (!this.isViewDestroyed()){
+        if (!this.isDestroyed()){
           that.renderAttachmentButton();
         }
       });
@@ -196,7 +196,7 @@ var IdeaPanel = AssemblPanel.extend({
     var that = this;
 
     setTimeout(function(){
-      if(!that.isViewDestroyed()) {
+      if(!that.isDestroyed()) {
         //console.log("Render from ideaList requestRender");
         that.render();
       }
@@ -263,15 +263,15 @@ var IdeaPanel = AssemblPanel.extend({
   renderAttachmentButton: function(){
     var collection = this.getAttachmentCollection();
     if (collection.length > 0 ) {
-      this.attachmentButton.empty();
-    } 
+      this.getRegion('attachmentButton').empty();
+    }
     else {
       // var buttonView = new AttachmentViews.AttachmentUploadButtonView({
       var buttonView = new AttachmentViews.AttachmentUploadTextView({
         collection: collection,
         objectAttachedToModel: this.model
       });
-      this.attachmentButton.show(buttonView);
+      this.showChildView('attachmentButton', buttonView);
     }
   },
 
@@ -279,13 +279,13 @@ var IdeaPanel = AssemblPanel.extend({
     var collection = this.getAttachmentCollection();
     var user = Ctx.getCurrentUser();
     if (user.can(Permissions.EDIT_IDEA)){
-      
+
       var attachmentView = new AttachmentViews.AttachmentEditUploadView({
         collection: collection,
         target: AttachmentViews.TARGET.IDEA
       });
 
-      this.attachment.show(attachmentView);
+      this.showChildView('attachment', attachmentView);
       this.renderAttachmentButton();
     }
 
@@ -293,7 +293,7 @@ var IdeaPanel = AssemblPanel.extend({
       var attachmentView = new AttachmentViews.AttachmentCollectionView({
         collection: collection
       });
-      this.attachment.show(attachmentView);
+      this.showChildView('attachment', attachmentView);
     }
   },
 
@@ -395,7 +395,7 @@ var IdeaPanel = AssemblPanel.extend({
       collectionManager.getWidgetsForContextPromise(
         Widget.Model.prototype.IDEA_PANEL_ACCESS_CTX,
         that.model).then(function(subset) {
-          that.widgetsInteractionRegion.show(
+          that.showChildView('widgetsInteractionRegion', 
             new WidgetButtons.WidgetButtonListView({collection: subset}));
           if(subset.length > 0) {
             that.ui.widgetsSection.removeClass("hidden");
@@ -405,13 +405,13 @@ var IdeaPanel = AssemblPanel.extend({
         collectionManager.getWidgetsForContextPromise(
           Widget.Model.prototype.IDEA_PANEL_CONFIGURE_CTX,
           that.model).then(function(subset) {
-            that.widgetsConfigurationInteraction.show(
+            that.showChildView('widgetsConfigurationInteraction', 
               new WidgetLinks.WidgetLinkListView({collection: subset}));
           });
 
         //Check that the type of the widgetModel is localType, can see results, then show it.
 
-        that.widgetsCreationInteraction.show(
+        that.showChildView('widgetsCreationInteraction', 
           new WidgetLinks.WidgetLinkListView({
             context: Widget.Model.prototype.IDEA_PANEL_CREATE_CTX,
             collection: Widget.localWidgetClassCollection,
@@ -423,7 +423,7 @@ var IdeaPanel = AssemblPanel.extend({
   },
 
   onAttach: function() {
-    if ( !this.isViewDestroyed() ) {
+    if ( !this.isDestroyed() ) {
       if ( !this.ideaPanelOpensAutomatically ){
         this.panelWrapper.minimizePanel(); // even if there is a this.model
       }
@@ -446,7 +446,7 @@ var IdeaPanel = AssemblPanel.extend({
                     allMessagesCollection: allMessagesCollection
                   });
 
-                  that.getRegion('segmentList').show(that.extractListView);
+                  that.showChildView('segmentList', that.extractListView);
                   that.renderTemplateGetExtractsLabel();
                 });
     } else {
@@ -495,7 +495,7 @@ var IdeaPanel = AssemblPanel.extend({
         collection: contributors
       });
 
-      that.contributors.show(avatarsView);
+      that.showChildView('contributors', avatarsView);
       that.ui.contributorsSection.find('.title-text').html(i18n.sprintf(i18n.ngettext('%d contributor', '%d contributors', contributorsId.length), contributorsId.length));
 
       if(contributorsId.length > 0) {
@@ -628,20 +628,20 @@ var IdeaPanel = AssemblPanel.extend({
         if (this.model) {
           //this.resetView();
           //console.log("setIdeaModel:  we have a model ")
-          if (!this.isViewDestroyed()) {
+          if (!this.isDestroyed()) {
             if ( that.ideaPanelOpensAutomatically ){
               this.panelWrapper.unminimizePanel();
             }
             this.template = '#tmpl-loader';
             if (!this.model.id) {
               //console.log("setIdeaModel:  we have a model, but no id ")
-              if (this.isViewRenderedAndNotYetDestroyed()) {
+              if (this.isRenderedAndNotYetDestroyed()) {
                 this.render();
               }
 
               this.listenTo(this.model, 'acquiredId', function(m) {
                 // model has acquired an ID. Reset everything.
-                if (!this.isViewDestroyed()) {
+                if (!this.isDestroyed()) {
                   var model = that.model;
                   that.model = null;
                   that.setIdeaModel(model, reason);
@@ -661,13 +661,13 @@ var IdeaPanel = AssemblPanel.extend({
         //TODO: More sophisticated behaviour here, depending
         //on if the panel was opened by selection, or by something else.
         //If we don't call render here, the panel will not refresh if we delete an idea.
-        if (!this.isViewDestroyed()) {
+        if (!this.isDestroyed()) {
           this.template = '#tmpl-ideaPanel';
           if ( that.ideaPanelOpensAutomatically ){
             this.panelWrapper.minimizePanel();
           }
         }
-        if (this.isViewRenderedAndNotYetDestroyed()) {
+        if (this.isRenderedAndNotYetDestroyed()) {
           this.render();
         }
       }
@@ -680,7 +680,7 @@ var IdeaPanel = AssemblPanel.extend({
       Promise.join(collectionManager.getAllExtractsCollectionPromise(), fetchPromise,
           function(allExtractsCollection, fetchedJQHR) {
             //View could be gone, or model may have changed in the meantime
-            if (that.isViewRenderedAndNotYetDestroyed() && that.model) {
+            if (that.isRenderedAndNotYetDestroyed() && that.model) {
               that.extractListSubset = new SegmentList.IdeaSegmentListSubset([], {
                 parent: allExtractsCollection,
                 ideaId: that.model.id
@@ -713,7 +713,7 @@ var IdeaPanel = AssemblPanel.extend({
                   submitText: i18n.gettext('OK'),
                   cancelText : null
                 });
-                Assembl.slider.show(confirmModal);
+                Assembl.rootView.showChildView('slider', confirmModal);
               }
 
               // Nor has any segments
@@ -724,7 +724,7 @@ var IdeaPanel = AssemblPanel.extend({
                   submitText: i18n.gettext('OK'),
                   cancelText : null
                 });
-                Assembl.slider.show(confirmModal);
+                Assembl.rootView.showChildView('slider', confirmModal);
               }
               else if (that.model.get('num_posts') > 0) {
                 that.unblockPanel();
@@ -733,7 +733,7 @@ var IdeaPanel = AssemblPanel.extend({
                   submitText: i18n.gettext('OK'),
                   cancelText : null
                 });
-                Assembl.slider.show(confirmModal);
+                Assembl.rootView.showChildView('slider', confirmModal);
               }
               else {
                 var onSubmit = function(){
@@ -754,7 +754,7 @@ var IdeaPanel = AssemblPanel.extend({
                   submitText: i18n.gettext('Yes'),
                   onSubmit: onSubmit,
                 });
-                Assembl.slider.show(confirmModal);
+                Assembl.rootView.showChildView('slider', confirmModal);
               }
             });
   },
@@ -979,7 +979,7 @@ var IdeaPanel = AssemblPanel.extend({
               collection: announcementIdeaSubsetCollection,
               objectAttachedTo: that.model
             });
-            that.getRegion('announcementRegion').show(editableAnnouncementView);
+            that.showChildView('announcementRegion', editableAnnouncementView);
           });
     }
   },
@@ -1001,7 +1001,7 @@ var IdeaPanel = AssemblPanel.extend({
       'openInModal': true
     });
 
-    this.regionDescription.show(description);
+    this.showChildView('regionDescription', description);
   },
 
   renderCKEditorLongTitle: function() {
@@ -1018,7 +1018,7 @@ var IdeaPanel = AssemblPanel.extend({
       'openInModal': true
     });
 
-    this.regionLongTitle.show(ckeditor);
+    this.showChildView('regionLongTitle', ckeditor);
   },
 
   openTargetInPopOver: function(evt) {

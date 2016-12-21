@@ -48,9 +48,9 @@ var MIN_TEXT_TO_TOOLTIP = 5,
  * @class app.views.message.IdeaClassificationNameListView
  * Classification view that is shown in the underneath each message
  */
-var IdeaClassificationNameListView = Marionette.ItemView.extend({
+var IdeaClassificationNameListView = Marionette.View.extend({
   constructor: function IdeaClassificationNameListView() {
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-loader',
@@ -134,7 +134,7 @@ var IdeaClassificationNameListView = Marionette.ItemView.extend({
         .then(function(ideaNames){
           that.ideaNames = ideaNames;
 
-          if (!that.isViewDestroyed()) {
+          if (!that.isDestroyed()) {
             if (_.isEmpty(ideaNames)) {
               that.messageView.removeIdeaClassificationView();
             }
@@ -202,7 +202,7 @@ var IdeaClassificationNameListView = Marionette.ItemView.extend({
     });
 
     Ctx.setCurrentModalView(modalView);
-    Assembl.slider.show(modalView);
+    Assembl.rootView.showChildView('slider', modalView);
   }
 });
 
@@ -210,9 +210,9 @@ var IdeaClassificationNameListView = Marionette.ItemView.extend({
 /**
  * @class app.views.message.MessageView
  */
-var MessageView = Marionette.LayoutView.extend({
+var MessageView = Marionette.View.extend({
   constructor: function MessageView() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-loader',
@@ -286,7 +286,7 @@ var MessageView = Marionette.LayoutView.extend({
     this.viewStyle = this.messageListView.getTargetMessageViewStyleFromMessageListConfig(this);
     this.showAnnotations = this.canShowAnnotations();
 
-    if(!this.isViewDestroyed()) {
+    if(!this.isDestroyed()) {
       //Yes, it IS possible the view is already destroyed in initialize, so we check
       this.listenTo(this.messageListView, 'annotator:destroy', this.onAnnotatorDestroy);
       this.listenTo(this.messageListView, 'annotator:initComplete', this.onAnnotatorInitComplete);
@@ -384,7 +384,7 @@ var MessageView = Marionette.LayoutView.extend({
           function(creator, ulp, messageFullModel) {
             //Not doing anything with messageFullModel, this.model is already
             //the right link, we just want the content of the model updated
-            if(!that.isViewDestroyed()) {
+            if(!that.isDestroyed()) {
               that.creator = creator;
 
               //To initalize functions called to set up translations
@@ -410,7 +410,7 @@ var MessageView = Marionette.LayoutView.extend({
     if (Ctx.debugRender) {
       console.log("MessageView modelEvents change fired from", this.model);
     }
-    if(!this.isViewDestroyed()) {
+    if(!this.isDestroyed()) {
       if (!this.changeIsPartialRender()) {
         this.render();
       }
@@ -873,7 +873,7 @@ var MessageView = Marionette.LayoutView.extend({
         });
 
         this.ui.messageReplyBox.removeClass('hidden');
-        this.messageReplyBoxRegion.show(this.replyView);
+        this.showChildView('messageReplyBoxRegion', this.replyView);
         if (this.replyBoxHasFocus) {
           //console.log("Focusing reply box, message had this.replyBoxHasFocus == true");
           this.focusReplyBox();
@@ -900,10 +900,10 @@ var MessageView = Marionette.LayoutView.extend({
               this.unknownPreference && !this.bodyTranslationError)) {
             //Only show the translation view *iff* the message was translated by the backend
             var translationView = new MessageTranslationView({messageModel: this.model, messageView: this});
-            this.translationRegion.show(translationView);
-            this.translationRegion.$el.removeClass("hidden");
-          } else if (this.translationRegion.$el) {
-            this.translationRegion.$el.addClass("hidden");
+            this.showChildView('translationRegion', translationView);
+            this.getRegion('translationRegion').$el.removeClass("hidden");
+          } else if (this.getRegion('translationRegion').$el) {
+            this.getRegion('translationRegion').$el.addClass("hidden");
           }
         }
       }
@@ -986,7 +986,7 @@ var MessageView = Marionette.LayoutView.extend({
             //console.log("current_navigation_state:", current_navigation_state);
             if (current_navigation_state === 'about')
             {
-              that.listenToOnce(Assembl.vent, 'DEPRECATEDnavigation:selected', applyEllipsis);
+              that.listenToOnce(Assembl.other_vent, 'DEPRECATEDnavigation:selected', applyEllipsis);
               return;
             }
 
@@ -1009,7 +1009,7 @@ var MessageView = Marionette.LayoutView.extend({
         //console.log('current_navigation_state is:', current_navigation_state);
         if (current_navigation_state !== undefined) {
           //console.log('Setting listener on DEPRECATEDnavigation:selected');
-          that.listenTo(Assembl.vent, 'DEPRECATEDnavigation:selected', function(navSection) {
+          that.listenTo(Assembl.other_vent, 'DEPRECATEDnavigation:selected', function(navSection) {
             //console.log('New navigation has just been selected:', navSection);
             if (navSection === 'debate') {
               //console.log('Updating dotdotdot because debate has just been selected');
@@ -1030,11 +1030,11 @@ var MessageView = Marionette.LayoutView.extend({
     var agentAvatarView = new AgentViews.AgentAvatarView({
       model: this.creator
     });
-    this.avatar.show(agentAvatarView);
+    this.showChildView('avatar', agentAvatarView);
     var agentNameView = new AgentViews.AgentNameView({
       model: this.creator
     });
-    this.name.show(agentNameView);
+    this.showChildView('name', agentNameView);
   },
 
   /**
@@ -1142,7 +1142,7 @@ var MessageView = Marionette.LayoutView.extend({
 
     if (this.annotator && this.showAnnotations && (this.viewStyle == this.availableMessageViewStyles.FULL_BODY)) {
       this.getAnnotationsToLoadPromise().done(function(annotationsToLoad) {
-        if(!that.isViewDestroyed()) {
+        if(!that.isDestroyed()) {
           // Loading the annotations
           if (annotationsToLoad.length) {
             if (!that.annotator) {
@@ -1236,7 +1236,7 @@ var MessageView = Marionette.LayoutView.extend({
                         if (that.messageListView.getContainingGroup().findViewByType(PanelSpecTypes.IDEA_PANEL)) {
                           //FIXME:  Even this isn't proper behaviour.  Maybe we should just pop a panel systematically in this case.
                           that.messageListView.getContainingGroup().setCurrentIdea(allIdeasCollection.get(annotation.idIdea), false, "from_annotation");
-                          Assembl.vent.trigger('DEPRECATEDideaPanel:showSegment', segment);
+                          Assembl.other_vent.trigger('DEPRECATEDideaPanel:showSegment', segment);
                         }
                         else {
                           console.log("TODO:  NOT implemented yet.  Should pop panel in a lightbox.  See example at the end of Modal object in navigation.js ");
@@ -1246,7 +1246,7 @@ var MessageView = Marionette.LayoutView.extend({
                           //FIXME:  We don't want to affect every panel, only the one in the current group
                           //FIXME:  Nothing listens to this anymore
                           console.error("FIXME:  Nothing listens to DEPRECATEDsegmentList:showSegment anymore");
-                          Assembl.vent.trigger('DEPRECATEDsegmentList:showSegment', segment);
+                          Assembl.other_vent.trigger('DEPRECATEDsegmentList:showSegment', segment);
                         }
                         else {
                           console.log("TODO:  NOT implemented yet.  Should pop panel in a lightbox.  See example at the end of Modal object in navigation.js ");
@@ -1271,7 +1271,7 @@ var MessageView = Marionette.LayoutView.extend({
   renderAnnotations: function(annotations) {
     var that = this;
 
-    if(!this.isViewDestroyed()) {
+    if(!this.isDestroyed()) {
       _.each(annotations, function(annotation) {
         var highlights = annotation.highlights,
         func = that.showSegmentByAnnotation.bind(that, annotation);
@@ -1296,7 +1296,7 @@ var MessageView = Marionette.LayoutView.extend({
         model: this.model
       });
 
-      this.getRegion('ideaClassification').show(view);  
+      this.showChildView('ideaClassification', view);  
     }
     
   },
@@ -1312,7 +1312,7 @@ var MessageView = Marionette.LayoutView.extend({
     });
 
     if (this.canShowAttachments()){
-      this.attachmentsRegion.show(this.attachmentsCollectionView);
+      this.showChildView('attachmentsRegion', this.attachmentsCollectionView);
     }
   },
 
@@ -1435,7 +1435,7 @@ var MessageView = Marionette.LayoutView.extend({
       }
 
       setTimeout(function() {
-        if(!that.isViewDestroyed()) {
+        if(!that.isDestroyed()) {
           if (Ctx.debugRender) {
             console.log("Message:focusReplyBox() stealing browser focus");
           }
@@ -1446,7 +1446,7 @@ var MessageView = Marionette.LayoutView.extend({
           var retval = el.focus();
           //console.log("jqery called focus, returned:", retval, "has focus: ", retval.is(":focus"), $( document.activeElement ));
           var maintainFocus = function(ev) {
-            if(!that.isViewDestroyed() && !el.is(":focus")) {
+            if(!that.isDestroyed() && !el.is(":focus")) {
               if (Ctx.debugRender) {
                 console.warn("focus was quickly lost.  Focusing again to work around the problem.");
               }
@@ -1539,7 +1539,7 @@ var MessageView = Marionette.LayoutView.extend({
       message_moderation_remarks: this.model.get("moderator_comment"),
       message_original_body_safe: this.generateSafeOriginalBody()
     });
-    this.getRegion("moderationOptionsRegion").show(this.messageModerationOptionsView);
+    this.showChildView('moderationOptionsRegion', this.messageModerationOptionsView);
     this.listenToOnce(this.messageModerationOptionsView, 'moderationOptionsSaveAndClose', this.onModerationOptionsSaveAndClose);
     this.listenToOnce(this.messageModerationOptionsView, 'moderationOptionsClose', this.onModerationOptionsClose);
   },
@@ -1591,7 +1591,7 @@ var MessageView = Marionette.LayoutView.extend({
       submitText: i18n.gettext('Yes'),
       onSubmit: onSubmit,
     });
-    Assembl.slider.show(confirm);
+    Assembl.rootView.showChildView('slider', confirm);
   },
 
   onShowTranslationClick: function(ev){
@@ -1954,12 +1954,12 @@ var MessageView = Marionette.LayoutView.extend({
         this.model.setRead(true); // we do not call markAsRead on purpose
       }
 
-      Assembl.vent.trigger('messageList:replyBoxFocus');
+      Assembl.message_vent.trigger('messageList:replyBoxFocus');
     },
 
   onReplyBoxBlur: function(e) {
       this.replyBoxHasFocus = false;
-      Assembl.vent.trigger('messageList:replyBoxBlur');
+      Assembl.message_vent.trigger('messageList:replyBoxBlur');
     },
 
   /**

@@ -40,6 +40,16 @@ var Marionette = require('backbone.marionette'),
  * @class app.common.collectionManager.CollectionManager
  */
 var CollectionManager = Marionette.Object.extend({
+  channelName: 'socket',
+
+  radioEvents: {
+    'socket:open': 'refetchAllMessageStructureCollection',
+  },
+
+  radioRequests: {
+    'ideas:update': 'ideasCollectionUpdateHandler',
+  },
+
   FETCH_WORKERS_LIFETIME: 30,
 
   /**
@@ -314,28 +324,30 @@ var CollectionManager = Marionette.Object.extend({
     this._allMessageStructureCollection.collectionManager = this;
     this._allMessageStructureCollectionPromise = Promise.resolve(this._allMessageStructureCollection.fetch())
       .then(function() {
-        that.listenTo(Assembl.vent, 'socket:open', function() {
-          //Yes, I want that in sentry for now
-          console.debug("collectionManager: getAllMessageStructureCollectionPromise re-fetching because of socket re-open.");
-          //console.log(that._allMessageStructureCollection);
-          //WARNING:  This is wastefull.  But even if we had a mecanism to request only if there is new data, some specific models might have changed.
-          //So the only way we could fix that is to add a generic mecanism that returns objects modified after a specific date, 
-          // recursively taking into account any relationship in the viewdef.  Not likely to happen...
-          
-          /* Another aspect is that ALL messages onscreen will re-fetch and re-render
-          This is wastefull (CPU usage and loaders and flashing for the user), 
-          as in the specific case of messages it is relatively easy to get a
-          reliable modification date */
-          that._allMessageStructureCollection.fetch();
-        });
-
         return that._allMessageStructureCollection;
       })
       .catch(function(e) {
         Raven.captureException(e);
       });
-      
     return this._allMessageStructureCollectionPromise;
+  },
+
+  refetchAllMessageStructureCollection: function() {
+    if (this._allMessageStructureCollectionPromise !== undefined
+      && this._allMessageStructureCollectionPromise.isFulfilled()) {
+      //Yes, I want that in sentry for now
+      console.debug("collectionManager: getAllMessageStructureCollectionPromise re-fetching because of socket re-open.");
+      //console.log(that._allMessageStructureCollection);
+      //WARNING:  This is wastefull.  But even if we had a mecanism to request only if there is new data, some specific models might have changed.
+      //So the only way we could fix that is to add a generic mecanism that returns objects modified after a specific date, 
+      // recursively taking into account any relationship in the viewdef.  Not likely to happen...
+
+      /* Another aspect is that ALL messages onscreen will re-fetch and re-render
+      This is wastefull (CPU usage and loaders and flashing for the user),
+      as in the specific case of messages it is relatively easy to get a
+      reliable modification date */
+      that._allMessageStructureCollection.fetch();
+    }
   },
 
   _waitingWorker: undefined,
@@ -609,22 +621,20 @@ var CollectionManager = Marionette.Object.extend({
               Raven.captureException(e);
             });
 
-    //Start listener setup
-    //This is so the unread count update when setting a message unread.
-    //See Message:setRead()
-    Assembl.reqres.setHandler('ideas:update', function(ideas) {
+    return this._allIdeasCollectionPromise;
+  },
+
+  ideasCollectionUpdateHandler: function(ideas) {
+    if (this._allIdeasCollection !== undefined) {
       if (Ctx.debugRender) {
         console.log("ideaList: triggering render because app.on('ideas:update') was triggered");
       }
 
-      that._allIdeasCollection.add(ideas, {merge: true});
-    });
-
-    //End listener setup
-
-    return this._allIdeasCollectionPromise;
-
+      this._allIdeasCollection.add(ideas, {merge: true});
+    }
   },
+
+
   /**
    * Returns the collection of idea links
    * @returns {BaseCollection}

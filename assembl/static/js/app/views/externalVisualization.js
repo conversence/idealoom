@@ -10,9 +10,9 @@ var Marionette = require('backbone.marionette'),
     PanelSpecTypes = require('../utils/panelSpecTypes.js'),
     AssemblPanel = require('./assemblPanel.js');
 
-var externalVisualizationPanel = Marionette.ItemView.extend({
+var externalVisualizationPanel = Marionette.View.extend({
   constructor: function externalVisualizationPanel() {
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-externalViz',

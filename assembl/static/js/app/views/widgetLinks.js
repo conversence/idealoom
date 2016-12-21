@@ -10,9 +10,9 @@ var Backbone = require("backbone"),
     Widget = require("../models/widget.js");
 
 
-var WidgetLinkView = Marionette.ItemView.extend({
+var WidgetLinkView = Marionette.View.extend({
   constructor: function WidgetLinkView() {
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: "#tmpl-widgetLink",

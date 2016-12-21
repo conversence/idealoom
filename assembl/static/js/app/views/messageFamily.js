@@ -21,9 +21,9 @@ var Marionette = require('backbone.marionette'),
 /**
  * @class app.views.messageFamily.MessageFamilyView
  */
-var MessageFamilyView = Marionette.ItemView.extend({
+var MessageFamilyView = Marionette.View.extend({
   constructor: function MessageFamilyView() {
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-loader',
@@ -247,7 +247,7 @@ var MessageFamilyView = Marionette.ItemView.extend({
         modal = modalFactory.modal,
         messageList = modalFactory.messageList;
 
-    Assembl.slider.show(modal);
+    Assembl.rootView.showChildView('slider', modal);
     messageList.showMessageById(this.model.id, undefined, true, true); 
   },
 

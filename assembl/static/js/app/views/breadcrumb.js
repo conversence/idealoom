@@ -16,9 +16,9 @@ var Marionette = require('backbone.marionette'),
  *
  * @param {function} options.serializerFunc  The serializer function taking the passed model and returning a template string
  */
-var BreadcrumbItemView = Marionette.ItemView.extend({
+var BreadcrumbItemView = Marionette.View.extend({
   constructor: function BreadcrumbItemView() {
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
 // from http://jsfiddle.net/zaSvT/

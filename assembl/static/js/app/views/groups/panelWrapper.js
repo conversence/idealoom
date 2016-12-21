@@ -17,9 +17,9 @@ var $ = require('jquery'),
 /**
  * @class app.views.groups.panelWrapper.PanelWrapper
  */
-var PanelWrapper = Marionette.LayoutView.extend({
+var PanelWrapper = Marionette.View.extend({
   constructor: function PanelWrapper() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
   template: "#tmpl-panelWrapper",
   regions: {
@@ -65,14 +65,14 @@ var PanelWrapper = Marionette.LayoutView.extend({
     this.contentsView = new contentClass({
       panelWrapper: this
     });
-    Marionette.bindEntityEvents(this, this.model, this.modelEvents);
+    Marionette.bindEvents(this, this.model, this.modelEvents);
     this.setPanelMinWidth();
     $(window).on("resize",function(){
       that.setPanelMinWidth();
     });
   },
   onRender: function() {
-    this.contents.show(this.contentsView);
+    this.showChildView('contents', this.contentsView);
     this.setHidden();
     this.displayContent(true);
     Ctx.initTooltips(this.ui.panelHeader);

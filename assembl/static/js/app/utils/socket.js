@@ -50,7 +50,7 @@ Socket.prototype.init = function() {
 /**
  * Triggered when the connection opens
  * 
- * Note that the actual backbone event App.vent.trigger('socket:open')
+ * Note that the actual backbone event App.socket_vent.trigger('socket:open')
  * is actually sent in Socket.prototype.onMessage
  * @event
  */
@@ -86,7 +86,7 @@ Socket.prototype.onMessage = function(ev) {
   }
   if (this.state === Socket.STATE_CONNECTING) {
     this.connectCallback(this);
-    App.vent.trigger('socket:open');
+    App.socket_vent.trigger('socket:open');
     if (Ctx.debugSocket) {
       console.log("Socket::onOpen() state is now STATE_OPEN");
     }
@@ -101,7 +101,7 @@ Socket.prototype.onMessage = function(ev) {
     this.processData(data[i]);
   }
 
-  App.commands.execute('socket:message');
+  //App.socket_vent.trigger('socket:message');
 };
 
 /**
@@ -116,7 +116,7 @@ Socket.prototype.onClose = function(ev) {
     console.log("Socket::onClose() state is now STATE_CLOSED");
   }
   this.state = Socket.STATE_CLOSED;
-  App.vent.trigger('socket:close');
+  App.socket_vent.trigger('socket:close');
 
   var that = this;
   window.setTimeout(function() {

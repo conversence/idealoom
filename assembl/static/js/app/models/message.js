@@ -307,7 +307,7 @@ var MessageModel = Base.Model.extend({
         }
         that.trigger('change:read', [value]);
         that.trigger('change', that);
-        Assembl.reqres.request('ideas:update', resp.ideas);
+        Assembl.socket_vent.request('ideas:update', resp.ideas);
       },
       error: function(model, resp) {}
     });

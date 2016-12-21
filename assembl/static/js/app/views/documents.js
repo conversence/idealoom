@@ -15,9 +15,9 @@ var Marionette = require('backbone.marionette'),
     Raven = require('raven-js');
 
 
-var AbstractDocumentView = Marionette.ItemView.extend({
+var AbstractDocumentView = Marionette.View.extend({
   constructor: function AbstractDocumentView(){
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   className: 'embeddedFile',
@@ -248,13 +248,13 @@ var AbstractEditView =  AbstractDocumentView.extend({
       this.model.save(null, {
         wait: true,
         success: function(model, resp, options){
-          if (!that.isViewDestroyed()){
+          if (!that.isDestroyed()){
             that.initalizeCallback();
           }
         },
         error: function(model, resp, options){
           resp.handled = true;
-          if (!that.isViewDestroyed()){
+          if (!that.isDestroyed()){
             if (that.parentView){
               var attachmentModel = that.parentView.model;
               //1st ParentView: AttachmentEditView
@@ -268,7 +268,7 @@ var AbstractEditView =  AbstractDocumentView.extend({
       });
     }
     else {
-      if (!that.isViewDestroyed()){
+      if (!that.isDestroyed()){
         that.initalizeCallback();
       }
     }
@@ -305,7 +305,7 @@ var DocumentEditView = AbstractEditView.extend({
   },
 
   initalizeCallback: function(){
-    if (!this.isViewDestroyed()){
+    if (!this.isDestroyed()){
       this.render();
     }
   },
@@ -332,7 +332,7 @@ var FileEditView = AbstractEditView.extend({
   initalizeCallback: function(){
     this.uploadComplete = true;
     this.uri = this.model.get('external_url');
-    if (!this.isViewDestroyed()){
+    if (!this.isDestroyed()){
       this.render();
     }
   },
@@ -348,7 +348,7 @@ var FileEditView = AbstractEditView.extend({
   onShowProgress: function(ev){
     // console.log("FileEditView progress bar has been made!", ev);
     this.percentComplete = ~~(ev * 100); //float -> integer
-    if (!this.isViewDestroyed()){
+    if (!this.isDestroyed()){
       this.render();
     }
   },

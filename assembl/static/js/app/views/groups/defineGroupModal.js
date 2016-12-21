@@ -131,7 +131,7 @@ var DefineGroupModal = Backbone.Modal.extend({
           that.scrollToRight();
 
           if (hasNavSide) {
-            Assembl.vent.trigger('DEPRECATEDnavigation:selected', 'about');
+            Assembl.other_vent.trigger('DEPRECATEDnavigation:selected', 'about');
           }
 
           that.$el.unbind();

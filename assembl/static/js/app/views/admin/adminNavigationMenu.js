@@ -10,9 +10,9 @@ var Marionette = require('backbone.marionette'),
     Permissions = require('../../utils/permissions.js'),
     Ctx = require('../../common/context.js');
 
-var adminNavigationMenu = Marionette.LayoutView.extend({
+var adminNavigationMenu = Marionette.View.extend({
   constructor: function adminNavigationMenu() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   tagName: 'nav',
@@ -32,7 +32,7 @@ var adminNavigationMenu = Marionette.LayoutView.extend({
     };
   },
 
-  templateHelpers: function() {
+  templateContext: function() {
     return {
       urlDiscussion: function() {
         return '/' + Ctx.getDiscussionSlug() + '/';

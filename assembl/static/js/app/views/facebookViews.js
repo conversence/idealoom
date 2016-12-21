@@ -533,9 +533,9 @@ var checkState = function(renderView) {
       });
 };
 
-var errorView = Marionette.ItemView.extend({
+var errorView = Marionette.View.extend({
   constructor: function errorView() {
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-exportPostModal-fb-token-error',
@@ -586,9 +586,9 @@ var errorView = Marionette.ItemView.extend({
   }
 });
 
-var groupView = Marionette.ItemView.extend({
+var groupView = Marionette.View.extend({
   constructor: function groupView() {
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: "#tmpl-loader",
@@ -646,9 +646,9 @@ var groupView = Marionette.ItemView.extend({
     }
 });
 
-var pageView = Marionette.ItemView.extend({
+var pageView = Marionette.View.extend({
   constructor: function pageView() {
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-loader',
@@ -749,9 +749,9 @@ var pageView = Marionette.ItemView.extend({
 
 });
 
-var exportPostForm = Marionette.LayoutView.extend({
+var exportPostForm = Marionette.View.extend({
   constructor: function exportPostForm() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-loader',
@@ -831,14 +831,14 @@ var exportPostForm = Marionette.LayoutView.extend({
 
     switch (value) {
       case 'page':
-        this.getRegion('subform').show(new pageView({
+        this.showChildView('subform', new pageView({
           token: this.token,
           bundle: this.bundle,
           vent: this.vent
         }));
         break;
       case 'group':
-        this.getRegion('subform').show(new groupView({
+        this.showChildView('subform', new groupView({
           token: this.token,
           bundle: this.bundle,
           vent: this.vent
@@ -1020,9 +1020,9 @@ var exportPostForm = Marionette.LayoutView.extend({
 
 });
 
-var FacebookSourceForm = Marionette.LayoutView.extend({
+var FacebookSourceForm = Marionette.View.extend({
   constructor: function FacebookSourceForm() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-facebookSourceForm',
@@ -1111,13 +1111,13 @@ var privateGroupSourceForm = FacebookSourceForm.extend({
     FacebookSourceForm.apply(this, arguments);
   },
 
-  onBeforeShow: function() {
+  onRender: function() {
     this.groupView = new groupView({
           token: this.token,
           bundle: this.bundle,
           vent: this.vent
         });
-    this.getRegion("sourcePicker").show(this.groupView);
+    this.showChildView('sourcePicker', this.groupView);
   },
   getModelData: function(sender) {
     if (this.bundle.endpoint) {
@@ -1135,13 +1135,13 @@ var pageSourceForm = FacebookSourceForm.extend({
     FacebookSourceForm.apply(this, arguments);
   },
 
-  onBeforeShow: function() {
+  onRender: function() {
     this.pageView = new pageView({
           token: this.token,
           bundle: this.bundle,
           vent: this.vent
         });
-    this.getRegion("sourcePicker").show(this.pageView);
+    this.showChildView('sourcePicker', this.pageView);
   },
   getModelData: function(sender) {
     if (this.bundle.endpoint) {
@@ -1154,9 +1154,9 @@ var pageSourceForm = FacebookSourceForm.extend({
   }
 });
 
-var basefbView = Marionette.LayoutView.extend({
+var basefbView = Marionette.View.extend({
   constructor: function basefbView() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-sourceFacebook',
@@ -1177,10 +1177,10 @@ var basefbView = Marionette.LayoutView.extend({
     this.model = options.model;
     this.exportedMessage = options.exportedMessage;
 
-    this.vent.on("reloadBase", this.onShow, this);
+    this.vent.on("reloadBase", this.onRender, this);
   },
 
-  onShow: function(){
+  onRender: function(){
     var that = this;
     checkState(function(fbState) {
       console.log('The state of the checkState function', fbState);
@@ -1223,9 +1223,9 @@ var basefbView = Marionette.LayoutView.extend({
         }
         that.fbView = fbView;
         if (fbView) {
-          that.subForm.show(fbView);
+          that.showChildView('subForm', fbView);
         } else {
-          that.subForm.show("");
+          that.showChildView('subForm', "");
         }
       }
       else {
@@ -1236,7 +1236,7 @@ var basefbView = Marionette.LayoutView.extend({
           model: that.model
         });
 
-        that.subForm.show(errView);
+        that.showChildView('subForm', errView);
       }
     });
 

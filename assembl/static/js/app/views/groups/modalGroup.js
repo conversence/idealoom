@@ -8,6 +8,7 @@ var Marionette = require('backbone.marionette'),
     Backbone = require('backbone'),
     BackboneModal = require('backbone.modal'),
     _ = require('underscore'),
+    $ = require('jquery'),
     Assembl = require('../../app.js'),
     Ctx = require('../../common/context.js'),
     i18n = require('../../utils/i18n.js'),
@@ -40,7 +41,7 @@ var ModalGroupView = Backbone.Modal.extend({
    * A modal group has only a single group
    */
   getGroup: function() {
-    if (!this.groupsView.isViewRendered() && !this.groupsView.isViewDestroyed()) {
+    if (!this.groupsView.isRendered() && !this.groupsView.isDestroyed()) {
       //so children will work
       this.groupsView.render();
     }
@@ -72,8 +73,8 @@ var ModalGroupView = Backbone.Modal.extend({
   },
 
   onRender: function() {
-    if (!this.groupsView.isViewDestroyed()) {
-      if (!this.groupsView.isViewRendered()) {
+    if (!this.groupsView.isDestroyed()) {
+      if (!this.groupsView.isRendered()) {
         this.groupsView.render();
       }
 

@@ -22,9 +22,9 @@ var Marionette = require('backbone.marionette'),
     Types = require('../utils/types.js'),
     Promise = require('bluebird');
 
-var Partner = Marionette.ItemView.extend({
+var Partner = Marionette.View.extend({
   constructor: function Partner() {
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-partnerItem',
@@ -34,7 +34,7 @@ var Partner = Marionette.ItemView.extend({
       organization: this.model
     }
   },
-  templateHelpers: function() {
+  templateContext: function() {
     return {
       htmlEntities: function(str) {
         return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -66,9 +66,9 @@ var PartnerList = Marionette.CompositeView.extend({
 
 });
 
-var Synthesis = Marionette.ItemView.extend({
+var Synthesis = Marionette.View.extend({
   constructor: function Synthesis() {
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-synthesisContext',
@@ -109,14 +109,14 @@ var Synthesis = Marionette.ItemView.extend({
   },
 
   readSynthesis: function() {
-    Assembl.vent.trigger("DEPRECATEDnavigation:selected", "synthesis");
+    Assembl.other_vent.trigger("DEPRECATEDnavigation:selected", "synthesis");
   }
 
 });
 
-var Instigator = Marionette.LayoutView.extend({
+var Instigator = Marionette.View.extend({
   constructor: function Instigator() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-instigator',
@@ -157,11 +157,11 @@ var Instigator = Marionette.LayoutView.extend({
       canEdit: Ctx.getCurrentUser().can(Permissions.ADMIN_DISCUSSION)
     });
 
-    this.regionInstigatorDescription.show(instigator);
+    this.showChildView('regionInstigatorDescription', instigator);
 
   },
 
-  templateHelpers: function() {
+  templateContext: function() {
     return {
       editInstigatorUrl: function() {
               return '/' + Ctx.getDiscussionSlug() + '/partners';
@@ -171,9 +171,9 @@ var Instigator = Marionette.LayoutView.extend({
 
 });
 
-var Introduction = Marionette.LayoutView.extend({
+var Introduction = Marionette.View.extend({
   constructor: function Introduction() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-introductions',
@@ -239,7 +239,7 @@ var Introduction = Marionette.LayoutView.extend({
       canEdit: Ctx.getCurrentUser().can(Permissions.ADMIN_DISCUSSION)
     });
 
-    this.introductionEditorRegion.show(introduction);
+    this.showChildView('introductionEditorRegion', introduction);
     this._introductionEditor = introduction;
   },
 
@@ -253,15 +253,15 @@ var Introduction = Marionette.LayoutView.extend({
       canEdit: Ctx.getCurrentUser().can(Permissions.ADMIN_DISCUSSION)
     });
 
-    this.objectiveEditorRegion.show(objective);
+    this.showChildView('objectiveEditorRegion', objective);
     this._objectiveEditor = objective;
   }
 
 });
 
-var ContextPage = Marionette.LayoutView.extend({
+var ContextPage = Marionette.View.extend({
   constructor: function ContextPage() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-contextPage',
@@ -281,7 +281,7 @@ var ContextPage = Marionette.LayoutView.extend({
     introductions: '#context-introduction'
   },
 
-  onBeforeShow: function() {
+  onRender: function() {
     var that = this,
         collectionManager = new CollectionManager();
 
@@ -291,7 +291,7 @@ var ContextPage = Marionette.LayoutView.extend({
         collectionManager.getAllSynthesisCollectionPromise(),
 
             function(DiscussionModel, AllPartner, allMessageStructureCollection, allSynthesisCollection) {
-              try { if (!that.isViewDestroyed() ){
+              try { if (!that.isDestroyed() ){
                 var partnerInstigator =  AllPartner.find(function(partner) {
                   return partner.get('is_initiator');
                 });
@@ -302,37 +302,37 @@ var ContextPage = Marionette.LayoutView.extend({
                 Once you've rendered the layoutView, you now have direct access
                 to all of the specified regions as region managers.
 
-                layoutView.getRegion('menu').show(new MenuView());
+                layoutView.showChildView('menu', new MenuView());
                 >>
                 This means layoutView.getRegion('...').show(...) has to be called after the layoutview has been rendered.
-                So it has to be called in an onRender() method, or in an onBeforeShow() or onShow() method.
+                So it has to be called in an onRender() method.
                 But when the page http://localhost:6543/sandbox/posts/local%3AContent%2F568 is accessed using Chromium, we get this error:
                 TypeError: Cannot read property 'show' of undefined
                 So, getRegion() does not seem to always find the region, why?
-                This current onBeforeShow() method seems to be called twice, so maybe the view is destroyed or replaced before getting the result of the promise.
+                This current onBeforeRender() method seems to be called twice, so maybe the view is destroyed or replaced before getting the result of the promise.
                 This answer http://stackoverflow.com/questions/25070398/re-rendering-of-backbone-marionette-template-on-trigger-event suggests that we should use listeners instead.
                 We may have to dig in this direction. Until then, and because the view is rendered correctly the second time, we simply ignore the problem, using a try/catch.
                 */
-                
+
                 var introduction = new Introduction({
                   model: DiscussionModel
                 });
-                that.getRegion('introductions').show(introduction);
+                that.showChildView('introductions', introduction);
 
                 if (partnerInstigator !== undefined) {
                     var instigator = new Instigator({
                       model: partnerInstigator
                     });
-                    that.getRegion('instigator').show(instigator);
+                    that.showChildView('instigator', instigator);
                 }
 
-                that.getRegion('statistics').show(new Statistics());
+                that.showChildView('statistics', new Statistics());
 
                 var synthesis = new Synthesis({
                   allMessageStructureCollection: allMessageStructureCollection,
                   allSynthesisCollection: allSynthesisCollection
                 });
-                that.getRegion('synthesis').show(synthesis);
+                that.showChildView('synthesis', synthesis);
 
                 var NonInstigatorSubset = Backbone.Subset.extend({
                   constructor: function NonInstigatorSubset() {
@@ -352,7 +352,7 @@ var ContextPage = Marionette.LayoutView.extend({
                   nbOrganisations: nonInstigatorSubset.length,
                   collection: nonInstigatorSubset
                 });
-                that.getRegion('organizations').show(partners);
+                that.showChildView('organizations', partners);
 
               } } catch (e) {
                 console.log("Aborting rendering of ContextPanel's regions, probably because the view was replaced since.");

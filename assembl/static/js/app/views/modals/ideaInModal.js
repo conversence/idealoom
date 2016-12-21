@@ -51,7 +51,7 @@ function navigateToIdea(panel, idea, forcePopup){
       //console.log("modal_title:", modal_title);
       var modal = new ModalGroup.View({"model": groupSpecModel, "title": modal_title});
       Ctx.setCurrentModalView(modal);
-      Assembl.slider.show(modal);
+      Assembl.rootView.showChildView('slider', modal);
     }
   }
 

@@ -27,9 +27,9 @@ var Backbone = require('backbone'),
 var DEFAULT_MESSAGE_VIEW_LI_ID_PREFIX = "js_defaultMessageView-",
     MESSAGE_LIST_VIEW_STYLES_CLASS_PREFIX = "js_messageList-view-";
 
-var MessageListHeader = Marionette.ItemView.extend({
+var MessageListHeader = Marionette.View.extend({
   constructor: function MessageListHeader() {
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-messageListHeader',
@@ -119,7 +119,7 @@ var MessageListHeader = Marionette.ItemView.extend({
 
     this.renderQueryInfo();
     Ctx.initTooltips(this.$el);
-    Assembl.vent.trigger("requestTour", "message_list_options");
+    Assembl.tour_vent.trigger("requestTour", "message_list_options");
   },
 
   renderToggleButton: function() {

@@ -21,9 +21,9 @@ var Assembl = require('../app.js'),
 /**
  * @class  app.views.admin.simp.SimpleLangStringEditPanel
  */
-var SimpleLangStringEditPanel = Marionette.LayoutView.extend({
+var SimpleLangStringEditPanel = Marionette.View.extend({
   constructor: function SimpleLangStringEditPanel() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
   template: '#tmpl-simpleLangStringEdit',
 
@@ -41,7 +41,7 @@ var SimpleLangStringEditPanel = Marionette.LayoutView.extend({
   },
 
   initialize: function(options) {
-    if(this.isViewDestroyed()) {
+    if(this.isDestroyed()) {
       return;
     }
     this.langCache = Ctx.localesAsSortedList();
@@ -59,7 +59,7 @@ var SimpleLangStringEditPanel = Marionette.LayoutView.extend({
   },
 
   onRender: function() {
-    if (this.isViewDestroyed()) {
+    if (this.isDestroyed()) {
       return;
     }
     this.showChildView(
@@ -77,9 +77,9 @@ var SimpleLangStringEditPanel = Marionette.LayoutView.extend({
 /**
  * @class  app.views.admin.adminMessageColumns.LangStringEntryView
  */
-var LangStringEntryView = Marionette.LayoutView.extend({
+var LangStringEntryView = Marionette.View.extend({
   constructor: function LangStringEntryView() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
   template: '#tmpl-langStringEntry',
   ui: {

@@ -16,9 +16,9 @@ var Marionette = require('backbone.marionette'),
 /**
  * @class app.views.message.MessageDeletedByUserView
  */
-var MessageDeletedByUserView = Marionette.LayoutView.extend({
+var MessageDeletedByUserView = Marionette.View.extend({
   constructor: function MessageDeletedByUserView() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
   className: 'message message-deleted',
 
@@ -54,7 +54,7 @@ var MessageDeletedByUserView = Marionette.LayoutView.extend({
 
 
     this.model.getCreatorPromise().then(function(creator){
-      if(!that.isViewDestroyed()) {
+      if(!that.isDestroyed()) {
         that.creator = creator;
         that.template = "#tmpl-messageDeletedByUser";
         that.render();
@@ -66,11 +66,11 @@ var MessageDeletedByUserView = Marionette.LayoutView.extend({
     var agentAvatarView = new AgentViews.AgentAvatarView({
       model: this.creator
     });
-    this.avatar.show(agentAvatarView);
+    this.showChildView('avatar', agentAvatarView);
     var agentNameView = new AgentViews.AgentNameView({
       model: this.creator
     });
-    this.name.show(agentNameView);
+    this.showChildView('name', agentNameView);
   },
 
   onRender: function(){

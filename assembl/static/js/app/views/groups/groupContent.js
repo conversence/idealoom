@@ -38,7 +38,7 @@ var groupContent = Marionette.CompositeView.extend({
     this.groupContainer = options['groupContainer'];
   },
   onRender:function(){
-    if (!this.isViewDestroyed()) {
+    if (!this.isDestroyed()) {
       var navView = this.findViewByType(PanelSpecTypes.NAV_SIDEBAR);
       if (navView) {
         navView.setViewByName(this.model.get('navigationState'), null);
@@ -122,7 +122,7 @@ var groupContent = Marionette.CompositeView.extend({
    * If there is, get's it back to the default debate view
    */
   NavigationResetDebateState: function() {
-    if (!this.isViewDestroyed()) {  //Because this is called from outside the view
+    if (!this.isDestroyed()) {  //Because this is called from outside the view
       if (this.findNavigationSidebarPanelSpec()) {
         this.model.set('navigationState', 'debate');
         this.SimpleUIResetMessageAndIdeaPanelState(this._getCurrentIdea());
@@ -130,7 +130,7 @@ var groupContent = Marionette.CompositeView.extend({
     }
   },
   NavigationResetAboutState: function() {
-    if (!this.isViewDestroyed()) {  //Because this is called from outside the view
+    if (!this.isDestroyed()) {  //Because this is called from outside the view
       var nav = this.findNavigationSidebarPanelSpec();
       if (nav) {
         this.model.set('navigationState', 'about');
@@ -139,7 +139,7 @@ var groupContent = Marionette.CompositeView.extend({
     }
   },
   NavigationResetSynthesisMessagesState: function(synthesisInNavigationPanel) {
-    if (!this.isViewDestroyed()) {  //Because this is called from outside the view
+    if (!this.isDestroyed()) {  //Because this is called from outside the view
       if (this.findNavigationSidebarPanelSpec()) {
         this.setCurrentIdea(null);
         this.ensureOnlyPanelsVisible(PanelSpecTypes.MESSAGE_LIST, PanelSpecTypes.IDEA_PANEL);
@@ -148,7 +148,7 @@ var groupContent = Marionette.CompositeView.extend({
     }
   },
   NavigationResetVisualizationState: function(url) {
-    if (!this.isViewDestroyed()) {  //Because this is called from outside the view
+    if (!this.isDestroyed()) {  //Because this is called from outside the view
       var nav = this.findNavigationSidebarPanelSpec();
       if (nav) {
         this.model.set('navigationState', 'visualizations');
@@ -159,7 +159,7 @@ var groupContent = Marionette.CompositeView.extend({
     }
   },
   SimpleUIResetMessageAndIdeaPanelState: function(idea) {
-    if (!this.isViewDestroyed()) {  //Because this is called from outside the view
+    if (!this.isDestroyed()) {  //Because this is called from outside the view
       var preferences = Ctx.getPreferences();
       // defined here and in collectionManager.getGroupSpecsCollectionPromise
       if (preferences.simple_view_panel_order === "NMI") {
@@ -206,11 +206,11 @@ var groupContent = Marionette.CompositeView.extend({
           wrapper = this.findPanelWrapperByType(panelSpecType);
 
       if (wrapper != null) {
-        if (wrapper.contents === undefined) {
+        if (wrapper.getRegion('contents') === undefined) {
           throw new Error("PanelWrapper doesn't have any content");
         }
 
-        retval = wrapper.contents.currentView;
+        retval = wrapper.getRegion('contents').currentView;
       }
       return retval;
     },

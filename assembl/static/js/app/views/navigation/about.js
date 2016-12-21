@@ -29,7 +29,7 @@ var AboutNavPanel = AssemblPanel.extend({
       AssemblPanel.prototype.initialize.apply(this, arguments);
     },
   goToDebate: function() {
-    Assembl.vent.trigger("DEPRECATEDnavigation:selected", "debate");
+    Assembl.other_vent.trigger("DEPRECATEDnavigation:selected", "debate");
   },
   testAnalytics: function(e){
     e.stopPropagation();

@@ -27,9 +27,9 @@ var Marionette = require('backbone.marionette'),
     StatisticsModal = require('./modals/discussionStatisticsModal.js'),
     AgentViews = require('./agent.js');
 
-var navBarLeft = Marionette.LayoutView.extend({
+var navBarLeft = Marionette.View.extend({
   constructor: function navBarLeft() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-navBarLeft',
@@ -49,10 +49,10 @@ var navBarLeft = Marionette.LayoutView.extend({
   },
   onRender: function() {
     var that = this;
-    this.listenTo(Assembl.vent, 'socket:open', function() {
+    this.listenTo(Assembl.socket_vent, 'socket:open', function() {
       that.$('#onlinedot').addClass('is-online');
     });
-    this.listenTo(Assembl.vent, 'socket:close', function() {
+    this.listenTo(Assembl.socket_vent, 'socket:close', function() {
       that.$('#onlinedot').removeClass('is-online');
     });
 
@@ -64,7 +64,7 @@ var navBarLeft = Marionette.LayoutView.extend({
       Promise.join(collectionManager.getAllIdeasCollectionPromise(),
           collectionManager.getAllWidgetsPromise(),
         function(allIdeasCollection, widgets) {
-        if(!that.isViewDestroyed()) {
+        if(!that.isDestroyed()) {
           var rootIdea = allIdeasCollection.getRootIdea();
           if (rootIdea) {
             var confWidgets = new Widget.WidgetSubset([], {
@@ -73,14 +73,14 @@ var navBarLeft = Marionette.LayoutView.extend({
               idea: rootIdea});
             if (confWidgets.length) {
               var configuration = new WidgetLinks.WidgetLinkListView({collection: confWidgets});
-              that.widgetMenuConfig.show(configuration);
+              that.showChildView('widgetMenuConfig', configuration);
             }
             var creation = new WidgetLinks.WidgetLinkListView({
               collection: Widget.globalWidgetClassCollection,
               context: Widget.Model.prototype.DISCUSSION_MENU_CREATE_CTX,
               idea: rootIdea
             });
-            that.widgetMenuCreation.show(creation);
+            that.showChildView('widgetMenuCreation', creation);
           } else {
             console.log("rootIdea problem: ", rootIdea);
             this.$el.find(".discussion-title-dropdown").addClass("hidden");
@@ -105,9 +105,9 @@ var navBarLeft = Marionette.LayoutView.extend({
   },
 });
 
-var navBarRight = Marionette.LayoutView.extend({
+var navBarRight = Marionette.View.extend({
   constructor: function navBarRight() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-loader',
@@ -125,7 +125,7 @@ var navBarRight = Marionette.LayoutView.extend({
         that.template = realTemplate;
 
         that.render();
-        that.onBeforeShow();
+        // that.onBeforeRender();
 
         if (localRoles) {
           that.listenTo(localRoles, 'remove add', function(model) {
@@ -157,7 +157,7 @@ var navBarRight = Marionette.LayoutView.extend({
     userAvatarRegion: '.user-avatar-container'
   },
 
-  onBeforeShow: function() {
+  onRender: function() {
     if(this.template === '#tmpl-loader') {
       return {};
     }
@@ -167,7 +167,7 @@ var navBarRight = Marionette.LayoutView.extend({
       avatarSize: 25
     });
     if (!Ctx.getCurrentUser().isUnknownUser()) {
-        this.userAvatarRegion.show(userAvatarView);
+        this.showChildView('userAvatarRegion', userAvatarView);
     }
   },
 
@@ -183,7 +183,7 @@ var navBarRight = Marionette.LayoutView.extend({
       isAdminDiscussion: Ctx.getCurrentUser().can(Permissions.ADMIN_DISCUSSION)
     }
   },
-  templateHelpers: function() {
+  templateContext: function() {
     return {
       urlNotifications: function() {
         return '/' + Ctx.getDiscussionSlug() + '/user/notifications';
@@ -210,14 +210,14 @@ var navBarRight = Marionette.LayoutView.extend({
 
   joinPopin: function() {
     var analytics = Analytics.getInstance();
-    Assembl.vent.trigger('navBar:joinDiscussion');
+    Assembl.other_vent.trigger('navBar:joinDiscussion');
     analytics.trackEvent(analytics.events.JOIN_DISCUSSION_CLICK);
   }
 });
 
-var navBar = Marionette.LayoutView.extend({
+var navBar = Marionette.View.extend({
   constructor: function navBar() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-navBar',
@@ -227,8 +227,8 @@ var navBar = Marionette.LayoutView.extend({
     this._store = window.localStorage;
     this.showPopInDiscussion();
     this.showPopInOnFirstLoginAfterAutoSubscribeToNotifications();
-    this.listenTo(Assembl.vent, 'navBar:subscribeOnFirstPost', this.showPopInOnFirstPost);
-    this.listenTo(Assembl.vent, 'navBar:joinDiscussion', this.joinDiscussion)
+    this.listenTo(Assembl.other_vent, 'navBar:subscribeOnFirstPost', this.showPopInOnFirstPost);
+    this.listenTo(Assembl.other_vent, 'navBar:joinDiscussion', this.joinDiscussion)
   },
   ui: {
     groups: '.js_addGroup',
@@ -251,10 +251,10 @@ var navBar = Marionette.LayoutView.extend({
     }
   },
 
-  onBeforeShow: function() {
+  onRender: function() {
     var navRight = new navBarRight();
-    this.getRegion('navBarRight').show(navRight);
-    this.getRegion('navBarLeft').show(new navBarLeft());
+    this.showChildView('navBarRight', navRight);
+    this.showChildView('navBarLeft', new navBarLeft());
   },
 
   switchToExpertInterface: function(e) {
@@ -269,7 +269,7 @@ var navBar = Marionette.LayoutView.extend({
     var collectionManager = new CollectionManager(),
         groupSpecsP = collectionManager.getGroupSpecsCollectionPromise(viewsFactory);
 
-    Assembl.slider.show(new DefineGroupModal({groupSpecsP: groupSpecsP}));
+    Assembl.rootView.showChildView('slider', new DefineGroupModal({groupSpecsP: groupSpecsP}));
   },
 
   /**
@@ -348,7 +348,7 @@ var navBar = Marionette.LayoutView.extend({
                         analytics.trackEvent(analytics.events.JOIN_DISCUSSION);
 
                         // TODO: Is there a simpler way to do this? MAP
-                        self.navBarRight.currentView.ui.joinDiscussion.css('visibility', 'hidden');
+                        self.getRegion('navBarRight').currentView.ui.joinDiscussion.css('visibility', 'hidden');
                         self._store.removeItem('needJoinDiscussion');
 
                         // reload user data and its permissions (so for example now when he clicks on the "reply" button of a message, it should not show "Before you can reply to this message..." anymore)
@@ -373,7 +373,7 @@ var navBar = Marionette.LayoutView.extend({
                   analytics.changeCurrentPage(this.returningPage, {default: true}); //if page is null, go back to / page
                 }
               });
-              Assembl.slider.show(new Modal());
+              Assembl.rootView.showChildView('slider', new Modal());
 
               //}
             }

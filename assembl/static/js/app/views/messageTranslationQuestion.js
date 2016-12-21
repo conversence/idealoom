@@ -34,7 +34,7 @@ var processConfirmLanguagePreferences = function(messageView){
     var cm = new CollectionManager();
 
     //Remove silent, remove messageListView.render()
-    if (!messageView.isViewDestroyed()){
+    if (!messageView.isDestroyed()){
         messageView.closeTranslationView(function(){
             cm.getAllMessageStructureCollectionPromise()
                 .then(function(messageStructures){
@@ -43,7 +43,7 @@ var processConfirmLanguagePreferences = function(messageView){
                 .then(function(messages){
                     //Do not need to do anything else. The re-fetching of messages will cause the
                     //messagelist to re-render itself.
-                    if (!messageView.isViewDestroyed()){
+                    if (!messageView.isDestroyed()){
                         messageView.resetTranslationState();
                         messageView.render(); // This is questionable.
                     }
@@ -52,9 +52,9 @@ var processConfirmLanguagePreferences = function(messageView){
     }
 };
 
-var LanguageSelectionView = Marionette.ItemView.extend({
+var LanguageSelectionView = Marionette.View.extend({
   constructor: function LanguageSelectionView() {
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
     template: '#tmpl-message_translation_question_selection',
@@ -135,9 +135,9 @@ var LanguageSelectionView = Marionette.ItemView.extend({
     }
 });
 
-var TranslationView = Marionette.LayoutView.extend({
+var TranslationView = Marionette.View.extend({
   constructor: function TranslationView() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
     template: '#tmpl-loader',
@@ -175,7 +175,7 @@ var TranslationView = Marionette.LayoutView.extend({
 
         cm.getUserLanguagePreferencesPromise(Ctx)
             .then(function(preferences){
-                if (!that.isViewDestroyed()){
+                if (!that.isDestroyed()){
                     var translationData = that.messageView.translationData || preferences.getTranslationData();
                     that.langCache = that.messageView.langCache; //For reference
                     var bestSuggestedTranslation = that.message.get('body').best(translationData),
@@ -251,7 +251,7 @@ var TranslationView = Marionette.LayoutView.extend({
 
     onLanguageRevealClick: function(ev){
         if (!this.moreLanguagesViewShown) {
-            this.getRegion('selectLanguage').show(new LanguageSelectionView({
+            this.showChildView('selectLanguage', new LanguageSelectionView({
                 messageModel: this.message,
                 questionView: this
             }));

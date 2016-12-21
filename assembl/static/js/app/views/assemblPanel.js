@@ -11,9 +11,9 @@ var Marionette = require('backbone.marionette'),
  * An abstract class every panel should eventually extend
  * @class app.views.assemblPanel.AssemblPanel
  */
-var AssemblPanel = Marionette.LayoutView.extend({
+var AssemblPanel = Marionette.View.extend({
   constructor: function AssemblPanel() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: _.template(""),

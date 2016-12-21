@@ -70,9 +70,9 @@ var Backbone = require('backbone'),
  *
  */
 
-var messageSendView = Marionette.LayoutView.extend({
+var messageSendView = Marionette.View.extend({
   constructor: function messageSendView() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-messageSend',
@@ -192,7 +192,7 @@ var messageSendView = Marionette.LayoutView.extend({
     if (!Ctx.getCurrentUser().can(Permissions.ADD_POST)) {
       var that = this, collectionManager = new CollectionManager();
       collectionManager.getDiscussionModelPromise().then(function(discussion) {
-        if (that.isViewDestroyed()) {
+        if (that.isDestroyed()) {
           return;
         }
         var routeUrl = null;
@@ -215,9 +215,9 @@ var messageSendView = Marionette.LayoutView.extend({
     }
     //In case there was a message in progess just restored
     this.processHyperlinks();
-  },
 
-  onShow: function() {
+    // Code from onShow
+
     //console.log("messageSend onShow() this.documentsView:", this.documentsView);
 
     // TODO: the attachments and uploadButton regions should either always appear in the template (which is now the case) or be in a subview (which would be better, because in one case they are not used at all)
@@ -233,8 +233,8 @@ var messageSendView = Marionette.LayoutView.extend({
         collection: this.attachmentsCollection,
         errorCollection: this.errorCollection
       });
-      this.attachments.show(documentView);
-      this.uploadButton.show(uploadButtonView);
+      this.showChildView('attachments', documentView);
+      this.showChildView('uploadButton', uploadButtonView);
     }
   },
 
@@ -484,7 +484,7 @@ var messageSendView = Marionette.LayoutView.extend({
    * @returns true if there was a message to save
    */
   savePartialMessage: function() {
-    if(this.isViewRenderedAndNotYetDestroyed()) {
+    if(this.isRenderedAndNotYetDestroyed()) {
       var message_body = this.ui.messageBody,
       message_title = this.ui.messageSubject;
 
@@ -597,7 +597,7 @@ var messageSendView = Marionette.LayoutView.extend({
   },
 
   showPopInFirstPost: function() {
-    Assembl.vent.trigger('navBar:subscribeOnFirstPost');
+    Assembl.other_vent.trigger('navBar:subscribeOnFirstPost');
   }
 
 });

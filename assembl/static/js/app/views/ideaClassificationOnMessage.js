@@ -28,9 +28,9 @@ var Marionette = require('backbone.marionette'),
 /**
  * Abstract Class of Idea Classification Views
  */
-var IdeaClassificationView = Marionette.LayoutView.extend({
+var IdeaClassificationView = Marionette.View.extend({
   constructor: function IdeaClassificationView() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: false,
@@ -127,7 +127,7 @@ var IdeaClassificationView = Marionette.LayoutView.extend({
         serializerFunc: this.serializerFunc()
       });
 
-      this.breadcrumb.show(IdeaBreadcrumbView);
+      this.showChildView('breadcrumb', IdeaBreadcrumbView);
       this.postRender();
     }
   },
@@ -149,7 +149,7 @@ var IdeaClassificationView = Marionette.LayoutView.extend({
   }, 
   
 
-  templateHelpers: function(){
+  templateContext: function(){
     return {
       i18n: i18n,
       viewIdea: i18n.gettext("Go to this idea")
@@ -264,9 +264,9 @@ var IndirectExtractView = IdeaClassificationView.extend({
 });
 
 
-var ErrorView = Marionette.ItemView.extend({
+var ErrorView = Marionette.View.extend({
   constructor: function ErrorView() {
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: _.template("<div><%= i18n.gettext(\"Something went wrong in getting the contents of this idea. We are looking into it. Thank you for your patience.\") %></div>"),
@@ -304,7 +304,7 @@ var IdeaShowingMessageCollectionView = Marionette.CompositeView.extend({
     }
   },
 
-  getChildView: function(item){
+  childView: function(item){
 
     //In the scenario that the View failed to initialize the models necessary
     //to parse this. An Error view should be made.

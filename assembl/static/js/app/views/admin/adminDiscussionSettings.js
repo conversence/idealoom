@@ -11,9 +11,9 @@ var Marionette = require('backbone.marionette'),
     SourceView = require('./generalSource.js'),
     AdminNavigationMenu = require('./adminNavigationMenu.js');
 
-var AdminDiscussionSettings = Marionette.LayoutView.extend({
+var AdminDiscussionSettings = Marionette.View.extend({
   constructor: function AdminDiscussionSettings() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-adminDiscussionSettings',
@@ -29,7 +29,7 @@ var AdminDiscussionSettings = Marionette.LayoutView.extend({
     createSource: "#create-source",
     navigationMenuHolder: '.navigation-menu-holder'
   },
-  onBeforeShow: function() {
+  onRender: function() {
     var that = this,
         collectionManager = new CollectionManager();
 
@@ -39,14 +39,14 @@ var AdminDiscussionSettings = Marionette.LayoutView.extend({
         var discussionSourceList = new SourceView.DiscussionSourceList({
           collection: discussionSource
         });
-        that.getRegion('sources').show(discussionSourceList);
+        that.showChildView('sources', discussionSourceList);
       });
     
-    this.getRegion('createSource').show(new SourceView.CreateSource());
+    this.showChildView('createSource', new SourceView.CreateSource());
 
     var menu = new AdminNavigationMenu.discussionAdminNavigationMenu(
       {selectedSection: "settings"});
-    this.getRegion('navigationMenuHolder').show(menu);
+    this.showChildView('navigationMenuHolder', menu);
   },
 
   addFakeFacebookSource: function(evt){

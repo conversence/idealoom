@@ -16,6 +16,7 @@ var Marionette = require('backbone.marionette'),
 
 
 var TourManager = Marionette.Object.extend({
+  channelName: 'tour',
   nextTours: [],
   tourModel: undefined,
   currentTour: undefined,
@@ -27,6 +28,10 @@ var TourManager = Marionette.Object.extend({
           skipBtn: i18n.gettext('Skip'),
           closeTooltip: i18n.gettext('Close')
       },
+
+  radioEvents: {
+    'requestTour': 'requestTour',
+  },
 
   initialize: function() {
     if (Ctx.isAdminApp()) {
@@ -130,6 +135,10 @@ var TourManager = Marionette.Object.extend({
   },
 
   requestTour: function(tourName) {
+    if (tourName === undefined) {
+      console.error("undefined tour name");
+      return;
+    }
     var tour = this.toursById[tourName];
     if (tour === undefined) {
       Raven.captureMessage("Unknown tour", {extra: {"tour_name": tourName}});

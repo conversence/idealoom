@@ -16,9 +16,9 @@ var Marionette = require('backbone.marionette'),
     i18n = require('../../utils/i18n.js'),
     AdminNavigationMenu = require('./adminNavigationMenu.js');
 
-var adminDiscussion = Marionette.LayoutView.extend({
+var adminDiscussion = Marionette.View.extend({
   constructor: function adminDiscussion() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-adminDiscussion',
@@ -53,7 +53,7 @@ var adminDiscussion = Marionette.LayoutView.extend({
     // this is in onRender instead of onBeforeShow because of the re-render in initialize()
     var menu = new AdminNavigationMenu.discussionAdminNavigationMenu(
       {selectedSection: "edition"});
-    this.getRegion('navigationMenuHolder').show(menu);
+    this.showChildView('navigationMenuHolder', menu);
 
     this.$('#introduction').autosize();
     this.renderLogoThumbnail();

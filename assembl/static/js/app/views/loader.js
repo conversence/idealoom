@@ -9,9 +9,9 @@ var Marionette = require('backbone.marionette'),
     Assembl = require('../app.js'),
     Ctx = require('../common/context.js');
 
-var LoaderView = Marionette.ItemView.extend({
+var LoaderView = Marionette.View.extend({
   constructor: function LoaderView() {
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-loader',

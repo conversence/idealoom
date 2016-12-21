@@ -9,9 +9,9 @@ var Marionette = require('backbone.marionette'),
     Assembl = require('../../app.js'),
     Ctx = require('../../common/context.js');
 
-var TrueFalseField = Marionette.ItemView.extend({
+var TrueFalseField = Marionette.View.extend({
   constructor: function TrueFalseField() {
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-trueFalseField',

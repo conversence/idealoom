@@ -14,9 +14,9 @@ var Marionette = require('backbone.marionette'),
     i18n = require('../../utils/i18n.js'),
     Growl = require('../../utils/growl.js');
 
-var email = Marionette.ItemView.extend({
+var email = Marionette.View.extend({
   constructor: function email() {
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template:'#tmpl-associateAccount',
@@ -63,9 +63,9 @@ var emailList = Marionette.CompositeView.extend({
   childViewContainer:'.controls'
 });
 
-var socialProvidersList = Marionette.ItemView.extend({
+var socialProvidersList = Marionette.View.extend({
   constructor: function socialProvidersList() {
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-socialProviders',
@@ -77,7 +77,7 @@ var socialProvidersList = Marionette.ItemView.extend({
   }
 });
 
-var userAccount =  Marionette.ItemView.extend({
+var userAccount =  Marionette.View.extend({
   template: '#tmpl-userAccountForm',
   ui: {
       'account': '.js_saveAccount'
@@ -93,7 +93,7 @@ var userAccount =  Marionette.ItemView.extend({
       user: this.model
     }
   },
-  templateHelpers: function() {
+  templateContext: function() {
     return {
       urlDiscussion: function() {
         return '/' + Ctx.getDiscussionSlug() + '/';
@@ -139,9 +139,9 @@ var userAccount =  Marionette.ItemView.extend({
   }
 });
 
-var account = Marionette.LayoutView.extend({
+var account = Marionette.View.extend({
   constructor: function account() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-userAccount',
@@ -164,29 +164,29 @@ var account = Marionette.LayoutView.extend({
   events: {
     'click @ui.addEmail': 'addEmail'
   },
-  onBeforeShow: function() {
+  onRender: function() {
     var menu = new UserNavigationMenu({selectedSection: "account"});
-    this.getRegion('navigationMenuHolder').show(menu);
+    this.showChildView('navigationMenuHolder', menu);
     var email_domain_constraints = Ctx.getPreferences().require_email_domain;
     if (email_domain_constraints.length == 0) {
       var accounts = new emailList({
         collection: this.emailCollection
       });
       this.emailCollection.fetch();
-      this.getRegion('accounts').show(accounts);
+      this.showChildView('accounts', accounts);
 
       var providers = new socialProvidersList({
         providers: this.providers
       });
 
       // disable until I complete the work
-      this.getRegion('social_accounts').show(providers);
+      this.showChildView('social_accounts', providers);
     }
 
     var userAccountForm = new userAccount({
       model: this.userAcount
     });
-    this.getRegion('accountForm').show(userAccountForm);
+    this.showChildView('accountForm', userAccountForm);
   },
 
   addEmail: function(e) {

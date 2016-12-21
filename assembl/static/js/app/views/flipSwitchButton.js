@@ -6,9 +6,9 @@
 
 var Marionette = require('backbone.marionette');
 
-var FlipSwitchButton = Marionette.ItemView.extend({
+var FlipSwitchButton = Marionette.View.extend({
   constructor: function FlipSwitchButton() {
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-flipSwitchButton',

@@ -14,9 +14,9 @@ var Backbone = require('backbone'),
     i18n = require('../utils/i18n.js');
 
 
-var messageModerationOptions = Marionette.LayoutView.extend({
+var messageModerationOptions = Marionette.View.extend({
   constructor: function messageModerationOptions() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-messageModerationOptions',
@@ -60,7 +60,7 @@ var messageModerationOptions = Marionette.LayoutView.extend({
     'click @ui.cancelButton': 'onCancelButtonClick'
   },
 
-  onShow: function(){
+  onRender: function(){
     var that = this;
 
     this.updateContent();
@@ -77,7 +77,7 @@ var messageModerationOptions = Marionette.LayoutView.extend({
         });
         that.ui.messageModeratorName.html(agentNameView.render().el);
       });
-    }    
+    }
   },
 
   onPublicationStatusSelectChange: function(ev){

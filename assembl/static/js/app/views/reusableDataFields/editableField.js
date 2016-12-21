@@ -10,9 +10,9 @@ var $ = require('jquery'),
     Assembl = require('../../app.js'),
     Ctx = require('../../common/context.js');
 
-var EditableField = Marionette.ItemView.extend({
+var EditableField = Marionette.View.extend({
   constructor: function EditableField() {
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: _.template(""),

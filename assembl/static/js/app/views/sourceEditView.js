@@ -14,9 +14,9 @@ var Marionette = require('backbone.marionette'),
  * to use for the editing of each source in a source list
  * view.
  */
-module.exports = Marionette.ItemView.extend({
+module.exports = Marionette.View.extend({
   constructor: function exports() {
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
     ui: {

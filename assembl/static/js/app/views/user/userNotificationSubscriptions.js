@@ -22,9 +22,9 @@ var Marionette = require('backbone.marionette'),
 /**
  * User notification
  * */
-var Notification = Marionette.ItemView.extend({
+var Notification = Marionette.View.extend({
   constructor: function Notification() {
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template:'#tmpl-userSubscriptions',
@@ -94,9 +94,9 @@ var Notifications = Marionette.CollectionView.extend({
 /**
  * Notification template
  * */
-var TemplateSubscription = Marionette.ItemView.extend({
+var TemplateSubscription = Marionette.View.extend({
   constructor: function TemplateSubscription() {
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-templateSubscription',
@@ -201,9 +201,9 @@ var TemplateSubscriptions = Marionette.CollectionView.extend({
 /**
  *  Choose an email to notify user
  * */
-var NotificationByEmail = Marionette.ItemView.extend({
+var NotificationByEmail = Marionette.View.extend({
   constructor: function NotificationByEmail() {
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-notificationByEmail',
@@ -252,9 +252,9 @@ var NotificationByEmails = Marionette.CompositeView.extend({
 /**
  * Subscripbe / Unsubscribe action
  * */
-var Subscriber = Marionette.ItemView.extend({
+var Subscriber = Marionette.View.extend({
   constructor: function Subscriber() {
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template:'#tmpl-userSubscriber',
@@ -320,9 +320,9 @@ var Subscriber = Marionette.ItemView.extend({
 
 });
 
-var userNotificationSubscriptions = Marionette.LayoutView.extend({
+var userNotificationSubscriptions = Marionette.View.extend({
   constructor: function userNotificationSubscriptions() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-userNotificationSubscriptions',
@@ -334,9 +334,9 @@ var userNotificationSubscriptions = Marionette.LayoutView.extend({
     userSubscriber: '#subscriber',
     notifByEmail: '#notifByEmail'
   },
-  onBeforeShow: function() {
+  onRender: function() {
     var menu = new UserNavigationMenu({selectedSection: "notifications"});
-    this.getRegion('navigationMenuHolder').show(menu);
+    this.showChildView('navigationMenuHolder', menu);
 
     var that = this,
         collectionManager = new CollectionManager();
@@ -351,7 +351,7 @@ var userNotificationSubscriptions = Marionette.LayoutView.extend({
                 role: allRoles.isUserSubscribedToDiscussion(),
                 roles: allRoles
               });
-              that.getRegion('userSubscriber').show(subscriber);
+              that.showChildView('userSubscriber', subscriber);
 
               var templateSubscriptions = new TemplateSubscriptions({
                 notificationTemplates: notificationTemplates,
@@ -359,14 +359,14 @@ var userNotificationSubscriptions = Marionette.LayoutView.extend({
                 role: allRoles.isUserSubscribedToDiscussion(),
                 roles: allRoles
               });
-              that.getRegion('templateSubscription').show(templateSubscriptions);
+              that.showChildView('templateSubscription', templateSubscriptions);
 
               var userNotification = new Notifications({
                 notificationsUser: NotificationsUser,
                 role: allRoles.isUserSubscribedToDiscussion(),
                 roles: allRoles
               });
-              that.getRegion('userNotifications').show(userNotification);
+              that.showChildView('userNotifications', userNotification);
 
             });
 
@@ -376,7 +376,7 @@ var userNotificationSubscriptions = Marionette.LayoutView.extend({
     });
     emailAccount.fetch();
 
-    this.notifByEmail.show(notificationByEmails);
+    this.showChildView('notifByEmail', notificationByEmails);
   },
 
   serializeData: function() {

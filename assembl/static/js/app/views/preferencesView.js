@@ -122,9 +122,9 @@ function getPreferenceEditView(preferenceModel, subViewKey, useKey) {
  * A single preference item
  * @class app.views.preferencesView.PreferencesItemView
  */
-var PreferencesItemView = Marionette.LayoutView.extend({
+var PreferencesItemView = Marionette.View.extend({
   constructor: function PreferencesItemView() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
   regions: {
     subview: ".js_prefItemSubview"
@@ -203,7 +203,7 @@ var PreferencesItemView = Marionette.LayoutView.extend({
   onRender: function() {
     var subview = getPreferenceEditView(this.preferenceData, this.listKey);
     if (subview) {
-        this.getRegion("subview").show(new subview(this.childViewOptions));
+        this.showChildView('subview', new subview(this.childViewOptions));
     } else {
         console.error("Missing preference subview for ", this.preferenceData);
     }
@@ -251,9 +251,9 @@ var ListPreferencesItemView = PreferencesItemView.extend({
  * Abstract class for preference views
  * @class app.views.preferencesView.BasePreferenceView
  */
-var BasePreferenceView = Marionette.LayoutView.extend({
+var BasePreferenceView = Marionette.View.extend({
   constructor: function BasePreferenceView() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
   ui: {
     prefValue: ".pref_value"
@@ -401,9 +401,9 @@ var DictPreferencesItemView = PreferencesItemView.extend({
         val_subview = getPreferenceEditView(this.preferenceData, this.listKey),
         key_options = _.clone(this.childViewOptions);
     _.extend(key_options, { isKeyView: true });
-    this.getRegion("key_subview").show(new key_subview(key_options));
+    this.showChildView('key_subview', new key_subview(key_options));
     if (val_subview) {
-        this.getRegion("val_subview").show(new val_subview(this.childViewOptions));
+        this.showChildView('val_subview', new val_subview(this.childViewOptions));
     } else {
         console.error("Missing preference subview for ", this.preferenceData);
     }
@@ -850,9 +850,9 @@ var GlobalPreferenceCollectionSubset = PreferenceCollectionSubset.extend({
  * The preferences window
  * @class app.views.preferencesView.PreferencesView
  */
-var PreferencesView = Marionette.LayoutView.extend({
+var PreferencesView = Marionette.View.extend({
   constructor: function PreferencesView() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
   template: "#tmpl-loader",
   ui: {

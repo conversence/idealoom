@@ -17,9 +17,9 @@ var Backbone = require('backbone'),
     Marionette = require('backbone.marionette'),
     Analytics = require('../internal_modules/analytics/dispatcher.js');
 
-var IdeaInIdeaListView = Marionette.LayoutView.extend({
+var IdeaInIdeaListView = Marionette.View.extend({
   constructor: function IdeaInIdeaListView() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   /**
@@ -83,16 +83,16 @@ var IdeaInIdeaListView = Marionette.LayoutView.extend({
     this.listenTo(this.model, 'replacedBy', this.onReplaced);
 
     this.listenTo(this.parentPanel.getGroupState(), "change:currentIdea", function(state, currentIdea) {
-      if(!that.isViewDestroyed()) {
+      if(!that.isDestroyed()) {
         that.onIsSelectedChange(currentIdea);
       }
     });
 
     // TODO: Detect a change in current synthesis
     Ctx.getCurrentSynthesisDraftPromise().then(function(synthesis) {
-      if(!that.isViewDestroyed()) {
+      if(!that.isDestroyed()) {
         that.listenTo(synthesis.getIdeasCollection(), 'add remove reset', function() {
-          if(!that.isViewDestroyed()) {
+          if(!that.isDestroyed()) {
             that.render();
           }
         });
@@ -176,7 +176,7 @@ var IdeaInIdeaListView = Marionette.LayoutView.extend({
         visitorData: visitorData,
         synthesis: that.synthesis,
     };
-    that.regionChildren.show(ideaFamilies);
+    that.showChildView('regionChildren', ideaFamilies);
     if(Ctx.isSmallScreen()){
       var screenSize = window.innerWidth;
       //TO FIX : impossible to add event marionette on this class: 'idealist-title-unread'
@@ -255,7 +255,7 @@ var IdeaInIdeaListView = Marionette.LayoutView.extend({
 
     ev.stopPropagation();
     Ctx.getCurrentSynthesisDraftPromise().then(function(synthesis) {
-      if(that.model) {//once marionettized, replace with: if (!that.isViewDestroyed()) {
+      if(that.model) {//once marionettized, replace with: if (!that.isDestroyed()) {
         var ideaCollection = synthesis.getIdeasCollection();
         if (checked) {
           ideaCollection.add(that.model);
@@ -344,7 +344,7 @@ var IdeaInIdeaListView = Marionette.LayoutView.extend({
     //console.log("ideaInIdeaList::onDragStart() ev: ", ev);
     if (ev) {
       ev.stopPropagation();
-      Assembl.vent.trigger('idea:dragStart', this.model);
+      Assembl.idea_vent.trigger('idea:dragStart', this.model);
     }
 
     if (Ctx.getCurrentUser().can(Permissions.EDIT_IDEA)) {
@@ -365,7 +365,7 @@ var IdeaInIdeaListView = Marionette.LayoutView.extend({
     if (ev) {
       ev.preventDefault();
       ev.stopPropagation();
-      Assembl.vent.trigger('idea:dragEnd', this.model);
+      Assembl.idea_vent.trigger('idea:dragEnd', this.model);
     }
 
     ev.currentTarget.style.opacity = '';
@@ -382,7 +382,7 @@ var IdeaInIdeaListView = Marionette.LayoutView.extend({
     if (ev) {
       ev.preventDefault();
       ev.stopPropagation();
-      Assembl.vent.trigger('idea:dragOver', this.model);
+      Assembl.idea_vent.trigger('idea:dragOver', this.model);
     }
 
     if (ev.originalEvent) {
@@ -551,7 +551,7 @@ var IdeaInIdeaListView = Marionette.LayoutView.extend({
 
   onIdeaCollaspedStateChange: function(ev) {
     //console.log("ideaInIdeaList::onIdeaCollaspedStateChange() ev: ", ev, " this:", this);
-    if(!this.isViewDestroyed()) {
+    if(!this.isDestroyed()) {
       this.applyCustomCollapsedState();
     }
   },

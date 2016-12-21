@@ -44,9 +44,10 @@ var SynthesisPanel = AssemblPanel.extend({
     var that = this,
         collectionManager = new CollectionManager();
 
-    if (obj.template) {
-      this.realTemplate = obj.template;
-    }
+    // done in constructor
+    // if (obj.realTemplate) {
+    //   this.realTemplate = obj.realTemplate;
+    // }
 
     if ( "showAsMessage" in obj ){
       this.showAsMessage = obj.showAsMessage;
@@ -61,7 +62,7 @@ var SynthesisPanel = AssemblPanel.extend({
                 collectionManager.getAllIdeasCollectionPromise(),
                 collectionManager.getAllIdeaLinksCollectionPromise(),
             function(synthesisCollection, allIdeasCollection, allIdeaLinksCollection) {
-              if (!that.isViewDestroyed()) {
+              if (!that.isDestroyed()) {
                 that.ideas = allIdeasCollection;
                 var rootIdea = allIdeasCollection.getRootIdea(),
                 raw_ideas;
@@ -71,7 +72,7 @@ var SynthesisPanel = AssemblPanel.extend({
                   that.model = _.find(synthesisCollection.models, function(model) {
                     return model.get('is_next_synthesis');
                   });
-                  that.bindEntityEvents(that.model, that.getOption('modelEvents'));
+                  that.bindEvents(that.model, that.getOption('modelEvents'));
                 }
                 that.synthesisIdeas = that.model.getIdeasCollection();
                 that.synthesisIdeas.collectionManager = collectionManager;
@@ -167,17 +168,19 @@ var SynthesisPanel = AssemblPanel.extend({
         console.log("synthesisPanel:onRender() is firing");
       }
 
-      var that = this;
-
-      if(that.template !== that.realTemplate) {
+      if (this.isDestroyed()) {
+        return;
+      }
+      if (this.template !== this.realTemplate) {
         return;
       }
 
-      var view_data = {},
-      order_lookup_table = [],
-      roots = [],
-      collectionManager = new CollectionManager(),
-      canEdit = Ctx.getCurrentUser().can(Permissions.EDIT_SYNTHESIS);
+      var that = this,
+          view_data = {},
+          order_lookup_table = [],
+          roots = [],
+          collectionManager = new CollectionManager(),
+          canEdit = Ctx.getCurrentUser().can(Permissions.EDIT_SYNTHESIS);
 
       Ctx.removeCurrentlyDisplayedTooltips(this.$el);
 
@@ -220,7 +223,7 @@ var SynthesisPanel = AssemblPanel.extend({
             model: that.model,
             modelProp: 'subject'
           });
-          that.getRegion("title").show(titleField);
+          that.showChildView('title', titleField);
 
           var introductionField = new CKEditorField({
             model: that.model,
@@ -230,7 +233,7 @@ var SynthesisPanel = AssemblPanel.extend({
             autosave: true,
             hideButton: true
           });
-          that.getRegion("introduction").show(introductionField);
+          that.showChildView('introduction', introductionField);
 
           var conclusionField = new CKEditorField({
             model: that.model,
@@ -240,7 +243,7 @@ var SynthesisPanel = AssemblPanel.extend({
             autosave: true,
             hideButton: true
           });
-          that.getRegion("conclusion").show(conclusionField);
+          that.showChildView('conclusion', conclusionField);
         }
         else {
           // TODO: Use regions here.
@@ -253,10 +256,10 @@ var SynthesisPanel = AssemblPanel.extend({
 
         if (that.getContainingGroup().model.get('navigationState') == "synthesis") {
           that.$('.synthesisPanel-introduction')[0].id = "tour_step_synthesis_intro";
-          Assembl.vent.trigger("requestTour", "synthesis_intro");
+          Assembl.tour_vent.trigger("requestTour", "synthesis_intro");
           if (roots.length > 0) {
             that.$('.synthesisPanel-ideas')[0].id = "tour_step_synthesis_idea1";
-            Assembl.vent.trigger("requestTour", "synthesis_idea1");
+            Assembl.tour_vent.trigger("requestTour", "synthesis_idea1");
           }
         }
 
@@ -280,7 +283,7 @@ var SynthesisPanel = AssemblPanel.extend({
     if ( this.showAsMessage ){
       return;
     }
-    var el = Assembl.groupContainer.$el;
+    var el = Assembl.rootView.getRegion('groupContainer').$el;
     if ( el ){
       if (isVisible){
         el.addClass("hasSynthesisPanel");

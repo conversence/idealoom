@@ -715,7 +715,7 @@ Context.prototype = {
       }
     };
 
-    Assembl.slider.show(window.modal_instance);
+    Assembl.rootView.showChildView('slider', window.modal_instance);
 
     return false; // so that we cancel the normal behaviour of the clicked link (aka making browser go to "target" attribute of the "a" tag)
   },
@@ -769,7 +769,7 @@ Context.prototype = {
   popDraggedIdea: function() {
     if (this.ideaList && this.draggedIdea) {
 
-      Assembl.vent.trigger('ideaList:removeIdea', this.draggedIdea);
+      Assembl.idea_vent.trigger('ideaList:removeIdea', this.draggedIdea);
     }
 
     var idea = this.draggedIdea;
@@ -1089,7 +1089,7 @@ Context.prototype = {
 
         var selector = this.format('[data-annotation-id="{0}"]', segment.id);
 
-        Assembl.vent.trigger('messageList:showMessageById', segment.get('idPost'), function() {
+        Assembl.message_vent.trigger('messageList:showMessageById', segment.get('idPost'), function() {
           $(selector).highlight();
         });
 

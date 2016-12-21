@@ -11,9 +11,9 @@ var _ = require('underscore'),
     Ctx = require('../../common/context.js'),
     Permissions = require('../../utils/permissions.js');
 
-var SimpleLinkView = Marionette.ItemView.extend({
+var SimpleLinkView = Marionette.View.extend({
   constructor: function SimpleLinkView() {
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-simpleLink',

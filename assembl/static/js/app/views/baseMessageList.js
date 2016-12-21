@@ -92,7 +92,7 @@ return cls.extend({
 
     collectionManager.getAllMessageStructureCollectionPromise()
     .then(function(allMessageStructureCollection) {
-      if(!that.isViewDestroyed()) {
+      if(!that.isDestroyed()) {
         that.resetPendingMessages(allMessageStructureCollection);
         that.listenTo(allMessageStructureCollection, 'add', that.addPendingMessage);
       }
@@ -103,7 +103,7 @@ return cls.extend({
     if ( this.annotatorIsEnabled ){
       collectionManager.getAllExtractsCollectionPromise()
       .then(function(allExtractsCollection) {
-        if(!that.isViewDestroyed()) {
+        if(!that.isDestroyed()) {
           that.listenToOnce(allExtractsCollection, 'add remove reset', function(eventName) {
             // console.log("about to call initAnnotator because allExtractsCollection was updated with:", eventName);
             that.initAnnotator();
@@ -165,6 +165,8 @@ return cls.extend({
     this._offsetStart = undefined;
     this._offsetEnd = undefined;
 
+    //FIXME once marionettization is complete
+    //console.log("messageList onRender() this.newTopicView:", this.newTopicView);
   },
 
   // OVERRIDE
@@ -399,7 +401,7 @@ return cls.extend({
         debug = false,
         that = this;
 
-      if (previousScrollTarget && !this.isViewDestroyed()) {
+      if (previousScrollTarget && !this.isDestroyed()) {
         if (debug) {
           console.log("scrollToPreviousScrollTarget(): Trying to scroll to:", previousScrollTarget); // example: "message-local:Content/5232"
         }
@@ -699,7 +701,7 @@ return cls.extend({
           if (that.getContainingGroup().model.get('navigationState') !== "synthesis") {
             // dynamically add id to the first view of message to enable take tour
             views[0].$el.attr('id', 'tour_step_message');
-            Assembl.vent.trigger("requestTour", "first_message");
+            Assembl.tour_vent.trigger("requestTour", "first_message");
           }
 
           _.each(views, function(view) {
@@ -761,7 +763,7 @@ return cls.extend({
     var that = this;
 
     //console.log("_postRenderSlowCallbackWorker fired, stack length: ", this._postRenderSlowCallbackStack.length)
-    if (this.isViewDestroyed()) {
+    if (this.isDestroyed()) {
       // this case is hypothetical.
       this._postRenderSlowCallbackStack = [];
       return;
@@ -775,7 +777,7 @@ return cls.extend({
 
     this._postRenderSlowCallbackWorkerInterval = setTimeout(function() {
       that._postRenderSlowCallbackWorker();
-    }, this.SLOW_WORKER_DELAY_VALUE)
+    }, SLOW_WORKER_DELAY_VALUE)
   },
 
   /**
@@ -785,7 +787,7 @@ return cls.extend({
     var that = this;
     this._postRenderSlowCallbackWorkerInterval = setTimeout(function() {
       that._postRenderSlowCallbackWorker();
-    }, this.SLOW_WORKER_DELAY_VALUE);
+    }, SLOW_WORKER_DELAY_VALUE);
   },
   /**
    * Stops processing and clears the queue
@@ -804,7 +806,7 @@ return cls.extend({
     if (Ctx.debugAnnotator) {
       console.log("messageList:_doAnnotatorRefresh() called for " + _.size(this.renderedMessageViewsCurrent) + " messages on render id ", _.clone(this._renderId));
     }
-    if(!this.isViewDestroyed()) {
+    if(!this.isDestroyed()) {
       this.annotatorRefreshRequested = false;
 
       //console.log("_doAnnotatorRefresh(): About to call initAnnotator");
@@ -1117,11 +1119,6 @@ return cls.extend({
       return this;
     },
 
-  onShow: function() {
-    //FIXME once marionettization is complete
-    //console.log("messageList onShow() this.newTopicView:", this.newTopicView);
-
-  },
   onBeforeDestroy: function() {
     this.saveMessagesInProgress();
   },
@@ -1232,7 +1229,7 @@ return cls.extend({
     return Promise.join(this.currentQuery.getResultMessageStructureCollectionPromise(),
         this.currentQuery.getResultMessageIdCollectionPromise(),
         function(messageStructureCollection, resultMessageIdCollection) {
-      if (!that.isViewDestroyed()) {
+      if (!that.isDestroyed()) {
         if(that._cachedVisitorDataPromise !== undefined) {
           //resultMessageIdCollection is a plain array, NOT a real collection
           // Still, could we not use _.isEqual instead?
@@ -1295,7 +1292,7 @@ return cls.extend({
         this.getVisitorDataPromise(),
         function(messageStructureModels, visitorData) {
               var list = [];
-              if(!that.isViewDestroyed()) {
+              if(!that.isDestroyed()) {
                 that.clearRenderedMessages();
                 _.each(requestedIds, function(messageId) {
                   var messageModel = undefined;
@@ -2358,7 +2355,7 @@ return cls.extend({
     Promise.join(
         that.currentQuery.getResultMessageIdCollectionPromise(), that.getVisitorDataPromise(),
         function(resultMessageIdCollection, visitorData) {
-          if(!that.isViewDestroyed()) {
+          if(!that.isDestroyed()) {
             that.checkMessagesOnscreen(resultMessageIdCollection, visitorData);
           }
         });

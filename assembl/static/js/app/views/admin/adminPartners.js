@@ -15,9 +15,9 @@ var Marionette = require('backbone.marionette'),
     partnerModel = require('../../models/partners.js'),
     AdminNavigationMenu = require('./adminNavigationMenu.js');
 
-var Partners = Marionette.ItemView.extend({
+var Partners = Marionette.View.extend({
   constructor: function Partners() {
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-partnersInAdmin',
@@ -97,7 +97,7 @@ var Partners = Marionette.ItemView.extend({
 
     var modal = new Modal();
 
-    Assembl.slider.show(modal);
+    Assembl.rootView.showChildView('slider', modal);
 
   }
 });
@@ -113,9 +113,9 @@ var PartnerList = Marionette.CollectionView.extend({
   }
 });
 
-var adminPartners = Marionette.LayoutView.extend({
+var adminPartners = Marionette.View.extend({
   constructor: function adminPartners() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-adminPartners',
@@ -141,7 +141,7 @@ var adminPartners = Marionette.LayoutView.extend({
     }
   },
 
-  onBeforeShow: function() {
+  onRender: function() {
     var that = this,
         collectionManager = new CollectionManager();
 
@@ -156,12 +156,12 @@ var adminPartners = Marionette.LayoutView.extend({
 
               that.partners = allPartnerOrganization;
 
-              that.getRegion('partner').show(partnerList);
+              that.showChildView('partner', partnerList);
             });
 
     var menu = new AdminNavigationMenu.discussionAdminNavigationMenu(
       {selectedSection: "partners"});
-    this.getRegion('navigationMenuHolder').show(menu);
+    this.showChildView('navigationMenuHolder', menu);
   },
 
   close: function() {
@@ -220,7 +220,7 @@ var adminPartners = Marionette.LayoutView.extend({
 
     var modal = new Modal();
 
-    Assembl.slider.show(modal);
+    Assembl.rootView.showChildView('slider', modal);
 
   }
 

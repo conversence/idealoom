@@ -14,9 +14,9 @@ var Marionette = require('backbone.marionette'),
     Permissions = require('../utils/permissions.js'),
     availableFilters = require('./postFilters.js');
 
-var AgentView = Marionette.ItemView.extend({
+var AgentView = Marionette.View.extend({
   constructor: function AgentView() {
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
   ui: {
     avatar: '.js_agentAvatar',
@@ -89,7 +89,7 @@ function showUserMessages(userModel) {
   modal = modalFactory.modal,
   messageList = modalFactory.messageList;
 
-  Assembl.slider.show(modal);
+  Assembl.rootView.showChildView('slider', modal);
 } 
 
 module.exports = {

@@ -180,7 +180,7 @@ var transitionAnimation = function(el, el2, duration){
 
 
 // This view shows at the top of the popin the bag of remaining tokens the user has
-var TokenBagsView = Marionette.LayoutView.extend({
+var TokenBagsView = Marionette.View.extend({
   template: '#tmpl-tokenBags',
   regions: {
     "tokenBags": ".token-bags-content"
@@ -216,13 +216,13 @@ var TokenBagsView = Marionette.LayoutView.extend({
       tokenSize: that.tokenSize,
       userLanguagePreferences: that.userLanguagePreferences
     });
-    that.getRegion('tokenBags').show(bags);
+    that.showChildView('tokenBags', bags);
   }
 });
 
 // This view shows the remaining tokens the user has, of a given category
 // This view's model is a token category (an instance of Widget.TokenCategorySpecificationModel)
-var RemainingCategoryTokensView = Marionette.ItemView.extend({
+var RemainingCategoryTokensView = Marionette.View.extend({
   template: false,
   initialize: function(options){
     if ( !("myVotesCollection" in this.options)){
@@ -336,7 +336,7 @@ var RemainingTokenCategoriesCollectionView = Marionette.CollectionView.extend({
 
 // This view shows (in the block of an idea) the clickable tokens (of one given category of tokens) a user can allocate (and has allocated) on this idea
 // This view's model is a token category
-var TokenCategoryAllocationView = Marionette.ItemView.extend({
+var TokenCategoryAllocationView = Marionette.View.extend({
   template: '#tmpl-tokenIdeaAllocation',
   className: "token-category-allocation",
   initialize: function(options){
@@ -735,7 +735,7 @@ var TokenCategoryAllocationCollectionView = Marionette.CollectionView.extend({
 });
 
 
-var TokenCategoryExclusivePairCollectionView = Marionette.LayoutView.extend({
+var TokenCategoryExclusivePairCollectionView = Marionette.View.extend({
   template: '#tmpl-tokenCategoryExclusivePairCollection',
   regions: {
     negativeTokens: ".negative-tokens",
@@ -748,7 +748,7 @@ var TokenCategoryExclusivePairCollectionView = Marionette.LayoutView.extend({
     this.parent = options.parent;
     this.tokenSize = options.tokenSize;
   },
-  onShow: function() {
+  onRender: function() {
     // placeholder for better code. TODO: We need to choose positive/negative
     // according to typename.
     var negativeTokens = this.collection.at(0),
@@ -775,8 +775,8 @@ var TokenCategoryExclusivePairCollectionView = Marionette.LayoutView.extend({
       negativeTokensView.setForceUnselectZero(true);
     }
 
-    this.getRegion("negativeTokens").show(negativeTokensView);
-    this.getRegion("positiveTokens").show(positiveTokensView);
+    this.showChildView('negativeTokens', negativeTokensView);
+    this.showChildView('positiveTokens', positiveTokensView);
 
 
     positiveTokensView.on("token:click", function(clicked_value){
@@ -815,7 +815,7 @@ var TokenCategoryExclusivePairCollectionView = Marionette.LayoutView.extend({
 
 
 // This view shows an idea in the list of votable ideas (and calls a subview which shows the tokens for this idea)
-var TokenVoteItemView = Marionette.LayoutView.extend({
+var TokenVoteItemView = Marionette.View.extend({
   template: '#tmpl-tokenVoteItem',
   initialize: function(options){
     this.childIndex = options.childIndex;
@@ -861,14 +861,14 @@ var TokenVoteItemView = Marionette.LayoutView.extend({
           tokenSize: tokenSize
         });
       }
-      this.getRegion('tokensForIdea').show(tokenCategoryCollection);
+      this.showChildView('tokensForIdea', tokenCategoryCollection);
     }
-  },
 
-  onShow: function(){
+    // code from onShow
+
     this.renderCKEditorDescription();
   },
-  
+
   renderCKEditorDescription: function() {
     if (!Ctx.stripHtml(this.model.get('definition')).length){
       return;
@@ -882,7 +882,7 @@ var TokenVoteItemView = Marionette.LayoutView.extend({
       readMoreAfterHeightPx: 39 // should match the min-heght of .idea-description .  Currently this is  2*$baseLineHeightFontMultiplier*$baseFontSize (2 lines)
     });
 
-    this.getRegion('regionIdeaDescription').show(description);
+    this.showChildView('regionIdeaDescription', description);
   },
 });
 
@@ -898,7 +898,7 @@ var TokenVoteCollectionView = Marionette.CompositeView.extend({
       parent: that
     };
   },
-  templateHelpers: function(){
+  templateContext: function(){
     var that = this;
     return {
       i18n: i18n,
@@ -914,9 +914,9 @@ var TokenVoteCollectionView = Marionette.CompositeView.extend({
   The view of a single vote result, which will be created by
   the collection view TokenVoteResultCollectionView
  */
-var TokenVoteResultView = Marionette.LayoutView.extend({
+var TokenVoteResultView = Marionette.View.extend({
   constructor: function TokenVoteResultView(){
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-tokenVoteResultSingleView',
@@ -1223,9 +1223,9 @@ var TokenVoteResultCollectionView = Marionette.CompositeView.extend({
   It contains the question asked, and a collection view of each
   idea's vote results
  */
-var TokenResultView = Marionette.LayoutView.extend({
+var TokenResultView = Marionette.View.extend({
   constructor: function ModalView(){
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: "#tmpl-tokenVoteResultView",
@@ -1288,10 +1288,10 @@ var TokenResultView = Marionette.LayoutView.extend({
           voteSpecification: that.tokenSpecs,
           languagePreferences: that.languagePreferences
         });
-        if (!that.isViewDestroyed()){
+        if (!that.isDestroyed()){
           that.isReady = true;
           that.render();
-          that.results.show(that.tokenResultsView);
+          that.showChildView('results', that.tokenResultsView);
         }
       });
     });
@@ -1356,10 +1356,10 @@ var TokenResultView = Marionette.LayoutView.extend({
     }
   },
 
-  onShow: function(){
+  onRender: function(){
     var that = this;
     if (this.tokenResultsView){
-      this.results.show(this.tokenResultsView);
+      this.showChildView('results', this.tokenResultsView);
     }
   }
 });
@@ -1535,7 +1535,7 @@ var TokenVoteSessionModal = Backbone.Modal.extend({
 
   },
 
-  onShow: function(){
+  onRender: function(){
     var that = this;
 
     that.availableTokensPositionTop = that.$(".available-tokens").position().top;
@@ -1591,7 +1591,7 @@ var TokenVoteSessionModal = Backbone.Modal.extend({
     this.remove();
     var modalView = new TokenVoteSessionSubmittedModal();
     Ctx.setCurrentModalView(modalView);
-    Assembl.slider.show(modalView);
+    Assembl.rootView.showChildView('slider', modalView);
   },
 
   /*
@@ -1675,7 +1675,7 @@ var TokenVoteSessionSubmittedModal = Backbone.Modal.extend({
   className: 'modal-token-vote-session-submitted popin-wrapper',
   cancelEl: '.close, .js_close',
 
-  onShow: function(){
+  onRender: function(){
     var container = this.$el.find(".js_modal-body");
     container.empty();
     var text = $("<p></p>");

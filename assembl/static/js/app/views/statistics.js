@@ -15,14 +15,23 @@ var Marionette = require('backbone.marionette'),
     Moment = require('moment'),
     Promise = require('bluebird');
 
-var Statistics = Marionette.ItemView.extend({
+var Statistics = Marionette.View.extend({
   constructor: function Statistics() {
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-statistics',
   initialize: function() {
-    // this.computeStatistics(); // moved to onBeforeShow() because it can finish before the DOM is present and attached ( which can make the D3 lib crash while doing work involving transitions)
+    var that = this,
+        collectionManager = new CollectionManager();
+    Promise.join(collectionManager.getAllUsersCollectionPromise(),
+                 collectionManager.getAllMessageStructureCollectionPromise(),
+      function(allUsersCollection, allMessagesCollection) {
+        that.allUsersCollection = allUsersCollection;
+        that.allMessagesCollection = allMessagesCollection;
+        that.render();
+      });
+
   },
   ui: {
     statistics: '.statistics',
@@ -34,7 +43,7 @@ var Statistics = Marionette.ItemView.extend({
   pieChartShowMessages: false,
   pie_chart_data: undefined,
 
-  onBeforeShow: function() {
+  onBeforeRender: function() {
     this.computeStatistics();
   },
 
@@ -774,20 +783,15 @@ var Statistics = Marionette.ItemView.extend({
   },
 
   computeStatistics: function() {
-    var that = this;
-    var collectionManager = new CollectionManager();
-
-    //var users = collectionManager.getAllUsersCollectionPromise();
-
-    Promise.join(collectionManager.getAllUsersCollectionPromise(),
-                 collectionManager.getAllMessageStructureCollectionPromise(),
-            function(allUsersCollection, allMessagesCollection) {
+    var allUsersCollection = this.allUsersCollection,
+        allMessagesCollection = this.allMessagesCollection;
+    if (allUsersCollection !== undefined && allMessagesCollection !== undefined) {
               // console.log("collections allUsersCollection, allMessagesCollection are loaded");
               // console.log(allMessagesCollection);
               if (allMessagesCollection.size() == 0) {
-                var chart_div = that.$('.chart');
+                var chart_div = this.$('.chart');
                 chart_div.html(i18n.gettext("Not enough data yet."));
-                that.$(".pie").hide();
+                this.$(".pie").hide();
                 return;
               }
 
@@ -847,11 +851,11 @@ var Statistics = Marionette.ItemView.extend({
               //console.log("messages_per_day_totals_array:");
               //console.log(messages_per_day_totals_array);
 
-              var period = that.deduceGoodPeriod(messages_per_day_totals_array, messages_threshold);
+              var period = this.deduceGoodPeriod(messages_per_day_totals_array, messages_threshold);
 
               var statsPeriodName = i18n.gettext(period.period_type);
 
-              // this switch is here just so that the i18n strings are correcly parsed and put into the .pot file
+              // this switch is here just so this the i18n strings are correcly parsed and put into the .pot file
               switch (period.period_type) {
                 case 'last week':
                   statsPeriodName = i18n.gettext('last week');
@@ -936,17 +940,17 @@ var Statistics = Marionette.ItemView.extend({
                 //msg.value = messages_in_period_total;
               });
 
-              if (that.lineChartIsCumulative) {
+              if (this.lineChartIsCumulative) {
                 var i = 0;
                 var messages_per_day_totals_filled_array_cumulative = $.extend(true, [], messages_per_day_totals_filled_array);
                 _.each(messages_per_day_totals_filled_array_cumulative, function(msg) {
                   i += msg.value;
                   msg.value = i;
                 });
-                that.messages_per_day_for_line_graph = messages_per_day_totals_filled_array_cumulative;
+                this.messages_per_day_for_line_graph = messages_per_day_totals_filled_array_cumulative;
               }
               else {
-                that.messages_per_day_for_line_graph = messages_per_day_totals_filled_array;
+                this.messages_per_day_for_line_graph = messages_per_day_totals_filled_array;
               }
 
               // -----
@@ -1011,7 +1015,7 @@ var Statistics = Marionette.ItemView.extend({
               // show results
               // -----
 
-              that.stats = {
+              this.stats = {
                 "statsPeriodName": statsPeriodName,
                 "messages_in_period_total": messages_in_period_total,
                 "messages_total": messages_total
@@ -1091,13 +1095,11 @@ var Statistics = Marionette.ItemView.extend({
                     }
                 ];
 
-              that.pie_chart_data = pie_chart_data;
-              that.pie_chart_default_legend_data = pie_chart_default_legend_data;
-              that.legend_squares_data = legend_squares_data;
+              this.pie_chart_data = pie_chart_data;
+              this.pie_chart_default_legend_data = pie_chart_default_legend_data;
+              this.legend_squares_data = legend_squares_data;
 
-              that.render();
-
-            });
+    }
   },
 
   /*

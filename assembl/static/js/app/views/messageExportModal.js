@@ -56,8 +56,8 @@ var Modal = Backbone.Modal.extend({
 
       this.$('.js_source-specific-form').html(fbView.render().el);
       //Because we are not yet using marionette's version of Backbone.modal.
-      fbView.onShow();
-    },
+      fbView.onRender();
+  },
   generateView: function(event) {
       //Whilst checking for accessTokens, make the region where
       //facebook will be rendered a loader

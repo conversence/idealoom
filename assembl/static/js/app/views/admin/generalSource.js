@@ -38,9 +38,9 @@ function getSourceEditView(model_type) {
 
 
 
-var ReadSource = Marionette.ItemView.extend({
+var ReadSource = Marionette.View.extend({
   constructor: function ReadSource() {
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
     template: '#tmpl-adminDiscussionSettingsGeneralSourceRead',
@@ -141,9 +141,9 @@ function getSourceDisplayView(model) {
 };
 
 
-var SourceView = Marionette.LayoutView.extend({
+var SourceView = Marionette.View.extend({
   constructor: function SourceView() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   ui: {
@@ -157,20 +157,20 @@ var SourceView = Marionette.LayoutView.extend({
   toggleEditView: function() {
     this.ui.edit_container.toggleClass('hidden');
   },
-  onShow: function(){
+  onRender: function(){
     var display_view = getSourceDisplayView(this.model);
-    this.getRegion('readOnly').show(new display_view({parent: this}));
+    this.showChildView('readOnly', new display_view({parent: this}));
     var editViewClass = getSourceEditView(this.model.get("@type"));
     if (editViewClass !== undefined) {
-      this.getRegion('form').show(new editViewClass({model: this.model}));
+      this.showChildView('form', new editViewClass({model: this.model}));
     }
   },
 });
 
 
-var CreateSource = Marionette.LayoutView.extend({
+var CreateSource = Marionette.View.extend({
   constructor: function CreateSource() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-DiscussionSettingsCreateSource',
@@ -211,10 +211,10 @@ var CreateSource = Marionette.LayoutView.extend({
     var modelClass = Source.getSourceClassByType(sourceType);
     if (editViewClass !== undefined && modelClass !== undefined) {
       this.editView = new editViewClass({model: new modelClass()});
-      this.getRegion('edit_form').show(this.editView);
+      this.showChildView('edit_form', this.editView);
     } else {
       this.editView = undefined;
-      this.getRegion('edit_form').show("");
+      this.showChildView('edit_form', "");
     }
   },
   createButton: function(ev) {

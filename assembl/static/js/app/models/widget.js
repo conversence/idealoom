@@ -512,7 +512,7 @@ var TokenVotingWidgetModel = VotingWidgetModel.extend({
         });
 
         Ctx.setCurrentModalView(modalView);
-        Assembl.slider.show(modalView);
+        Assembl.rootView.showChildView('slider', modalView);
       break;
       case "ended":
         that.onShowResult();
@@ -526,7 +526,7 @@ var TokenVotingWidgetModel = VotingWidgetModel.extend({
   onShowResult: function(evt){
     var modalView = new TokenVoteSessionView.TokenVoteSessionResultModal({model: this});
     Ctx.setCurrentModalView(modalView);
-    Assembl.slider.show(modalView);
+    Assembl.rootView.showChildView('slider', modalView);
   },
 
   getCssClasses: function(context, idea) {

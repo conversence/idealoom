@@ -76,7 +76,7 @@ var SynthesisMessageView = MessageView.extend({
               messageListView: that.messageListView,
               panelWrapper: that.messageListView.getPanelWrapper(),
               el: that.$('.message-body'),
-              template: '#tmpl-synthesisPanelMessage',
+              realTemplate: '#tmpl-synthesisPanelMessage',
               showAsMessage: true
             });
             that.synthesisPanel.render();

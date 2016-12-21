@@ -18,9 +18,9 @@ var Marionette = require('backbone.marionette'),
     scrollUtils = require('../../utils/scrollUtils.js'),
     Analytics = require('../../internal_modules/analytics/dispatcher.js');
 
-var SynthesisItem = Marionette.ItemView.extend({
+var SynthesisItem = Marionette.View.extend({
   constructor: function SynthesisItem() {
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-loader',
@@ -99,8 +99,21 @@ var SynthesisInNavigationPanel = AssemblPanel.extend({
   },
 
   initialize: function(options) {
-      AssemblPanel.prototype.initialize.apply(this, arguments);
-    },
+    AssemblPanel.prototype.initialize.apply(this, arguments);
+    var that = this,
+        collectionManager = new CollectionManager();
+
+    Promise.join(collectionManager.getAllMessageStructureCollectionPromise(),
+      collectionManager.getAllSynthesisCollectionPromise(),
+      function(allMessageStructureCollection, allSynthesisCollection) {
+      if(!that.isDestroyed()) {
+        that.template = '#tmpl-synthesisInNavigationPanel';
+        that.allMessageStructureCollection = allMessageStructureCollection;
+        that.allSynthesisCollection = allSynthesisCollection;
+        that.render();
+      }
+    });
+  },
 
   selectSynthesisInMenu: function(messageId) {
       $(".synthesisItem").closest('li').removeClass("selected");
@@ -124,7 +137,6 @@ var SynthesisInNavigationPanel = AssemblPanel.extend({
         messageListView.ui.replyBox.addClass('hidden');
       }
     }, 1);
-    
 
     // Show that entry is selected
     this.selectSynthesisInMenu(messageId);
@@ -140,34 +152,28 @@ var SynthesisInNavigationPanel = AssemblPanel.extend({
           panel: this
         });
 
-        this.getRegion('synthesisContainer').show(synthesisList);
+        this.showChildView('synthesisContainer', synthesisList);
         this.displaySynthesis(lastPublisedSynthesis.get('published_in_post'));
       }
       else {
         this.ui.synthesisListHeader.html(i18n.gettext("No synthesis of the discussion has been published yet"));
       }
     },
-  
-  onBeforeShow: function() {
+
+  onRender: function() {
     var that = this,
     collectionManager = new CollectionManager();
 
-    Promise.join(collectionManager.getAllMessageStructureCollectionPromise(),
-      collectionManager.getAllSynthesisCollectionPromise(),
-      function(allMessageStructureCollection, allSynthesisCollection) {
-      if(!that.isViewDestroyed()) {
-        that.template = '#tmpl-synthesisInNavigationPanel';
-        that.render();
-        that.displaySynthesisList(allMessageStructureCollection, allSynthesisCollection);
-        that.listenTo(allSynthesisCollection, 'add reset', function() {
+    if (this.template !== '#tmpl-loader' && !this.isDestroyed()) {
+        this.displaySynthesisList(this.allMessageStructureCollection, this.allSynthesisCollection);
+        this.listenTo(this.allSynthesisCollection, 'add reset', function() {
           //console.log("Re-displaying synthesis list from collection update...", allSynthesisCollection.length);
-          that.displaySynthesisList(allMessageStructureCollection, allSynthesisCollection);
+          that.displaySynthesisList(that.allMessageStructureCollection, that.allSynthesisCollection);
         });
-        // that.synthesisContainer.$el.find(".synthesisItem:first")[0].id = "tour_step_synthesis_item1";
-        // Assembl.vent.trigger("requestTour", "synthesis_item1");
-      }
-    });
-  }
+        // that.getRegion('synthesisContainer').$el.find(".synthesisItem:first")[0].id = "tour_step_synthesis_item1";
+        // Assembl.tour_vent.trigger("requestTour", "synthesis_item1");
+    }
+  },
 
 });
 

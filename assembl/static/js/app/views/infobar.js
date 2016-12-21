@@ -13,9 +13,9 @@ var Backbone=require('backbone'),
     Ctx = require('../common/context.js'),
     $ = require('jquery');
 
-var CookieInfobarItemView = Marionette.LayoutView.extend({
+var CookieInfobarItemView = Marionette.View.extend({
   constructor: function CookiebarItem() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
   template: '#tmpl-cookieBanner',
   ui:{
@@ -28,14 +28,14 @@ var CookieInfobarItemView = Marionette.LayoutView.extend({
   },
   openCookiesSettings:function(){
     var piwikIframe = new PiwikIframeModal();
-    Assembl.slider.show(piwikIframe); 
+    Assembl.rootView.showChildView('slider', piwikIframe); 
     this.closeInfobar();
   },
   closeInfobar: function() {
     CookiesManager.setUserCookiesAuthorization();
     this.destroy();
     this.model.set("closeInfobar", true);
-    Assembl.vent.trigger('infobar:closeItem');
+    Assembl.other_vent.trigger('infobar:closeItem');
   }
 });
 
@@ -69,9 +69,9 @@ var PiwikIframeModal = Backbone.Modal.extend({
   cancelEl: '.close'
 });
 
-var WidgetInfobarItemView = Marionette.LayoutView.extend({
+var WidgetInfobarItemView = Marionette.View.extend({
   constructor: function InfobarItem() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
   template: '#tmpl-infobar',
   className: 'content-infobar',
@@ -101,7 +101,8 @@ var WidgetInfobarItemView = Marionette.LayoutView.extend({
     }
     return false;
   },
-  serializeModel: function(model) {
+  serializeModel: function() {
+    var model = this.model;
     return {
       model: model,
       message: model.getDescriptionText(Widget.Model.prototype.INFO_BAR),
@@ -116,7 +117,7 @@ var WidgetInfobarItemView = Marionette.LayoutView.extend({
   closeInfobar: function() {
     this.destroy();
     this.model.set("closeInfobar", true);
-    Assembl.vent.trigger('infobar:closeItem');
+    Assembl.other_vent.trigger('infobar:closeItem');
   }
 });
 
@@ -124,7 +125,7 @@ var InfobarsView = Marionette.CollectionView.extend({
   constructor: function Infobars() {
     Marionette.CollectionView.apply(this, arguments);
   },
-  getChildView:function(item){
+  childView:function(item){
     if(item.get('@type')){
       return WidgetInfobarItemView;
     }else{
@@ -142,7 +143,7 @@ var InfobarsView = Marionette.CollectionView.extend({
   },
   //TO DO: refactor because should not be necessary to set the top of 'groupContainer' in js file
   adjustInfobarSize: function(evt) {
-    var el = Assembl.groupContainer.$el;
+    var el = Assembl.rootView.getRegion('groupContainer').$el;
     var n = this.collection.length;
     this.collection.each(function(itemView){
       if(itemView.get('closeInfobar')){

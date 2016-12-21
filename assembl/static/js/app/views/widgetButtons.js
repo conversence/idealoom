@@ -14,9 +14,9 @@ var Backbone = require("backbone"),
     Permissions = require('../utils/permissions.js');
 
 
-var WidgetButtonView = Marionette.ItemView.extend({
+var WidgetButtonView = Marionette.View.extend({
   constructor: function WidgetButtonView() {
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: "#tmpl-widgetButton",

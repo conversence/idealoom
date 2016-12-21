@@ -23,9 +23,9 @@ var Marionette = require('backbone.marionette'),
     BackboneSubset = require("Backbone.Subset"),
     Promise = require('bluebird');
 
-var SegmentView = Marionette.LayoutView.extend({
+var SegmentView = Marionette.View.extend({
   constructor: function SegmentView() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-segment',
@@ -94,7 +94,7 @@ var SegmentView = Marionette.LayoutView.extend({
     this.renderAuthor();
     if (!_.isUndefined(this.model.get('firstInlist'))) {
       this.$el.attr('id', 'tour_step_segment');
-      Assembl.vent.trigger("requestTour", "segment");
+      Assembl.tour_vent.trigger("requestTour", "segment");
     }
   },
 
@@ -106,11 +106,11 @@ var SegmentView = Marionette.LayoutView.extend({
       agentAvatarView = new AgentViews.AgentAvatarView({
         model: this.postCreator
       });
-      this.authorAvatar.show(agentAvatarView);
+      this.showChildView('authorAvatar', agentAvatarView);
       agentNameView = new AgentViews.AgentNameView({
         model: this.postCreator
       });
-      this.authorName.show(agentNameView);
+      this.showChildView('authorName', agentNameView);
     }
   },
 
@@ -282,7 +282,7 @@ var SegmentListPanel = AssemblPanel.extend({
 
     collectionManager.getAllExtractsCollectionPromise()
             .then(function(allExtractsCollection) {
-              if(!that.isViewDestroyed()) {
+              if(!that.isDestroyed()) {
                 that.clipboard = new Clipboard([], {
                   parent: allExtractsCollection,
                   currentUserId: Ctx.getCurrentUser().id
@@ -301,7 +301,8 @@ var SegmentListPanel = AssemblPanel.extend({
               }
             });
 
-    this.listenTo(Assembl.vent, 'segmentListPanel:showSegment', function(segment) {
+    // TODO: There is no trigger for this event. See if there should be one.
+    this.listenTo(Assembl.other_vent, 'segmentListPanel:showSegment', function(segment) {
       that.showSegment(segment);
     });
   },
@@ -354,7 +355,7 @@ var SegmentListPanel = AssemblPanel.extend({
                     closeDeletes: true
                   });
 
-                  that.getRegion('extractList').show(segmentListView);
+                  that.showChildView('extractList', segmentListView);
                 });
     }
 
@@ -590,7 +591,7 @@ var SegmentListPanel = AssemblPanel.extend({
       cancelEl: '.close, .btn-primary'
     });
 
-    Assembl.slider.show(new Modal());
+    Assembl.rootView.showChildView('slider', new Modal());
   }
 
 });

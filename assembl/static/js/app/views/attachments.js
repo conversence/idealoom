@@ -28,9 +28,9 @@ var TARGET = {
  * Represents the link between an object (ex: Message, Idea) and a remote (url)
  * or eventually local document attached to it.
  */
-var AbstractAttachmentView = Marionette.LayoutView.extend({
+var AbstractAttachmentView = Marionette.View.extend({
   constructor: function AbstractAttachmentView() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
 
@@ -68,15 +68,14 @@ var AbstractAttachmentView = Marionette.LayoutView.extend({
           model: documentModel
         },
         documentView;
-    
+
     if (documentModel.isFileType()) {
       documentView = new DocumentViews.FileView(hash);
     }
     else {
       documentView = new DocumentViews.DocumentView(hash);
-      
     }
-    this.documentEmbeedRegion.show(documentView);
+    this.showChildView('documentEmbeedRegion', documentView);
   },
   onRender: function() {
     //console.log("AbstractAttachmentView: onRender with this.model:",this.model);
@@ -85,9 +84,6 @@ var AbstractAttachmentView = Marionette.LayoutView.extend({
       this.renderDocument();
     }
   },
-
-  onShow: function() {
-  }
 });
 
 
@@ -160,7 +156,7 @@ var AttachmentEditableView = AbstractAttachmentView.extend({
       });
       
     }
-    this.documentEmbeedRegion.show(documentView);
+    this.showChildView('documentEmbeedRegion', documentView);
   },
 
   onRender: function() {
@@ -364,7 +360,7 @@ var AttachmentEditableCollectionView = Marionette.CollectionView.extend({
     return AttachmentFileEditableView;
   },
 
-  getChildView: function(item){
+  childView: function(item){
 
     if (item.isFailed()){
       return AttachmentEditableErrorView;
@@ -410,10 +406,10 @@ var AttachmentEditableCollectionViewIdeaPanel = AttachmentEditableCollectionView
 /*
   A contained view that will show attachments
  */
-var AttachmentEditUploadView = Marionette.LayoutView.extend({
+var AttachmentEditUploadView = Marionette.View.extend({
 
   constructor: function AttachmentEditUploadView(){
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-uploadView',
@@ -456,14 +452,14 @@ var AttachmentEditUploadView = Marionette.LayoutView.extend({
         parentView: parent
       });
     }
-    
+
     this.collectionView = createAttachmentEditableCollectionView(this, this.collection);
     this.collectionFailedView = createAttachmentEditableCollectionView(this, this.failedCollection);
   },
 
-  onShow: function(){
-    this.collectionRegion.show(this.collectionView);
-    this.collectionFailedRegion.show(this.collectionFailedView);
+  onRender: function(){
+    this.showChildView('collectionRegion', this.collectionView);
+    this.showChildView('collectionFailedRegion', this.collectionFailedView);
   },
 
   failModels: function(models){
@@ -516,9 +512,9 @@ var AttachmentEditUploadViewModal = Backbone.Modal.extend({
 /*
   The button view that will be the stand-alone view for the attachment button
  */
-var AttachmentUploadButtonView = Marionette.ItemView.extend({
+var AttachmentUploadButtonView = Marionette.View.extend({
   constructor: function AttachmentUploadButtonView(){
-    return Marionette.ItemView.apply(this, arguments);
+    return Marionette.View.apply(this, arguments);
   },
 
   template: "#tmpl-attachmentButton",

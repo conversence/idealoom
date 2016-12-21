@@ -13,9 +13,9 @@ var Marionette = require('backbone.marionette'),
     Promise = require('bluebird'),
     AdminNavigationMenu = require('./adminNavigationMenu.js');
 
-var notifications = Marionette.LayoutView.extend({
+var notifications = Marionette.View.extend({
   constructor: function notifications() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-adminNotification',
@@ -59,9 +59,9 @@ var notificationList = Marionette.CompositeView.extend({
   className:'mtl'
 });
 
-var defaultNotification = Marionette.ItemView.extend({
+var defaultNotification = Marionette.View.extend({
   constructor: function defaultNotification() {
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-defaultNotification',
@@ -88,9 +88,9 @@ var defaultNotification = Marionette.ItemView.extend({
   }
 });
 
-var adminNotificationSubscriptions = Marionette.LayoutView.extend({
+var adminNotificationSubscriptions = Marionette.View.extend({
   constructor: function adminNotificationSubscriptions() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-adminNotificationSubscriptions',
@@ -115,7 +115,7 @@ var adminNotificationSubscriptions = Marionette.LayoutView.extend({
     }
   },
 
-  onBeforeShow: function() {
+  onRender: function() {
     var that = this,
         collectionManager = new CollectionManager();
 
@@ -126,18 +126,18 @@ var adminNotificationSubscriptions = Marionette.LayoutView.extend({
               var defaultNotif = new defaultNotification({
                 model: Discussion
               });
-              that.getRegion('autoSubscribe').show(defaultNotif);
+              that.showChildView('autoSubscribe', defaultNotif);
 
               var notif = new notificationList({
                 collection: NotificationsDiscussion
               });
-              that.getRegion('notification').show(notif);
+              that.showChildView('notification', notif);
 
             });
 
     var menu = new AdminNavigationMenu.discussionAdminNavigationMenu(
       {selectedSection: "notifications"});
-    this.getRegion('navigationMenuHolder').show(menu);
+    this.showChildView('navigationMenuHolder', menu);
   },
 
   close: function() {

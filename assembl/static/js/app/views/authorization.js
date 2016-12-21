@@ -7,9 +7,9 @@
 var Marionette = require('backbone.marionette'),
     Ctx = require('../common/context.js');
 
-var authorization = Marionette.ItemView.extend({
+var authorization = Marionette.View.extend({
   constructor: function authorization() {
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-authorization',
@@ -24,7 +24,7 @@ var authorization = Marionette.ItemView.extend({
         message: this.message
       }
     },
-  templateHelpers: function() {
+  templateContext: function() {
     return {
       urlLogIn: function() {
         return '/login?next=/' + Ctx.getDiscussionSlug() + '/';

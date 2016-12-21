@@ -19,9 +19,9 @@ var Marionette = require('backbone.marionette'),
 
 /** 
  */
-var AbstractAnnouncementView = Marionette.LayoutView.extend({
+var AbstractAnnouncementView = Marionette.View.extend({
   constructor: function AbstractAnnouncementView() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
 
@@ -93,7 +93,7 @@ var AnnouncementMessageView = AbstractAnnouncementView.extend({
     this.hideCreator = options.hide_creator;
     this.creator = undefined;
     this.model.getCreatorPromise().then(function(creator) {
-      if(!that.isViewDestroyed()) {
+      if(!that.isDestroyed()) {
         that.creator = creator;
         that.template = '#tmpl-announcementMessage';
         that.render();
@@ -113,11 +113,11 @@ var AnnouncementMessageView = AbstractAnnouncementView.extend({
       model: this.creator,
       avatarSize: 50
     });
-    this.authorAvatarRegion.show(agentAvatarView);
+    this.showChildView('authorAvatarRegion', agentAvatarView);
     var agentNameView = new AgentViews.AgentNameView({
       model: this.creator
     });
-    this.authorNameRegion.show(agentNameView);
+    this.showChildView('authorNameRegion', agentNameView);
   },
 });
 
@@ -142,20 +142,20 @@ var AnnouncementEditableView = AbstractAnnouncementView.extend({
       'modelProp': 'title',
       'placeholder': i18n.gettext('Please give a title of this announcement...')
     });
-    this.region_title.show(titleView);
+    this.showChildView('region_title', titleView);
 
     var bodyView = new CKEditorField({
       'model': this.model,
       'modelProp': 'body',
       'placeholder': i18n.gettext('Please write the content of this announcement here...')
     });
-    this.region_body.show(bodyView);
+    this.showChildView('region_body', bodyView);
 
     var shouldPropagateDownView = new TrueFalseField({
       'model': this.model,
       'modelProp': 'should_propagate_down'
     });
-    this.region_shouldPropagateDown.show(shouldPropagateDownView);
+    this.showChildView('region_shouldPropagateDown', shouldPropagateDownView);
     
   },
 
@@ -164,9 +164,9 @@ var AnnouncementEditableView = AbstractAnnouncementView.extend({
   },
 });
 
-var AnnouncementListEmptyEditableView = Marionette.ItemView.extend({
+var AnnouncementListEmptyEditableView = Marionette.View.extend({
   constructor: function AnnouncementListEmptyEditableView() {
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: "#tmpl-announcementListEmptyEditable",

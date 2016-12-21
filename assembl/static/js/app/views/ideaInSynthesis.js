@@ -22,9 +22,9 @@ var Marionette = require('backbone.marionette'),
     Analytics = require('../internal_modules/analytics/dispatcher.js'),
     openIdeaInModal = require('./modals/ideaInModal.js');
 
-var IdeaInSynthesisView = Marionette.LayoutView.extend({
+var IdeaInSynthesisView = Marionette.View.extend({
   constructor: function IdeaInSynthesisView() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   synthesis: null,
@@ -75,7 +75,7 @@ var IdeaInSynthesisView = Marionette.LayoutView.extend({
       // Calculate the contributors of the idea: authors of important segments (nuggets)
       // Should match Idea.get_synthesis_contributors in the backend
       function render_with_info(allMessageStructureCollection, allUsersCollection, ideaExtracts) {
-        if (!that.isViewDestroyed()) {
+        if (!that.isDestroyed()) {
           ideaExtracts.filter(function(segment){
             return segment.get("important");
           }).forEach(function(segment) {
@@ -94,7 +94,7 @@ var IdeaInSynthesisView = Marionette.LayoutView.extend({
       }
       // idea is either a tombstone or from a different collection; get the original
       Promise.resolve(collectionManager.getAllIdeasCollectionPromise()).then(function(allIdeasCollection) {
-        if (!that.isViewDestroyed()) {
+        if (!that.isDestroyed()) {
           var idea = that.model,
           original_idea = undefined;
           if (that.synthesis.get('is_next_synthesis')) {
@@ -206,7 +206,7 @@ var IdeaInSynthesisView = Marionette.LayoutView.extend({
       hideButton: true
     });
 
-    this.regionExpression.show(ideaSynthesis);
+    this.showChildView('regionExpression', ideaSynthesis);
   },
 
   /**
@@ -217,7 +217,7 @@ var IdeaInSynthesisView = Marionette.LayoutView.extend({
       partialCtx = "synthesis-idea-" + this.model.getId(),
       partialMessage = MessagesInProgress.getMessage(partialCtx),
       send_callback = function() {
-        Assembl.vent.trigger('messageList:currentQuery');
+        Assembl.message_vent.trigger('messageList:currentQuery');
         // If we're in synthesis view, do not reset view to idea view
         that.getPanel().getContainingGroup().setCurrentIdea(that.original_idea, true);
       };

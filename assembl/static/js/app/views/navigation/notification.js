@@ -6,9 +6,9 @@
 
 var Marionette = require('marionette.js');
 
-var sidebarNotification = Marionette.ItemView.extend({
+var sidebarNotification = Marionette.View.extend({
   constructor: function sidebarNotification() {
-    Marionette.ItemView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-sidebar-notification'

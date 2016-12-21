@@ -12,9 +12,9 @@ var Marionette = require('backbone.marionette'),
     Roles = require('../../utils/roles.js'),
     Permissions = require('../../utils/permissions.js');
 
-var userNavigationMenu = Marionette.LayoutView.extend({
+var userNavigationMenu = Marionette.View.extend({
   constructor: function userNavigationMenu() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-loader',
@@ -30,7 +30,7 @@ var userNavigationMenu = Marionette.LayoutView.extend({
       this.selectedSection = options.selectedSection;
     }
     collectionManager.getLocalRoleCollectionPromise().then(function(localRoles) {
-      if(!that.isViewDestroyed()) {
+      if(!that.isDestroyed()) {
         that.localRoles = localRoles;
         that.template = '#tmpl-userNavigationMenu';
         that.render();
@@ -52,7 +52,7 @@ var userNavigationMenu = Marionette.LayoutView.extend({
     };
   },
 
-  templateHelpers: function() {
+  templateContext: function() {
     return {
       urlDiscussion: function() {
         return '/' + Ctx.getDiscussionSlug() + '/';

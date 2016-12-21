@@ -67,8 +67,8 @@ var NavigationView = AssemblPanel.extend({
     this.visualizationItems = new Base.Collection();
     this.num_items = 2;
 
-    this.listenTo(Assembl.vent, 'DEPRECATEDnavigation:selected', this.setViewByName);
-    this.listenTo(Assembl.vent, 'infobar:closeItem', this.setSideBarHeight);
+    this.listenTo(Assembl.other_vent, 'DEPRECATEDnavigation:selected', this.setViewByName);
+    this.listenTo(Assembl.other_vent, 'infobar:closeItem', this.setSideBarHeight);
   },
   onAttach:function() {
     var that = this,
@@ -102,7 +102,7 @@ var NavigationView = AssemblPanel.extend({
         that.ui.discussion_tab_minimize_icon.hide();
         if (that.getContainingGroup().model.get('navigationState') !== "synthesis") {
           that.ui.synthesis_tab[0].id = "tour_step_synthesis";
-          Assembl.vent.trigger("requestTour", "synthesis");
+          Assembl.tour_vent.trigger("requestTour", "synthesis");
         }
       }
 
@@ -156,7 +156,7 @@ var NavigationView = AssemblPanel.extend({
         return;
     var elm = $(evt.currentTarget), // use currentTarget instead of target, so that we are sure that it is a .nav element
         view = elm.attr('data-view');
-    Assembl.vent.trigger("DEPRECATEDnavigation:selected", view, 'NAVIGATION');
+    Assembl.other_vent.trigger("DEPRECATEDnavigation:selected", view, 'NAVIGATION');
   },
 
   /**
@@ -167,18 +167,18 @@ var NavigationView = AssemblPanel.extend({
     this.setSideBarHeight();
     var view = elm.attr('data-view');
 
-    if (elm.next(this.ui.level).is(':hidden')) {
+    if (elm.next('div.second-level').is(':hidden')) {
       this.$('.nav').next('div:visible').slideUp();
       this.$('.nav').removeClass('active');
       elm.addClass('active');
-      elm.next(this.ui.level).slideDown();
+      elm.next('div.second-level').slideDown();
     }
   },
 
   setSideBarHeight: function() {
     var that = this;
     var debouncedFunction = _.debounce(function() {
-      if(that.isViewRenderedAndNotYetDestroyed()) {
+      if(that.isRenderedAndNotYetDestroyed()) {
         that.initVar();
         that.ui.level.height(that._accordionContentHeight);
       }
@@ -209,7 +209,7 @@ var NavigationView = AssemblPanel.extend({
             groupContent: this.getContainingGroup(),
             panelWrapper: this.getPanelWrapper()
           });
-          this.about.show(aboutNavPanel);
+          this.showChildView('about', aboutNavPanel);
           if(origin !== null) {
             analytics.trackEvent(analytics.events.NAVIGATION_OPEN_CONTEXT_SECTION);
             analytics.changeCurrentPage(analytics.pages.SIMPLEUI_CONTEXT_SECTION);
@@ -222,7 +222,7 @@ var NavigationView = AssemblPanel.extend({
             panelWrapper: this.getPanelWrapper(),
             nav: true
           });
-          this.debate.show(idealist);
+          this.showChildView('debate', idealist);
           if(origin !== null) {
             analytics.trackEvent(analytics.events.NAVIGATION_OPEN_DEBATE_SECTION);
             analytics.changeCurrentPage(analytics.pages.SIMPLEUI_DEBATE_SECTION);
@@ -234,7 +234,7 @@ var NavigationView = AssemblPanel.extend({
             groupContent: this.getContainingGroup(),
             panelWrapper: this.getPanelWrapper()
           });
-          this.synthesis.show(synthesisInNavigationPanel);
+          this.showChildView('synthesis', synthesisInNavigationPanel);
           if(origin !== null) {
             analytics.trackEvent(analytics.events.NAVIGATION_OPEN_SYNTHESES_SECTION);
             analytics.changeCurrentPage(analytics.pages.SIMPLEUI_SYNTHESES_SECTION);
@@ -246,7 +246,7 @@ var NavigationView = AssemblPanel.extend({
             groupContent: this.getContainingGroup(),
             collection: this.visualizationItems
           });
-          this.visualizationList.show(visualizationListPanel);
+          this.showChildView('visualizationList', visualizationListPanel);
           //SHOULDN'T WE CLEAR THE OTHER PANELS HERE?  benoitg- 2015-08-20
           if(origin !== null) {
             analytics.trackEvent(analytics.events.NAVIGATION_OPEN_VISUALIZATIONS_SECTION);
@@ -300,7 +300,7 @@ var NavigationView = AssemblPanel.extend({
   },
 
   addIdeaFromIdeaList: function() {
-    Assembl.vent.trigger('ideaList:addChildToSelected');
+    Assembl.idea_vent.trigger('ideaList:addChildToSelected');
   }
 
 });

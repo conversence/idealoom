@@ -12,9 +12,9 @@ var Marionette = require('backbone.marionette'),
     Ctx = require('../../common/context.js'),
     Growl = require('../../utils/growl.js');
 
-var profile = Marionette.LayoutView.extend({
+var profile = Marionette.View.extend({
   constructor: function profile() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-userProfile',
@@ -49,9 +49,9 @@ var profile = Marionette.LayoutView.extend({
   },
 
   onRender: function() {
-    // this is in onRender instead of onBeforeShow because of the modelEvents
+    // this is in onRender instead of onBeforeRender because of the modelEvents
     var menu = new UserNavigationMenu({selectedSection: "profile"});
-    this.getRegion('navigationMenuHolder').show(menu);
+    this.showChildView('navigationMenuHolder', menu);
   },
 
   saveProfile: function(e) {
@@ -71,7 +71,7 @@ var profile = Marionette.LayoutView.extend({
     })
   },
 
-  templateHelpers: function() {
+  templateContext: function() {
     return {
       urlDiscussion: function() {
         return '/' + Ctx.getDiscussionSlug() + '/';

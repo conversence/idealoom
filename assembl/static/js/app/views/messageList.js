@@ -80,7 +80,7 @@ var MessageList = BaseMessageList.extend({
     var that = this;
     this.isUsingExpertView = (Ctx.getCurrentInterfaceType() === Ctx.InterfaceTypes.EXPERT); // TODO?: have a dedicated flag
 
-    if(!this.isViewDestroyed()) {
+    if(!this.isDestroyed()) {
       //Yes, it IS possible the view is already destroyed in initialize, so we check
       this.listenTo(this.getGroupState(), "change:currentIdea", function(state, currentIdea) {
         if (currentIdea) {
@@ -106,7 +106,7 @@ var MessageList = BaseMessageList.extend({
         this.ideaChanged();
       });
 
-      this.listenTo(Assembl.vent, 'messageList:showMessageById', function(id, callback) {
+      this.listenTo(Assembl.message_vent, 'messageList:showMessageById', function(id, callback) {
         //console.log("Calling showMessageById from messageList:showMessageById with params:", id, callback);
         that.showMessageById(id, callback);
       });
@@ -139,24 +139,24 @@ var MessageList = BaseMessageList.extend({
             }, 'syncWithCurrentIdea');
       });
 
-      this.listenTo(Assembl.vent, 'messageList:showAllMessages', function() {
+      this.listenTo(Assembl.message_vent, 'messageList:showAllMessages', function() {
         that.getPanelWrapper().filterThroughPanelLock(
             function() {
               that.showAllMessages();
             }, 'syncWithCurrentIdea');
       });
 
-      this.listenTo(Assembl.vent, 'messageList:currentQuery', function() {
+      this.listenTo(Assembl.message_vent, 'messageList:currentQuery', function() {
         if (!that.getPanelWrapper().isPanelLocked()) {
           that.currentQuery.clearAllFilters();
         }
       });
 
-      this.listenTo(Assembl.vent, 'messageList:replyBoxFocus', function() {
+      this.listenTo(Assembl.message_vent, 'messageList:replyBoxFocus', function() {
         that.onReplyBoxFocus();
       });
 
-      this.listenTo(Assembl.vent, 'messageList:replyBoxBlur', function() {
+      this.listenTo(Assembl.message_vent, 'messageList:replyBoxBlur', function() {
         that.onReplyBoxBlur();
       });
     }
@@ -285,7 +285,7 @@ var MessageList = BaseMessageList.extend({
         defaultMessageStyle: this.defaultMessageStyle,
         currentQuery: this.currentQuery
       });
-      this.getRegion("messageListHeader").show(messageListHeader);
+      this.showChildView('messageListHeader', messageListHeader);
     },
 
   onSetIsUsingExpertView: function(isUsingExpertView) {
@@ -369,7 +369,7 @@ var MessageList = BaseMessageList.extend({
       Promise.join(this.currentQuery.getResultMessageStructureCollectionPromise(),
           this.currentQuery.getResultMessageIdCollectionPromise(),
               function(messageStructureCollection, resultMessageIdCollection) {
-                if (!that.isViewDestroyed()) {
+                if (!that.isDestroyed()) {
 
                   if (Ctx.debugRender) {
                     console.log("messageList:onRender() structure collection ready for render id:", renderId);
@@ -423,13 +423,13 @@ var MessageList = BaseMessageList.extend({
 
   showAnnouncement: function(announcement) {
     var announcementMessageView = new Announcements.AnnouncementMessageView({model: announcement});
-    this.announcementRegion.show(announcementMessageView);
+    this.showChildView('announcementRegion', announcementMessageView);
     this.ui.announcementRegion.removeClass('hidden');
   },
 
   showTopPostBox: function(options) {
     this.newTopicView = new MessageSendView(options);
-    this.topPostRegion.show(this.newTopicView);
+    this.showChildView('topPostRegion', this.newTopicView);
   },
 
 
