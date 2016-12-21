@@ -259,13 +259,13 @@ def assign_ob(ob, r, subob):
             "DISCARDING", r
             # Handled by the reverse connection
             return
-    setattr(ob, r.key, subob)
     for col in r.local_columns:
         if col.foreign_keys:
             fkcol = next(iter(col.foreign_keys)).column
             k = next(iter(r.local_columns))
             setattr(ob, col.key, getattr(subob, fkcol.key))
             return
+    setattr(ob, r.key, subob)
     print "assign_ob: missing foreign key?"
 
 
