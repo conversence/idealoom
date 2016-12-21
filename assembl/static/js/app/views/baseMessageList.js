@@ -2140,7 +2140,7 @@ return cls.extend({
               );
               }
 
-              return;
+              return true;
             }
 
             if (!messageIsInFilter) {
@@ -2163,7 +2163,7 @@ return cls.extend({
               );
               }
 
-              return;
+              return true;
             }
 
             var real_callback = function() {
