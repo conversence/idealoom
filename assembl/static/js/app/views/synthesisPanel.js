@@ -44,10 +44,9 @@ var SynthesisPanel = AssemblPanel.extend({
     var that = this,
         collectionManager = new CollectionManager();
 
-    // done in constructor
-    // if (obj.realTemplate) {
-    //   this.realTemplate = obj.realTemplate;
-    // }
+    if (obj.realTemplate) {
+      this.realTemplate = obj.realTemplate;
+    }
 
     if ( "showAsMessage" in obj ){
       this.showAsMessage = obj.showAsMessage;
