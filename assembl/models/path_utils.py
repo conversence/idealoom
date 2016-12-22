@@ -422,7 +422,8 @@ class PostPathCombiner(PostPathGlobalCollection, IdeaVisitor):
     def end_visit(self, idea_id, level, result, child_results):
         if isinstance(idea_id, Idea):
             idea_id = idea_id.id
-        child_results = filter(None, child_results.itervalues())
+        child_results = [
+            res for (child, res) in child_results if bool(res)]
         if len(child_results) == 1 and not result:
             # optimisation
             self.copy_result(idea_id, result, child_results[0])
