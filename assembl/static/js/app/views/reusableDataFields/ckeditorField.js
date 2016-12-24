@@ -125,7 +125,7 @@ var cKEditorField = Marionette.View.extend({
       this.$(this.ui.seeMore).hide();
     }
 
-    // from onShow
+    // from onShow. TODO: Maybe put in onAttach????
     this.requestEllipsis();
     this._viewIsAlreadyShown = true;
   },
