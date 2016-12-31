@@ -323,6 +323,8 @@ class Discussion(DiscussionBoundBase, NamedClassMixin):
 
     def get_related_extracts_preload(self, user_id):
         from assembl.views.api.extract import _get_extracts_real
+        from .idea import Idea
+        Idea.get_discussion_data(self.id)
         return json.dumps(_get_extracts_real(discussion=self, user_id=user_id))
 
     def get_user_permissions(self, user_id):

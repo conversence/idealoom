@@ -397,6 +397,9 @@ class Idea(HistoryMixin, DiscussionBoundBase):
         return self.source_links_ts[0].order if self.source_links_ts else None
 
     def get_first_parent_uri(self):
+        data = self.get_discussion_data(self.discussion_id, False)
+        if data is not None:
+            return data.parent_dict[self.id]
         for link in self.source_links:
             return Idea.uri_generic(link.source_id)
 
@@ -420,7 +423,7 @@ class Idea(HistoryMixin, DiscussionBoundBase):
                 include_deleted=include_deleted)
 
     @classmethod
-    def get_discussion_data(cls, discussion_id):
+    def get_discussion_data(cls, discussion_id, create=True):
         from pyramid.threadlocal import get_current_request
         from .path_utils import DiscussionGlobalData
         from pyramid.security import authenticated_userid
@@ -428,7 +431,7 @@ class Idea(HistoryMixin, DiscussionBoundBase):
         discussion_data = None
         if req:
             discussion_data = getattr(req, "discussion_data", None)
-        if not discussion_data:
+        if create and not discussion_data:
             discussion_data = DiscussionGlobalData(
                 cls.default_db(), discussion_id,
                 authenticated_userid(req) if req else None)
