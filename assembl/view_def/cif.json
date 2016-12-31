@@ -272,6 +272,7 @@
         "function_of": "user",
         "name": "&get_role_name"
     },
+    "AbstractVoteSpecification": {},
     "LickertVoteSpecification": {
         "@extends": "AbstractVoteSpecification",
         "@type": "'\"LickertRange\"",
