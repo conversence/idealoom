@@ -398,8 +398,8 @@ class Idea(HistoryMixin, DiscussionBoundBase):
 
     def get_first_parent_uri(self):
         data = self.get_discussion_data(self.discussion_id, False)
-        if data is not None:
-            return data.parent_dict[self.id]
+        if data is not None and self.id in data.parent_dict:
+            return Idea.uri_generic(data.parent_dict[self.id])
         for link in self.source_links:
             return Idea.uri_generic(link.source_id)
 
