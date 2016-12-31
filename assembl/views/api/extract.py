@@ -80,8 +80,9 @@ def _get_extracts_real(discussion, view_def='default', ids=None, user_id=None):
 
     all_extracts = all_extracts.options(joinedload_all(
         Extract.content))
-    all_extracts = all_extracts.options(joinedload_all(
-        Extract.text_fragment_identifiers))
+    all_extracts = all_extracts.options(
+        joinedload_all(Extract.text_fragment_identifiers).joinedload(
+            TextFragmentIdentifier.extract, innerjoin=True))
     permissions = get_permissions(user_id, discussion.id)
 
     return [extract.generic_json(view_def, user_id, permissions)
