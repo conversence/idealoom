@@ -645,7 +645,7 @@ var MessageView = Marionette.LayoutView.extend({
       },
       relative: true
     }),
-        share_link_url = Widget.Model.getShareUrl(
+        share_link_url = Widget.Model.prototype.getShareUrl(
           [
             {'u': Ctx.getAbsoluteURLFromRelativeURL(direct_link_relative_url)},
             {'t': this._subject.value()},
