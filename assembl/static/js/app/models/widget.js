@@ -114,7 +114,7 @@ var WidgetModel = Base.Model.extend({
   },
   */
 
-  getShareUrl: function(params) {
+  getObjectShareUrl: function(params) {
     return Ctx.appendExtraURLParams(widget_url + "/share/index.html", params);
   },
 

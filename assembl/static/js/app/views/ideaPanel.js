@@ -320,7 +320,7 @@ var IdeaPanel = AssemblPanel.extend({
         relative: true
       });
       // TODO: Create a share widget class
-      share_link_url = Widget.Model.prototype.getShareUrl(
+      share_link_url = Widget.Model.prototype.getObjectShareUrl(
         [
           {'u': Ctx.getAbsoluteURLFromRelativeURL(direct_link_relative_url) },
           {'t': this.model.get('shortTitle')},
