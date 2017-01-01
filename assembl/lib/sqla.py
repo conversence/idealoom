@@ -1288,8 +1288,12 @@ class BaseOps(object):
                 setattr(self, accessor_name, instance)
                 # Note: also set the column, because that's what is used
                 # to compute the output json.
-                if len(accessor.local_columns) == 1:
-                    for col in accessor.local_columns:
+                local_columns = accessor.local_columns
+                # filter out Datetime field
+                if len(local_columns) > 1:
+                    local_columns = [c for c in local_columns if c.foreign_keys]
+                if len(local_columns) == 1:
+                    for col in local_columns:
                         setattr(self, col.name, instance.id)
                 else:
                     raise RuntimeError("Multiple column relationship not handled yet")
