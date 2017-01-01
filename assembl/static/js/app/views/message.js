@@ -36,6 +36,7 @@ var Marionette = require('backbone.marionette'),
     IdeaContentLink = require('../models/ideaContentLink.js'),
     ConfirmModal = require('./confirmModal.js'),
     Growl = require('../utils/growl.js'),
+    Widget = require('../models/widget.js'),
     MessageModel = require('../models/message.js');
 
 var MIN_TEXT_TO_TOOLTIP = 5,
@@ -644,7 +645,7 @@ var MessageView = Marionette.LayoutView.extend({
       },
       relative: true
     }),
-        share_link_url = Ctx.appendExtraURLParams(static_url + "/widget/share/index.html",
+        share_link_url = Widget.Model.getShareUrl(
           [
             {'u': Ctx.getAbsoluteURLFromRelativeURL(direct_link_relative_url)},
             {'t': this._subject.value()},

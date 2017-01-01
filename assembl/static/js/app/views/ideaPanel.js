@@ -319,7 +319,8 @@ var IdeaPanel = AssemblPanel.extend({
         },
         relative: true
       });
-      share_link_url = Ctx.appendExtraURLParams(static_url + "/widget/share/index.html",
+      // TODO: Create a share widget class
+      share_link_url = Widget.Model.getShareUrl(
         [
           {'u': Ctx.getAbsoluteURLFromRelativeURL(direct_link_relative_url) },
           {'t': this.model.get('shortTitle')},

@@ -114,6 +114,10 @@ var WidgetModel = Base.Model.extend({
   },
   */
 
+  getShareUrl: function(params) {
+    return Ctx.appendExtraURLParams(widget_url + "/share/index.html", params);
+  },
+
   getCreationUrl: function(ideaId, locale) {
     console.error("Widget.getCreationUrl: wrong type");
   },
@@ -193,7 +197,7 @@ var VotingWidgetModel = WidgetModel.extend({
     WidgetModel.apply(this, arguments);
   },
 
-  baseUri: static_url + "/widget/vote/",
+  baseUri: widget_url + "/vote/",
   defaults: {
     '@type': 'MultiCriterionVotingWidget'
   },
@@ -979,7 +983,7 @@ var CreativitySessionWidgetModel = WidgetModel.extend({
   constructor: function CreativitySessionWidgetModel() {
     WidgetModel.apply(this, arguments);
   },
-  baseUri: static_url + "/widget/session/",
+  baseUri: widget_url + "/session/",
   defaults: {
     "@type": "CreativitySessionWidget",
     "num_posts_by_current_user": 0
@@ -1123,7 +1127,7 @@ var InspirationWidgetModel = WidgetModel.extend({
   constructor: function InspirationWidgetModel() {
     WidgetModel.apply(this, arguments);
   },
-  baseUri: static_url + "/widget/creativity/",
+  baseUri: widget_url + "/creativity/",
   defaults: {
     '@type': 'InspirationWidget'
   },

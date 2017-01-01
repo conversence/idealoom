@@ -202,6 +202,7 @@ def get_default_context(request):
 
     use_webpack_server = asbool(config.get("use_webpack_server"))
     static_url = '/static'
+    widget_url = '/static/widget'
     if use_webpack_server:
         static_url = 'http://%s:%d' % (
             config.get('public_hostname', 'localhost'),
@@ -211,6 +212,7 @@ def get_default_context(request):
     return dict(
         default_context,
         STATIC_URL=static_url,
+        WIDGET_URL=widget_url,
         request=request,
         user=user,
         templates=get_template_views(),
