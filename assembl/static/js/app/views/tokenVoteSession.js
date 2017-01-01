@@ -864,8 +864,6 @@ var TokenVoteItemView = Marionette.View.extend({
       this.showChildView('tokensForIdea', tokenCategoryCollection);
     }
 
-    // code from onShow TODO: put in onAttach???
-
     this.renderCKEditorDescription();
   },
 
@@ -1535,7 +1533,7 @@ var TokenVoteSessionModal = Backbone.Modal.extend({
 
   },
 
-  onRender: function(){
+  onAttach: function(){
     var that = this;
 
     that.availableTokensPositionTop = that.$(".available-tokens").position().top;
@@ -1675,8 +1673,7 @@ var TokenVoteSessionSubmittedModal = Backbone.Modal.extend({
   className: 'modal-token-vote-session-submitted popin-wrapper',
   cancelEl: '.close, .js_close',
 
-  onRender: function(){
-    // TODO: This was in onShow, probably should go in onAttach.
+  onShow: function(){
     var container = this.$el.find(".js_modal-body");
     container.empty();
     var text = $("<p></p>");
