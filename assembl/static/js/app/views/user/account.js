@@ -53,14 +53,28 @@ var email = Marionette.View.extend({
   }
 });
 
-var emailList = Marionette.CompositeView.extend({
+var emailListBody = Marionette.CollectionView.extend({
+  constructor: function emailListBody() {
+    Marionette.CollectionView.apply(this, arguments);
+  },
+
+  childView: email,
+});
+
+var emailList = Marionette.View.extend({
   constructor: function emailList() {
-    Marionette.CompositeView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-associateAccounts',
-  childView: email,
-  childViewContainer:'.controls'
+  regions: {
+    body: '.controls',
+  },
+  onRender: function() {
+    this.showChildView('body', new emailListBody({
+      collection: this.collection,
+    }));
+  },
 });
 
 var socialProvidersList = Marionette.View.extend({

@@ -39,7 +39,7 @@ var groupContainer = Marionette.CollectionView.extend({
     var screenSize = window.innerWidth;
     var animationDuration = 1000;
     this.children.each(function(groupContentView){
-      groupContentView.children.each(function(panelWrapperView){
+      groupContentView.body.children.each(function(panelWrapperView){
         var panelMinWidth = panelWrapperView.model.get('minWidth');
         var isPanelMinimized = panelWrapperView.model.get('minimized');
         var panelWidth = that.getPanelWidth(panelMinWidth,isPanelMinimized);
@@ -82,7 +82,7 @@ var groupContainer = Marionette.CollectionView.extend({
         var panelWidthInPercent = (panelMinWidth * 100) / totalMinWidth;
         var totalMinimized = this.getTotalWidthMinimized();
         var panelWidthInPixel = (panelWidthInPercent * (screenSize-totalMinimized)) / 100;
-        panelWIdth = panelWidthInPixel;        
+        panelWIdth = panelWidthInPixel;
       }else{
         panelWIdth = screenSize;
       }
@@ -90,9 +90,9 @@ var groupContainer = Marionette.CollectionView.extend({
     return panelWIdth;
   },
   getTotalMinWidth:function(){
-    var totalMinWidth = 0;    
+    var totalMinWidth = 0;
     this.children.each(function(groupContentView){
-      groupContentView.children.each(function(panelWrapperView){
+      groupContentView.body.children.each(function(panelWrapperView){
         var isPanelMinimized = panelWrapperView.model.get('minimized');
         var isPanelHidden = panelWrapperView.model.get('hidden');
         if(!isPanelHidden){
@@ -108,7 +108,7 @@ var groupContainer = Marionette.CollectionView.extend({
     var that = this;
     var totalMinimized = 0;
     this.children.each(function(groupContentView){
-      groupContentView.children.each(function(panelWrapperView){
+      groupContentView.body.children.each(function(panelWrapperView){
         var isPanelMinimized = panelWrapperView.model.get('minimized');
         var isPanelHidden = panelWrapperView.model.get('hidden');
         if(!isPanelHidden){

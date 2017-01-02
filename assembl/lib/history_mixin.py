@@ -21,7 +21,7 @@ class TombstonableMixin(object):
     TODO: Generate a DB view on live objects."""
 
     # Note on tombstone_date: Virtuoso can test for its being null, but not non-null.
-    tombstone_date = Column(DateTime, server_default=None)
+    tombstone_date = Column(DateTime, server_default=None, default=None)
 
     @property
     def is_tombstone(self):

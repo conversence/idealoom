@@ -282,16 +282,13 @@ var ErrorView = Marionette.View.extend({
   }
 });
 
-var IdeaShowingMessageCollectionView = Marionette.CompositeView.extend({
-  constructor: function IdeaShowingMessageCollectionView() {
-    Marionette.CompositeView.apply(this, arguments);
+var IdeaShowingMessageCollectionViewBody = Marionette.CollectionView.extend({
+  constructor: function IdeaShowingMessageCollectionViewBody() {
+    Marionette.CollectionView.apply(this, arguments);
   },
 
-  
-  childViewContainer: '.items',
-  
-  template: '#tmpl-ideaClassification_collection',
-  
+  className: 'items',
+
   initialize: function(options){
     this._groupContent = options.groupContent;
     this.messageView = options.messageView;
@@ -338,6 +335,33 @@ var IdeaShowingMessageCollectionView = Marionette.CompositeView.extend({
       }
     }
   }
+});
+
+
+var IdeaShowingMessageCollectionView = Marionette.View.extend({
+  constructor: function IdeaShowingMessageCollectionView() {
+    Marionette.View.apply(this, arguments);
+  },
+
+  template: '#tmpl-ideaClassification_collection',
+
+  regions: {
+    items: {
+      el: '.items',
+      replaceElement: true,
+    }
+  },
+  initialize: function(options){
+    this._groupContent = options.groupContent;
+    this.messageView = options.messageView;
+  },
+  onRender: function() {
+    this.showChildView('items', new IdeaShowingMessageCollectionViewBody({
+      collection: this.collection,
+      groupContent: this._groupContent,
+      messageView: this.messageView,
+    }));
+  },
 });
 
 

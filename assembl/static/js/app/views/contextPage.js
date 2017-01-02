@@ -41,20 +41,32 @@ var Partner = Marionette.View.extend({
       }
     };
   }
-
 });
 
-var PartnerList = Marionette.CompositeView.extend({
+var PartnerListBody = Marionette.CollectionView.extend({
+  constructor: function PartnerListBody() {
+    Marionette.CollectionView.apply(this, arguments);
+  },
+  childView: Partner,
+});
+
+var PartnerList = Marionette.View.extend({
   constructor: function PartnerList() {
-    Marionette.CompositeView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-partnerList',
-  childView: Partner,
   className:'gr mvxl',
-  childViewContainer: '.partnersList',
   initialize: function(options) {
     this.nbOrganisations = options.nbOrganisations;
+  },
+  regions: {
+    partnerListBody: 'div.partnersList',
+  },
+  onRender: function() {
+    this.showChildView('partnerListBody', new PartnerListBody({
+      collection: this.collection,
+    }));
   },
   serializeData: function() {
     return {

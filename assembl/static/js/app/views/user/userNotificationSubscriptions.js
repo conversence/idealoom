@@ -239,15 +239,30 @@ var NotificationByEmail = Marionette.View.extend({
 
 });
 
-var NotificationByEmails = Marionette.CompositeView.extend({
+var NotificationByEmailsList = Marionette.CollectionView.extend({
+  constructor: function NotificationByEmailsList() {
+    Marionette.CollectionView.apply(this, arguments);
+  },
+
+  childView: NotificationByEmail,
+});
+
+
+var NotificationByEmails = Marionette.View.extend({
   constructor: function NotificationByEmails() {
-    Marionette.CompositeView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-notificationByEmails',
-  childView: NotificationByEmail,
-  childViewContainer:'.controls'
-})
+  regions: {
+    list: '.controls',
+  },
+  onRender: function() {
+    this.showChildView('list', new NotificationByEmailsList({
+      collection: this.collection,
+    }));
+  },
+});
 
 /**
  * Subscripbe / Unsubscribe action

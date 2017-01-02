@@ -905,17 +905,42 @@ var TokenVoteItemView = Marionette.View.extend({
   },
 });
 
-// This view shows the list of votable ideas and their tokens
-var TokenVoteCollectionView = Marionette.CompositeView.extend({
+
+var TokenVoteCollectionViewBody = Marionette.CollectionView.extend({
+  constructor: function TokenVoteCollectionViewBody() {
+    Marionette.CollectionView.apply(this, arguments);
+  },
+  initialize: function(options) {
+    this.parent = options.parent;
+  },
+  tagName: 'tbody',
   childView: TokenVoteItemView,
-  template: '#tmpl-tokenVoteCollection',
-  childViewContainer: "tbody",
   childViewOptions: function(model, index){
-    var that = this;
     return {
       childIndex: index,
-      parent: that
+      parent: this.parent,
     };
+  },
+});
+
+
+// This view shows the list of votable ideas and their tokens
+var TokenVoteCollectionView = Marionette.View.extend({
+  constructor: function TokenVoteCollectionView() {
+    Marionette.View.apply(this, arguments);
+  },
+  template: '#tmpl-tokenVoteCollection',
+  regions: {
+    votes: {
+      el: 'tbody',
+      replaceElement: true
+    },
+  },
+  onRender: function() {
+    this.showChildView('votes', new TokenVoteCollectionViewBody({
+      collection: this.collection,
+      parent: this,
+    }));
   },
   templateContext: function(){
     var that = this;
@@ -1117,26 +1142,57 @@ var TokenVoteResultView = Marionette.View.extend({
 
 });
 
+
+var TokenVoteResultCollectionViewBody = Marionette.CollectionView.extend({
+  constructor: function TokenVoteResultCollectionViewBody(){
+    Marionette.CollectionView.apply(this, arguments);
+  },
+  childView: TokenVoteResultView,
+  tagName: 'tbody',
+  initialize: function(options) {
+    this.categoryIndex = options.categoryIndex;
+    this.sumTokens = options.sumTokens;
+    this.maxPercent = options.maxPercent;
+    this.voteSpecification = options.voteSpecification;
+    this.languagePreferences = options.languagePreferences;
+  },
+  childViewOptions: function(){
+    return {
+      categoryIndex: this.categoryIndex,
+      sumTokens: this.sumTokens,
+      maxPercent: this.maxPercent,
+      voteSpecification: this.voteSpecification,
+      languagePreferences: this.languagePreferences
+    };
+  },
+});
+
+
 /*
   This is the collection view of each vote result
  */
-var TokenVoteResultCollectionView = Marionette.CompositeView.extend({
+var TokenVoteResultCollectionView = Marionette.View.extend({
   constructor: function TokenVoteResultCollectionView(){
-    Marionette.CompositeView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-tokenVoteResultCollectionView',
 
   ui: {
-    'categoryName': '.js_vote-result-category'
+    'categoryName': '.js_vote-result-category',
+  },
+
+  regions: {
+    voteResults: {
+      el: 'tbody',
+      replaceElement: true,
+    },
   },
 
   events: {
     'click @ui.categoryName': 'onCategoryClickName'
   },
 
-  childView: TokenVoteResultView,
-  childViewContainer: 'tbody',
   sortOnCategoryNum: 0,
   initialize: function(options){
     this.firstRender = true;
@@ -1193,16 +1249,6 @@ var TokenVoteResultCollectionView = Marionette.CompositeView.extend({
     this.voteResults.sort();
   },
 
-  childViewOptions: function(){
-    return {
-      categoryIndex: this.categoryIndex,
-      sumTokens: this.sumTokens,
-      maxPercent: this.maxPercent,
-      voteSpecification: this.voteSpecification,
-      languagePreferences: this.languagePreferences
-    };
-  },
-
   onRender: function() {
     if (this.firstRender) {
       var el = $(this.ui.categoryName[0]),
@@ -1211,6 +1257,14 @@ var TokenVoteResultCollectionView = Marionette.CompositeView.extend({
       this._colorMeBaby(el);
       this.firstRender = false;
     }
+    this.showChildView('voteResults', new TokenVoteResultCollectionViewBody({
+      collection: this.voteResults,
+      categoryIndex: this.categoryIndex,
+      sumTokens: this.sumTokens,
+      maxPercent: this.maxPercent,
+      voteSpecification: this.voteSpecification,
+      languagePreferences: this.languagePreferences
+    }));
   },
 
   serializeData: function(){
@@ -1281,6 +1335,10 @@ var TokenResultView = Marionette.View.extend({
         that.voteResults = new Widget.VoteResultCollection({widgetModel: that.model, parse: true});
         return that.voteResults.fetch();
       }).then(function(){
+        if (that.isDestroyed()) {
+          return;
+        }
+
         //Don't care about results, it's been fetched.
         that.tokenSpecs = that.model.getVoteSpecificationModel();
         that.voteResults.associateTo(that.ideas, that.tokenSpecs);
@@ -1291,7 +1349,7 @@ var TokenResultView = Marionette.View.extend({
           var name = category.get('typename');
           that.categoryIndex.push(name);
         });
-        
+
         //Get statistics from the collection
         var stats = that.voteResults.getStatistics();
         that.numVoters = stats.numVoters;
@@ -1307,11 +1365,8 @@ var TokenResultView = Marionette.View.extend({
           voteSpecification: that.tokenSpecs,
           languagePreferences: that.languagePreferences
         });
-        if (!that.isDestroyed()){
-          that.isReady = true;
-          that.render();
-          that.showChildView('results', that.tokenResultsView);
-        }
+        that.isReady = true;
+        that.render();
       });
     });
   },
@@ -1376,7 +1431,6 @@ var TokenResultView = Marionette.View.extend({
   },
 
   onRender: function(){
-    var that = this;
     if (this.tokenResultsView){
       this.showChildView('results', this.tokenResultsView);
     }

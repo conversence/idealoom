@@ -15,20 +15,48 @@ var Marionette = require('backbone.marionette'),
     Storage = require('../../objects/storage.js'),
     UserCustomData = require('../../models/userCustomData.js');
 
+
 /** Represents the entire content of a single panel group
 * @class  app.views.groups.groupContent.groupContent
 */
-var groupContent = Marionette.CompositeView.extend({
+var groupContentBody = Marionette.CollectionView.extend({
+  constructor: function groupContentBody() {
+    Marionette.CollectionView.apply(this, arguments);
+  },
+
+  className: 'groupBody',
+  childView: PanelWrapper,
+  initialize: function(options) {
+    this.parent = options.parent;
+  },
+  /**
+   * Tell the panelWrapper which view to put in its contents
+   */
+  childViewOptions: function(child, index) {
+    return {
+      groupContent: this.parent,
+      contentSpec: child,
+    };
+  },
+});
+
+/** Represents the entire content of a single panel group
+* @class  app.views.groups.groupContent.groupContent
+*/
+var groupContent = Marionette.View.extend({
   constructor: function groupContent() {
-    Marionette.CompositeView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
 
   template: "#tmpl-groupContent",
   className: "groupContent",
-  childViewContainer: ".groupBody",
-  childView: PanelWrapper,
+  regions: {
+    body: {
+      el: '.groupBody',
+      replaceElement: true,
+    },
+  },
   panel_borders_size: 1,
-
 
   events: {
     'click .js_closeGroup': 'closeGroup'
@@ -36,9 +64,14 @@ var groupContent = Marionette.CompositeView.extend({
   initialize: function(options) {
     this.collection = this.model.get('panels');
     this.groupContainer = options['groupContainer'];
+    this.body = new groupContentBody({
+      collection: this.collection,
+      parent: this,
+    });
   },
   onRender:function(){
     if (!this.isDestroyed()) {
+      this.showChildView('body', this.body);
       var navView = this.findViewByType(PanelSpecTypes.NAV_SIDEBAR);
       if (navView) {
         navView.setViewByName(this.model.get('navigationState'), null);
@@ -89,15 +122,6 @@ var groupContent = Marionette.CompositeView.extend({
     this.applyUserCustomDataChangesOnGroupClose();
     this.model.collection.remove(this.model);
     this.groupContainer.resizeAllPanels(true);
-  },
-  /**
-   * Tell the panelWrapper which view to put in its contents
-   */
-  childViewOptions: function(child, index) {
-    return {
-      groupContent: this,
-      contentSpec: child
-    }
   },
   findNavigationSidebarPanelSpec: function() {
     return this.model.findNavigationSidebarPanelSpec();
@@ -191,7 +215,7 @@ var groupContent = Marionette.CompositeView.extend({
   findPanelWrapperByType: function(panelSpecType) {
     var model = this.model.getPanelSpecByType(panelSpecType);
     if (model !== undefined) {
-      var view = this.children.findByModel(model);
+      var view = this.body.children.findByModel(model);
       if (view == null) {
         return undefined;
       }
@@ -238,7 +262,7 @@ var groupContent = Marionette.CompositeView.extend({
       var panelSpecType = aPanelSpec.getPanelSpecType();
       if (panelSpecType === PanelSpecTypes.NAV_SIDEBAR)
           return;
-      var view = that.children.findByModel(aPanelSpec);
+      var view = that.body.children.findByModel(aPanelSpec);
       if (!view)
           return;
       var shouldBeVisible = _.find(args, function(arg) {

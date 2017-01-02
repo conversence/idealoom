@@ -13,8 +13,8 @@ var Marionette = require('backbone.marionette'),
     Promise = require('bluebird'),
     AdminNavigationMenu = require('./adminNavigationMenu.js');
 
-var notifications = Marionette.View.extend({
-  constructor: function notifications() {
+var NotificationView = Marionette.View.extend({
+  constructor: function NotificationView() {
     Marionette.View.apply(this, arguments);
   },
 
@@ -48,15 +48,29 @@ var notifications = Marionette.View.extend({
   }
 });
 
-var notificationList = Marionette.CompositeView.extend({
-  constructor: function notificationList() {
-    Marionette.CompositeView.apply(this, arguments);
+var NotificationListBody = Marionette.CollectionView.extend({
+  constructor: function NotificationListBody() {
+    Marionette.CollectionView.apply(this, arguments);
+  },
+
+  childView: NotificationView,
+  className: 'mtl',
+});
+
+var NotificationList = Marionette.View.extend({
+  constructor: function NotificationList() {
+    Marionette.View.apply(this, arguments);
   },
 
   template: '#tmpl-adminNotificationList',
-  childView: notifications,
-  childViewContainer: '.control-group',
-  className:'mtl'
+  regions: {
+    list: '.control-group',
+  },
+  onRender: function() {
+    this.showChildView('list', new NotificationListBody({
+      collection: this.collection,
+    }));
+  },
 });
 
 var defaultNotification = Marionette.View.extend({
@@ -128,7 +142,7 @@ var adminNotificationSubscriptions = Marionette.View.extend({
               });
               that.showChildView('autoSubscribe', defaultNotif);
 
-              var notif = new notificationList({
+              var notif = new NotificationList({
                 collection: NotificationsDiscussion
               });
               that.showChildView('notification', notif);
