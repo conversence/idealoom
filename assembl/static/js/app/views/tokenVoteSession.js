@@ -181,6 +181,9 @@ var transitionAnimation = function(el, el2, duration){
 
 // This view shows at the top of the popin the bag of remaining tokens the user has
 var TokenBagsView = Marionette.View.extend({
+  constructor: function TokenBagsView(){
+    Marionette.View.apply(this, arguments);
+  },
   template: '#tmpl-tokenBags',
   regions: {
     "tokenBags": ".token-bags-content"
@@ -223,6 +226,9 @@ var TokenBagsView = Marionette.View.extend({
 // This view shows the remaining tokens the user has, of a given category
 // This view's model is a token category (an instance of Widget.TokenCategorySpecificationModel)
 var RemainingCategoryTokensView = Marionette.View.extend({
+  constructor: function RemainingCategoryTokensView() {
+    Marionette.View.apply(this, arguments);
+  },
   template: false,
   initialize: function(options){
     if ( !("myVotesCollection" in this.options)){
@@ -314,6 +320,9 @@ var RemainingCategoryTokensView = Marionette.View.extend({
 
 
 var RemainingTokenCategoriesCollectionView = Marionette.CollectionView.extend({
+  constructor: function RemainingTokenCategoriesCollectionView() {
+    Marionette.CollectionView.apply(this, arguments);
+  },
   template: false,
   childView: RemainingCategoryTokensView,
   initialize: function(options) {
@@ -337,6 +346,9 @@ var RemainingTokenCategoriesCollectionView = Marionette.CollectionView.extend({
 // This view shows (in the block of an idea) the clickable tokens (of one given category of tokens) a user can allocate (and has allocated) on this idea
 // This view's model is a token category
 var TokenCategoryAllocationView = Marionette.View.extend({
+  constructor: function TokenCategoryAllocationView() {
+    Marionette.View.apply(this, arguments);
+  },
   template: '#tmpl-tokenIdeaAllocation',
   className: "token-category-allocation",
   initialize: function(options){
@@ -712,6 +724,9 @@ var TokenCategoryAllocationView = Marionette.View.extend({
 
 // The collection parameter has to be a collection of token categories
 var TokenCategoryAllocationCollectionView = Marionette.CollectionView.extend({
+  constructor: function TokenCategoryAllocationCollectionView() {
+    Marionette.CollectionView.apply(this, arguments);
+  },
   template: '#tmpl-tokenCategoryAllocationCollection',
   childView: TokenCategoryAllocationView,
   initialize: function(options) {
@@ -736,6 +751,9 @@ var TokenCategoryAllocationCollectionView = Marionette.CollectionView.extend({
 
 
 var TokenCategoryExclusivePairCollectionView = Marionette.View.extend({
+  constructor: function TokenCategoryExclusivePairCollectionView() {
+    Marionette.View.apply(this, arguments);
+  },
   template: '#tmpl-tokenCategoryExclusivePairCollection',
   regions: {
     negativeTokens: ".negative-tokens",
@@ -816,6 +834,9 @@ var TokenCategoryExclusivePairCollectionView = Marionette.View.extend({
 
 // This view shows an idea in the list of votable ideas (and calls a subview which shows the tokens for this idea)
 var TokenVoteItemView = Marionette.View.extend({
+  constructor: function TokenVoteItemView() {
+    Marionette.View.apply(this, arguments);
+  },
   template: '#tmpl-tokenVoteItem',
   initialize: function(options){
     this.childIndex = options.childIndex;
@@ -1533,7 +1554,8 @@ var TokenVoteSessionModal = Backbone.Modal.extend({
 
   },
 
-  onAttach: function(){
+  // this can remain a onShow because it is in a Backbone.Modal
+  onShow: function(){
     var that = this;
 
     that.availableTokensPositionTop = that.$(".available-tokens").position().top;
@@ -1673,6 +1695,7 @@ var TokenVoteSessionSubmittedModal = Backbone.Modal.extend({
   className: 'modal-token-vote-session-submitted popin-wrapper',
   cancelEl: '.close, .js_close',
 
+  // this can remain a onShow because it is in a Backbone.Modal
   onShow: function(){
     var container = this.$el.find(".js_modal-body");
     container.empty();
