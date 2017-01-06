@@ -3,7 +3,7 @@
  * @module app.views.discussionStatisticsModal
  */
 var Backbone = require('backbone'),
-    Marionette = require('../../shims/marionette.js'),
+    Marionette = require('backbone.marionette'),
     i18n = require('../../utils/i18n.js'),
     $ = require('jquery'),
     _ = require('underscore'),
