@@ -1081,11 +1081,11 @@ var TokenVoteResultView = Marionette.View.extend({
         num, category, total, category);
     };
 
-    var scale = d3.scale.linear()
+    var scale = d3.scaleLinear()
                         .domain([0, this.maxPercent])
                         .range([0, this.maxPixels]);
 
-    var percent = d3.format('%');
+    var percent = d3.format('.0%');
     var results = d3.select(this.el)
        .selectAll("div.token-vote-result-category-column")
         .data(this.results);

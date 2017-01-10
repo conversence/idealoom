@@ -114,10 +114,10 @@ var Statistics = Marionette.View.extend({
       });
       var min = 0;
       var pointRadius = 3;
-      var x = d3.time.scale().range([0, w - margin * 2]).domain([data[0].date, data[data.length - 1].date]);
-      var y = d3.scale.linear().range([h - margin * 2, 0]).domain([min, max]);
+      var x = d3.scaleTime().range([0, w - margin * 2]).domain([data[0].date, data[data.length - 1].date]);
+      var y = d3.scaleLinear().range([h - margin * 2, 0]).domain([min, max]);
 
-      var xAxis = d3.svg.axis().scale(x).tickSize(h - margin * 2).tickPadding(10).tickFormat(function(d) {
+      var xAxis = d3.axisBottom(x).tickSize(h - margin * 2).tickPadding(10).tickFormat(function(d) {
         return Ctx.getNiceDate(d);
       });
 
@@ -125,15 +125,15 @@ var Statistics = Marionette.View.extend({
       var time_span = data[data.length - 1].date - data[0].date; // in ms
       var time_span_in_days = time_span / (1000 * 60 * 60 * 24);
       if (time_span_in_days <= 30)
-          xAxis.ticks(d3.time.day, 5);
+          xAxis.ticks(d3.timeDay, 5);
       else if (time_span_in_days > 30 && time_span_in_days <= 3 * 30)
-          xAxis.ticks(d3.time.week, 2);
+          xAxis.ticks(d3.timeWeek, 2);
       else if (time_span_in_days > 3 * 30 && time_span_in_days <= 6 * 30)
-          xAxis.ticks(d3.time.month, 1);
+          xAxis.ticks(d3.timeMonth, 1);
       else
           xAxis.ticks(4);
 
-      var yAxis = d3.svg.axis().scale(y).orient('left').tickSize(-w + margin * 2).tickPadding(10).tickFormat(d3.format("d"));
+      var yAxis = d3.axisLeft(y).tickSize(-w + margin * 2).tickPadding(10).tickFormat(d3.format("d"));
       var t = null;
       var chart_div = that.$('.chart');
 
@@ -184,7 +184,7 @@ var Statistics = Marionette.View.extend({
       var dataLines = dataLinesGroup.selectAll('.data-line')
           .data([data]);
 
-      var line = d3.svg.line()
+      var line = d3.line()
 
           // assign the X function to plot our line as we wish
                 .x(function(d, i) {
@@ -199,10 +199,10 @@ var Statistics = Marionette.View.extend({
                   // return the Y coordinate where we want to plot this datapoint
                   return y(d.value);
                 })
-                .interpolate("linear");
+                .curve(d3.curveLinear);
 
-      var garea = d3.svg.area()
-          .interpolate("linear")
+      var garea = d3.area()
+          .curve(d3.curveLinear)
                 .x(function(d) {
                   // verbose logging to show what's actually being done
                   return x(d.date);
@@ -463,7 +463,7 @@ var Statistics = Marionette.View.extend({
 
       // var max_level = 4;
       var max_level = 2;
-      var color = d3.scale.category10();
+      var color = d3.scaleOrdinal(d3.schemeCategory10);
 
       var svg_orig = d3.select(plot).append("svg")
           .attr("width", width)
@@ -512,7 +512,7 @@ var Statistics = Marionette.View.extend({
       //var thickness = width/2.0/(max_level+2)*1.1;
       var thickness = inner_width / 2.0 / (max_level + 1) * 1.1;
 
-      var arc = d3.svg.arc()
+      var arc = d3.arc()
                 .startAngle(function(d) {
                   if (d[3] == 0) {
                     return d[0];
