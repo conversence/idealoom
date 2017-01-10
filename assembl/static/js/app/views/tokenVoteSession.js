@@ -1018,13 +1018,14 @@ var TokenVoteResultView = Marionette.View.extend({
         });
     var color = cat.get('color') || null;
     if (color){
-      var tmp;
       color.trim(); //Get rid of whitespace around text
-      if (!(color.indexOf('#') === 0)){
-        tmp = "#" + color;
+      if (!validTextColour(color)) {
+        color = "#" + color;
+        if (!validTextColour(color)) {
+          return null;
+        }
       }
-      var isGoodCss = validTextColour(tmp);
-      return isGoodCss ? tmp : null;
+      return color;
     }
     else { return null; }
   },
