@@ -331,6 +331,9 @@ class TokenCategorySpecification(DiscussionBoundBase):
 
     color = Column(String(25))
 
+    def vote_range(self):
+        return (0, self.maximum_per_idea)
+
     def get_discussion_id(self):
         tvs = self.token_vote_specification or TokenVoteSpecification.get(self.token_vote_specification_id)
         return tvs.get_discussion_id()
@@ -389,6 +392,9 @@ class LickertVoteSpecification(AbstractVoteSpecification):
     @classmethod
     def get_vote_class(cls):
         return LickertIdeaVote
+
+    def vote_range(self):
+        return (self.minimum, self.maximum)
 
     def voting_results(self, histogram_size=None):
         if self.question_id:
@@ -544,6 +550,9 @@ class BinaryVoteSpecification(AbstractVoteSpecification):
         base["no"] = n - positive
         return base
 
+    def vote_range(self):
+        return (0, 1)
+
     def csv_results(self, csv_file, histogram_size=None):
         dw = DictWriter(csv_file, ["idea", "yes", "no"],
                         dialect='excel', delimiter=';')
@@ -584,6 +593,9 @@ class MultipleChoiceVoteSpecification(AbstractVoteSpecification):
         Integer, ForeignKey(AbstractVoteSpecification.id), primary_key=True)
 
     num_choices = Column(Integer, nullable=False)
+
+    def vote_range(self):
+        return (0, self.num_choices - 1)
 
     def results_for(self, voting_results, histogram_size=None):
         base = super(
