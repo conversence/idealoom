@@ -29,6 +29,7 @@ function theme_entries() {
 module.exports = {
   entry: _.extend(theme_entries(), {
     main: './js/app/index.js',
+    panelTest: './js/app/views/testPanels.js',
     infrastructure: [
       'jquery',
       'underscore',

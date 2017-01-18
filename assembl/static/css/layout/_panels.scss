@@ -1,0 +1,205 @@
+#testapp {
+
+background-color: white;
+overflow-x: scroll;
+box-sizing: border-box;
+height: 100%;
+
+.panel-manager {
+  border: 2px solid black;
+  height: 100%;
+  box-sizing: border-box;
+  content: "";
+  clear: both;
+  display: table;
+  white-space: nowrap;
+  border: 0;
+  @include display(flex);
+  @include flex-direction(horizontal);
+  @include flex-wrap(nowrap);
+
+  &.fitting {
+    width: 100%;
+    overflow-x: hide;
+  }
+}
+
+.panel-group {
+  border: 2px solid purple;
+  height: 100%;
+  box-sizing: border-box;
+  white-space: nowrap;
+  display: inline-block;
+  &:not(.minimized) {
+    top: 0;
+  }
+  &.minimized {
+    display: block;
+    height: 1.5em;
+    .columns {
+      height: 1.5em;
+      .panel-column {
+        height: 1.5em;
+      }
+    }
+  }
+}
+
+.group-header {
+  height: 1.5em;
+  text-align: right;
+}
+
+.columns {
+  height: calc(100% - 1.5em - 2px);
+  width: 100%;
+  box-sizing: border-box;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+
+.panel-column-collection {
+  border: 2px solid red;
+  width: 100%;
+  @include display(flex);
+  @include flex-direction(horizontal);
+  @include flex-wrap(nowrap);
+}
+
+.panel-column {
+  /* aka level collection */
+  border: 2px solid orange;
+  box-sizing: border-box;
+  white-space: nowrap;
+  vertical-align: top;
+  top: 0;
+  height: 100%;
+  @include display(flex);
+  @include flex-direction(column);
+  @include flex-wrap(nowrap);
+}
+
+.panel-level {
+  border: 2px solid yellow;
+  width: 100%;
+  box-sizing: border-box;
+  white-space: nowrap;
+  display: inline-block;
+  &:not(.minimized) {
+    @include flex(1);
+    @include display(flex);
+    @include flex-direction(column);
+  }
+  &.minimized {
+    display: block;
+    height: 4.7em;
+    .panels {
+      height: 4.6em;
+    }
+  }
+}
+
+.level-header {
+  height: 1.5em;
+  .panel-selector-collection {
+    white-space: nowrap;
+    .panel-selector {
+      white-space: nowrap;
+      display: inline-block;
+      button {
+        white-space: nowrap;
+        display: inline-block;
+        outline: 2px outset;
+        margin: 2px;
+        &.button_down {
+          outline: 2px inset;
+        }
+      }
+    }
+  }
+}
+
+.panels {
+  @include flex(1);
+  @include display(flex);
+  @include flex-direction(column);
+  @include flex-wrap(nowrap);
+  width: 100%;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+
+.panel-collection {
+  @include flex(1);
+  @include display(flex);
+  @include flex-direction(row);
+  width: 100%;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+
+
+
+.panel-w {
+  @include flex(1);
+  @include display(flex);
+  @include flex-direction(column);
+  box-sizing: border-box;
+  overflow-y: scroll;
+  &.minimized {
+    display: block;
+    height: 3em;
+    .panel {
+      height: 1.5em;
+    }
+  }
+  &:not(.minimized) {
+    top: 0;
+  }
+}
+
+.panelw-header {
+  height: 1.5em;
+}
+
+
+.panelc {
+  width: 100%;
+  @include flex(1);
+  @include display(flex);
+  box-sizing: border-box;
+  white-space:normal;
+}
+
+
+.panel {
+  @include flex(1);
+  min-width: 200px;
+  min-height: 1.5em;
+  max-width: 1500px;
+  box-sizing: border-box;
+  white-space:normal;
+  &.minimized {
+    display: block;
+    height: 3em;
+    .panel {
+      height: 1.5em;
+    }
+  }
+  &:not(.minimized) {
+    top: 0;
+  }
+}
+
+
+.test-panel {
+  border: 2px solid blue;
+}
+
+.test2-panel {
+  border: 2px solid green;
+  /*height:2000px;*/
+}
+
+}
