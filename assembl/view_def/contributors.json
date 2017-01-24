@@ -38,7 +38,6 @@
         "contributors": "&get_contributors:",
         "widget_links": "&widget_link_signatures",
         "widget_add_post_endpoint": true,
-        "message_columns": [":default"],
         "attachments": [":default"]
     }
 }
