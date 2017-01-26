@@ -903,6 +903,12 @@ def install_redis():
         run('brew services start redis')
     else:
         sudo('apt-get install -y redis-server')
+        if exists('/etc/systemd/system/redis.service'):
+            sudo('sudo systemctl start redis.service')
+        elif exists('/etc/init.d/redis-server'):
+            sudo('/etc/init.d/redis-server start')
+        else:
+            print(red("Make sure that redis is running"))
 
 
 @task
@@ -917,6 +923,10 @@ def install_memcached():
         run('brew services start memcached')
     else:
         sudo('apt-get install -y memcached')
+        if exists('/etc/init.d/memcached'):
+            sudo('/etc/init.d/memcached start')
+        else:
+            print(red("Make sure that memcached is running"))
 
 
 @task
@@ -1446,6 +1456,10 @@ def install_postgres():
         run('brew services start postgres')
     else:
         sudo('apt-get install -y postgresql')
+        if exists('/etc/init.d/postgresql'):
+            sudo('/etc/init.d/postgresql start')
+        else:
+            print(red("Make sure that postgres is running"))
 
 
 @task
