@@ -26,7 +26,6 @@ from ...models.auth import (
 from assembl.auth.util import user_has_permission
 from .. import HTTPTemporaryRedirect, get_default_context as base_default_context
 from assembl.lib.frontend_urls import FrontendUrls
-from assembl import locale_negotiator
 from assembl.nlp.translation_service import DummyGoogleTranslationService
 from ..auth.views import get_social_autologin
 
@@ -187,7 +186,8 @@ def home_view(request):
             process_locale(locale, user, session,
                            LanguagePreferenceOrder.Parameter)
         else:
-            locale = locale_negotiator(request)
+            # uses my locale negotiator
+            locale = request.locale_name
             process_locale(locale, user, session,
                            LanguagePreferenceOrder.OS_Default)
     else:
