@@ -1656,6 +1656,8 @@ class LanguagePreferenceCollection(object):
                 except Exception:
                     capture_exception()
             locale = locale_negotiator(req)
+            if not locale:
+                locale = config.get('pyramid.default_locale_name')
             req.lang_prefs = LanguagePreferenceCollectionWithDefault(locale)
         return req.lang_prefs
 
