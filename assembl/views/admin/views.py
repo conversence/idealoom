@@ -23,7 +23,6 @@ from assembl.models.auth import (
     create_default_permissions, User, Username, AgentProfile,
     LanguagePreferenceOrder)
 from assembl.models import Preferences, Locale
-from assembl import locale_negotiator
 from assembl.lib.utils import get_global_base_url
 from assembl.nlp.translation_service import DummyGoogleTranslationService
 from ..discussion.views import process_locale
@@ -71,7 +70,7 @@ def base_admin_view(request):
         process_locale(locale, user, session,
                        LanguagePreferenceOrder.Parameter)
     else:
-        locale = locale_negotiator(request)
+        request.locale_name
         process_locale(locale, user, session,
                        LanguagePreferenceOrder.OS_Default)
 
