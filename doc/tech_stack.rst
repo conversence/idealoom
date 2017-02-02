@@ -355,8 +355,8 @@ Essentially, this comes from :file:`package.json` and :file:`bower.json`, as
 well as the content of js/app/lib
 
 Underscore_
-  The basis of backbone, but also used extensively in IdeaLoom code.  
-  It is a wery usefull Javascript utility library
+  The basis of backbone, but also used extensively in IdeaLoom code.
+  It is a very useful Javascript utility library
 
 Backbone_
   An unopinionated Model-Collection-View Javascript framework
