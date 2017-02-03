@@ -47,13 +47,6 @@ var LanguagePreferenceModel = Base.Model.extend({
         translate_to_name: null
     },
   /**
-   * @function app.models.languagePreference.LanguagePreferenceModel.setExplicitPromise
-   */
-    setExplicitPromise: function(language){
-        this.set({"translate_to": language});
-        return Promise.resolve(this.save({}));
-    },
-  /**
    * @function app.models.languagePreference.LanguagePreferenceModel.isLocale
    */
     isLocale: function(locale){

@@ -131,7 +131,6 @@ from .social_auth import (
     SocialAuthAccount,
 )
 from .langstrings import (
-    Locale,
     LocaleLabel,
     LangString,
     LangStringEntry,

@@ -54,7 +54,7 @@ def init_key_for_classes(db):
     global fn_for_classes, user_refs
     from assembl.models import (
         AgentProfile, User, Permission, Role, Webpage, Action, LocalUserRole,
-        IdentityProvider, EmailAccount, WebLinkAccount, Locale,
+        IdentityProvider, EmailAccount, WebLinkAccount,
         NotificationSubscription, DiscussionPerUserNamespacedKeyValue)
     fn_for_classes = {
         AgentProfile: partial(find_or_create_agent_profile, db),
@@ -62,7 +62,6 @@ def init_key_for_classes(db):
         Webpage: partial(find_or_create_object_by_keys, db, ['url']),
         Permission: partial(find_or_create_object_by_keys, db, ['name']),
         Role: partial(find_or_create_object_by_keys, db, ['name']),
-        Locale: partial(find_or_create_object_by_keys, db, ['code']),
         # SocialAuthAccount: partial(find_or_create_object_by_keys, db, ['provider_id', 'uid']),
         IdentityProvider: partial(find_or_create_object_by_keys, db, ['provider_type', 'name']),
         # email_ci?

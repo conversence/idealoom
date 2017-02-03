@@ -14,7 +14,6 @@ from sqlalchemy.orm.exc import NoResultFound
 from assembl.models import Discussion, Role
 from assembl.models.post import Post
 from assembl.models.idea import Idea
-from assembl.models.langstrings import Locale
 from assembl.auth import P_READ, P_ADD_EXTRACT
 from assembl.lib.locale import (to_posix_string, strip_country)
 from assembl.lib.utils import is_url_from_same_server, path_qs
@@ -66,9 +65,6 @@ def get_styleguide_components():
 def process_locale(
         locale_code, user, session, source_of_evidence):
     locale_code = to_posix_string(locale_code)
-    # Updated: Now Locale is a model. Converting posix_string into its
-    # equivalent model. Creates it if it does not exist
-    locale = Locale.get_or_create(locale_code, session)
 
     if source_of_evidence in LanguagePreferenceOrder.unique_prefs:
         lang_pref_signatures = defaultdict(list)
@@ -79,19 +75,19 @@ def process_locale(
             lp = lang_pref_signatures[source_of_evidence].pop()
             lp.delete()
         if len(lang_pref_signatures[source_of_evidence]) == 1:
-            lang_pref_signatures[source_of_evidence][0].locale = locale
+            lang_pref_signatures[source_of_evidence][0].locale = locale_code
             session.flush()
             return
         # else creation below
     else:
         lang_pref_signatures = {
-            (lp.locale_id, lp.source_of_evidence)
+            (lp.locale, lp.source_of_evidence)
             for lp in user.language_preference
         }
-        if (locale.id, source_of_evidence) in lang_pref_signatures:
+        if (locale_code, source_of_evidence) in lang_pref_signatures:
             return
     lang = UserLanguagePreference(
-        user=user, source_of_evidence=source_of_evidence.value, locale=locale)
+        user=user, source_of_evidence=source_of_evidence.value, locale=locale_code)
     session.add(lang)
     session.flush()
 
@@ -193,8 +189,7 @@ def home_view(request):
     else:
         locale = request.localizer.locale_name
 
-    target_locale = Locale.get_or_create(
-        strip_country(locale), discussion.db)
+    target_locale = strip_country(locale)
 
     translation_service_data = {}
     try:
@@ -234,7 +229,7 @@ def styleguide_view(request):
 def frontend_test_view(request):
     context = get_default_context(request)
     discussion = context["discussion"]
-    target_locale = Locale.get_or_create('en', discussion.db)
+    target_locale = 'en'
     locale_labels = json.dumps(
         DummyGoogleTranslationService.target_locale_labels_cls(target_locale))
     context['translation_locale_names_json'] = locale_labels

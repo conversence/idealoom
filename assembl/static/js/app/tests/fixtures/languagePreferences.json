@@ -27,7 +27,7 @@
     "user": "local:AgentProfile/1",
     "@id": "local:UserLanguagePreference/3",
     "@type": "UserLanguagePreference",
-    "@view": "default"    
+    "@view": "default"
   },
   "fr_cookie": {
     "source_of_evidence": 1,
@@ -47,7 +47,7 @@
     "user": "local:AgentProfile/1",
     "@id": "local:UserLanguagePreference/4",
     "@type": "UserLanguagePreference",
-    "@view": "default"    
+    "@view": "default"
   },
   "fr": {
     "source_of_evidence": 0,
@@ -57,7 +57,7 @@
     "user": "local:AgentProfile/1",
     "@id": "local:UserLanguagePreference/5",
     "@type": "UserLanguagePreference",
-    "@view": "default"    
+    "@view": "default"
   },
   "it": {
     "source_of_evidence": 0,
@@ -67,14 +67,13 @@
     "user": "local:AgentProfile/1",
     "@id": "local:UserLanguagePreference/6",
     "@type": "UserLanguagePreference",
-    "@view": "default"    
+    "@view": "default"
   },
   "fr_from_en": {
     "source_of_evidence": 0,
     "locale": "local:Locale/1",
     "locale_code": "en",
     "user": "local:AgentProfile/1",
-    "translate_to": "local:Locale/2",
     "translate_to_name": "fr",
     "preferred_order": 0,
     "@id": "local:UserLanguagePreference/7",
@@ -85,19 +84,17 @@
     "source_of_evidence": 0,
     "locale": "local:Locale/1",
     "locale_code": "fr",
-    "translate_to": "local:Locale/2",
     "translate_to_name": "en",
     "user": "local:AgentProfile/1",
     "preferred_order": 0,
     "@id": "local:UserLanguagePreference/8",
     "@type": "UserLanguagePreference",
-    "@view": "default"    
+    "@view": "default"
   },
   "it_from_fr": {
     "source_of_evidence": 0,
     "locale": "local:Locale/2",
     "locale_code": "fr",
-    "translate_to": "local:Locale/3",
     "translate_to_name": "it",
     "user": "local:AgentProfile/1",
     "preferred_order": 0,

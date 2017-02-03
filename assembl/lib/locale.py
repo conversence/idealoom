@@ -116,12 +116,55 @@ def strip_country(locale):
     return locale
 
 
+def locale_ancestry(locale):
+    locale = locale.split("_")
+    return ["_".join(locale[:i]) for i in range(len(locale), 0, -1)]
+
+
+def create_mt_code(source_code, target_code):
+    return "-x-mtfrom-".join((target_code, source_code))
+
+
+_rtl_locales = {"ar", "dv", "ha", "he", "fa", "ps", "ur", "yi"}
+
+def is_rtl(locale):
+    parts = locale.split("_")
+    return parts[0] in _rtl_locales or (len(parts) > 1 and parts[1] == 'Arab')
+
+
+def locale_compatible(locname1, locname2):
+    """Are the two locales similar enough to be substituted
+    one for the other. Mostly same language/script, disregard country.
+    """
+    # Google special case... should be done upstream ideally.
+    if locname1 == 'zh':
+        locname1 = 'zh_Hans'
+    if locname2 == 'zh':
+        locname2 = 'zh_Hans'
+    loc1 = locname1.split("_")
+    loc2 = locname2.split("_")
+    for i in range(min(len(loc1), len(loc2))):
+        if loc1[i] != loc2[i]:
+            if i and len(loc1[i]) == 2:
+                # discount difference in country
+                return i
+            return False
+    return i + 1
+
+
+def any_locale_compatible(cls, locname, locnames):
+    for l in locnames:
+        if cls.compatible(l, locname):
+            return True
+    return False
+
+
 def get_preferred_languages(session, user_id):
-    from ..models import UserLanguagePreference, Locale
+    from ..models import UserLanguagePreference
     prefs = (session.query(UserLanguagePreference)
              .filter_by(user_id=user_id)
              .order_by(UserLanguagePreference.preferred_order))
-    return [Locale.code_for_id(p.locale_id) for p in prefs]
+    return [p.locale for p in prefs]
 
 
 def locale_negotiator(request):

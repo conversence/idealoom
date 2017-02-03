@@ -35,7 +35,7 @@ def langstring_entry_values():
 
 
 @pytest.fixture(scope="function")
-def en_langstring_entry(request, test_session, en_locale,
+def en_langstring_entry(request, test_session,
                         langstring_body, langstring_entry_values):
     """LangStringEntry fixture with English locale"""
 
@@ -44,7 +44,7 @@ def en_langstring_entry(request, test_session, en_locale,
     entry = LangStringEntry(
         locale_confirmed=False,
         langstring=langstring_body,
-        locale=en_locale,
+        locale='en',
         value=langstring_entry_values.get('body').get('english')
     )
 
@@ -61,7 +61,7 @@ def en_langstring_entry(request, test_session, en_locale,
 
 
 @pytest.fixture(scope="function")
-def fr_langstring_entry(request, test_session, fr_locale,
+def fr_langstring_entry(request, test_session,
                         langstring_body, langstring_entry_values):
     """LangStringEntry fixture with French locale"""
 
@@ -70,7 +70,7 @@ def fr_langstring_entry(request, test_session, fr_locale,
     entry = LangStringEntry(
         locale_confirmed=False,
         langstring=langstring_body,
-        locale=fr_locale,
+        locale='fr',
         value=langstring_entry_values.get('body').get('french')
     )
 
@@ -87,7 +87,7 @@ def fr_langstring_entry(request, test_session, fr_locale,
 
 
 @pytest.fixture(scope="function")
-def it_langstring_entry(request, test_session, it_locale,
+def it_langstring_entry(request, test_session,
                         langstring_body, langstring_entry_values):
     """LangStringEntry fixture with Italian locale"""
 
@@ -96,7 +96,7 @@ def it_langstring_entry(request, test_session, it_locale,
     entry = LangStringEntry(
         locale_confirmed=False,
         langstring=langstring_body,
-        locale=it_locale,
+        locale='it',
         value=langstring_entry_values.get('body').get('italian')
     )
 
@@ -113,7 +113,7 @@ def it_langstring_entry(request, test_session, it_locale,
 
 
 @pytest.fixture(scope="function")
-def tr_langstring_entry(request, test_session, tr_locale,
+def tr_langstring_entry(request, test_session,
                         langstring_body, langstring_entry_values):
     """LangStringEntry fixture with Turkish locale"""
 
@@ -122,7 +122,7 @@ def tr_langstring_entry(request, test_session, tr_locale,
     entry = LangStringEntry(
         locale_confirmed=False,
         langstring=langstring_body,
-        locale=tr_locale,
+        locale='tr',
         value=langstring_entry_values.get('body').get('turkish')
     )
 
@@ -139,16 +139,16 @@ def tr_langstring_entry(request, test_session, tr_locale,
 
 
 @pytest.fixture(scope="function")
-def und_langstring_entry(request, test_session, undefined_locale,
+def und_langstring_entry(request, test_session,
                          langstring_body, langstring_entry_values):
     """LangStringEntry fixture with undefined locale"""
 
-    from assembl.models.langstrings import LangStringEntry
+    from assembl.models.langstrings import LangStringEntry, LocaleLabel
 
     entry = LangStringEntry(
         locale_confirmed=False,
         langstring=langstring_body,
-        locale=undefined_locale,
+        locale=LocaleLabel.UNDEFINED,
         value=langstring_entry_values.get('body').get('english')
     )
 
@@ -166,16 +166,16 @@ def und_langstring_entry(request, test_session, undefined_locale,
 
 @pytest.fixture(scope="function")
 def non_linguistic_langstring_entry(request, test_session,
-                                    non_linguistic_locale, langstring_body,
+                                    langstring_body,
                                     langstring_entry_values):
     """LangStringEntry fixture with non_linguistic locale"""
 
-    from assembl.models.langstrings import LangStringEntry
+    from assembl.models.langstrings import LangStringEntry, LocaleLabel
 
     entry = LangStringEntry(
         locale_confirmed=False,
         langstring=langstring_body,
-        locale=non_linguistic_locale,
+        locale=LocaleLabel.NON_LINGUISTIC,
         value=langstring_entry_values.get('body').get('english')
     )
 
@@ -192,7 +192,7 @@ def non_linguistic_langstring_entry(request, test_session,
 
 
 @pytest.fixture(scope="function")
-def fr_from_en_langstring_entry(request, test_session, fr_from_en_locale,
+def fr_from_en_langstring_entry(request, test_session,
                                 langstring_body, en_langstring_entry,
                                 langstring_entry_values):
     """LangStringEntry fixture with EN locale + FR from EN locale"""
@@ -202,7 +202,8 @@ def fr_from_en_langstring_entry(request, test_session, fr_from_en_locale,
     entry = LangStringEntry(
         locale_confirmed=False,
         langstring=langstring_body,
-        locale=fr_from_en_locale,
+        locale='fr',
+        mt_trans_of=en_langstring_entry,
         value=langstring_entry_values.get('body').get('french')
     )
 
@@ -220,7 +221,7 @@ def fr_from_en_langstring_entry(request, test_session, fr_from_en_locale,
 
 
 @pytest.fixture(scope="function")
-def en_from_fr_langstring_entry(request, test_session, en_from_fr_locale,
+def en_from_fr_langstring_entry(request, test_session,
                                 langstring_body, fr_langstring_entry,
                                 langstring_entry_values):
     """LangStringEntry fixture with FR locale + EN from FR locale"""
@@ -230,7 +231,8 @@ def en_from_fr_langstring_entry(request, test_session, en_from_fr_locale,
     entry = LangStringEntry(
         locale_confirmed=False,
         langstring=langstring_body,
-        locale=en_from_fr_locale,
+        locale='en',
+        mt_trans_of=fr_langstring_entry,
         value=langstring_entry_values.get('body').get('english')
     )
 
@@ -247,7 +249,7 @@ def en_from_fr_langstring_entry(request, test_session, en_from_fr_locale,
 
 
 @pytest.fixture(scope="function")
-def it_from_en_langstring_entry(request, test_session, it_from_en_locale,
+def it_from_en_langstring_entry(request, test_session,
                                 langstring_body, en_langstring_entry,
                                 langstring_entry_values):
     """LangStringEntry fixture with EN locale + IT from EN locale"""
@@ -257,7 +259,8 @@ def it_from_en_langstring_entry(request, test_session, it_from_en_locale,
     entry = LangStringEntry(
         locale_confirmed=False,
         langstring=langstring_body,
-        locale=it_from_en_locale,
+        locale='it',
+        mt_trans_of=en_langstring_entry,
         value=langstring_entry_values.get('body').get('italian')
     )
 
@@ -274,7 +277,7 @@ def it_from_en_langstring_entry(request, test_session, it_from_en_locale,
 
 
 @pytest.fixture(scope="function")
-def en_from_it_langstring_entry(request, test_session, en_from_it_locale,
+def en_from_it_langstring_entry(request, test_session,
                                 langstring_body, it_langstring_entry,
                                 langstring_entry_values):
     """LangStringEntry fixture with IT locale + EN from IT locale"""
@@ -284,7 +287,8 @@ def en_from_it_langstring_entry(request, test_session, en_from_it_locale,
     entry = LangStringEntry(
         locale_confirmed=False,
         langstring=langstring_body,
-        locale=en_from_it_locale,
+        locale='en',
+        mt_trans_of=it_langstring_entry,
         value=langstring_entry_values.get('body').get('english')
     )
 
@@ -301,7 +305,7 @@ def en_from_it_langstring_entry(request, test_session, en_from_it_locale,
 
 
 @pytest.fixture(scope="function")
-def it_from_fr_langstring_entry(request, test_session, it_from_fr_locale,
+def it_from_fr_langstring_entry(request, test_session,
                                 langstring_body, fr_langstring_entry,
                                 langstring_entry_values):
     """LangStringEntry fixture with FR locale + IT from FR locale"""
@@ -311,7 +315,8 @@ def it_from_fr_langstring_entry(request, test_session, it_from_fr_locale,
     entry = LangStringEntry(
         locale_confirmed=False,
         langstring=langstring_body,
-        locale=it_from_fr_locale,
+        locale='it',
+        mt_trans_of=fr_langstring_entry,
         value=langstring_entry_values.get('body').get('italian')
     )
 
@@ -328,7 +333,7 @@ def it_from_fr_langstring_entry(request, test_session, it_from_fr_locale,
 
 
 @pytest.fixture(scope="function")
-def fr_from_it_langstring_entry(request, test_session, fr_from_it_locale,
+def fr_from_it_langstring_entry(request, test_session,
                                 langstring_body, it_langstring_entry,
                                 langstring_entry_values):
     """LangStringEntry fixture with IT locale + FR from IT locale"""
@@ -338,7 +343,8 @@ def fr_from_it_langstring_entry(request, test_session, fr_from_it_locale,
     entry = LangStringEntry(
         locale_confirmed=False,
         langstring=langstring_body,
-        locale=fr_from_it_locale,
+        locale='fr',
+        mt_trans_of=it_langstring_entry,
         value=langstring_entry_values.get('body').get('french')
     )
 
@@ -355,7 +361,7 @@ def fr_from_it_langstring_entry(request, test_session, fr_from_it_locale,
 
 
 @pytest.fixture(scope="function")
-def en_from_tr_langstring_entry(request, test_session, en_from_tr_locale,
+def en_from_tr_langstring_entry(request, test_session,
                                 langstring_body, tr_langstring_entry,
                                 langstring_entry_values):
     """LangStringEntry fixture with TR locale + EN from TR locale"""
@@ -365,7 +371,8 @@ def en_from_tr_langstring_entry(request, test_session, en_from_tr_locale,
     entry = LangStringEntry(
         locale_confirmed=False,
         langstring=langstring_body,
-        locale=en_from_tr_locale,
+        locale='en',
+        mt_trans_of=tr_langstring_entry,
         value=langstring_entry_values.get('body').get('english')
     )
 
@@ -382,7 +389,7 @@ def en_from_tr_langstring_entry(request, test_session, en_from_tr_locale,
 
 
 @pytest.fixture(scope="function")
-def de_from_tr_langstring_entry(request, test_session, de_from_tr_locale,
+def de_from_tr_langstring_entry(request, test_session,
                                 langstring_body, tr_langstring_entry,
                                 langstring_entry_values):
     """LangStringEntry fixture with TR locale + DE from TR locale"""
@@ -392,7 +399,8 @@ def de_from_tr_langstring_entry(request, test_session, de_from_tr_locale,
     entry = LangStringEntry(
         locale_confirmed=False,
         langstring=langstring_body,
-        locale=de_from_tr_locale,
+        locale='de',
+        mt_trans_of=tr_langstring_entry,
         value=langstring_entry_values.get('body').get('german')
     )
 
@@ -409,7 +417,7 @@ def de_from_tr_langstring_entry(request, test_session, de_from_tr_locale,
 
 
 @pytest.fixture(scope="function")
-def fr_from_und_langstring_entry(request, test_session, fr_from_und_locale,
+def fr_from_und_langstring_entry(request, test_session,
                                  langstring_body, und_langstring_entry,
                                  langstring_entry_values):
     """LangStringEntry fixture with und locale + FR from und locale"""
@@ -419,7 +427,8 @@ def fr_from_und_langstring_entry(request, test_session, fr_from_und_locale,
     entry = LangStringEntry(
         locale_confirmed=False,
         langstring=langstring_body,
-        locale=fr_from_und_locale,
+        locale='fr',
+        mt_trans_of=und_langstring_entry,
         value=langstring_entry_values.get('body').get('french')
     )
 

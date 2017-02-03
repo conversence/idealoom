@@ -22,7 +22,7 @@ from assembl.auth.util import (
 from assembl.models.auth import (
     create_default_permissions, User, Username, AgentProfile,
     LanguagePreferenceOrder)
-from assembl.models import Preferences, Locale
+from assembl.models import Preferences
 from assembl.lib.utils import get_global_base_url
 from assembl.nlp.translation_service import DummyGoogleTranslationService
 from ..discussion.views import process_locale
@@ -74,8 +74,7 @@ def base_admin_view(request):
         process_locale(locale, user, session,
                        LanguagePreferenceOrder.OS_Default)
 
-    target_locale = Locale.get_or_create(
-        strip_country(locale), session)
+    target_locale = strip_country(locale)
     locale_labels = json.dumps(
         DummyGoogleTranslationService.target_locale_labels_cls(target_locale))
     context['translation_locale_names_json'] = locale_labels

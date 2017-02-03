@@ -24,12 +24,10 @@
     },
     "UserLanguagePreference": {
         "user": true,
-        "locale": true,
-        "locale_code": true,
+        "locale_code": "locale",
         "preferred_order": true,
         "source_of_evidence": true,
-        "translate_to": true,
-        "translate_to_name": "translate_to_code"
+        "translate_to_name": "translate"
     },
     "AgentProfile": {
         "description": true,

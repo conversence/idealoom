@@ -127,9 +127,6 @@ def db_default_data(
         session = db_tables()
         clear_rows(get_config(), session)
         transaction.commit()
-        from assembl.models import Locale, LangString
-        Locale.reset_cache()
-        LangString.reset_cache()
     request.addfinalizer(fin)
     return db_tables  # session_factory
 

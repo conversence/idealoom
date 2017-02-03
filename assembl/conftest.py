@@ -14,7 +14,6 @@ from assembl.tests.fixtures.creativity_session import *
 from assembl.tests.fixtures.idea_content_links import *
 from assembl.tests.fixtures.ideas import *
 from assembl.tests.fixtures.langstring import *
-from assembl.tests.fixtures.locale import *
 from assembl.tests.fixtures.mailbox import *
 from assembl.tests.fixtures.posts import *
 from assembl.tests.fixtures.preferences import *

@@ -21,7 +21,7 @@ from .optics import Optics
 
 from assembl.lib.config import get_config
 from assembl.models import (
-    Content, Idea, Discussion, RootIdea, Post, IdeaLink, LangStringEntry, Locale)
+    Content, Idea, Discussion, RootIdea, Post, IdeaLink, LangStringEntry)
 from .indexedcorpus import IdMmCorpus
 from . import (
     get_stop_words, get_stemmer, DummyStemmer, ReversibleStemmer)
@@ -265,9 +265,7 @@ class SemanticAnalysisData(object):
                 ).join(
                     LangStringEntry,
                     content_alias.body_id == LangStringEntry.langstring_id
-                ).join(
-                    Locale, LangStringEntry.locale_id == Locale.id
-                ).filter(~Locale.is_machine_translated))
+                ).filter(~LangStringEntry.is_machine_translated))
         return self._post_texts
 
     @property

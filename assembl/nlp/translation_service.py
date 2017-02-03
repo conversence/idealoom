@@ -14,8 +14,9 @@ from assembl.lib.abc import (abstractclassmethod, classproperty)
 from assembl.lib import config
 from assembl.lib.enum import OrderedEnum
 from assembl.models.langstrings import (
-    Locale, LangString, LangStringEntry, LocaleLabel)
-from assembl.lib.locale import strip_country
+    LangString, LangStringEntry, LocaleLabel)
+from assembl.lib.locale import (
+    strip_country, create_mt_code, locale_compatible, any_locale_compatible)
 
 
 _ = TranslationStringFactory('assembl')
@@ -92,7 +93,7 @@ class TranslationService(object):
     def target_locale_labels_for_locales(cls, locales, target_locale):
         return LocaleLabel.names_of_locales_in_locale(
             [strip_country(cls.asPosixLocale(loc)) for loc in locales] +
-            Locale.SPECIAL_LOCALES,
+            LocaleLabel.SPECIAL_LOCALES,
             target_locale)
 
     def target_locale_labels(self, target_locale):
@@ -117,31 +118,29 @@ class TranslationService(object):
             constrain_to_discussion_locales=SECURE_IDENTIFICATION_LIMIT):
         "Try to identify locale of text. Boost if one of the expected locales."
         if not text:
-            return Locale.UNDEFINED, {Locale.UNDEFINED: 1}
+            return LocaleLabel.UNDEFINED, {LocaleLabel.UNDEFINED: 1}
         len_nourl = self.strlen_nourl(text)
         if len_nourl < 5:
-            return Locale.NON_LINGUISTIC
-        expected_locales = set((
-            Locale.extract_root_locale(l)
-            for l in self.discussion.discussion_locales))
+            return LocaleLabel.NON_LINGUISTIC
+        expected_locales = set(self.discussion.discussion_locales)
         language_data = detect_langs(text)
         if constrain_to_discussion_locales and (
                 len_nourl < constrain_to_discussion_locales):
             data = [(x.prob, x.lang)
                     for x in language_data
-                    if Locale.any_compatible(
-                        Locale.extract_root_locale(x.lang),
+                    if any_locale_compatible(
+                        x.lang,
                         expected_locales)]
         else:
             # boost with discussion locales.
             data = [
                 (x.prob * (
-                    5 if Locale.extract_root_locale(x.lang)
+                    5 if x.lang
                     in expected_locales else 1
                 ), x.lang) for x in language_data]
         data.sort(reverse=True)
         top = data[0][1] if (data and (data[0][0] > 0.5)
-                             ) else Locale.UNDEFINED
+                             ) else LocaleLabel.UNDEFINED
         return top, {lang: prob for (prob, lang) in data}
 
     def confirm_locale(
@@ -157,26 +156,23 @@ class TranslationService(object):
                 langstring_entry.db.expire(langstring_entry, ["locale"])
                 langstring_entry.db.expire(
                     langstring_entry.langstring, ["entries"])
-            if lang == Locale.UNDEFINED:
+            if lang == LocaleLabel.UNDEFINED:
                 pass  # say you can't identify
         except Exception as e:
             print_exc()
-            expected_locales = [
-                Locale.extract_root_locale(l)
-                for l in self.discussion.discussion_locales]
+            expected_locales = self.discussion.discussion_locales
             self.set_error(langstring_entry, *self.decode_exception(e, True))
 
     @abstractmethod
     def translate(self, text, target, source=None, db=None):
         if not text:
-            return text, Locale.NON_LINGUISTIC
-        if not source or source == Locale.UNDEFINED:
+            return text, LocaleLabel.NON_LINGUISTIC
+        if not source or source == LocaleLabel.UNDEFINED:
             lang, data = self.identify(text)
-            source = Locale.get_or_create(source, db)
         return text, lang
 
     def get_mt_name(self, source_name, target_name):
-        return Locale.create_mt_code(source_name, target_name)
+        return create_mt_code(source_name, target_name)
 
     def has_fatal_error(self, lse):
         return lse.error_code >= LangStringStatus.PERMANENT_TRANSLATION_FAILURE
@@ -192,57 +188,56 @@ class TranslationService(object):
         if not source_lse.value:
             # don't translate empty strings
             return source_lse
-        source_locale = source_lse.locale_code
-        if source_locale == Locale.NON_LINGUISTIC:
+        source_locale = source_lse.locale
+        if source_locale == LocaleLabel.NON_LINGUISTIC:
             return source_lse
         # TODO: Handle MULTILINGUAL
-        if (source_locale == Locale.UNDEFINED and
+        if (source_locale == LocaleLabel.UNDEFINED and
                 self.strlen_nourl(source_lse.value) < 5):
-            source_lse.identify_locale(Locale.NON_LINGUISTIC, None, True)
+            source_lse.identify_locale(LocaleLabel.NON_LINGUISTIC, None, True)
             return source_lse
-        if (source_locale == Locale.UNDEFINED
+        if (source_locale == LocaleLabel.UNDEFINED
                 and self.distinct_identify_step):
             self.confirm_locale(source_lse, constrain_to_discussion_locales)
             # TODO: bail if identification failed
-            source_locale = source_lse.locale_code
+            source_locale = source_lse.locale
         # TODO: Handle script differences
-        if (Locale.compatible(source_locale, target.code)):
+        if (locale_compatible(source_locale, target)):
             return source_lse
         target_lse = None
         is_new_lse = False
-        if (source_locale != Locale.UNDEFINED
+        if (source_locale != LocaleLabel.UNDEFINED
                 or not self.distinct_identify_step
                 or self.has_fatal_error(source_lse)):
             # We try to avoid ???-mt-from-und locales in the DB.
             # This is only stored if both identification and translation
             # failed to identify a language.
-            mt_target_name = self.get_mt_name(source_locale, target.code)
-            target_lse = source_lse.langstring.entries_as_dict.get(
-                Locale.get_id_of(mt_target_name), None)
+            mt_target_name = self.get_mt_name(source_locale, target)
+            target_lse = source_lse.langstring.entries_as_dict.get(mt_target_name, None)
             if target_lse and not retranslate:
                 if self.has_fatal_error(target_lse):
                     return target_lse
         if target_lse is None:
             target_lse = LangStringEntry(
                 langstring_id=source_lse.langstring_id,
-                locale_id = Locale.UNDEFINED_LOCALEID,
+                locale = LocaleLabel.UNDEFINED,
                 value='')
             is_new_lse = True
-        if self.canTranslate(source_locale, target.code):
+        if self.canTranslate(source_locale, target):
             try:
                 trans, lang = self.translate(
                     source_lse.value,
-                    target.code,
-                    source_locale if source_locale != Locale.UNDEFINED
+                    target,
+                    source_locale if source_locale != LocaleLabel.UNDEFINED
                     else None,
                     source_lse.db)
                 lang = self.asPosixLocale(lang)
                 # What if detected language is not a discussion language?
-                if source_locale == Locale.UNDEFINED:
+                if source_locale == LocaleLabel.UNDEFINED:
                     if constrain_to_discussion_locales and (
                             self.strlen_nourl(source_lse.value) <
                             constrain_to_discussion_locales):
-                        if (not lang) or not Locale.any_compatible(
+                        if (not lang) or not any_locale_compatible(
                                 lang, self.discussion.discussion_locales):
                             self.set_error(
                                 source_lse,
@@ -254,14 +249,14 @@ class TranslationService(object):
                     # This should never actually happen, because
                     # it would mean that the language id. was forgotten.
                     # Still, to be sure that all cases are covered.
-                    mt_target_name = self.get_mt_name(lang, target.code)
+                    mt_target_name = self.get_mt_name(lang, target)
                     other_target_lse = source_lse.langstring.entries_as_dict.get(
-                        Locale.get_id_of(mt_target_name), None)
+                        mt_target_name, None)
                     if other_target_lse:
                         target_lse = other_target_lse
                         is_new_lse = False
-                source_locale = source_lse.locale_code
-                if Locale.compatible(source_locale, target.code):
+                source_locale = source_lse.locale
+                if locale_compatible(source_locale, target):
                     return source_lse
                 target_lse.value = trans
                 target_lse.error_count = 0
@@ -279,23 +274,20 @@ class TranslationService(object):
                 target_lse.value = None
         else:
             # Note: when retranslating, we may lose a valid translation.
-            if source_locale == Locale.UNDEFINED:
+            if source_locale == LocaleLabel.UNDEFINED:
                 if not self.distinct_identify_step:
                     # At least do this much.
                     self.confirm_locale(source_lse)
-                    source_locale = source_lse.locale_code
+                    source_locale = source_lse.locale
             self.set_error(
                 target_lse, LangStringStatus.CANNOT_TRANSLATE,
                 "cannot translate")
             target_lse.value = None
         if (not target_lse.locale or
-                (source_locale != Locale.UNDEFINED
-                 and Locale.extract_base_locale(
-                    target_lse.locale_code) == Locale.UNDEFINED)):
-            mt_target_name = self.get_mt_name(
-                source_lse.locale_code, target.code)
-            target_lse.locale = Locale.get_or_create(
-                mt_target_name, source_lse.db)
+                (source_locale != LocaleLabel.UNDEFINED
+                 and target_lse.locale == LocaleLabel.UNDEFINED)):
+            target_lse.locale = self.get_mt_name(
+                source_lse.locale, target)
         if is_new_lse:
             source_lse.db.add(target_lse)
         return target_lse
@@ -307,11 +299,11 @@ class DummyTranslationServiceTwoSteps(TranslationService):
 
     def translate(self, text, target, source=None, db=None):
         if not text:
-            return text, Locale.NON_LINGUISTIC
+            return text, LocaleLabel.NON_LINGUISTIC
         if not source:
             source, _ = self.identify(text)
         return u"Pseudo-translation from %s to %s of: %s" % (
-            source or Locale.UNDEFINED, target, text), source
+            source or LocaleLabel.UNDEFINED, target, text), source
 
     def target_locale_labels(self, target_locale):
         return LocaleLabel.names_in_locale(target_locale)
@@ -335,7 +327,7 @@ class DummyTranslationServiceTwoStepsWithErrors(
 
     def translate(self, text, target, source=None, db=None):
         if not text:
-            return text, Locale.NON_LINGUISTIC
+            return text, LocaleLabel.NON_LINGUISTIC
         from random import random
         if random() > 0.8:
             raise RuntimeError()
@@ -346,11 +338,11 @@ class DummyTranslationServiceTwoStepsWithErrors(
 class DummyTranslationServiceOneStepWithErrors(DummyTranslationServiceOneStep):
     def translate(self, text, target, source=None, db=None):
         if not text:
-            return text, Locale.NON_LINGUISTIC
+            return text, LocaleLabel.NON_LINGUISTIC
         from random import random
         if random() > 0.8:
             raise RuntimeError()
-        if source is None or source == Locale.UNDEFINED:
+        if source is None or source == LocaleLabel.UNDEFINED:
             source, _ = self.identify(text)
         return super(DummyTranslationServiceOneStepWithErrors, self).translate(
             text, target, source=source, db=db)
@@ -427,13 +419,13 @@ class DummyGoogleTranslationService(TranslationService):
             self.asPosixLocale(source_name), self.asPosixLocale(target_name))
 
     def canTranslate(self, source, target):
-        return ((source == Locale.UNDEFINED or
+        return ((source == LocaleLabel.UNDEFINED or
                  self.asKnownLocale(source)) and
                 self.asKnownLocale(target))
 
     def translate(self, text, target, source=None, db=None):
         if not text:
-            return text, Locale.NON_LINGUISTIC
+            return text, LocaleLabel.NON_LINGUISTIC
         # Initial implementation from
         # https://github.com/mouuff/Google-Translate-API
         link = "http://translate.google.com/m?hl=%s&sl=%s&q=%s" % (
@@ -480,7 +472,7 @@ class GoogleTranslationService(DummyGoogleTranslationService):
 
     def identify(self, text, expected_locales=None):
         if not text:
-            return Locale.UNDEFINED, {Locale.UNDEFINED: 1}
+            return LocaleLabel.UNDEFINED, {LocaleLabel.UNDEFINED: 1}
         if not self.client:
             return super(GoogleTranslationService, (self).identify(text, expected_locales=None))
         r = self.client.detections().list(q=text).execute()
@@ -493,7 +485,7 @@ class GoogleTranslationService(DummyGoogleTranslationService):
 
     def translate(self, text, target, source=None, db=None):
         if not text:
-            return text, Locale.NON_LINGUISTIC
+            return text, LocaleLabel.NON_LINGUISTIC
         if not self.client:
             from googleapiclient.http import HttpError
             raise HttpError(401, '{"error":"Please define server_api_key"}')

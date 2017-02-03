@@ -4,6 +4,7 @@ from abc import abstractmethod
 
 from . import config_celery_app, CeleryWithConfig
 from ..lib.utils import waiting_get
+from ..lib.locale import locale_compatible
 from ..lib.raven_client import capture_exception
 
 # broker specified
@@ -25,8 +26,8 @@ class PrefCollectionTranslationTable(TranslationTable):
 
     def languages_for(self, locale_code, db=None):
         pref = self.prefCollection.find_locale(locale_code, db)
-        if pref.translate_to:
-            return (self.service.asKnownLocale(pref.translate_to_code),)
+        if pref.translate:
+            return (self.service.asKnownLocale(pref.translate),)
         return ()
 
 
@@ -46,7 +47,7 @@ def translate_content(
         content, translation_table=None, service=None,
         constrain_to_discussion_languages=True,
         send_to_changes=False):
-    from ..models import Locale
+    from ..models import LocaleLabel
     discussion = content.discussion
     service = service or discussion.translation_service()
     if not service:
@@ -54,7 +55,7 @@ def translate_content(
     if translation_table is None:
         translation_table = DiscussionPreloadTranslationTable(
             service, discussion)
-    undefined_id = Locale.UNDEFINED_LOCALEID
+    undefined = LocaleLabel.UNDEFINED
     changed = False
     # Special case: Short strings.
     und_subject = content.subject.undefined_entry
@@ -76,11 +77,11 @@ def translate_content(
             capture_exception()
             return changed
         if und_subject:
-            und_subject.locale_code = language
+            und_subject.locale = language
             content.db.expire(und_subject, ("locale",))
             content.db.expire(content.subject, ("entries",))
         if und_body:
-            und_body.locale_code = language
+            und_body.locale = language
             content.db.expire(und_body, ("locale",))
             content.db.expire(content.body, ("entries",))
 
@@ -88,8 +89,8 @@ def translate_content(
         ls = getattr(content, prop)
         if ls:
             entries = ls.entries_as_dict
-            if service.distinct_identify_step and undefined_id in entries:
-                entry = entries[undefined_id]
+            if service.distinct_identify_step and undefined in entries:
+                entry = entries[undefined]
                 if entry.value:
                     # assume can_guess_locale = true
                     try:
@@ -101,17 +102,15 @@ def translate_content(
                     # reload entries
                     ls.db.expire(ls, ("entries",))
                     entries = ls.entries_as_dict
-            entries = {service.asKnownLocale(
-                        Locale.extract_base_locale(
-                            entry.locale_code)): entry
+            entries = {service.asKnownLocale(entry.locale): entry
                        for entry in entries.values()}
             originals = ls.non_mt_entries()
             # pick randomly. TODO: Recency order?
             for original in originals:
-                source_loc = (service.asKnownLocale(original.locale_code) or
-                              original.locale_code) or 'und'
+                source_loc = (service.asKnownLocale(original.locale) or
+                              original.locale) or 'und'
                 for dest in translation_table.languages_for(source_loc, content.db):
-                    if Locale.compatible(dest, source_loc):
+                    if locale_compatible(dest, source_loc):
                         continue
                     entry = entries.get(dest, None)
                     if entry is None or (
@@ -119,19 +118,16 @@ def translate_content(
                             not service.has_fatal_error(entry)):
                         try:
                             result = service.translate_lse(
-                                original,
-                                Locale.get_or_create(dest, content.db))
+                                original, dest)
                         except:
                             capture_exception()
                             return changed
                         # recalculate, may have changed
                         source_loc = (
-                            service.asKnownLocale(original.locale_code) or
-                            original.locale_code)
+                            service.asKnownLocale(original.locale) or
+                            original.locale)
                         ls.db.expire(ls, ["entries"])
-                        entries[service.asKnownLocale(
-                            Locale.extract_base_locale(
-                                result.locale_code))] = result
+                        entries[service.asKnownLocale(result.locale)] = result
                         changed = True
     if changed and send_to_changes:
         content.send_to_changes()
