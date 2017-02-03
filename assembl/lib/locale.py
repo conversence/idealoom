@@ -152,9 +152,9 @@ def locale_compatible(locname1, locname2):
     return i + 1
 
 
-def any_locale_compatible(cls, locname, locnames):
+def any_locale_compatible(locname, locnames):
     for l in locnames:
-        if cls.compatible(l, locname):
+        if locale_compatible(l, locname):
             return True
     return False
 

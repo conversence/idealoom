@@ -212,8 +212,7 @@ class TranslationService(object):
             # We try to avoid ???-mt-from-und locales in the DB.
             # This is only stored if both identification and translation
             # failed to identify a language.
-            mt_target_name = self.get_mt_name(source_locale, target)
-            target_lse = source_lse.langstring.entries_as_dict.get(mt_target_name, None)
+            target_lse = source_lse.langstring.entries_as_dict.get(target, None)
             if target_lse and not retranslate:
                 if self.has_fatal_error(target_lse):
                     return target_lse
@@ -249,9 +248,7 @@ class TranslationService(object):
                     # This should never actually happen, because
                     # it would mean that the language id. was forgotten.
                     # Still, to be sure that all cases are covered.
-                    mt_target_name = self.get_mt_name(lang, target)
-                    other_target_lse = source_lse.langstring.entries_as_dict.get(
-                        mt_target_name, None)
+                    other_target_lse = source_lse.langstring.entries_as_dict.get(target, None)
                     if other_target_lse:
                         target_lse = other_target_lse
                         is_new_lse = False
@@ -286,8 +283,7 @@ class TranslationService(object):
         if (not target_lse.locale or
                 (source_locale != LocaleLabel.UNDEFINED
                  and target_lse.locale == LocaleLabel.UNDEFINED)):
-            target_lse.locale = self.get_mt_name(
-                source_lse.locale, target)
+            target_lse.locale = target
         if is_new_lse:
             source_lse.db.add(target_lse)
         return target_lse
