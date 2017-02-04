@@ -3,6 +3,7 @@ from __future__ import division
 from builtins import next
 from math import ceil
 import logging
+from collections import defaultdict
 
 import simplejson as json
 from cornice import Service
@@ -16,8 +17,8 @@ from sqlalchemy import String, text
 
 from sqlalchemy.orm import (
     joinedload_all, aliased, subqueryload_all, undefer)
-from sqlalchemy.sql.expression import bindparam, and_
-from sqlalchemy.sql import cast, column
+from sqlalchemy.sql.expression import bindparam, and_, or_
+from sqlalchemy.sql import cast, column, func, case
 
 from jwzthreading import restrip_pat
 
@@ -25,6 +26,8 @@ import transaction
 
 from assembl.lib.parsedatetime import parse_datetime
 from assembl.lib.clean_input import sanitize_html, sanitize_text
+from assembl.lib.config import get
+from assembl.lib.sqla_types import postgres_language_configurations
 from assembl.views.api import API_DISCUSSION_PREFIX
 from assembl.auth import P_READ, P_ADD_POST
 from assembl.tasks.translate import (
@@ -34,7 +37,7 @@ from assembl.models import (
     get_database_id, Post, AssemblPost, SynthesisPost,
     Synthesis, Discussion, Content, Idea, ViewPost, User,
     IdeaRelatedPostLink, AgentProfile, LikedPost, LangString,
-    LanguagePreferenceCollection)
+    LanguagePreferenceCollection, LangStringEntry)
 from assembl.models.post import deleted_publication_states
 from assembl.lib.raven_client import capture_message
 
@@ -70,6 +73,8 @@ def get_posts(request):
     ids: explicit message ids.
     posted_after_date, posted_before_date: date selection (ISO format)
     post_author: filter by author
+    keyword: use full-text search
+    locale: restrict to locale
     """
     localizer = request.localizer
     discussion = request.context
@@ -93,14 +98,14 @@ def get_posts(request):
     except (ValueError, KeyError):
         page = 1
 
-    text_search = request.GET.get('text_search', None)
+    keywords = request.GET.getall('keyword')
 
     order = request.GET.get('order')
     if order is None:
         order = 'chronological'
     assert order in ('chronological', 'reverse_chronological', 'score', 'popularity')
-    if order == 'score':
-        assert text_search is not None
+    if order == 'score' and not keywords:
+        raise HTTPBadRequest("Cannot ask for a score without keywords")
 
     if page < 1:
         page = 1
@@ -138,10 +143,7 @@ def get_posts(request):
     posted_before_date = request.GET.get('posted_before_date')
 
     PostClass = SynthesisPost if only_synthesis == "true" else Post
-    if order == 'score':
-        posts = discussion.db.query(PostClass, Content.body_text_index.score_name)
-    else:
-        posts = discussion.db.query(PostClass)
+    posts = discussion.db.query(PostClass)
 
     posts = posts.filter(
         PostClass.discussion == discussion,
@@ -152,54 +154,6 @@ def get_posts(request):
 
     # True means deleted only, False (default) means non-deleted only. None means both.
 
-    # v0
-    # deleted = request.GET.get('deleted', None)
-    # end v0
-
-    # v1: we would like something like that
-    # deleted = request.GET.get('deleted', None)
-    # if deleted is None:
-    #     if view_def == 'id_only':
-    #         deleted = None
-    #     else:
-    #         deleted = False
-    # end v1
-
-    # v2
-    # deleted = request.GET.get('deleted', None)
-    # if deleted is None:
-    #     if not ids:
-    #         deleted = False
-    #     else:
-    #         deleted = None
-    #
-    # if deleted == 'false':
-    #     deleted = False
-    #     posts = posts.filter(PostClass.tombstone_condition())
-    # elif deleted == 'true':
-    #     deleted = True
-    #     posts = posts.filter(PostClass.not_tombstone_condition())
-    # elif deleted == 'any':
-    #     deleted = None
-    #     # result will contain deleted and non-deleted posts
-    #     pass
-    # end v2
-
-
-    # v3
-    # deleted = request.GET.get('deleted', None)
-    # if deleted is None:
-    #     if not ids:
-    #         deleted = False
-    #     else:
-    #         deleted = None
-
-    # if deleted == 'true':
-    #     deleted = True
-    #     posts = posts.filter(PostClass.not_tombstone_condition())
-    # end v3
-
-    # v4
     deleted = request.GET.get('deleted', None)
     if deleted is None:
         if not ids:
@@ -284,6 +238,61 @@ def get_posts(request):
         parent_alias = aliased(PostClass)
         posts = posts.join(parent_alias, PostClass.parent)
         posts = posts.filter(parent_alias.creator_id == post_replies_to)
+
+    if keywords:
+        keywords_j = ' '.join(keywords)
+        lse = aliased(LangStringEntry)
+        posts = posts.join(lse, lse.langstring_id == PostClass.body_id)
+        locales = request.GET.getall('locale')
+        if locales:
+            active_text_indices = get('active_text_indices', 'en')
+            locales_by_config = defaultdict(list)
+            any_locale = 'any' in locales
+            for locale in locales:
+                fts_config = postgres_language_configurations.get(locale, 'simple')
+                if fts_config not in active_text_indices:
+                    fts_config = 'simple'
+                locales_by_config[fts_config].append(locale)
+            conds = {}
+            # TODO: to_tsquery vs plainto_tsquery vs phraseto_tsquery
+            for fts_config, locales in locales_by_config.items():
+                conds[fts_config] = (
+                    or_(*[((lse.locale == locale) | lse.locale.like(locale+"_%"))
+                        for locale in locales]) if 'any' not in locales else None,
+                    func.to_tsvector(fts_config, lse.value))
+            filter = [cond & v.match(keywords_j, postgresql_regconfig=conf)
+                      for (conf, (cond, v)) in conds.items()
+                      if cond is not None]
+            if any_locale:
+                (_, v) = conds['simple']
+                filter.append(v.match(keywords_j, postgresql_regconfig='simple'))
+            posts = posts.filter(or_(*filter))
+            if order == 'score':
+                if len(conds) > 1:
+                    if any_locale:
+                        (_, v) = conds['simple']
+                        else_case = func.ts_rank(v, func.to_tsquery('simple', keywords_j))
+                    else:
+                        else_case = 0
+                    rank = case([
+                        (cond, func.ts_rank(v, func.to_tsquery(conf, keywords_j)))
+                        for (conf, (cond, v)) in conds.items()
+                        if cond is not None], else_ = else_case).label('score')
+                else:
+                    (conf, (cond, v)) = next(iter(conds.items()))
+                    rank = func.ts_rank(v, func.to_tsquery(conf, keywords_j)).label('score')
+                posts = posts.add_column(rank)
+        else:
+            fts_config = 'simple'
+            posts = posts.filter(
+                func.to_tsvector(fts_config, lse.value
+                    ).match(keywords_j, postgresql_regconfig=fts_config))
+            if order == 'score':
+                rank = func.ts_rank(
+                    func.to_tsvector(fts_config, lse.value),
+                    func.to_tsquery(fts_config, keywords_j)).label('score')
+                posts = posts.add_column(rank)
+
     # Post read/unread management
     is_unread = request.GET.get('is_unread')
     translations = None
@@ -321,12 +330,6 @@ def get_posts(request):
             raise HTTPBadRequest(localizer.translate(
                 _("You must be logged in to view which posts are read")))
 
-    if text_search is not None:
-        # another Virtuoso bug: offband kills score. but it helps speed.
-        offband = () if (order == 'score') else None
-        posts = posts.filter(Post.body_text_index.contains(
-            text_search.encode('utf-8'), offband=offband))
-
     # posts = posts.options(contains_eager(Post.source))
     # Horrible hack... But useful for structure load
     if view_def in ('partial_post', 'id_only'):
@@ -352,7 +355,7 @@ def get_posts(request):
     elif order == 'reverse_chronological':
         posts = posts.order_by(Content.creation_date.desc())
     elif order == 'score':
-        posts = posts.order_by(Content.body_text_index.score_name.desc())
+        posts = posts.order_by(rank.desc())
     elif order == 'popularity':
         # assume reverse chronological otherwise
         posts = posts.order_by(Content.like_count.desc(), Content.creation_date.desc())
