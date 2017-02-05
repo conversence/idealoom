@@ -550,6 +550,47 @@ class Discussion(DiscussionBoundBase, NamedClassMixin):
                 return super(AllUsersCollection, self).get_instance(
                     key, parent_instance)
 
+        class ConnectedUsersCollection(AbstractCollectionDefinition):
+            def __init__(self, cls):
+                super(ConnectedUsersCollection, self).__init__(cls, User)
+
+            def decorate_query(self, query, owner_alias, last_alias, parent_instance, ctx):
+                from .auth import AgentStatusInDiscussion
+                return query.join(AgentStatusInDiscussion).join(
+                    owner_alias, owner_alias.id != None).filter(
+                    (AgentStatusInDiscussion.last_connected != None) & (
+                    (AgentStatusInDiscussion.last_disconnected
+                        < AgentStatusInDiscussion.last_connected ) |
+                    (AgentStatusInDiscussion.last_disconnected == None)))
+
+            def contains(self, parent_instance, instance):
+                ast = instance.get_status_in_discussion(parent_instance.id)
+                if not ast:
+                    return False
+                return ast.last_connected and (
+                    (ast.last_disconnected < ast.last_connected) or (
+                    ast.last_disconnected is None))
+
+            def decorate_instance(
+                    self, instance, parent_instance, assocs, user_id,
+                    ctx, kwargs):
+                pass
+
+            def get_instance(self, key, parent_instance):
+                if key == 'current':
+                    from pyramid.threadlocal import get_current_request
+                    from pyramid.httpexceptions import HTTPUnauthorized
+                    request = get_current_request()
+                    if request is not None:
+                        key = request.authenticated_userid
+                        if key is None:
+                            raise HTTPUnauthorized()
+                    else:
+                        raise RuntimeError()
+                return super(AllUsersCollection, self).get_instance(
+                    key, parent_instance)
+
+
         class ActiveWidgetsCollection(CollectionDefinition):
 
             def __init__(self, cls):
@@ -610,6 +651,7 @@ class Discussion(DiscussionBoundBase, NamedClassMixin):
                                         raise ValueError("Failed on content sink transaction")
 
         return {'all_users': AllUsersCollection(cls),
+                'connected_users': ConnectedUsersCollection(cls),
                 'active_widgets': ActiveWidgetsCollection(cls),
                 'sources': SourcesCollection(cls),
                 'user_ns_kv': UserNsDictCollection(cls),
