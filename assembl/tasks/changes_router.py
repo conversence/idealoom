@@ -39,6 +39,7 @@ CHANGES_PREFIX = settings.get(SECTION, 'changes.prefix')
 TOKEN_SECRET = settings.get(SECTION, 'session.secret')
 WEBSERVER_PORT = settings.getint(SECTION, 'changes.websocket.port')
 # NOTE: Not sure those are always what we want.
+SERVER_PROTOCOL = 'https' if settings.getboolean(SECTION, 'require_secure_connection') else 'http'
 SERVER_HOST = settings.get(SECTION, 'public_hostname')
 SERVER_PORT = settings.getint(SECTION, 'public_port')
 setup_raven(settings)
@@ -104,8 +105,8 @@ class ZMQRouter(SockJSConnection):
                 self.discussion = msg.split(':', 1)[1]
             if msg.startswith('token:') and self.valid:
                 try:
-                    self.token = decode_token(
-                        msg.split(':', 1)[1], TOKEN_SECRET)
+                    self.raw_token = msg.split(':', 1)[1]
+                    self.token = decode_token(self.raw_token, TOKEN_SECRET)
                     self.userId = 'local:AgentProfile/' + str(
                         self.token['userId'])
                 except TokenInvalid:
@@ -113,8 +114,8 @@ class ZMQRouter(SockJSConnection):
             if self.token and self.discussion:
                 # Check if token authorizes discussion
                 r = requests.get(
-                    'http://%s:%d/api/v1/discussion/%s/permissions/read/u/%s' %
-                    (SERVER_HOST, SERVER_PORT, self.discussion,
+                    '%s://%s:%d/api/v1/discussion/%s/permissions/read/u/%s' %
+                    (SERVER_PROTOCOL, SERVER_HOST, SERVER_PORT, self.discussion,
                         self.token['userId']))
                 print r.text
                 if r.text != 'true':
@@ -127,6 +128,9 @@ class ZMQRouter(SockJSConnection):
                 self.loop.on_recv(self.on_recv)
                 print "connected"
                 self.send('[{"@type":"Connection"}]')
+                requests.post('%s://%s:%d/data/Discussion/%s/all_users/%d/connecting' %
+                    (SERVER_PROTOCOL, SERVER_HOST, SERVER_PORT, self.discussion,
+                        self.token['userId']), data={'token': self.raw_token})
         except Exception:
             capture_exception()
             self.do_close()
@@ -136,6 +140,10 @@ class ZMQRouter(SockJSConnection):
             return
         try:
             print "closing"
+            if self.raw_token and self.discussion:
+                requests.post('%s://%s:%d/data/Discussion/%s/all_users/%d/disconnecting' %
+                    (SERVER_PROTOCOL, SERVER_HOST, SERVER_PORT, self.discussion,
+                        self.token['userId']), data={'token': self.raw_token})
             self.do_close()
         except Exception:
             capture_exception()

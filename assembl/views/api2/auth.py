@@ -1,5 +1,6 @@
 from simplejson import dumps, loads
 from string import Template
+from datetime import datetime
 
 from pyramid.response import Response
 from pyramid.view import view_config
@@ -8,6 +9,8 @@ from pyramid.httpexceptions import (
     HTTPNotFound, HTTPUnauthorized, HTTPBadRequest, HTTPClientError,
     HTTPOk, HTTPNoContent, HTTPForbidden, HTTPNotImplemented)
 
+import assembl.lib.config as settings
+from assembl.lib.web_token import decode_token, TokenInvalid
 from assembl.auth import (
     P_ADMIN_DISC, P_SELF_REGISTER, P_SELF_REGISTER_REQUEST,
     R_PARTICIPANT, P_READ, CrudPermissions)
@@ -21,6 +24,9 @@ from . import (
     FORM_HEADER, JSON_HEADER, collection_view, instance_put_json,
     collection_add_json, instance_view, check_permissions, CreationResponse)
 from assembl.lib.sqla import ObjectNotUniqueError
+
+
+TOKEN_SECRET = settings.get('session.secret')
 
 
 @view_config(
@@ -341,6 +347,42 @@ def post_email_account(request):
     instance = request.context.collection_class.get_instance(response.location)
     send_confirmation_email(request, instance)
     return response
+
+
+def set_user_dis_connected(request, connecting):
+    ctx = request.context
+    discussion_id = ctx.get_discussion_id()
+    if not discussion_id:
+        # This view should only exist in discussion+user context
+        raise HTTPNotFound()
+    token = request.POST.get('token')
+    # see if token corresponds to user
+    user = ctx.get_instance_of_class(User)
+    try:
+        token = decode_token(token, TOKEN_SECRET)
+        assert token['userId'] == user.id
+    except TokenInvalid:
+        raise HTTPUnauthorized()
+
+    status = user.get_status_in_discussion(discussion_id)
+    assert status
+    if connecting:
+        status.last_connected = datetime.now()
+    else:
+        status.last_disconnected = datetime.now()
+    return HTTPOk()
+
+
+@view_config(context=InstanceContext, request_method='POST',
+             ctx_instance_class=AgentProfile, name="connecting")
+def set_user_connected(request):
+    return set_user_dis_connected(request, True)
+
+
+@view_config(context=InstanceContext, request_method='POST',
+             ctx_instance_class=AgentProfile, name="disconnecting")
+def set_user_disconnected(request):
+    return set_user_dis_connected(request, False)
 
 
 @view_config(

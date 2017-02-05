@@ -600,6 +600,8 @@ class AgentStatusInDiscussion(DiscussionBoundBase):
     first_subscribed = Column(DateTime)
     last_unsubscribed = Column(DateTime)
     user_created_on_this_discussion = Column(Boolean, server_default='0')
+    last_connected = Column(DateTime)
+    last_disconnected = Column(DateTime)
 
     def get_discussion_id(self):
         return self.discussion_id or self.discussion.id
