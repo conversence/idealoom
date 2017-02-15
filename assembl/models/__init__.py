@@ -122,7 +122,6 @@ from .auth import (
     UserLanguagePreference,
     UserRole,
     UserTemplate,
-    Username,
 )
 from .social_auth import (
     Nonce,

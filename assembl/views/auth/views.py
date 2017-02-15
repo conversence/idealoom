@@ -36,7 +36,7 @@ from social.exceptions import (
 
 from assembl.models import (
     EmailAccount, IdentityProvider, SocialAuthAccount,
-    AgentProfile, User, Username, Role, LocalUserRole, Preferences,
+    AgentProfile, User, Role, LocalUserRole, Preferences,
     AbstractAgentAccount, Discussion, AgentStatusInDiscussion)
 from assembl.auth import (
     P_READ, R_PARTICIPANT, P_SELF_REGISTER, P_SELF_REGISTER_REQUEST)
@@ -206,11 +206,10 @@ def get_profile(request):
     identifier = request.matchdict.get('identifier').strip()
     session = AgentProfile.default_db
     if id_type == 'u':
-        username = session.query(Username).filter_by(
+        profile = session.query(User).filter_by(
             username=identifier).first()
-        if not username:
+        if not profile:
             raise HTTPNotFound()
-        profile = username.user
     elif id_type == 'id':
         try:
             id = int(identifier)
@@ -268,20 +267,13 @@ def assembl_profile(request):
         username = request.params.get('username', '').strip()
         if username and (
                 profile.username is None
-                or username != profile.username.username):
+                or username != profile.username):
             # check if exists
-            if session.query(Username).filter_by(username=username).count():
+            if session.query(User).filter_by(username=username).count():
                 errors.append(localizer.translate(_(
                     'The username %s is already used')) % (username,))
             else:
-                old_username = profile.username
-                if old_username is not None:
-                    # free existing username
-                    session.delete(old_username)
-                    session.flush()
-                # add new username
-                session.add(Username(username=username, user=profile))
-
+                profile.username = username
                 if id_type == 'u':
                     redirect = True
         name = request.params.get('name', '').strip()
@@ -460,10 +452,10 @@ def from_identifier(identifier):
             user = account.profile
             return (user, account)
     else:
-        username = session.query(Username).filter_by(
+        user = session.query(User).filter_by(
             username=identifier).first()
-        if username:
-            return (username.user, None)
+        if user:
+            return (user, None)
     return None, None
 
 
@@ -660,7 +652,7 @@ def user_confirm_email(request):
     headers = remember(request, user.id)
     request.response.headerlist.extend(headers)
     user.last_login = datetime.utcnow()
-    username = user.username.username if user.username else None
+    username = user.username
     next_view = handle_next_view(request, False)
 
     if account.verified:
@@ -679,7 +671,7 @@ def user_confirm_email(request):
                 user.merge(other_profile)
                 session.delete(other_profile)
                 if user.username:
-                    username = user.username.username
+                    username = user.username
             account = other_account
         account.verified = True
         user.verified = True

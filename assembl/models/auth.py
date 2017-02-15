@@ -653,6 +653,7 @@ class User(AgentProfile):
     creation_date = Column(DateTime, nullable=False, default=datetime.utcnow,
         info={'rdf': QuadMapPatternS(
             None, DCTERMS.created, sections=(PRIVATE_USER_SECTION,))})
+    username = Column(CoerceUnicode(20), unique=True)
 
     def __init__(self, **kwargs):
         if kwargs.get('password', None) is not None:
@@ -676,26 +677,6 @@ class User(AgentProfile):
                 self.name = name
         else:
             self.name = name
-
-    @property
-    def username_p(self):
-        if self.username:
-            return self.username.username
-
-    @username_p.setter
-    def username_p(self, name):
-        if self.username:
-            if name:
-                self.username.username = name
-            else:
-                self.db.delete(self.username)
-        elif name:
-            self.username = Username(username=name)
-
-    @username_p.deleter
-    def username_p(self):
-        if self.username:
-            self.db.delete(self.username)
 
     @property
     def password_p(self):
@@ -802,7 +783,7 @@ class User(AgentProfile):
         if self.name:
             return self.name
         if self.username:
-            return self.username.username
+            return self.username
         return super(User, self).display_name()
 
     @property
@@ -1082,31 +1063,6 @@ class User(AgentProfile):
         if user_id == self.id:
             return True
         return super(User, self).user_can(user_id, operation, permissions)
-
-
-
-class Username(Base):
-    """Optional usernames for users
-    This is in one-one relationships to users.
-    Usernames are unique, and in one-one relationships to users.
-    It exists because we cannot have a unique index on a nullable property in virtuoso.
-    TODO: Refactor to a column of :py:class:`User` now that we're using postgres.
-    """
-    __tablename__ = 'username'
-    user_id = Column(Integer,
-                     ForeignKey('user.id', ondelete='CASCADE', onupdate='CASCADE'),
-                     nullable=False, unique=True, index=True)
-    username = Column(CoerceUnicode(20), primary_key=True)
-    user = relationship(User, backref=backref('username', uselist=False, lazy="joined"))
-
-    def get_id_as_str(self):
-        return str(self.user_id)
-
-    # @classmethod
-    # def special_quad_patterns(cls, alias_maker, discussion_id):
-    #     return [QuadMapPatternS(User.iri_class().apply(Username.user_id),
-    #         SIOC.name, Username.username,
-    #         name=QUADNAMES.class_User_username, sections=(PRIVATE_USER_SECTION,))]
 
 
 class Role(Base):

@@ -38,7 +38,7 @@ from ..lib import config
 from ..lib.sqla_types import (
     URLString, EmailString, EmailUnicode, CaseInsensitiveWord, JSONType)
 from .auth import (
-    AbstractAgentAccount, IdentityProvider, AgentProfile, User, Username)
+    AbstractAgentAccount, IdentityProvider, AgentProfile, User)
 from . import Base
 from ..semantic.namespaces import (
     SIOC, ASSEMBL, QUADNAMES, FOAF, DCTERMS, RDF)
@@ -146,7 +146,7 @@ class SocialAuthAccount(
     # reimplementation of UserSocialAuth
     @classmethod
     def username_max_length(cls):
-        return Username.__table__.columns.get('username').type.length
+        return User.__table__.columns.get('username').type.length
 
     @classmethod
     def user_model(cls):
@@ -194,23 +194,20 @@ class SocialAuthAccount(
         query = cls.user_query()
         username = kwargs.pop('username', None)
         if username:
-            query = query.join(
-                User.username).filter(Username.username == username)
+            query = query.filter(User.username == username)
         return query.filter_by(*args, **kwargs).count() > 0
 
     @classmethod
     def get_username(cls, user):
         """Return the username for given user"""
         # assume user is a User, not an AgentProfile
-        return user.username_p
+        return user.username
 
     @classmethod
     def create_user(cls, email=None, username=None, fullname=None, *args, **kwargs):
         if fullname:
             kwargs['name'] = fullname
         user = cls._new_instance(cls.user_model(), *args, **kwargs)
-        if username:
-            user.db.add(Username(user=user, username=username))
         return user
 
     @classmethod

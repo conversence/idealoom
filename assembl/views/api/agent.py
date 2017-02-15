@@ -10,7 +10,7 @@ from assembl.views.api import API_DISCUSSION_PREFIX
 from assembl.auth import (P_READ, Everyone, P_SYSADMIN, P_ADMIN_DISC)
 from assembl.auth.util import get_permissions
 from assembl.models import (
-    Discussion, AgentProfile, EmailAccount, User, Username)
+    Discussion, AgentProfile, EmailAccount, User)
 
 from .. import get_default_context
 

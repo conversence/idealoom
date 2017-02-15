@@ -20,7 +20,7 @@ from assembl.auth import (
 from assembl.auth.util import (
     add_multiple_users_csv, user_has_permission, get_permissions)
 from assembl.models.auth import (
-    create_default_permissions, User, Username, AgentProfile,
+    create_default_permissions, User, AgentProfile,
     LanguagePreferenceOrder)
 from assembl.models import Preferences
 from assembl.lib.utils import get_global_base_url
@@ -364,9 +364,9 @@ def discussion_permissions(request):
 
         elif 'submit_look_for_user' in request.POST:
             search_string = '%' + request.POST['user_search'] + '%'
-            other_users = db.query(User).outerjoin(Username).filter(
+            other_users = db.query(User).filter(
                 AgentProfile.name.ilike(search_string)
-                | Username.username.ilike(search_string)
+                | User.username.ilike(search_string)
                 | User.preferred_email.ilike(search_string)).all()
             users.update(other_users)
         elif 'submit_user_file' in request.POST:
@@ -477,9 +477,9 @@ def general_permissions(request):
 
         elif 'submit_look_for_user' in request.POST:
             search_string = '%' + request.POST['user_search'] + '%'
-            other_users = db.query(User).outerjoin(Username).filter(
+            other_users = db.query(User).filter(
                 AgentProfile.name.ilike(search_string)
-                | Username.username.ilike(search_string)
+                | User.username.ilike(search_string)
                 | User.preferred_email.ilike(search_string)).all()
             users.update(other_users)
 

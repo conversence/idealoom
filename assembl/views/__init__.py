@@ -128,7 +128,7 @@ def get_default_context(request):
     user = get_user(request)
     if user and user.username:
         user_profile_edit_url = request.route_url(
-            'profile_user', type='u', identifier=user.username.username)
+            'profile_user', type='u', identifier=user.username)
     elif user:
         user_profile_edit_url = request.route_url(
             'profile_user', type='id', identifier=user.id)

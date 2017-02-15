@@ -371,7 +371,7 @@ def maybe_auto_subscribe(user, discussion):
 def add_user(name, email, password, role, force=False, username=None,
              localrole=None, discussion=None, change_old_password=True,
              **kwargs):
-    from assembl.models import Discussion, Username
+    from assembl.models import Discussion
     db = Discussion.default_db
     # refetch within transaction
     all_roles = {r.name: r for r in Role.default_db.query(Role).all()}
@@ -392,18 +392,18 @@ def add_user(name, email, password, role, force=False, username=None,
     assert force or not existing_email,\
         "User with email %s already exists" % (email,)
     if username:
-        existing_username = db.query(Username).filter_by(
+        existing_user = db.query(User).filter_by(
             username=username).first()
-        assert force or not existing_username,\
+        assert force or not existing_user,\
             "User with username %s already exists" % (username,)
-        assert not existing_email or not existing_username or \
-            existing_username.user == existing_email.profile,\
+        assert not existing_email or not existing_user or \
+            existing_user == existing_email.profile,\
             "Two different users already exist with "\
             "username %s and email %s." % (username, email)
     if existing_email:
         user = existing_email.profile
-    elif username and existing_username:
-        user = existing_username.user
+    elif username and existing_user:
+        user = existing_user
     old_user = isinstance(user, User)
     if old_user:
         user.preferred_email = email
@@ -416,10 +416,7 @@ def add_user(name, email, password, role, force=False, username=None,
             else:
                 user.password_p = password
         if username:
-            if user.username:
-                user.username.username = username
-            else:
-                db.add(Username(username=username, user=user))
+            user.username = username
     else:
         if user:
             # Profile may have come from userless existing AgentProfile
@@ -436,10 +433,9 @@ def add_user(name, email, password, role, force=False, username=None,
                 preferred_email=email,
                 verified=True,
                 password=password,
+                username=username,
                 creation_date=datetime.utcnow())
             db.add(user)
-        if username:
-            db.add(Username(username=username, user=user))
     for account in user.accounts:
         if isinstance(account, EmailAccount) and account.email_ci == email:
             account.verified = True
