@@ -55,7 +55,7 @@
         "password": false,
         "verified": true,
         "permissions": "&get_all_permissions",
-        "username": "username_p"
+        "username": true
     },
     "UserTemplate": {
         "@extends": "User",
