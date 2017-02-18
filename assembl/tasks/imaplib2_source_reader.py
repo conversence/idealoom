@@ -1,20 +1,19 @@
-import sys
-
+from sqlalchemy.orm import joinedload_all
 from imaplib2 import IMAP4_SSL, IMAP4
-import transaction
 
 from assembl.models import ContentSource
 
 from .source_reader import (
-    ReaderStatus, SourceDispatcher, SourceReader,
-    ReaderError, ClientError, IrrecoverableError)
+    ReaderStatus, SourceReader, ReaderError, ClientError, IrrecoverableError)
 
 
 def is_ok(response):
     return response[0] == 'OK'
 
+
 class IMAPReader(SourceReader):
-    """A :py:class:`assembl.tasks.source_reader.SourceReader` subclass for reading IMAP messages with imaplib2. Can wait for push."""
+    """A :py:class:`assembl.tasks.source_reader.SourceReader`
+    subclass for reading IMAP messages with imaplib2. Can wait for push."""
 
     def setup(self):
         super(IMAPReader, self).setup()
@@ -24,11 +23,15 @@ class IMAPReader(SourceReader):
     def login(self):
         try:
             if self.source.use_ssl:
-                mailbox = IMAP4_SSL(host=self.source.host.encode('utf-8'), port=self.source.port)
+                mailbox = IMAP4_SSL(
+                    host=self.source.host.encode('utf-8'),
+                    port=self.source.port)
             else:
-                mailbox = IMAP4(host=self.source.host.encode('utf-8'), port=self.source.port)
+                mailbox = IMAP4(
+                    host=self.source.host.encode('utf-8'),
+                    port=self.source.port)
             if 'STARTTLS' in mailbox.capabilities:
-                #Always use starttls if server supports it
+                # Always use starttls if server supports it
                 res = mailbox.starttls()
                 if not is_ok(res):
                     # TODO: Require bad login from client error
@@ -50,7 +53,6 @@ class IMAPReader(SourceReader):
         except IMAP4.error as e:
             raise ClientError(e)
 
-
     def wait_for_push(self):
         assert self.can_push
         try:
@@ -59,7 +61,8 @@ class IMAPReader(SourceReader):
                 raise ClientError(res)
             # was it a timeout?
             res = self.mailbox.response('IDLE')
-            if res and len(res) > 1 and len(res[1]) > 1 and res[1][1] == 'TIMEOUT':
+            if (res and len(res) > 1 and
+                    len(res[1]) > 1 and res[1][1] == 'TIMEOUT'):
                 self.set_status(ReaderStatus.PAUSED)
                 return
             if not self.is_connected():
@@ -174,6 +177,16 @@ class IMAPReader(SourceReader):
                     self.import_email(email_id)
                     if self.status != ReaderStatus.READING:
                         break
+                from assembl.models import Email, AbstractMailbox
+                # We imported mails, we need to re-thread
+                self.source.db.flush()
+                # Note: This may not be enough,
+                # we may need to rethread existing emails.
+                emails = self.source.db.query(Email).filter(
+                    Email.id.in_(email_ids)
+                    ).options(joinedload_all(Email.parent)).all()
+
+                AbstractMailbox.thread_mails(emails)
             else:
                 print "No IMAP messages to process"
             self.successful_read()
