@@ -192,9 +192,6 @@ class AgentProfile(Base):
         for post in other_profile.posts_created[:]:
             post.creator = self
             post.creator_id = self.id
-        for post in other_profile.posts_moderated[:]:
-            post.moderator = self
-            post.moderator_id = self.id
         for attachment in other_profile.attachments[:]:
             attachment.creator = self
         from .action import Action
@@ -736,6 +733,9 @@ class User(AgentProfile):
                 role.user = self
             for role in other_user.local_roles[:]:
                 role.user = self
+            for post in other_profile.posts_moderated[:]:
+                post.moderator = self
+                post.moderator_id = self.id
             for announcement in other_user.announcements_created[:]:
                 announcement.creator = self
             for announcement in other_user.announcements_updated[:]:
