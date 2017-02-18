@@ -395,7 +395,7 @@ class Content(TombstonableMixin, DiscussionBoundBase):
                 _ = LangStringEntry(
                     value='<span style="white-space: pre-wrap">%s</div>' % (
                         e.value,),
-                    langstring=ls, locale_id=e.locale_id)
+                    langstring=ls, locale=e.locale)
             return ls
         else:
             log.error("What is this mimetype?" + mimetype)
@@ -465,7 +465,7 @@ class Content(TombstonableMixin, DiscussionBoundBase):
             for e in body.entries:
                 _ = LangStringEntry(
                     value=BeautifulSoup(e.value).get_text().strip(),
-                    langstring=ls, locale_id=e.locale_id)
+                    langstring=ls, locale=e.locale)
             return ls
         else:
             log.error("What is this mimetype?" + mimetype)

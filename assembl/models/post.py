@@ -235,7 +235,7 @@ class Post(Content):
             if short != entry.value:
                 shortened = True
             _ = LangStringEntry(
-                value=short, locale_id=entry.locale_id, langstring=ls)
+                value=short, locale=entry.locale, langstring=ls)
         if shortened or is_html:
             return ls
         else:

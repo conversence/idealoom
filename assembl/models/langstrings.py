@@ -450,9 +450,7 @@ class LangStringEntry(TombstonableMixin, Base):
     )
 
     def __init__(self, session=None, *args, **kwargs):
-        """ in the kwargs, you can specify locale info in many ways:
-        as a Locale numeric id (locale_id), Locale object (locale)
-        or language code (@language)"""
+        """ in the kwargs, you can specify locale using locale or @language"""
         if ("locale" not in kwargs and '@language' in kwargs):
             # Create locale on demand.
             kwargs["locale"] = kwargs.get("@language", "und")
