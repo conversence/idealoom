@@ -346,7 +346,7 @@ var CollectionManager = Marionette.Object.extend({
       This is wastefull (CPU usage and loaders and flashing for the user),
       as in the specific case of messages it is relatively easy to get a
       reliable modification date */
-      that._allMessageStructureCollection.fetch();
+      this._allMessageStructureCollection.fetch();
     }
   },
 
