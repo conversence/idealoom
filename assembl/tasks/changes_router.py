@@ -39,12 +39,10 @@ CHANGES_SOCKET = settings.get(SECTION, 'changes.socket')
 CHANGES_PREFIX = settings.get(SECTION, 'changes.prefix')
 TOKEN_SECRET = settings.get(SECTION, 'session.secret')
 WEBSERVER_PORT = settings.getint(SECTION, 'changes.websocket.port')
-# NOTE: Not sure those are always what we want. Also seems to fail in requests,
-# possibly due to https://github.com/kennethreitz/requests/issues/3844 ?
-# SERVER_PROTOCOL = 'https' if settings.getboolean(SECTION, 'require_secure_connection') else 'http'
-SERVER_PROTOCOL = 'http'
+# NOTE: Not sure those are always what we want.
+SERVER_PROTOCOL = 'https' if settings.getboolean(SECTION, 'require_secure_connection') else 'http'
 SERVER_HOST = settings.get(SECTION, 'public_hostname')
-SERVER_PORT = settings.getint(SECTION, 'public_port')
+SERVER_PORT = 443 if SERVER_PROTOCOL == 'https' else settings.getint(SECTION, 'public_port')
 setup_raven(settings)
 
 context = zmq.Context.instance()
