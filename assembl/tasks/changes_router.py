@@ -31,6 +31,7 @@ if len(sys.argv) != 2:
 
 
 SECTION = 'app:assembl'
+Everyone = 'system.Everyone'
 
 settings = ConfigParser.ConfigParser({'changes.prefix': ''})
 settings.read(sys.argv[-1])
@@ -107,8 +108,11 @@ class ZMQRouter(SockJSConnection):
                 try:
                     self.raw_token = msg.split(':', 1)[1]
                     self.token = decode_token(self.raw_token, TOKEN_SECRET)
-                    self.userId = 'local:AgentProfile/' + str(
-                        self.token['userId'])
+                    if self.token['userId'] != Everyone:
+                        self.userId = 'local:AgentProfile/' + str(
+                            self.token['userId'])
+                    else:
+                        self.userId = Everyone
                 except TokenInvalid:
                     pass
             if self.token and self.discussion:
@@ -128,9 +132,10 @@ class ZMQRouter(SockJSConnection):
                 self.loop.on_recv(self.on_recv)
                 print "connected"
                 self.send('[{"@type":"Connection"}]')
-                requests.post('%s://%s:%d/data/Discussion/%s/all_users/%d/connecting' %
-                    (SERVER_PROTOCOL, SERVER_HOST, SERVER_PORT, self.discussion,
-                        self.token['userId']), data={'token': self.raw_token})
+                if self.userId != Everyone:
+                    requests.post('%s://%s:%d/data/Discussion/%s/all_users/%d/connecting' %
+                        (SERVER_PROTOCOL, SERVER_HOST, SERVER_PORT, self.discussion,
+                            self.token['userId']), data={'token': self.raw_token})
         except Exception:
             capture_exception()
             self.do_close()
@@ -140,7 +145,7 @@ class ZMQRouter(SockJSConnection):
             return
         try:
             print "closing"
-            if self.raw_token and self.discussion:
+            if self.raw_token and self.discussion and self.userId != Everyone:
                 requests.post('%s://%s:%d/data/Discussion/%s/all_users/%d/disconnecting' %
                     (SERVER_PROTOCOL, SERVER_HOST, SERVER_PORT, self.discussion,
                         self.token['userId']), data={'token': self.raw_token})
