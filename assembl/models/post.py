@@ -277,10 +277,13 @@ class Post(Content):
         self.db.add(self)
         self.db.flush()
 
-        self._set_ancestry("%s%d," % (
-            parent.ancestry or '',
-            parent.id
-        ))
+        if parent is not None:
+            self._set_ancestry("%s%d," % (
+                parent.ancestry or '',
+                parent.id
+            ))
+        else:
+            self._set_ancestry('')
 
     def last_updated(self):
         ancestry_query_string = "%s%d,%%" % (self.ancestry or '', self.id)
