@@ -237,10 +237,9 @@ class SourceReader(Thread):
         self.refresh_source()
 
     def refresh_source(self):
+        from assembl.models import ContentSource
         # after a commit, refresh the source so it's still usable
-        self.source.db.query(
-            self.source.__class__
-            ).populate_existing().get(self.source.id)
+        self.source = ContentSource.get(self.source_id)
 
     def is_in_error(self):
         return self.last_error_status is not None
