@@ -132,7 +132,7 @@ class ZMQRouter(SockJSConnection):
                 self.loop.on_recv(self.on_recv)
                 print "connected"
                 self.send('[{"@type":"Connection"}]')
-                if self.userId != Everyone:
+                if self.raw_token and self.discussion and self.userId != Everyone:
                     requests.post('%s://%s:%d/data/Discussion/%s/all_users/%d/connecting' %
                         (SERVER_PROTOCOL, SERVER_HOST, SERVER_PORT, self.discussion,
                             self.token['userId']), data={'token': self.raw_token})
