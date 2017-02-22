@@ -177,16 +177,15 @@ class IMAPReader(SourceReader):
                     self.import_email(email_id)
                     if self.status != ReaderStatus.READING:
                         break
-                from assembl.models import Email, AbstractMailbox
+                from assembl.models import Post, AbstractMailbox
                 # We imported mails, we need to re-thread
                 self.source.db.flush()
-                # Note: This may not be enough,
-                # we may need to rethread existing emails.
-                emails = self.source.db.query(Email).filter(
-                    Email.id.in_(email_ids)
-                    ).options(joinedload_all(Email.parent)).all()
+                # Rethread emails globally (sigh)
+                emails = self.source.db.query(Post).filter(
+                    discussion_id=self.source.discussion_id).all()
 
                 AbstractMailbox.thread_mails(emails)
+                self.source.db.flush()
             else:
                 print "No IMAP messages to process"
             self.successful_read()
