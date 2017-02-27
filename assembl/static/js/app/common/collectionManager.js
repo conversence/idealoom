@@ -17,6 +17,7 @@ var Marionette = require('backbone.marionette'),
     Segment = require('../models/segment.js'),
     Synthesis = require('../models/synthesis.js'),
     Partners = require('../models/partners.js'),
+    TimelineEvent = require('../models/timeline.js'),
     Announcement = require('../models/announcement.js'),
     Agents = require('../models/agents.js'),
     NotificationSubscription = require('../models/notificationSubscription.js'),
@@ -130,6 +131,14 @@ var CollectionManager = Marionette.Object.extend({
    */
   _allPartnerOrganizationCollection: undefined,
   _allPartnerOrganizationCollectionPromise: undefined,
+
+  /**
+   * Collection with all timeline events in the discussion.
+   *
+   * @type {TimelineEventCollection}
+   */
+  _allTimelineEventCollection: undefined,
+  _allTimelineEventCollectionPromise: undefined,
 
   /**
    * Collection with idea announcments for the messageList.
@@ -277,6 +286,12 @@ var CollectionManager = Marionette.Object.extend({
 
       case Types.PARTNER_ORGANIZATION:
         return this.getAllPartnerOrganizationCollectionPromise();
+
+      case Types.TIMELINE_EVENT:
+      case Types.DISCUSSION_PHASE:
+      case Types.DISCUSSION_MILESTONE:
+      case TYPES.DISCUSSION_SESSION:
+        return this.getAllTimelineEventCollectionPromise();
 
       case Types.WIDGET:
         return this.getAllWidgetsPromise();
@@ -694,6 +709,27 @@ var CollectionManager = Marionette.Object.extend({
             });
 
     return this._allPartnerOrganizationCollectionPromise;
+  },
+
+  /**
+   * Returns the collection of partners
+   * @returns {BaseCollection}
+   * @function app.common.collectionManager.CollectionManager.getAllPartnerOrganizationCollectionPromise
+  **/
+  getAllTimelineEventCollectionPromise: function() {
+    if (this._allTimelineEventCollectionPromise) {
+      return this._allTimelineEventCollectionPromise;
+    }
+
+    this._allTimelineEventCollection = new TimelineEvent.Collection();
+    this._allTimelineEventCollection.collectionManager = this;
+    this._allTimelineEventCollectionPromise = Promise.resolve(this._allTimelineEventCollection.fetch())
+        .thenReturn(this._allTimelineEventCollection)
+            .catch(function(e) {
+              Raven.captureException(e);
+            });
+
+    return this._allTimelineEventCollectionPromise;
   },
   /**
    * Returns the collection of annoucements
