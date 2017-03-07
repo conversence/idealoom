@@ -193,10 +193,10 @@ var routeManager = Marionette.Object.extend({
   },
 
   timeline: function() {
-    Assembl.headerRegions.show(new NavBar());
+    Assembl.rootView.showChildView('headerRegions', new NavBar());
     if (this.userHaveAccess()) {
       var adminSetting = new AdminTimeline();
-      Assembl.groupContainer.show(adminSetting);
+      Assembl.rootView.showChildView('groupContainer', adminSetting);
     }
   },
 

@@ -11,7 +11,7 @@ var Assembl = require('../../app.js'),
     TimelineEvent = require('../../models/timeline.js'),
     LangString = require('../../models/langstring.js'),
     CollectionManager = require('../../common/collectionManager.js'),
-    Marionette = require('../../shims/marionette.js'),
+    Marionette = require('backbone.marionette'),
     Growl = require('../../utils/growl.js'),
     SimpleLangStringEditPanel = require('../simpleLangStringEdit.js'),
     Moment = require('moment'),
@@ -24,9 +24,9 @@ var Assembl = require('../../app.js'),
 /**
  * @class  app.views.admin.adminTimelineEvents.AdminTimelineEventPanel
  */
-var AdminTimelineEventPanel = Marionette.LayoutView.extend({
+var AdminTimelineEventPanel = Marionette.View.extend({
   constructor: function AdminTimelineEventPanel() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
   template: '#tmpl-adminTimelineEvents',
 
@@ -50,7 +50,7 @@ var AdminTimelineEventPanel = Marionette.LayoutView.extend({
     var that = this,
         collectionManager = new CollectionManager();
     this.timelineEventCollection = null;
-    if(this.isViewDestroyed()) {
+    if(this.isDestroyed()) {
       return;
     }
     this.timelinePromise = collectionManager.getAllTimelineEventCollectionPromise().then(function(timeline) {
@@ -93,7 +93,7 @@ var AdminTimelineEventPanel = Marionette.LayoutView.extend({
   },
 
   onRender: function() {
-    if (this.isViewDestroyed()) {
+    if (this.isDestroyed()) {
       return;
     }
     if (this.timelineEventCollection != null) {
@@ -114,9 +114,9 @@ var AdminTimelineEventPanel = Marionette.LayoutView.extend({
 /**
  * @class  app.views.admin.adminTimelineEvents.TimelineEventView
  */
-var TimelineEventView = Marionette.LayoutView.extend({
+var TimelineEventView = Marionette.View.extend({
   constructor: function TimelineEventView() {
-    Marionette.LayoutView.apply(this, arguments);
+    Marionette.View.apply(this, arguments);
   },
   template: '#tmpl-adminTimelineEvent',
   ui: {
