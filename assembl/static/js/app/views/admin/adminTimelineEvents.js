@@ -28,7 +28,7 @@ var AdminTimelineEventPanel = Marionette.View.extend({
   constructor: function AdminTimelineEventPanel() {
     Marionette.View.apply(this, arguments);
   },
-  template: '#tmpl-adminTimelineEvents',
+  template: '#tmpl-loader',
 
   ui: {
     addTimelineEvent: '.js_add_event',
@@ -55,6 +55,7 @@ var AdminTimelineEventPanel = Marionette.View.extend({
     }
     this.timelinePromise = collectionManager.getAllTimelineEventCollectionPromise().then(function(timeline) {
       that.timelineEventCollection = timeline;
+      that.template = '#tmpl-adminTimelineEvents';
       that.render();
     })
   },
@@ -98,7 +99,7 @@ var AdminTimelineEventPanel = Marionette.View.extend({
   },
 
   onRender: function() {
-    if (this.isDestroyed()) {
+    if (this.isDestroyed() || this.template === '#tmpl-loader') {
       return;
     }
     if (this.timelineEventCollection != null) {
@@ -128,6 +129,7 @@ var TimelineEventView = Marionette.View.extend({
     eventTitle: '.js_timeline_title',
     eventDescription: '.js_timeline_description',
     eventImageUrl: '.js_timeline_image_url',
+    eventIdentifier: '.js_identifier',
     eventStartDate: '.js_start_date',
     eventEndDate: '.js_end_date',
     eventUp: '.js_timeline_up',
@@ -143,6 +145,7 @@ var TimelineEventView = Marionette.View.extend({
     'click @ui.eventDown': 'reorderColumnDown',
     'click @ui.eventDelete': 'deleteColumn',
     'change @ui.eventImageUrl': 'changeImageUrl',
+    'change @ui.eventIdentifier': 'changeIdentifier',
     'change @ui.eventStartDate': 'changeStartDate',
     'change @ui.eventEndDate': 'changeEndDate',
   },
@@ -214,6 +217,11 @@ var TimelineEventView = Marionette.View.extend({
   },
   changeImageUrl: function(ev) {
     this.model.set('image_url', ev.currentTarget.value);
+    this.model.save();
+    ev.preventDefault();
+  },
+  changeIdentifier: function(ev) {
+    this.model.set('identifier', ev.currentTarget.value);
     this.model.save();
     ev.preventDefault();
   },
