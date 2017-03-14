@@ -605,7 +605,7 @@ class AgentStatusInDiscussion(DiscussionBoundBase):
 
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):
-        return (cls.id == discussion_id,)
+        return (cls.discussion_id == discussion_id,)
 
     def is_owner(self, user_id):
         return user_id == self.profile_id
@@ -1220,7 +1220,7 @@ class LocalUserRole(DiscussionBoundBase, PrivateObjectMixin):
 
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):
-        return (cls.id == discussion_id,)
+        return (cls.discussion_id == discussion_id,)
 
     def get_role_name(self):
         return self.role.name
@@ -1371,7 +1371,7 @@ class DiscussionPermission(DiscussionBoundBase):
 
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):
-        return (cls.id == discussion_id, )
+        return (cls.discussion_id == discussion_id, )
 
 
 def create_default_permissions(discussion):
