@@ -70,7 +70,11 @@ var Notification = Marionette.View.extend({
         console.error('ERROR: userNotification', resp)
       }
     });
-  }
+  },
+  updateRole: function(role) {
+    this.role = role;
+    this.render();
+  },
 });
 
 var Notifications = Marionette.CollectionView.extend({
@@ -87,8 +91,14 @@ var Notifications = Marionette.CollectionView.extend({
        }
   },
   collectionEvents: {
-      'reset': 'render'
-    }
+    'reset': 'render'
+  },
+  updateRole: function(role) {
+    this.childViewOptions.role = role;
+    this.children.each(function(child) {
+      child.updateRole(role);
+    });
+  },
 });
 
 /**
@@ -156,8 +166,11 @@ var TemplateSubscription = Marionette.View.extend({
         console.error('ERROR: userNewSubscription', resp)
       }
     })
-  }
-
+  },
+  updateRole: function(role) {
+    this.role = role;
+    this.render();
+  },
 });
 
 var TemplateSubscriptions = Marionette.CollectionView.extend({
@@ -194,8 +207,14 @@ var TemplateSubscriptions = Marionette.CollectionView.extend({
 
   },
   collectionEvents: {
-      'reset': 'render'
-    }
+    'reset': 'render'
+  },
+  updateRole: function(role) {
+    this.childViewOptions.role = role;
+    this.children.each(function(child) {
+      child.updateRole(role);
+    });
+  },
 });
 
 /**
@@ -286,6 +305,7 @@ var Subscriber = Marionette.View.extend({
   initialize: function(options) {
     this.roles = options.roles;
     this.role = options.role;
+    this.parent = options.parent;
 
     var analytics = Analytics.getInstance();
     analytics.changeCurrentPage(analytics.pages.NOTIFICATION_SETTINGS);
@@ -306,6 +326,10 @@ var Subscriber = Marionette.View.extend({
 
     if (this.role) {
       this.roles.UnsubscribeUserFromDiscussion();
+      // this is a partial solution, because the collections also need updating
+      // this.parent.updateRole(null);
+      // horrible temporary hack
+      location.reload();
     }
   },
 
@@ -326,6 +350,10 @@ var Subscriber = Marionette.View.extend({
                 success: function(model, resp) {
                   that.roles.add(model);
                   analytics.trackEvent(analytics.events.JOIN_DISCUSSION);
+                  // this is a partial solution, because the collections also need updating
+                  // that.parent.updateRole(model);
+                  // horrible temporary hack
+                  location.reload();
                 },
                 error: function(model, resp) {
                   console.error('ERROR: joinDiscussion->subscription', resp);
@@ -362,26 +390,27 @@ var userNotificationSubscriptions = Marionette.View.extend({
            collectionManager.getConnectedSocketPromise(),
             function(NotificationsUser, notificationTemplates, allRoles, socket) {
 
-              var subscriber = new Subscriber({
+              that.subscriber = new Subscriber({
+                parent: that,
                 role: allRoles.isUserSubscribedToDiscussion(),
-                roles: allRoles
+                roles: allRoles,
               });
-              that.showChildView('userSubscriber', subscriber);
+              that.showChildView('userSubscriber', that.subscriber);
 
-              var templateSubscriptions = new TemplateSubscriptions({
+              that.templateSubscriptions = new TemplateSubscriptions({
                 notificationTemplates: notificationTemplates,
                 notificationsUser: NotificationsUser,
                 role: allRoles.isUserSubscribedToDiscussion(),
                 roles: allRoles
               });
-              that.showChildView('templateSubscription', templateSubscriptions);
+              that.showChildView('templateSubscription', that.templateSubscriptions);
 
-              var userNotification = new Notifications({
+              that.userNotification = new Notifications({
                 notificationsUser: NotificationsUser,
                 role: allRoles.isUserSubscribedToDiscussion(),
                 roles: allRoles
               });
-              that.showChildView('userNotifications', userNotification);
+              that.showChildView('userNotifications', that.userNotification);
 
             });
 
@@ -392,6 +421,11 @@ var userNotificationSubscriptions = Marionette.View.extend({
     emailAccount.fetch();
 
     this.showChildView('notifByEmail', notificationByEmails);
+  },
+
+  updateRole: function(role) {
+    this.userNotification.updateRole(role);
+    this.templateSubscriptions.updateRole(role);
   },
 
   serializeData: function() {
