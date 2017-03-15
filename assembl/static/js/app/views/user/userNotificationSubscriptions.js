@@ -435,7 +435,7 @@ var userNotificationSubscriptions = Marionette.View.extend({
           role: role,
           roles: allRoles,
         });
-        that.getRegion('userNotifications').show(that.userNotification);
+        that.showChildView('userNotifications', that.userNotification);
 
         that.templateSubscriptions = new TemplateSubscriptions({
           notificationTemplates: notificationTemplates,
@@ -443,7 +443,7 @@ var userNotificationSubscriptions = Marionette.View.extend({
           role: role,
           roles: allRoles
         });
-        that.getRegion('templateSubscription').show(that.templateSubscriptions);
+        that.showChildView('templateSubscription', that.templateSubscriptions);
       });
     }
   },
