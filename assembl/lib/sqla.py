@@ -216,8 +216,6 @@ class TableLockCreationThread(Thread):
             self.exception = e
         except Exception as e:
             print e
-            import pdb
-            pdb.post_mortem()
             self.success = False
             self.exception = e
 
