@@ -88,7 +88,7 @@ class CreationResponse(Response):
         uri = uri or ob_created.uri()
         super(CreationResponse, self).__init__(
             dumps(ob_created.generic_json(view, user_id, permissions)),
-            location=uri, status_code=201)
+            location=uri, status_code=201, content_type="application/json")
 
 
 @view_config(context=ClassContext, renderer='json',
