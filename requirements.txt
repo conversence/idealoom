@@ -1,5 +1,5 @@
 pip==9.0.1
-setuptools==34.3.1
+setuptools==34.3.2
 alabaster==0.7.10
 alembic==0.9.1
 amqp==2.1.4
@@ -26,7 +26,7 @@ cornice==2.4.0
 -e git+https://github.com/maparent/cornice.ext.sphinx.git@cornice_sphinx_services#egg=cornice_sphinx
 cov-core==1.15.0
 coverage==4.3.4
-cryptography==1.7.2
+cryptography==1.8.1
 cssselect==1.0.1
 cssutils==1.0.2
 DateTime==4.1.1
@@ -53,14 +53,14 @@ greenlet==0.4.12
 hiredis==0.2.0
 html5lib==0.999999999
 httplib2==0.10.3
-hupper==0.4.2
+hupper==0.4.4
 idna==2.5
 imagesize==0.7.1
 #IMAPClient==1.0.1
 imaplib2==2.45.0
 ipaddress==1.0.18
 ipykernel==4.5.2
-ipython-genutils==0.1.0
+ipython-genutils==0.2.0
 ipython==5.3.0
 iso639==0.1.4  # failure with 0.1.3
 isodate==0.5.4
@@ -75,7 +75,7 @@ langdetect==1.0.7
 lingua==4.13
 lxml==3.7.3
 Mako==1.0.6
-MarkupSafe==0.23
+MarkupSafe==1.0
 meld3==1.0.2
 mock==2.0.0
 ndg_httpsclient==0.4.2
@@ -92,7 +92,7 @@ pexpect==4.2.1
 pickleshare==0.7.4
 polib==1.0.8
 premailer==3.0.1
-psycopg2==2.7
+psycopg2==2.7.1
 py==1.4.32
 pyasn1==0.2.3
 pyasn1_modules==0.0.8
@@ -117,13 +117,13 @@ pyramid-jinja2==2.7
 pyramid-mailer==0.15.1
 pyramid-mako==1.0.2
 pyramid-tm==1.1.1
-pyramid==1.8.2
+pyramid==1.8.3
 PyStemmer==1.3.0
 pytest-cov==2.4.0
 pytest-localserver==0.3.6
 pytest-mock==1.5.0
 pytest-splinter==1.8.1
-pytest==3.0.6
+pytest==3.0.7
 python-dateutil==2.6.0
 python-openid==2.2.5
 python-saml==2.2.1
@@ -141,11 +141,11 @@ requests-oauthlib==0.8.0
 requests==2.13.0
 rsa==3.4.2
 scikit-learn==0.18.1
-scipy==0.18.1
-selenium==3.0.2
+scipy==0.19.0
+selenium==3.3.1
 simplejson==3.10.0
 six==1.10.0
-smart-open==1.4.0
+smart-open==1.5.0
 snowballstemmer==1.2.1
 -e git+https://github.com/assembl/sockjs-tornado.git@conflicting_localhost#egg=sockjs_tornado
 SPARQLWrapper==1.8.0
@@ -160,7 +160,7 @@ sqlparse==0.2.3
 supervisor==3.3.1
 tornado==4.4.2
 traitlets==4.3.2
-transaction==2.1.0
+transaction==2.1.2
 translationstring==1.3
 Unidecode==0.4.20
 uritemplate==3.0.0
@@ -170,9 +170,9 @@ venusian==1.0
 waitress==1.0.2
 watchdog==0.8.3
 webencodings==0.5
-WebOb==1.7.1
-WebTest==2.0.26
-Werkzeug==0.11.15
+WebOb==1.7.2
+WebTest==2.0.27
+Werkzeug==0.12.1
 zope.component==4.3.0
 zope.deprecation==4.2.0
 zope.event==4.2.0
