@@ -195,7 +195,7 @@ class AbstractVoteSpecification(DiscussionBoundBase):
 
     @classmethod
     def get_vote_classname(cls):
-        return cls.get_vote_class().__name__
+        return cls.get_vote_class().external_typename()
 
     def is_valid_vote(self, vote):
         return issubclass(vote.__class__, self.get_vote_class())
