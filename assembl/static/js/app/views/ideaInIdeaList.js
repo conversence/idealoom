@@ -301,7 +301,7 @@ var IdeaInIdeaListView = Marionette.View.extend({
 
     if (Ctx.getCurrentUserId()) {
       // tell the backend that the idea was read
-      $.ajax("/data/Discussion/" + Ctx.getDiscussionId() + "/ideas/" + this.model.getNumericId() + "/actions", {
+      $.ajax(Ctx.getApiV2DiscussionUrl("ideas/" + this.model.getNumericId() + "/actions"), {
         method: "POST",
         contentType: "application/json",
         data: '{"@type":"ViewIdea"}'

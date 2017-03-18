@@ -1070,7 +1070,7 @@ var MessageView = Marionette.View.extend({
     } else {
       analytics.trackEvent(analytics.events.MESSAGE_LIKED);
       Promise.resolve($.ajax(
-          "/data/Discussion/" + Ctx.getDiscussionId() + "/posts/" + this.model.getNumericId() + "/actions", {
+          Ctx.getApiV2DiscussionUrl("posts/" + this.model.getNumericId() + "/actions"), {
             method: "POST",
             contentType: "application/json",
             dataType: "json",

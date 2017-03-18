@@ -4,6 +4,7 @@
  * @module app.models.discussionPreference
  */
 var Backbone = require("backbone"),
+    Types = require("../utils/types.js"),
     Ctx = require("../common/context.js");
 
 
@@ -209,7 +210,7 @@ var GlobalPreferenceCollection = PreferenceCollection.extend({
   constructor: function GlobalPreferenceCollection() {
     PreferenceCollection.apply(this, arguments);
   },
-  url: Ctx.getApiV2Url("Preferences/default"),
+  url: Ctx.getApiV2Url(Types.PREFERENCES + "/default"),
 });
 
 

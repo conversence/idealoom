@@ -7,6 +7,7 @@
 var Base = require('./base.js'),
     Ctx = require('../common/context.js'),
     Roles = require('../utils/roles.js'),
+    Types = require('../utils/types.js'),
     Analytics = require('../internal_modules/analytics/dispatcher.js');
 
 /**
@@ -54,7 +55,7 @@ var roleCollection = Base.Collection.extend({
 
   url: function() {
     if (Ctx.isAdminApp()) {
-      return Ctx.getApiV2Url("/User/"+Ctx.getCurrentUserId()+"/roles")
+      return Ctx.getApiV2Url("/"+Types.USER+"/"+Ctx.getCurrentUserId()+"/roles")
     } else {
       return Ctx.getApiV2DiscussionUrl("/all_users/current/local_roles")
     }

@@ -458,7 +458,7 @@ Context.prototype = {
       url = '/' + url;
     }
 
-    return this.getApiV2Url('Discussion/' + this.getDiscussionId() + url);
+    return this.getApiV2Url(Types.DISCUSSION + '/' + this.getDiscussionId() + url);
   },
   /**
    * Returns the Object with mesagelistconfig in the localStorage
@@ -1809,7 +1809,7 @@ Context.prototype = {
         serverUrlComp2 = serverUrlComp1[1].split('/', 1),
         cif_perms = [Permissions.READ_PUBLIC_CIF],
         user_perms = [Permissions.READ, Permissions.READ_PUBLIC_CIF],
-        url_base = serverUrlComp1[0] + '://' + serverUrlComp2[0] + '/data/Discussion/' + Ctx.getDiscussionId();
+        url_base = serverUrlComp1[0] + '://' + serverUrlComp2[0] + '/data/'+Types.DISCUSSION+'/' + Ctx.getDiscussionId();
     Promise.join(
         this.getPermissionTokenPromise([cif_perms, user_perms],
               ["local:"+Types.AGENT_PROFILE+"/" + this.getCurrentUserId()]),

@@ -41,7 +41,7 @@ var Source = Base.Model.extend({
     'error_description': null,
     'error_backoff_until': null,
     'number_of_imported_posts': 0,
-    '@type': 'ContentSource',
+    '@type': Types.CONTENT_SOURCE,
     'is_content_sink': false // Used by API V2 as flag for side-effectful POST creation only.
     // DO NOT use for any other scenario than creating facebook content_sinks
   },
@@ -179,7 +179,7 @@ var ContentSourceId = Base.Model.extend({
     Base.Model.apply(this, arguments);
   },
 
-  urlRoot: Ctx.getApiV2Url('ContentSourceIDs'),
+  urlRoot: Ctx.getApiV2Url(Types.CONTENT_SOURCE_IDS),
   defaults: {
     'source_id': '', //Source.id
     'post_id': '', //message.id
