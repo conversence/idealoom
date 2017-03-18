@@ -83,8 +83,6 @@ class AgentProfile(Base):
     """
     __tablename__ = "agent_profile"
 
-    __external_typename = "Agent"
-
     rdf_class = FOAF.Agent
     rdf_sections = (USER_SECTION,)
     # This is very hackish. We need Posts to point to accounts vs users,
