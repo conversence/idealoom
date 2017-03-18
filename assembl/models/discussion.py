@@ -397,7 +397,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
 
     @property
     def widget_collection_url(self):
-        return "/data/Discussion/%d/widgets" % (self.id,)
+        return "/data/Conversation/%d/widgets" % (self.id,)
 
     # Properties as a route context
     __parent__ = None

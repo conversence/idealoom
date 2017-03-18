@@ -96,7 +96,7 @@ class AgentProfile(Base):
     # but right now they do not know the accounts.
     agent_as_account_iri = PatternIriClass(
             QUADNAMES.agent_as_account_iri,
-            get_global_base_url() + '/data/AgentAccount/%d', None,
+            get_global_base_url() + '/data/Agent/%d', None,
             ('id', Integer, False))
 
     id = Column(Integer, primary_key=True)

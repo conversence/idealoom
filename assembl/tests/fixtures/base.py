@@ -303,9 +303,9 @@ def json_representation_of_fixtures(
     rec_app.get("/api/v1/discussion/%d/posts" % discussion.id,
                 {"view": "partial_post"})
     rec_app.get("/api/v1/discussion/%d/explicit_subgraphs/synthesis" % discussion.id)
-    rec_app.get("/data/Discussion/%d/idea_links" % discussion.id)
-    rec_app.get("/data/Discussion/%d/widgets" % discussion.id)
-    rec_app.get("/data/Discussion/%d/settings/default_table_of_ideas_collapsed_state" % discussion.id)
-    rec_app.get("/data/Discussion/%d/user_ns_kv/expertInterface_group_0_table_of_ideas_collapsed_state" % discussion.id)
+    rec_app.get("/data/Conversation/%d/idea_links" % discussion.id)
+    rec_app.get("/data/Conversation/%d/widgets" % discussion.id)
+    rec_app.get("/data/Conversation/%d/settings/default_table_of_ideas_collapsed_state" % discussion.id)
+    rec_app.get("/data/Conversation/%d/user_ns_kv/expertInterface_group_0_table_of_ideas_collapsed_state" % discussion.id)
 
     return None

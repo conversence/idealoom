@@ -13,7 +13,7 @@
         "locale": true,
         "rtl": true
     },
-    "AgentProfile": {
+    "Agent": {
         "description": true,
         "name": true,
         "preferred_email": false

@@ -398,11 +398,11 @@ class BaseIdeaWidget(Widget):
         self.base_idea = idea
 
     def get_ideas_url(self):
-        return 'local:Discussion/%d/widgets/%d/base_idea/-/children' % (
+        return 'local:Conversation/%d/widgets/%d/base_idea/-/children' % (
             self.discussion_id, self.id)
 
     def get_messages_url(self):
-        return 'local:Discussion/%d/widgets/%d/base_idea/-/widgetposts' % (
+        return 'local:Conversation/%d/widgets/%d/base_idea/-/widgetposts' % (
             self.discussion_id, self.id)
 
     @classmethod
@@ -478,13 +478,13 @@ class IdeaCreatingWidget(BaseIdeaWidget):
     def get_confirm_ideas_url(self):
         idea_uri = self.settings_json.get('idea', None)
         if idea_uri:
-            return ('local:Discussion/%d/widgets/%d/confirm_ideas') % (
+            return ('local:Conversation/%d/widgets/%d/confirm_ideas') % (
                 self.discussion_id, self.id)
 
     def get_confirm_messages_url(self):
         idea_uri = self.settings_json.get('idea', None)
         if idea_uri:
-            return ('local:Discussion/%d/widgets/%d/confirm_messages') % (
+            return ('local:Conversation/%d/widgets/%d/confirm_messages') % (
                 self.discussion_id, self.id)
 
     def get_confirmed_ideas(self):
@@ -534,7 +534,7 @@ class IdeaCreatingWidget(BaseIdeaWidget):
             post.hidden = (post.uri() not in post_ids)
 
     def get_ideas_hiding_url(self):
-        return 'local:Discussion/%d/widgets/%d/base_idea_hiding/-/children' % (
+        return 'local:Conversation/%d/widgets/%d/base_idea_hiding/-/children' % (
             self.discussion_id, self.id)
 
     @classmethod
@@ -670,7 +670,7 @@ class InspirationWidget(IdeaCreatingWidget):
         return "/static/widget/creativity/"
 
     def get_add_post_endpoint(self, idea):
-        return 'local:Discussion/%d/widgets/%d/base_idea_descendants/%d/linkedposts' % (
+        return 'local:Conversation/%d/widgets/%d/base_idea_descendants/%d/linkedposts' % (
             self.discussion_id, self.id, idea.id)
 
 
@@ -735,7 +735,7 @@ class CreativitySessionWidget(IdeaCreatingWidget):
             return self.num_posts_by(user_id)
 
     def get_add_post_endpoint(self, idea):
-        return 'local:Discussion/%d/widgets/%d/base_idea/-/children/%d/widgetposts' % (
+        return 'local:Conversation/%d/widgets/%d/base_idea/-/children/%d/widgetposts' % (
             self.discussion_id, self.id, idea.id)
 
 
@@ -788,21 +788,21 @@ class VotingWidget(BaseIdeaWidget):
 
     @property
     def criteria_url(self):
-        return 'local:Discussion/%d/widgets/%d/criteria' % (
+        return 'local:Conversation/%d/widgets/%d/criteria' % (
             self.discussion_id, self.id)
 
     @property
     def votespecs_url(self):
-        return 'local:Discussion/%d/widgets/%d/vote_specifications' % (
+        return 'local:Conversation/%d/widgets/%d/vote_specifications' % (
             self.discussion_id, self.id)
 
     @property
     def votables_url(self):
-        return 'local:Discussion/%d/widgets/%d/targets/' % (
+        return 'local:Conversation/%d/widgets/%d/targets/' % (
             self.discussion_id, self.id)
 
     def get_user_votes_url(self, idea_id):
-        return 'local:Discussion/%d/widgets/%d/targets/%d/votes' % (
+        return 'local:Conversation/%d/widgets/%d/targets/%d/votes' % (
             self.discussion_id, self.id, Idea.get_database_id(idea_id))
 
     def all_voting_results(self):
@@ -815,7 +815,7 @@ class VotingWidget(BaseIdeaWidget):
         # TODO: Does not work yet.
         return {
             AbstractVoteSpecification.uri_generic(vote_spec.id):
-            'local:Discussion/%d/widgets/%d/vote_specifications/%d/vote_targets/%d/votes' % (
+            'local:Conversation/%d/widgets/%d/vote_specifications/%d/vote_targets/%d/votes' % (
                 self.discussion_id, self.id, vote_spec.id,
                 Idea.get_database_id(target_idea_id))
             for vote_spec in self.vote_specifications
@@ -824,7 +824,7 @@ class VotingWidget(BaseIdeaWidget):
     def get_voting_results_by_spec_url(self):
         return {
             AbstractVoteSpecification.uri_generic(vote_spec.id):
-            'local:Discussion/%d/widgets/%d/vote_specifications/%d/vote_results' % (
+            'local:Conversation/%d/widgets/%d/vote_specifications/%d/vote_results' % (
                 self.discussion_id, self.id, vote_spec.id)
             for vote_spec in self.vote_specifications
         }

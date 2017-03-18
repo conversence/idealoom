@@ -90,7 +90,7 @@ class ZMQRouter(SockJSConnection):
                     self.raw_token = msg.split(':', 1)[1]
                     self.token = decode_token(self.raw_token, TOKEN_SECRET)
                     if self.token['userId'] != Everyone:
-                        self.userId = 'local:AgentProfile/' + str(
+                        self.userId = 'local:Agent/' + str(
                             self.token['userId'])
                     else:
                         self.userId = Everyone

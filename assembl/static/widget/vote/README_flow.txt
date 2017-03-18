@@ -146,7 +146,7 @@ value
 Such a POST request is sent for each criterion displayed on the page, so the POST URL and parameters differ (for example .../criteria/121/... instead of 120).
 
 The response of this POST request is a JSON like
-{"widget": "local:Widget/5", "voter": "local:AgentProfile/92", "idea": "local:Idea/120", "value": 0.4722222222222222
+{"widget": "local:Widget/5", "voter": "local:Agent/92", "idea": "local:Idea/120", "value": 0.4722222222222222
 , "criterion": "local:Idea/120", "@id": "local:IdeaVote/70", "@type": "LickertVote", "@view": "default"
 }
 But if the response header status not a 201 code but rather an error code, the page shows a red error instead of a green confirmation.

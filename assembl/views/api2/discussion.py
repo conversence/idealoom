@@ -874,10 +874,10 @@ def get_analytics_alerts(discussion, user_id, types, all_users=False):
         "metric": "alerts",
         "types": types}]
     if user_id != Everyone and not all_users:
-        obfuscated_userid = "local:AgentProfile/" + obfuscator.encrypt(
+        obfuscated_userid = "local:Agent/" + obfuscator.encrypt(
             str(user_id))
         metrics_requests[0]['users'] = [obfuscated_userid]
-    mapurl = '%s://%s/data/Discussion/%d/jsonld?token=%s' % (
+    mapurl = '%s://%s/data/Conversation/%d/jsonld?token=%s' % (
         protocol,
         host,
         discussion.id,
@@ -888,7 +888,7 @@ def get_analytics_alerts(discussion, user_id, types, all_users=False):
         verify=verify_metrics)
     obfuscator.deobfuscate(alerts.text)
     # AgentAccount is a pseudo for AgentProfile
-    result = re.sub(r'local:AgentAccount\\/', r'local:AgentProfile\\/', result)
+    result = re.sub(r'local:AgentAccount\\/', r'local:Agent\\/', result)
     return result
 
 

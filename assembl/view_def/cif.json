@@ -8,7 +8,7 @@
         "in_conversation": false
     },
     "User": {
-        "@extends": "AgentProfile",
+        "@extends": "Agent",
         "created": "creation_date"
     },
     "Update": {

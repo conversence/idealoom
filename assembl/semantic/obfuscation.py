@@ -14,16 +14,19 @@ class Obfuscator(object):
     def decrypt(self, code):
         pass
 
+    type_names = "(?:/data/|local:)"\
+        "(?:Agent|UserAccount|AgentProfile|AgentAccount|AbstractAgentAccount)"
+    obfuscate_re = re.compile(r'(%s/)(\d+)\b' % (type_names,))
+    deobfuscate_re = re.compile(r'(%s(?:\\?)/)([-=\w]+)' % (type_names,))
+
     def obfuscate(self, serialized_rdf, obfuscator=None):
         # Work in progress.
-        r = re.compile(r'((?:/data/|local:)(?:AgentProfile|AgentAccount|AbstractAgentAccount)/)(\d+)\b')
-        return r.sub(lambda matchob: (
+        return self.obfuscate_re.sub(lambda matchob: (
             matchob.group(1) + self.encrypt(matchob.group(2))), serialized_rdf)
 
     def deobfuscate(self, serialized_rdf):
         # Work in progress.
-        r = re.compile(r'((?:/data/|local:)(?:AgentProfile|AgentAccount|AbstractAgentAccount)(?:\\?)/)([-=\w]+)')
-        return r.sub(lambda matchob: (
+        return self.deobfuscate_re.sub(lambda matchob: (
             matchob.group(1) + self.decrypt(matchob.group(2))), serialized_rdf)
 
 

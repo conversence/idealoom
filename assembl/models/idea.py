@@ -676,7 +676,7 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
             ).order_by(
                 count(post.id.distinct()).desc())
 
-        return ['local:AgentProfile/' + str(i) for (i,) in query]
+        return ['local:Agent/' + str(i) for (i,) in query]
 
     def get_discussion_id(self):
         return self.discussion_id or self.discussion.id

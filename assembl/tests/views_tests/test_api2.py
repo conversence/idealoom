@@ -34,13 +34,13 @@ def test_get_ideas(discussion, test_app, synthesis_1,
     all_ideas = test_app.get('/data/Idea')
     assert all_ideas.status_code == 200
     all_ideas = all_ideas.json
-    disc_ideas = test_app.get('/data/Discussion/%d/ideas?view=id_only' %
+    disc_ideas = test_app.get('/data/Conversation/%d/ideas?view=id_only' %
                               (discussion.id,))
     assert disc_ideas.status_code == 200
     disc_ideas = disc_ideas.json
     assert set(all_ideas) == set(disc_ideas)
     synthesis_ideasassocs = test_app.get(
-        '/data/Discussion/%d/views/%d/idea_assocs?view=id_only' % (
+        '/data/Conversation/%d/views/%d/idea_assocs?view=id_only' % (
             discussion.id, synthesis_1.id))
     assert synthesis_ideasassocs.status_code == 200
     synthesis_ideasassocs = synthesis_ideasassocs.json
@@ -53,7 +53,7 @@ def test_get_ideas(discussion, test_app, synthesis_1,
     assert subidea_1_1_1_id in disc_ideas
     assert subidea_1_1_1_id not in syn_ideas
     syn_ideas = test_app.get(
-        '/data/Discussion/%d/views/%d/ideas?view=id_only' % (
+        '/data/Conversation/%d/views/%d/ideas?view=id_only' % (
             discussion.id, synthesis_1.id))
     assert syn_ideas.status_code == 200
     syn_ideas = syn_ideas.json
@@ -67,7 +67,7 @@ def test_add_idea_in_synthesis(
         discussion, test_app, test_session, subidea_1_1):
     synthesis = discussion.next_synthesis
     new_idea_r = test_app.post_json(
-        '/data/Discussion/%d/views/%d/ideas' % (
+        '/data/Conversation/%d/views/%d/ideas' % (
             discussion.id, synthesis.id),
         {"@id": subidea_1_1.uri()})
     assert new_idea_r.status_code == 201
@@ -77,7 +77,7 @@ def test_add_idea_in_synthesis(
 
     # remove this subidea from synthesis
     remove_idea_result = test_app.delete(
-        '/data/Discussion/%d/syntheses/%d/ideas/%d' % (
+        '/data/Conversation/%d/syntheses/%d/ideas/%d' % (
             discussion.id, synthesis.id, subidea_1_1.id))
     assert remove_idea_result.status_code == 200
 
@@ -85,7 +85,7 @@ def test_add_idea_in_synthesis(
 def test_add_subidea_in_synthesis(
         discussion, test_app, synthesis_1, subidea_1_1, test_session):
     new_idea_r = test_app.post_json(
-        '/data/Discussion/%d/views/%d/ideas/%d/children' % (
+        '/data/Conversation/%d/views/%d/ideas/%d/children' % (
             discussion.id, synthesis_1.id, subidea_1_1.id),
         {"short_title": "New subidea"})
     assert new_idea_r.status_code == 201
@@ -116,7 +116,7 @@ def test_widget_settings(
         ]
     }
     new_widget_loc = test_app.post_json(
-        '/data/Discussion/%d/widgets' % (discussion.id,), {
+        '/data/Conversation/%d/widgets' % (discussion.id,), {
             '@type': 'CreativitySessionWidget',
             'settings': {
                 'idea': 'local:Idea/%d' % (subidea_1.id)
@@ -151,7 +151,7 @@ def test_widget_user_state(
     state = [{"local:Idea/67": 8}, {"local:Idea/66": 2},
              {"local:Idea/65": 9}, {"local:Idea/64": 1}]
     new_widget_loc = test_app.post_json(
-        '/data/Discussion/%d/widgets' % (discussion.id,), {
+        '/data/Conversation/%d/widgets' % (discussion.id,), {
             '@type': 'CreativitySessionWidget',
             'settings': {
                 'idea': 'local:Idea/%d' % (subidea_1.id)
@@ -206,7 +206,7 @@ def test_creativity_session_widget(
     # Post the initial configuration
     format = lambda x: x.strftime('%Y-%m-%dT%H:%M:%S')
     new_widget_loc = test_app.post_json(
-        '/data/Discussion/%d/widgets' % (discussion.id,), {
+        '/data/Conversation/%d/widgets' % (discussion.id,), {
             '@type': 'CreativitySessionWidget',
             'settings': {
                 'idea': 'local:Idea/%d' % (subidea_1.id),
@@ -449,7 +449,7 @@ def test_creativity_session_widget(
 
     # Get the notifications
     notifications = test_app.get(
-        '/data/Discussion/%d/notifications' % discussion.id)
+        '/data/Conversation/%d/notifications' % discussion.id)
     assert notifications.status_code == 200
     notifications = notifications.json
 
@@ -469,7 +469,7 @@ def test_inspiration_widget(
     # Post the initial configuration
     format = lambda x: x.strftime('%Y-%m-%dT%H:%M:%S')
     new_widget_loc = test_app.post_json(
-        '/data/Discussion/%d/widgets' % (discussion.id,), {
+        '/data/Conversation/%d/widgets' % (discussion.id,), {
             '@type': 'InspirationWidget',
             'settings': {
                 'idea': 'local:Idea/%d' % (subidea_1.id)
@@ -551,7 +551,7 @@ def test_voting_widget(
     db = discussion.db
     criteria = (criterion_1, criterion_2, criterion_3)
     new_widget_loc = test_app.post_json(
-        '/data/Discussion/%d/widgets' % (discussion.id,), {
+        '/data/Conversation/%d/widgets' % (discussion.id,), {
             '@type': 'MultiCriterionVotingWidget',
             'settings': {
                 "votable_root_id": subidea_1_1.uri()
@@ -647,10 +647,10 @@ def test_voting_widget(
             assert False, "vote spec %s in voting_urls "\
                 "but not in vote_specifications" % (vote_spec_id)
         vote_type = spec['vote_class']
-        if vote_type == 'LickertIdeaVote':
+        if vote_type == 'LickertVote':
             vote_range = spec['maximum'] - spec['minimum']
             value = spec['minimum'] + (i % vote_range)
-        elif vote_type == 'BinaryIdeaVote':
+        elif vote_type == 'BinaryVote':
             value = True
         elif vote_type == 'MultipleChoiceIdeaVote':
             value = (i % spec['num_choices'])
@@ -687,7 +687,7 @@ def test_voting_widget(
     criterion_key = criteria[0].uri()
     voting_url = local_to_absolute(voting_urls[criterion_key])
     test_app.post_json(voting_url, {
-        "@type": "LickertIdeaVote", "value": 10})
+        "@type": "LickertVote", "value": 10})
     votes = db.query(AbstractIdeaVote).filter_by(
         voter_id=admin_user.id, idea_id=subidea_1_1.id,
         criterion_id=criteria[0].id).all()
@@ -734,7 +734,7 @@ def DISABLEDtest_voting_widget_criteria(
         } for criterion in criteria
     ]
     new_widget_loc = test_app.post_json(
-        '/data/Discussion/%d/widgets' % (discussion.id,), {
+        '/data/Conversation/%d/widgets' % (discussion.id,), {
             '@type': 'MultiCriterionVotingWidget',
             'settings': {
                 "criteria": criteria_def
@@ -792,7 +792,7 @@ def DISABLEDtest_voting_widget_criteria(
 
 
 def test_add_user_description(test_app, discussion, participant1_user):
-    url = "/data/AgentProfile/%d" % (participant1_user.id,)
+    url = "/data/Agent/%d" % (participant1_user.id,)
     description = 'Lorem ipsum Aliqua est irure eu id.'
 
     # Add the description
@@ -807,7 +807,7 @@ def test_add_user_description(test_app, discussion, participant1_user):
 
 
 def test_add_partner_organization(test_app, discussion):
-    url = "/data/Discussion/%d/partner_organizations/" % (discussion.id,)
+    url = "/data/Conversation/%d/partner_organizations/" % (discussion.id,)
     org = {
         'name': "Our organizer",
         'description': "We organize discussions!",
@@ -830,7 +830,7 @@ def test_add_partner_organization(test_app, discussion):
 
 
 def test_add_timeline_event(test_app, discussion):
-    url = "/data/Discussion/%d/timeline_events" % (discussion.id,)
+    url = "/data/Conversation/%d/timeline_events" % (discussion.id,)
     phase1 = {
         '@type': "DiscussionPhase",
         'title': {

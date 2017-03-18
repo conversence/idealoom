@@ -37,7 +37,7 @@ def test_default_notifications(
     assert len(template.notification_subscriptions) == 3
     # Get the user's notifications. Should not be empty.
     response = test_app.get(
-        '/data/Discussion/%d/all_users/%d/notification_subscriptions' % (
+        '/data/Conversation/%d/all_users/%d/notification_subscriptions' % (
             discussion.id, participant1_user.id), headers=accept_json)
     assert response.status_code == 200
     user_notif_subsc = response.json
@@ -47,7 +47,7 @@ def test_default_notifications(
     assert len(template.notification_subscriptions) >= 3
     # Get the template's subscriptions.
     response = test_app.get(
-        '/data/Discussion/%d/user_templates/-/notification_subscriptions' % (
+        '/data/Conversation/%d/user_templates/-/notification_subscriptions' % (
             discussion.id,), headers=accept_json)
     assert response.status_code == 200
     template_notif_subsc = response.json
@@ -64,14 +64,14 @@ def test_default_notifications(
     t_unsub_id = NotificationSubscription.get_database_id(t_unsub['@id'])
     testing_configurator.set_authentication_policy(admin_auth_policy)
     response = test_app.put_json(
-        '/data/Discussion/%d/user_templates/-/notification_subscriptions/%d' % (
+        '/data/Conversation/%d/user_templates/-/notification_subscriptions/%d' % (
         discussion.id, t_unsub_id),
         t_unsub)
     assert response.status_code == 200  # or 204?
     testing_configurator.set_authentication_policy(participant_auth_policy)
     # Check if the user's subscriptions were affected
     response = test_app.get(
-        '/data/Discussion/%d/all_users/%d/notification_subscriptions' % (
+        'data/Conversation/%d/all_users/%d/notification_subscriptions' % (
             discussion.id, participant1_user.id), headers=accept_json)
     assert response.status_code == 200
     user_notif_subsc_new = response.json
@@ -84,14 +84,14 @@ def test_default_notifications(
     t_unsub['status'] = "INACTIVE_DFT"
     testing_configurator.set_authentication_policy(admin_auth_policy)
     response = test_app.put_json(
-        '/data/Discussion/%d/user_templates/-/notification_subscriptions/%d' % (
+        '/data/Conversation/%d/user_templates/-/notification_subscriptions/%d' % (
         discussion.id, t_unsub_id),
         t_unsub)
     assert response.status_code == 200  # or 204?
     testing_configurator.set_authentication_policy(participant_auth_policy)
     # Check if the user's subscriptions were affected again
     response = test_app.get(
-        '/data/Discussion/%d/all_users/%d/notification_subscriptions' % (
+        '/data/Conversation/%d/all_users/%d/notification_subscriptions' % (
             discussion.id, participant1_user.id), headers=accept_json)
     assert response.status_code == 200
     user_notif_subsc_3 = response.json
@@ -112,7 +112,7 @@ def test_user_unsubscribed_stable(
     assert len(template.notification_subscriptions) == 3
     # Get the user's notifications. Should not be empty.
     response = test_app.get(
-        '/data/Discussion/%d/all_users/%d/notification_subscriptions' % (
+        '/data/Conversation/%d/all_users/%d/notification_subscriptions' % (
             discussion.id, participant1_user.id), headers=accept_json)
     assert response.status_code == 200
     user_notif_subsc = response.json
@@ -123,7 +123,7 @@ def test_user_unsubscribed_stable(
     assert len(template.notification_subscriptions) >= 3
     # Get the template's subscriptions.
     response = test_app.get(
-        '/data/Discussion/%d/user_templates/-/notification_subscriptions' % (
+        '/data/Conversation/%d/user_templates/-/notification_subscriptions' % (
             discussion.id,), headers=accept_json)
     assert response.status_code == 200
     template_notif_subsc = response.json
@@ -133,7 +133,7 @@ def test_user_unsubscribed_stable(
     del default_subscribed['creation_origin']
     default_subscribed_id = NotificationSubscription.get_database_id(default_subscribed['@id'])
     response = test_app.put_json(
-        '/data/Discussion/%d/all_users/%d/notification_subscriptions/%d' % (
+        '/data/Conversation/%d/all_users/%d/notification_subscriptions/%d' % (
         discussion.id, participant1_user.id, default_subscribed_id),
         default_subscribed)
     # Change the template default to unsubscribed
@@ -145,21 +145,21 @@ def test_user_unsubscribed_stable(
     corresponding_id = NotificationSubscription.get_database_id(corresponding['@id'])
     testing_configurator.set_authentication_policy(admin_auth_policy)
     response = test_app.put_json(
-        '/data/Discussion/%d/user_templates/-/notification_subscriptions/%d' % (
+        '/data/Conversation/%d/user_templates/-/notification_subscriptions/%d' % (
         discussion.id, corresponding_id),
         corresponding)
     assert response.status_code == 200  # or 204?
     # Change it back to subscribed
     corresponding['status'] = 'ACTIVE'
     response = test_app.put_json(
-        '/data/Discussion/%d/user_templates/-/notification_subscriptions/%d' % (
+        '/data/Conversation/%d/user_templates/-/notification_subscriptions/%d' % (
         discussion.id, corresponding_id),
         corresponding)
     assert response.status_code == 200  # or 204?
     testing_configurator.set_authentication_policy(participant_auth_policy)
     # check that the user's default was not affected
     response = test_app.get(
-        '/data/Discussion/%d/all_users/%d/notification_subscriptions/%d' % (
+        '/data/Conversation/%d/all_users/%d/notification_subscriptions/%d' % (
         discussion.id, participant1_user.id, default_subscribed_id),
         default_subscribed, headers=accept_json)
     assert response.status_code == 200
@@ -178,7 +178,7 @@ def test_user_subscribed_stable(
     assert len(template.notification_subscriptions) == 3
     # Get the user's notifications. Should not be empty.
     response = test_app.get(
-        '/data/Discussion/%d/all_users/%d/notification_subscriptions' % (
+        '/data/Conversation/%d/all_users/%d/notification_subscriptions' % (
             discussion.id, participant1_user.id), headers=accept_json)
     assert response.status_code == 200
     user_notif_subsc = response.json
@@ -189,7 +189,7 @@ def test_user_subscribed_stable(
     assert len(template.notification_subscriptions) >= 3
     # Get the template's subscriptions.
     response = test_app.get(
-        '/data/Discussion/%d/user_templates/-/notification_subscriptions' % (
+        '/data/Conversation/%d/user_templates/-/notification_subscriptions' % (
             discussion.id,), headers=accept_json)
     assert response.status_code == 200
     template_notif_subsc = response.json
@@ -207,7 +207,7 @@ def test_user_subscribed_stable(
         "@type": t_unsub["@type"]
     }
     response = test_app.post_json(
-        '/data/Discussion/%d/all_users/%d/notification_subscriptions' % (
+        '/data/Conversation/%d/all_users/%d/notification_subscriptions' % (
         discussion.id, participant1_user.id),
         new_subscription)
     assert response.status_code == 201
@@ -217,21 +217,21 @@ def test_user_subscribed_stable(
     t_unsub_id = NotificationSubscription.get_database_id(t_unsub['@id'])
     testing_configurator.set_authentication_policy(admin_auth_policy)
     response = test_app.put_json(
-        '/data/Discussion/%d/user_templates/-/notification_subscriptions/%d' % (
+        '/data/Conversation/%d/user_templates/-/notification_subscriptions/%d' % (
         discussion.id, t_unsub_id),
         t_unsub)
     assert response.status_code == 200  # or 204?
     # Make the default inactive again
     t_unsub['status'] = "INACTIVE_DFT"
     response = test_app.put_json(
-        '/data/Discussion/%d/user_templates/-/notification_subscriptions/%d' % (
+        '/data/Conversation/%d/user_templates/-/notification_subscriptions/%d' % (
         discussion.id, t_unsub_id),
         t_unsub)
     assert response.status_code == 200  # or 204?
     testing_configurator.set_authentication_policy(participant_auth_policy)
     # check that the user's default was not affected
     response = test_app.get(
-        '/data/Discussion/%d/all_users/%d/notification_subscriptions/%d' % (
+        '/data/Conversation/%d/all_users/%d/notification_subscriptions/%d' % (
         discussion.id, participant1_user.id, new_subscription_id),
         default_subscribed, headers=accept_json)
     assert response.status_code == 200
