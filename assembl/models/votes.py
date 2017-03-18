@@ -777,9 +777,7 @@ class AbstractIdeaVote(HistoryMixin, DiscussionBoundBase):
         secondary=Idea.__table__, primaryjoin=(idea_id == Idea.id),
         info={'rdf': QuadMapPatternS(None, ASSEMBL.in_conversation)})
 
-    @classmethod
-    def external_typename(cls):
-        return "IdeaVote"
+    __external_typename = "IdeaVote"
 
     @abstractproperty
     def value(self):
@@ -833,10 +831,6 @@ class LickertIdeaVote(AbstractIdeaVote):
     def __init__(self, **kwargs):
         super(LickertIdeaVote, self).__init__(**kwargs)
 
-    @classmethod
-    def external_typename(cls):
-        return cls.__name__
-
     @property
     def value(self):
         return self.vote_value
@@ -870,10 +864,6 @@ class MultipleChoiceIdeaVote(AbstractIdeaVote):
     vote_value = Column(
         Integer, nullable=False)
 
-    @classmethod
-    def external_typename(cls):
-        return cls.__name__
-
     @property
     def value(self):
         return self.vote_value
@@ -903,10 +893,6 @@ class BinaryIdeaVote(AbstractIdeaVote):
     vote_value = Column(
         Boolean, nullable=False,
         info={'rdf': QuadMapPatternS(None, VOTE.positive)})
-
-    @classmethod
-    def external_typename(cls):
-        return cls.__name__
 
     @property
     def value(self):
@@ -975,7 +961,3 @@ class TokenIdeaVote(AbstractIdeaVote):
         token_category_id = self.token_category_id or (
             self.token_category.id if self.token_category else None)
         return (query.filter_by(token_category_id=token_category_id), True)
-
-    @classmethod
-    def external_typename(cls):
-        return cls.__name__

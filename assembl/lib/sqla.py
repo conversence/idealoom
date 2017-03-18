@@ -428,8 +428,10 @@ class BaseOps(object):
     def external_typename(cls):
         """What is the class name that will be sent on the API, as @type.
 
-        Usually the python class name directly."""
-        return cls.__name__
+        Will use a class-local name defined as ``__external_typename``,
+        otherwise will use the python class name directly."""
+        name = cls.__name__
+        return getattr(cls, '_%s__external_typename' % (name,), name)
 
     def __repr__(self):
         return "<%s id=%d >" % (
