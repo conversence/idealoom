@@ -57,9 +57,9 @@ def get_extract(request):
     extract_id = request.matchdict['id']
     extract = Extract.get_instance(extract_id)
     view_def = request.GET.get('view') or 'default'
-    discussion_id = int(request.matchdict['discussion_id'])
+    discussion = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(user_id, discussion_id)
+    permissions = get_permissions(user_id, discussion.id)
 
     if extract is None:
         raise HTTPNotFound(
@@ -92,11 +92,7 @@ def _get_extracts_real(discussion, view_def='default', ids=None, user_id=None):
 
 @extracts.get(permission=P_READ)
 def get_extracts(request):
-    discussion_id = int(request.matchdict['discussion_id'])
-    discussion = Discussion.get(int(discussion_id))
-    if not discussion:
-        raise HTTPNotFound(
-            "Discussion with id '%s' not found." % discussion_id)
+    discussion = request.context
     view_def = request.GET.get('view')
     ids = request.GET.getall('ids')
 
@@ -110,7 +106,7 @@ def post_extract(request):
     Create a new extract.
     """
     extract_data = json.loads(request.body)
-    discussion_id = int(request.matchdict['discussion_id'])
+    discussion = request.context
     user_id = authenticated_userid(request)
     if not user_id:
         # Straight from annotator
@@ -121,7 +117,7 @@ def post_extract(request):
             if token:
                 user_id = token['userId']
     user_id = user_id or Everyone
-    if not user_has_permission(discussion_id, user_id, P_ADD_EXTRACT):
+    if not user_has_permission(discussion.id, user_id, P_ADD_EXTRACT):
         #TODO: maparent:  restore this code once it works:
         #return HTTPForbidden(result=ACLDenied(permission=P_ADD_EXTRACT))
         return HTTPForbidden()
@@ -156,19 +152,19 @@ def post_extract(request):
             # TODO: maparent:  This is actually a singleton pattern, should be
             # handled by the AnnotatorSource now that it exists...
             source = AnnotatorSource.default_db.query(AnnotatorSource).filter_by(
-                discussion_id=discussion_id).filter(
+                discussion=discussion).filter(
                 cast(AnnotatorSource.name, Unicode) == 'Annotator').first()
             if not source:
                 source = AnnotatorSource(
-                    name='Annotator', discussion_id=discussion_id,
+                    name='Annotator', discussion=discussion,
                     type='source')
-            content = Webpage(url=uri, discussion_id=discussion_id)
+            content = Webpage(url=uri, discussion=discussion)
     extract_body = extract_data.get('quote', '')
 
     idea_id = extract_data.get('idIdea', None)
     if idea_id:
         idea = Idea.get_instance(idea_id)
-        if(idea.discussion.id != discussion_id):
+        if(idea.discussion.id != discussion.id):
             raise HTTPBadRequest(
                 "Extract from discussion %s cannot be associated with an idea from a different discussion." % extract.get_discussion_id())
     else:
@@ -178,7 +174,7 @@ def post_extract(request):
     new_extract = Extract(
         creator_id=user_id,
         owner_id=user_id,
-        discussion_id=discussion_id,
+        discussion=discussion,
         body=extract_body,
         idea=idea,
         important=important,
@@ -207,7 +203,7 @@ def put_extract(request):
     """
     extract_id = request.matchdict['id']
     user_id = authenticated_userid(request)
-    discussion_id = int(request.matchdict['discussion_id'])
+    discussion = request.context
 
     if not user_id:
         # Straight from annotator
@@ -224,8 +220,8 @@ def put_extract(request):
     if not extract:
         raise HTTPNotFound("Extract with id '%s' not found." % extract_id)
 
-    if not (user_has_permission(discussion_id, user_id, P_EDIT_EXTRACT)
-        or (user_has_permission(discussion_id, user_id, P_EDIT_MY_EXTRACT)
+    if not (user_has_permission(discussion.id, user_id, P_EDIT_EXTRACT)
+        or (user_has_permission(discussion.id, user_id, P_EDIT_MY_EXTRACT)
             and user_id == extract.owner_id)):
         return HTTPForbidden()
 
@@ -251,7 +247,7 @@ def put_extract(request):
 @extract.delete(permission=P_READ)
 def delete_extract(request):
     user_id = authenticated_userid(request)
-    discussion_id = int(request.matchdict['discussion_id'])
+    discussion = request.context
 
     if not user_id:
         # Straight from annotator
@@ -266,8 +262,8 @@ def delete_extract(request):
     extract_id = request.matchdict['id']
     extract = Extract.get_instance(extract_id)
 
-    if not (user_has_permission(discussion_id, user_id, P_EDIT_EXTRACT)
-        or (user_has_permission(discussion_id, user_id, P_EDIT_MY_EXTRACT)
+    if not (user_has_permission(discussion.id, user_id, P_EDIT_EXTRACT)
+        or (user_has_permission(discussion.id, user_id, P_EDIT_MY_EXTRACT)
             and user_id == extract.owner_id)):
         raise HTTPForbidden()
 
@@ -285,9 +281,9 @@ def delete_extract(request):
 def do_search_extracts(request):
     uri = request.GET['uri']
     view_def = request.GET.get('view') or 'default'
-    discussion_id = int(request.matchdict['discussion_id'])
+    discussion = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(user_id, discussion_id)
+    permissions = get_permissions(user_id, discussion.id)
 
     if not uri:
         return HTTPBadRequest("Please specify a search uri")

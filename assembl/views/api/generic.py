@@ -31,8 +31,8 @@ def get_object(request):
         raise HTTPNotFound("Id %s of class '%s' not found." % (id, classname))
     if not get_view_def(view):
         raise HTTPNotFound("View '%s' not found." % view)
-    discussion_id = int(request.matchdict['discussion_id'])
+    discussion = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(user_id, discussion_id)
+    permissions = get_permissions(user_id, discussion.id)
 
     return obj.generic_json(view, user_id, permissions)

@@ -31,16 +31,15 @@ idea_extracts = Service(
 # Create
 @ideas.post(permission=P_ADD_IDEA)
 def create_idea(request):
-    discussion_id = int(request.matchdict['discussion_id'])
-    session = Discussion.default_db
-    discussion = session.query(Discussion).get(int(discussion_id))
+    discussion = request.context
+    session = discussion.db
     idea_data = json.loads(request.body)
 
     new_idea = Idea(
         short_title=idea_data['shortTitle'],
         long_title=idea_data['longTitle'],
         discussion=discussion,
-        )
+    )
 
     session.add(new_idea)
 
@@ -48,7 +47,9 @@ def create_idea(request):
         parent = Idea.get_instance(idea_data['parentId'])
     else:
         parent = discussion.root_idea
-    session.add(IdeaLink(source=parent, target=new_idea, order=idea_data.get('order', 0.0)))
+    session.add(IdeaLink(
+        source=parent, target=new_idea,
+        order=idea_data.get('order', 0.0)))
 
     session.flush()
 
@@ -60,9 +61,9 @@ def get_idea(request):
     idea_id = request.matchdict['id']
     idea = Idea.get_instance(idea_id)
     view_def = request.GET.get('view')
-    discussion_id = int(request.matchdict['discussion_id'])
+    discussion = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(user_id, discussion_id)
+    permissions = get_permissions(user_id, discussion.id)
 
     if not idea:
         raise HTTPNotFound("Idea with id '%s' not found." % idea_id)
@@ -78,9 +79,11 @@ def _get_ideas_real(discussion, view_def=None, ids=None, user_id=None):
     universal_widget_links = []
     by_idea_widget_links = defaultdict(list)
     widget_links = discussion.db.query(IdeaWidgetLink
-        ).join(Widget).join(Discussion).filter(
-        Widget.test_active(), Discussion.id == discussion.id,
-        IdeaDescendantsShowingWidgetLink.polymorphic_filter()
+        ).join(Widget).join(Discussion
+        ).filter(
+            Widget.test_active(),
+            Discussion.id == discussion.id,
+            IdeaDescendantsShowingWidgetLink.polymorphic_filter()
         ).options(joinedload_all(IdeaWidgetLink.idea)).all()
     for wlink in widget_links:
         if isinstance(wlink.idea, RootIdea):
@@ -95,19 +98,19 @@ def _get_ideas_real(discussion, view_def=None, ids=None, user_id=None):
 
     next_synthesis = discussion.get_next_synthesis()
     ideas = discussion.db.query(Idea).filter_by(
-        discussion_id=discussion.id
+        discussion=discussion
     )
 
-    ideas = ideas.outerjoin(SubGraphIdeaAssociation,
-                    and_(SubGraphIdeaAssociation.sub_graph_id==next_synthesis.id, SubGraphIdeaAssociation.idea_id==Idea.id)
-        )
-    
-    ideas = ideas.outerjoin(IdeaLink,
-                    and_(IdeaLink.target_id==Idea.id)
-        )
-    
+    ideas = ideas.outerjoin(
+        SubGraphIdeaAssociation,
+        and_(SubGraphIdeaAssociation.sub_graph_id == next_synthesis.id,
+             SubGraphIdeaAssociation.idea_id == Idea.id))
+
+    ideas = ideas.outerjoin(
+        IdeaLink, IdeaLink.target_id == Idea.id)
+
     ideas = ideas.order_by(IdeaLink.order, Idea.creation_date)
-    
+
     if ids:
         ids = [get_database_id("Idea", id) for id in ids]
         ideas = ideas.filter(Idea.id.in_(ids))
@@ -135,26 +138,23 @@ def _get_ideas_real(discussion, view_def=None, ids=None, user_id=None):
 @ideas.get(permission=P_READ)
 def get_ideas(request):
     user_id = authenticated_userid(request) or Everyone
-    discussion_id = int(request.matchdict['discussion_id'])
-    discussion = Discussion.get(int(discussion_id))
-    if not discussion:
-        raise HTTPNotFound("Discussion with id '%s' not found." % discussion_id)
+    discussion = request.context
     view_def = request.GET.get('view')
     ids = request.GET.getall('ids')
     return _get_ideas_real(discussion=discussion, view_def=view_def,
                            ids=ids, user_id=user_id)
 
-# Update
+
 @idea.put(permission=P_EDIT_IDEA)
 def save_idea(request):
     """Update this idea.
 
     In case the ``parentId`` is changed, handle all
     ``IdeaLink`` changes and send relevant ideas on the socket."""
-    discussion_id = int(request.matchdict['discussion_id'])
+    discussion = request.context
     idea_id = request.matchdict['id']
     idea_data = json.loads(request.body)
-    #Idea.default_db.execute('set transaction isolation level read committed')
+    # Idea.default_db.execute('set transaction isolation level read committed')
     # Special items in TOC, like unsorted posts.
     if idea_id in ['orphan_posts']:
         return {'ok': False, 'id': Idea.uri_generic(idea_id)}
@@ -164,19 +164,17 @@ def save_idea(request):
         raise HTTPNotFound("No such idea: %s" % (idea_id))
     if isinstance(idea, RootIdea):
         raise HTTPBadRequest("Cannot edit root idea.")
-    discussion = Discussion.get(int(discussion_id))
-    if not discussion:
-        raise HTTPNotFound("Discussion with id '%s' not found." % discussion_id)
     if(idea.discussion_id != discussion.id):
         raise HTTPBadRequest(
-            "Idea from discussion %s cannot saved from different discussion (%s)." % (idea.discussion_id,discussion.id ))
+            "Idea from discussion %s cannot saved from different discussion (%s)." % (
+                idea.discussion_id, discussion.id))
     if 'shortTitle' in idea_data:
         idea.short_title = idea_data['shortTitle']
     if 'longTitle' in idea_data:
         idea.long_title = idea_data['longTitle']
     if 'definition' in idea_data:
         idea.definition = idea_data['definition']
-    
+
     if 'parentId' in idea_data and idea_data['parentId'] is not None:
         # TODO: Make sure this is sent as a list!
         parent = Idea.get_instance(idea_data['parentId'])
@@ -213,9 +211,9 @@ def save_idea(request):
 
     idea.send_to_changes()
 
-    return {'ok': True, 'id': idea.uri() }
+    return {'ok': True, 'id': idea.uri()}
 
-# Delete
+
 @idea.delete(permission=P_EDIT_IDEA)
 def delete_idea(request):
     idea_id = request.matchdict['id']
@@ -241,12 +239,12 @@ def delete_idea(request):
 
 @idea_extracts.get(permission=P_READ)
 def get_idea_extracts(request):
+    discussion = request.context
     idea_id = request.matchdict['id']
     idea = Idea.get_instance(idea_id)
     view_def = request.GET.get('view') or 'default'
-    discussion_id = int(request.matchdict['discussion_id'])
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(user_id, discussion_id)
+    permissions = get_permissions(user_id, discussion.id)
 
     if not idea:
         raise HTTPNotFound("Idea with id '%s' not found." % idea_id)

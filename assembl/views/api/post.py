@@ -70,16 +70,12 @@ def get_posts(request):
     post_author: filter by author
     """
     localizer = request.localizer
-    discussion_id = int(request.matchdict['discussion_id'])
-    discussion = Discussion.get(int(discussion_id))
-    if not discussion:
-        raise HTTPNotFound(localizer.translate(
-            _("No discussion found with id=%s")) % discussion_id)
+    discussion = request.context
 
     discussion.import_from_sources()
 
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(user_id, discussion_id)
+    permissions = get_permissions(user_id, discussion.id)
 
     DEFAULT_PAGE_SIZE = 25
     page_size = DEFAULT_PAGE_SIZE
@@ -146,7 +142,7 @@ def get_posts(request):
         posts = discussion.db.query(PostClass)
 
     posts = posts.filter(
-        PostClass.discussion_id == discussion_id,
+        PostClass.discussion == discussion,
     )
     ##no_of_posts_to_discussion = posts.count()
 
@@ -222,12 +218,12 @@ def get_posts(request):
             raise HTTPBadRequest(localizer.translate(
                 _("Getting orphan posts of a specific idea isn't supported.")))
         orphans = Idea._get_orphan_posts_statement(
-            discussion_id, True, include_deleted=deleted).subquery("orphans")
+            discussion.id, True, include_deleted=deleted).subquery("orphans")
         posts = posts.join(orphans, PostClass.id == orphans.c.post_id)
 
     if root_idea_id:
         related = Idea.get_related_posts_query_c(
-            discussion_id, root_idea_id, True, include_deleted=deleted)
+            discussion.id, root_idea_id, True, include_deleted=deleted)
         posts = posts.join(related, PostClass.id == related.c.post_id)
     elif not only_orphan:
         if deleted is not None:
@@ -296,12 +292,12 @@ def get_posts(request):
             ViewPost).filter(
                 ViewPost.tombstone_condition(),
                 ViewPost.actor_id == user_id,
-                *ViewPost.get_discussion_conditions(discussion_id))}
+                *ViewPost.get_discussion_conditions(discussion.id))}
         liked_posts = {l.post_id: l.id for l in discussion.db.query(
             LikedPost).filter(
                 LikedPost.tombstone_condition(),
                 LikedPost.actor_id == user_id,
-                *LikedPost.get_discussion_conditions(discussion_id))}
+                *LikedPost.get_discussion_conditions(discussion.id))}
         if is_unread != None:
             posts = posts.outerjoin(
                 ViewPost, and_(
@@ -452,7 +448,7 @@ def get_posts(request):
     #no_of_messages_viewed_by_user = discussion.db.query(ViewPost).join(
     #    Post
     #).filter(
-    #    Post.discussion_id == discussion_id,
+    #    Post.discussion_id == discussion.id,
     #    ViewPost.actor_id == user_id,
     #).count() if user_id else 0
 
@@ -481,9 +477,9 @@ def get_post(request):
 
     if not post:
         raise HTTPNotFound("Post with id '%s' not found." % post_id)
-    discussion_id = int(request.matchdict['discussion_id'])
+    discussion = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(user_id, discussion_id)
+    permissions = get_permissions(user_id, discussion.id)
 
     return post.generic_json(view_def, user_id, permissions)
 
@@ -491,8 +487,7 @@ def get_post(request):
 @post_read.put(permission=P_READ)
 def mark_post_read(request):
     """Mark this post as un/read. Return the read post count for all affected ideas."""
-    discussion_id = int(request.matchdict['discussion_id'])
-    discussion = Discussion.get_instance(discussion_id)
+    discussion = request.context
     post_id = request.matchdict['id']
     post = Post.get_instance(post_id)
     if not post:
@@ -522,7 +517,7 @@ def mark_post_read(request):
 
     new_counts = []
     if change:
-        new_counts = Idea.idea_read_counts(discussion_id, post_id, user_id)
+        new_counts = Idea.idea_read_counts(discussion.id, post_id, user_id)
 
     return { "ok": True, "ideas": [
         {"@id": Idea.uri_generic(idea_id),
@@ -567,13 +562,7 @@ def create_post(request):
     else:
         in_reply_to_idea = None
 
-    discussion_id = int(request.matchdict['discussion_id'])
-    discussion = Discussion.get_instance(discussion_id)
-
-    if not discussion:
-        raise HTTPNotFound(localizer.translate(_(
-            "No discussion found with id=%s")) % (discussion_id,)
-        )
+    discussion = request.context
 
     ctx = DummyContext({Discussion: discussion})
     if html:
@@ -654,6 +643,6 @@ def create_post(request):
     for source in discussion.sources:
         if 'send_post' in dir(source):
             source.send_post(new_post)
-    permissions = get_permissions(user_id, discussion_id)
+    permissions = get_permissions(user_id, discussion.id)
 
     return new_post.generic_json('default', user_id, permissions)

@@ -52,10 +52,7 @@ def _get_agents_real(discussion, user_id=None, view_def='default'):
 
 @agents.get(permission=P_READ)
 def get_agents(request, discussion_only=False):
-    discussion_id = int(request.matchdict['discussion_id'])
-    discussion = Discussion.get(int(discussion_id))
-    if not discussion:
-        raise HTTPNotFound("Discussion with id '%s' not found." % discussion_id)
+    discussion = request.context
     view_def = request.GET.get('view')
     return _get_agents_real(
         discussion, authenticated_userid(request), view_def)
@@ -69,9 +66,9 @@ def get_agent(request):
 
     if not agent:
       raise HTTPNotFound("Agent with id '%s' not found." % agent_id)
-    discussion_id = int(request.matchdict['discussion_id'])
+    discussion = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(user_id, discussion_id)
+    permissions = get_permissions(user_id, discussion.id)
 
     agent_json = agent.generic_json(view_def, user_id, permissions)
     if user_id == agent.id:

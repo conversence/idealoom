@@ -21,12 +21,9 @@ synthesis = Service(name='ExplicitSubgraphs',
 
 @syntheses.get(permission=P_READ)
 def get_syntheses(request):
-    discussion_id = int(request.matchdict['discussion_id'])
-    discussion = Discussion.get(int(discussion_id))
-    if not discussion:
-        raise HTTPNotFound("Discussion with id '%s' not found." % discussion_id)
+    discussion = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(user_id, discussion_id)
+    permissions = get_permissions(user_id, discussion.id)
     syntheses = discussion.get_all_syntheses()
     view_def = request.GET.get('view') or 'default'
     res = [synthesis.generic_json(view_def, user_id, permissions)
@@ -37,9 +34,8 @@ def get_syntheses(request):
 @synthesis.get(permission=P_READ)
 def get_synthesis(request):
     synthesis_id = request.matchdict['id']
+    discussion = request.context
     if synthesis_id == 'next_synthesis':
-        discussion_id = int(request.matchdict['discussion_id'])
-        discussion = Discussion.get_instance(discussion_id)
         synthesis = discussion.get_next_synthesis()
     else:
         synthesis = Synthesis.get_instance(synthesis_id)
@@ -47,9 +43,8 @@ def get_synthesis(request):
         raise HTTPNotFound("Synthesis with id '%s' not found." % synthesis_id)
 
     view_def = request.GET.get('view') or 'default'
-    discussion_id = int(request.matchdict['discussion_id'])
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(user_id, discussion_id)
+    permissions = get_permissions(user_id, discussion.id)
 
     return synthesis.generic_json(view_def, user_id, permissions)
 
@@ -58,9 +53,8 @@ def get_synthesis(request):
 @synthesis.put(permission=P_EDIT_SYNTHESIS)
 def save_synthesis(request):
     synthesis_id = request.matchdict['id']
+    discussion = request.context
     if synthesis_id == 'next_synthesis':
-        discussion_id = int(request.matchdict['discussion_id'])
-        discussion = Discussion.get_instance(discussion_id)
         synthesis = discussion.get_next_synthesis()
     else:
         synthesis = Synthesis.get_instance(synthesis_id)

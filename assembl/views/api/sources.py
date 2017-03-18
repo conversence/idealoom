@@ -21,17 +21,16 @@ sources = Service(
 
 @sources.get(permission=P_READ)
 def get_sources(request):
-    discussion_id = int(request.matchdict['discussion_id'])
-    discussion = Discussion.get_instance(discussion_id)
+    discussion = request.context
     view_def = request.GET.get('view') or 'default'
 
     if not discussion:
         raise HTTPNotFound(
-            "Discussion with id '%s' not found." % discussion_id
+            "Discussion with id '%s' not found." % discussion.id
         )
 
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(user_id, discussion_id)
+    permissions = get_permissions(user_id, discussion.id)
 
     res = [source.generic_json(view_def, user_id, permissions)
            for source in discussion.sources]
