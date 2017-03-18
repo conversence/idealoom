@@ -10,6 +10,7 @@ var $ = require('jquery'),
     Promise = require('bluebird'),
     Assembl =  require('../app.js'),
     Permissions =  require('../utils/permissions.js'),
+    Types = require('../utils/types.js'),
     Roles =  require('../utils/roles.js'),
     i18n =  require('../utils/i18n.js'),
     Raven = require('raven-js'),
@@ -1811,7 +1812,7 @@ Context.prototype = {
         url_base = serverUrlComp1[0] + '://' + serverUrlComp2[0] + '/data/Discussion/' + Ctx.getDiscussionId();
     Promise.join(
         this.getPermissionTokenPromise([cif_perms, user_perms],
-              ["local:AgentProfile/" + this.getCurrentUserId()]),
+              ["local:"+Types.AGENT_PROFILE+"/" + this.getCurrentUserId()]),
             function(token_data) {
               var cif_token = token_data[cif_perms.join(",")],
                   user_token = token_data[user_perms.join(",")];

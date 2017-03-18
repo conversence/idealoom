@@ -279,6 +279,7 @@ var CollectionManager = Marionette.Object.extend({
         return this.getAllMessageStructureCollectionPromise();
 
       case Types.USER:
+      case Types.AGENT_PROFILE:
         return this.getAllUsersCollectionPromise();
 
       case Types.SYNTHESIS:
@@ -303,7 +304,7 @@ var CollectionManager = Marionette.Object.extend({
   initialize: function(options){
   },
   /** 
-   * Returns the collection of users
+   * Returns the collection of users and agents
    * An exception, the collection is instanciated from json sent in the HTML of the frontend, not through an ajax request.
    * @returns {BaseCollection}
    * @function app.common.collectionManager.CollectionManager.getAllUsersCollectionPromise

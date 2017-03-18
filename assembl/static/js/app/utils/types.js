@@ -26,6 +26,7 @@ var Types = {
   EMAIL: 'Email',
   SYNTHESIS: 'Synthesis',
   TABLE_OF_CONTENTS: 'TableOfIdeas',
+  AGENT_PROFILE: 'Agent',
   USER: 'User',
   PARTNER_ORGANIZATION: 'PartnerOrganization',
   TIMELINE_EVENT: 'TimelineEvent',
