@@ -152,5 +152,5 @@ widgetServices.factory('sendIdeaService', ['$resource', function($resource) {
  * WIP: use Angular's REST and Custom Services as our Model for Messages
  * */
 widgetServices.factory('DiscussionService', ['$resource', function($resource) {
-  return $resource('/data/Discussion/:discussionId');
+  return $resource('/data/Conversation/:discussionId');
 }]);

@@ -3,7 +3,7 @@
         "id": true,
         "_default": false
     },
-    "Discussion": {
+    "Conversation": {
         "createdAt": "creation_date",
         "name": "topic",
         "slug": true,

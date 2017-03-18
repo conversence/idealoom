@@ -1530,7 +1530,7 @@ var TokenVoteSessionModal = Backbone.Modal.extend({
     that.myVotesCollection = new Widget.TokenIdeaVoteCollection(myVotes);
 
     // This URL needs the idea id in the JSON payload
-    var genericVotingUrl = "voting_url" in that.tokenVoteSpecification ? that.tokenVoteSpecification.voting_url : null; // for example: http://localhost:6543/data/Discussion/6/widgets/90/vote_specifications/22/votes
+    var genericVotingUrl = "voting_url" in that.tokenVoteSpecification ? that.tokenVoteSpecification.voting_url : null; // for example: http://localhost:6543/data/Conversation/6/widgets/90/vote_specifications/22/votes
     that.myVotesCollection.url = Ctx.getUrlFromUri(genericVotingUrl); 
     console.log("that.myVotesCollection: ", that.myVotesCollection);
     

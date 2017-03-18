@@ -12,7 +12,7 @@ voteApp.controller('adminConfigureInstanceSetSettingsCtl',
     $scope.widget = null;
     $scope.discussion_uri = null; // "local:Discussion/1"
     //$scope.criteria_url = null; // "local:Discussion/1/widgets/66/criteria"
-    //$scope.criteria_endpoint = null; // "/data/Discussion/1/widgets/66/criteria"
+    //$scope.criteria_endpoint = null; // "/data/Conversation/1/widgets/66/criteria"
     $scope.criteria = null; // array of ideas (their full structure)
     $scope.vote_specifications = null; // array of vote specs (descriptions of items)
     $scope.ideas = null; // array of ideas
@@ -30,7 +30,7 @@ voteApp.controller('adminConfigureInstanceSetSettingsCtl',
     //$scope.optional_typed_criterion_fields = VoteWidgetService.optional_typed_criterion_fields;
 
     // build an object of array, which will be used by Angular to build a <select> DOM element where <option>s will be grouped into <optgroup> by criterion type
-    $scope.aggregated_optional_criterion_fields_by_type = {}; // will be like { "LickertIdeaVote": [ {"key": "description", "type": "all", ..}, {"key": "descriptionMin", "type": "LickertIdeaVote", ..}, .. ], .. }
+    $scope.aggregated_optional_criterion_fields_by_type = {}; // will be like { "LickertVote": [ {"key": "description", "type": "all", ..}, {"key": "descriptionMin", "type": "LickertVote", ..}, .. ], .. }
     for (var j = 0; j < VoteWidgetService.criterion_types.length; ++j) {
       var type_key = VoteWidgetService.criterion_types[j].key;
       $scope.aggregated_optional_criterion_fields_by_type[type_key] = [];
@@ -53,7 +53,7 @@ voteApp.controller('adminConfigureInstanceSetSettingsCtl',
     }
 
     // build an object of array
-    $scope.aggregated_mandatory_criterion_fields_by_type = {}; // will be like { "LickertIdeaVote": [ {"key": "description", "type": "all", ..}, {"key": "descriptionMin", "type": "LickertIdeaVote", ..}, .. ], .. }
+    $scope.aggregated_mandatory_criterion_fields_by_type = {}; // will be like { "LickertVote": [ {"key": "description", "type": "all", ..}, {"key": "descriptionMin", "type": "LickertVote", ..}, .. ], .. }
     for (var j = 0; j < VoteWidgetService.criterion_types.length; ++j) {
       var type_key = VoteWidgetService.criterion_types[j].key;
       $scope.aggregated_mandatory_criterion_fields_by_type[type_key] = [];
@@ -102,9 +102,9 @@ voteApp.controller('adminConfigureInstanceSetSettingsCtl',
     $scope.getOptionalFieldCategoryName = function(key) {
     if (key == 'all')
       return "General";
-    if (key == 'LickertIdeaVote')
+    if (key == 'LickertVote')
       return "Optional fields for type Lickert";
-    if (key == 'BinaryIdeaVote')
+    if (key == 'BinaryVote')
       return "Optional fields for type Binary";
     return "Unknown";
   };

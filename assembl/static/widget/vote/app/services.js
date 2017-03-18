@@ -282,7 +282,7 @@ voteServices.service('VoteWidgetService', ['$window', '$rootScope', '$log', '$ht
       "label": "Criterion type",
 
       // "description": "",
-      // "default": "LickertIdeaVote", // we will probably use the change event to display the right fields
+      // "default": "LickertVote", // we will probably use the change event to display the right fields
       "options": this.criterion_types
     }
   ];
@@ -657,7 +657,7 @@ voteServices.factory('configTestingService', [function() {
     }/*,
     testCall: function() {
       $.ajax({
-        url:'http://localhost:6543/data/Discussion/1/widgets',
+        url:'http://localhost:6543/data/Conversation/1/widgets',
         type:'POST',
         data: {
           "@type":'MultiCriterionVotingWidget',

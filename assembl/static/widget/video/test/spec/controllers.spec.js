@@ -51,10 +51,10 @@ describe('creativityApp', function() {
 
     it('Should return data', function() {
 
-      //$httpBackend.when('GET', '/data/Discussion/1/widgets/1/base_idea/-/children')
+      //$httpBackend.when('GET', '/data/Conversation/1/widgets/1/base_idea/-/children')
       //  .respond(200, [{}]);
 
-      //$httpBackend.expect('GET', '/data/Discussion/1/widgets/1/base_idea/-/children');
+      //$httpBackend.expect('GET', '/data/Conversation/1/widgets/1/base_idea/-/children');
       //$httpBackend.flush();
 
       /*scope.$apply(function(){

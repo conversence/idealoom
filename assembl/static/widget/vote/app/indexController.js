@@ -343,7 +343,7 @@ voteApp.controller('indexCtl',
       // determine vote type
 
       var widget = configService;
-      var vote_type = "LickertIdeaVote";
+      var vote_type = "LickertVote";
 
       if ("vote_specifications" in widget) {
         var vote_spec = _.findWhere(widget.vote_specifications, { "@id": criterion_id});
@@ -355,7 +355,7 @@ voteApp.controller('indexCtl',
       // validate vote value
 
       var value = null; // must be float, and contained in the range defined in the criterion
-      if (vote_type == "BinaryIdeaVote")
+      if (vote_type == "BinaryVote")
       {
         if (typeof vote_value == 'string')
           value = !!parseInt(vote_value);
@@ -374,7 +374,7 @@ voteApp.controller('indexCtl',
         else
           value = vote_value;
       }
-      else // if ( vote_type == "LickertIdeaVote" )
+      else // if ( vote_type == "LickertVote" )
       {
         if (typeof vote_value == 'string')
           value = parseFloat(vote_value);
@@ -1513,7 +1513,7 @@ voteApp.controller('indexCtl',
       div.css('-moz-box-sizing','border-box');
       div.css('-webkit-box-sizing','border-box');
 
-      // adapt data format from BinaryIdeaVote which has labelYes and labelNo, to PluralityIdeaVote which has possibleValues
+      // adapt data format from BinaryVote which has labelYes and labelNo, to PluralityIdeaVote which has possibleValues
       // criterion.possibleValues is like so: [ { label: 'Choice 1', value: 0 }, { label: 'Choice 2', value: 1} ]
       if ('@type' in criterion) {
         if (criterion["@type"] == 'BinaryVoteSpecification') {

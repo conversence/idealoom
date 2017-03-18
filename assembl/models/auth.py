@@ -88,6 +88,7 @@ class AgentProfile(Base):
     Agents have at least one :py:class:`AbstractAgentAccount`.
     """
     __tablename__ = "agent_profile"
+    __external_typename = "Agent"
 
     rdf_class = FOAF.Agent
     rdf_sections = (USER_SECTION,)
@@ -373,6 +374,7 @@ class AbstractAgentAccount(Base):
     The main subclasses are :py:class:`EmailAccount` and
     :py:class:`.social_auth.SocialAuthAccount`."""
     __tablename__ = "abstract_agent_account"
+    __external_typename = "UserAccount"
     rdf_class = SIOC.UserAccount
     rdf_sections = (PRIVATE_USER_SECTION,)
     prefer_newest_info_on_merge = True
@@ -540,6 +542,7 @@ class IdentityProvider(Base):
     This is a service that provides online identities, expressed as
     :py:class:`.social_auth.SocialAuthAccount`."""
     __tablename__ = "identity_provider"
+    __external_typename = "Usergroup"
     rdf_class = SIOC.Usergroup
     rdf_sections = (PRIVATE_USER_SECTION,)
 

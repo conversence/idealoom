@@ -7,7 +7,7 @@
         "@view": "@view",
         "_default": false
     },
-    "AgentProfile": {
+    "Agent": {
         "description": true,
         "avatar_url_base": "&external_avatar_url",
         "name": "&display_name",
@@ -15,7 +15,7 @@
         "preferred_email": false
     },
     "User": {
-        "@extends": "AgentProfile",
+        "@extends": "Agent",
         "creation_date": true,
         "last_login": true,
         "login_failures": false,

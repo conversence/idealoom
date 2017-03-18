@@ -2,7 +2,7 @@
  * Resolve configuration before access to a controller
  * */
 SessionApp.factory('UserService', ['$resource', function($resource) {
-  return $resource('/data/Discussion/:id/all_users/current', null, {
+  return $resource('/data/Conversation/:id/all_users/current', null, {
 
     'get': {
       method: 'GET', params: { id: '@id' },

@@ -19,7 +19,7 @@
         "preferred_email": false
     },
     "User": {
-        "@extends": "AgentProfile",
+        "@extends": "Agent",
         "creation_date": true,
         "last_login": true,
         "login_failures": false,
@@ -35,12 +35,12 @@
     "WebLinkAccount": false,
     "LoomioAccount": false,
     "SocialAuthAccount": false,
-    "IdentityProvider": {
+    "Usergroup": {
         "name": true,
         "provider_type": true,
         "trust_emails": true
     },
-    "ContentSource": {
+    "Container": {
         "discussion_id": "discussion",
         "name": true,
         "creation_date": true,
@@ -49,7 +49,7 @@
         "error_backoff_until": true
     },
     "PostSource": {
-        "@extends": "ContentSource",
+        "@extends": "Container",
         "last_import": true
     },
     "AbstractMailbox": {
@@ -84,7 +84,7 @@
         "@extends": "FacebookGenericSource"
     },
     "AnnotatorSource": {
-        "@extends": "ContentSource"
+        "@extends": "Container"
     },
     "Content": {
         "date": "creation_date",
@@ -159,7 +159,7 @@
         "@extends": "IMAPMailbox",
         "post_email_address": true
     },
-    "Discussion": {
+    "Conversation": {
         "creation_date": true,
         "slug": true,
         "topic": true
@@ -186,22 +186,22 @@
         "num_orphan_posts": true,
         "num_synthesis_posts": true
     },
-    "IdeaLink": {
+    "InclusionRelation": {
         "original_uri": true,
         "target": true,
         "source": true,
         "subtype": "rdf_type",
         "order": true
     },
-    "IdeaGraphView": {
+    "Map": {
         "creation_date": true,
         "discussion": false
     },
     "ExplicitSubGraphView": {
-        "@extends": "IdeaGraphView"
+        "@extends": "Map"
     },
     "TableOfContents": {
-        "@extends": "IdeaGraphView"
+        "@extends": "Map"
     },
     "Synthesis": {
         "@extends": "ExplicitSubGraphView",
@@ -213,7 +213,7 @@
         "ideas": [":partial"],
         "idea_links": [":partial"]
     },
-    "Extract": {
+    "Excerpt": {
         "idIdea": "idea",
         "idPost": "content",
         "target": true,
@@ -227,7 +227,7 @@
         "ranges": ["text_fragment_identifiers:partial"],
         "text": "annotation_text"
     },
-    "TextFragmentIdentifier": {
+    "FragmentSelector": {
         "end": "xpath_end_calc",
         "endOffset": "offset_end",
         "extract_id": false,

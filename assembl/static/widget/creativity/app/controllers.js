@@ -133,7 +133,7 @@ creativityApp.controller('adminConfigureInstanceSetAssociatedIdeasCtl',
     $scope.discussion_uri = null; // "local:Discussion/1"
     $scope.ideas = null; // list of all ideas of the discussion
     $scope.associated_ideas_url = null; // "local:Discussion/1/widgets/66/criteria"
-    $scope.associated_ideas_endpoint = null; // "/data/Discussion/1/widgets/66/criteria"
+    $scope.associated_ideas_endpoint = null; // "/data/Conversation/1/widgets/66/criteria"
     $scope.associated_ideas = null; // array of ideas (their full structure)
 
     $scope.init = function() {

@@ -4,70 +4,64 @@
         "@id": "self",
         "_default": false
     },
-    "AgentProfile": {
-        "@type": "'\"Agent\"",
+    "Agent": {
         "in_conversation": false
     },
     "User": {
         "@extends": "AgentProfile",
         "created": "creation_date"
     },
-    "Action": {
-        "@type": "'\"Update\"",
+    "Update": {
         "when": "creation_date",
         "who": "actor",
         "in_conversation": "&get_discussion"
     },
     "ActionOnPost": {
-        "@extends": "Action",
+        "@extends": "Update",
         "what": "post"
     },
     "LikedPost": {
         "@extends": "ActionOnPost"
     },
-    "ViewPost": {
+    "ReadStatusChange": {
         "@extends": "ActionOnPost",
-        "@type": "'\"ReadStatusChange\""
     },
     "ActionOnIdea": {
-        "@extends": "Action",
+        "@extends": "Update",
         "target": "idea",
         "target_type": "'\"Idea\""
     },
     "ViewIdea": {
         "@extends": "ActionOnIdea"
     },
-    "AbstractAgentAccount": {
-        "@type": "'\"UserAccount\"",
+    "UserAccount": {
         "account_of": "profile",
         "has_function": false
     },
     "EmailAccount": {
-        "@extends": "AbstractAgentAccount"
+        "@extends": "UserAccount"
     },
     "WebLinkAccount": {
-        "@extends": "AbstractAgentAccount"
+        "@extends": "UserAccount"
     },
     "LoomioAccount": {
         "@extends": "WebLinkAccount"
     },
     "SourceSpecificAccount": {
-        "@extends": "AbstractAgentAccount"
+        "@extends": "UserAccount"
     },
     "SocialAuthAccount": {
-        "@extends": "AbstractAgentAccount"
+        "@extends": "UserAccount"
     },
-    "IdentityProvider": {
-        "@type": "'\"Usergroup\"",
+    "Usergroup": {
         "name": true
     },
-    "ContentSource": {
-        "@type": "'\"Container\"",
+    "Container": {
         "created": "creation_date",
         "in_conversation": "discussion"
     },
     "PostSource": {
-        "@extends": "ContentSource",
+        "@extends": "Container",
         "@type": "'[\"Container\",\"PostSource\"]"
     },
     "FeedPostSource": {
@@ -95,7 +89,7 @@
         "@extends": "FacebookGenericSource"
     },
     "AnnotatorSource": {
-        "@extends": "ContentSource"
+        "@extends": "Container"
     },
     "EdgeSenseDrupalSource": {
         "@extends": "PostSource"
@@ -164,8 +158,7 @@
         "full_message": false,
         "in_reply_to": false
     },
-    "Discussion": {
-        "@type": "'\"Conversation\"",
+    "Conversation": {
         "created": "creation_date",
         "title": "topic",
         "uses_source": ["sources"]
@@ -182,27 +175,24 @@
         "includes": "children_uris"
     },
     "RootIdea": {
-        "@extends": "Idea",
-        "@type": "'\"RootIdea\""
+        "@extends": "Idea"
     },
-    "IdeaLink": {
-        "@type": "'\"InclusionRelation\"",
+    "InclusionRelation": {
         "in_conversation": "&get_discussion",
         "link_order": "order",
         "target_idea": "target",
         "source_idea": "source"
     },
-    "IdeaGraphView": {
-        "@type": "'\"Map\"",
+    "Map": {
         "in_conversation": "discussion",
         "created": "creation_date",
         "has_container": "discussion"
     },
     "ExplicitSubGraphView": {
-        "@extends": "IdeaGraphView"
+        "@extends": "Map"
     },
     "TableOfContents": {
-        "@extends": "IdeaGraphView"
+        "@extends": "Map"
     },
     "Synthesis": {
         "@extends": "ExplicitSubGraphView"
@@ -225,15 +215,13 @@
     "IdeaThreadContextBreakLink": {
         "@extends": "IdeaContentNegativeLink"
     },
-    "Extract": {
-        "@type": "'\"Excerpt\"",
+    "Excerpt": {
         "@extends": "IdeaContentPositiveLink",
         "hasBody": "&local_uri_as_graph",
         "hasTarget": "&local_uri_as_resource",
         "relevantToConversation": "discussion"
     },
-    "TextFragmentIdentifier": {
-        "@type": "'\"FragmentSelector\"",
+    "FragmentSelector": {
         "conformsTo": "'\"http://tools.ietf.org/rfc/rfc3023\"",
         "value": "&as_xpointer"
     },
@@ -242,17 +230,15 @@
         "voter": true,
         "voting_criterion": "criterion"
     },
-    "BinaryIdeaVote": {
-        "@extends": "AbstractIdeaVote",
-        "@type": "'\"BinaryVote\""
+    "BinaryVote": {
+        "@extends": "AbstractIdeaVote"
     },
     "MultipleChoiceIdeaVote": {
         "@type": "'\"Vote\"",
         "@extends": "AbstractIdeaVote"
     },
-    "LickertIdeaVote": {
+    "LickertVote": {
         "@extends": "AbstractIdeaVote",
-        "@type": "'\"LickertVote\"",
         "lickert_in_range": "vote_spec"
     },
     "TokenIdeaVote": {

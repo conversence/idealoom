@@ -193,7 +193,7 @@ appCards.controller('cardsCtl',
             throw "no endpoint";
           }
 
-          // an example value for url is "/data/Discussion/1/widgets/56/base_idea_descendants/4/linkedposts";
+          // an example value for url is "/data/Conversation/1/widgets/56/base_idea_descendants/4/linkedposts";
           // FIXME: error when http://localhost:6543/widget/video/?config=/data/Widget/40#/?idea=local:Idea%2F4%3Fview%3Dcreativity_widget => $scope.config.idea.widget_add_post_endpoint is an empty object
 
           //var url = utils.urlApi($scope.config.widget.ideas_url);

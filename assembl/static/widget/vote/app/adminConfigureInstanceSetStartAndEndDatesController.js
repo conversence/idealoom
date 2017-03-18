@@ -14,7 +14,7 @@ voteApp.controller('adminConfigureInstanceSetStartAndEndDatesCtl',
     $scope.discussion_uri = null; // "local:Discussion/1"
     $scope.ideas = null; // list of all ideas of the discussion
     $scope.votable_ideas_url = null; // "local:Discussion/4/widgets/5/targets/"
-    $scope.votable_ideas_endpoint = null; // "/data/Discussion/4/widgets/5/targets/"
+    $scope.votable_ideas_endpoint = null; // "/data/Conversation/4/widgets/5/targets/"
     $scope.votable_ideas = null; // array of ideas (their full structure)
 
     $scope.init = function() {

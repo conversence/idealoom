@@ -63,7 +63,7 @@ creativityServices.factory('configTestingService', [function() {
     },
     testCall: function() {
       $http({
-        url: 'http://localhost:6543/data/Discussion/1/widgets',
+        url: 'http://localhost:6543/data/Conversation/1/widgets',
         method: 'POST',
         data: {
           "@type": 'MultiCriterionVotingWidget',
@@ -103,7 +103,7 @@ creativityServices.factory('sendIdeaService', ['$resource', function($resource) 
 
 // WIP: use Angular's REST and Custom Services as our Model for Messages
 creativityServices.factory('Discussion', ['$resource', function($resource) {
-  return $resource('http://localhost:6543/data/Discussion/:discussionId', {}, {
+  return $resource('http://localhost:6543/data/Conversation/:discussionId', {}, {
     query: {method: 'GET', params: {discussionId: '1'}, isArray: false}
   });
 }]);

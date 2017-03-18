@@ -10,7 +10,7 @@ The link looks like
 http://localhost:6543/static/widget/vote/?admin=1#/admin/create_from_idea?idea=local%3AIdea%2F120%3Fview%3Dcreativity_widget
 and opens in a pop-in.
 A confirmation page appears, click on "Yes, create it". This sends a application/x-www-form-urlencoded POST request to
-http://localhost:6543/data/Discussion/4/widgets
+http://localhost:6543/data/Conversation/4/widgets
 with 2 parameters:
 * settings	
 {"votable_root_id":"local:Idea/120"}
@@ -55,11 +55,11 @@ On return, each of these will have a "voting_urls" field which looks like
 
 
 The page then makes a GET request to AssemblToolsService.resourceToUrl($scope.discussion_uri) + '/ideas?view=default', which looks like
-http://localhost:6543/data/Discussion/4/ideas?view=default
+http://localhost:6543/data/Conversation/4/ideas?view=default
 The response is a JSON array of ideas, which is used to show the user selectable vote criteria (a criterion has to be an idea). Those which are already present in the previously mentioned "criteria" array will appear already selected.
 
 Select ideas which will be used as criteria, and click "Submit". This sends a application/json PUT to
-http://localhost:6543/data/Discussion/4/widgets/4/criteria
+http://localhost:6543/data/Conversation/4/widgets/4/criteria
 with a JSON parameter which is an array of Idea objects (which have an "@id" attribute).
 
 
@@ -84,11 +84,11 @@ http://localhost:6543/static/widget/vote/?admin=1#/admin/configure_instance_set_
 This page also makes a GET request to the value of the widget_uri parameter, in order to use widget's data. It uses these response fields: "discussion" (to compute the URL which lists the ideas), "votables_url" (to know where to PUT data), and "votable_ideas" (to know which ideas are already set as votables and show them selected).
 
 The page then makes a GET request to AssemblToolsService.resourceToUrl($scope.discussion_uri) + '/ideas?view=default', which looks like
-http://localhost:6543/data/Discussion/4/ideas?view=default
+http://localhost:6543/data/Conversation/4/ideas?view=default
 The response is a JSON array of ideas, which is used to show the user selectable vote targets (votable ideas). Those which are already present in the previously mentioned "votable_ideas" array will appear already selected.
 
 Select ideas which will be votable (a "Vote on this idea" link will be shown in the Idea panel when these ideas are open), and click "Submit". This sends a application/json PUT to
-http://localhost:6543/data/Discussion/4/widgets/4/targets/
+http://localhost:6543/data/Conversation/4/widgets/4/targets/
 with a JSON parameter which is an array of Idea objects (which have an "@id" attribute).
 
 
@@ -98,10 +98,10 @@ The URL of this page looks like
 http://localhost:6543/static/widget/vote/?config=http://localhost:6543/data/Widget/4&target=local:Idea/120#/results
 Click on "Number of voters"
 The link is
-http://localhost:6543/data/Discussion/4/widgets/4/targets/120/vote_counts
+http://localhost:6543/data/Conversation/4/widgets/4/targets/120/vote_counts
 Click on "Average grade for each criterion"
 The link is
-http://localhost:6543/data/Discussion/4/widgets/4/targets/120/vote_results
+http://localhost:6543/data/Conversation/4/widgets/4/targets/120/vote_results
 
 
 ### Delete this widget instance
@@ -133,21 +133,21 @@ The content of the "settings" field is the JSON of configuration of the appearan
 The content of the "user" field is optionnaly used by the page to display as which registered account the user is voting.
 
 The page then makes a GET request to the URL given in this "user_votes_url" field, which is like
-http://localhost:6543/data/Discussion/4/widgets/5/targets/120/votes
+http://localhost:6543/data/Conversation/4/widgets/5/targets/120/votes
 in order to know if and what the logged in user has already voted (on this widget instance, for this votable idea in this discussion).
 
 Interact with the page to cast the vote, and then click "Submit your vote". This sends a application/x-www-form-urlencoded POST request to
-http://localhost:6543/data/Discussion/4/widgets/5/criteria/120/vote_targets/120/votes
+http://localhost:6543/data/Conversation/4/widgets/5/criteria/120/vote_targets/120/votes
 with as parameters:
 type	
-LickertIdeaVote
+LickertVote
 value	
 0.4722222222222222
 Such a POST request is sent for each criterion displayed on the page, so the POST URL and parameters differ (for example .../criteria/121/... instead of 120).
 
 The response of this POST request is a JSON like
 {"widget": "local:Widget/5", "voter": "local:AgentProfile/92", "idea": "local:Idea/120", "value": 0.4722222222222222
-, "criterion": "local:Idea/120", "@id": "local:IdeaVote/70", "@type": "LickertIdeaVote", "@view": "default"
+, "criterion": "local:Idea/120", "@id": "local:IdeaVote/70", "@type": "LickertVote", "@view": "default"
 }
 But if the response header status not a 201 code but rather an error code, the page shows a red error instead of a green confirmation.
 

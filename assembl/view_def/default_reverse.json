@@ -7,7 +7,7 @@
         "@view": false,
         "_default": false
     },
-    "AgentProfile": {
+    "Agent": {
         "avatar_url_base": false,
         "name": false,
         "real_name": "name",
@@ -40,43 +40,43 @@
         "translate_to_name": "translate"
     },
     "User": {
-        "@extends": "AgentProfile",
+        "@extends": "Agent",
         "login_failures": false,
         "password": "password_p",
         "permissions": false,
         "username": true,
         "real_name": "real_name_p"
     },
-    "AbstractAgentAccount": {
+    "UserAccount": {
         "preferred": true,
         "email": true,
         "verified": false,
         "profile": false
     },
     "EmailAccount": {
-        "@extends": "AbstractAgentAccount",
+        "@extends": "UserAccount",
         "will_merge_if_validated": false
     },
     "SourceSpecificAccount": {
-        "@extends": "AbstractAgentAccount",
+        "@extends": "UserAccount",
         "user_link": true,
         "user_id": true,
         "source_id": true
     },
     "SocialAuthAccount": {
-        "@extends": "AbstractAgentAccount",
+        "@extends": "UserAccount",
         "provider": false,
         "username": false,
         "uid": false,
         "picture_url": false
     },
-    "ContentSource": {
+    "Container": {
         "discussion_id": "discussion",
         "name": true,
         "creation_date": false
     },
     "PostSource": {
-        "@extends": "ContentSource",
+        "@extends": "Container",
         "number_of_imported_posts": false,
         "last_import": false
     },
@@ -120,7 +120,7 @@
         "@extends": "FacebookGenericSource"
     },
     "AnnotatorSource": {
-        "@extends": "ContentSource"
+        "@extends": "Container"
     },
     "AbstractMailbox": {
         "@extends": "PostSource",
@@ -190,29 +190,29 @@
         "@extends": "WidgetPost",
         "proposes_idea": false
     },
-    "Action": {
+    "Update": {
         "user": "actor",
         "when": "creation_date",
         "target_type": false
     },
     "ActionOnPost": {
-        "@extends": "Action",
+        "@extends": "Update",
         "target": "post"
     },
     "LikedPost": {
         "@extends": "ActionOnPost"
     },
-    "ViewPost": {
+    "ReadStatusChange": {
         "@extends": "ActionOnPost"
     },
     "ActionOnIdea": {
-        "@extends": "Action",
+        "@extends": "Update",
         "target": "idea"
     },
     "ViewIdea": {
         "@extends": "ActionOnIdea"
     },
-    "Discussion": {
+    "Conversation": {
         "permissions": false,
         "widget_collection_url": false,
         "creation_date": false,
@@ -256,7 +256,7 @@
         "root": "'true",
         "parentId": false
     },
-    "IdeaLink": {
+    "InclusionRelation": {
         "original_uri": false,
         "target": true,
         "source": true,
@@ -264,14 +264,14 @@
         "subtype": "rdf_type",
         "order": true
     },
-    "IdeaGraphView": {
+    "Map": {
         "discussion": false
     },
     "ExplicitSubGraphView": {
-        "@extends": "IdeaGraphView"
+        "@extends": "Map"
     },
     "TableOfContents": {
-        "@extends": "IdeaGraphView"
+        "@extends": "Map"
     },
     "Synthesis": {
         "@extends": "ExplicitSubGraphView"
@@ -294,14 +294,14 @@
     "IdeaThreadContextBreakLink": {
         "@extends": "IdeaContentNegativeLink"
     },
-    "Extract": {
+    "Excerpt": {
         "@extends": "IdeaContentPositiveLink",
         "quote": "body",
         "discussion": false,
         "ranges": ["text_fragment_identifiers"],
         "text": "annotation_text"
     },
-    "TextFragmentIdentifier": {
+    "FragmentSelector": {
         "end": "xpath_end",
         "endOffset": "offset_end",
         "extract_id": false,
@@ -370,14 +370,14 @@
         "idea": true,
         "value": true
     },
-    "LickertIdeaVote": {
+    "LickertVote": {
         "@extends": "AbstractIdeaVote"
     },
     "TokenIdeaVote": {
         "@extends": "AbstractIdeaVote",
         "token_category": true
     },
-    "BinaryIdeaVote": {
+    "BinaryVote": {
         "@extends": "AbstractIdeaVote"
     },
     "MultipleChoiceIdeaVote": {

@@ -25,7 +25,7 @@
     "IdeaThreadContextBreakLink": {
         "@extends": "IdeaContentNegativeLink"
     },
-    "Extract": {
+    "Excerpt": {
         "@extends": "IdeaContentPositiveLink"
     }
 }

@@ -13,7 +13,7 @@ How to use the creativity widget
 
 1) Create an instance of the creativity widget, and give it a configuration (the linked idea, etc)
 
-You have to POST to http://localhost:6543/data/Discussion/1/widgets using the following variables:
+You have to POST to http://localhost:6543/data/Conversation/1/widgets using the following variables:
 - variable name: "type", variable value: "CreativityWidget"
 - variable name: "settings", variable example value:
 {

@@ -46,6 +46,7 @@ class ContentSource(DiscussionBoundBase, OriginMixin):
     A ContentSource is where any outside content comes from. .
     """
     __tablename__ = "content_source"
+    __external_typename = "Container"
     rdf_class = SIOC.Container
 
     id = Column(Integer, primary_key=True,
@@ -257,6 +258,7 @@ class Content(TombstonableOriginMixin, DiscussionBoundBase):
     optimize the most common case.
     """
     __tablename__ = "content"
+    # __external_typename = "SPost"
     # __table_cls__ = TableWithTextIndex
 
     rdf_class = SIOC.Post

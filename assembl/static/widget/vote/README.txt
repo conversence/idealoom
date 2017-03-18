@@ -14,7 +14,7 @@ How to use the vote widget
 
 1) Create an instance of the vote widget, and give it a configuration (the criteria the user will vote on, etc)
 
-You have to POST to http://localhost:6543/data/Discussion/1/widgets using the following variables:
+You have to POST to http://localhost:6543/data/Conversation/1/widgets using the following variables:
 - variable name: "type", variable value: "MultiCriterionVotingWidget"
 - variable name: "settings", variable example value:
 {
@@ -115,7 +115,7 @@ Tools to make REST calls
 To POST the information above, you can use one of these tools:
 * curl
     For example you can type the following command:
-    curl -D test -d type=CreativityWidget -d settings='{...}' http://localhost:6544/data/Discussion/1/widgets
+    curl -D test -d type=CreativityWidget -d settings='{...}' http://localhost:6544/data/Conversation/1/widgets
     And then you can read the content of the "test" file (thanks to the -D option), and read the value of "location"
 * a browser plugin, such as "REST Easy" (https://addons.mozilla.org/en-US/firefox/addon/rest-easy/)
 

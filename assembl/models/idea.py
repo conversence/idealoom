@@ -147,6 +147,7 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
     An idea (or concept) distilled from the conversation flux.
     """
     __tablename__ = "idea"
+    # __external_typename = "GenericIdeaNode"
     ORPHAN_POSTS_IDEA_ID = 'orphan_posts'
     sqla_type = Column(String(60), nullable=False)
     rdf_type = Column(
@@ -1064,6 +1065,7 @@ class IdeaLink(HistoryMixinWithOrigin, DiscussionBoundBase):
     Note: it's reversed in the RDF model.
     """
     __tablename__ = 'idea_idea_link'
+    __external_typename = "InclusionRelation"
     rdf_class = IDEA.InclusionRelation
     rdf_type = Column(
         String(60), nullable=False, server_default='idea:InclusionRelation')

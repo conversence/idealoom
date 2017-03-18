@@ -22,13 +22,13 @@
         "error_code": true,
         "value": true
     },
-    "AgentProfile": {
+    "Agent": {
         "description": false,
         "preferred_email": false,
         "name": "&display_name"
     },
     "User": {
-        "@extends": "AgentProfile",
+        "@extends": "Agent",
         "creation_date": true,
         "last_login": true,
         "login_failures": false,
@@ -41,22 +41,22 @@
     },
     "EmailAccount": false,
     "SocialAuthAccount": false,
-    "IdentityProvider": {
+    "Usergroup": {
         "name": true,
         "provider_type": true,
         "trust_emails": true
         },
-    "ContentSource": {
+    "Container": {
         "discussion_id": "discussion",
         "name": true,
         "creation_date": true
     },
     "PostSource": {
-        "@extends": "ContentSource",
+        "@extends": "Container",
         "last_import": true
     },
     "AnnotatorSource": {
-        "@extends": "ContentSource"
+        "@extends": "Container"
     },
     "AbstractMailbox": {
         "@extends": "PostSource",
@@ -120,7 +120,7 @@
         "full_message": false,
         "in_reply_to": false
     },
-    "Discussion": {
+    "Conversation": {
         "creation_date": true,
         "slug": true,
         "topic": true
@@ -144,22 +144,22 @@
         "parentId": false,
         "root": "'true"
     },
-    "IdeaLink": {
+    "InclusionRelation": {
         "source": true,
         "target": true,
         "is_tombstone": true,
         "original_uri": true,
         "order": true
     },
-    "IdeaGraphView": {
+    "Map": {
         "creation_date": true,
         "discussion": false
     },
     "ExplicitSubGraphView": {
-        "@extends": "IdeaGraphView"
+        "@extends": "Map"
     },
     "TableOfContents": {
-        "@extends": "IdeaGraphView"
+        "@extends": "Map"
     },
     "Synthesis": {
         "@extends": "ExplicitSubGraphView",
@@ -185,7 +185,7 @@
     "IdeaThreadContextBreakLink": {
         "@extends": "IdeaContentNegativeLink"
     },
-    "Extract": {
+    "Excerpt": {
         "@extends": "IdeaContentPositiveLink",
         "important": true,
         "owner": true,
@@ -195,7 +195,7 @@
         "ranges": ["text_fragment_identifiers:"],
         "annotation_text": false
     },
-    "TextFragmentIdentifier": {
+    "FragmentSelector": {
         "end": "xpath_end_calc",
         "endOffset": "offset_end",
         "extract_id": false,
@@ -207,21 +207,21 @@
         "permission": "&permission_name",
         "role": "&role_name"
     },
-    "Action": {
+    "Update": {
         "user": "actor"
     },
     "ActionOnPost": {
-        "@extends": "Action",
+        "@extends": "Update",
         "target": "post"
     },
     "LikedPost": {
         "@extends": "ActionOnPost"
     },
-    "ViewPost": {
+    "ReadStatusChange": {
         "@extends": "ActionOnPost"
     },
     "ActionOnIdea": {
-        "@extends": "Action",
+        "@extends": "Update",
         "target": "idea"
     },
     "ViewIdea": {
@@ -256,10 +256,10 @@
         "value": true,
         "voter": true
     },
-    "BinaryIdeaVote": {
+    "BinaryVote": {
         "@extends": "AbstractIdeaVote"
     },
-    "LickertIdeaVote": {
+    "LickertVote": {
         "@extends": "AbstractIdeaVote"
     },
     "MultipleChoiceIdeaVote": {

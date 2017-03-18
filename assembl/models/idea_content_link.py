@@ -210,6 +210,7 @@ class Extract(IdeaContentPositiveLink):
     An extracted part of a Content. A quotation to be referenced by an `Idea`.
     """
     __tablename__ = 'extract'
+    __external_typename = "Excerpt"
     rdf_class = CATALYST.Excerpt
     # Extract ID represents both the oa:Annotation and the oa:SpecificResource
     # TODO: This iri is not yet dereferencable.
@@ -458,6 +459,7 @@ class IdeaThreadContextBreakLink(IdeaContentNegativeLink):
 
 class TextFragmentIdentifier(DiscussionBoundBase):
     __tablename__ = 'text_fragment_identifier'
+    __external_typename = "FragmentSelector"
     rdf_class = OA.FragmentSelector
 
     id = Column(Integer, primary_key=True,

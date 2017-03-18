@@ -62,6 +62,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
     :py:class:`assembl.models.DiscussionBoundBase`.
     """
     __tablename__ = "discussion"
+    __external_typename = "Conversation"
     rdf_class = CATALYST.Conversation
 
     id = Column(Integer, primary_key=True,

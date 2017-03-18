@@ -6,7 +6,7 @@
         <h2>1. Create a Widget instance (without settings)</h2>
         <form id="widget_create_without_settings" method="POST">
             <label for="widget_create_without_settings_api_endpoint">endpoint</label>
-            <input type="text" id="widget_create_without_settings_api_endpoint" value="/data/Discussion/1/widgets" size="50" />
+            <input type="text" id="widget_create_without_settings_api_endpoint" value="/data/Conversation/1/widgets" size="50" />
             <br/>
             <label for="widget_create_without_settings_type">type</label>
             <input type="text" id="widget_create_without_settings_type" value="MultiCriterionVotingWidget" size="50" />
@@ -38,7 +38,7 @@
     <h2>Create a Widget instance (with settings)</h2>
     <form id="widget_create" method="POST">
         <label for="widget_create_api_endpoint">endpoint</label>
-        <input type="text" id="widget_create_api_endpoint" value="/data/Discussion/1/widgets" size="50" />
+        <input type="text" id="widget_create_api_endpoint" value="/data/Conversation/1/widgets" size="50" />
         <br/>
         JSON content:
         <br/>
@@ -144,7 +144,7 @@
     <h2>Set widget's criteria</h2>
     <form id="criteria_set" method="POST">
         <label for="criteria_set_endpoint">criteria endpoint</label>
-        <input type="text" id="criteria_set_endpoint" value="/data/Discussion/1/widgets/13/criteria" size="50" />
+        <input type="text" id="criteria_set_endpoint" value="/data/Conversation/1/widgets/13/criteria" size="50" />
         <br/>
         <label for="criteria_set_criteria">criteria</label>
         <textarea id="criteria_set_criteria">[{"@id":"local:Idea/70"}]</textarea>
@@ -157,7 +157,7 @@
     <h2>Add a criterion</h2>
     <form id="criterion_add" method="POST">
         <label for="criterion_add_api_endpoint">criteria endpoint</label>
-        <input type="text" id="criterion_add_api_endpoint" value="/data/Discussion/1/widgets/13/criteria" size="50" />
+        <input type="text" id="criterion_add_api_endpoint" value="/data/Conversation/1/widgets/13/criteria" size="50" />
         <br/>
         <label for="criterion_add_id">criterion id</label>
         <input type="text" id="criterion_add_id" value="local:Idea/3" size="50" />
@@ -169,7 +169,7 @@
     <h2>Remove a criterion (TODO backend side)</h2>
     <form id="criterion_remove" method="POST">
         <label for="criterion_remove_api_endpoint">criteria endpoint</label>
-        <input type="text" id="criterion_remove_api_endpoint" value="/data/Discussion/1/widgets/13/criteria" size="50" />
+        <input type="text" id="criterion_remove_api_endpoint" value="/data/Conversation/1/widgets/13/criteria" size="50" />
         <br/>
         <label for="criterion_remove_id">criterion id</label>
         <input type="text" id="criterion_remove_id" value="local:Idea/3" size="50" />
@@ -181,7 +181,7 @@
     <h2>Delete a widget instance</h2>
     <form id="widget_delete" method="POST">
         <label for="widget_delete_widget_endpoint">widget endpoint</label>
-        <input type="text" id="widget_delete_widget_endpoint" value="/data/Discussion/1/widgets/13" size="50" />
+        <input type="text" id="widget_delete_widget_endpoint" value="/data/Conversation/1/widgets/13" size="50" />
         <br/>
         <input type="submit" />
         <span id="widget_delete_result"></span>

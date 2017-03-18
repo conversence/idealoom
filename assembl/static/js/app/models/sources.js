@@ -31,7 +31,7 @@ var Source = Base.Model.extend({
       If urlRoot of an object is a ClassInstance, then the front-end model
       MUST pass the discussion_id explicitly. However, since the urlRoot
       is an InstanceContext or CollectionContext after Discussion 
-      (eg. /data/Discussion/1/sources/ instead of /data/ContentSource),
+      (eg. /data/Conversation/1/sources/ instead of /data/Container),
       the api v2 can infer the discussion_id through the context of the
       traversal. POSTing with discussion_id: null yields a 400 Error from
       backend.

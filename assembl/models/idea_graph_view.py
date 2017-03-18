@@ -42,6 +42,7 @@ class IdeaGraphView(DiscussionBoundBase, OriginMixin):
     A view on the graph of idea.
     """
     __tablename__ = "idea_graph_view"
+    __external_typename = "Map"
     rdf_class = CATALYST.Map
 
     type = Column(String(60), nullable=False)

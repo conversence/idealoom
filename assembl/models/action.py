@@ -43,6 +43,7 @@ class Action(TombstonableMixin, OriginMixin, DiscussionBoundBase):
     with verbs including but not restricted to CRUD operations.
     """
     __tablename__ = 'action'
+    __external_typename = "Update"
 
     id = Column(Integer, primary_key=True)
     type = Column(String(255), nullable=False)
@@ -193,6 +194,7 @@ class ViewPost(UniqueActionOnPost):
     __mapper_args__ = {
         'polymorphic_identity': 'version:ReadStatusChange_P'
     }
+    __external_typename = "ReadStatusChange"
 
     def tombstone(self):
         from .generic import Content

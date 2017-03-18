@@ -4,38 +4,38 @@
         "@id": "self",
         "_default": false
     },
-    "Extract": {
+    "Excerpt": {
         "@id": "&local_uri_as_resource",
         "@type": "'\"SpecificResource\"",
         "hasSource": "content",
         "hasSelector": "text_fragment_identifiers",
         "resourceExpressesIdea": "idea"
     },
-    "AgentProfile": {
+    "Agent": {
         "fname": "name"
     },
     "User": {
         "@extends": "AgentProfile"
     },
-    "AbstractAgentAccount": {
+    "UserAccount": {
         "@type": "'\"UserAccount\"",
         "account_of": "profile",
         "has_function": false
     },
     "EmailAccount": {
-        "@extends": "AbstractAgentAccount"
+        "@extends": "UserAccount"
     },
     "WebLinkAccount": {
-        "@extends": "AbstractAgentAccount"
+        "@extends": "UserAccount"
     },
     "LoomioAccount": {
         "@extends": "WebLinkAccount"
     },
     "SourceSpecificAccount": {
-        "@extends": "AbstractAgentAccount"
+        "@extends": "UserAccount"
     },
     "SocialAuthAccount": {
-        "@extends": "AbstractAgentAccount",
+        "@extends": "UserAccount",
         "foaf:img": "picture_url",
         "member_of": "identity_provider"
     }

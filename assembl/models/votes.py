@@ -863,6 +863,7 @@ class AbstractIdeaVote(HistoryMixinWithOrigin, DiscussionBoundBase):
 
 class LickertIdeaVote(AbstractIdeaVote):
     __tablename__ = "lickert_idea_vote"
+    __external_typename = "LickertVote"
     __table_args__ = ()
     rdf_class = VOTE.LickertVote
     __mapper_args__ = {
@@ -928,6 +929,7 @@ class MultipleChoiceIdeaVote(AbstractIdeaVote):
 class BinaryIdeaVote(AbstractIdeaVote):
     rdf_class = VOTE.BinaryVote
     __tablename__ = "binary_idea_vote"
+    __external_typename = "BinaryVote"
     __table_args__ = ()
     __mapper_args__ = {
         'polymorphic_identity': 'binary_idea_vote',

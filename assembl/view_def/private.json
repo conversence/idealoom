@@ -22,7 +22,7 @@
         "error_code": true,
         "value": true
     },
-    "AgentProfile": {
+    "Agent": {
         "description": true,
         "@private": "self",
         "avatar_url_base": "&external_avatar_url",
@@ -32,23 +32,23 @@
         "is_first_visit": false,
         "accounts": [":default"]
     },
-    "Action": {
+    "Update": {
         "@private": "actor",
         "user": "actor"
     },
     "ActionOnPost": {
-        "@extends": "Action",
+        "@extends": "Update",
         "target": "post",
         "target_type": "'\"Content\""
     },
     "LikedPost": {
         "@extends": "ActionOnPost"
     },
-    "ViewPost": {
+    "ReadStatusChange": {
         "@extends": "ActionOnPost"
     },
     "User": {
-        "@extends": "AgentProfile",
+        "@extends": "Agent",
         "creation_date": true,
         "last_login": true,
         "login_failures": false,
@@ -62,7 +62,7 @@
         "discussion": true,
         "for_role": ":"
     },
-    "AbstractAgentAccount": {
+    "UserAccount": {
         "@private": "profile",
         "preferred": true,
         "email": true,
@@ -70,29 +70,29 @@
         "profile": true
     },
     "EmailAccount": {
-        "@extends": "AbstractAgentAccount",
+        "@extends": "UserAccount",
         "will_merge_if_validated": "'false"
     },
     "WebLinkAccount": {
-        "@extends": "AbstractAgentAccount",
+        "@extends": "UserAccount",
         "user_link": true
     },
     "LoomioAccount": {
         "@extends": "WebLinkAccount"
     },
     "SourceSpecificAccount": {
-        "@extends": "AbstractAgentAccount",
+        "@extends": "UserAccount",
         "user_link": true,
         "user_id": true,
         "source_id": true
     },
     "SocialAuthAccount": {
-        "@extends": "AbstractAgentAccount",
+        "@extends": "UserAccount",
         "provider": "&get_provider_type",
         "username": true,
         "picture_url": true
     },
-    "IdentityProvider": {
+    "Usergroup": {
         "name": true,
         "provider_type": true,
         "trust_emails": true
