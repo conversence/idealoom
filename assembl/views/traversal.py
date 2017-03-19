@@ -145,7 +145,9 @@ class Api2Context(TraversalContext):
         return self._class_cache[cls]
 
     def all_class_names(self):
-        return [k for k in Base._decl_class_registry.iterkeys() if k[0] != '_']
+        return [k.external_typename()
+            for k in Base._decl_class_registry.itervalues()
+            if getattr(k, 'external_typename', False)]
 
     def get_discussion_id(self):
         return None
