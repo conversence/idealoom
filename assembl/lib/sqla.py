@@ -2136,6 +2136,14 @@ def get_metadata():
     return _metadata
 
 
+# TODO: Initialize this in assembl.models
+legacy_typenames = {
+    "Content": "SPost",
+    "Idea": "GenericIdeaNode",
+    "Discussion": "Conversation",
+}
+
+
 def get_named_class(typename):
     global aliased_class_registry
     if not aliased_class_registry:
@@ -2144,6 +2152,8 @@ def get_named_class(typename):
             for cls in class_registry.values()
             if getattr(cls, 'external_typename', None)
         }
+        for k, v in legacy_typenames.iteritems():
+            aliased_class_registry[k] = aliased_class_registry[v]
     return aliased_class_registry.get(typename, None)
 
 

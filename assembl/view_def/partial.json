@@ -72,7 +72,7 @@
         "@extends": "IMAPMailbox",
         "post_email_address": true
     },
-    "Content": {
+    "SPost": {
         "discussion": true,
         "date": "creation_date",
         "hidden": true,
@@ -81,7 +81,7 @@
         "import_date": false
     },
     "Post": {
-        "@extends": "Content",
+        "@extends": "SPost",
         "publication_state": true,
         "moderation_text": true,
         "message_id": false,
@@ -109,7 +109,7 @@
         "source": true
     },
     "Webpage": {
-        "@extends": "Content",
+        "@extends": "SPost",
         "last_modified_date": true,
         "url": true
     },
@@ -140,7 +140,7 @@
         "numChildIdea": "num_children"
     },
     "RootIdea": {
-        "@extends": "Idea",
+        "@extends": "GenericIdeaNode",
         "parentId": false,
         "root": "'true"
     },

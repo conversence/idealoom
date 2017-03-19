@@ -31,7 +31,7 @@ def local_to_absolute(uri):
 
 def test_get_ideas(discussion, test_app, synthesis_1,
                    subidea_1_1_1, test_session):
-    all_ideas = test_app.get('/data/Idea')
+    all_ideas = test_app.get('/data/GenericIdeaNode')
     assert all_ideas.status_code == 200
     all_ideas = all_ideas.json
     disc_ideas = test_app.get('/data/Conversation/%d/ideas?view=id_only' %
@@ -109,17 +109,17 @@ def test_widget_settings(
     # Post arbitrary json as initial configuration
     settings = {
         "ideas": [
-            {"local:Idea/67": 8},
-            {"local:Idea/66": 2},
-            {"local:Idea/65": 9},
-            {"local:Idea/64": 1}
+            {"local:GenericIdeaNode/67": 8},
+            {"local:GenericIdeaNode/66": 2},
+            {"local:GenericIdeaNode/65": 9},
+            {"local:GenericIdeaNode/64": 1}
         ]
     }
     new_widget_loc = test_app.post_json(
         '/data/Conversation/%d/widgets' % (discussion.id,), {
             '@type': 'CreativitySessionWidget',
             'settings': {
-                'idea': 'local:Idea/%d' % (subidea_1.id)
+                'idea': 'local:GenericIdeaNode/%d' % (subidea_1.id)
             }
         })
     assert new_widget_loc.status_code == 201
@@ -148,13 +148,13 @@ def test_widget_settings(
 def test_widget_user_state(
         discussion, test_app, subidea_1, participant1_user, test_session):
     # Post the initial configuration
-    state = [{"local:Idea/67": 8}, {"local:Idea/66": 2},
-             {"local:Idea/65": 9}, {"local:Idea/64": 1}]
+    state = [{"local:GenericIdeaNode/67": 8}, {"local:GenericIdeaNode/66": 2},
+             {"local:GenericIdeaNode/65": 9}, {"local:GenericIdeaNode/64": 1}]
     new_widget_loc = test_app.post_json(
         '/data/Conversation/%d/widgets' % (discussion.id,), {
             '@type': 'CreativitySessionWidget',
             'settings': {
-                'idea': 'local:Idea/%d' % (subidea_1.id)
+                'idea': 'local:GenericIdeaNode/%d' % (subidea_1.id)
             }
         })
     assert new_widget_loc.status_code == 201
@@ -188,7 +188,7 @@ def test_widget_user_state(
     assert result.status_code == 200
     assert state in result.json
     # Alter the state
-    state.append({'local:Idea/30': 3})
+    state.append({'local:GenericIdeaNode/30': 3})
     # Put the user state
     result = test_app.put_json(
         widget_user_state_endpoint, state)
@@ -209,7 +209,7 @@ def test_creativity_session_widget(
         '/data/Conversation/%d/widgets' % (discussion.id,), {
             '@type': 'CreativitySessionWidget',
             'settings': {
-                'idea': 'local:Idea/%d' % (subidea_1.id),
+                'idea': 'local:GenericIdeaNode/%d' % (subidea_1.id),
                 'notifications': [
                     {
                         'start': '2014-01-01T00:00:00',
@@ -262,7 +262,7 @@ def test_creativity_session_widget(
     ctx_url = "http://example.com/cardgame.xml#card_1"
     # Create a new sub-idea
     new_idea_create = test_app.post_json(idea_hiding_endpoint, {
-        "@type": "Idea", "short_title": "This is a brand new idea",
+        "@type": "GenericIdeaNode", "short_title": "This is a brand new idea",
         "widget_links": [
             {
                 "@type": "GeneratedIdeaWidgetLink",
@@ -376,7 +376,7 @@ def test_creativity_session_widget(
 
     # Create a second idea
     new_idea_create = test_app.post_json(idea_hiding_endpoint, {
-        "@type": "Idea", "short_title": "This is another new idea"})
+        "@type": "GenericIdeaNode", "short_title": "This is another new idea"})
     assert new_idea_create.status_code == 201
     # Get the sub-idea from the db
     discussion.db.flush()
@@ -472,7 +472,7 @@ def test_inspiration_widget(
         '/data/Conversation/%d/widgets' % (discussion.id,), {
             '@type': 'InspirationWidget',
             'settings': {
-                'idea': 'local:Idea/%d' % (subidea_1.id)
+                'idea': 'local:GenericIdeaNode/%d' % (subidea_1.id)
             }
         })
     assert new_widget_loc.status_code == 201

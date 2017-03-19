@@ -175,7 +175,7 @@ voteApp.controller('indexCtl',
       console.log("$scope.targets_ids: ", $scope.targets_ids);
       console.log("$scope.target: ", $scope.target);
 
-      $scope.targets_promises = {}; // {"local:Idea/228": promise, ...}
+      $scope.targets_promises = {}; // {"local:GenericIdeaNode/228": promise, ...}
       if ( $scope.targets_ids && $scope.targets_ids.length ){
         $scope.targets_ids.forEach(function(target, targetIndex){
           var promise_generator = function(){
@@ -253,7 +253,7 @@ voteApp.controller('indexCtl',
     };
 
     // @param container: DOM container where to find votes. For example the DOM element of one question, or of the whole page.
-    // @returns An object in the form of {"target_id": "local:Idea/228", "criterion_id": "local:AbstractVoteSpecification/20", "value": 10} . The "target_id" field is optional (when there is only one pre-identified vote target).
+    // @returns An object in the form of {"target_id": "local:GenericIdeaNode/228", "criterion_id": "local:AbstractVoteSpecification/20", "value": 10} . The "target_id" field is optional (when there is only one pre-identified vote target).
     $scope.computeMyVotes = function(container, alert_if_a_criterion_has_no_value) {
       // do not use .data("criterion-value") because jQuery does not seem to read the value set by d3
 
@@ -689,7 +689,7 @@ voteApp.controller('indexCtl',
     // @param item_data
     // One of the elements of the "items" array, from the configuration JSON
     // @param target_id
-    // Id of the target votable (for example: "local:Idea/228")
+    // Id of the target votable (for example: "local:GenericIdeaNode/228")
     // @param getUserPreviousVoteFunction
     // function(criterion_id [, target_id]) which returns the user's previous vote for this criterion and this (or current) target
     // @param xPosCenter
@@ -704,7 +704,7 @@ voteApp.controller('indexCtl',
       }
 
       var criterion = item_data.vote_specifications[0];
-      var criterion_id = "@id" in criterion ? criterion["@id"] : null; // contains something like "local:Idea/3"
+      var criterion_id = "@id" in criterion ? criterion["@id"] : null; // contains something like "local:GenericIdeaNode/3"
       if ( !criterion_id ){
         var str = "error: item's vote_specification has no '@id' field.";
         console.log(str);
@@ -999,7 +999,7 @@ voteApp.controller('indexCtl',
     // @param item_data
     // One of the elements of the "items" array, from the configuration JSON
     // @param target_id
-    // Id of the target votable (for example: "local:Idea/228")
+    // Id of the target votable (for example: "local:GenericIdeaNode/228")
     // @param getUserPreviousVoteFunction
     // function(criterion_id [, target_id]) which returns the user's previous vote for this criterion and this (or current) target
     // @param xPosCenter
@@ -1026,12 +1026,12 @@ voteApp.controller('indexCtl',
         return;
       }
 
-      var criterionXId = "@id" in criteria[0] ? criteria[0]["@id"] : null; // contains something like "local:Idea/3"
+      var criterionXId = "@id" in criteria[0] ? criteria[0]["@id"] : null; // contains something like "local:GenericIdeaNode/3"
       if ( criterionXId === null ){
         showError("error: first criterion has no '@id' field");
         return;
       }
-      var criterionYId = "@id" in criteria[1] ? criteria[1]["@id"] : null; // contains something like "local:Idea/3"
+      var criterionYId = "@id" in criteria[1] ? criteria[1]["@id"] : null; // contains something like "local:GenericIdeaNode/3"
       if ( criterionYId === null ){
         showError("error: second criterion has no '@id' field");
         return;
@@ -1439,7 +1439,7 @@ voteApp.controller('indexCtl',
     // @param item_data
     // One of the elements of the "items" array, from the configuration JSON
     // @param target_id
-    // Id of the target votable (for example: "local:Idea/228")
+    // Id of the target votable (for example: "local:GenericIdeaNode/228")
     // @param getUserPreviousVoteFunction
     // function(criterion_id [, target_id]) which returns the user's previous vote for this criterion and this (or current) target
     $scope.drawRadioVote = function(destination, item_data, target_id, getUserPreviousVoteFunction, refreshVoteButtonFunction) {

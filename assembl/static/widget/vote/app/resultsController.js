@@ -68,7 +68,7 @@ voteApp.controller('resultsCtl',
       console.log("$scope.targets_ids: ", $scope.targets_ids);
       console.log("$scope.target: ", $scope.target);
 
-      $scope.targets_promises = {}; // {"local:Idea/228": promise, ...}
+      $scope.targets_promises = {}; // {"local:GenericIdeaNode/228": promise, ...}
       if ( $scope.targets_ids && $scope.targets_ids.length ){
         $scope.targets_ids.forEach(function(target, targetIndex){
           var promise_generator = function(){

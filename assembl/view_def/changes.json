@@ -86,7 +86,7 @@
     "AnnotatorSource": {
         "@extends": "Container"
     },
-    "Content": {
+    "SPost": {
         "date": "creation_date",
         "hidden": true,
         "discussion": true,
@@ -97,7 +97,7 @@
         "extracts": [":id_only"]
     },
     "Post": {
-        "@extends": "Content",
+        "@extends": "SPost",
         "attachments": [":default"],
         "publication_state": true,
         "moderation_text": true,
@@ -139,7 +139,7 @@
         "in_reply_to": false
     },
     "Webpage": {
-        "@extends": "Content",
+        "@extends": "SPost",
         "last_modified_date": true,
         "url": true
     },
@@ -164,7 +164,7 @@
         "slug": true,
         "topic": true
     },
-    "Idea": {
+    "GenericIdeaNode": {
         "original_uri": true,
         "longTitle": "long_title",
         "shortTitle": "short_title",
@@ -180,7 +180,7 @@
         "num_total_and_read_posts": true
     },
     "RootIdea": {
-        "@extends": "Idea",
+        "@extends": "GenericIdeaNode",
         "root": "'true",
         "parentId": false,
         "num_orphan_posts": true,

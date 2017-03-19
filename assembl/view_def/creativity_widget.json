@@ -83,7 +83,7 @@
         "@extends": "IMAPMailbox",
         "post_email_address": true
     },
-    "Content": {
+    "SPost": {
         "date": "creation_date",
         "hidden": true,
         "like_count": true,
@@ -94,7 +94,7 @@
         "widget_ideas": "&widget_ideas"
     },
     "Post": {
-        "@extends": "Content",
+        "@extends": "SPost",
         "publication_state": true,
         "moderation_text": true,
         "moderator": true,
@@ -125,7 +125,7 @@
         "source": true
     },
     "Webpage": {
-        "@extends": "Content",
+        "@extends": "SPost",
         "last_modified_date": true,
         "url": true,
         "extracts": [":partial"]
@@ -145,7 +145,7 @@
         "widget_collection_url": true,
         "sources": [":partial"]
     },
-    "Idea": {
+    "GenericIdeaNode": {
         "longTitle": "long_title",
         "shortTitle": "short_title",
         "definition": true,
@@ -165,7 +165,7 @@
         "widget_add_post_endpoint": true
     },
     "RootIdea": {
-        "@extends": "Idea",
+        "@extends": "GenericIdeaNode",
         "root": "'true",
         "extracts": [":partial"],
         "parentId": false,

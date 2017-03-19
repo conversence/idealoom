@@ -269,7 +269,11 @@ var routeManager = Marionette.Object.extend({
           //We need context for the message
           //Set the view style to default (supposed to be a threaded type)
           //but do not store it
-          messageList.setViewStyle(null, true); 
+          messageList.setViewStyle(null, true);
+        }
+        if (id.substr(0, 14) === "local:Content/") {
+          // legacy URI
+          id = "local:SPost/" + id.substr(14);
         }
 
         Assembl.message_vent.trigger('messageList:showMessageById', id);
@@ -280,11 +284,15 @@ var routeManager = Marionette.Object.extend({
 
   idea: function(id, qs) {
     //TODO: add new behavior to show messageList Panel
-    
+
     trackAnalyticsWithQueryString(qs, 'idea');
     this.restoreViews().then(function() {
       //We really need to address panels explicitely
       Assembl.other_vent.trigger("DEPRECATEDnavigation:selected", 'debate', null);
+      if (id.substr(0, 11) === "local:Idea/") {
+        // legacy URI
+        id = "local:GenericIdeaNode/" + id.substr(11);
+      }
       Assembl.idea_vent.trigger('DEPRECATEDideaList:selectIdea', id, "from_url", true);
     });
 
@@ -295,10 +303,14 @@ var routeManager = Marionette.Object.extend({
   },
 
   user: function(id, qs) {
-    this.restoreViews().then(function() {    
-      var collectionManager = CollectionManager(); 
+    this.restoreViews().then(function() {
+      var collectionManager = CollectionManager();
       collectionManager.getAllUsersCollectionPromise().then(
           function(agentsCollection) {
+            if (id.substr(0, 19) === "local:AgentProfile/") {
+              // legacy URI
+              id = "local:Agent/" + id.substr(19);
+            }
             var agent = agentsCollection.get(id);
             if(!agent) {
               console.log(agentsCollection, id)

@@ -96,7 +96,7 @@ HomeModule.controller('HomeController', [
           var rootUrl = UtilsService.getURL($scope.widget.ideas_hiding_url),
               random_index = angular.element('.random_index');
 
-          $scope.formData["@type"] = 'Idea';
+          $scope.formData["@type"] = 'GenericIdeaNode';
           var inspirationSourceUrl = "/static/widget/card/?#/card?deck=" + $scope.deck_pseudo_url + "&card=" + $scope.displayed_cards[$scope.displayed_card_index].originalIndex;
           $scope.formData.proposed_in_post = {
             "@type": "IdeaProposalPost",

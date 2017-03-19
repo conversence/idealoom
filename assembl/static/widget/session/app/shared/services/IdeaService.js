@@ -3,7 +3,7 @@
  * */
 SessionApp.factory('IdeaService', ['$resource', function($resource) {
 
-  return $resource('/data/Idea/:id/?view=creativity_widget', null, {
+  return $resource('/data/GenericIdeaNode/:id/?view=creativity_widget', null, {
 
     'get': {
       method: 'GET', params: { id: '@id' },

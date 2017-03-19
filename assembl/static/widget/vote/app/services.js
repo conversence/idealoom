@@ -15,7 +15,7 @@ voteServices.service('AssemblToolsService', ['$window', '$rootScope', '$log', fu
   };
 
   /**
-   * @param id: string, for example "local:Idea/351"
+   * @param id: string, for example "local:GenericIdeaNode/351"
    */
   this.getCssClassFromId = function(id) {
     var re = /^(\w+):(\w+)\/(\d+)$/;
@@ -661,7 +661,7 @@ voteServices.factory('configTestingService', [function() {
         type:'POST',
         data: {
           "@type":'MultiCriterionVotingWidget',
-          settings: JSON.stringify({"idea":"local:Idea/2"})
+          settings: JSON.stringify({"idea":"local:GenericIdeaNode/2"})
         },
         success: function(data, textStatus, jqXHR) {
 

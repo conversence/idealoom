@@ -900,7 +900,7 @@ class SKLearnClusteringSemanticAnalysis(SemanticAnalysisData):
                         u", ".join(features[1])))
                 f.write(u"<dl>\n")
                 for post_id in cluster:
-                    f.write(u"<dt><a target='out' href='%(url)sposts/local:Content/%(post_id)d'>Post %(post_id)d</a> (%(ideas)s):</dt>\n" % dict(
+                    f.write(u"<dt><a target='out' href='%(url)sposts/local:SPost/%(post_id)d'>Post %(post_id)d</a> (%(ideas)s):</dt>\n" % dict(
                         url=self.discussion_url,
                         post_id=post_id,
                         ideas=','.join((
@@ -1201,7 +1201,7 @@ class OpticsSemanticsAnalysis(SemanticAnalysisData):
             self.write_features(f, cluster)
 
             def title_function(post_id):
-                return "<a target='out' href='%(url)sposts/local:Content/%(post_id)d'>Post %(post_id)d</a> (in ideas %(ideas)s):" % dict(
+                return "<a target='out' href='%(url)sposts/local:SPost/%(post_id)d'>Post %(post_id)d</a> (in ideas %(ideas)s):" % dict(
                     post_id=post_id,
                     url=self.discussion_url,
                     ideas=','.join((

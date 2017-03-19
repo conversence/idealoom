@@ -147,7 +147,7 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
     An idea (or concept) distilled from the conversation flux.
     """
     __tablename__ = "idea"
-    # __external_typename = "GenericIdeaNode"
+    __external_typename = "GenericIdeaNode"
     ORPHAN_POSTS_IDEA_ID = 'orphan_posts'
     sqla_type = Column(String(60), nullable=False)
     rdf_type = Column(
@@ -221,7 +221,8 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
                     QUADNAMES.idea_external_link_iri,
                     # TODO: Use discussion.get_base_url.
                     # This should be computed outside the DB.
-                    get_global_base_url() + '/%s/idea/local:Idea/%d', None,
+                    get_global_base_url() + '/%s/idea/local:' +
+                    cls.external_typename_with_inheritance() + '/%d', None,
                     ('slug', Unicode, False), ('id', Integer, False)).apply(
                     discussion_alias.slug, cls.id),
                 name=QUADNAMES.idea_external_link_map)

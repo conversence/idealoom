@@ -144,7 +144,7 @@
         "@extends": "IMAPMailbox",
         "post_email_address": true
     },
-    "Content": {
+    "SPost": {
         "date": "creation_date",
         "like_count": false,
         "bodyMimeType": false,
@@ -153,7 +153,7 @@
         "widget_ideas": false
     },
     "Post": {
-        "@extends": "Content",
+        "@extends": "SPost",
         "publication_state": true,
         "moderation_text": true,
         "moderator": true,
@@ -231,7 +231,7 @@
         "homepage": true,
         "show_help_in_debate_section": true
     },
-    "Idea": {
+    "GenericIdeaNode": {
         "longTitle": "long_title",
         "shortTitle": "short_title",
         "creationDate": "creation_date",
@@ -252,7 +252,7 @@
         "widget_links": true
     },
     "RootIdea": {
-        "@extends": "Idea",
+        "@extends": "GenericIdeaNode",
         "root": "'true",
         "parentId": false
     },

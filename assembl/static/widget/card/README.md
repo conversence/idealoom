@@ -17,7 +17,7 @@ You have to POST to http://localhost:6543/data/Conversation/1/widgets using the 
 - variable name: "type", variable value: "CreativityWidget"
 - variable name: "settings", variable example value:
 {
-    "idea": "local:Idea/3"
+    "idea": "local:GenericIdeaNode/3"
 }
 
 2) Use the response to build the URL which users will access
@@ -35,9 +35,9 @@ When the user clicks the "Inspire me" button on an idea in Assembl, selects a vi
 
 {
     "inspire_me_posts_by_original_idea": {
-        "local:Idea/2": [
+        "local:GenericIdeaNode/2": [
             {
-                "idea_id": "local:Idea/3",
+                "idea_id": "local:GenericIdeaNode/3",
                 "inspiration_type": "video",
                 "inspiration_url": "http://www.youtube.com/watch?v=aaa"
             }

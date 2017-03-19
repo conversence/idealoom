@@ -194,7 +194,7 @@ appCards.controller('cardsCtl',
           }
 
           // an example value for url is "/data/Conversation/1/widgets/56/base_idea_descendants/4/linkedposts";
-          // FIXME: error when http://localhost:6543/widget/video/?config=/data/Widget/40#/?idea=local:Idea%2F4%3Fview%3Dcreativity_widget => $scope.config.idea.widget_add_post_endpoint is an empty object
+          // FIXME: error when http://localhost:6543/widget/video/?config=/data/Widget/40#/?idea=local:GenericIdeaNode%2F4%3Fview%3Dcreativity_widget => $scope.config.idea.widget_add_post_endpoint is an empty object
 
           //var url = utils.urlApi($scope.config.widget.ideas_url);
           console.log("url: ", url);
@@ -207,7 +207,7 @@ appCards.controller('cardsCtl',
             console.log("Success: ", data, status, headers, config);
             /* commented out because we don't post an idea anymore, now we post a message
             // save the association between the video and the comment in the widget instance's memory
-            var created_idea = headers("Location"); // "local:Idea/66"
+            var created_idea = headers("Location"); // "local:GenericIdeaNode/66"
             $scope.associateVideoToIdea(created_idea, videoUrl, videoTitle);
             */
             

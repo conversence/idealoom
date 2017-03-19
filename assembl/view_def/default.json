@@ -202,7 +202,7 @@
         "@extends": "IMAPMailbox",
         "post_email_address": true
     },
-    "Content": {
+    "SPost": {
         "date": "creation_date",
         "hidden": true,
         "discussion": true,
@@ -214,7 +214,7 @@
         "tombstone_date": true
     },
     "Post": {
-        "@extends": "Content",
+        "@extends": "SPost",
         "publication_state": true,
         "moderation_text": true,
         "moderator": true,
@@ -260,7 +260,7 @@
         "attachment_blob": false
     },
     "Webpage": {
-        "@extends": "Content",
+        "@extends": "SPost",
         "last_modified_date": true,
         "url": true,
         "extracts": [":partial"]
@@ -292,7 +292,7 @@
         "translation_service_class": true,
         "show_help_in_debate_section": true
     },
-    "Idea": {
+    "GenericIdeaNode": {
         "longTitle": "long_title",
         "shortTitle": "short_title",
         "original_uri": true,
@@ -312,7 +312,7 @@
         "attachments": [":default"]
     },
     "RootIdea": {
-        "@extends": "Idea",
+        "@extends": "GenericIdeaNode",
         "root": "'true",
         "extracts": [":partial"],
         "parentId": false,

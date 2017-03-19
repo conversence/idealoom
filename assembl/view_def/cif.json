@@ -24,7 +24,7 @@
         "@extends": "ActionOnPost"
     },
     "ReadStatusChange": {
-        "@extends": "ActionOnPost",
+        "@extends": "ActionOnPost"
     },
     "ActionOnIdea": {
         "@extends": "Update",
@@ -103,15 +103,14 @@
     "MailingList": {
         "@extends": "IMAPMailbox"
     },
-    "Content": {
+    "SPost": {
         "date": "creation_date",
-        "@type": "'\"SPost\"",
         "created": "creation_date",
         "in_conversation": "discussion",
         "title": "&get_original_subject"
     },
     "Post": {
-        "@extends": "Content",
+        "@extends": "SPost",
         "reply_of": "parent",
         "id": "message_id",
         "has_creator": "creator"
@@ -147,7 +146,7 @@
         "@extends": "ImportedPost"
     },
     "Webpage": {
-        "@extends": "Content",
+        "@extends": "SPost",
         "last_modified_date": true,
         "url": true
     },
@@ -163,8 +162,7 @@
         "title": "topic",
         "uses_source": ["sources"]
     },
-    "Idea": {
-        "@type": "'\"GenericIdeaNode\"",
+    "GenericIdeaNode": {
         "created": "creation_date",
         "description": "definition",
         "title": "short_title",
@@ -175,7 +173,7 @@
         "includes": "children_uris"
     },
     "RootIdea": {
-        "@extends": "Idea"
+        "@extends": "GenericIdeaNode"
     },
     "InclusionRelation": {
         "in_conversation": "&get_discussion",

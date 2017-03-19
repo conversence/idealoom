@@ -258,7 +258,7 @@ class Content(TombstonableOriginMixin, DiscussionBoundBase):
     optimize the most common case.
     """
     __tablename__ = "content"
-    # __external_typename = "SPost"
+    __external_typename = "SPost"
     # __table_cls__ = TableWithTextIndex
 
     rdf_class = SIOC.Post
@@ -526,7 +526,7 @@ class Content(TombstonableOriginMixin, DiscussionBoundBase):
                     QUADNAMES.post_external_link_iri,
                     # TODO: Use discussion.get_base_url.
                     # This should be computed outside the DB.
-                    get_global_base_url() + '/%s/posts/local:Content/%d', None,
+                    get_global_base_url() + '/%s/posts/local:SPost/%d', None,
                     ('slug', Unicode, False), ('id', Integer, False)).apply(
                     discussion_alias.slug, cls.id),
                 name=QUADNAMES.post_external_link_map)

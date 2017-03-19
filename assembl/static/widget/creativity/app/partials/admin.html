@@ -55,7 +55,7 @@
             "type":"2_axes",
             "criteria":[
             {
-            "entity_id":"local:Idea/70",
+            "entity_id":"local:GenericIdeaNode/70",
             "name_slug":"rentabilite",
             "name":"Rentabilite (%)",
             "description":"Description de l'axe rentabilite",
@@ -67,7 +67,7 @@
             "ticks":6
             },
             {
-            "entity_id":"local:Idea/71",
+            "entity_id":"local:GenericIdeaNode/71",
             "name_slug":"risque",
             "name":"Risque (%)",
             "description":"Description de l'axe risque",
@@ -86,7 +86,7 @@
             "type": "vertical_gauge",
             "criteria": [
             {
-            "entity_id":"local:Idea/72",
+            "entity_id":"local:GenericIdeaNode/72",
             "name_slug":"investissement",
             "name":"Investissement (Euros)",
             "description":"Description de l'axe investissement",
@@ -103,7 +103,7 @@
             "type": "vertical_gauge",
             "criteria": [
             {
-            "entity_id":"local:Idea/73",
+            "entity_id":"local:GenericIdeaNode/73",
             "name_slug":"difficulte_mise_en_oeuvre",
             "name":"Difficulte de mise en oeuvre (note)",
             "description":"Description de l'axe difficulte de mise en oeuvre",
@@ -136,7 +136,7 @@
 
     <form id="idea_children_to_criteria" method="POST">
         <label for="idea_children_to_criteria_endpoint">idea children endpoint</label>
-        <input type="text" id="idea_children_to_criteria_endpoint" value="/data/Idea/3/children" size="50"/>
+        <input type="text" id="idea_children_to_criteria_endpoint" value="/data/GenericIdeaNode/3/children" size="50"/>
         <br/>
         <input type="submit"/>
 
@@ -151,7 +151,7 @@
         <input type="text" id="criteria_set_endpoint" value="/data/Conversation/1/widgets/13/criteria" size="50"/>
         <br/>
         <label for="criteria_set_criteria">criteria</label>
-        <textarea id="criteria_set_criteria">[{"@id":"local:Idea/70"}]</textarea>
+        <textarea id="criteria_set_criteria">[{"@id":"local:GenericIdeaNode/70"}]</textarea>
         <br/>
         <input type="submit"/>
 
@@ -166,7 +166,7 @@
         <input type="text" id="criterion_add_api_endpoint" value="/data/Conversation/1/widgets/13/criteria" size="50"/>
         <br/>
         <label for="criterion_add_id">criterion id</label>
-        <input type="text" id="criterion_add_id" value="local:Idea/3" size="50"/>
+        <input type="text" id="criterion_add_id" value="local:GenericIdeaNode/3" size="50"/>
         <br/>
         <input type="submit"/>
         <span id="criterion_add_result"></span>
@@ -179,7 +179,7 @@
         <input type="text" id="criterion_remove_api_endpoint" value="/data/Conversation/1/widgets/13/criteria" size="50"/>
         <br/>
         <label for="criterion_remove_id">criterion id</label>
-        <input type="text" id="criterion_remove_id" value="local:Idea/3" size="50"/>
+        <input type="text" id="criterion_remove_id" value="local:GenericIdeaNode/3" size="50"/>
         <br/>
         <input type="submit"/>
         <span id="criterion_remove_result"></span>

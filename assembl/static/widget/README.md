@@ -71,12 +71,12 @@ The widget may also store the user's interaction with that specific idea in the 
 There will be an API endpoint to get the realized array of all criteria ideas.
 (Eventually, we will use idea subtypes, but implementation 0 will probably be for criteria to be the children of a given idea, and likewise for the voting targets.) 
 
-    /data/Conversation/1/widgets/2?target=local:Idea/20
+    /data/Conversation/1/widgets/2?target=local:GenericIdeaNode/20
     {
-        "criteria": [{"@id":"local:Idea/11", "short_title":"price"}, {"@id":"local:Idea/12", "short_title":"quality"}],
+        "criteria": [{"@id":"local:GenericIdeaNode/11", "short_title":"price"}, {"@id":"local:GenericIdeaNode/12", "short_title":"quality"}],
         "criteria_url": "/data/Conversation/1/widgets/criteria",
-        "voting_urls": {"local:Idea/11": "/data/Conversation/1/widgets/2/criteria/11/targets/20/votes",
-                        "local:Idea/12": "/data/Conversation/1/widgets/2/criteria/12/targets/20/votes"},
+        "voting_urls": {"local:GenericIdeaNode/11": "/data/Conversation/1/widgets/2/criteria/11/targets/20/votes",
+                        "local:GenericIdeaNode/12": "/data/Conversation/1/widgets/2/criteria/12/targets/20/votes"},
         "user_votes_uri": "/data/Conversation/1/widgets/2/targets/20/votes",
         "vote_results_url": "/data/Conversation/1/widgets/2/targets/20/votes/results"}
     }

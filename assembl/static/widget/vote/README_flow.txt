@@ -13,18 +13,18 @@ A confirmation page appears, click on "Yes, create it". This sends a application
 http://localhost:6543/data/Conversation/4/widgets
 with 2 parameters:
 * settings	
-{"votable_root_id":"local:Idea/120"}
+{"votable_root_id":"local:GenericIdeaNode/120"}
 * type	
 MultiCriterionVotingWidget
 
 The next page gives you 2 links:
 * The configuration link
-http://localhost:6543/static/widget/vote/?admin=1#/admin/configure_instance?widget_uri=local:Widget/4&target=local:Idea/120
+http://localhost:6543/static/widget/vote/?admin=1#/admin/configure_instance?widget_uri=local:Widget/4&target=local:GenericIdeaNode/120
 You will then be able to access configuration of this vote widget instance via a link in the Idea panel.
 * The URL for users to vote
-http://localhost:6543/static/widget/vote/?config=local:Widget/4&target=local:Idea/120
+http://localhost:6543/static/widget/vote/?config=local:Widget/4&target=local:GenericIdeaNode/120
 URL parameters which start with "local:" are shortcuts, the front-end code of the vote widget replaces this part by "[hostname]/data/". So, the extended version of the vote link is:
-http://localhost:6543/static/widget/vote/?config=http://localhost:6543/data/Widget/4&target=http://localhost:6543/data/Idea/120#/
+http://localhost:6543/static/widget/vote/?config=http://localhost:6543/data/Widget/4&target=http://localhost:6543/data/GenericIdeaNode/120#/
 
 Click on "Configure this vote instance"
 
@@ -32,7 +32,7 @@ Click on "Configure this vote instance"
 ## Configuring a vote widget instance
 
 The configuration panel of a widget instance can be accessed by different ways:
-* If you know the root URL of this vote widget frontend, the URI of a widget instance that you have created, and the URI of a vote target (e.g. a votable idea), you can craft the URL of its configuration page by replacing the hostname, and the value of widget_uri and target parameters in: http://localhost:6543/static/widget/vote/?admin=1#/admin/configure_instance?widget_uri=local:Widget/4&target=local:Idea/120
+* If you know the root URL of this vote widget frontend, the URI of a widget instance that you have created, and the URI of a vote target (e.g. a votable idea), you can craft the URL of its configuration page by replacing the hostname, and the value of widget_uri and target parameters in: http://localhost:6543/static/widget/vote/?admin=1#/admin/configure_instance?widget_uri=local:Widget/4&target=local:GenericIdeaNode/120
 * As an admin, a "Configure this vote widget" link appears in the Idea panel of every idea which has been set votable in a vote widget
 * This same link appears on the page which confirms the creation of the vote widget instance
 
@@ -42,7 +42,7 @@ This configuration page shows a menu with several options.
 ### Define vote specifications
 
 The URL of this page looks like
-?http://localhost:6543/static/widget/vote/?admin=1#/admin/configure_instance_set_criteria?widget_uri=http:%2F%2Flocalhost:6543%2Fdata%2FWidget%2F4&target=local:Idea%2F120
+?http://localhost:6543/static/widget/vote/?admin=1#/admin/configure_instance_set_criteria?widget_uri=http:%2F%2Flocalhost:6543%2Fdata%2FWidget%2F4&target=local:GenericIdeaNode%2F120
 
 This page makes a GET request to the value of the widget_uri parameter, which looks like
 http://localhost:6543/data/Widget/4
@@ -51,7 +51,7 @@ The response is a JSON with fields like "discussion", "votespecs_url", which are
 The widget successively POSTs JSON descriptions of the vote specs on the votespecs_url endpoint.
 A Vote spec description contains fields like "id", "type", "widget_id", "criterion_idea_id", "question_id", "settings", and other fields depending on the value of the "type" field.
 On return, each of these will have a "voting_urls" field which looks like
-{"local:Idea/120":"local:Discussion/4/widgets/5/vote_specifications/121/vote_targets/120/votes","local:Idea/184":"local:Discussion/4/widgets/5/vote_specifications/184/vote_targets/120/votes"}
+{"local:GenericIdeaNode/120":"local:Discussion/4/widgets/5/vote_specifications/121/vote_targets/120/votes","local:GenericIdeaNode/184":"local:Discussion/4/widgets/5/vote_specifications/184/vote_targets/120/votes"}
 
 
 The page then makes a GET request to AssemblToolsService.resourceToUrl($scope.discussion_uri) + '/ideas?view=default', which looks like
@@ -66,20 +66,20 @@ with a JSON parameter which is an array of Idea objects (which have an "@id" att
 ### Configure appearance
 
 The URL of this page looks like
-http://localhost:6543/static/widget/vote/?admin=1#/admin/configure_instance_set_settings?widget_uri=http://localhost:6543/data/Widget/4&target=local:Idea/120
+http://localhost:6543/static/widget/vote/?admin=1#/admin/configure_instance_set_settings?widget_uri=http://localhost:6543/data/Widget/4&target=local:GenericIdeaNode/120
 
 This page also makes a GET request to the value of the widget_uri parameter, in order to use widget's data (it uses its "settings" and "criteria" fields).
 
 Add items and their criteria, and set their parameters. When done, click "Save widget configuration". This sends a application/json PUT to
 http://localhost:6543/data/Widget/4/settings
 with a JSON parameter which has an "items" field (and optional fields for the optional parameters), which contains something like:
-[{"criteria":[{"entity_id":"local:Idea/120","name":"Wonderful idea n°2"}],"type":"vertical_gauge"}]
+[{"criteria":[{"entity_id":"local:GenericIdeaNode/120","name":"Wonderful idea n°2"}],"type":"vertical_gauge"}]
 
 
 ### Select votable ideas
 
 The URL of this page looks like
-http://localhost:6543/static/widget/vote/?admin=1#/admin/configure_instance_set_votable_ideas?widget_uri=http:%2F%2Flocalhost:6543%2Fdata%2FWidget%2F4&target=local:Idea%2F120
+http://localhost:6543/static/widget/vote/?admin=1#/admin/configure_instance_set_votable_ideas?widget_uri=http:%2F%2Flocalhost:6543%2Fdata%2FWidget%2F4&target=local:GenericIdeaNode%2F120
 
 This page also makes a GET request to the value of the widget_uri parameter, in order to use widget's data. It uses these response fields: "discussion" (to compute the URL which lists the ideas), "votables_url" (to know where to PUT data), and "votable_ideas" (to know which ideas are already set as votables and show them selected).
 
@@ -95,7 +95,7 @@ with a JSON parameter which is an array of Idea objects (which have an "@id" att
 ### See vote results
 
 The URL of this page looks like
-http://localhost:6543/static/widget/vote/?config=http://localhost:6543/data/Widget/4&target=local:Idea/120#/results
+http://localhost:6543/static/widget/vote/?config=http://localhost:6543/data/Widget/4&target=local:GenericIdeaNode/120#/results
 Click on "Number of voters"
 The link is
 http://localhost:6543/data/Conversation/4/widgets/4/targets/120/vote_counts
@@ -117,7 +117,7 @@ The link looks like
 http://localhost:6543/static/widget/vote/?config=local:Widget/4%3Ftarget%3Dlocal%3AIdea%2F120
 
 This page makes a GET request to
-http://localhost:6543/data/Widget/5?target=local:Idea/120
+http://localhost:6543/data/Widget/5?target=local:GenericIdeaNode/120
 which returns a JSON with fields. Response fields which are used by this page are "user", "user_votes_url", "settings", and "voting_urls".
 The content of the "voting_urls" field looks like
 {"local:AbstractVoteSpecification/200":"local:Discussion/4/widgets/5/vote_specifications/200/vote_targets/120/votes","local:AbstractVoteSpecification/184":"local:Discussion/4/widgets/5/vote_specifications/184/vote_targets/120/votes"}
@@ -125,7 +125,7 @@ The content of the "voting_urls" field looks like
 Alternatively, we could ask for 
 http://localhost:6543/data/Widget/5/vote_specifications/200
 and get the voting_urls field giving the url for each target
-{"local:Idea/120":"local:Discussion/4/widgets/5/vote_specifications/200/vote_targets/120/votes","local:Idea/184":"local:Discussion/4/widgets/5/vote_specifications/200/vote_targets/184/votes"}
+{"local:GenericIdeaNode/120":"local:Discussion/4/widgets/5/vote_specifications/200/vote_targets/120/votes","local:GenericIdeaNode/184":"local:Discussion/4/widgets/5/vote_specifications/200/vote_targets/184/votes"}
 
 
 It is a JSON Object used as an associative array: the key is the id of a criterion, and the value is the URI where the voter can POST his vote to (for this criterion). So these voting URLs are built by the server depending on the value given in the "target" GET parameter.
@@ -146,8 +146,8 @@ value
 Such a POST request is sent for each criterion displayed on the page, so the POST URL and parameters differ (for example .../criteria/121/... instead of 120).
 
 The response of this POST request is a JSON like
-{"widget": "local:Widget/5", "voter": "local:Agent/92", "idea": "local:Idea/120", "value": 0.4722222222222222
-, "criterion": "local:Idea/120", "@id": "local:IdeaVote/70", "@type": "LickertVote", "@view": "default"
+{"widget": "local:Widget/5", "voter": "local:Agent/92", "idea": "local:GenericIdeaNode/120", "value": 0.4722222222222222
+, "criterion": "local:GenericIdeaNode/120", "@id": "local:GenericIdeaNodeVote/70", "@type": "LickertVote", "@view": "default"
 }
 But if the response header status not a 201 code but rather an error code, the page shows a red error instead of a green confirmation.
 
