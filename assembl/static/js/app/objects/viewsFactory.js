@@ -5,6 +5,7 @@
  */
 
 var _ = require('underscore'),
+    Types = require('../utils/types.js'),
     AssemblPanel = require('../views/assemblPanel.js'),
     AboutNavPanel = require('../views/navigation/about.js'),
     ContextPanel = require('../views/contextPage.js'),
@@ -69,7 +70,7 @@ function decodeUrlData(code, data) {
   if (code == 'i') {
     var ideasCollection = new CollectionManager().getAllIdeasCollectionPromise();
     return ideasCollection.then(function(ideas) {
-        var idea = ideas.get("local:Idea/" + data);
+        var idea = ideas.get("local:" + Types.IDEA + "/" + data);
         return ["currentIdea", idea];
       });
   }

@@ -7,6 +7,7 @@
 var Backbone = require('backbone'),
     _ = require('underscore'),
     $ = require('jquery'),
+    Types = require('../utils/types.js'),
     classlist = require('classlist-polyfill'),
     Assembl = require('../app.js'),
     Ctx = require('../common/context.js'),
@@ -142,7 +143,7 @@ var IdeaInIdeaListView = Marionette.View.extend({
 
     data.Ctx = Ctx;
     data.idea_css_class = this.model.getCssClassFromId();
-    if(this.model.get('@type') === 'Idea') {
+    if(this.model.get('@type') === Types.IDEA) {
       var visitorData = this.visitorData,
       render_data = visitorData[this.model.getId()];
       data.inNextSynthesis = this.synthesis.getIdeasCollection().get(this.model.id) !== undefined;

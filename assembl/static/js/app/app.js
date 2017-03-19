@@ -9,6 +9,7 @@ var Marionette = require('backbone.marionette'),
     classlist = require('classlist-polyfill'),
     Raven = require('raven-js'),
     Radio = require('backbone.radio'),
+    Types = require('./utils/types.js'),
     _ = require('underscore');
 
 
@@ -67,7 +68,8 @@ var AppClass = Marionette.Application.extend({
           data = data.substring(0, dlen-2) + data[dlen-1];
         }
         data = JSON.parse(data);
-        if (data.event == "click" && data.target.substring(0, 11) == "local:Idea/") {
+        var ideaIdPrefix = 'local:' + Types.IDEA + '/';
+        if (data.event == "click" && data.target.substring(0, ideaIdPrefix.length) === ideaIdPrefix) {
           // TODO: look for right group. Also handle Content.
           that.idea_vent.trigger('DEPRECATEDideaList:selectIdea', data.target);
         }
