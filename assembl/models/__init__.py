@@ -40,6 +40,7 @@ class DiscussionBoundBase(Base):
     """
     __metaclass__ = DeclarativeAbstractMeta
     __abstract__ = True
+    __external_typename = None
 
     @abstractmethod
     def get_discussion_id(self):

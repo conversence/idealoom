@@ -433,6 +433,16 @@ class BaseOps(object):
         name = cls.__name__
         return getattr(cls, '_%s__external_typename' % (name,), name)
 
+    @classmethod
+    def external_typename_list(cls):
+        mro = cls.mro()
+        for i, c in enumerate(mro):
+            if c.__module__.startswith('sqlalchemy'):
+                mro = mro[:i]
+                break
+        return filter(None, (c.external_typename() for c in mro
+                             if getattr(c, 'external_typename', False)))
+
     def __repr__(self):
         return "<%s id=%d >" % (
             self.external_typename(), getattr(self, 'id', None) or -1)
