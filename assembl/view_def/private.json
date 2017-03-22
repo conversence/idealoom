@@ -39,7 +39,7 @@
     "ActionOnPost": {
         "@extends": "Update",
         "target": "post",
-        "target_type": "'\"Content\""
+        "target_type": "'\"SPost\""
     },
     "LikedPost": {
         "@extends": "ActionOnPost"

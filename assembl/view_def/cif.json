@@ -28,8 +28,7 @@
     },
     "ActionOnIdea": {
         "@extends": "Update",
-        "target": "idea",
-        "target_type": "'\"Idea\""
+        "target": "idea"
     },
     "ViewIdea": {
         "@extends": "ActionOnIdea"
