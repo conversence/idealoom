@@ -479,8 +479,8 @@ def get_time_series_analytics(request):
             )
         votes_subquery = votes_subquery.outerjoin(Idea, Idea.discussion_id == discussion.id)
         votes_subquery = votes_subquery.outerjoin(votes_aliased, and_(
-            votes_aliased.vote_date >= intervals_table.c.interval_start,
-            votes_aliased.vote_date < intervals_table.c.interval_end,
+            votes_aliased.creation_date >= intervals_table.c.interval_start,
+            votes_aliased.creation_date < intervals_table.c.interval_end,
             votes_aliased.idea_id == Idea.id))
         votes_subquery = votes_subquery.group_by(intervals_table.c.interval_id)
         votes_subquery = votes_subquery.subquery()
@@ -493,7 +493,7 @@ def get_time_series_analytics(request):
             )
         cumulative_votes_subquery = cumulative_votes_subquery.outerjoin(Idea, Idea.discussion_id == discussion.id)
         cumulative_votes_subquery = cumulative_votes_subquery.outerjoin(cumulative_votes_aliased, and_(
-            cumulative_votes_aliased.vote_date < intervals_table.c.interval_end,
+            cumulative_votes_aliased.creation_date < intervals_table.c.interval_end,
             cumulative_votes_aliased.idea_id == Idea.id))
         cumulative_votes_subquery = cumulative_votes_subquery.group_by(intervals_table.c.interval_id)
         cumulative_votes_subquery = cumulative_votes_subquery.subquery()

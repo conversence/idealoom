@@ -719,7 +719,7 @@ class AbstractIdeaVote(HistoryMixin, DiscussionBoundBase):
                              "AbstractIdeaVote.tombstone_date == None)",
             ))
 
-    vote_date = Column(DateTime, default=datetime.utcnow,
+    creation_date = Column('vote_date', DateTime, default=datetime.utcnow,
                        info={'rdf': QuadMapPatternS(None, DCTERMS.created)})
 
     voter_id = Column(
@@ -791,7 +791,7 @@ class AbstractIdeaVote(HistoryMixin, DiscussionBoundBase):
             voter=self.voter,
             idea=self.idea,
             criterion=self.criterion,
-            vote_date=self.vote_date,
+            creation_date=self.creation_date,
         )
         return super(AbstractIdeaVote, self).copy(**kwargs)
 
