@@ -3,7 +3,7 @@ from datetime import datetime
 
 from sqlalchemy import (
     Column, DateTime, Integer, UniqueConstraint, event, Table, ForeignKey,
-    Sequence)
+    Sequence, Index)
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.sql.expression import join
 from sqlalchemy.orm import relationship
@@ -88,10 +88,22 @@ class HistoryMixin(TombstonableMixin):
     def idtable_name(cls):
         return cls.__tablename__ + '_idtable'
 
+    @classmethod
+    def base_id_live_index(cls):
+        # eg:
+        # CREATE UNIQUE INDEX idea_vote_base_id_live_ix
+        # ON idea_vote (base_id) WHERE tombstone_date IS NULL
+        return Index(
+            cls.__tablename__ + "_base_id_live_ix",
+            cls.base_id,
+            postgresql_where=(cls.tombstone_date == None),
+            unique=True)
+
     @declared_attr
     def __table_args__(cls):
         if cls == cls.base_polymorphic_class():
-            return (UniqueConstraint('base_id', 'tombstone_date'), )
+            return (UniqueConstraint('base_id', 'tombstone_date'),
+                    cls.base_id_live_index())
 
     @declared_attr
     def identity_table(cls):
