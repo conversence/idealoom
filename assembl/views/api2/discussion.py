@@ -316,6 +316,7 @@ def get_time_series_analytics(request):
     import pprint
     import transaction
     with transaction.manager:
+        bind = discussion.db.connection()
         metadata = MetaData(discussion.db.get_bind())  # make sure we are using the same connexion
 
         intervals_table = Table('temp_table_intervals_' + str(user_id), metadata,
@@ -324,11 +325,8 @@ def get_time_series_analytics(request):
             Column('interval_end', DateTime, nullable=False),
             prefixes=None if discussion.using_virtuoso else ['TEMPORARY']
         )
-        try:
-            intervals_table.drop()  # In case there is a leftover from a previous crash
-        except ProgrammingError:
-            pass
-        intervals_table.create()
+        intervals_table.drop(bind=bind, checkfirst=True)
+        intervals_table.create(bind=bind)
         interval_start = start
         intervals = []
         while interval_start < end:
@@ -611,10 +609,8 @@ def get_time_series_analytics(request):
         query = query.order_by(intervals_table.c.interval_id)
         results = query.all()
 
-        # pprint.pprint(results)
-        # end of transaction
+        intervals_table.drop(bind=bind)
 
-    intervals_table.drop()
     if format == JSON_MIMETYPE:
             # json default
         return Response(json.dumps(results, cls=DateJSONEncoder),
@@ -1127,6 +1123,7 @@ def get_participant_time_series_analytics(request):
     import pprint
     import transaction
     with transaction.manager:
+        bind = discussion.db.connection()
         metadata = MetaData(discussion.db.get_bind())  # make sure we are using the same connexion
 
         intervals_table = Table('temp_table_intervals_' + str(user_id), metadata,
@@ -1135,11 +1132,9 @@ def get_participant_time_series_analytics(request):
             Column('interval_end', DateTime, nullable=False),
             prefixes=None if discussion.using_virtuoso else ['TEMPORARY']
         )
-        try:
-            intervals_table.drop()  # In case there is a leftover from a previous crash
-        except ProgrammingError:
-            pass
-        intervals_table.create()
+        # In case there is a leftover from a previous crash
+        intervals_table.drop(bind=bind, checkfirst=True)
+        intervals_table.create(bind=bind)
         interval_start = start
         intervals = []
         while interval_start < end:
@@ -1405,11 +1400,9 @@ def get_participant_time_series_analytics(request):
             combined_subquery, combined_subquery.c.interval_id_q == intervals_table.c.interval_id
             ).order_by(intervals_table.c.interval_id)
         results = query.all()
-
+        intervals_table.drop(bind=bind)
         # pprint.pprint(results)
         # end of transaction
-
-    # intervals_table.drop()  # temporary is dropped implicitly
 
     if with_email:
         participant_ids = {row._asdict()['participant_id'] for row in results}
