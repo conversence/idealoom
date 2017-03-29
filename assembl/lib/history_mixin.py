@@ -93,17 +93,29 @@ class HistoryMixin(TombstonableMixin):
         # eg:
         # CREATE UNIQUE INDEX idea_vote_base_id_live_ix
         # ON idea_vote (base_id) WHERE tombstone_date IS NULL
+        # This can be called again, make sure to create index once.
+        idx_name = cls.__tablename__ + "_base_id_live_ix"
+        table = getattr(cls, '__table__', None)
+        if table is not None:
+            for idx in table.indexes:
+                if idx.name == idx_name:
+                    return idx
         return Index(
-            cls.__tablename__ + "_base_id_live_ix",
+            idx_name,
             cls.base_id,
             postgresql_where=(cls.tombstone_date == None),
             unique=True)
 
+    @classmethod
+    def __declare_last__(cls):
+        if cls == cls.base_polymorphic_class():
+            # Compute at least once.
+            cls.base_id_live_index()
+
     @declared_attr
     def __table_args__(cls):
         if cls == cls.base_polymorphic_class():
-            return (UniqueConstraint('base_id', 'tombstone_date'),
-                    cls.base_id_live_index())
+            return (UniqueConstraint('base_id', 'tombstone_date'), )
 
     @declared_attr
     def identity_table(cls):
