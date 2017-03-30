@@ -374,7 +374,7 @@ var MessageCollection = Base.Collection.extend({
    * The url
    * @type {string}
    */
-  url: Ctx.getApiUrl("posts?view=id_only"),
+  url: Ctx.getApiUrl("posts?view=partial_post"),
 
   /**
    * The model

@@ -327,7 +327,7 @@ def get_posts(request):
 
     # posts = posts.options(contains_eager(Post.source))
     # Horrible hack... But useful for structure load
-    if view_def == 'id_only':
+    if view_def in ('partial_post', 'id_only'):
         pass  # posts = posts.options(defer(Post.body))
     else:
         ideaContentLinkQuery = posts.with_entities(
@@ -377,7 +377,7 @@ def get_posts(request):
         if ancestor_ids:
             ancestors = discussion.db.query(
                 PostClass).filter(PostClass.id.in_(ancestor_ids))
-            if view_def == 'id_only':
+            if view_def in ('partial_post', 'id_only'):
                 pass  # ancestors = ancestors.options(defer(Post.body))
             else:
                 ancestors = ancestors.options(
@@ -395,18 +395,24 @@ def get_posts(request):
                         *Content.joinedload_options())
             posts.extend(ancestors.all())
 
+    if view_def == 'id_only':
+        posts = posts.with_entities(PostClass.id)
+
     for query_result in posts:
         score, viewpost, likedpost = None, None, None
         if not isinstance(query_result, (list, tuple)):
             query_result = [query_result]
         post = query_result[0]
+        if view_def == 'id_only':
+            post_data.append(Content.uri_generic(post))
+            continue
         if deleted is True:
             add_ancestors(post)
 
         if user_id != Everyone:
             viewpost = post.id in read_posts
             likedpost = liked_posts.get(post.id, None)
-            if view_def != "id_only":
+            if view_def not in ("partial_post", "id_only"):
                 translate_content(
                     post, translation_table=translations, service=service)
         no_of_posts += 1
@@ -432,7 +438,7 @@ def get_posts(request):
         # serializable_post['liked'] = likedpost.uri() if likedpost else False
         serializable_post['liked'] = (
             LikedPost.uri_generic(likedpost) if likedpost else False)
-        if view_def != "id_only":
+        if view_def not in ("partial_post", "id_only"):
             serializable_post['indirect_idea_content_links'] = (
                 post.indirect_idea_content_links_with_cache(
                     ideaContentLinkCache.get(post.id, None)))

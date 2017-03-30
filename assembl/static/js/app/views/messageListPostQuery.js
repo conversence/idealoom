@@ -75,7 +75,7 @@ var PostQuery = function() {
     /**
      * The server viewDef used to fulfill the data
      */
-    this._viewDef = 'id_only';
+    this._viewDef = 'partial_post';
 
     /**
      * Information on the query result once executed, such as the number of
@@ -403,7 +403,7 @@ var PostQuery = function() {
       // TODO: Have a more generic mecanism than a list of ifs. For example add a usesNonStandardMessageStructure boolean method in AbstractPostFilter
       if ( ("only_deleted_posts" in this._query) || ("also_deleted_posts" in this._query) ){
         var url = Ctx.getApiUrl('posts');
-        var params = {"view": "id_only"};
+        var params = {"view": "partial_post"};
         _.each(this._query, function(filter) {
           var values = filter.getValues();
           for (var i = 0; i < values.length; i++) {
