@@ -140,6 +140,7 @@ from .user_key_values import (
     # AbstractNamespacedKeyValue,
     # AbstractPerUserNamespacedKeyValue,
     DiscussionPerUserNamespacedKeyValue,
+    IdeaNamespacedKeyValue,
     # NamespacedUserKVCollection,
     # UserNsDict,
     UserPreferenceCollection,
