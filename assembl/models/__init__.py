@@ -105,6 +105,14 @@ class NamedClassMixin(object):
         query = query or session.query(cls)
         return query.filter_by(**{cls.get_naming_column_name(): name}).first()
 
+    @classmethod
+    def get_instance(cls, id, session=None):
+        instance = super(NamedClassMixin, cls).get_instance(id, session)
+        if instance:
+            return instance
+        return cls.getByName(id, session)
+
+
 
 from .auth import (
     AbstractAgentAccount,

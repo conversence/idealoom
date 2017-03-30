@@ -48,7 +48,7 @@ import logging
 log = logging.getLogger('assembl')
 
 
-class Discussion(DiscussionBoundBase, NamedClassMixin):
+class Discussion(NamedClassMixin, DiscussionBoundBase):
     """
     The context for a specific Assembl discussion.
 
@@ -544,19 +544,6 @@ class Discussion(DiscussionBoundBase, NamedClassMixin):
             def contains(self, parent_instance, instance):
                 return True
 
-            def get_instance(self, key, parent_instance):
-                if key == 'current':
-                    from pyramid.threadlocal import get_current_request
-                    from pyramid.httpexceptions import HTTPUnauthorized
-                    request = get_current_request()
-                    if request is not None:
-                        key = request.authenticated_userid
-                        if key is None:
-                            raise HTTPUnauthorized()
-                    else:
-                        raise RuntimeError()
-                return super(AllUsersCollection, self).get_instance(
-                    key, parent_instance)
 
         class ConnectedUsersCollection(AbstractCollectionDefinition):
             def __init__(self, cls):
@@ -583,20 +570,6 @@ class Discussion(DiscussionBoundBase, NamedClassMixin):
                     self, instance, parent_instance, assocs, user_id,
                     ctx, kwargs):
                 pass
-
-            def get_instance(self, key, parent_instance):
-                if key == 'current':
-                    from pyramid.threadlocal import get_current_request
-                    from pyramid.httpexceptions import HTTPUnauthorized
-                    request = get_current_request()
-                    if request is not None:
-                        key = request.authenticated_userid
-                        if key is None:
-                            raise HTTPUnauthorized()
-                    else:
-                        raise RuntimeError()
-                return super(AllUsersCollection, self).get_instance(
-                    key, parent_instance)
 
 
         class ActiveWidgetsCollection(CollectionDefinition):

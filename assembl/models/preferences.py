@@ -37,7 +37,7 @@ def merge_json(base, patch):
     return base
 
 
-class Preferences(MutableMapping, Base, NamedClassMixin):
+class Preferences(MutableMapping, NamedClassMixin, Base):
     """
     Cascading preferences
     """

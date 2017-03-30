@@ -46,7 +46,7 @@ from ..lib.sqla import (
 from ..lib.sqla_types import (
     URLString, EmailString, EmailUnicode, CaseInsensitiveWord, CoerceUnicode)
 from ..lib.raven_client import capture_message
-from . import Base, DiscussionBoundBase, PrivateObjectMixin
+from . import Base, DiscussionBoundBase, PrivateObjectMixin, NamedClassMixin
 from ..auth import *
 from assembl.lib.raven_client import capture_exception, capture_message
 from ..semantic.namespaces import (
@@ -625,7 +625,7 @@ def send_user_to_socket_for_asid(mapper, connection, target):
         connection, CrudOperation.UPDATE, target.discussion_id)
 
 
-class User(AgentProfile):
+class User(NamedClassMixin, AgentProfile):
     """
     A user of the platform.
     """
@@ -663,6 +663,20 @@ class User(AgentProfile):
     @property
     def real_name_p(self):
         return self.real_name()
+
+    @classmethod
+    def get_naming_column_name(cls):
+        return "username"
+
+    @classmethod
+    def getByName(cls, name, session=None, query=None):
+        if name == 'current':
+            from ..auth.util import get_current_user_id
+            user_id = get_current_user_id()
+            if not user_id:
+                return None
+            return User.get_instance(user_id)
+        return super(User, self).getByName(cls, name, session, query)
 
     @real_name_p.setter
     def real_name_p(self, name):
