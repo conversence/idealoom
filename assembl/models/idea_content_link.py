@@ -51,7 +51,8 @@ class IdeaContentLink(DiscussionBoundBase):
     # attached later.
     idea_id = Column(Integer, ForeignKey(Idea.id),
                      nullable=True, index=True)
-    idea = relationship(Idea, active_history=True)
+    idea = relationship(Idea, active_history=True,
+        backref="idea_content_links")
 
     content_id = Column(Integer, ForeignKey(
         'content.id', ondelete="CASCADE", onupdate="CASCADE"),
@@ -92,6 +93,7 @@ class IdeaContentLink(DiscussionBoundBase):
 
     discussion = relationship(
         Discussion, viewonly=True, uselist=False, secondary=Content.__table__,
+        backref="idea_content_links",
         info={'rdf': QuadMapPatternS(None, ASSEMBL.in_conversation)})
 
 

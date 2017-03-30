@@ -67,6 +67,13 @@ class AbstractVoteSpecification(DiscussionBoundBase):
     retypeable_as = ("LickertVoteSpecification", "BinaryVoteSpecification",
                      "MultipleChoiceVoteSpecification", "TokenVoteSpecification")
 
+    @classmethod
+    def __declare_last__(cls):
+        from .widgets import Widget
+        cls.discussion = relationship(
+            Discussion, viewonly=True, uselist=False,
+            secondary=Widget.__table__, backref="vote_specifications")
+
     ##
     # TODO (MAP):
     #   These and several functions that return a hard-encoded 'local' should
