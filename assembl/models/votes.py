@@ -70,9 +70,10 @@ class AbstractVoteSpecification(DiscussionBoundBase):
     @classmethod
     def __declare_last__(cls):
         from .widgets import Widget
-        cls.discussion = relationship(
-            Discussion, viewonly=True, uselist=False,
-            secondary=Widget.__table__, backref="vote_specifications")
+        if getattr(cls, 'discussion', None) is None:
+            cls.discussion = relationship(
+                Discussion, viewonly=True, uselist=False,
+                secondary=Widget.__table__, backref="vote_specifications")
 
     ##
     # TODO (MAP):
