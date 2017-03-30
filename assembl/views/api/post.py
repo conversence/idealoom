@@ -403,6 +403,7 @@ def get_posts(request):
         if not isinstance(query_result, (list, tuple)):
             query_result = [query_result]
         post = query_result[0]
+        no_of_posts += 1
         if view_def == 'id_only':
             post_data.append(Content.uri_generic(post))
             continue
@@ -415,7 +416,6 @@ def get_posts(request):
             if view_def not in ("partial_post", "id_only"):
                 translate_content(
                     post, translation_table=translations, service=service)
-        no_of_posts += 1
         serializable_post = post.generic_json(
             view_def, user_id, permissions) or {}
         if order == 'score':

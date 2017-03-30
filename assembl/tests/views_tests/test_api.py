@@ -337,7 +337,7 @@ def test_api_get_posts_queries(
 
     # Test date queries
     url = base_post_url + \
-        "?posted_before_date=2000-01-02T00%3A00%3A00.000Z&view=id_only"
+        "?posted_before_date=2000-01-02T00%3A00%3A00.000Z&view=partial_post"
     res = test_app.get(url)
     assert res.status_code == 200
     res_data = json.loads(res.body)
@@ -345,7 +345,7 @@ def test_api_get_posts_queries(
     assert res_data['posts'][0]['@id'] == root_post_1.uri()
 
     url = base_post_url + \
-        "?posted_after_date=2000-01-02T00%3A00%3A00.000Z&view=id_only"
+        "?posted_after_date=2000-01-02T00%3A00%3A00.000Z&view=partial_post"
     res = test_app.get(url)
     assert res.status_code == 200
     res_data = json.loads(res.body)

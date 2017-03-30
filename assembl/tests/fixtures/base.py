@@ -271,7 +271,7 @@ def json_representation_of_fixtures(
     rec_app = RecordingApp(test_app)
     rec_app.get("/api/v1/discussion/%d/ideas" % discussion.id)
     rec_app.get("/api/v1/discussion/%d/posts" % discussion.id,
-                {"view": "id_only"})
+                {"view": "partial_post"})
     rec_app.get("/api/v1/discussion/%d/explicit_subgraphs/synthesis" % discussion.id)
     rec_app.get("/data/Discussion/%d/idea_links" % discussion.id)
     rec_app.get("/data/Discussion/%d/widgets" % discussion.id)
