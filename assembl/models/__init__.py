@@ -149,6 +149,7 @@ from .generic import (
     AnnotatorSource,
     Content,
     ContentSource,
+    ContentSourceIDs,
     PostSource,
 )
 from .post import (
