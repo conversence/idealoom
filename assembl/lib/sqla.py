@@ -494,6 +494,9 @@ class BaseOps(object):
                 None, ('id', Integer, False))
         return cls._iri_class
 
+    def container_url(self):
+        return '/data/' + self.__class__.external_typename()
+
     @classmethod
     def base_conditions(cls, alias=None, alias_maker=None):
         """Return a list of SQLA expressions that will filter out

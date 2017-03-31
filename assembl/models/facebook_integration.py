@@ -1139,6 +1139,10 @@ class FacebookAccessToken(Base):
     object_name = Column(String(512))
     object_fb_id = Column(String(512))
 
+    def container_url(self):
+        return "/data/User/%d/accounts/%d/access_tokens" % (
+            self.fb_account.profile_id, self.fb_account_id)
+
     @property
     def infinite_token(self):
         if not self.expiration:

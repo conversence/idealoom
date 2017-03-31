@@ -75,11 +75,15 @@ class AbstractVoteSpecification(DiscussionBoundBase):
                 Discussion, viewonly=True, uselist=False,
                 secondary=Widget.__table__, backref="vote_specifications")
 
+    def container_url(self):
+        return "/data/Discussion/%d/widgets/$d/vote_specifications" % (
+            self.get_discussion_id(), self.widget_id)
+
     ##
     # TODO (MAP):
     #   These and several functions that return a hard-encoded 'local' should
     #   be migrated away from hard-encoding. The Widget APIs are supposed to be
-    #   self contained, and they do not hit the SIF defintion in the process.
+    #   self contained, and they do not hit the CIF defintion in the process.
     def get_voting_urls(self):
         return {
             Idea.uri_generic(votable.id):
@@ -345,6 +349,11 @@ class TokenCategorySpecification(DiscussionBoundBase):
     def get_discussion_id(self):
         tvs = self.token_vote_specification or TokenVoteSpecification.get(self.token_vote_specification_id)
         return tvs.get_discussion_id()
+
+    def container_url(self):
+        return "/data/Discussion/%d/widgets/%d/vote_specifications/%d/token_categories" % (
+            self.get_discussion_id(), self.token_vote_specification.widget_id,
+            self.token_vote_specification_id)
 
     def is_valid_vote(self, vote):
         if vote.vote_value < 0:
@@ -774,6 +783,12 @@ class AbstractIdeaVote(HistoryMixin, DiscussionBoundBase):
     def get_discussion_id(self):
         idea = self.idea or self.idea_ts or Idea.get(self.idea_id)
         return idea.get_discussion_id()
+
+    def container_url(self):
+        # Or stop at widget or spec?
+        return "/data/Discussion/%d/widgets/%d/vote_specifications/%d/vote_targets/%d/votes" % (
+            self.get_discussion_id(), self.widget_id,
+            self.vote_spec_id, self.idea_id)
 
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):

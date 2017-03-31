@@ -511,6 +511,9 @@ class DiscussionPerUserNamespacedKeyValue(
     def get_discussion_id(self):
         return self.discussion_id
 
+    def container_url(self):
+        return "/data/Discussion/%d/user_ns_kv" % (self.discussion_id,)
+
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):
         return (cls.discussion_id == discussion_id, )
@@ -541,6 +544,10 @@ class IdeaNamespacedKeyValue(
 
     def get_discussion_id(self):
         return self.idea.discussion_id
+
+    def container_url(self):
+        return "/data/Discussion/%d/ideas/%d/ns_kv" % (
+            self.get_discussion_id(), self.idea_id)
 
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):

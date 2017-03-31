@@ -1169,6 +1169,9 @@ class UserRole(Base, PrivateObjectMixin):
     def get_role_name(self):
         return self.role.name
 
+    def container_url(self):
+        return "/data/User/%d/roles" % (self.user_id)
+
     @classmethod
     def special_quad_patterns(cls, alias_maker, discussion_id):
         role_alias = alias_maker.alias_from_relns(cls.role)
@@ -1232,6 +1235,10 @@ class LocalUserRole(DiscussionBoundBase, PrivateObjectMixin):
 
     def get_discussion_id(self):
         return self.discussion_id or self.discussion.id
+
+    def container_url(self):
+        return "/data/Discussion/%d/all_users/%d/local_roles" % (
+            self.discussion_id, self.user_id)
 
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):

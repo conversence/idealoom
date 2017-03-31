@@ -77,6 +77,12 @@ class DiscussionBoundBase(Base):
     def tombstone(self):
         return DiscussionBoundTombstone(self)
 
+    def container_url(self):
+        for r in self.__class__.__mapper__.relationships:
+            if r.mapper.class_ == Discussion and r.back_populates:
+                return '/data/Discussion/%d/%s' % (
+                    self.get_discussion_id(), r.back_populates)
+
 
 class DiscussionBoundTombstone(Tombstone):
     "A :py:class:`assembl.lib.sqla.Tombstone` that is bound to a discussion"

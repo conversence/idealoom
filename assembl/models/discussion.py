@@ -221,6 +221,9 @@ class Discussion(NamedClassMixin, DiscussionBoundBase):
     def get_discussion_id(self):
         return self.id
 
+    def container_url(self):
+        return "/data/Discussion"
+
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):
         return (cls.id == discussion_id,)

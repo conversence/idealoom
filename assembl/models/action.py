@@ -84,6 +84,10 @@ class Action(TombstonableMixin, DiscussionBoundBase):
     def is_owner(self, user_id):
         return self.actor_id == user_id
 
+    def container_url(self):
+        return "/data/Discussion/%d/all_users/%d/actions" % (
+            self.get_discussion_id(), self.actor_id)
+
     @classmethod
     def restrict_to_owners(cls, q, user_id):
         return q.filter(cls.actor_id == user_id)
