@@ -878,6 +878,7 @@ class Idea(HistoryMixin, DiscussionBoundBase):
                 return query.count() > 0
 
         class LinkedPostCollectionDefinition(AbstractCollectionDefinition):
+            # used by inspiration widget
             def __init__(self, cls):
                 super(LinkedPostCollectionDefinition, self).__init__(
                     cls, Content)
@@ -922,6 +923,7 @@ class Idea(HistoryMixin, DiscussionBoundBase):
                     ).count() > 0
 
         class WidgetPostCollectionDefinition(AbstractCollectionDefinition):
+            # used by creativity widget
             def __init__(self, cls):
                 super(WidgetPostCollectionDefinition, self).__init__(
                     cls, Content)

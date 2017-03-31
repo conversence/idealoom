@@ -679,6 +679,14 @@ class WidgetPost(AssemblPost):
 
     widget = relationship("Widget", backref="posts")
 
+    def container_url(self):
+        return "/data/Discussion/%d/widgets/%d/posts" % (
+            self.discussion_id, self.widget_id)
+        # in practice, inspiration uses
+        # /data/Discussion/%d/widgets/%d/base_idea_descendants/%d/linkedposts
+        # and creativity uses
+        # /data/Discussion/%d/widgets/%d/base_idea/-/children/%d/widgetposts
+
     @property
     def metadata_json(self):
         if self.metadata_raw:
@@ -714,6 +722,10 @@ class IdeaProposalPost(WidgetPost):
 
     proposes_idea = relationship('Idea',
                                  backref=backref('proposed_in_post',uselist=False))
+
+    def container_url(self):
+        return "/data/Discussion/%d/widgets/%d/base_idea/-/children/%d/widgetposts" % (
+            self.discussion_id, self.widget_id, self.idea_id)
 
     __mapper_args__ = {
         'polymorphic_identity': 'idea_proposal_post',
@@ -772,6 +784,10 @@ class ImportedPost(Post):
     __mapper_args__ = {
         'polymorphic_identity': 'imported_post',
     }
+
+    def container_url(self):
+        return "/data/Discussion/%d/sources/%d/contents" % (
+            self.discussion_id, self.source_id)
 
     def get_body_mime_type(self):
         return self.body_mime_type
