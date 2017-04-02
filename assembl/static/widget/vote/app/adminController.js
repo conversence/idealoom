@@ -112,10 +112,6 @@ voteApp.controller('adminCtl',
     $http({
       method: 'GET',
       url: $scope.widget_endpoint
-
-      //data: $.param(post_data),
-      //headers: {'Content-Type': 'application/json'}
-      //headers: {'Content-Type': 'application/x-www-form-urlencoded'}
     }).success(function(data, status, headers) {
       console.log("success");
       $scope.widget_data = data;

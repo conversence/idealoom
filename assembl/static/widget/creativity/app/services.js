@@ -23,10 +23,7 @@ creativityServices.service('WidgetService', ['$window', '$rootScope', '$log', '$
       url: endpoint,
       data: post_data,
 
-      //data: $.param(post_data),
       headers: {'Content-Type': 'application/json'}
-
-      //headers: {'Content-Type': 'application/x-www-form-urlencoded'}
     }).success(function(data, status, headers) {
       console.log("success");
       if (result_holder)

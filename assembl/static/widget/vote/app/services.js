@@ -602,11 +602,7 @@ voteServices.service('VoteWidgetService', ['$window', '$rootScope', '$log', '$ht
       method: method,
       url: endpoint,
       data: post_data,
-
-      //data: $.param(post_data),
       headers: {'Content-Type': 'application/json'}
-
-      //headers: {'Content-Type': 'application/x-www-form-urlencoded'}
     }).success(function(data, status, headers) {
       console.log("success");
       if (result_holder && display_filter != "show_only_error")
