@@ -913,13 +913,6 @@ class User(NamedClassMixin, AgentProfile):
                     query = query.filter(last_alias.discussion_id == discussion.id)
                 return query
 
-            def decorate_instance(
-                    self, instance, parent_instance, assocs, user_id,
-                    ctx, kwargs):
-                super(NotificationSubscriptionCollection,
-                      self).decorate_instance(
-                      instance, parent_instance, assocs, user_id, ctx, kwargs)
-
             def contains(self, parent_instance, instance):
                 if not super(NotificationSubscriptionCollection, self).contains(
                         parent_instance, instance):
@@ -944,13 +937,6 @@ class User(NamedClassMixin, AgentProfile):
                 if discussion is not None:
                     query = query.filter(last_alias.discussion_id == discussion.id)
                 return query
-
-            def decorate_instance(
-                    self, instance, parent_instance, assocs, user_id,
-                    ctx, kwargs):
-                super(LocalRoleCollection,
-                      self).decorate_instance(
-                      instance, parent_instance, assocs, user_id, ctx, kwargs)
 
             def contains(self, parent_instance, instance):
                 if not super(LocalRoleCollection, self).contains(
