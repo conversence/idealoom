@@ -454,7 +454,7 @@ class BaseOps(object):
         if mapper_args.get('polymorphic_identity', None) is not None:
             for nextclass in cls.mro():
                 if getattr(nextclass, '__mapper__', None) is None:
-                    break
+                    continue
                 if nextclass.__mapper__.polymorphic_identity is not None:
                     cls = nextclass
         return cls
