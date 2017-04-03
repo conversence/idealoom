@@ -7,7 +7,7 @@ from pyramid.view import view_config
 from pyramid.security import authenticated_userid, Everyone
 from pyramid.httpexceptions import (
     HTTPNotFound, HTTPUnauthorized, HTTPBadRequest, HTTPClientError,
-    HTTPOk, HTTPNoContent, HTTPForbidden, HTTPNotImplemented)
+    HTTPOk, HTTPNoContent, HTTPForbidden, HTTPNotImplemented, HTTPError)
 
 import assembl.lib.config as settings
 from assembl.lib.web_token import decode_token, TokenInvalid
@@ -230,7 +230,7 @@ def view_localuserrole_collection(request):
 
 @view_config(context=CollectionContext, renderer='json', request_method='GET',
              ctx_collection_class=AgentProfile,
-             accept="application/json")
+             accept="application/json", permission=P_READ)
 def view_profile_collection(request):
     ctx = request.context
     view = request.GET.get('view', None) or ctx.get_default_view() or 'default'
@@ -250,9 +250,11 @@ def view_profile_collection(request):
 
 @view_config(context=InstanceContext, renderer='json', request_method='GET',
              ctx_instance_class=AgentProfile,
-             accept="application/json")
+             accept="application/json", permission=P_READ)
 def view_agent_profile(request):
     profile = instance_view(request)
+    if isinstance(profile, HTTPError):
+        raise profile
     ctx = request.context
     view = ctx.get_default_view() or 'default'
     view = request.GET.get('view', view)
