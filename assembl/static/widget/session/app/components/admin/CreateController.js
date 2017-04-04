@@ -46,12 +46,9 @@ AdminModule.controller('CreateController', ['$rootScope', '$scope', '$stateParam
       $scope.createWidgetInstance = function(endpoint, widget_type, settings) {
 
         var post_data = {
-          "type": widget_type
+          "@type": widget_type,
+          settings: settings,
         };
-
-        if (settings != null) {
-          post_data["settings"] = JSON.stringify({"idea": settings});
-        }
 
         console.debug(post_data, endpoint)
 
@@ -70,13 +67,13 @@ AdminModule.controller('CreateController', ['$rootScope', '$scope', '$stateParam
         user_states_url: "local:Widget/40/user_states"
         widget_settings_url: "local:Widget/40/settings"
         widget_state_url: "local:Widget/40/state" */
-        
+
         $http({
           method: 'POST',
           url: endpoint,
-          data: $.param(post_data),
+          data: post_data,
           async: true,
-          headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+          headers: {'Content-Type': 'application/json'}
 
           //headers: {'Content-Type': 'application/json'}
         }).success(function(data, status, headers) {

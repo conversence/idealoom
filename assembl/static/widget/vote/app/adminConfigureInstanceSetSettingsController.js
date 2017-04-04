@@ -217,7 +217,7 @@ voteApp.controller('adminConfigureInstanceSetSettingsCtl',
       $http({
         method: 'DELETE',
         url: AssemblToolsService.resourceToUrl($scope.widget.vote_specifications[criterion_index].token_categories[category_index][id_field]),
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+        headers: {'Content-Type': 'application/json'}
       }).success(function(data, status, headers) {
         console.log("DELETE success");
       }).error(function(status, headers) {
@@ -300,7 +300,7 @@ voteApp.controller('adminConfigureInstanceSetSettingsCtl',
               url: AssemblToolsService.resourceToUrl(vote_spec["@id"]),
 
               //data: $.param(post_data),
-              headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+              headers: {'Content-Type': 'application/json'}
             }).success(function(data, status, headers) {
               console.log("DELETE success");
             }).error(function(status, headers) {
@@ -593,7 +593,7 @@ voteApp.controller('adminConfigureInstanceSetSettingsCtl',
                 $http({
                   method: 'DELETE',
                   url: AssemblToolsService.resourceToUrl(vote_spec["@id"]),
-                  headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+                  headers: {'Content-Type': 'application/json'}
                 }).success(function(data, status, headers) {
                   console.log("DELETE success");
                 }).error(function(status, headers) {

@@ -383,7 +383,7 @@ voteApp.controller('indexCtl',
       }
 
       return {
-        "type": vote_type,
+        "@type": vote_type,
         "value": value
       };
     };
@@ -512,11 +512,11 @@ voteApp.controller('indexCtl',
 
       var votePromiseGenerator = function(url, data_to_post, delay){
         var promise_generator = function(){
-          return $.ajax({
-            type: "POST",
+          return $http({
+            method: "POST",
             url: url,
-            data: $.param(data_to_post), // or maybe: data_to_post
-            contentType: 'application/x-www-form-urlencoded; charset=UTF-8' // or maybe: 'Content-Type': 'application/json'
+            data: data_to_post,
+            contentType: 'application/json'
           });
         };
         var promise = AssemblToolsService.afterDelayPromiseGenerator(delay, promise_generator);

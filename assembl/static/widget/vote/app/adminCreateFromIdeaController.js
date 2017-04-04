@@ -78,22 +78,18 @@ voteApp.controller('adminCreateFromIdeaCtl',
     $scope.createWidgetInstance = function(endpoint, widget_type, settings, result_holder) {
 
       var post_data = {
-      "type": widget_type
-    };
-
-      if (settings != null)
-      {
-        post_data["settings"] = JSON.stringify(settings);
-      }
+        "@type": widget_type,
+        settings: settings,
+      };
 
       $http({
       method: 'POST',
       url: endpoint,
-      data: $.param(post_data),
+      data: post_data,
 
       //data: post_data,
       async: true,
-      headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+      headers: {'Content-Type': 'application/json'}
 
       //headers: {'Content-Type': 'application/json'}
     }).success(function(data, status, headers) {

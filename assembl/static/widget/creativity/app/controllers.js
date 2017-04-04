@@ -39,7 +39,7 @@ creativityApp.controller('adminConfigureInstanceCtl',
             $http({
               method: 'DELETE',
               url: endpoint,
-              headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+              headers: {'Content-Type': 'application/json'}
             }).success(function(data, status, headers) {
               console.log("success");
               result_holder.text("Success!");
@@ -277,21 +277,18 @@ creativityApp.controller('adminCreateFromIdeaCtl',
           $scope.createWidgetInstance = function(endpoint, widget_type, settings, result_holder) {
 
             var post_data = {
-              "type": widget_type
+              "@type": widget_type,
+              settings: settings,
             };
-
-            if (settings != null) {
-              post_data["settings"] = JSON.stringify(settings);
-            }
 
             $http({
               method: 'POST',
               url: endpoint,
-              data: $.param(post_data),
+              data: post_data,
 
               //data: post_data,
               async: true,
-              headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+              headers: {'Content-Type': 'application/json'}
 
               //headers: {'Content-Type': 'application/json'}
             }).success(function(data, status, headers) {
@@ -425,8 +422,7 @@ creativityApp.controller('adminCtl',
               url: $scope.widget_endpoint
 
               //data: $.param(post_data),
-              //headers: {'Content-Type': 'application/json'}
-              //headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+              headers: {'Content-Type': 'application/json'},
             }).success(function(data, status, headers) {
               console.log("success");
               $scope.widget_data = data;
@@ -451,21 +447,18 @@ creativityApp.controller('adminCtl',
           $scope.createWidgetInstance = function(endpoint, widget_type, settings, result_holder) {
 
             var post_data = {
-              "type": widget_type
+              "@type": widget_type,
+              settings: settings,
             };
-
-            if (settings != null) {
-              post_data["settings"] = settings;
-            }
 
             $http({
               method: 'POST',
               url: endpoint,
-              data: $.param(post_data),
+              data: post_data,
               async: true,
 
               //headers: {'Content-Type': 'application/json'}
-              headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+              headers: {'Content-Type': 'application/json'}
             }).success(function(data, status, headers) {
               console.log("success");
               var created_widget = headers("Location"); // "local:Widget/5"
@@ -488,15 +481,15 @@ creativityApp.controller('adminCtl',
 
           $scope.addCriterion = function(endpoint, criterion_id, result_holder) {
             var post_data = {
-              "id": criterion_id
+              "@id": criterion_id
             };
 
             $http({
               method: 'POST',
               url: endpoint,
-              data: $.param(post_data),
+              data: post_data,
               async: true,
-              headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+              headers: {'Content-Type': 'application/json'}
             }).success(function(data, status, headers) {
               console.log("success");
               result_holder.text("Success!");
@@ -514,7 +507,7 @@ creativityApp.controller('adminCtl',
               url: endpoint + "/" + criterion_id_last_part,
 
               //data: $.param(post_data),
-              headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+              headers: {'Content-Type': 'application/json'}
             }).success(function(data, status, headers) {
               console.log("success");
               result_holder.text("Success!");
@@ -533,7 +526,7 @@ creativityApp.controller('adminCtl',
             $http({
               method: 'DELETE',
               url: endpoint,
-              headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+              headers: {'Content-Type': 'application/json'}
             }).success(function(data, status, headers) {
               console.log("success");
               result_holder.text("Success!");

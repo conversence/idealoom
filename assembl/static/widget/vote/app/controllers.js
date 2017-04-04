@@ -84,7 +84,7 @@ voteApp.controller('adminConfigureInstanceCtl',
       $http({
         method: 'DELETE',
         url: endpoint,
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'}
+        headers: {'Content-Type': 'application/json'}
       }).success(function(data, status, headers) {
         console.log("success");
         result_holder.text("Success!");
