@@ -34,7 +34,7 @@ voteApp.controller('adminCtl',
       $scope.createWidgetInstance(
         $("#widget_create_api_endpoint").val(),
         $("#widget_create_type").val(),
-        $("#widget_create_settings").val(),
+        JSON.parse($("#widget_create_settings").val()),
         $("#widget_create_result")
       );
     });
@@ -137,17 +137,16 @@ voteApp.controller('adminCtl',
     $scope.createWidgetInstance = function(endpoint, widget_type, settings, result_holder) {
 
       var post_data = {
-      "@type": widget_type,
-      settings: settings,
-    };
+        "@type": widget_type,
+        settings: settings,
+      };
 
       $http({
         method: 'POST',
         url: endpoint,
-        data: $.param(post_data),
+        data: post_data,
         async: true,
 
-        //headers: {'Content-Type': 'application/json'}
         headers: {'Content-Type': 'application/json'}
       }).success(function(data, status, headers) {
         console.log("success");
@@ -165,7 +164,7 @@ voteApp.controller('adminCtl',
     $scope.setWidgetSettings = function(endpoint, settings, result_holder) {
     console.log("setWidgetSettings()");
 
-    var post_data = settings;
+    var post_data = settings; // do we need to parse first?
     VoteWidgetService.putJson(endpoint, post_data, result_holder);
   };
 

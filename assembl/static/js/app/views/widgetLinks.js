@@ -7,6 +7,7 @@
 var Backbone = require("backbone"),
     Marionette = require('backbone.marionette'),
     _ = require("underscore"),
+    $ = require("jquery"),
     Widget = require("../models/widget.js");
 
 

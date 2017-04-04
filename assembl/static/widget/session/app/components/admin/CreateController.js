@@ -22,7 +22,7 @@ AdminModule.controller('CreateController', ['$rootScope', '$scope', '$stateParam
       }).success(function(data, status, headers) {
 
         $scope.widget = data;
-        $scope.widget["@type"] = 'CreativitySessionWidget';
+        $scope.widget.type = 'CreativitySessionWidget';
         $scope.widget.idea = idea['@id'];
 
         $scope.discussion = data;
@@ -43,11 +43,11 @@ AdminModule.controller('CreateController', ['$rootScope', '$scope', '$stateParam
       };
 
       // settings can be null
-      $scope.createWidgetInstance = function(endpoint, widget_type, settings) {
+      $scope.createWidgetInstance = function(endpoint, widget_type, idea) {
 
         var post_data = {
           "@type": widget_type,
-          settings: settings,
+          settings: {idea: idea},
         };
 
         console.debug(post_data, endpoint)
