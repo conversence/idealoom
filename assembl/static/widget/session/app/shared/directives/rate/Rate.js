@@ -1,4 +1,4 @@
-SessionApp.directive('Rate', ['UtilsService', function($http, UtilsService) {
+SessionApp.directive('rate', ['UtilsService', function($http, UtilsService) {
   return {
     restrict:'E',
     scope: {

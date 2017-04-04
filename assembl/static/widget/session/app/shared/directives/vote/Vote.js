@@ -1,4 +1,4 @@
-SessionApp.directive('Vote', function($http, $rootScope, utils) {
+SessionApp.directive('vote', function($http, $rootScope, utils) {
   return {
     restrict:'E',
     scope: {
