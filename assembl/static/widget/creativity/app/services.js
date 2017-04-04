@@ -62,23 +62,18 @@ creativityServices.factory('configTestingService', [function() {
 
     },
     testCall: function() {
-      $.ajax({
+      $http({
         url: 'http://localhost:6543/data/Discussion/1/widgets',
-        type: 'POST',
+        method: 'POST',
         data: {
-          type: 'MultiCriterionVotingWidget',
-          settings: JSON.stringify({"idea": "local:Idea/2"})
+          "@type": 'MultiCriterionVotingWidget',
+          settings: {"idea": "local:Idea/2"}
+        }).then(function success(response) {
+          getConfig(response.getResponseHeader('location'));
         },
-        success: function(data, textStatus, jqXHR) {
-
-          getConfig(jqXHR.getResponseHeader('location'));
-        },
-        error: function(jqXHR, textStatus, errorThrown) {
-
-          console.log(jqXHR);
-
-        }
-      });
+        function error(response) {
+          console.log(response);
+        });
 
       function getConfig(value) {
         var widget = value.split(':');
@@ -92,13 +87,10 @@ creativityServices.factory('configTestingService', [function() {
       };
       fnError = fnError || function(jqXHR, textStatus, errorThrown) {
             };
-      $.ajax({
+      $http({
         url: url,
-        type: 'GET',
-        data: {},
-        success: fnSuccess,
-        error: fnError
-      });
+        method: 'GET',
+        data: {}).then(fnSuccess, fnError);
     }
   }
 

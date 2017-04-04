@@ -660,7 +660,7 @@ voteServices.factory('configTestingService', [function() {
         url:'http://localhost:6543/data/Discussion/1/widgets',
         type:'POST',
         data: {
-          type:'MultiCriterionVotingWidget',
+          "@type":'MultiCriterionVotingWidget',
           settings: JSON.stringify({"idea":"local:Idea/2"})
         },
         success: function(data, textStatus, jqXHR) {

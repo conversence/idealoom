@@ -22,7 +22,7 @@ AdminModule.controller('CreateController', ['$rootScope', '$scope', '$stateParam
       }).success(function(data, status, headers) {
 
         $scope.widget = data;
-        $scope.widget.type = 'CreativitySessionWidget';
+        $scope.widget["@type"] = 'CreativitySessionWidget';
         $scope.widget.idea = idea['@id'];
 
         $scope.discussion = data;
