@@ -192,9 +192,7 @@ class AbstractVoteSpecification(DiscussionBoundBase):
                         inst.vote_spec = parent_instance
                         assocs.append(VotedIdeaWidgetLink(
                             widget=widgets_coll.parent_instance,
-                            idea=inst.idea,
-                            **self.filter_kwargs(
-                                VotedIdeaWidgetLink, kwargs)))
+                            idea=inst.idea))
 
             def contains(self, parent_instance, instance):
                 return isinstance(instance, Idea)

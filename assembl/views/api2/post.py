@@ -12,7 +12,7 @@ from assembl.models.post import PublicationStates
 from ..traversal import InstanceContext, CollectionContext
 from . import (
     FORM_HEADER, JSON_HEADER, instance_put_json, instance_put_form,
-    collection_add_json, collection_add_with_params)
+    collection_add_json)
 
 
 @view_config(context=InstanceContext, request_method='GET',
@@ -143,15 +143,6 @@ def post_put(request):
         form_data['moderator'] = User.uri_generic(
             authenticated_userid(request))
     return instance_put_form(request, form_data)
-
-
-@view_config(
-    context=CollectionContext, request_method='POST',
-    ctx_collection_class=Post, header=FORM_HEADER, renderer='json')
-def add_post_form(request):
-    if has_moderation(request.params):
-        raise HTTPBadRequest("Cannot moderate at post creation")
-    return collection_add_with_params(request)
 
 
 @view_config(

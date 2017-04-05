@@ -823,9 +823,7 @@ class Idea(HistoryMixin, DiscussionBoundBase):
                     ctx, kwargs):
                 if isinstance(instance, Idea):
                     assocs.append(IdeaLink(
-                        source=parent_instance, target=instance,
-                        **self.filter_kwargs(
-                            IdeaLink, kwargs)))
+                        source=parent_instance, target=instance))
 
             def contains(self, parent_instance, instance):
                 return instance.db.query(
@@ -861,9 +859,7 @@ class Idea(HistoryMixin, DiscussionBoundBase):
                     assocs.append(
                         IdeaContentWidgetLink(
                             content=instance, widget=parent_instance,
-                            creator=instance.creator,
-                            **self.filter_kwargs(
-                                IdeaContentWidgetLink, kwargs)))
+                            creator=instance.creator))
 
             def contains(self, parent_instance, instance):
                 ancestors = aliased(Idea)
@@ -896,8 +892,7 @@ class Idea(HistoryMixin, DiscussionBoundBase):
                         IdeaRelatedPostLink(
                             content=instance, idea=parent_instance,
                             creator=instance.creator,
-                            **self.filter_kwargs(
-                                IdeaRelatedPostLink, kwargs)))
+                            **self.filter_kwargs(IdeaRelatedPostLink, kwargs)))
                 if isinstance(instance, WidgetPost):
                     insp_url = instance.metadata_json.get('inspiration_url', '')
                     if insp_url.startswith("https://www.youtube.com/"):
@@ -955,9 +950,7 @@ class Idea(HistoryMixin, DiscussionBoundBase):
                     assocs.append(
                         IdeaContentWidgetLink(
                             content=instance, idea=parent_instance,
-                            creator=instance.creator,
-                            **self.filter_kwargs(
-                                IdeaContentWidgetLink, kwargs)))
+                            creator=instance.creator))
                     instance.hidden = True
 
             def contains(self, parent_instance, instance):

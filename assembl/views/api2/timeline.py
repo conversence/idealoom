@@ -5,7 +5,7 @@ from assembl.models.timeline import TimelineEvent
 from ..traversal import InstanceContext, CollectionContext
 from . import (
     FORM_HEADER, JSON_HEADER, instance_put_json, instance_put_form,
-    collection_add_json, collection_add_with_params, instance_del)
+    collection_add_json, instance_del)
 
 
 @view_config(

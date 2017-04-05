@@ -14,7 +14,7 @@ from assembl.auth.util import get_permissions
 from assembl.auth import CrudPermissions
 from ..traversal import InstanceContext, CollectionContext
 from . import (
-    FORM_HEADER, JSON_HEADER, instance_put_form, collection_add,
+    FORM_HEADER, JSON_HEADER, instance_put_form,
     collection_add_json, check_permissions)
 
 
@@ -344,19 +344,6 @@ def set_idea_criteria(request):
     ideas = [Idea.get_instance(idea['@id']) for idea in request.json_body]
     widget.set_criteria(ideas)
     return HTTPOk()
-
-
-@view_config(context=CollectionContext, request_method='POST',
-             ctx_named_collection="ChildIdeaCollectionDefinition",
-             permission=P_ADD_POST, header=FORM_HEADER)
-def add_child_idea(request):
-    args = request.params
-    if 'context_url' in args:
-        from webob.multidict import NestedMultiDict
-        v = args['context_url']
-        args = NestedMultiDict(dict(GeneratedIdeaWidgetLink__context_url=v),
-                               *args.dicts)
-    return collection_add(request, args)
 
 
 @view_config(context=CollectionContext, request_method='POST',

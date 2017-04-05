@@ -250,22 +250,10 @@ class ClassContext(TraversalContext):
     def get_target_alias(self):
         return self.class_alias
 
-    def create_object(self, typename=None, json=None, user_id=None, **kwargs):
+    def create_object(self, typename=None, json=None, user_id=None):
         cls = self.get_class(typename)
         with self._class.default_db.no_autoflush:
-            if json is None:
-                mapper = sqlainspect(cls)
-                for prop in ('creator_id', 'user_id'):
-                    if prop in mapper.c and prop not in kwargs:
-                        kwargs[prop] = user_id
-                        break
-                try:
-                    return [cls(**dict(process_args(kwargs, cls)))]
-                except Exception as e:
-                    print_exc()
-                    raise e
-            else:
-                return [cls.create_from_json(json, user_id, self)]
+            return [cls.create_from_json(json, user_id, self)]
 
 
 class ClassContextPredicate(object):
@@ -517,34 +505,20 @@ class CollectionContext(TraversalContext):
             CollectionContext, self).ctx_permissions(permissions))
         return new_permissions
 
-    def create_object(self, typename=None, json=None, user_id=None, **kwargs):
+    def create_object(self, typename=None, json=None, user_id=None):
         cls = self.get_collection_class(typename)
         permissions = get_permissions(
             user_id, self.get_discussion_id())
         permissions.extend(self.ctx_permissions(permissions))
         with self.parent_instance.db.no_autoflush:
             try:
-                if json is None:
-                    mapper = sqlainspect(cls)
-                    for prop in ('creator_id', 'user_id'):
-                        if prop in mapper.c and prop not in kwargs:
-                            kwargs[prop] = user_id
-                            break
-                    inst = cls(**dict(process_args(kwargs, cls)))
-                else:
-                    inst = cls.create_from_json(
-                        json, user_id, self, permissions=permissions)
-                    kwargs.update(json)
+                inst = cls.create_from_json(
+                    json, user_id, self, permissions=permissions)
             except Exception as e:
                 print_exc()
                 raise e
             assocs = [inst]
-            self.decorate_instance(inst, assocs, user_id, self, kwargs)
-            if json is None:
-                inst = inst.handle_duplication(
-                    None, None, self, permissions, user_id,
-                    None, None, kwargs)
-                assocs[0] = inst
+            self.decorate_instance(inst, assocs, user_id, self, json)
         return assocs
 
     def __repr__(self):

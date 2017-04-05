@@ -95,57 +95,6 @@ def votes_collection_add_json(request):
             status_code=201)
 
 
-@view_config(context=CollectionContext, request_method='POST',
-             permission=P_VOTE, header=FORM_HEADER,
-             ctx_collection_class=AbstractIdeaVote)
-def votes_collection_add(request):
-    ctx = request.context
-    user_id = authenticated_userid(request)
-    if not user_id:
-        raise HTTPUnauthorized
-    permissions = get_permissions(
-        user_id, ctx.get_discussion_id())
-    check_permissions(ctx, user_id, permissions, CrudPermissions.CREATE)
-    widget = ctx.get_instance_of_class(VotingWidget)
-    if widget.activity_state != 'active':
-        raise HTTPUnauthorized("Not in voting period")
-    args = dict(request.params)
-    spec = ctx.get_instance_of_class(AbstractVoteSpecification)
-    if spec:
-        required = spec.get_vote_class()
-    else:
-        required = ctx.collection_class
-    if 'type' in args:
-        typename = args['type']
-        del args['type']
-        cls = get_named_class(typename)
-        if not issubclass(cls, required):
-            raise HTTPBadRequest("@type is %s, should be in %s" % (
-                typename, spec.get_vote_class().__name__))
-    else:
-        typename = required.external_typename()
-    args['voter_id'] = user_id
-    try:
-        instances = ctx.create_object(typename, None, user_id, **args)
-    except Exception as e:
-        raise HTTPBadRequest(e)
-    if instances:
-        first = instances[0]
-        if not first.is_valid():
-            raise HTTPBadRequest("Invalid vote")
-        db = first.db
-        for instance in instances:
-            db.add(instance)
-        print "before flush"
-        db.flush()
-        print "after flush"
-        return Response(
-            dumps(first.generic_json('default', user_id, permissions)),
-            location=first.uri_generic(first.id),
-            status_code=201)
-    raise HTTPBadRequest()
-
-
 @view_config(context=InstanceContext, request_method='GET',
              ctx_instance_class=AbstractVoteSpecification,
              name="vote_results", renderer="json",

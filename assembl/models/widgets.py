@@ -561,15 +561,11 @@ class IdeaCreatingWidget(BaseIdeaWidget):
                             subject=LangString.create(inst.short_title),
                             body=(LangString.create(instance.definition)
                                   if instance.definition
-                                  else LangString.EMPTY(instance.db)),  # repeated
-                            **self.filter_kwargs(
-                                IdeaProposalPost, kwargs))
+                                  else LangString.EMPTY(instance.db)))  # repeated
                         assocs.append(post)
                         assocs.append(IdeaContentWidgetLink(
                             content=post, idea=inst,
-                            creator_id=user_id,
-                            **self.filter_kwargs(
-                                IdeaContentWidgetLink, kwargs)))
+                            creator_id=user_id))
                         assocs.append(GeneratedIdeaWidgetLink(
                             idea=inst,
                             **self.filter_kwargs(
@@ -618,15 +614,11 @@ class IdeaCreatingWidget(BaseIdeaWidget):
                             discussion=inst.discussion,
                             hidden=self.hide_proposed_ideas,
                             body=LangString.EMPTY(instance.db),
-                            subject=LangString.create(inst.short_title),
-                            **self.filter_kwargs(
-                                IdeaProposalPost, kwargs))
+                            subject=LangString.create(inst.short_title))
                         assocs.append(post)
                         assocs.append(IdeaContentWidgetLink(
                             content=post, idea=inst,
-                            creator_id=user_id,
-                            **self.filter_kwargs(
-                                IdeaContentWidgetLink, kwargs)))
+                            creator_id=user_id))
                         assocs.append(GeneratedIdeaWidgetLink(
                             idea=inst,
                             **self.filter_kwargs(
@@ -904,10 +896,7 @@ class VotingWidget(BaseIdeaWidget):
                     instance, parent_instance, assocs, user_id, ctx, kwargs)
                 for inst in assocs[:]:
                     if isinstance(inst, Idea):
-                        assocs.append(VotingCriterionWidgetLink(
-                            idea=inst,
-                            **self.filter_kwargs(
-                                VotingCriterionWidgetLink, kwargs)))
+                        assocs.append(VotingCriterionWidgetLink(idea=inst))
                     elif isinstance(inst, AbstractIdeaVote):
                         criterion_ctx = ctx.find_collection(
                             'CriterionCollection.criteria')
@@ -946,9 +935,7 @@ class VotingWidget(BaseIdeaWidget):
                     if isinstance(inst, Idea):
                         assocs.append(VotableIdeaWidgetLink(
                             idea=inst,
-                            widget=self.parent_instance,
-                            **self.filter_kwargs(
-                                VotableIdeaWidgetLink, kwargs)))
+                            widget=self.parent_instance))
 
         return {'criteria': CriterionCollection(cls),
                 'targets': VotableCollection(cls)}

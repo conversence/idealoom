@@ -184,43 +184,6 @@ def collection_view(request, default_view='default'):
         return [x for x in res if x is not None]
 
 
-def collection_add(request, args):
-    ctx = request.context
-    user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(
-        user_id, ctx.get_discussion_id())
-    check_permissions(ctx, user_id, permissions, CrudPermissions.CREATE)
-    if 'type' in args:
-        args = dict(args)
-        typename = args['type']
-        del args['type']
-    else:
-        typename = ctx.collection_class.external_typename()
-    session = User.default_db
-    old_autoflush = session.autoflush
-    session.autoflush = False
-    try:
-        instances = ctx.create_object(typename, None, user_id, **args)
-    except Exception as e:
-        session.autoflush = old_autoflush
-        raise HTTPBadRequest(e)
-    if instances:
-        first = instances[0]
-        db = first.db
-        for instance in instances:
-            db.add(instance)
-        session.autoflush = old_autoflush
-        session.flush()
-        return CreationResponse(first, user_id, permissions)
-    raise HTTPBadRequest()
-
-
-@view_config(context=CollectionContext, request_method='POST',
-             header=FORM_HEADER)
-def collection_add_with_params(request):
-    return collection_add(request, request.params)
-
-
 @view_config(context=InstanceContext, request_method='POST')
 def instance_post(request):
     raise HTTPBadRequest()
@@ -346,36 +309,6 @@ def show_collections(request):
              request_method="GET", permission=P_READ)
 def show_class_names(request):
     return request.context.all_class_names()
-
-
-@view_config(context=ClassContext, request_method='POST', header=FORM_HEADER)
-def class_add(request):
-    ctx = request.context
-    user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(
-        user_id, ctx.get_discussion_id())
-    check_permissions(ctx, user_id, permissions, CrudPermissions.CREATE)
-    args = request.params
-    typename = args.get('type', None)
-    if typename:
-        cls = ctx.get_class(typename)
-    else:
-        cls = request.context._class
-        typename = cls.external_typename()
-    try:
-        instances = ctx.create_object(typename, None, user_id, **args)
-    except ObjectNotUniqueError as e:
-        raise JSONError(409, str(e))
-    except Exception as e:
-        raise HTTPBadRequest(e)
-    if instances:
-        first = instances[0]
-        db = first.db
-        for instance in instances:
-            db.add(instance)
-        db.flush()
-        return CreationResponse(first, user_id, permissions)
-    raise HTTPBadRequest()
 
 
 @view_config(context=CollectionContext, request_method='POST',

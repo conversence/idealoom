@@ -19,8 +19,6 @@ from assembl.models import (
 )
 
 
-JSON_HEADER = {"Content-Type": "application/json"}
-
 
 def local_to_absolute(uri):
     if uri.startswith('local:'):
@@ -65,11 +63,10 @@ def test_get_ideas(discussion, test_app, synthesis_1,
 def test_add_idea_in_synthesis(
         discussion, test_app, test_session, subidea_1_1):
     synthesis = discussion.next_synthesis
-    new_idea_r = test_app.post(
+    new_idea_r = test_app.post_json(
         '/data/Discussion/%d/views/%d/ideas' % (
             discussion.id, synthesis.id),
-        json.dumps({"@id": subidea_1_1.uri()}),
-        headers=JSON_HEADER)
+        {"@id": subidea_1_1.uri()})
     assert new_idea_r.status_code == 201
     idea_assoc = discussion.db.query(SubGraphIdeaAssociation).filter_by(
         idea=subidea_1_1, sub_graph=synthesis).first()
@@ -84,7 +81,7 @@ def test_add_idea_in_synthesis(
 
 def test_add_subidea_in_synthesis(
         discussion, test_app, synthesis_1, subidea_1_1, test_session):
-    new_idea_r = test_app.post(
+    new_idea_r = test_app.post_json(
         '/data/Discussion/%d/views/%d/ideas/%d/children' % (
             discussion.id, synthesis_1.id, subidea_1_1.id),
         {"short_title": "New subidea"})
@@ -115,13 +112,12 @@ def test_widget_settings(
             {"local:Idea/64": 1}
         ]
     }
-    settings_s = json.dumps(settings)
-    new_widget_loc = test_app.post(
+    new_widget_loc = test_app.post_json(
         '/data/Discussion/%d/widgets' % (discussion.id,), {
-            'type': 'CreativitySessionWidget',
-            'settings': json.dumps({
+            '@type': 'CreativitySessionWidget',
+            'settings': {
                 'idea': 'local:Idea/%d' % (subidea_1.id)
-            })
+            }
         })
     assert new_widget_loc.status_code == 201
     widget_id = new_widget_loc.location
@@ -135,13 +131,12 @@ def test_widget_settings(
     # Put the settings
     widget_settings_endpoint = local_to_absolute(
         widget_rep['widget_settings_url'])
-    result = test_app.put(
-        widget_settings_endpoint, settings_s,
-        headers=JSON_HEADER)
+    result = test_app.put_json(
+        widget_settings_endpoint, settings)
     assert result.status_code in (200, 204)
     # Get it back
     result = test_app.get(
-        widget_settings_endpoint, settings_s,
+        widget_settings_endpoint,
         headers={"Accept": "application/json"})
     assert result.status_code == 200
     assert result.json == settings
@@ -152,13 +147,12 @@ def test_widget_user_state(
     # Post the initial configuration
     state = [{"local:Idea/67": 8}, {"local:Idea/66": 2},
              {"local:Idea/65": 9}, {"local:Idea/64": 1}]
-    state_s = json.dumps(state)
-    new_widget_loc = test_app.post(
+    new_widget_loc = test_app.post_json(
         '/data/Discussion/%d/widgets' % (discussion.id,), {
-            'type': 'CreativitySessionWidget',
-            'settings': json.dumps({
+            '@type': 'CreativitySessionWidget',
+            'settings': {
                 'idea': 'local:Idea/%d' % (subidea_1.id)
-            })
+            }
         })
     assert new_widget_loc.status_code == 201
     # Get the widget from the db
@@ -174,9 +168,8 @@ def test_widget_user_state(
     # Put the user state
     widget_user_state_endpoint = local_to_absolute(
         widget_rep['user_state_url'])
-    result = test_app.put(
-        widget_user_state_endpoint, state_s,
-        headers=JSON_HEADER)
+    result = test_app.put_json(
+        widget_user_state_endpoint, state)
     assert result.status_code in (200, 204)
     # Get it back
     result = test_app.get(
@@ -193,11 +186,9 @@ def test_widget_user_state(
     assert state in result.json
     # Alter the state
     state.append({'local:Idea/30': 3})
-    state_s = json.dumps(state)
     # Put the user state
-    result = test_app.put(
-        widget_user_state_endpoint, state_s,
-        headers=JSON_HEADER)
+    result = test_app.put_json(
+        widget_user_state_endpoint, state)
     # Get it back
     result = test_app.get(
         widget_user_state_endpoint,
@@ -468,12 +459,12 @@ def test_inspiration_widget(
         participant1_user, test_session):
     # Post the initial configuration
     format = lambda x: x.strftime('%Y-%m-%dT%H:%M:%S')
-    new_widget_loc = test_app.post(
+    new_widget_loc = test_app.post_json(
         '/data/Discussion/%d/widgets' % (discussion.id,), {
-            'type': 'InspirationWidget',
-            'settings': json.dumps({
+            '@type': 'InspirationWidget',
+            'settings': {
                 'idea': 'local:Idea/%d' % (subidea_1.id)
-            })
+            }
         })
     assert new_widget_loc.status_code == 201
 
@@ -526,10 +517,10 @@ def test_inspiration_widget(
 
     # TODO. ajouter la collection descendant_ideas.
     # Comment déduire cet URL du widget????
-    r = test_app.post(
+    r = test_app.post_json(
         '/data/Discussion/%d/widgets/%d/base_idea_descendants/%d/linkedposts' %
         (discussion.id, widget_id, subidea_1_1.id), {
-            "type": "WidgetPost",
+            "@type": "WidgetPost",
             "body": {"@type": "LangString", "entries": [{
                 "@type": "LangStringEntry", "value": "body",
                 "@language": "en"
@@ -552,12 +543,12 @@ def test_voting_widget(
     # Post the initial configuration
     db = discussion.db
     criteria = (criterion_1, criterion_2, criterion_3)
-    new_widget_loc = test_app.post(
+    new_widget_loc = test_app.post_json(
         '/data/Discussion/%d/widgets' % (discussion.id,), {
-            'type': 'MultiCriterionVotingWidget',
-            'settings': json.dumps({
+            '@type': 'MultiCriterionVotingWidget',
+            'settings': {
                 "votable_root_id": subidea_1_1.uri()
-            })
+            }
         })
     assert new_widget_loc.status_code == 201
 
@@ -587,9 +578,8 @@ def test_voting_widget(
         'maximum': 1,
         'criterion_idea': criterion_1.uri()
     }
-    new_vote_spec_loc = test_app.post(
-        votespecs_url, json.dumps(vote_spec_1),
-        headers=JSON_HEADER)
+    new_vote_spec_loc = test_app.post_json(
+        votespecs_url, vote_spec_1)
     assert new_vote_spec_loc.status_code == 201
     new_vote_spec_uri = new_vote_spec_loc.location
     new_vote_spec = AbstractVoteSpecification.get_instance(new_vote_spec_uri)
@@ -600,9 +590,7 @@ def test_voting_widget(
         '@type': 'BinaryVoteSpecification',
         'criterion_idea': criterion_2.uri()
     }
-    new_vote_spec_loc = test_app.post(
-        votespecs_url, json.dumps(vote_spec_2),
-        headers=JSON_HEADER)
+    new_vote_spec_loc = test_app.post_json(votespecs_url, vote_spec_2)
     assert new_vote_spec_loc.status_code == 201
     new_vote_spec_uri = new_vote_spec_loc.location
     new_vote_spec = AbstractVoteSpecification.get_instance(new_vote_spec_uri)
@@ -614,9 +602,8 @@ def test_voting_widget(
         'num_choices': 5,
         'criterion_idea': criterion_3.uri()
     }
-    new_vote_spec_loc = test_app.post(
-        votespecs_url, json.dumps(vote_spec_3),
-        headers=JSON_HEADER)
+    new_vote_spec_loc = test_app.post_json(
+        votespecs_url, vote_spec_3)
     assert new_vote_spec_loc.status_code == 201
     new_vote_spec_uri = new_vote_spec_loc.location
     new_vote_spec = AbstractVoteSpecification.get_instance(new_vote_spec_uri)
@@ -661,10 +648,10 @@ def test_voting_widget(
         elif vote_type == 'MultipleChoiceIdeaVote':
             value = (i % spec['num_choices'])
 
-        test = test_app.post(voting_url, json.dumps({
+        test = test_app.post_json(voting_url, {
             "@type": vote_type,
             "value": value,
-        }), headers=JSON_HEADER)
+        })
         assert test.status_code == 201
 
     # Get them back
@@ -692,8 +679,8 @@ def test_voting_widget(
     # Change my mind
     criterion_key = criteria[0].uri()
     voting_url = local_to_absolute(voting_urls[criterion_key])
-    test_app.post(voting_url, {
-        "type": "LickertIdeaVote", "value": 10})
+    test_app.post_json(voting_url, {
+        "@type": "LickertIdeaVote", "value": 10})
     votes = db.query(AbstractIdeaVote).filter_by(
         voter_id=admin_user.id, idea_id=subidea_1_1.id,
         criterion_id=criteria[0].id).all()
@@ -739,12 +726,12 @@ def DISABLEDtest_voting_widget_criteria(
             "short_title": criterion.short_title
         } for criterion in criteria
     ]
-    new_widget_loc = test_app.post(
+    new_widget_loc = test_app.post_json(
         '/data/Discussion/%d/widgets' % (discussion.id,), {
-            'type': 'MultiCriterionVotingWidget',
-            'settings': json.dumps({
+            '@type': 'MultiCriterionVotingWidget',
+            'settings': {
                 "criteria": criteria_def
-            })
+            }
         })
     assert new_widget_loc.status_code == 201
     # Get the widget from the db
@@ -786,8 +773,7 @@ def DISABLEDtest_voting_widget_criteria(
             "short_title": criterion.short_title
         } for criterion in criteria
     ]
-    test_app.put(criteria_url, json.dumps(criteria_def),
-                 headers=JSON_HEADER)
+    test_app.put_json(criteria_url, criteria_def)
     db.flush()
     db.expire(new_widget, ('criteria', ))
 
@@ -803,7 +789,7 @@ def test_add_user_description(test_app, discussion, participant1_user):
     description = 'Lorem ipsum Aliqua est irure eu id.'
 
     # Add the description
-    r = test_app.put(url, {'description': description})
+    r = test_app.put_json(url, {'description': description})
     assert r.status_code == 200
 
     # Check it
@@ -824,7 +810,7 @@ def test_add_partner_organization(test_app, discussion):
     }
 
     # Create the org
-    r = test_app.post(url, org)
+    r = test_app.post_json(url, org)
     assert r.status_code == 201
 
     # Check it

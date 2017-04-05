@@ -321,14 +321,10 @@ class ExplicitSubGraphView(IdeaGraphView):
                 for inst in assocs[:]:
                     if isinstance(inst, Idea):
                         assocs.append(SubGraphIdeaAssociation(
-                            idea=inst, sub_graph=parent_instance,
-                            **self.filter_kwargs(
-                                SubGraphIdeaAssociation, kwargs)))
+                            idea=inst, sub_graph=parent_instance))
                     elif isinstance(inst, IdeaLink):
                         assocs.append(SubGraphIdeaLinkAssociation(
-                                idea_link=inst, sub_graph=parent_instance,
-                                **self.filter_kwargs(
-                                    SubGraphIdeaLinkAssociation, kwargs)))
+                                idea_link=inst, sub_graph=parent_instance))
 
             def contains(self, parent_instance, instance):
                 return instance.db.query(
@@ -352,9 +348,7 @@ class ExplicitSubGraphView(IdeaGraphView):
                 if isinstance(instance, IdeaLink):
                     assocs.append(
                         SubGraphIdeaLinkAssociation(
-                            idea_link=instance, sub_graph=parent_instance,
-                            **self.filter_kwargs(
-                                SubGraphIdeaLinkAssociation, kwargs)))
+                            idea_link=instance, sub_graph=parent_instance))
 
             def contains(self, parent_instance, instance):
                 return instance.db.query(
