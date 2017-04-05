@@ -1,13 +1,13 @@
 """API to get an authentication token, for use by Web annotation"""
-import json
-import transaction
-
 from pyramid.security import authenticated_userid, Everyone
-from pyramid.httpexceptions import HTTPUnauthorized
+from pyramid.httpexceptions import (
+    HTTPUnauthorized, HTTPBadRequest, HTTPOk)
 from pyramid.view import view_config
 from pyramid.response import Response
 
 from assembl.lib.web_token import encode_token
+from assembl.auth.password import verify_password_change_token, Validity
+
 
 _ac = 'Access-Control-'
 option_headers = [
@@ -39,3 +39,13 @@ def auth_token(request, extra_headers=None):
     }
     token = encode_token(payload, request.registry.settings['session.secret'])
     return Response(token, 200, headers, content_type='text/plain')
+
+
+@view_config(route_name='check_password_token', request_method='GET',
+             renderer="json")
+def check_password_token(request):
+    token = request.matchdict.get('token', None)
+    user, validity = verify_password_change_token(token)
+    if validity != Validity.VALID:
+        raise HTTPBadRequest(validity.name)
+    return {"user": user.uri()}
