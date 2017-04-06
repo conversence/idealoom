@@ -71,7 +71,20 @@ var StatsModal = Backbone.Modal.extend({
     }
     return url;
   },
+  checkDates: function() {
+    var fields = this.$el.find('fieldset'),
+        startDate = fields.children('#start_date').val(),
+        endDate = fields.children('#end_date').val();
+    if (endDate <= startDate) {
+      alert(_("The end date should be later than the start date"));
+    }
+    return (endDate > startDate);
+  },
   getStats: function(ev) {
+    if (!this.checkDates()) {
+      ev.preventDefault();
+      return;
+    }
     try {
       var url = '/time_series_analytics';
       url = this.addCommonStats(url);
@@ -86,6 +99,10 @@ var StatsModal = Backbone.Modal.extend({
     'posts', 'cumulative_posts', 'liking', 'cumulative_liking', 'liked', 'cumulative_liked',
     'replies_received', 'cumulative_replies_received', 'active'],
   getParticipantStats: function(ev) {
+    if (!this.checkDates()) {
+      ev.preventDefault();
+      return;
+    }
     var val, separator = "?",
         fields = this.$el.find('fieldset'),
         url = '/participant_time_series_analytics';
