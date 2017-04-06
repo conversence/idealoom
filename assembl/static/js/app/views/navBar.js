@@ -188,12 +188,6 @@ var navBarRight = Marionette.View.extend({
       urlNotifications: function() {
         return '/' + Ctx.getDiscussionSlug() + '/user/notifications';
       },
-      urlLogOut: function() {
-        return '/' + Ctx.getDiscussionSlug() + '/logout';
-      },
-      userProfile: function() {
-        return '/' + Ctx.getDiscussionSlug() + '/user/profile';
-      },
     }
   },
   setLocale: function(e) {
