@@ -6,7 +6,7 @@ from pyramid.response import Response
 from pyramid.view import view_config
 from pyramid.settings import asbool
 from pyramid.security import (
-    authenticated_userid, Everyone, NO_PERMISSION_REQUIRED)
+    authenticated_userid, Everyone, NO_PERMISSION_REQUIRED, remember)
 from pyramid.i18n import TranslationStringFactory
 from pyramid.httpexceptions import (
     HTTPNotFound, HTTPUnauthorized, HTTPBadRequest, HTTPClientError,
@@ -23,6 +23,8 @@ from assembl.auth import (
 from assembl.models import (
     User, Discussion, LocalUserRole, AbstractAgentAccount, AgentProfile,
     UserLanguagePreference, EmailAccount, AgentStatusInDiscussion)
+from assembl.auth.password import (
+    verify_password_change_token, get_data_token_time, Validity)
 from assembl.auth.util import get_permissions, discussion_from_request
 from ..traversal import (CollectionContext, InstanceContext, ClassContext)
 from .. import JSONError
@@ -33,7 +35,6 @@ from assembl.lib.sqla import ObjectNotUniqueError
 from ..auth.views import (
     send_change_password_email, from_identifier, send_confirmation_email,
     maybe_auto_subscribe)
-
 
 _ = TranslationStringFactory('assembl')
 
@@ -370,7 +371,7 @@ def do_password_change(request):
         user is None or token_date is None or (
             user.last_login and token_date < user.last_login))
 
-    if (validity != Validity.VALID or old_token) and not logged_in:
+    if (validity != Validity.VALID or old_token):
         # V-, V+P+W-B-L-: Invalid or obsolete token (obsolete+logged in treated later.)
         # Offer to send a new token
         if validity != Validity.VALID:
