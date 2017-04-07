@@ -107,13 +107,6 @@ var userAccount =  Marionette.View.extend({
       user: this.model
     }
   },
-  templateContext: function() {
-    return {
-      urlDiscussion: function() {
-        return '/' + Ctx.getDiscussionSlug() + '/';
-      }
-    }
-  },
   saveAccount: function(e) {
     e.preventDefault();
 

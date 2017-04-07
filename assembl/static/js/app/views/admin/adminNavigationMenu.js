@@ -31,14 +31,6 @@ var adminNavigationMenu = Marionette.View.extend({
       is_sysadmin: Ctx.getCurrentUser().can(Permissions.SYSADMIN),
     };
   },
-
-  templateContext: function() {
-    return {
-      urlDiscussion: function() {
-        return '/' + Ctx.getDiscussionSlug() + '/';
-      }
-    }
-  }
 });
 
 var discussionAdminNavigationMenu = adminNavigationMenu.extend({

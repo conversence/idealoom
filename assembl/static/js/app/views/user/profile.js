@@ -70,14 +70,6 @@ var profile = Marionette.View.extend({
       }
     })
   },
-
-  templateContext: function() {
-    return {
-      urlDiscussion: function() {
-        return '/' + Ctx.getDiscussionSlug() + '/';
-      }
-    }
-  }
 });
 
 module.exports = profile;

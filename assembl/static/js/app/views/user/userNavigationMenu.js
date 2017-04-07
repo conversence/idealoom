@@ -35,7 +35,6 @@ var userNavigationMenu = Marionette.View.extend({
         that.template = '#tmpl-userNavigationMenu';
         that.render();
       }
-     
     });
   },
 
@@ -51,14 +50,6 @@ var userNavigationMenu = Marionette.View.extend({
       localRoles: this.localRoles
     };
   },
-
-  templateContext: function() {
-    return {
-      urlDiscussion: function() {
-        return '/' + Ctx.getDiscussionSlug() + '/';
-      }
-    }
-  }
 });
 
 module.exports = userNavigationMenu;
