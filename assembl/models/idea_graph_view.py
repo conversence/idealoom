@@ -309,7 +309,8 @@ class ExplicitSubGraphView(IdeaGraphView):
     def extra_collections(cls):
         class GViewIdeaCollectionDefinition(AbstractCollectionDefinition):
             def __init__(self, cls):
-                super(GViewIdeaCollectionDefinition, self).__init__(cls, Idea)
+                super(GViewIdeaCollectionDefinition, self).__init__(
+                    cls, 'ideas', Idea)
 
             def decorate_query(self, query, owner_alias, last_alias,
                                parent_instance, ctx):
@@ -336,7 +337,7 @@ class ExplicitSubGraphView(IdeaGraphView):
         class GViewIdeaLinkCollectionDefinition(AbstractCollectionDefinition):
             def __init__(self, cls):
                 super(GViewIdeaLinkCollectionDefinition, self
-                      ).__init__(cls, IdeaLink)
+                      ).__init__(cls, 'idea_links', IdeaLink)
 
             def decorate_query(self, query, owner_alias, last_alias,
                                parent_instance, ctx):
@@ -357,8 +358,8 @@ class ExplicitSubGraphView(IdeaGraphView):
                         sub_graph=parent_instance
                     ).count() > 0
 
-        return {'ideas': GViewIdeaCollectionDefinition(cls),
-                'idea_links': GViewIdeaLinkCollectionDefinition(cls)}
+        return (GViewIdeaCollectionDefinition(cls),
+                GViewIdeaLinkCollectionDefinition(cls))
 
     crud_permissions = CrudPermissions(P_ADMIN_DISC)
 

@@ -257,7 +257,7 @@ def voting_widget_view(request):
 
 
 @view_config(context=CollectionContext, request_method='POST',
-             ctx_named_collection="CriterionCollection.criteria",
+             ctx_named_collection="VotingWidget.criteria",
              permission=P_ADMIN_DISC, header=FORM_HEADER)
 def post_to_vote_criteria(request):
     ctx = request.context
@@ -274,7 +274,7 @@ def post_to_vote_criteria(request):
 
 @view_config(context=InstanceContext, request_method='DELETE',
              ctx_instance_class=Idea,
-             ctx_named_collection_instance="CriterionCollection.criteria",
+             ctx_named_collection_instance="VotingWidget.criteria",
              permission=P_ADMIN_DISC)
 def delete_vote_criteria(request):
     ctx = request.context
@@ -285,7 +285,7 @@ def delete_vote_criteria(request):
 
 
 @view_config(context=CollectionContext, request_method='POST',
-             ctx_named_collection="VotableCollection.votable_ideas",
+             ctx_named_collection="VotingWidget.votable_ideas",
              permission=P_ADMIN_DISC, header=FORM_HEADER)
 def post_to_vote_votables(request):
     ctx = request.context
@@ -302,7 +302,7 @@ def post_to_vote_votables(request):
 
 @view_config(context=InstanceContext, request_method='DELETE',
              ctx_instance_class=Idea, permission=P_ADMIN_DISC,
-             ctx_named_collection_instance="VotableCollection.votable_ideas")
+             ctx_named_collection_instance="VotingWidget.votable_ideas")
 def delete_vote_votable(request):
     ctx = request.context
     idea = ctx._instance
@@ -316,11 +316,11 @@ def delete_vote_votable(request):
 # (which is the collection used below) => FIXME: solve this strange thing
 @view_config(
     context=CollectionContext, request_method="PATCH",
-    ctx_named_collection="VotableCollection.votable_ideas",
+    ctx_named_collection="VotingWidget.votable_ideas",
     permission=P_ADMIN_DISC, header=JSON_HEADER)
 @view_config(
     context=CollectionContext, request_method="PUT",
-    ctx_named_collection="VotableCollection.votable_ideas",
+    ctx_named_collection="VotingWidget.votable_ideas",
     permission=P_ADMIN_DISC, header=JSON_HEADER)
 def set_vote_votables(request):
     ctx = request.context
@@ -332,11 +332,11 @@ def set_vote_votables(request):
 
 @view_config(
     context=CollectionContext, request_method="PATCH",
-    ctx_named_collection="CriterionCollection.criteria",
+    ctx_named_collection="VotingWidget.criteria",
     permission=P_ADMIN_DISC, header=JSON_HEADER)
 @view_config(
     context=CollectionContext, request_method="PUT",
-    ctx_named_collection="CriterionCollection.criteria",
+    ctx_named_collection="VotingWidget.criteria",
     permission=P_ADMIN_DISC, header=JSON_HEADER)
 def set_idea_criteria(request):
     ctx = request.context
@@ -347,7 +347,7 @@ def set_idea_criteria(request):
 
 
 @view_config(context=CollectionContext, request_method='POST',
-             ctx_named_collection="ChildIdeaCollectionDefinition",
+             ctx_named_collection="Idea.children",
              permission=P_ADD_POST, header=JSON_HEADER)
 def add_child_idea_json(request):
     json = request.json_body

@@ -814,7 +814,8 @@ class Idea(HistoryMixin, DiscussionBoundBase):
 
         class ChildIdeaCollectionDefinition(AbstractCollectionDefinition):
             def __init__(self, cls):
-                super(ChildIdeaCollectionDefinition, self).__init__(cls, Idea)
+                super(ChildIdeaCollectionDefinition, self).__init__(
+                    cls, 'children', Idea)
 
             def decorate_query(self, query, owner_alias, last_alias, parent_instance, ctx):
                 parent = owner_alias
@@ -843,7 +844,7 @@ class Idea(HistoryMixin, DiscussionBoundBase):
             # used by inspiration widget
             def __init__(self, cls):
                 super(LinkedPostCollectionDefinition, self).__init__(
-                    cls, Content)
+                    cls, 'linkedposts', Content)
 
             def decorate_query(self, query, owner_alias, last_alias, parent_instance, ctx):
                 return query.join(IdeaRelatedPostLink, owner_alias)
@@ -887,7 +888,7 @@ class Idea(HistoryMixin, DiscussionBoundBase):
             # used by creativity widget
             def __init__(self, cls):
                 super(WidgetPostCollectionDefinition, self).__init__(
-                    cls, Content)
+                    cls, 'widgetposts', Content)
 
             def decorate_query(self, query, owner_alias, last_alias, parent_instance, ctx):
                 from .post import IdeaProposalPost
@@ -942,11 +943,11 @@ class Idea(HistoryMixin, DiscussionBoundBase):
                     idea.id == parent_instance.id)
                 return query
 
-        return {'children': ChildIdeaCollectionDefinition(cls),
-                'linkedposts': LinkedPostCollectionDefinition(cls),
-                'widgetposts': WidgetPostCollectionDefinition(cls),
-                'ns_kv': NsDictCollection(cls),
-                'active_showing_widget_links': ActiveShowingWidgetsCollection(cls)}
+        return (ChildIdeaCollectionDefinition(cls),
+                LinkedPostCollectionDefinition(cls),
+                WidgetPostCollectionDefinition(cls),
+                NsDictCollection(cls),
+                ActiveShowingWidgetsCollection(cls))
 
     def widget_link_signatures(self):
         from .widgets import Widget

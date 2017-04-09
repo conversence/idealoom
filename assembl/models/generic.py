@@ -35,7 +35,6 @@ from ..auth import (
 from ..semantic.namespaces import (
     SIOC, CATALYST, ASSEMBL, DCTERMS, QUADNAMES, FOAF)
 from .discussion import Discussion
-from assembl.views.traversal import AbstractCollectionDefinition
 from ..lib.history_mixin import TombstonableMixin
 
 

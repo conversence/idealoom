@@ -36,7 +36,6 @@ from zope.sqlalchemy import ZopeTransactionExtension
 from zope.sqlalchemy.datamanager import mark_changed as z_mark_changed
 from zope.component import getGlobalSiteManager
 from pyramid.httpexceptions import HTTPUnauthorized, HTTPBadRequest
-import transaction
 
 from .parsedatetime import parse_datetime
 from ..view_def import get_view_def
@@ -1649,12 +1648,22 @@ class BaseOps(object):
             raise ObjectNotUniqueError("Duplicate of <%s> created" % (duplicate.uri()))
 
     @classmethod
-    def extra_collections(cls):
+    def extra_collections_dict(cls):
         """Returns a dictionary of (named) collections of objects related to an instance of this class
 
         Many collections can be obtained by introspection on
         SQLAlchemy relationships, but collections here go beyond this."""
-        return {}
+        extra_collections = []
+        for cls in reversed(cls.mro()):
+            if not issubclass(cls, Base):
+                continue
+            if '_extra_collections_cache' not in cls.__dict__:
+                if 'extra_collections' in cls.__dict__:
+                    cls._extra_collections_cache = cls.extra_collections()
+                else:
+                    cls._extra_collections_cache = ()
+            extra_collections.extend(cls._extra_collections_cache)
+        return {coll.name: coll for coll in extra_collections}
 
     def is_owner(self, user_id):
         """The user owns this ressource, and has more permissions."""

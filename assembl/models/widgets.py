@@ -390,8 +390,8 @@ class BaseIdeaWidget(Widget):
 
     @classmethod
     def extra_collections(cls):
-        return {'base_idea': BaseIdeaCollection(),
-                'base_idea_descendants': BaseIdeaDescendantsCollection() }
+        return (BaseIdeaCollection(),
+                BaseIdeaDescendantsCollection('base_idea_descendants'))
 
 
 BaseIdeaWidget.base_idea = relationship(
@@ -404,9 +404,9 @@ BaseIdeaWidget.base_idea = relationship(
 
 class BaseIdeaCollection(RelationCollectionDefinition):
     """The 'collection' of the ``base_idea`` of this :py:class:`BaseIdeaWidget`"""
-    def __init__(self):
+    def __init__(self, name=None):
         super(BaseIdeaCollection, self).__init__(
-            BaseIdeaWidget, BaseIdeaWidget.base_idea)
+            BaseIdeaWidget, BaseIdeaWidget.base_idea, name)
 
     def decorate_query(self, query, owner_alias, last_alias, parent_instance, ctx):
         widget = owner_alias
@@ -422,9 +422,9 @@ class BaseIdeaCollection(RelationCollectionDefinition):
 class BaseIdeaDescendantsCollection(AbstractCollectionDefinition):
     """The collection of the descendants of the ``base_idea`` of this :py:class:`BaseIdeaWidget`"""
 
-    def __init__(self):
+    def __init__(self, name):
         super(BaseIdeaDescendantsCollection, self).__init__(
-            BaseIdeaWidget, Idea)
+            BaseIdeaWidget, name, Idea)
 
     def decorate_query(self, query, owner_alias, last_alias, parent_instance, ctx):
         widget = owner_alias
@@ -534,8 +534,7 @@ class IdeaCreatingWidget(BaseIdeaWidget):
             def decorate_query(self, query, owner_alias, last_alias, parent_instance, ctx):
                 query = super(BaseIdeaCollectionC, self).decorate_query(
                     query, owner_alias, last_alias, parent_instance, ctx)
-                children_ctx = ctx.find_collection(
-                    'ChildIdeaCollectionDefinition')
+                children_ctx = ctx.find_collection('Idea.children')
                 if children_ctx:
                     gen_idea_link = aliased(GeneratedIdeaWidgetLink)
                     query = query.join(
@@ -591,7 +590,7 @@ class IdeaCreatingWidget(BaseIdeaWidget):
                 query = super(BaseIdeaDescendantsCollectionC, self).decorate_query(
                     query, owner_alias, last_alias, parent_instance, ctx)
                 children_ctx = ctx.find_collection(
-                    'ChildIdeaCollectionDefinition')
+                    'Idea.children')
                 if children_ctx:
                     gen_idea_link = aliased(GeneratedIdeaWidgetLink)
                     query = query.join(
@@ -624,10 +623,9 @@ class IdeaCreatingWidget(BaseIdeaWidget):
                             **self.filter_kwargs(
                                 GeneratedIdeaWidgetLink, kwargs)))
 
-        return dict(BaseIdeaWidget.extra_collections(),
-            base_idea=BaseIdeaCollectionC(),
-            base_idea_hiding=BaseIdeaHidingCollection(),
-            base_idea_descendants=BaseIdeaDescendantsCollectionC())
+        return (BaseIdeaCollectionC(),
+                BaseIdeaHidingCollection('base_idea_hiding'),
+                BaseIdeaDescendantsCollectionC('base_idea_descendants'))
 
 
 IdeaCreatingWidget.generated_ideas = relationship(
@@ -899,7 +897,7 @@ class VotingWidget(BaseIdeaWidget):
                         assocs.append(VotingCriterionWidgetLink(idea=inst))
                     elif isinstance(inst, AbstractIdeaVote):
                         criterion_ctx = ctx.find_collection(
-                            'CriterionCollection.criteria')
+                            'VotingWidget.criteria')
                         search_ctx = ctx
                         while (search_ctx.__parent__
                                and search_ctx.__parent__ != criterion_ctx):
@@ -911,19 +909,13 @@ class VotingWidget(BaseIdeaWidget):
             # The set of votable ideas.
             def __init__(self, cls):
                 super(VotableCollection, self).__init__(
-                    cls, cls.votable_ideas)
+                    cls, cls.votable_ideas, "targets")
 
             def decorate_query(self, query, owner_alias, last_alias, parent_instance, ctx):
                 widget = owner_alias
                 idea = last_alias
                 query = query.join(idea.has_votable_links).join(
                     widget).filter(widget.id == parent_instance.id)
-                # This is unhealthy knowledge, but best I can do now.
-                vote_coll = ctx.find_collection('RelationCollectionDefinition.votes')
-                if vote_coll:
-                    query = query.filter(
-                        vote_coll.class_alias.widget_id ==
-                        parent_instance.id)
                 return query
 
             def decorate_instance(
@@ -937,8 +929,8 @@ class VotingWidget(BaseIdeaWidget):
                             idea=inst,
                             widget=self.parent_instance))
 
-        return {'criteria': CriterionCollection(cls),
-                'targets': VotableCollection(cls)}
+        return (CriterionCollection(cls),
+                VotableCollection(cls))
 
     # @property
     # def criteria(self):

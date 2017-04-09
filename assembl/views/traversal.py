@@ -314,7 +314,7 @@ class InstanceContext(TraversalContext):
     """A context that represents a given model instance (e.g. ``/data/Idea/12``)
 
     Sub-contexts are :py:class:`CollectionContext`, given by relationship name
-    or taken from :py:meth:`assembl.lib.sqla.Base.extra_collections`.
+    or taken from :py:meth:`assembl.lib.sqla.Base.extra_collections_dict`.
     """
     def __init__(self, parent, instance):
         # Do not call super, because it will set the acl.
@@ -327,7 +327,7 @@ class InstanceContext(TraversalContext):
     @classmethod
     def _get_collections(cls, for_class):
         if for_class not in cls._collections_by_class:
-            collections = dict(for_class.extra_collections())
+            collections = for_class.extra_collections_dict()
             relations = for_class.__mapper__.relationships
             for rel in relations:
                 if rel.key not in collections:
@@ -540,7 +540,7 @@ class CollectionContext(TraversalContext):
             self.collection,)
 
     def find_collection(self, collection_class_name):
-        if self.collection.name() == collection_class_name:
+        if self.collection.qual_name() == collection_class_name:
             return self
         return self.__parent__.find_collection(collection_class_name)
 
@@ -562,7 +562,7 @@ class NamedCollectionContextPredicate(object):
 
     def __call__(self, context, request):
         return (isinstance(context, CollectionContext) and
-                self.val == context.collection.name())
+                self.val == context.collection.qual_name())
 
 
 class NamedCollectionInstancePredicate(object):
@@ -584,7 +584,7 @@ class NamedCollectionInstancePredicate(object):
         parent = context.__parent__
         return (isinstance(context, InstanceContext) and
                 isinstance(parent, CollectionContext) and
-                self.val == parent.collection.name())
+                self.val == parent.collection.qual_name())
 
 
 class SecureConnectionPredicate(object):
@@ -629,9 +629,10 @@ class AbstractCollectionDefinition(object):
     """Represents a collection of objects related to an instance."""
     __metaclass__ = ABCMeta
 
-    def __init__(self, owner_class, collection_class):
+    def __init__(self, owner_class, name, collection_class):
         self.owner_class = owner_class
         self.collection_class = collection_class
+        self.name = name
 
     def make_context(self, parent_ctx):
         return CollectionContext(parent_ctx, self, parent_ctx._instance)
@@ -660,11 +661,11 @@ class AbstractCollectionDefinition(object):
     def get_default_view(self):
         pass
 
-    def name(self):
-        """The name of the collection, used in :py:class:`NamedCollectionContextPredicate`.
+    def qual_name(self):
+        """The fully qualified name of the collection, including owning class name.
 
-        In simple cases, the name of a collection is given by the name of its class."""
-        return self.__class__.__name__
+        Used in :py:class:`NamedCollectionContextPredicate` and :py:method:`TraversalContext.find_collection`."""
+        return ".".join((self.owner_class.__name__, self.name))
 
     def ctx_permissions(self, permissions):
         return []
@@ -687,9 +688,9 @@ class RelationCollectionDefinition(AbstractCollectionDefinition):
     """A collection of objects related to an instance through a relationship."""
     back_relation = None
 
-    def __init__(self, owner_class, relationship):
+    def __init__(self, owner_class, relationship, name=None):
         super(RelationCollectionDefinition, self).__init__(
-            owner_class, relationship.mapper.class_)
+            owner_class, name or relationship.key, relationship.mapper.class_)
         self.relationship = relationship
         back_properties = list(getattr(relationship, '_reverse_property', ()))
         if back_properties:
@@ -787,15 +788,6 @@ class RelationCollectionDefinition(AbstractCollectionDefinition):
             raise KeyError("This instance does not live in this collection.")
         return instance
 
-    def name(self):
-        """The name of the collection, used in :py:class:`NamedCollectionContextPredicate`.
-
-        In the case of Relationship-based collections,
-        concatenate the model class and relationship key."""
-        cls = self.owner_class if (
-            self.__class__ == RelationCollectionDefinition) else self.__class__
-        return ".".join((cls.__name__, self.relationship.key))
-
     def __repr__(self):
         return "<%s %s -(%s/%s)-> %s>" % (
             self.__class__.__name__,
@@ -874,7 +866,7 @@ class UserNsDictCollection(AbstractCollectionDefinition):
     def __init__(self, cls):
         from assembl.models.user_key_values import NamespacedUserKVCollection
         super(UserNsDictCollection, self).__init__(
-            cls, NamespacedUserKVCollection)
+            cls, 'user_ns_kv', NamespacedUserKVCollection)
 
     def make_context(self, parent_context):
         return UserBoundNamespacedDictContext(parent_context, self)
@@ -979,7 +971,7 @@ class NsDictCollection(AbstractCollectionDefinition):
     def __init__(self, cls):
         from assembl.models.user_key_values import NamespacedKVCollection
         super(NsDictCollection, self).__init__(
-            cls, NamespacedKVCollection)
+            cls, 'ns_kv', NamespacedKVCollection)
 
     def make_context(self, parent_context):
         return NamespacedDictContext(parent_context, self)
@@ -1072,7 +1064,7 @@ class DiscussionPreferenceCollection(AbstractCollectionDefinition):
     def __init__(self, cls):
         from assembl.models.preferences import Preferences
         super(DiscussionPreferenceCollection, self).__init__(
-            cls, Preferences)
+            cls, 'settings', Preferences)
 
     def make_context(self, parent_context):
         return DiscussionPreferenceContext(parent_context, self)

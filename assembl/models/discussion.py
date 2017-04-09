@@ -532,7 +532,7 @@ class Discussion(NamedClassMixin, DiscussionBoundBase):
 
         class AllUsersCollection(AbstractCollectionDefinition):
             def __init__(self, cls):
-                super(AllUsersCollection, self).__init__(cls, User)
+                super(AllUsersCollection, self).__init__(cls, 'all_users', User)
 
             def decorate_query(self, query, owner_alias, last_alias, parent_instance, ctx):
                 return query.outerjoin(
@@ -547,10 +547,10 @@ class Discussion(NamedClassMixin, DiscussionBoundBase):
             def contains(self, parent_instance, instance):
                 return True
 
-
         class ConnectedUsersCollection(AbstractCollectionDefinition):
             def __init__(self, cls):
-                super(ConnectedUsersCollection, self).__init__(cls, User)
+                super(ConnectedUsersCollection, self).__init__(
+                    cls, 'connected_users', User)
 
             def decorate_query(self, query, owner_alias, last_alias, parent_instance, ctx):
                 from .auth import AgentStatusInDiscussion
@@ -634,12 +634,12 @@ class Discussion(NamedClassMixin, DiscussionBoundBase):
                                     except:
                                         raise ValueError("Failed on content sink transaction")
 
-        return {'all_users': AllUsersCollection(cls),
-                'connected_users': ConnectedUsersCollection(cls),
-                'active_widgets': ActiveWidgetsCollection(cls),
-                'sources': SourcesCollection(cls),
-                'user_ns_kv': UserNsDictCollection(cls),
-                'settings': DiscussionPreferenceCollection(cls)}
+        return (AllUsersCollection(cls),
+                ConnectedUsersCollection(cls),
+                ActiveWidgetsCollection(cls),
+                SourcesCollection(cls),
+                UserNsDictCollection(cls),
+                DiscussionPreferenceCollection(cls))
 
     all_participants = relationship(
         User, viewonly=True, secondary=LocalUserRole.__table__,

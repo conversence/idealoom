@@ -951,7 +951,7 @@ class User(NamedClassMixin, AgentProfile):
         class PreferencePseudoCollection(AbstractCollectionDefinition):
             def __init__(self):
                 super(PreferencePseudoCollection, self).__init__(
-                    cls, UserPreferenceCollection)
+                    cls, 'preferences', UserPreferenceCollection)
 
             def decorate_query(
                     self, query, owner_alias, coll_alias, parent_instance,
@@ -981,10 +981,9 @@ class User(NamedClassMixin, AgentProfile):
                 coll = UserPreferenceCollection(user_id, discussion)
                 return UserNSBoundDictContext(coll, parent_ctx)
 
-        return {
-            'notification_subscriptions': NotificationSubscriptionCollection(cls),
-            'local_roles': LocalRoleCollection(cls),
-            'preferences': PreferencePseudoCollection()}
+        return (NotificationSubscriptionCollection(cls),
+                LocalRoleCollection(cls),
+                PreferencePseudoCollection())
 
     def get_notification_subscriptions_for_current_discussion(self):
         "CAN ONLY BE CALLED FROM API V2"

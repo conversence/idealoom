@@ -156,9 +156,12 @@ class AbstractVoteSpecification(DiscussionBoundBase):
             # The set of voting target ideas.
             # Fake: There is no DB link here.
             def __init__(self, cls):
-                super(VoteTargetsCollection, self).__init__(cls, Idea)
+                super(VoteTargetsCollection, self).__init__(
+                    cls, 'vote_targets', Idea)
 
-            def decorate_query(self, query, owner_alias, last_alias, parent_instance, ctx):
+            def decorate_query(
+                    self, query, owner_alias, last_alias, parent_instance,
+                    ctx):
                 from .widgets import (
                     VotingWidget, VotableIdeaWidgetLink)
                 # TODO : Why did this work?
@@ -197,7 +200,7 @@ class AbstractVoteSpecification(DiscussionBoundBase):
             def contains(self, parent_instance, instance):
                 return isinstance(instance, Idea)
 
-        return {'vote_targets': VoteTargetsCollection(cls)}
+        return (VoteTargetsCollection(cls),)
 
     @abstractclassmethod
     def get_vote_class(cls):

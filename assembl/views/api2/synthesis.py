@@ -17,7 +17,7 @@ def discussion_notifications(request):
 
 
 @view_config(context=CollectionContext, renderer='json', request_method='POST',
-             ctx_named_collection="GViewIdeaCollectionDefinition",
+             ctx_named_collection="ExplicitSubGraphView.ideas",
              permission=P_EDIT_SYNTHESIS, accept="application/json")
 def add_idea_to_synthesis(request):
     """Add an idea to an ExplictSubgraphView"""
@@ -47,7 +47,7 @@ def add_idea_to_synthesis(request):
 
 
 @view_config(context=InstanceContext, renderer='json', request_method='DELETE',
-             ctx_named_collection_instance="GViewIdeaCollectionDefinition",
+             ctx_named_collection_instance="ExplicitSubGraphView.ideas",
              permission=P_EDIT_SYNTHESIS, accept="application/json")
 def remove_idea_from_synthesis(request):
     """Remove an idea from an ExplictSubgraphView"""

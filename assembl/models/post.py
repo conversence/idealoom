@@ -529,8 +529,8 @@ class Post(Content):
 
         class IdeaContentLinkCollection(AbstractCollectionDefinition):
             def __init__(self, cls):
-                super(IdeaContentLinkCollection, self
-                      ).__init__(cls, IdeaContentLink)
+                super(IdeaContentLinkCollection, self).__init__(
+                    cls, 'indirect_idea_content_links', IdeaContentLink)
 
             def decorate_query(
                     self, query, owner_alias, last_alias, parent_instance,
@@ -553,7 +553,8 @@ class Post(Content):
                     str(instance.content_id) in
                     parent_instance.ancestry.split(","))
 
-        return {'indirect_idea_content_links': IdeaContentLinkCollection(cls)}
+        return (IdeaContentLinkCollection(cls),)
+
     @classmethod
     def restrict_to_owners(cls, query, user_id):
         "filter query according to object owners"
