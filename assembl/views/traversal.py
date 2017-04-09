@@ -17,10 +17,9 @@ from pyramid.httpexceptions import HTTPNotFound
 from abc import ABCMeta, abstractmethod
 
 from assembl.auth import P_READ, R_SYSADMIN
-from assembl.auth.util import get_permissions
+from assembl.auth.util import get_permissions, discussion_from_request
 from assembl.lib.sqla import uses_list, get_named_class, Base
 from assembl.lib.decl_enums import DeclEnumType
-
 
 log = logging.getLogger('assembl')
 
@@ -326,19 +325,10 @@ class InstanceContext(TraversalContext):
 
     @classmethod
     def _get_collections(cls, for_class):
-        if for_class not in cls._collections_by_class:
-            collections = for_class.extra_collections_dict()
-            relations = for_class.__mapper__.relationships
-            for rel in relations:
-                if rel.key not in collections:
-                    collections[rel.key] = RelationCollectionDefinition(
-                        for_class, rel)
-            cls._collections_by_class[for_class] = collections
-        return cls._collections_by_class[for_class]
+        return for_class.get_collections()
 
     def get_collection_names(self):
-        return self.__class__._get_collections(
-            self._instance.__class__).keys()
+        return self._instance.get_collections().keys()
 
     def get_default_view(self):
         my_default = getattr(self._instance, 'default_view', None)
@@ -371,7 +361,10 @@ class InstanceContext(TraversalContext):
     def get_discussion_id(self):
         from assembl.models import DiscussionBoundBase
         if isinstance(self._instance, DiscussionBoundBase):
-            return self._instance.get_discussion_id()
+            try:
+                return self._instance.get_discussion_id()
+            except Exception:
+                pass
         return super(InstanceContext, self).get_discussion_id()
 
     def get_instance_of_class(self, cls):
@@ -390,6 +383,9 @@ class InstanceContext(TraversalContext):
 
     def get_target_alias(self):
         return self.__parent__.get_target_alias()
+
+    def __repr__(self):
+        return "<InstanceContext (%s)>" % (self._instance,)
 
 
 class InstanceContextPredicate(object):
@@ -678,9 +674,10 @@ class AbstractCollectionDefinition(object):
                 if k.startswith(prefix)}
 
     def __repr__(self):
-        return "<%s %s -> %s>" % (
+        return "<%s %s -(%s)-> %s>" % (
             self.__class__.__name__,
             self.owner_class.__name__,
+            self.name,
             self.collection_class.__name__)
 
 
@@ -789,12 +786,15 @@ class RelationCollectionDefinition(AbstractCollectionDefinition):
         return instance
 
     def __repr__(self):
-        return "<%s %s -(%s/%s)-> %s>" % (
-            self.__class__.__name__,
-            self.owner_class.__name__,
-            self.relationship.key,
-            self.back_relation.key if self.back_relation else '',
-            self.collection_class.__name__)
+        if self.back_relation:
+            return "<%s %s <-(%s/%s)-> %s>" % (
+                self.__class__.__name__,
+                self.owner_class.__name__,
+                self.back_relation.key if self.back_relation else '',
+                self.name,
+                self.collection_class.__name__)
+        else:
+            return super(RelationCollectionDefinition, self).__repr__()
 
 
 class UserBoundNamespacedDictContext(TraversalContext):

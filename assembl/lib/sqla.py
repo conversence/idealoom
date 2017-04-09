@@ -14,6 +14,7 @@ import logging
 from time import sleep
 from random import random
 from threading import Thread
+from itertools import ifilter, chain
 
 from enum import Enum
 from anyjson import dumps, loads
@@ -152,28 +153,6 @@ class DummyContext(object):
 
     def context_chain(self):
         return (self,)
-
-
-class ChainingContext(object):
-    def __init__(self, context, instance):
-        self.__parent__ = context
-        self.instance = instance
-
-    def get_instance_of_class(self, cls):
-        if isinstance(self.instance, cls):
-            return self.instance
-        return self.__parent__.get_instance_of_class(cls)
-
-    def get_all_instances(self):
-        yield self.instance
-        # Should be a yield from
-        for i in self.__parent__.get_all_instances():
-            yield i
-
-    def context_chain(self):
-        yield self
-        for ctx in self.__parent__.context_chain():
-            yield ctx
 
 
 class TableLockCreationThread(Thread):
@@ -1029,11 +1008,14 @@ class BaseOps(object):
                     if instance is not None:
                         aliases[target_id] = instance
         if instance is not None:
+            # Interesting that it works here and not upstream
+            sub_context = instance.get_instance_context(context)
+            print "Chaining context from", context, c_context
             instance = instance._do_update_from_json(
-                json, parse_def, aliases, context, permissions,
+                json, parse_def, aliases, sub_context, permissions,
                 user_id, DuplicateHandling.USE_ORIGINAL, jsonld)
             instance = instance.handle_duplication(
-                json, parse_def, aliases, context, permissions,
+                json, parse_def, aliases, sub_context, permissions,
                 user_id, DuplicateHandling.USE_ORIGINAL, jsonld)
         else:
             instance = target_cls._do_create_from_json(
@@ -1089,8 +1071,9 @@ class BaseOps(object):
                     user_id, cls.__name__))
         # creating an object can be a weird way to find an object by attributes
         inst = cls()
+        i_context = inst.get_instance_context(context)
         result = inst._do_update_from_json(
-            json, parse_def, aliases, context, permissions,
+            json, parse_def, aliases, i_context, permissions,
             user_id, duplicate_handling, jsonld)
 
         # Now look for missing relationships
@@ -1317,7 +1300,11 @@ class BaseOps(object):
                         key, json.get('@id', '?'), json.get('@type', '?')))
 
             # We have an accessor, let's treat the value.
-            c_context = ChainingContext(context, self)
+            # Build a context
+            c_context = self.get_collection_context(context, key) or context
+            print "Chaining context from", context, c_context
+            if c_context is context:
+                print("Could not find collection context: ", self, key)
             if isinstance(value, (str, unicode)):
                 assert not must_be_list
                 target_id = value
@@ -1513,8 +1500,10 @@ class BaseOps(object):
                 # This was already set, assume it was set correctly
                 related_objects.add(obj)
                 continue
-            # Do not decorate nullable columns
-            if all(col.nullable for col in reln.local_columns):
+            # Do not decorate nullable relations
+            if any(map(lambda c: c.nullable,
+                       ifilter(lambda x: x.foreign_keys,
+                               chain(*reln.local_remote_pairs)))):
                 nullables.append(reln)
             else:
                 non_nullables.append(reln)
@@ -1664,6 +1653,29 @@ class BaseOps(object):
                     cls._extra_collections_cache = ()
             extra_collections.extend(cls._extra_collections_cache)
         return {coll.name: coll for coll in extra_collections}
+
+    @classmethod
+    def get_collections(cls):
+        if '_collections_cache' not in cls.__dict__:
+            from assembl.views.traversal import RelationCollectionDefinition
+            collections = cls.extra_collections_dict()
+            relations = cls.__mapper__.relationships
+            for rel in relations:
+                if rel.key not in collections:
+                    collections[rel.key] = RelationCollectionDefinition(
+                        cls, rel)
+            cls._collections_cache = collections
+        return cls._collections_cache
+
+    def get_instance_context(self, parent_context):
+        from assembl.views.traversal import InstanceContext
+        return InstanceContext(parent_context, self)
+
+    def get_collection_context(self, parent_context, relation_name):
+        from assembl.views.traversal import CollectionContext
+        collection = self.get_collections().get(relation_name, None)
+        if collection:
+            return CollectionContext(parent_context, collection, self)
 
     def is_owner(self, user_id):
         """The user owns this ressource, and has more permissions."""
