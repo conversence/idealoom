@@ -6,7 +6,6 @@ Pyramid allows to use model objects as Context objects, but in our cases they're
 from traceback import print_exc
 import logging
 
-from sqlalchemy import select
 from sqlalchemy.orm import aliased
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from sqlalchemy.sql.expression import and_
@@ -19,7 +18,7 @@ from abc import ABCMeta, abstractmethod
 
 from assembl.auth import P_READ, R_SYSADMIN
 from assembl.auth.util import get_permissions
-from assembl.lib.sqla import *
+from assembl.lib.sqla import uses_list, get_named_class, Base
 from assembl.lib.decl_enums import DeclEnumType
 
 
@@ -153,7 +152,7 @@ class TraversalContext(object):
 
 class Api2Context(TraversalContext):
     """The root class for the magic API (``/data``)
-    
+
     Sub-contexts are :py:class:`ClassContext`"""
     _class_cache = {}
 
@@ -173,8 +172,8 @@ class Api2Context(TraversalContext):
 
     def all_class_names(self):
         return [k.external_typename()
-            for k in Base._decl_class_registry.itervalues()
-            if getattr(k, 'external_typename', False)]
+                for k in Base._decl_class_registry.itervalues()
+                if getattr(k, 'external_typename', False)]
 
     def get_discussion_id(self):
         return None
@@ -221,8 +220,8 @@ def process_args(args, cls):
                 yield (key, value)
             continue
         reln = mapper.relationships.get(key)
-        if (reln is not None and reln.direction.name == 'MANYTOONE'
-                and isinstance(value, (str, unicode))):
+        if (reln is not None and reln.direction.name == 'MANYTOONE' and
+                isinstance(value, (str, unicode))):
             assert(len(reln.local_columns) == 1)
             key = next(reln.local_columns.__iter__()).key
             yield (key, reln.mapper.class_.get_database_id(value))
@@ -321,7 +320,7 @@ class InstanceContext(TraversalContext):
         # Do not call super, because it will set the acl.
         self._instance = instance
         self.__parent__ = parent
-        #relations = instance.__class__.__mapper__.relationships
+        # relations = instance.__class__.__mapper__.relationships
 
     _collections_by_class = {}
 
@@ -332,7 +331,8 @@ class InstanceContext(TraversalContext):
             relations = for_class.__mapper__.relationships
             for rel in relations:
                 if rel.key not in collections:
-                    collections[rel.key] = RelationCollectionDefinition(for_class, rel)
+                    collections[rel.key] = RelationCollectionDefinition(
+                        for_class, rel)
             cls._collections_by_class[for_class] = collections
         return cls._collections_by_class[for_class]
 
@@ -561,8 +561,8 @@ class NamedCollectionContextPredicate(object):
     phash = text
 
     def __call__(self, context, request):
-        return (isinstance(context, CollectionContext)
-                and self.val == context.collection.name())
+        return (isinstance(context, CollectionContext) and
+                self.val == context.collection.name())
 
 
 class NamedCollectionInstancePredicate(object):
@@ -582,9 +582,9 @@ class NamedCollectionInstancePredicate(object):
 
     def __call__(self, context, request):
         parent = context.__parent__
-        return (isinstance(context, InstanceContext)
-            and isinstance(parent, CollectionContext)
-            and self.val == parent.collection.name())
+        return (isinstance(context, InstanceContext) and
+                isinstance(parent, CollectionContext) and
+                self.val == parent.collection.name())
 
 
 class SecureConnectionPredicate(object):
@@ -697,12 +697,13 @@ class RelationCollectionDefinition(AbstractCollectionDefinition):
             self.back_relation = back_properties.pop()
             self.owner_class = self.back_relation.mapper.class_
 
-    def decorate_query(self, query, owner_alias, coll_alias, parent_instance, ctx):
+    def decorate_query(
+            self, query, owner_alias, coll_alias, parent_instance, ctx):
         # This will decorate a query with a join on the relation.
         inv = self.back_relation
         if inv:
             query = query.join(owner_alias,
-                getattr(coll_alias, inv.key))
+                               getattr(coll_alias, inv.key))
         else:
             # hope for the best
             try:
@@ -719,7 +720,9 @@ class RelationCollectionDefinition(AbstractCollectionDefinition):
             for column in inv.local_columns:
                 for fk in column.foreign_keys:
                     if fk.column.table == parent_instance.__class__.__table__:
-                        query = query.filter(getattr(coll_alias, column.name) == parent_instance.id)
+                        query = query.filter(
+                            getattr(coll_alias, column.name) ==
+                            parent_instance.id)
                         found_key = True
         if not found_key:
             query = query.filter(owner_alias.id == parent_instance.id)
@@ -735,19 +738,19 @@ class RelationCollectionDefinition(AbstractCollectionDefinition):
         # Prefer non-list properties because we can check if they're set.
         if not uses_list(self.relationship):
             if getattr(parent_instance, self.relationship.key, None) is None:
-                #print "Setting1 ", parent_instance, self.relationship.key, instance
+                # print "Setting1 ", parent_instance, self.relationship.key, instance
                 setattr(parent_instance, self.relationship.key, instance)
         elif self.back_relation and not uses_list(self.back_relation):
             inv = self.back_relation
             if getattr(instance, inv.key, None) is None:
-                #print "Setting2 ", instance, inv.key, parent_instance
+                # print "Setting2 ", instance, inv.key, parent_instance
                 setattr(instance, inv.key, parent_instance)
         elif self.back_relation:
             inv = self.back_relation
-            #print "Adding1 ", instance, inv.key, parent_instance
+            # print "Adding1 ", instance, inv.key, parent_instance
             getattr(instance, inv.key).append(parent_instance)
         else:
-            #print "Adding2 ", parent_instance, self.relationship.key, instance
+            # print "Adding2 ", parent_instance, self.relationship.key, instance
             getattr(parent_instance, self.relationship.key).append(instance)
 
     def get_attribute(self, instance, property=None):
@@ -769,7 +772,8 @@ class RelationCollectionDefinition(AbstractCollectionDefinition):
         instance = None
         if key == '-':
             if not uses_list(self.relationship):
-                instance = getattr(parent_instance, self.relationship.key, None)
+                instance = getattr(
+                    parent_instance, self.relationship.key, None)
             else:
                 # Allow if it happens to be a singleton.
                 instances = getattr(parent_instance, self.relationship.key)
@@ -1003,7 +1007,6 @@ class NsDictCollection(AbstractCollectionDefinition):
         return c[namespace]
 
 
-
 class PreferenceContext(TraversalContext):
     """Represents a set of preference values (eg for a discussion)
 
@@ -1035,7 +1038,8 @@ class DiscussionPreferenceContext(PreferenceContext):
         self.collection = collection
         self.parent_instance = parent_context._instance
         preferences = collection.as_collection(self.parent_instance)
-        super(DiscussionPreferenceContext, self).__init__(parent_context, preferences)
+        super(DiscussionPreferenceContext, self).__init__(
+            parent_context, preferences)
 
     @property
     def __acl__(self):
@@ -1095,7 +1099,6 @@ class DiscussionPreferenceCollection(AbstractCollectionDefinition):
         return c[key]
 
 
-
 def root_factory(request):
     """The factory function for the root context"""
     # OK, this is the old code... I need to do better, but fix first.
@@ -1120,11 +1123,11 @@ def includeme(config):
     config.add_view_predicate('ctx_class', ClassContextPredicate)
     config.add_view_predicate('ctx_instance_class', InstanceContextPredicate)
     config.add_view_predicate('ctx_instance_class_with_exceptions',
-        InstanceContextPredicateWithExceptions)
+                              InstanceContextPredicateWithExceptions)
     config.add_view_predicate('ctx_named_collection',
-        NamedCollectionContextPredicate)
+                              NamedCollectionContextPredicate)
     config.add_view_predicate('ctx_named_collection_instance',
-        NamedCollectionInstancePredicate)
+                              NamedCollectionInstancePredicate)
     config.add_view_predicate('secure_connection', SecureConnectionPredicate)
     config.add_view_predicate('ctx_collection_class',
                               CollectionContextClassPredicate,
