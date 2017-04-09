@@ -130,6 +130,17 @@ def using_virtuoso():
     return _using_virtuoso
 
 
+def uses_list(prop):
+    "is a property a list?"
+    # Weird indirection
+    uselist = getattr(prop, 'uselist', None)
+    if uselist is not None:
+        return uselist
+    subprop = getattr(prop, 'property', None)
+    if subprop:
+        return subprop.uselist
+
+
 class DummyContext(object):
     def __init__(self, presets=None):
         self.presets = presets or {}
@@ -137,16 +148,33 @@ class DummyContext(object):
     def get_instance_of_class(self, cls):
         return self.presets.get(cls, None)
 
+    def get_all_instances(self):
+        return self.presets.itervalues()
+
+    def context_chain(self):
+        return (self,)
+
 
 class ChainingContext(object):
     def __init__(self, context, instance):
-        self.context = context
+        self.__parent__ = context
         self.instance = instance
 
     def get_instance_of_class(self, cls):
         if isinstance(self.instance, cls):
             return self.instance
-        return self.context.get_instance_of_class(cls)
+        return self.__parent__.get_instance_of_class(cls)
+
+    def get_all_instances(self):
+        yield self.instance
+        # Should be a yield from
+        for i in self.__parent__.get_all_instances():
+            yield i
+
+    def context_chain(self):
+        yield self
+        for ctx in self.__parent__.context_chain():
+            yield ctx
 
 
 class TableLockCreationThread(Thread):
@@ -1062,6 +1090,13 @@ class BaseOps(object):
         result = inst._do_update_from_json(
             json, parse_def, aliases, context, permissions,
             user_id, duplicate_handling, jsonld)
+
+        # Now look for missing relationships
+        result.populate_from_context(context)
+        result = result.handle_duplication(
+            json, parse_def, aliases, context, permissions,
+            user_id, duplicate_handling, jsonld)
+
         if result is inst and not can_create:
             raise HTTPUnauthorized(
                 "User id <%s> cannot create a <%s> object" % (
@@ -1101,9 +1136,14 @@ class BaseOps(object):
                     user_id, self.__class__.__name__))
         with self.db.no_autoflush:
             # We need this to allow db.is_modified to work well
-            return self._do_update_from_json(
-                json, parse_def, {}, context, permissions, user_id,
+            aliases = {}
+            self._do_update_from_json(
+                json, parse_def, aliases, context, permissions, user_id,
                 None, jsonld)
+            return self.handle_duplication(
+                json, parse_def, aliases, context, permissions, user_id,
+                None, jsonld)
+
 
     # TODO: Add security by attribute?
     # Some attributes may be settable only on create.
@@ -1120,9 +1160,14 @@ class BaseOps(object):
             new_cls = get_named_class(typename)
             assert new_cls
             recast = self.change_class(new_cls, json)
-            return recast._do_update_from_json(
+            recast = recast._do_update_from_json(
                 json, parse_def, aliases, context, permissions,
                 user_id, duplicate_handling, jsonld)
+            recast.populate_from_context(context)
+            return recast.handle_duplication(
+                json, parse_def, aliases, context, permissions, user_id,
+                duplicate_handling, jsonld)
+
         local_view = self.expand_view_def(parse_def)
         # False means it's illegal to get this.
         assert local_view is not False
@@ -1444,46 +1489,60 @@ class BaseOps(object):
                 assert False, "we should not get here"
             else:
                 assert False, "we should not get here"
+        return self
 
-        # Now look for missing relationships
-        for reln in mapper.relationships:
-            if reln in treated_relns:
+    def populate_from_context(self, context):
+        """If object created in this context, populate some relations from that context.
+
+        This is the magic fallback, ideally define the relationships you want populated
+        explicitly in subclasses of this."""
+
+        relations = self.__class__.__mapper__.relationships
+        non_nullables = []
+        nullables = []
+        related_objects = set()
+        for reln in relations:
+            if uses_list(reln):
                 continue
-            if all((col in treated_foreign_keys
-                    for col in reln.local_columns)):
+            if reln.viewonly:
                 continue
-            # Only non-nullable relationships. Otherwise I get conflicts
-            if all((col.nullable and col.info.get("pseudo_nullable", True)
-                    for col in reln.local_columns)):
+            obj = getattr(self, reln.key, None)
+            if obj is not None:
+                # This was already set, assume it was set correctly
+                related_objects.add(obj)
                 continue
-            if reln.direction != MANYTOONE:
-                # only direct relations
-                continue
-            if getattr(self, reln.key, None) is None:
-                from assembl.models.auth import AgentProfile, User
-                target_class = reln.mapper.class_
-                # Hack: if it's a user relationship, assume owner.
-                # TODO: Make ownership reln explicit, we had an issue
-                # with moderator.
-                # TODO: Subclasses of user.
-                if user_id != Everyone and issubclass(
-                        target_class, AgentProfile):
-                    if any([
-                            issubclass(AgentProfile, r.mapper.class_)
-                            for r in treated_relns]):
-                            # User is already treated
-                        continue
-                    instance = User.get(user_id)
-                else:
-                    instance = context.get_instance_of_class(target_class)
-                    if instance is self:
-                        continue
-                if instance is not None:
-                    print "extra relation assignment", reln.key, instance
-                    setattr(self, reln.key, instance)
-        return self.handle_duplication(
-            json, parse_def, aliases, context, permissions, user_id,
-            duplicate_handling, jsonld)
+            # Do not decorate nullable columns
+            if all(col.nullable for col in reln.local_columns):
+                nullables.append(reln)
+            else:
+                non_nullables.append(reln)
+        for reln in non_nullables:
+            inst = context.get_instance_of_class(reln.mapper.class_)
+            if inst:
+                if inst in related_objects:
+                    # no need to duplicate
+                    print("populate_from_context magic on %s.%s: duplicate" % (
+                        self.__class__.__name__, reln.key))
+                    continue
+                print("populate_from_context magic on %s.%s" % (
+                    self.__class__.__name__, reln.key))
+                setattr(self, reln.key, inst)
+                related_objects.add(inst)
+        # if an object in the context is not related,
+        # and there is an appropriate nullable column, we might want
+        # to add it. Let's record for now.
+        if nullables:
+            for instance in context.get_all_instances():
+                if instance in related_objects:
+                    continue
+                candidates = [r.key for r in nullables if issubclass(
+                    instance.__class__, r.mapper.class_)]
+                for rname in candidates:
+                    print("populate_from_context magic: could populate nullable %s.%s with %s" % (
+                        self.__class__.__name__, rname, instance))
+
+    def creation_side_effects(self, context):
+        pass
 
     def handle_duplication(
                 self, json={}, parse_def={}, aliases={}, context=None,

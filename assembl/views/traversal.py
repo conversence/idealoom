@@ -46,7 +46,8 @@ ACL_RESTRICTIVE = [(Allow, R_SYSADMIN, ALL_PERMISSIONS), DENY_ALL]
 
 class AppRoot(DictContext):
     """The root context. Anything not defined by a root comes here."""
-    def __init__(self):
+    def __init__(self, request):
+        self.request = request
         super(AppRoot, self).__init__(ACL_READABLE, {
             'data': Api2Context(self, ACL_RESTRICTIVE),
             'admin': DictContext(ACL_RESTRICTIVE, {
@@ -59,6 +60,13 @@ class AppRoot(DictContext):
 
     __parent__ = None
     __name__ = "Assembl"
+
+    def get_request(self):
+        """Get the request from the context"""
+        return self.request
+
+    def context_chain(self):
+        yield self
 
     def __getitem__(self, key):
         if key in self.subobjects:
@@ -80,6 +88,11 @@ class DiscussionsContext(object):
             raise KeyError()
         return discussion
 
+    def context_chain(self):
+        yield self
+        for ctx in self.__parent__.context_chain():
+            yield ctx
+
 
 class TraversalContext(object):
     """The base class for the magic API"""
@@ -97,6 +110,20 @@ class TraversalContext(object):
 
         often from a :py:class:`DiscussionBoundBase` instance"""
         return self.__parent__.get_discussion_id()
+
+    def get_request(self):
+        """Get the request from the context"""
+        return self.__parent__.get_request()
+
+    def get_all_instances(self):
+        # Should be a yield from
+        for i in self.__parent__.get_all_instances():
+            yield i
+
+    def context_chain(self):
+        yield self
+        for ctx in self.__parent__.context_chain():
+            yield ctx
 
     def get_instance_of_class(self, cls):
         """Look in the context chain for a model instance of a given class"""
@@ -153,7 +180,17 @@ class Api2Context(TraversalContext):
         return None
 
     def get_instance_of_class(self, cls):
-        return None
+        from assembl.models import User
+        if issubclass(cls, User):
+            user_id = self.get_request().authenticated_userid
+            if user_id and user_id != Everyone:
+                return User.get(user_id)
+
+    def get_all_instances(self):
+        from assembl.models import User
+        user = self.get_instance_of_class(User)
+        if user is not None:
+            yield user
 
     def decorate_query(self, query, ctx, tombstones=False):
         # The buck stops here
@@ -328,37 +365,6 @@ class InstanceContext(TraversalContext):
             raise KeyError()
         return collection.make_context(self)
 
-    def decorate_instance(self, instance, assocs, user_id, ctx, kwargs):
-        # if one of the objects has a non-list relation to this class, add it
-        # Slightly dangerous...
-        nullables = []
-        found = False
-        for inst in assocs:
-            relations = inst.__class__.__mapper__.relationships
-            for reln in relations:
-                if uses_list(reln):
-                    continue
-                if getattr(inst, reln.key, None) is not None:
-                    # This was already set, assume it was set correctly
-                    found = True
-                    continue
-                # Do not decorate nullable columns
-                if all((col.nullable and col.info.get("pseudo_nullable", True)
-                        for col in reln.local_columns)):
-                    nullables.append(reln)
-                    continue
-                if issubclass(self._instance.__class__, reln.mapper.class_):
-                    # print "Setting3 ", inst, reln.key, self._instance
-                    setattr(inst, reln.key, self._instance)
-                    found = True
-                    break
-        if nullables and not found:
-            reln = nullables[0]
-            log.debug("Setting nullable column" + reln)
-            setattr(inst, reln.key, self._instance)
-        super(InstanceContext, self).decorate_instance(
-            instance, assocs, user_id, ctx, kwargs)
-
     def find_collection(self, collection_class_name):
         return self.__parent__.find_collection(collection_class_name)
 
@@ -372,6 +378,12 @@ class InstanceContext(TraversalContext):
         if isinstance(self._instance, cls):
             return self._instance
         return self.__parent__.get_instance_of_class(cls)
+
+    def get_all_instances(self):
+        yield self._instance
+        # Should be a yield from
+        for i in self.__parent__.get_all_instances():
+            yield i
 
     def get_target_class(self):
         return self._instance.__class__
@@ -519,6 +531,8 @@ class CollectionContext(TraversalContext):
                 raise e
             assocs = [inst]
             self.decorate_instance(inst, assocs, user_id, self, json)
+            for inst in assocs[1:]:
+                inst.populate_from_context(self)
         return assocs
 
     def __repr__(self):
@@ -667,15 +681,6 @@ class AbstractCollectionDefinition(object):
             self.__class__.__name__,
             self.owner_class.__name__,
             self.collection_class.__name__)
-
-def uses_list(prop):
-    # Weird indirection
-    uselist = getattr(prop, 'uselist', None)
-    if uselist is not None:
-        return uselist
-    subprop = getattr(prop, 'property', None)
-    if subprop:
-        return subprop.uselist
 
 
 class CollectionDefinition(AbstractCollectionDefinition):
@@ -885,10 +890,9 @@ class UserNsDictCollection(AbstractCollectionDefinition):
         return True
 
     def as_collection(self, parent_instance):
-        from pyramid.threadlocal import get_current_request
         from pyramid.httpexceptions import HTTPUnauthorized
         from assembl.models.user_key_values import UserNsDict
-        request = get_current_request()
+        request = self.get_request()
         if request is not None:
             user_id = request.authenticated_userid
             if user_id is None:
@@ -991,8 +995,6 @@ class NsDictCollection(AbstractCollectionDefinition):
         return True
 
     def as_collection(self, parent_instance):
-        from pyramid.threadlocal import get_current_request
-        from pyramid.httpexceptions import HTTPUnauthorized
         from assembl.models.user_key_values import NsDict
         return NsDict(parent_instance)
 
@@ -1111,7 +1113,7 @@ def root_factory(request):
         if not discussion:
             raise HTTPNotFound("No discussion named %s" % (discussion_slug,))
         return discussion
-    return AppRoot()
+    return AppRoot(request)
 
 
 def includeme(config):

@@ -1142,6 +1142,11 @@ class IdeaLink(HistoryMixin, DiscussionBoundBase):
         Float, nullable=False, default=0.0,
         info={'rdf': QuadMapPatternS(None, ASSEMBL.link_order)})
 
+    def populate_from_context(self, context):
+        if not(self.source or self.source_ts or self.source_id):
+            self.source = context.get_instance_of_class(Idea)
+        super(IdeaLink, self).populate_from_context(context)
+
     @classmethod
     def base_conditions(cls, alias=None, alias_maker=None):
         if alias_maker is None:

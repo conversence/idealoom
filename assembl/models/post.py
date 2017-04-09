@@ -687,6 +687,12 @@ class WidgetPost(AssemblPost):
         # and creativity uses
         # /data/Discussion/%d/widgets/%d/base_idea/-/children/%d/widgetposts
 
+    def populate_from_context(self, context):
+        if not(self.widget or self.widget_id):
+            from .widgets import Widget
+            self.widget = context.get_instance_of_class(Widget)
+        super(WidgetPost, self).populate_from_context(context)
+
     @property
     def metadata_json(self):
         if self.metadata_raw:
