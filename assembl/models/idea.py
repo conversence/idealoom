@@ -839,48 +839,6 @@ class Idea(HistoryMixin, DiscussionBoundBase):
                     source=parent_instance, target=instance
                     ).count() > 0
 
-        class AncestorWidgetsCollectionDefinition(AbstractCollectionDefinition):
-            # For widgets which represent general configuration.
-
-            def __init__(self, cls, widget_subclass=None):
-                super(AncestorWidgetsCollectionDefinition, self).__init__(cls, Widget)
-                self.widget_subclass = widget_subclass
-
-            def decorate_query(self, query, owner_alias, last_alias, parent_instance, ctx):
-                parent = owner_alias
-                widgets = last_alias
-                ancestry = parent_instance.get_ancestors_query(
-                    parent_instance.id)
-                ancestors = aliased(Idea)
-                iwlink = aliased(IdeaWidgetLink)
-                query = query.join(iwlink).join(ancestors).filter(
-                    ancestors.id.in_(ancestry)).join(
-                    parent, parent.id == parent_instance.id)
-                if self.widget_subclass is not None:
-                    query = query.filter(iwlink.widget.of_type(self.widget_subclass))
-                return query
-
-            def decorate_instance(
-                    self, instance, parent_instance, assocs, user_id,
-                    ctx, kwargs):
-                if isinstance(instance, Post):
-                    assocs.append(
-                        IdeaContentWidgetLink(
-                            content=instance, widget=parent_instance,
-                            creator=instance.creator))
-
-            def contains(self, parent_instance, instance):
-                ancestors = aliased(Idea)
-                iwlink = aliased(IdeaWidgetLink)
-                ancestry = parent_instance.get_ancestors_query(
-                    parent_instance.id)
-                query = instance.db.query(Widget).join(iwlink).join(
-                    ancestors).filter(ancestors.id.in_(ancestry)).filter(
-                    Widget.id == instance.id)
-                if self.widget_subclass is not None:
-                    query = query.filter(iwlink.widget.of_type(self.widget_subclass))
-                return query.count() > 0
-
         class LinkedPostCollectionDefinition(AbstractCollectionDefinition):
             # used by inspiration widget
             def __init__(self, cls):
@@ -988,9 +946,6 @@ class Idea(HistoryMixin, DiscussionBoundBase):
                 'linkedposts': LinkedPostCollectionDefinition(cls),
                 'widgetposts': WidgetPostCollectionDefinition(cls),
                 'ns_kv': NsDictCollection(cls),
-                'ancestor_widgets': AncestorWidgetsCollectionDefinition(cls),
-                'ancestor_inspiration_widgets': AncestorWidgetsCollectionDefinition(
-                    cls, InspirationWidget),
                 'active_showing_widget_links': ActiveShowingWidgetsCollection(cls)}
 
     def widget_link_signatures(self):
