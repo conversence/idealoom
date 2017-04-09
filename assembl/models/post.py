@@ -543,11 +543,6 @@ class Post(Content):
                 return query.join(
                     parent, children.content_id.in_(ancestors))
 
-            def decorate_instance(
-                    self, instance, parent_instance, assocs, user_id,
-                    ctx, kwargs):
-                pass
-
             def contains(self, parent_instance, instance):
                 return instance.content_id == parent_instance.id or (
                     str(instance.content_id) in

@@ -449,11 +449,6 @@ class BaseIdeaDescendantsCollection(AbstractCollectionDefinition):
             Widget, Widget.id == parent_instance.id)
         return query.count() > 0
 
-    def decorate_instance(
-            self, instance, parent_instance, assocs, user_id,
-            ctx, kwargs):
-        pass
-
 
 class IdeaCreatingWidget(BaseIdeaWidget):
     """A widget where new ideas are created"""

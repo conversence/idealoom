@@ -569,12 +569,6 @@ class Discussion(NamedClassMixin, DiscussionBoundBase):
                     (ast.last_disconnected < ast.last_connected) or (
                     ast.last_disconnected is None))
 
-            def decorate_instance(
-                    self, instance, parent_instance, assocs, user_id,
-                    ctx, kwargs):
-                pass
-
-
         class ActiveWidgetsCollection(RelationCollectionDefinition):
 
             def __init__(self, cls):

@@ -138,6 +138,11 @@ class TraversalContext(object):
         self.__parent__.decorate_instance(
             instance, assocs, user_id, ctx, kwargs)
 
+    def on_new_instance(self, instance):
+        """If a model instance was created in this context, let the context learn about it.
+        Exists mostly for :py:meth:`RelationCollectionDefinition.on_new_instance`"""
+        self.__parent__.on_new_instance(instance)
+
     def get_target_class(self):
         """What is the model class we can expect to find at this context?"""
         return None
@@ -195,6 +200,10 @@ class Api2Context(TraversalContext):
         return query
 
     def decorate_instance(self, instance, assocs, user_id, ctx, kwargs):
+        # and here
+        pass
+
+    def on_new_instance(self, instance):
         # and here
         pass
 
@@ -507,6 +516,10 @@ class CollectionContext(TraversalContext):
         super(CollectionContext, self).decorate_instance(
             instance, assocs, user_id, ctx, kwargs)
 
+    def on_new_instance(self, instance):
+        self.collection.on_new_instance(instance, self.parent_instance)
+        super(CollectionContext, self).on_new_instance(instance)
+
     def ctx_permissions(self, permissions):
         new_permissions = self.collection.ctx_permissions(permissions)
         new_permissions.extend(super(
@@ -526,8 +539,11 @@ class CollectionContext(TraversalContext):
                 print_exc()
                 raise e
             assocs = [inst]
+            self.on_new_instance(inst)
             self.decorate_instance(inst, assocs, user_id, self, json)
+            # this should disappear
             for inst in assocs[1:]:
+                self.on_new_instance(inst)
                 inst.populate_from_context(self)
         return assocs
 
@@ -645,9 +661,12 @@ class AbstractCollectionDefinition(object):
             self, query, owner_alias, coll_alias, parent_instance, ctx):
         pass
 
-    @abstractmethod
     def decorate_instance(
             self, instance, parent_instance, assocs, user_id, ctx, kwargs):
+        pass
+
+    def on_new_instance(
+            self, instance, parent_instance):
         pass
 
     @abstractmethod
@@ -660,7 +679,7 @@ class AbstractCollectionDefinition(object):
     def qual_name(self):
         """The fully qualified name of the collection, including owning class name.
 
-        Used in :py:class:`NamedCollectionContextPredicate` and :py:method:`TraversalContext.find_collection`."""
+        Used in :py:class:`NamedCollectionContextPredicate` and :py:meth:`TraversalContext.find_collection`."""
         return ".".join((self.owner_class.__name__, self.name))
 
     def ctx_permissions(self, permissions):
@@ -726,8 +745,7 @@ class RelationCollectionDefinition(AbstractCollectionDefinition):
             query = query.filter(owner_alias.id == parent_instance.id)
         return query
 
-    def decorate_instance(
-            self, instance, parent_instance, assocs, user_id, ctx, kwargs):
+    def on_new_instance(self, instance, parent_instance):
         if not isinstance(instance, self.collection_class):
             return
         # if the relation is through a helper class,
@@ -871,10 +889,6 @@ class UserNsDictCollection(AbstractCollectionDefinition):
     def make_context(self, parent_context):
         return UserBoundNamespacedDictContext(parent_context, self)
 
-    def decorate_instance(self, instance, assocs, user_id, ctx, kwargs):
-        self.__parent__.decorate_instance(
-            self, instance, assocs, user_id, ctx, kwargs)
-
     def decorate_query(
             self, query, owner_alias, last_alias, parent_instance, ctx):
         # No clue what to do here; UserKVCollection is not a sqla object
@@ -976,10 +990,6 @@ class NsDictCollection(AbstractCollectionDefinition):
     def make_context(self, parent_context):
         return NamespacedDictContext(parent_context, self)
 
-    def decorate_instance(self, instance, assocs, user_id, ctx, kwargs):
-        self.__parent__.decorate_instance(
-            self, instance, assocs, user_id, ctx, kwargs)
-
     def decorate_query(
             self, query, owner_alias, last_alias, parent_instance, ctx):
         # No clue what to do here; KVCollection is not a sqla object
@@ -1068,10 +1078,6 @@ class DiscussionPreferenceCollection(AbstractCollectionDefinition):
 
     def make_context(self, parent_context):
         return DiscussionPreferenceContext(parent_context, self)
-
-    def decorate_instance(self, instance, assocs, user_id, ctx, kwargs):
-        self.__parent__.decorate_instance(
-            self, instance, assocs, user_id, ctx, kwargs)
 
     def decorate_query(
             self, query, owner_alias, last_alias, parent_instance, ctx):
