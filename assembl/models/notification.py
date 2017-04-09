@@ -319,9 +319,7 @@ class NotificationSubscription(DiscussionBoundBase):
             if status != self.status:
                 self.status = status
                 self.last_status_change_date = datetime.utcnow()
-        return self.handle_duplication(
-                json, parse_def, aliases, ctx, permissions, user_id,
-                duplicate_handling, jsonld)
+        return self
 
     def unique_query(self):
         # documented in lib/sqla

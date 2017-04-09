@@ -1030,7 +1030,10 @@ class BaseOps(object):
                     if instance is not None:
                         aliases[target_id] = instance
         if instance is not None:
-            instance._do_update_from_json(
+            instance = instance._do_update_from_json(
+                json, parse_def, aliases, context, permissions,
+                user_id, DuplicateHandling.USE_ORIGINAL, jsonld)
+            instance = instance.handle_duplication(
                 json, parse_def, aliases, context, permissions,
                 user_id, DuplicateHandling.USE_ORIGINAL, jsonld)
         else:
@@ -1594,7 +1597,10 @@ class BaseOps(object):
                     else:
                         # TODO: check the CrudPermissions on subobject,
                         # UNLESS it's they're inherited (eg Langstring)
-                        return other._do_update_from_json(
+                        other = other._do_update_from_json(
+                            json, parse_def, aliases, context, permissions,
+                            user_id, duplicate_handling, jsonld)
+                        return other.handle_duplication(
                             json, parse_def, aliases, context, permissions,
                             user_id, duplicate_handling, jsonld)
                 else:
