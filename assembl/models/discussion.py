@@ -525,7 +525,7 @@ class Discussion(NamedClassMixin, DiscussionBoundBase):
     @classmethod
     def extra_collections(cls):
         from assembl.views.traversal import (
-            CollectionDefinition, AbstractCollectionDefinition)
+            RelationCollectionDefinition, AbstractCollectionDefinition)
         from .notification import NotificationSubscription
         from ..views.traversal import (
             UserNsDictCollection, DiscussionPreferenceCollection)
@@ -575,7 +575,7 @@ class Discussion(NamedClassMixin, DiscussionBoundBase):
                 pass
 
 
-        class ActiveWidgetsCollection(CollectionDefinition):
+        class ActiveWidgetsCollection(RelationCollectionDefinition):
 
             def __init__(self, cls):
                 super(ActiveWidgetsCollection, self).__init__(
@@ -593,7 +593,7 @@ class Discussion(NamedClassMixin, DiscussionBoundBase):
                     ActiveWidgetsCollection, self).contains(
                     parent_instance, instance)
 
-        class SourcesCollection(CollectionDefinition):
+        class SourcesCollection(RelationCollectionDefinition):
             def __init__(self, cls):
                 super(SourcesCollection, self).__init__(
                     cls, cls.sources)

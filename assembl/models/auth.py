@@ -887,12 +887,12 @@ class User(NamedClassMixin, AgentProfile):
     @classmethod
     def extra_collections(cls):
         from assembl.views.traversal import (
-            CollectionDefinition, AbstractCollectionDefinition,
+            RelationCollectionDefinition, AbstractCollectionDefinition,
             UserNSBoundDictContext)
         from .notification import NotificationSubscription
         from .discussion import Discussion
         from .user_key_values import UserPreferenceCollection
-        class NotificationSubscriptionCollection(CollectionDefinition):
+        class NotificationSubscriptionCollection(RelationCollectionDefinition):
             def __init__(self, cls):
                 super(NotificationSubscriptionCollection, self).__init__(
                     cls, User.notification_subscriptions.property)
@@ -923,7 +923,7 @@ class User(NamedClassMixin, AgentProfile):
             def get_default_view(self):
                 return "extended"
 
-        class LocalRoleCollection(CollectionDefinition):
+        class LocalRoleCollection(RelationCollectionDefinition):
             def __init__(self, cls):
                 super(LocalRoleCollection, self).__init__(
                     cls, User.local_roles.property)

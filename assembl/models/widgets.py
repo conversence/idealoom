@@ -28,7 +28,7 @@ from .post import Post, IdeaProposalPost
 from .auth import User
 from .votes import AbstractVoteSpecification, AbstractIdeaVote
 from ..views.traversal import (
-    CollectionDefinition, AbstractCollectionDefinition)
+    RelationCollectionDefinition, AbstractCollectionDefinition)
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..semantic.namespaces import (ASSEMBL, QUADNAMES)
 
@@ -402,7 +402,7 @@ BaseIdeaWidget.base_idea = relationship(
         uselist=False)
 
 
-class BaseIdeaCollection(CollectionDefinition):
+class BaseIdeaCollection(RelationCollectionDefinition):
     """The 'collection' of the ``base_idea`` of this :py:class:`BaseIdeaWidget`"""
     def __init__(self):
         super(BaseIdeaCollection, self).__init__(
@@ -876,7 +876,7 @@ class VotingWidget(BaseIdeaWidget):
 
     @classmethod
     def extra_collections(cls):
-        class CriterionCollection(CollectionDefinition):
+        class CriterionCollection(RelationCollectionDefinition):
             # The set of voting criterion ideas.
             # Not to be confused with http://www.criterion.com/
             def __init__(self, cls):
@@ -907,7 +907,7 @@ class VotingWidget(BaseIdeaWidget):
                         assert search_ctx.__parent__
                         inst.criterion = search_ctx._instance
 
-        class VotableCollection(CollectionDefinition):
+        class VotableCollection(RelationCollectionDefinition):
             # The set of votable ideas.
             def __init__(self, cls):
                 super(VotableCollection, self).__init__(
@@ -919,7 +919,7 @@ class VotingWidget(BaseIdeaWidget):
                 query = query.join(idea.has_votable_links).join(
                     widget).filter(widget.id == parent_instance.id)
                 # This is unhealthy knowledge, but best I can do now.
-                vote_coll = ctx.find_collection('CollectionDefinition.votes')
+                vote_coll = ctx.find_collection('RelationCollectionDefinition.votes')
                 if vote_coll:
                     query = query.filter(
                         vote_coll.class_alias.widget_id ==

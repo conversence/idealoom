@@ -45,7 +45,7 @@ from ..semantic.namespaces import (
     SIOC, IDEA, ASSEMBL, DCTERMS, QUADNAMES, FOAF, RDF, VirtRDF)
 from ..lib.sqla import (CrudOperation, get_model_watcher)
 from assembl.views.traversal import (
-    AbstractCollectionDefinition, CollectionDefinition)
+    AbstractCollectionDefinition, RelationCollectionDefinition)
 
 if DiscussionBoundBase.using_virtuoso:
     from virtuoso.alchemy import Timestamp
@@ -925,7 +925,7 @@ class Idea(HistoryMixin, DiscussionBoundBase):
                     content=instance, idea=parent_instance
                     ).count() > 0
 
-        class ActiveShowingWidgetsCollection(CollectionDefinition):
+        class ActiveShowingWidgetsCollection(RelationCollectionDefinition):
             def __init__(self, cls):
                 super(ActiveShowingWidgetsCollection, self).__init__(
                     cls, cls.active_showing_widget_links)

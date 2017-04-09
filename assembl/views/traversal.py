@@ -332,7 +332,7 @@ class InstanceContext(TraversalContext):
             relations = for_class.__mapper__.relationships
             for rel in relations:
                 if rel.key not in collections:
-                    collections[rel.key] = CollectionDefinition(for_class, rel)
+                    collections[rel.key] = RelationCollectionDefinition(for_class, rel)
             cls._collections_by_class[for_class] = collections
         return cls._collections_by_class[for_class]
 
@@ -683,12 +683,12 @@ class AbstractCollectionDefinition(object):
             self.collection_class.__name__)
 
 
-class CollectionDefinition(AbstractCollectionDefinition):
+class RelationCollectionDefinition(AbstractCollectionDefinition):
     """A collection of objects related to an instance through a relationship."""
     back_relation = None
 
     def __init__(self, owner_class, relationship):
-        super(CollectionDefinition, self).__init__(
+        super(RelationCollectionDefinition, self).__init__(
             owner_class, relationship.mapper.class_)
         self.relationship = relationship
         back_properties = list(getattr(relationship, '_reverse_property', ()))
@@ -789,7 +789,7 @@ class CollectionDefinition(AbstractCollectionDefinition):
         In the case of Relationship-based collections,
         concatenate the model class and relationship key."""
         cls = self.owner_class if (
-            self.__class__ == CollectionDefinition) else self.__class__
+            self.__class__ == RelationCollectionDefinition) else self.__class__
         return ".".join((cls.__name__, self.relationship.key))
 
     def __repr__(self):
