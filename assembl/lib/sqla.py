@@ -1025,6 +1025,7 @@ class BaseOps(object):
                 raise HTTPBadRequest(
                     "Could not find or create object %s" % (
                         dumps(json),))
+            context.on_new_instance(instance)
         if target_id is not None:
             aliases[target_id] = instance
         return instance
