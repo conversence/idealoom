@@ -154,6 +154,25 @@ class DummyContext(object):
     def context_chain(self):
         return (self,)
 
+    def get_discussion_id(self):
+        return None
+
+    def get_request(self):
+        return None
+
+    def on_new_instance(self, instance):
+        pass
+
+    def ctx_permissions(self, permissions):
+        return []
+
+    @property
+    def __acl__(self):
+        from pyramid.security import Allow, Everyone, ALL_PERMISSIONS, DENY_ALL
+        from assembl.auth import P_READ, R_SYSADMIN
+        return [(Allow, R_SYSADMIN, ALL_PERMISSIONS),
+                (Allow, Everyone, P_READ), DENY_ALL]
+
 
 class TableLockCreationThread(Thread):
     """Utility class to create objects as a side effect.
@@ -1010,7 +1029,7 @@ class BaseOps(object):
         if instance is not None:
             # Interesting that it works here and not upstream
             sub_context = instance.get_instance_context(context)
-            log.info("Chaining context from %s -> %s" % (context, c_context))
+            log.info("Chaining context from %s -> %s" % (context, sub_context))
             instance = instance._do_update_from_json(
                 json, parse_def, aliases, sub_context, permissions,
                 user_id, DuplicateHandling.USE_ORIGINAL, jsonld)
