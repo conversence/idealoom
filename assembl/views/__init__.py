@@ -364,19 +364,19 @@ def csrf_error_view(exc, request):
                 return Response(template, content_type='text/html')
             else:
                 # The hack failed. Tell the user what to do.
-                return HTTPBadRequest(explanation="Missing cookies", detail="""Note that we need active cookies.
+                raise HTTPBadRequest(explanation="Missing cookies", detail="""Note that we need active cookies.
                     On Safari, the "Allow from current website only" option
                     in the Privacy tab of preferences is too restrictive;
                     use "Allow from websites I visit" and try again. Simply reloading may work.""")
-        return HTTPBadRequest(explanation="Missing cookies", detail=repr(request.exception))
-    return  HTTPBadRequest(explanation="CSRF error", detail=repr(request.exception))
+        raise HTTPBadRequest(explanation="Missing cookies", detail=repr(request.exception))
+    raise HTTPBadRequest(explanation="CSRF error", detail=repr(request.exception))
 
 
 def error_view(exc, request):
     # from traceback import format_exc
     from datetime import datetime
     capture_exception(getattr(request, "exc_info", None))
-    return HTTPInternalServerError(
+    raise HTTPInternalServerError(
         explanation="Sorry, Assembl had an internal issue and you have to reload. Please send this to a discussion administrator.",
         detail=datetime.utcnow().isoformat()+"\n"+repr(request.exception))
         # format_exc(request.exception))

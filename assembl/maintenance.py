@@ -14,7 +14,7 @@ ${html_comment}
 def maintenance_message(request):
     _ = TranslationStringFactory('assembl')
     localizer = request.localizer
-    return HTTPServiceUnavailable(
+    raise HTTPServiceUnavailable(
         localizer.translate(_("Assembl is down for maintenance. We'll be back in a few minutes.")),
         body_template=maintenance_template)
 

@@ -18,7 +18,7 @@ def instance_del(request):
         user_id, ctx.get_discussion_id())
     idea = ctx._instance
     if not idea.user_can(user_id, CrudPermissions.DELETE, permissions):
-        return HTTPUnauthorized()
+        raise HTTPUnauthorized()
     for link in idea.source_links:
         link.is_tombstone = True
     idea.is_tombstone = True

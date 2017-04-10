@@ -118,8 +118,8 @@ def post_extract(request):
     user_id = user_id or Everyone
     if not user_has_permission(discussion.id, user_id, P_ADD_EXTRACT):
         #TODO: maparent:  restore this code once it works:
-        #return HTTPForbidden(result=ACLDenied(permission=P_ADD_EXTRACT))
-        return HTTPForbidden()
+        #raise HTTPForbidden(result=ACLDenied(permission=P_ADD_EXTRACT))
+        raise HTTPForbidden()
     if not user_id or user_id == Everyone:
         # TODO: Create an anonymous user.
         raise HTTPServerError("Anonymous extracts are not implemeted yet.")
@@ -222,7 +222,7 @@ def put_extract(request):
     if not (user_has_permission(discussion.id, user_id, P_EDIT_EXTRACT)
         or (user_has_permission(discussion.id, user_id, P_EDIT_MY_EXTRACT)
             and user_id == extract.owner_id)):
-        return HTTPForbidden()
+        raise HTTPForbidden()
 
     extract.owner_id = user_id or get_database_id("User", extract.owner_id)
     extract.order = updated_extract_data.get('order', extract.order)
@@ -283,7 +283,7 @@ def do_search_extracts(request):
     permissions = get_permissions(user_id, discussion.id)
 
     if not uri:
-        return HTTPBadRequest("Please specify a search uri")
+        raise HTTPBadRequest("Please specify a search uri")
     content = Webpage.get_by(url=uri)
     if content:
         extracts = Extract.default_db.query(Extract).filter_by(content=content).all()

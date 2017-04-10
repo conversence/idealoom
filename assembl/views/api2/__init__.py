@@ -128,7 +128,7 @@ def instance_view_jsonld(request):
         user_id, ctx.get_discussion_id())
     instance = ctx._instance
     if not instance.user_can(user_id, CrudPermissions.READ, permissions):
-        return HTTPUnauthorized()
+        raise HTTPUnauthorized()
     discussion = ctx.get_instance_of_class(Discussion)
     if not discussion:
         raise HTTPNotFound()
@@ -156,7 +156,7 @@ def instance_view(request):
         user_id, ctx.get_discussion_id())
     instance = ctx._instance
     if not instance.user_can(user_id, CrudPermissions.READ, permissions):
-        return HTTPUnauthorized()
+        raise HTTPUnauthorized()
     view = ctx.get_default_view() or 'default'
     view = request.GET.get('view', view)
     return instance.generic_json(view, user_id, permissions)
@@ -199,7 +199,7 @@ def instance_put_json(request, json_data=None):
         user_id, ctx.get_discussion_id())
     instance = ctx._instance
     if not instance.user_can(user_id, CrudPermissions.UPDATE, permissions):
-        return HTTPUnauthorized()
+        raise HTTPUnauthorized()
     try:
         updated = instance.update_from_json(json_data, user_id, ctx)
         view = request.GET.get('view', None) or 'default'
@@ -272,7 +272,7 @@ def instance_put_form(request, form_data=None):
     permissions = get_permissions(user_id, ctx.get_discussion_id())
     instance = ctx._instance
     if not instance.user_can(user_id, CrudPermissions.UPDATE, permissions):
-        return HTTPUnauthorized()
+        raise HTTPUnauthorized()
     update_from_form(instance, form_data)
     view = request.GET.get('view', None) or 'default'
     if view == 'id_only':
@@ -290,7 +290,7 @@ def instance_del(request):
         user_id, ctx.get_discussion_id())
     instance = ctx._instance
     if not instance.user_can(user_id, CrudPermissions.DELETE, permissions):
-        return HTTPUnauthorized()
+        raise HTTPUnauthorized()
     if isinstance(instance, TombstonableMixin):
         instance.is_tombstone = True
     else:

@@ -496,7 +496,7 @@ def delete_abstract_agent_account(request):
         user_id, ctx.get_discussion_id())
     instance = ctx._instance
     if not instance.user_can(user_id, CrudPermissions.DELETE, permissions):
-        return HTTPUnauthorized()
+        raise HTTPUnauthorized()
     if instance.email:
         accounts_with_mail = [a for a in instance.profile.accounts if a.email]
         if len(accounts_with_mail) == 1:
@@ -644,7 +644,7 @@ def modify_user_language_preference(request):
         user_id, ctx.get_discussion_id())
     instance = ctx._instance
     if not instance.user_can(user_id, CrudPermissions.UPDATE, permissions):
-        return HTTPUnauthorized()
+        raise HTTPUnauthorized()
     try:
         updated = instance.update_from_json(json_data, user_id, ctx)
         view = request.GET.get('view', None) or 'default'

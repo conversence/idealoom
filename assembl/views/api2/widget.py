@@ -47,7 +47,7 @@ def widget_view(request):
         if idea:
             json['target'] = idea.generic_json(view, user_id, permissions)
         else:
-            return HTTPNotFound("No idea "+target_id)
+            raise HTTPNotFound("No idea "+target_id)
     return json
 
 

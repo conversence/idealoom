@@ -103,10 +103,10 @@ def test_simultaneous_ajax_calls(request):
     discussion_id = g('discussion_id')
     widget_id = g('widget_id')
     if not discussion_id:
-        return HTTPBadRequest(
+        raise HTTPBadRequest(
             explanation="Please provide a discussion_id parameter")
     if not widget_id:
-        return HTTPBadRequest(
+        raise HTTPBadRequest(
             explanation="Please provide a widget_id parameter")
 
     widget_id = int(widget_id)
