@@ -13,7 +13,7 @@ def root_post_1(request, participant1_user, discussion, test_session):
         subject=LangString.create(u"a root post"),
         body=LangString.create(u"post body"), moderator=None,
         creation_date=datetime(year=2000, month=1, day=1),
-        type="post", message_id="msg1@example.com")
+        parent=None, type="post", message_id="msg1@example.com")
     test_session.add(p)
     test_session.flush()
 
@@ -36,7 +36,7 @@ def discussion2_root_post_1(request, participant1_user, discussion2, test_sessio
         subject=LangString.create(u"a root post"),
         body=LangString.create(u"post body"),
         creation_date=datetime(year=2000, month=1, day=2),
-        type="post", message_id="msg1@example2.com")
+        parent=None, type="post", message_id="msg1@example2.com")
     test_session.add(p)
     test_session.flush()
 
