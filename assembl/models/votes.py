@@ -200,7 +200,6 @@ class AbstractVoteSpecification(DiscussionBoundBase):
                     widgets_coll = ctx.find_collection(
                         'VotingWidget.vote_specifications')
                     if isinstance(inst, AbstractIdeaVote):
-                        inst.vote_spec = parent_instance
                         assocs.append(VotedIdeaWidgetLink(
                             widget=widgets_coll.parent_instance,
                             idea=inst.idea))
