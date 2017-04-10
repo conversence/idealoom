@@ -112,6 +112,7 @@ ACL_RESTRICTIVE = [(Allow, R_SYSADMIN, ALL_PERMISSIONS), DENY_ALL]
     reg.match_key('collection',
                   lambda inst, collection: collection.qual_name()))
 def collection_creation_side_effects(inst, collection):
+    """Multiple dispatch adapter for collection-related side effects"""
     return ()
 
 
@@ -205,10 +206,14 @@ class TraversalContext(BaseContext):
         self.__parent__.decorate_instance(instance, assocs, ctx, kwargs)
 
     def creation_side_effects(self, instance, top_ctx):
+        """Recursion"""
         for inst in self.__parent__.creation_side_effects(instance, top_ctx):
             yield inst
 
     def creation_side_effects_base(self, instance):
+        """Generator for objects that are created as side-effect of another
+        object's creation. They can have their own side-effect.
+        """
         for inst in self.creation_side_effects(instance, self):
             yield inst
             for sub in self.creation_side_effects_base(inst):
@@ -261,6 +266,7 @@ class Api2Context(TraversalContext):
         pass
 
     def creation_side_effects(self, instance, top_ctx):
+        """Apply simple side-effects from the instance"""
         for inst in instance.creation_side_effects(top_ctx):
             yield inst
 
@@ -625,6 +631,7 @@ class CollectionContext(TraversalContext):
         return assocs
 
     def creation_side_effects(self, instance, top_ctx):
+        """Apply side-effects through multiple dispatch on the collection"""
         for ins in self.__parent__.creation_side_effects(instance, top_ctx):
             yield ins
         for ins in collection_creation_side_effects(instance, self.collection):
