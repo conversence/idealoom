@@ -74,6 +74,12 @@ class Action(TombstonableMixin, DiscussionBoundBase):
     #         RDF.type, IriClass(VirtRDF.QNAME_ID).apply(Action.type),
     #         name=QUADNAMES.class_Action_class)]
 
+    def populate_from_context(self, context):
+        if not(self.actor or self.actor_id):
+            from .auth import User
+            self.actor = context.get_instance_of_class(User)
+        super(Action, self).populate_from_context(context)
+
     def __repr__(self):
         return "%s %s %s %s>" % (
             super(Action, self).__repr__()[:-1],
@@ -131,6 +137,11 @@ class ActionOnPost(Action):
             cascade="all, delete-orphan"))
 
     object_type = 'post'
+
+    def populate_from_context(self, context):
+        if not(self.post or self.post_id):
+            self.post = context.get_instance_of_class(Content)
+        super(ActionOnPost, self).populate_from_context(context)
 
     def get_discussion_id(self):
         post = self.post or Post.get(self.post_id)
@@ -299,6 +310,11 @@ class ActionOnIdea(Action):
 
 
     object_type = 'idea'
+
+    def populate_from_context(self, context):
+        if not(self.idea or self.idea_id):
+            self.idea = context.get_instance_of_class(Idea)
+        super(ActionOnIdea, self).populate_from_context(context)
 
     # This should not be necessary, but is.
     @classmethod
