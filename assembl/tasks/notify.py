@@ -15,7 +15,7 @@ from . import (config_celery_app, CeleryWithConfig)
 
 
 
-log = logging.getLogger('assembl')
+log = logging.getLogger(__name__)
 notify_process_mailer = None
 
 

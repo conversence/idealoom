@@ -26,7 +26,7 @@ from assembl.models import (
 from .util import discussion_from_request, maybe_auto_subscribe
 
 
-log = logging.getLogger('assembl')
+log = logging.getLogger(__name__)
 
 def login_user(backend, user, user_social_auth):
     remember(backend.strategy.request, user.id)

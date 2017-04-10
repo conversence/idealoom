@@ -48,7 +48,7 @@ from .utils import get_global_base_url
 from ..lib.config import get_config
 
 atexit_engines = []
-log = logging.getLogger('assembl')
+log = logging.getLogger(__name__)
 
 
 class CrudOperation(Enum):
@@ -221,7 +221,7 @@ class TableLockCreationThread(Thread):
                       "a non-unique object despite locking." + str(e))
             self.exception = e
         except Exception as e:
-            print e
+            log.error(e)
             self.success = False
             self.exception = e
 
@@ -1010,7 +1010,7 @@ class BaseOps(object):
         if instance is not None:
             # Interesting that it works here and not upstream
             sub_context = instance.get_instance_context(context)
-            print "Chaining context from", context, c_context
+            log.info("Chaining context from", context, c_context)
             instance = instance._do_update_from_json(
                 json, parse_def, aliases, sub_context, permissions,
                 user_id, DuplicateHandling.USE_ORIGINAL, jsonld)
@@ -1291,9 +1291,9 @@ class BaseOps(object):
                 # Target_cls?
                 can_be_list = must_be_list = True
             elif not value:
-                print "Ignoring unknown empty value for "\
+                log.info("Ignoring unknown empty value for "\
                     "attribute %s in json id %s (type %s)" % (
-                        key, json.get('@id', '?'), json.get('@type', '?'))
+                        key, json.get('@id', '?'), json.get('@type', '?')))
                 continue
             else:
                 raise HTTPBadRequest(
@@ -1303,9 +1303,9 @@ class BaseOps(object):
             # We have an accessor, let's treat the value.
             # Build a context
             c_context = self.get_collection_context(context, key) or context
-            print "Chaining context from", context, c_context
+            log.debug("Chaining context from", context, c_context)
             if c_context is context:
-                print("Could not find collection context: ", self, key)
+                log.info("Could not find collection context: ", self, key)
             if isinstance(value, (str, unicode)):
                 assert not must_be_list
                 target_id = value
@@ -1513,10 +1513,10 @@ class BaseOps(object):
             if inst:
                 if inst in related_objects:
                     # no need to duplicate
-                    print("populate_from_context magic on %s.%s: duplicate" % (
+                    log.debug("populate_from_context magic on %s.%s: duplicate" % (
                         self.__class__.__name__, reln.key))
                     continue
-                print("populate_from_context magic on %s.%s" % (
+                log.debug("populate_from_context magic on %s.%s" % (
                     self.__class__.__name__, reln.key))
                 setattr(self, reln.key, inst)
                 related_objects.add(inst)
@@ -1530,7 +1530,7 @@ class BaseOps(object):
                 candidates = [r.key for r in nullables if issubclass(
                     instance.__class__, r.mapper.class_)]
                 for rname in candidates:
-                    print("populate_from_context magic: could populate nullable %s.%s with %s" % (
+                    log.debug("populate_from_context magic: could populate nullable %s.%s with %s" % (
                         self.__class__.__name__, rname, instance))
 
     def creation_side_effects(self, context):
@@ -1884,7 +1884,7 @@ def before_commit_listener(session):
         del info['cdict']
         session.cdict2 = changes
     else:
-        print "EMPTY CDICT!"
+        log.warning("EMPTY CDICT!")
 
 
 def after_commit_listener(session):
@@ -1921,7 +1921,7 @@ def configure_engine(settings, zope_tr=True, autoflush=True, session_maker=None,
     """Return an SQLAlchemy engine configured as per the provided config."""
     if session_maker is None:
         if session_maker_is_initialized():
-            print "ERROR: Initialized twice."
+            log.error("ERROR: Initialized twice.")
             session_maker = get_session_maker()
         else:
             session_maker = initialize_session_maker(zope_tr, autoflush)

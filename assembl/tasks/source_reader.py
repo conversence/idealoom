@@ -26,7 +26,7 @@ from assembl.lib.config import set_config
 from assembl.lib.enum import OrderedEnum
 from assembl.lib.sqla import configure_engine
 
-log = logging.getLogger('assembl')
+log = logging.getLogger(__name__)
 pool_counter = 0
 
 

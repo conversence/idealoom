@@ -36,7 +36,7 @@ from assembl.models import (
 from assembl.models.post import deleted_publication_states
 from assembl.lib.raven_client import capture_message
 
-log = logging.getLogger('assembl')
+log = logging.getLogger(__name__)
 
 posts = Service(name='posts', path=API_DISCUSSION_PREFIX + '/posts',
                 description="Post API following SIOC vocabulary as much as possible",

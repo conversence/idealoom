@@ -45,7 +45,7 @@ from ..semantic.namespaces import (CATALYST, ASSEMBL, DCTERMS)
 
 resolver = DottedNameResolver(__package__)
 import logging
-log = logging.getLogger('assembl')
+log = logging.getLogger(__name__)
 
 
 class Discussion(NamedClassMixin, DiscussionBoundBase):

@@ -21,7 +21,7 @@ from assembl.auth.util import get_permissions, discussion_from_request
 from assembl.lib.sqla import uses_list, get_named_class, Base
 from assembl.lib.decl_enums import DeclEnumType
 
-log = logging.getLogger('assembl')
+log = logging.getLogger(__name__)
 
 
 class DictContext(object):

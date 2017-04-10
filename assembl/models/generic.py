@@ -38,7 +38,7 @@ from .discussion import Discussion
 from ..lib.history_mixin import TombstonableMixin
 
 
-log = logging.getLogger('assembl')
+log = logging.getLogger(__name__)
 
 
 class ContentSource(DiscussionBoundBase):

@@ -40,7 +40,7 @@ from .post import ImportedPost
 from .attachment import Document, PostAttachment
 
 
-log = logging.getLogger('assembl')
+log = logging.getLogger(__name__)
 
 API_VERSION_USED = 2.2
 DEFAULT_TIMEOUT = 30  # seconds

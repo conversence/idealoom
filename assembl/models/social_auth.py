@@ -47,7 +47,7 @@ from ..semantic.virtuoso_mapping import (
     AssemblQuadStorageManager)
 
 
-log = logging.getLogger('assembl')
+log = logging.getLogger(__name__)
 
 
 class AssemblSocialAuthMixin(Base, SQLAlchemyMixin):

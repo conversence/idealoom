@@ -53,7 +53,7 @@ from .. import (
     HTTPTemporaryRedirect, create_get_route)
 
 _ = TranslationStringFactory('assembl')
-log = logging.getLogger('assembl')
+log = logging.getLogger(__name__)
 
 
 public_roles = {Everyone, Authenticated}

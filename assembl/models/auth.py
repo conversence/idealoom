@@ -55,7 +55,7 @@ from ..semantic.virtuoso_mapping import (
     QuadMapPatternS, USER_SECTION, PRIVATE_USER_SECTION,
     AssemblQuadStorageManager)
 
-log = logging.getLogger('assembl')
+log = logging.getLogger(__name__)
 
 
 # None-tolerant min, max

@@ -36,7 +36,7 @@ from .langstrings import LangString, LangStringEntry
 from assembl.views.traversal import AbstractCollectionDefinition
 
 
-log = logging.getLogger('assembl')
+log = logging.getLogger(__name__)
 
 
 class PostVisitor(object):
