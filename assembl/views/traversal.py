@@ -108,10 +108,9 @@ ACL_RESTRICTIVE = [(Allow, R_SYSADMIN, ALL_PERMISSIONS), DENY_ALL]
 
 
 @reg.dispatch(
-    reg.match_instance('inst'),
-    reg.match_key('collection',
-                  lambda inst, collection: collection.qual_name()))
-def collection_creation_side_effects(inst, collection):
+    reg.match_instance('obj'),
+    reg.match_key('ctx', lambda obj, ctx: ctx.collection.qual_name()))
+def collection_creation_side_effects(obj, ctx):
     """Multiple dispatch adapter for collection-related side effects"""
     return ()
 
@@ -205,18 +204,18 @@ class TraversalContext(BaseContext):
         relevant to this step in the traversal path, often association objects."""
         self.__parent__.decorate_instance(instance, assocs, ctx, kwargs)
 
-    def creation_side_effects(self, instance, top_ctx):
+    def creation_side_effects_rec(self, instance, top_ctx):
         """Recursion"""
-        for inst in self.__parent__.creation_side_effects(instance, top_ctx):
+        for inst in self.__parent__.creation_side_effects_rec(instance, top_ctx):
             yield inst
 
-    def creation_side_effects_base(self, instance):
+    def creation_side_effects(self, instance):
         """Generator for objects that are created as side-effect of another
         object's creation. They can have their own side-effect.
         """
-        for inst in self.creation_side_effects(instance, self):
+        for inst in self.creation_side_effects_rec(instance, self):
             yield inst
-            for sub in self.creation_side_effects_base(inst):
+            for sub in self.creation_side_effects(inst):
                 yield sub
 
     def on_new_instance(self, instance):
@@ -265,7 +264,7 @@ class Api2Context(TraversalContext):
     def on_new_instance(self, instance):
         pass
 
-    def creation_side_effects(self, instance, top_ctx):
+    def creation_side_effects_rec(self, instance, top_ctx):
         """Apply simple side-effects from the instance"""
         for inst in instance.creation_side_effects(top_ctx):
             yield inst
@@ -618,7 +617,7 @@ class CollectionContext(TraversalContext):
             except Exception as e:
                 print_exc()
                 raise e
-            for instance in self.creation_side_effects_base(inst):
+            for instance in self.creation_side_effects(inst):
                 self.on_new_instance(inst)
                 inst.populate_from_context(self)
             assocs = [inst]
@@ -630,11 +629,11 @@ class CollectionContext(TraversalContext):
                 inst.populate_from_context(self)
         return assocs
 
-    def creation_side_effects(self, instance, top_ctx):
+    def creation_side_effects_rec(self, instance, top_ctx):
         """Apply side-effects through multiple dispatch on the collection"""
-        for ins in self.__parent__.creation_side_effects(instance, top_ctx):
+        for ins in self.__parent__.creation_side_effects_rec(instance, top_ctx):
             yield ins
-        for ins in collection_creation_side_effects(instance, self.collection):
+        for ins in collection_creation_side_effects(instance, self):
             yield ins
 
     def __repr__(self):
