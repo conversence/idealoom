@@ -15,6 +15,7 @@ from pyramid.security import Allow, Everyone, ALL_PERMISSIONS, DENY_ALL
 from pyramid.settings import asbool
 from pyramid.httpexceptions import HTTPNotFound
 from abc import ABCMeta, abstractmethod
+import reg
 
 from assembl.auth import P_READ, R_SYSADMIN
 from assembl.auth.util import discussion_from_request
@@ -106,6 +107,14 @@ ACL_READABLE = [(Allow, R_SYSADMIN, ALL_PERMISSIONS),
 ACL_RESTRICTIVE = [(Allow, R_SYSADMIN, ALL_PERMISSIONS), DENY_ALL]
 
 
+@reg.dispatch(
+    reg.match_instance('inst'),
+    reg.match_key('collection',
+                  lambda inst, collection: collection.qual_name()))
+def collection_creation_side_effects(inst, collection):
+    return ()
+
+
 class AppRoot(DictContext):
     """The root context. Anything not defined by a root comes here."""
     def __init__(self, request=None):
@@ -195,6 +204,16 @@ class TraversalContext(BaseContext):
         relevant to this step in the traversal path, often association objects."""
         self.__parent__.decorate_instance(instance, assocs, ctx, kwargs)
 
+    def creation_side_effects(self, instance, top_ctx):
+        for inst in self.__parent__.creation_side_effects(instance, top_ctx):
+            yield inst
+
+    def creation_side_effects_base(self, instance):
+        for inst in self.creation_side_effects(instance, self):
+            yield inst
+            for sub in self.creation_side_effects_base(inst):
+                yield sub
+
     def on_new_instance(self, instance):
         """If a model instance was created in this context, let the context learn about it.
         Exists mostly for :py:meth:`RelationCollectionDefinition.on_new_instance`"""
@@ -240,6 +259,10 @@ class Api2Context(TraversalContext):
 
     def on_new_instance(self, instance):
         pass
+
+    def creation_side_effects(self, instance, top_ctx):
+        for inst in instance.creation_side_effects(top_ctx):
+            yield inst
 
 
 def process_args(args, cls):
@@ -589,6 +612,9 @@ class CollectionContext(TraversalContext):
             except Exception as e:
                 print_exc()
                 raise e
+            for instance in self.creation_side_effects_base(inst):
+                self.on_new_instance(inst)
+                inst.populate_from_context(self)
             assocs = [inst]
             self.on_new_instance(inst)
             self.decorate_instance(inst, assocs, self, json)
@@ -597,6 +623,12 @@ class CollectionContext(TraversalContext):
                 self.on_new_instance(inst)
                 inst.populate_from_context(self)
         return assocs
+
+    def creation_side_effects(self, instance, top_ctx):
+        for ins in self.__parent__.creation_side_effects(instance, top_ctx):
+            yield ins
+        for ins in collection_creation_side_effects(instance, self.collection):
+            yield ins
 
     def __repr__(self):
         return "<CollectionContext (%s)>" % (

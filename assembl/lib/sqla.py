@@ -1504,7 +1504,7 @@ class BaseOps(object):
                         self.__class__.__name__, rname, instance))
 
     def creation_side_effects(self, context):
-        pass
+        return ()
 
     def handle_duplication(
                 self, json={}, parse_def={}, aliases={}, context=None,
