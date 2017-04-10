@@ -221,7 +221,7 @@ class TableLockCreationThread(Thread):
                       "a non-unique object despite locking." + str(e))
             self.exception = e
         except Exception as e:
-            log.error(e)
+            log.error(str(e))
             self.success = False
             self.exception = e
 
@@ -1010,7 +1010,7 @@ class BaseOps(object):
         if instance is not None:
             # Interesting that it works here and not upstream
             sub_context = instance.get_instance_context(context)
-            log.info("Chaining context from", context, c_context)
+            log.info("Chaining context from %s -> %s" % (context, c_context))
             instance = instance._do_update_from_json(
                 json, parse_def, aliases, sub_context, permissions,
                 user_id, DuplicateHandling.USE_ORIGINAL, jsonld)
@@ -1303,9 +1303,9 @@ class BaseOps(object):
             # We have an accessor, let's treat the value.
             # Build a context
             c_context = self.get_collection_context(context, key) or context
-            log.debug("Chaining context from", context, c_context)
+            log.debug("Chaining context from %s to %s" % (context, c_context))
             if c_context is context:
-                log.info("Could not find collection context: ", self, key)
+                log.info("Could not find collection context: %s %s" % (self, key))
             if isinstance(value, (str, unicode)):
                 assert not must_be_list
                 target_id = value
