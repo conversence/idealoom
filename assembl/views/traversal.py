@@ -371,7 +371,9 @@ class InstanceContext(TraversalContext):
         from assembl.models import DiscussionBoundBase
         if isinstance(self._instance, DiscussionBoundBase):
             try:
-                return self._instance.get_discussion_id()
+                discussion_id = self._instance.get_discussion_id()
+                if discussion_id:
+                    return discussion_id
             except Exception:
                 pass
         return super(InstanceContext, self).get_discussion_id()
