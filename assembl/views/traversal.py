@@ -900,9 +900,10 @@ class UserNsDictCollection(AbstractCollectionDefinition):
         return True
 
     def as_collection(self, parent_instance):
+        from pyramid.threadlocal import get_current_request
         from pyramid.httpexceptions import HTTPUnauthorized
         from assembl.models.user_key_values import UserNsDict
-        request = self.get_request()
+        request = get_current_request()
         if request is not None:
             user_id = request.authenticated_userid
             if user_id is None:
