@@ -202,6 +202,11 @@ class Idea(HistoryMixin, DiscussionBoundBase):
         #'with_polymorphic': '*'
     }
 
+    def populate_from_context(self, context):
+        if not(self.discussion or self.discussion_id):
+            self.discussion = context.get_instance_of_class(Discussion)
+        super(Idea, self).populate_from_context(context)
+
     @classmethod
     def special_quad_patterns(cls, alias_maker, discussion_id):
         discussion_alias = alias_maker.get_reln_alias(cls.discussion)

@@ -69,6 +69,11 @@ class Widget(DiscussionBoundBase):
     def interpret_settings(self, settings):
         pass
 
+    def populate_from_context(self, context):
+        if not(self.discussion or self.discussion_id):
+            self.discussion = context.get_instance_of_class(Discussion)
+        super(Widget, self).populate_from_context(context)
+
     def get_discussion_id(self):
         return self.discussion_id
 
@@ -241,6 +246,13 @@ class IdeaWidgetLink(DiscussionBoundBase):
         'polymorphic_on': type,
         'with_polymorphic': '*'
     }
+
+    def populate_from_context(self, context):
+        if not(self.widget or self.widget_id):
+            self.widget = context.get_instance_of_class(Widget)
+        if not(self.idea or self.idea_id):
+            self.idea = context.get_instance_of_class(Idea)
+        super(IdeaWidgetLink, self).populate_from_context(context)
 
     def get_discussion_id(self):
         idea = self.idea or Idea.get(self.idea_id)

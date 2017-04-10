@@ -507,6 +507,11 @@ class LangStringEntry(TombstonableMixin, Base):
             db.add(clone)
         return clone
 
+    def populate_from_context(self, context):
+        if not(self.langstring or self.langstring_id):
+            self.langstring = context.get_instance_of_class(LangString)
+        super(LangStringEntry, self).populate_from_context(context)
+
     def __repr__(self):
         value = self.value or ''
         if len(value) > 50:

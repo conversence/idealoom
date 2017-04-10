@@ -67,6 +67,14 @@ class AbstractVoteSpecification(DiscussionBoundBase):
     retypeable_as = ("LickertVoteSpecification", "BinaryVoteSpecification",
                      "MultipleChoiceVoteSpecification", "TokenVoteSpecification")
 
+    def populate_from_context(self, context):
+        if not(self.widget or self.widget_id):
+            from .widgets import VotingWidget
+            self.widget = context.get_instance_of_class(VotingWidget)
+        if not(self.criterion_idea or self.criterion_idea_id):
+            self.criterion_idea = context.get_instance_of_class(Idea)
+        super(AbstractVoteSpecification, self).populate_from_context(context)
+
     @classmethod
     def __declare_last__(cls):
         from .widgets import Widget
@@ -755,6 +763,20 @@ class AbstractIdeaVote(HistoryMixin, DiscussionBoundBase):
             "votes",
             primaryjoin="and_(User.id==AbstractIdeaVote.voter_id, "
                              "AbstractIdeaVote.tombstone_date == None)"))
+
+    def populate_from_context(self, context):
+        if not(self.widget or self.widget_id):
+            from .widgets import VotingWidget
+            self.widget = context.get_instance_of_class(VotingWidget)
+        if not(self.voter or self.voter_id):
+            self.voter = context.get_instance_of_class(User)
+        if not(self.vote_spec or self.vote_spec_id):
+            self.vote_spec = context.get_instance_of_class(
+                AbstractVoteSpecification)
+        if not(self.idea or self.idea_id):
+            self.idea = context.get_instance_of_class(Idea)
+        # Note: Criterion is not in context
+        super(AbstractIdeaVote, self).populate_from_context(context)
 
     def is_owner(self, user_id):
         return self.voter_id == user_id

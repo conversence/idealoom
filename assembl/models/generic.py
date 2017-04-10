@@ -359,6 +359,11 @@ class Content(TombstonableMixin, DiscussionBoundBase):
         'with_polymorphic': '*'
     }
 
+    def populate_from_context(self, context):
+        if not(self.discussion or self.discussion_id):
+            self.discussion = context.get_instance_of_class(Discussion)
+        super(Content, self).populate_from_context(context)
+
     def get_subject(self):
         return self.subject
 

@@ -118,6 +118,11 @@ class TimelineEvent(DiscussionBoundBase):
         info={'rdf': QuadMapPatternS(None, ASSEMBL.in_conversation)}
     )
 
+    def populate_from_context(self, context):
+        if not(self.discussion or self.discussion_id):
+            self.discussion = context.get_instance_of_class(Discussion)
+        super(TimelineEvent, self).populate_from_context(context)
+
     def set_previous_event(self, previous_event):
         # This allows setting the previous event as an insert.
         # this method may not be reliable with unflushed objects.

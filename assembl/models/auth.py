@@ -1593,6 +1593,12 @@ class PartnerOrganization(DiscussionBoundBase):
 
     is_initiator = Column(Boolean)
 
+    def populate_from_context(self, context):
+        if not(self.discussion or self.discussion_id):
+            from .discussion import Discussion
+            self.discussion = context.get_instance_of_class(Discussion)
+        super(PartnerOrganization, self).populate_from_context(context)
+
     def unique_query(self):
         query, _ = super(PartnerOrganization, self).unique_query()
         return query.filter_by(name=self.name), True

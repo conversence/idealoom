@@ -175,6 +175,11 @@ class Post(Content):
         'with_polymorphic': '*'
     }
 
+    def populate_from_context(self, context):
+        if not(self.creator or self.creator_id):
+            self.creator = context.get_instance_of_class(AgentProfile)
+        super(Post, self).populate_from_context(context)
+
     def get_descendants(self):
         assert self.id
         descendants = self.db.query(Post).filter(
