@@ -23,7 +23,8 @@ from .auth import User
 from ..auth import CrudPermissions, P_VOTE, P_SYSADMIN, P_ADMIN_DISC, P_READ
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..semantic.namespaces import (VOTE, ASSEMBL, DCTERMS, QUADNAMES)
-from ..views.traversal import AbstractCollectionDefinition
+from ..views.traversal import (
+    AbstractCollectionDefinition, collection_creation_side_effects)
 from .langstrings import LangString
 
 
@@ -162,7 +163,8 @@ class AbstractVoteSpecification(DiscussionBoundBase):
 
     @classmethod
     def extra_collections(cls):
-        from .widgets import (VotedIdeaWidgetLink)
+        from .widgets import (
+            VotedIdeaWidgetLink, VotingWidget, VotableIdeaWidgetLink)
 
         class VoteTargetsCollection(AbstractCollectionDefinition):
             # The set of voting target ideas.
@@ -174,8 +176,6 @@ class AbstractVoteSpecification(DiscussionBoundBase):
             def decorate_query(
                     self, query, owner_alias, last_alias, parent_instance,
                     ctx):
-                from .widgets import (
-                    VotingWidget, VotableIdeaWidgetLink)
                 # TODO : Why did this work?
                 # return query.filter(
                 #     last_alias.discussion_id == parent_instance.discussion_id
@@ -197,18 +197,15 @@ class AbstractVoteSpecification(DiscussionBoundBase):
                         spec_alias.id == parent_instance.id
                     )
 
-            def decorate_instance(
-                    self, instance, parent_instance, assocs, ctx, kwargs):
-                for inst in assocs[:]:
-                    widgets_coll = ctx.find_collection(
-                        'VotingWidget.vote_specifications')
-                    if isinstance(inst, AbstractIdeaVote):
-                        assocs.append(VotedIdeaWidgetLink(
-                            widget=widgets_coll.parent_instance,
-                            idea=inst.idea))
-
             def contains(self, parent_instance, instance):
                 return isinstance(instance, Idea)
+
+        @collection_creation_side_effects.register(
+            obj=AbstractIdeaVote, ctx='AbstractVoteSpecification.vote_targets')
+        def add_voted_widget_link(obj, ctx):
+            yield VotedIdeaWidgetLink(
+                widget=ctx.get_instance_of_class(VotingWidget),
+                idea=obj.idea)
 
         return (VoteTargetsCollection(cls),)
 

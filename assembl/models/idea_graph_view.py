@@ -28,6 +28,7 @@ from .idea import Idea, IdeaLink, RootIdea, IdeaVisitor
 from ..semantic.namespaces import (
     SIOC, CATALYST, IDEA, ASSEMBL, DCTERMS, QUADNAMES)
 from assembl.views.traversal import AbstractCollectionDefinition
+from ..views.traversal import collection_creation_side_effects
 
 
 class defaultdictlist(defaultdict):
@@ -316,22 +317,24 @@ class ExplicitSubGraphView(IdeaGraphView):
                                parent_instance, ctx):
                 return query.join(SubGraphIdeaAssociation, owner_alias)
 
-            def decorate_instance(
-                    self, instance, parent_instance, assocs, ctx, kwargs):
-                for inst in assocs[:]:
-                    if isinstance(inst, Idea):
-                        assocs.append(SubGraphIdeaAssociation(
-                            idea=inst, sub_graph=parent_instance))
-                    elif isinstance(inst, IdeaLink):
-                        assocs.append(SubGraphIdeaLinkAssociation(
-                                idea_link=inst, sub_graph=parent_instance))
-
             def contains(self, parent_instance, instance):
                 return instance.db.query(
                     SubGraphIdeaAssociation).filter_by(
                         idea=instance,
                         sub_graph=parent_instance
                     ).count() > 0
+
+        @collection_creation_side_effects.register(
+            obj=Idea, ctx='ExplicitSubGraphView.ideas')
+        def add_graph_idea_assoc(obj, ctx):
+            yield SubGraphIdeaAssociation(
+                idea=obj, sub_graph=ctx.parent_instance)
+
+        @collection_creation_side_effects.register(
+            obj=IdeaLink, ctx='ExplicitSubGraphView.ideas')
+        def add_graph_idea_link_assoc(obj, ctx):
+            yield SubGraphIdeaLinkAssociation(
+                idea_link=obj, sub_graph=ctx.parent_instance)
 
         class GViewIdeaLinkCollectionDefinition(AbstractCollectionDefinition):
             def __init__(self, cls):
@@ -342,19 +345,19 @@ class ExplicitSubGraphView(IdeaGraphView):
                                parent_instance, ctx):
                 return query.join(SubGraphIdeaLinkAssociation, owner_alias)
 
-            def decorate_instance(
-                    self, instance, parent_instance, assocs, ctx, kwargs):
-                if isinstance(instance, IdeaLink):
-                    assocs.append(
-                        SubGraphIdeaLinkAssociation(
-                            idea_link=instance, sub_graph=parent_instance))
-
             def contains(self, parent_instance, instance):
-                return instance.db.query(
-                    SubGraphIdeaLinkAssociation).filter_by(
-                        idea_link=instance,
-                        sub_graph=parent_instance
-                    ).count() > 0
+                    return instance.db.query(
+                        SubGraphIdeaLinkAssociation).filter_by(
+                            idea_link=instance,
+                            sub_graph=parent_instance
+                        ).count() > 0
+
+        @collection_creation_side_effects.register(
+            obj=IdeaLink, ctx='ExplicitSubGraphView.idea_links')
+        def add_graph_idea_link_assoc2(obj, ctx):
+            yield SubGraphIdeaLinkAssociation(
+                idea_link=obj, sub_graph=ctx.parent_instance)
+
 
         return (GViewIdeaCollectionDefinition(cls),
                 GViewIdeaLinkCollectionDefinition(cls))

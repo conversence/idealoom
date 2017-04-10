@@ -45,7 +45,8 @@ from ..semantic.namespaces import (
     SIOC, IDEA, ASSEMBL, DCTERMS, QUADNAMES, FOAF, RDF, VirtRDF)
 from ..lib.sqla import (CrudOperation, get_model_watcher)
 from assembl.views.traversal import (
-    AbstractCollectionDefinition, RelationCollectionDefinition)
+    AbstractCollectionDefinition, RelationCollectionDefinition,
+    collection_creation_side_effects)
 
 if DiscussionBoundBase.using_virtuoso:
     from virtuoso.alchemy import Timestamp
@@ -808,13 +809,11 @@ class Idea(HistoryMixin, DiscussionBoundBase):
 
     @classmethod
     def extra_collections(cls):
-        from .votes import AbstractIdeaVote
-        from .widgets import (
-            Widget, IdeaWidgetLink, VotedIdeaWidgetLink, InspirationWidget)
+        from .widgets import Widget
         from .idea_content_link import (
             IdeaRelatedPostLink, IdeaContentWidgetLink)
         from .generic import Content
-        from .post import Post
+        from .post import Post, WidgetPost
         from ..views.traversal import NsDictCollection
 
         class ChildIdeaCollectionDefinition(AbstractCollectionDefinition):
@@ -832,17 +831,17 @@ class Idea(HistoryMixin, DiscussionBoundBase):
                     IdeaLink.tombstone_date == None,
                     children.tombstone_date == None)
 
-            def decorate_instance(
-                    self, instance, parent_instance, assocs, ctx, kwargs):
-                if isinstance(instance, Idea):
-                    assocs.append(IdeaLink(
-                        source=parent_instance, target=instance))
-
             def contains(self, parent_instance, instance):
                 return instance.db.query(
                     IdeaLink).filter_by(
                     source=parent_instance, target=instance
                     ).count() > 0
+
+        @collection_creation_side_effects.register(
+            obj=Idea, ctx='Idea.children')
+        def add_child_link(obj, ctx):
+            yield IdeaLink(
+                source=ctx.parent_instance, target=obj)
 
         class LinkedPostCollectionDefinition(AbstractCollectionDefinition):
             # used by inspiration widget
@@ -855,37 +854,39 @@ class Idea(HistoryMixin, DiscussionBoundBase):
 
             def decorate_instance(
                     self, instance, parent_instance, assocs, ctx, kwargs):
-                from .post import WidgetPost
-                from .attachment import Document, PostAttachment
                 if isinstance(instance, Post):
                     assocs.append(
                         IdeaRelatedPostLink(
                             content=instance, idea=parent_instance,
                             creator=instance.creator,
                             **self.filter_kwargs(IdeaRelatedPostLink, kwargs)))
-                if isinstance(instance, WidgetPost):
-                    insp_url = instance.metadata_json.get('inspiration_url', '')
-                    if insp_url.startswith("https://www.youtube.com/"):
-                        # TODO: detect all video/image inspirations.
-                        # Handle duplicates in docs!
-                        doc = Document(
-                            discussion=instance.discussion,
-                            uri_id=insp_url)
-                        doc = doc.handle_duplication()
-                        att = PostAttachment(
-                            discussion=instance.discussion,
-                            creator=instance.creator,
-                            document=doc,
-                            attachmentPurpose='EMBED_ATTACHMENT',
-                            post=instance)
-                        assocs.append(doc)
-                        assocs.append(att)
 
             def contains(self, parent_instance, instance):
                 return instance.db.query(
                     IdeaRelatedPostLink).filter_by(
                     content=instance, idea=parent_instance
                     ).count() > 0
+
+        @collection_creation_side_effects.register(
+            obj=WidgetPost, ctx='Idea.linkedposts')
+        def add_youtube_attachment(obj, ctx):
+            from .attachment import Document, PostAttachment
+            insp_url = obj.metadata_json.get('inspiration_url', '')
+            if insp_url.startswith("https://www.youtube.com/"):
+                # TODO: detect all video/image inspirations.
+                # Handle duplicates in docs!
+                # Check whether we already have such an attachment?
+                doc = Document(
+                    discussion=obj.discussion,
+                    uri_id=insp_url)
+                doc = doc.handle_duplication()
+                yield(doc)
+                yield(PostAttachment(
+                    discussion=obj.discussion,
+                    creator=obj.creator,
+                    document=doc,
+                    attachmentPurpose='EMBED_ATTACHMENT',
+                    post=obj))
 
         class WidgetPostCollectionDefinition(AbstractCollectionDefinition):
             # used by creativity widget
@@ -909,24 +910,21 @@ class Idea(HistoryMixin, DiscussionBoundBase):
                     IdeaProposalPost.polymorphic_identities()))
                 return query
 
-            def decorate_instance(
-                    self, instance, parent_instance, assocs, ctx, kwargs):
-                # This is going to spell trouble: Sometimes we'll have creator,
-                # other times creator_id
-                if isinstance(instance, Post):
-                    if parent_instance.proposed_in_post:
-                        instance.set_parent(parent_instance.proposed_in_post)
-                    assocs.append(
-                        IdeaContentWidgetLink(
-                            content=instance, idea=parent_instance,
-                            creator=instance.creator))
-                    instance.hidden = True
-
             def contains(self, parent_instance, instance):
                 return instance.db.query(
                     IdeaContentWidgetLink).filter_by(
                     content=instance, idea=parent_instance
                     ).count() > 0
+
+        @collection_creation_side_effects.register(
+            obj=Post, ctx='Idea.widgetposts')
+        def add_content_widget_link(obj, ctx):
+            if ctx.parent_instance.proposed_in_post:
+                obj.set_parent(ctx.parent_instance.proposed_in_post)
+            obj.hidden = True
+            yield IdeaContentWidgetLink(
+                content=obj, idea=ctx.parent_instance,
+                creator=obj.creator)
 
         class ActiveShowingWidgetsCollection(RelationCollectionDefinition):
             def __init__(self, cls):

@@ -28,7 +28,8 @@ from .post import Post, IdeaProposalPost
 from .auth import User
 from .votes import AbstractVoteSpecification, AbstractIdeaVote
 from ..views.traversal import (
-    RelationCollectionDefinition, AbstractCollectionDefinition)
+    RelationCollectionDefinition, AbstractCollectionDefinition,
+    collection_creation_side_effects)
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..semantic.namespaces import (ASSEMBL, QUADNAMES)
 
@@ -554,8 +555,6 @@ class IdeaCreatingWidget(BaseIdeaWidget):
             def decorate_instance(
                     self, instance, parent_instance, assocs, ctx, kwargs):
                 from .langstrings import LangString
-                super(BaseIdeaCollection, self).decorate_instance(
-                    instance, parent_instance, assocs, ctx, kwargs)
                 for inst in assocs[:]:
                     if isinstance(inst, Idea):
                         user_id = ctx.get_user_id()
@@ -609,8 +608,6 @@ class IdeaCreatingWidget(BaseIdeaWidget):
             def decorate_instance(
                     self, instance, parent_instance, assocs, ctx, kwargs):
                 from .langstrings import LangString
-                super(BaseIdeaDescendantsCollectionC, self).decorate_instance(
-                    instance, parent_instance, assocs, ctx, kwargs)
                 for inst in assocs[:]:
                     if isinstance(inst, Idea):
                         user_id = ctx.get_user_id()
@@ -894,22 +891,23 @@ class VotingWidget(BaseIdeaWidget):
                 return query.join(idea.has_criterion_links).join(
                     widget).filter(widget.id == parent_instance.id)
 
-            def decorate_instance(
-                    self, instance, parent_instance, assocs, ctx, kwargs):
-                super(CriterionCollection, self).decorate_instance(
-                    instance, parent_instance, assocs, ctx, kwargs)
-                for inst in assocs[:]:
-                    if isinstance(inst, Idea):
-                        assocs.append(VotingCriterionWidgetLink(idea=inst))
-                    elif isinstance(inst, AbstractIdeaVote):
-                        criterion_ctx = ctx.find_collection(
-                            'VotingWidget.criteria')
-                        search_ctx = ctx
-                        while (search_ctx.__parent__
-                               and search_ctx.__parent__ != criterion_ctx):
-                            search_ctx = search_ctx.__parent__
-                        assert search_ctx.__parent__
-                        inst.criterion = search_ctx._instance
+        @collection_creation_side_effects.register(
+            obj=Idea, ctx='VotingWidget.criteria')
+        def add_criterion_link(obj, ctx):
+            yield VotingCriterionWidgetLink(idea=obj, widget=ctx.owner_alias)
+
+        @collection_creation_side_effects.register(
+            obj=AbstractIdeaVote, ctx='VotingWidget.criteria')
+        def add_criterion_relation(obj, ctx):
+            criterion_ctx = ctx.find_collection(
+                'VotingWidget.criteria')
+            # find instance context above me
+            search_ctx = ctx
+            while (search_ctx.__parent__ and
+                   search_ctx.__parent__ != criterion_ctx):
+                search_ctx = search_ctx.__parent__
+            assert search_ctx.__parent__
+            obj.criterion = search_ctx._instance
 
         class VotableCollection(RelationCollectionDefinition):
             # The set of votable ideas.
@@ -924,15 +922,12 @@ class VotingWidget(BaseIdeaWidget):
                     widget).filter(widget.id == parent_instance.id)
                 return query
 
-            def decorate_instance(
-                    self, instance, parent_instance, assocs, ctx, kwargs):
-                super(VotableCollection, self).decorate_instance(
-                    instance, parent_instance, assocs, ctx, kwargs)
-                for inst in assocs[:]:
-                    if isinstance(inst, Idea):
-                        assocs.append(VotableIdeaWidgetLink(
-                            idea=inst,
-                            widget=self.parent_instance))
+        @collection_creation_side_effects.register(
+            obj=Idea, ctx='VotingWidget.targets')
+        def add_votable_link(obj, ctx):
+            yield VotableIdeaWidgetLink(
+                idea=obj,
+                widget=ctx.parent_instance)
 
         return (CriterionCollection(cls),
                 VotableCollection(cls))
