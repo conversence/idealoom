@@ -141,39 +141,6 @@ def uses_list(prop):
         return subprop.uselist
 
 
-class DummyContext(object):
-    def __init__(self, presets=None):
-        self.presets = presets or {}
-
-    def get_instance_of_class(self, cls):
-        return self.presets.get(cls, None)
-
-    def get_all_instances(self):
-        return self.presets.itervalues()
-
-    def context_chain(self):
-        return (self,)
-
-    def get_discussion_id(self):
-        return None
-
-    def get_request(self):
-        return None
-
-    def on_new_instance(self, instance):
-        pass
-
-    def ctx_permissions(self, permissions):
-        return []
-
-    @property
-    def __acl__(self):
-        from pyramid.security import Allow, Everyone, ALL_PERMISSIONS, DENY_ALL
-        from assembl.auth import P_READ, R_SYSADMIN
-        return [(Allow, R_SYSADMIN, ALL_PERMISSIONS),
-                (Allow, Everyone, P_READ), DENY_ALL]
-
-
 class TableLockCreationThread(Thread):
     """Utility class to create objects as a side effect.
     Will use an exclusive table lock to ensure that the objects
@@ -969,8 +936,6 @@ class BaseOps(object):
                         result[name] = None
         return result
 
-    dummy_context = DummyContext()
-
     def locked_object_creation(
             self, object_generator, lock_table_cls=None, num_attempts=3):
         """Utility method to create objects as a side effect.
@@ -1065,7 +1030,7 @@ class BaseOps(object):
         from ..auth.util import get_permissions
         aliases = aliases or {}
         parse_def = get_view_def(parse_def_name)
-        context = context or cls.dummy_context
+        context = context or cls.get_class_context()
         user_id = user_id or Everyone
         from assembl.models import Discussion
         discussion = context.get_instance_of_class(Discussion)
@@ -1126,7 +1091,7 @@ class BaseOps(object):
         """Update (patch) an object from its JSON representation."""
         from ..auth.util import get_permissions
         parse_def = get_view_def(parse_def_name)
-        context = context or self.dummy_context
+        context = context or self.get_instance_context()
         user_id = user_id or Everyone
         from assembl.models import DiscussionBoundBase, Discussion
         discussion = context.get_instance_of_class(Discussion)
@@ -1321,7 +1286,7 @@ class BaseOps(object):
 
             # We have an accessor, let's treat the value.
             # Build a context
-            c_context = self.get_collection_context(context, key) or context
+            c_context = self.get_collection_context(key, context) or context
             log.debug("Chaining context from %s to %s" % (context, c_context))
             if c_context is context:
                 log.info("Could not find collection context: %s %s" % (self, key))
@@ -1687,14 +1652,29 @@ class BaseOps(object):
             cls._collections_cache = collections
         return cls._collections_cache
 
-    def get_instance_context(self, parent_context):
-        from assembl.views.traversal import InstanceContext
-        return InstanceContext(parent_context, self)
+    @staticmethod
+    def get_api_context(request=None):
+        from assembl.views.traversal import root_factory
+        from pyramid.threadlocal import get_current_request
+        request = request or get_current_request()
+        root = root_factory(request)
+        return root['data']
 
-    def get_collection_context(self, parent_context, relation_name):
+    @classmethod
+    def get_class_context(cls, request=None):
+        api_context = cls.get_api_context(request)
+        return api_context[self.external_typename()]
+
+    def get_instance_context(self, parent_context=None):
+        from assembl.views.traversal import InstanceContext
+        return InstanceContext(
+            parent_context or self.get_class_context(), self)
+
+    def get_collection_context(self, relation_name, parent_context=None):
         from assembl.views.traversal import CollectionContext
         collection = self.get_collections().get(relation_name, None)
         if collection:
+            parent_context = parent_context or self.get_instance_context()
             return CollectionContext(parent_context, collection, self)
 
     def is_owner(self, user_id):

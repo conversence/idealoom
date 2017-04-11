@@ -32,7 +32,7 @@ from assembl.models import (
     get_database_id, Post, AssemblPost, SynthesisPost,
     Synthesis, Discussion, Content, Idea, ViewPost, User,
     IdeaRelatedPostLink, AgentProfile, LikedPost, LangString,
-    DummyContext, LanguagePreferenceCollection)
+    LanguagePreferenceCollection)
 from assembl.models.post import deleted_publication_states
 from assembl.lib.raven_client import capture_message
 
@@ -570,7 +570,7 @@ def create_post(request):
 
     discussion = request.context
 
-    ctx = DummyContext({Discussion: discussion})
+    ctx = discussion.get_instance_context(request)
     if html:
         log.warning("Still using html")
         # how to guess locale in this case?

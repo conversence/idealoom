@@ -44,7 +44,7 @@ ACL_RESTRICTIVE = [(Allow, R_SYSADMIN, ALL_PERMISSIONS), DENY_ALL]
 
 class AppRoot(DictContext):
     """The root context. Anything not defined by a root comes here."""
-    def __init__(self, request):
+    def __init__(self, request=None):
         self.request = request
         super(AppRoot, self).__init__(ACL_READABLE, {
             'data': Api2Context(self, ACL_RESTRICTIVE),
@@ -60,7 +60,7 @@ class AppRoot(DictContext):
     __name__ = "Assembl"
 
     def get_request(self):
-        """Get the request from the context"""
+        """Get the request from the context, if known"""
         return self.request
 
     def context_chain(self):
@@ -110,7 +110,7 @@ class TraversalContext(object):
         return self.__parent__.get_discussion_id()
 
     def get_request(self):
-        """Get the request from the context"""
+        """Get the request from the context, if known"""
         return self.__parent__.get_request()
 
     def get_all_instances(self):
@@ -185,9 +185,11 @@ class Api2Context(TraversalContext):
     def get_instance_of_class(self, cls):
         from assembl.models import User
         if issubclass(cls, User):
-            user_id = self.get_request().authenticated_userid
-            if user_id and user_id != Everyone:
-                return User.get(user_id)
+            request = self.get_request()
+            if request:
+                user_id = request.authenticated_userid
+                if user_id and user_id != Everyone:
+                    return User.get(user_id)
 
     def get_all_instances(self):
         from assembl.models import User

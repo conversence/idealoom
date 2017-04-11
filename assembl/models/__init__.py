@@ -20,8 +20,7 @@ from sqlalchemy.ext.declarative import DeclarativeMeta
 from ..lib.abc import abstractclassmethod
 from ..lib.sqla import (
     Base, TimestampedBase, get_metadata, get_session_maker, PrivateObjectMixin,
-    get_named_object, get_database_id, Tombstone, CrudOperation,
-    DummyContext)
+    get_named_object, get_database_id, Tombstone, CrudOperation)
 from ..lib.history_mixin import TombstonableMixin, HistoryMixin
 
 
