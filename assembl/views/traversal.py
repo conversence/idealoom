@@ -618,13 +618,15 @@ class CollectionContext(TraversalContext):
                 print_exc()
                 raise e
             for instance in self.creation_side_effects(inst):
-                self.on_new_instance(inst)
-                inst.populate_from_context(self)
+                self.parent_instance.db.add(instance)
+                self.on_new_instance(instance)
+                instance.populate_from_context(self)
             assocs = [inst]
             self.on_new_instance(inst)
             self.decorate_instance(inst, assocs, self, json)
             # this should disappear
             for inst in assocs[1:]:
+                self.parent_instance.db.add(inst)
                 self.on_new_instance(inst)
                 inst.populate_from_context(self)
         return assocs
