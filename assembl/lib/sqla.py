@@ -1663,7 +1663,7 @@ class BaseOps(object):
     @classmethod
     def get_class_context(cls, request=None):
         api_context = cls.get_api_context(request)
-        return api_context[self.external_typename()]
+        return api_context[cls.external_typename()]
 
     def get_instance_context(self, parent_context=None):
         from assembl.views.traversal import InstanceContext
