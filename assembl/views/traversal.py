@@ -24,9 +24,67 @@ from assembl.lib.decl_enums import DeclEnumType
 log = logging.getLogger(__name__)
 
 
-class DictContext(object):
+class BaseContext(object):
+    """The base class for all traversal contexts.
+    Delegate everything to parent by default."""
+
+    def __init__(self, parent=None, acl=None):
+        self.__parent__ = parent
+        if parent:
+            self.__acl__ = acl or parent.__acl__
+            self.depth = getattr(parent, "depth", 0) + 1
+        elif acl:
+            self.acl = acl
+            self.depth = 0
+
+    def find_collection(self, collection_class_name):
+        """Find a collection by name"""
+        return self.__parent__.find_collection(collection_class_name)
+
+    def get_discussion_id(self):
+        """Get the current discussion_id somehow
+
+        often from a :py:class:`DiscussionBoundBase` instance"""
+        return self.__parent__.get_discussion_id()
+
+    def get_request(self):
+        """Get the request from the context, if known"""
+        return self.__parent__.get_request()
+
+    def get_all_instances(self):
+        # Should be a yield from
+        for i in self.__parent__.get_all_instances():
+            yield i
+
+    def context_chain(self):
+        yield self
+        for ctx in self.__parent__.context_chain():
+            yield ctx
+
+    def get_instance_of_class(self, cls):
+        """Look in the context chain for a model instance of a given class"""
+        return self.__parent__.get_instance_of_class(cls)
+
+    def ctx_permissions(self, permissions):
+        """Does the context give specific permissions?
+
+        See e.g. in :py:class:`assembl.models.widgets.IdeaCreatingWidget.BaseIdeaHidingCollection`"""
+        return self.__parent__.ctx_permissions(permissions)
+
+    def __eq__(self, other):
+        return (self.__class__ is other.__class__ and
+                self.__parent__ == other.__parent__)
+
+    def __hash__(self):
+        h = hash(self.__class__)
+        if self.__parent__:
+            h = h % hash(self.__parent__)
+
+
+class DictContext(BaseContext):
     """A Context defined using a simple dictionary"""
     def __init__(self, acl, subobjects=None):
+        super(DictContext, self).__init__(None, acl)
         self.subobjects = subobjects or {}
         for context in self.subobjects.itervalues():
             context.__parent__ = self
@@ -56,15 +114,7 @@ class AppRoot(DictContext):
                     'discussion': DiscussionsContext(),
                     'token': DictContext(ACL_READABLE)})})})
 
-    __parent__ = None
     __name__ = "Assembl"
-
-    def get_request(self):
-        """Get the request from the context, if known"""
-        return self.request
-
-    def context_chain(self):
-        yield self
 
     def __getitem__(self, key):
         if key in self.subobjects:
@@ -76,8 +126,42 @@ class AppRoot(DictContext):
             raise KeyError()
         return discussion
 
+    # Base of recursion for methods defined in BaseContext
 
-class DiscussionsContext(object):
+    def get_request(self):
+        """Get the request from the context, if known"""
+        return self.request
+
+    def context_chain(self):
+        yield self
+
+    def find_collection(self, collection_class_name):
+        """Find a collection by name"""
+        return None
+
+    def get_discussion_id(self):
+        return None
+
+    def get_instance_of_class(self, cls):
+        from assembl.models import User
+        if issubclass(cls, User):
+            request = self.get_request()
+            if request:
+                user_id = request.authenticated_userid
+                if user_id and user_id != Everyone:
+                    return User.get(user_id)
+
+    def get_all_instances(self):
+        from assembl.models import User
+        user = self.get_instance_of_class(User)
+        if user is not None:
+            yield user
+
+    def ctx_permissions(self, permissions):
+        return []
+
+
+class DiscussionsContext(BaseContext):
     """A context where discussions, named by id, are sub-contexts"""
     def __getitem__(self, key):
         from assembl.models import Discussion
@@ -86,46 +170,13 @@ class DiscussionsContext(object):
             raise KeyError()
         return discussion
 
-    def context_chain(self):
-        yield self
-        for ctx in self.__parent__.context_chain():
-            yield ctx
 
-
-class TraversalContext(object):
+class TraversalContext(BaseContext):
     """The base class for the magic API"""
     def __init__(self, parent, acl=None):
         self.__parent__ = parent
         self.__acl__ = acl or parent.__acl__
         self.depth = getattr(parent, "depth", 0) + 1
-
-    def find_collection(self, collection_class_name):
-        """Find a collection by name"""
-        return None
-
-    def get_discussion_id(self):
-        """Get the current discussion_id somehow
-
-        often from a :py:class:`DiscussionBoundBase` instance"""
-        return self.__parent__.get_discussion_id()
-
-    def get_request(self):
-        """Get the request from the context, if known"""
-        return self.__parent__.get_request()
-
-    def get_all_instances(self):
-        # Should be a yield from
-        for i in self.__parent__.get_all_instances():
-            yield i
-
-    def context_chain(self):
-        yield self
-        for ctx in self.__parent__.context_chain():
-            yield ctx
-
-    def get_instance_of_class(self, cls):
-        """Look in the context chain for a model instance of a given class"""
-        return self.__parent__.get_instance_of_class(cls)
 
     def decorate_query(self, query, ctx, tombstones=False):
         """Given a SQLAlchemy query, add joins and filters that correspond
@@ -146,12 +197,6 @@ class TraversalContext(object):
     def get_target_class(self):
         """What is the model class we can expect to find at this context?"""
         return None
-
-    def ctx_permissions(self, permissions):
-        """Does the context give specific permissions?
-
-        See e.g. in :py:class:`assembl.models.widgets.IdeaCreatingWidget.BaseIdeaHidingCollection`"""
-        return self.__parent__.ctx_permissions(permissions)
 
 
 class Api2Context(TraversalContext):
@@ -179,34 +224,15 @@ class Api2Context(TraversalContext):
                 for k in Base._decl_class_registry.itervalues()
                 if getattr(k, 'external_typename', False)]
 
-    def get_discussion_id(self):
-        return None
-
-    def get_instance_of_class(self, cls):
-        from assembl.models import User
-        if issubclass(cls, User):
-            request = self.get_request()
-            if request:
-                user_id = request.authenticated_userid
-                if user_id and user_id != Everyone:
-                    return User.get(user_id)
-
-    def get_all_instances(self):
-        from assembl.models import User
-        user = self.get_instance_of_class(User)
-        if user is not None:
-            yield user
+    # Base of recursion for methods defined in TraversalContext
 
     def decorate_query(self, query, ctx, tombstones=False):
-        # The buck stops here
         return query
 
     def decorate_instance(self, instance, assocs, user_id, ctx, kwargs):
-        # and here
         pass
 
     def on_new_instance(self, instance):
-        # and here
         pass
 
     def ctx_permissions(self, permissions):
@@ -300,6 +326,13 @@ class ClassContext(TraversalContext):
         cls = self.get_class(typename)
         with self._class.default_db.no_autoflush:
             return [cls.create_from_json(json, user_id, self)]
+
+    def __eq__(self, other):
+        return (super(ClassContext, self).__eq__(other) and
+                self._class == other._class)
+
+    def __hash__(self):
+        return super(ClassContext, self).hash() % hash(self._class)
 
 
 class ClassContextPredicate(object):
@@ -399,6 +432,13 @@ class InstanceContext(TraversalContext):
 
     def __repr__(self):
         return "<InstanceContext (%s)>" % (self._instance,)
+
+    def __eq__(self, other):
+        return (super(InstanceContext, self).__eq__(other) and
+                self._instance is other._instance)
+
+    def __hash__(self):
+        return super(ClassContext, self).hash() % id(self._instance)
 
 
 class InstanceContextPredicate(object):
@@ -559,6 +599,14 @@ class CollectionContext(TraversalContext):
         if self.collection.qual_name() == collection_class_name:
             return self
         return self.__parent__.find_collection(collection_class_name)
+
+    def __eq__(self, other):
+        return (super(CollectionContext, self).__eq__(other) and
+                self.collection is other.collection)
+
+    def __hash__(self):
+        return super(ClassContext, self).hash() % hash(
+            self.collection.qual_name())
 
 
 class NamedCollectionContextPredicate(object):
