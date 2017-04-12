@@ -35,7 +35,7 @@ def includeme(config):
     contextual_route('do_password_change', '/do_password_change/{token}')
     contextual_route('welcome', '/welcome/{token}')
     contextual_route('finish_password_change', '/finish_password_change')
-    config.add_route('contextual_social_auth', '/{discussion_slug}/login/{backend}')
+    config.add_route('contextual_social.auth', '/{discussion_slug}/login/{backend}')
     contextual_route('add_social_account', '/add_account/{backend}')
     config.include('social.apps.pyramid_app')
     config.scan()
