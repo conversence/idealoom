@@ -259,8 +259,12 @@ def get_default_context(request, **kwargs):
     static_url = '/static'
     widget_url = '/static/widget'
     if use_webpack_server:
+        webpack_host = config.get(
+            'webpack_host',
+            config.get('public_hostname',
+                       'localhost'))
         static_url = 'http://%s:%d' % (
-            config.get('public_hostname', 'localhost'),
+            webpack_host,
             int(config.get('webpack_port', 8080)))
 
     get_route = create_get_route(request, discussion)
