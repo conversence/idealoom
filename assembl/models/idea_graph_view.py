@@ -28,7 +28,7 @@ from .idea import Idea, IdeaLink, RootIdea, IdeaVisitor
 from ..semantic.namespaces import (
     SIOC, CATALYST, IDEA, ASSEMBL, DCTERMS, QUADNAMES)
 from assembl.views.traversal import AbstractCollectionDefinition
-from ..views.traversal import collection_creation_side_effects
+from ..views.traversal import collection_creation_side_effects, InstanceContext
 
 
 class defaultdictlist(defaultdict):
@@ -108,7 +108,7 @@ class SubGraphIdeaAssociation(DiscussionBoundBase):
         'idea.id', ondelete="CASCADE", onupdate="CASCADE"),
         nullable=False, index=True)
     # reference to the "Idea" object for proxying
-    idea = relationship("Idea")
+    idea = relationship("Idea", backref="in_subgraph_assoc")
 
     @classmethod
     def special_quad_patterns(cls, alias_maker, discussion_id):
@@ -179,7 +179,7 @@ class SubGraphIdeaLinkAssociation(DiscussionBoundBase):
         index=True, nullable=False)
 
     # reference to the "IdeaLink" object for proxying
-    idea_link = relationship("IdeaLink")
+    idea_link = relationship("IdeaLink", backref="in_subgraph_assoc")
 
     @classmethod
     def special_quad_patterns(cls, alias_maker, discussion_id):
@@ -325,16 +325,21 @@ class ExplicitSubGraphView(IdeaGraphView):
                     ).count() > 0
 
         @collection_creation_side_effects.register(
-            obj=Idea, ctx='ExplicitSubGraphView.ideas')
-        def add_graph_idea_assoc(obj, ctx):
-            yield SubGraphIdeaAssociation(
-                idea=obj, sub_graph=ctx.parent_instance)
+            inst_ctx=Idea, ctx='ExplicitSubGraphView.ideas')
+        def add_graph_idea_assoc(inst_ctx, ctx):
+            yield InstanceContext(
+                inst_ctx['in_subgraph_assoc'],
+                SubGraphIdeaAssociation(
+                    idea=inst_ctx._instance, sub_graph=ctx.parent_instance))
 
         @collection_creation_side_effects.register(
-            obj=IdeaLink, ctx='ExplicitSubGraphView.ideas')
-        def add_graph_idea_link_assoc(obj, ctx):
-            yield SubGraphIdeaLinkAssociation(
-                idea_link=obj, sub_graph=ctx.parent_instance)
+            inst_ctx=IdeaLink, ctx='ExplicitSubGraphView.ideas')
+        def add_graph_idea_link_assoc(inst_ctx, ctx):
+            yield InstanceContext(
+                inst_ctx['in_subgraph_assoc'],
+                SubGraphIdeaLinkAssociation(
+                    idea_link=inst_ctx._instance,
+                    sub_graph=ctx.parent_instance))
 
         class GViewIdeaLinkCollectionDefinition(AbstractCollectionDefinition):
             def __init__(self, cls):
@@ -353,10 +358,12 @@ class ExplicitSubGraphView(IdeaGraphView):
                         ).count() > 0
 
         @collection_creation_side_effects.register(
-            obj=IdeaLink, ctx='ExplicitSubGraphView.idea_links')
-        def add_graph_idea_link_assoc2(obj, ctx):
-            yield SubGraphIdeaLinkAssociation(
-                idea_link=obj, sub_graph=ctx.parent_instance)
+            inst_ctx=IdeaLink, ctx='ExplicitSubGraphView.idea_links')
+        def add_graph_idea_link_assoc2(inst_ctx, ctx):
+            yield InstanceContext(
+                inst_ctx['in_subgraph_assoc'],
+                SubGraphIdeaLinkAssociation(
+                    idea_link=inst_ctx._instance, sub_graph=ctx.parent_instance))
 
 
         return (GViewIdeaCollectionDefinition(cls),

@@ -1003,17 +1003,17 @@ class BaseOps(object):
                 json, parse_def, aliases, sub_context,
                 DuplicateHandling.USE_ORIGINAL, jsonld)
         else:
-            instance = target_cls._do_create_from_json(
+            instance_ctx = target_cls._do_create_from_json(
                 json, parse_def, aliases, context,
                 DuplicateHandling.USE_ORIGINAL, jsonld)
-            if instance is None:
+            if instance_ctx is None:
                 raise HTTPBadRequest(
                     "Could not find or create object %s" % (
                         dumps(json),))
-            context.on_new_instance(instance)
+            context.on_new_instance(instance_ctx._instance)
         if target_id is not None:
-            aliases[target_id] = instance
-        return instance
+            aliases[target_id] = instance_ctx._instance
+        return instance_ctx
 
     # If a duplicate is created, do we use the original? (Error otherwise)
     default_duplicate_handling = DuplicateHandling.ERROR
@@ -1073,11 +1073,12 @@ class BaseOps(object):
                 "User id <%s> cannot modify a <%s> object" % (
                     user_id, cls.__name__))
         if result is not inst:
+            i_context = result.get_instance_context(context)
             cls.default_db.add(result)
             result_id = result.uri()
             if '@id' in json and result_id != json['@id']:
                 aliases[json['@id']] = result
-        return result
+        return i_context
 
     def update_from_json(
             self, json, user_id=None, context=None, jsonld=None,
@@ -1293,9 +1294,10 @@ class BaseOps(object):
                         if instance is not None:
                             aliases[target_id] = instance
                     if instance is None and target_id in jsonld:
-                        instance = self._create_subobject_from_json(
+                        instance_ctx = self._create_subobject_from_json(
                             jsonld[target_id], target_cls, parse_def,
                             aliases, c_context, accessor, jsonld)
+                        instance = instance_ctx._instance
                         aliases[target_id] = instance
                     if instance is None:
                         raise HTTPBadRequest("Could not find object "+value)
@@ -1304,16 +1306,17 @@ class BaseOps(object):
                     instance = target_id
             elif isinstance(value, dict):
                 assert not must_be_list
-                instance = self._create_subobject_from_json(
+                instance_ctx = self._create_subobject_from_json(
                     value, target_cls, parse_def, aliases,
                     c_context, accessor_name, jsonld)
-                if instance is None:
+                if instance_ctx is None:
                     if isinstance(accessor, property):
                         # It may not be an object after all
                         setattr(self, key, value)
                         continue
                     raise RuntimeError(
                         "Could not create a sub-object from "+str(dict))
+                instance = instance_ctx._instance
             elif isinstance(value, list):
                 assert can_be_list
                 for subval in value:
@@ -1325,21 +1328,23 @@ class BaseOps(object):
                             if instance is not None:
                                 aliases[subval] = instance
                         if instance is None and subval in jsonld:
-                            instance = self._create_subobject_from_json(
+                            instance_ctx = self._create_subobject_from_json(
                                 jsonld[subval], target_cls, parse_def,
                                 aliases, c_context, accessor, jsonld)
                             aliases[subval] = instance
+                            instance = instance_ctx._instance if instance_ctx else None
                         if instance is None:
                             raise HTTPBadRequest(
                                 "Could not find object %s" % (
                                     subval,))
                         # TODO: Keys spanning multiple columns
                     elif isinstance(subval, dict):
-                        instance = self._create_subobject_from_json(
+                        instance_ctx = self._create_subobject_from_json(
                             subval, target_cls, parse_def, aliases,
                             c_context, accessor_name, jsonld)
-                        if instance is None:
+                        if instance_ctx is None:
                             raise HTTPBadRequest("No @class in "+dumps(subval))
+                        instance = instance_ctx._instance
                     else:
                         raise
                     instances.append(instance)

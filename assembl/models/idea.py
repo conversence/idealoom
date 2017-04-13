@@ -46,7 +46,7 @@ from ..semantic.namespaces import (
 from ..lib.sqla import (CrudOperation, get_model_watcher)
 from assembl.views.traversal import (
     AbstractCollectionDefinition, RelationCollectionDefinition,
-    collection_creation_side_effects)
+    collection_creation_side_effects, InstanceContext)
 
 if DiscussionBoundBase.using_virtuoso:
     from virtuoso.alchemy import Timestamp
@@ -838,10 +838,12 @@ class Idea(HistoryMixin, DiscussionBoundBase):
                     ).count() > 0
 
         @collection_creation_side_effects.register(
-            obj=Idea, ctx='Idea.children')
-        def add_child_link(obj, ctx):
-            yield IdeaLink(
-                source=ctx.parent_instance, target=obj)
+            inst_ctx=Idea, ctx='Idea.children')
+        def add_child_link(inst_ctx, ctx):
+            yield InstanceContext(
+                inst_ctx['target_links'],
+                IdeaLink(
+                    source=ctx.parent_instance, target=inst_ctx._instance))
 
         class LinkedPostCollectionDefinition(AbstractCollectionDefinition):
             # used by inspiration widget
@@ -868,9 +870,10 @@ class Idea(HistoryMixin, DiscussionBoundBase):
                     ).count() > 0
 
         @collection_creation_side_effects.register(
-            obj=WidgetPost, ctx='Idea.linkedposts')
-        def add_youtube_attachment(obj, ctx):
+            inst_ctx=WidgetPost, ctx='Idea.linkedposts')
+        def add_youtube_attachment(inst_ctx, ctx):
             from .attachment import Document, PostAttachment
+            obj = inst_ctx._instance
             insp_url = obj.metadata_json.get('inspiration_url', '')
             if insp_url.startswith("https://www.youtube.com/"):
                 # TODO: detect all video/image inspirations.
@@ -880,13 +883,17 @@ class Idea(HistoryMixin, DiscussionBoundBase):
                     discussion=obj.discussion,
                     uri_id=insp_url)
                 doc = doc.handle_duplication()
-                yield(doc)
-                yield(PostAttachment(
-                    discussion=obj.discussion,
-                    creator=obj.creator,
-                    document=doc,
-                    attachmentPurpose='EMBED_ATTACHMENT',
-                    post=obj))
+                attachment_ctx = InstanceContext(
+                    inst_ctx['attachments'],
+                    PostAttachment(
+                        discussion=obj.discussion,
+                        creator=obj.creator,
+                        document=doc,
+                        attachmentPurpose='EMBED_ATTACHMENT',
+                        post=obj))
+                yield attachment_ctx
+                yield InstanceContext(
+                    attachment_ctx['document'], doc)
 
         class WidgetPostCollectionDefinition(AbstractCollectionDefinition):
             # used by creativity widget
@@ -917,14 +924,17 @@ class Idea(HistoryMixin, DiscussionBoundBase):
                     ).count() > 0
 
         @collection_creation_side_effects.register(
-            obj=Post, ctx='Idea.widgetposts')
-        def add_content_widget_link(obj, ctx):
+            inst_ctx=Post, ctx='Idea.widgetposts')
+        def add_content_widget_link(inst_ctx, ctx):
+            obj = inst_ctx._instance
             if ctx.parent_instance.proposed_in_post:
                 obj.set_parent(ctx.parent_instance.proposed_in_post)
             obj.hidden = True
-            yield IdeaContentWidgetLink(
-                content=obj, idea=ctx.parent_instance,
-                creator=obj.creator)
+            yield InstanceContext(
+                inst_ctx['idea_links_of_content'],
+                IdeaContentWidgetLink(
+                    content=obj, idea=ctx.parent_instance,
+                    creator=obj.creator))
 
         class ActiveShowingWidgetsCollection(RelationCollectionDefinition):
             def __init__(self, cls):

@@ -24,7 +24,8 @@ from ..auth import CrudPermissions, P_VOTE, P_SYSADMIN, P_ADMIN_DISC, P_READ
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..semantic.namespaces import (VOTE, ASSEMBL, DCTERMS, QUADNAMES)
 from ..views.traversal import (
-    AbstractCollectionDefinition, collection_creation_side_effects)
+    AbstractCollectionDefinition, collection_creation_side_effects,
+    InstanceContext)
 from .langstrings import LangString
 
 
@@ -201,11 +202,16 @@ class AbstractVoteSpecification(DiscussionBoundBase):
                 return isinstance(instance, Idea)
 
         @collection_creation_side_effects.register(
-            obj=AbstractIdeaVote, ctx='AbstractVoteSpecification.vote_targets')
-        def add_voted_widget_link(obj, ctx):
-            yield VotedIdeaWidgetLink(
-                widget=ctx.get_instance_of_class(VotingWidget),
-                idea=obj.idea)
+            inst_ctx=AbstractIdeaVote,
+            ctx='AbstractVoteSpecification.vote_targets')
+        def add_voted_widget_link(inst_ctx, ctx):
+            idea_ctx = inst_ctx.get_instance_ctx_of_class(Idea)
+            assert idea_ctx
+            yield InstanceContext(
+                idea_ctx['has_voted_links'],
+                VotedIdeaWidgetLink(
+                    widget=ctx.get_instance_of_class(VotingWidget),
+                    idea=inst_ctx._instance.idea))
 
         return (VoteTargetsCollection(cls),)
 

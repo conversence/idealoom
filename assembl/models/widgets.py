@@ -29,7 +29,7 @@ from .auth import User
 from .votes import AbstractVoteSpecification, AbstractIdeaVote
 from ..views.traversal import (
     RelationCollectionDefinition, AbstractCollectionDefinition,
-    collection_creation_side_effects)
+    collection_creation_side_effects, InstanceContext)
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..semantic.namespaces import (ASSEMBL, QUADNAMES)
 
@@ -892,13 +892,16 @@ class VotingWidget(BaseIdeaWidget):
                     widget).filter(widget.id == parent_instance.id)
 
         @collection_creation_side_effects.register(
-            obj=Idea, ctx='VotingWidget.criteria')
-        def add_criterion_link(obj, ctx):
-            yield VotingCriterionWidgetLink(idea=obj, widget=ctx.owner_alias)
+            inst_ctx=Idea, ctx='VotingWidget.criteria')
+        def add_criterion_link(inst_ctx, ctx):
+            yield InstanceContext(
+                inst_ctx['has_criterion_links'],
+                VotingCriterionWidgetLink(idea=inst_ctx._instance,
+                                          widget=ctx.owner_alias))
 
         @collection_creation_side_effects.register(
-            obj=AbstractIdeaVote, ctx='VotingWidget.criteria')
-        def add_criterion_relation(obj, ctx):
+            inst_ctx=AbstractIdeaVote, ctx='VotingWidget.criteria')
+        def add_criterion_relation(inst_ctx, ctx):
             criterion_ctx = ctx.find_collection(
                 'VotingWidget.criteria')
             # find instance context above me
@@ -907,7 +910,7 @@ class VotingWidget(BaseIdeaWidget):
                    search_ctx.__parent__ != criterion_ctx):
                 search_ctx = search_ctx.__parent__
             assert search_ctx.__parent__
-            obj.criterion = search_ctx._instance
+            inst_ctx._instance.criterion = search_ctx._instance
 
         class VotableCollection(RelationCollectionDefinition):
             # The set of votable ideas.
@@ -923,11 +926,13 @@ class VotingWidget(BaseIdeaWidget):
                 return query
 
         @collection_creation_side_effects.register(
-            obj=Idea, ctx='VotingWidget.targets')
-        def add_votable_link(obj, ctx):
-            yield VotableIdeaWidgetLink(
-                idea=obj,
-                widget=ctx.parent_instance)
+            inst_ctx=Idea, ctx='VotingWidget.targets')
+        def add_votable_link(inst_ctx, ctx):
+            yield InstanceContext(
+                inst_ctx['has_votable_links'],
+                VotableIdeaWidgetLink(
+                    idea=inst_ctx._instance,
+                    widget=ctx.parent_instance))
 
         return (CriterionCollection(cls),
                 VotableCollection(cls))
@@ -997,6 +1002,7 @@ class WidgetUserConfig(DiscussionBoundBase):
 
 
 Idea.has_votable_links = relationship(VotableIdeaWidgetLink)
+Idea.has_voted_links = relationship(VotedIdeaWidgetLink)
 Idea.has_criterion_links = relationship(VotingCriterionWidgetLink)
 
 VotingWidget.votable_ideas = relationship(

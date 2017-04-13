@@ -65,6 +65,11 @@ class BaseContext(object):
         for ctx in self.__parent__.context_chain():
             yield ctx
 
+    def get_instance_ctx_of_class(self, cls):
+        """Look in the context chain for a model instance of a given class,
+        and return that context"""
+        return self.__parent__.get_instance_ctx_of_class(cls)
+
     def get_instance_of_class(self, cls):
         """Look in the context chain for a model instance of a given class"""
         return self.__parent__.get_instance_of_class(cls)
@@ -108,9 +113,9 @@ ACL_RESTRICTIVE = [(Allow, R_SYSADMIN, ALL_PERMISSIONS), DENY_ALL]
 
 
 @reg.dispatch(
-    reg.match_instance('obj'),
-    reg.match_key('ctx', lambda obj, ctx: ctx.collection.qual_name()))
-def collection_creation_side_effects(obj, ctx):
+    reg.match_instance('inst_ctx', lambda inst_ctx, ctx: inst_ctx._instance),
+    reg.match_key('ctx', lambda inst_ctx, ctx: ctx.collection.qual_name()))
+def collection_creation_side_effects(inst_ctx, ctx):
     """Multiple dispatch adapter for collection-related side effects"""
     return ()
 
@@ -154,6 +159,9 @@ class AppRoot(DictContext):
 
     def get_discussion_id(self):
         return None
+
+    def get_instance_ctx_of_class(self, cls):
+        return None # I'm the holder of the user, but not the user's context
 
     def get_instance_of_class(self, cls):
         from assembl.models import User
@@ -204,19 +212,19 @@ class TraversalContext(BaseContext):
         relevant to this step in the traversal path, often association objects."""
         self.__parent__.decorate_instance(instance, assocs, ctx, kwargs)
 
-    def creation_side_effects_rec(self, instance, top_ctx):
+    def creation_side_effects_rec(self, inst_ctx, top_ctx):
         """Recursion"""
-        for inst in self.__parent__.creation_side_effects_rec(instance, top_ctx):
+        for inst in self.__parent__.creation_side_effects_rec(inst_ctx, top_ctx):
             yield inst
 
-    def creation_side_effects(self, instance):
+    def creation_side_effects(self, inst_ctx):
         """Generator for objects that are created as side-effect of another
         object's creation. They can have their own side-effect.
         """
-        for inst in self.creation_side_effects_rec(instance, self):
-            yield inst
-            for sub in self.creation_side_effects(inst):
-                yield sub
+        for sub_inst_ctx in self.creation_side_effects_rec(inst_ctx, self):
+            yield sub_inst_ctx
+            for sub_sub in self.creation_side_effects(sub_inst_ctx):
+                yield sub_sub
 
     def on_new_instance(self, instance):
         """If a model instance was created in this context, let the context learn about it.
@@ -264,9 +272,9 @@ class Api2Context(TraversalContext):
     def on_new_instance(self, instance):
         pass
 
-    def creation_side_effects_rec(self, instance, top_ctx):
+    def creation_side_effects_rec(self, inst_ctx, top_ctx):
         """Apply simple side-effects from the instance"""
-        for inst in instance.creation_side_effects(top_ctx):
+        for inst in inst_ctx._instance.creation_side_effects(top_ctx):
             yield inst
 
 
@@ -357,7 +365,8 @@ class ClassContext(TraversalContext):
     def create_object(self, typename=None, json=None):
         cls = self.get_class(typename)
         with self._class.default_db.no_autoflush:
-            return [cls.create_from_json(json, self)]
+            inst_ctx = cls.create_from_json(json, self)
+            return [inst_ctx._instance]
 
     def __eq__(self, other):
         return (super(ClassContext, self).__eq__(other) and
@@ -450,6 +459,11 @@ class InstanceContext(TraversalContext):
         if isinstance(self._instance, cls):
             return self._instance
         return self.__parent__.get_instance_of_class(cls)
+
+    def get_instance_ctx_of_class(self, cls):
+        if isinstance(self._instance, cls):
+            return self
+        return self.__parent__.get_instance_ctx_of_class(cls)
 
     def get_all_instances(self):
         yield self._instance
@@ -613,29 +627,35 @@ class CollectionContext(TraversalContext):
         cls = self.get_collection_class(typename)
         with self.parent_instance.db.no_autoflush:
             try:
-                inst = cls.create_from_json(json, self)
+                inst_ctx = cls.create_from_json(json, self)
+                inst = inst_ctx._instance
+                for sub_instance_ctx in self.creation_side_effects(inst_ctx):
+                    sub_instance = sub_instance_ctx._instance
+                    self.parent_instance.db.add(sub_instance)
+                    self.on_new_instance(sub_instance)
+                    sub_instance.populate_from_context(self)
+                assocs = [inst]
+                self.on_new_instance(inst)
+                # this should disappear
+                self.decorate_instance(inst, assocs, self, json)
+                for inst in assocs[1:]:
+                    self.parent_instance.db.add(inst)
+                    self.on_new_instance(inst)
+                    inst.populate_from_context(self)
             except Exception as e:
+                # import pdb
+                # pdb.post_mortem()
                 print_exc()
                 raise e
-            for instance in self.creation_side_effects(inst):
-                self.parent_instance.db.add(instance)
-                self.on_new_instance(instance)
-                instance.populate_from_context(self)
-            assocs = [inst]
-            self.on_new_instance(inst)
-            self.decorate_instance(inst, assocs, self, json)
-            # this should disappear
-            for inst in assocs[1:]:
-                self.parent_instance.db.add(inst)
-                self.on_new_instance(inst)
-                inst.populate_from_context(self)
         return assocs
 
-    def creation_side_effects_rec(self, instance, top_ctx):
+    def creation_side_effects_rec(self, inst_ctx, top_ctx):
         """Apply side-effects through multiple dispatch on the collection"""
-        for ins in self.__parent__.creation_side_effects_rec(instance, top_ctx):
+        for ins in self.__parent__.creation_side_effects_rec(inst_ctx, top_ctx):
             yield ins
-        for ins in collection_creation_side_effects(instance, self):
+        assert isinstance(top_ctx, CollectionContext)
+        assert isinstance(inst_ctx, InstanceContext)
+        for ins in collection_creation_side_effects(inst_ctx, self):
             yield ins
 
     def __repr__(self):

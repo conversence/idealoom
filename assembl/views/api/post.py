@@ -573,12 +573,14 @@ def create_post(request):
         # how to guess locale in this case?
         body = LangString.create(html)
     elif body:
-        body = LangString.create_from_json(body, context=ctx)
+        body_ctx = LangString.create_from_json(body, context=ctx)
+        body = body_ctx._instance
     else:
         body = LangString.EMPTY(discussion.db)
 
     if subject:
-        subject = LangString.create_from_json(subject, context=ctx)
+        subject_ctx = LangString.create_from_json(subject, context=ctx)
+        subject = subject_ctx._instance
     else:
         # print(in_reply_to_post.subject, discussion.topic)
         if in_reply_to_post:
