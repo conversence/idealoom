@@ -12,7 +12,6 @@ from assembl.models import Discussion
 from assembl.auth.util import discussions_with_access
 
 from ...auth import P_READ, P_ADMIN_DISC, P_SYSADMIN
-from ...auth.util import get_permissions
 
 
 discussion = Service(
@@ -51,7 +50,7 @@ def etalab_get_discussions(request):
     # - metadata: metadata.creation_date => will probably be renamed, see above
     view = "etalab"
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(user_id, None)
+    permissions = request.permissions
     if P_READ not in permissions:
         raise HTTPUnauthorized()
     discussions = discussions_with_access(user_id)
@@ -68,7 +67,7 @@ def get_discussion(request):
     view_def = request.GET.get(
         'view', 'etalab' if is_etalab_request else 'default')
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(user_id, discussion_id)
+    permissions = request.permissions
 
     if not discussion:
         raise HTTPNotFound(

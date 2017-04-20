@@ -1,11 +1,10 @@
 from pyramid.view import view_config
 from pyramid.response import Response
-from pyramid.httpexceptions import HTTPServerError, HTTPBadRequest
+from pyramid.httpexceptions import HTTPServerError
 from pyramid.security import authenticated_userid, Everyone
 
 from assembl.auth import P_READ, P_ADD_POST
 from assembl.models import File, Document, Discussion
-from assembl.auth.util import get_permissions
 from assembl.views.traversal import InstanceContext, CollectionContext
 from assembl.lib.raven_client import capture_message
 from . import MULTIPART_HEADER, update_from_form
@@ -66,7 +65,6 @@ def upload_file(request):
     user_id = authenticated_userid(request) or Everyone
     discusison_id = ctx.get_discussion_id()
     discussion = Discussion.get(discusison_id)
-    permissions = get_permissions(user_id, discusison_id)
 
     mime = request.POST['mime_type']
     file_name = request.POST['name']
@@ -87,7 +85,7 @@ def upload_file(request):
         raise HTTPServerError
 
     view = 'default'
-    return blob.generic_json(view, user_id, permissions)
+    return blob.generic_json(view, user_id, request.permissions)
 
 
 @view_config(context=InstanceContext, request_method=('PUT', 'PATCH'),

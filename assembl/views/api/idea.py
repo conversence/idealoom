@@ -13,7 +13,7 @@ from assembl.models import (
     get_database_id, Idea, RootIdea, IdeaLink, Discussion,
     Extract, SubGraphIdeaAssociation)
 from assembl.auth import (P_READ, P_ADD_IDEA, P_EDIT_IDEA)
-from assembl.auth.util import get_permissions
+
 
 ideas = Service(name='ideas', path=API_DISCUSSION_PREFIX + '/ideas',
                 description="The ideas collection",
@@ -63,7 +63,7 @@ def get_idea(request):
     view_def = request.GET.get('view')
     discussion = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(user_id, discussion.id)
+    permissions = request.permissions
 
     if not idea:
         raise HTTPNotFound("Idea with id '%s' not found." % idea_id)
@@ -71,7 +71,8 @@ def get_idea(request):
     return idea.generic_json(view_def, user_id, permissions)
 
 
-def _get_ideas_real(discussion, view_def=None, ids=None, user_id=None):
+def _get_ideas_real(request, view_def=None, ids=None, user_id=None):
+    discussion = request.discussion
     user_id = user_id or Everyone
     # optimization: Recursive widget links.
     from assembl.models import (
@@ -121,7 +122,7 @@ def _get_ideas_real(discussion, view_def=None, ids=None, user_id=None):
         joinedload_all(Idea.has_showing_widget_links),
         undefer(Idea.num_children))
 
-    permissions = get_permissions(user_id, discussion.id)
+    permissions = request.permissions
     Idea.prepare_counters(discussion.id, True)
     retval = [idea.generic_json(view_def, user_id, permissions)
               for idea in ideas]
@@ -141,7 +142,7 @@ def get_ideas(request):
     discussion = request.context
     view_def = request.GET.get('view')
     ids = request.GET.getall('ids')
-    return _get_ideas_real(discussion=discussion, view_def=view_def,
+    return _get_ideas_real(request, view_def=view_def,
                            ids=ids, user_id=user_id)
 
 
@@ -244,7 +245,7 @@ def get_idea_extracts(request):
     idea = Idea.get_instance(idea_id)
     view_def = request.GET.get('view') or 'default'
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(user_id, discussion.id)
+    permissions = request.permissions
 
     if not idea:
         raise HTTPNotFound("Idea with id '%s' not found." % idea_id)

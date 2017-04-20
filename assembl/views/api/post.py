@@ -24,7 +24,6 @@ import transaction
 from assembl.lib.parsedatetime import parse_datetime
 from assembl.views.api import API_DISCUSSION_PREFIX
 from assembl.auth import P_READ, P_ADD_POST
-from assembl.auth.util import get_permissions
 from assembl.tasks.translate import (
     translate_content,
     PrefCollectionTranslationTable)
@@ -75,7 +74,7 @@ def get_posts(request):
     discussion.import_from_sources()
 
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(user_id, discussion.id)
+    permissions = request.permissions
 
     DEFAULT_PAGE_SIZE = 25
     page_size = DEFAULT_PAGE_SIZE
@@ -485,7 +484,7 @@ def get_post(request):
         raise HTTPNotFound("Post with id '%s' not found." % post_id)
     discussion = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(user_id, discussion.id)
+    permissions = request.permissions
 
     return post.generic_json(view_def, user_id, permissions)
 
@@ -649,6 +648,6 @@ def create_post(request):
     for source in discussion.sources:
         if 'send_post' in dir(source):
             source.send_post(new_post)
-    permissions = get_permissions(user_id, discussion.id)
+    permissions = request.permissions
 
     return new_post.generic_json('default', user_id, permissions)

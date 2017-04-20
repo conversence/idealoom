@@ -5,7 +5,6 @@ from cornice import Service
 
 import assembl.models
 from assembl.auth import P_READ
-from assembl.auth.util import get_permissions
 from assembl.view_def import get_view_def
 from assembl.views.api import API_DISCUSSION_PREFIX
 
@@ -31,8 +30,7 @@ def get_object(request):
         raise HTTPNotFound("Id %s of class '%s' not found." % (id, classname))
     if not get_view_def(view):
         raise HTTPNotFound("View '%s' not found." % view)
-    discussion = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(user_id, discussion.id)
+    permissions = request.permissions
 
     return obj.generic_json(view, user_id, permissions)

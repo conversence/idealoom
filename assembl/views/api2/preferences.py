@@ -7,7 +7,6 @@ from pyramid.response import Response
 
 from assembl.auth import (
     P_READ, IF_OWNED, Everyone, CrudPermissions)
-from assembl.auth.util import get_permissions
 from assembl.semantic.virtuoso_mapping import get_virtuoso
 from assembl.models import (
     User, Discussion, TombstonableMixin)
@@ -30,10 +29,7 @@ def patch_dict(request):
     preferences = request.context.preferences
     if not isinstance(request.json, dict):
         raise HTTPBadRequest()
-    ctx = request.context
-    user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(
-        user_id, ctx.get_discussion_id())
+    permissions = request.permissions
 
     try:
         for k, v in request.json.iteritems():
@@ -65,11 +61,8 @@ def put_value(request):
     ctx = request.context
     value = request.json
     preferences = ctx.collection
-    user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(
-        user_id, ctx.get_discussion_id())
     try:
-        preferences.safe_set(ctx.key, value, permissions)
+        preferences.safe_set(ctx.key, value, request.permissions)
     except KeyError:
         raise HTTPNotFound()
     except (AssertionError, ValueError) as e:
@@ -84,11 +77,8 @@ def put_value(request):
 def del_value(request):
     ctx = request.context
     preferences = ctx.collection
-    user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(
-        user_id, ctx.get_discussion_id())
     try:
-        preferences.safe_del(ctx.key, permissions)
+        preferences.safe_del(ctx.key, request.permissions)
     except KeyError:
         raise HTTPNotFound()
     except (AssertionError, ValueError) as e:

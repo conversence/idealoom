@@ -6,10 +6,7 @@ from cornice import Service
 
 from . import API_DISCUSSION_PREFIX
 
-from assembl.models import Discussion
-
 from assembl.auth import P_READ
-from assembl.auth.util import get_permissions
 
 sources = Service(
     name='sources',
@@ -30,8 +27,7 @@ def get_sources(request):
         )
 
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(user_id, discussion.id)
 
-    res = [source.generic_json(view_def, user_id, permissions)
+    res = [source.generic_json(view_def, user_id, request.permissions)
            for source in discussion.sources]
     return [x for x in res if x is not None]

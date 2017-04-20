@@ -25,7 +25,7 @@ from assembl.models import (
     UserLanguagePreference, EmailAccount, AgentStatusInDiscussion)
 from assembl.auth.password import (
     verify_password_change_token, get_data_token_time, Validity)
-from assembl.auth.util import get_permissions, discussion_from_request
+from assembl.auth.util import discussion_from_request
 from ..traversal import (CollectionContext, InstanceContext, ClassContext)
 from .. import JSONError
 from . import (
@@ -75,7 +75,7 @@ def add_local_role(request):
     user_uri = User.uri_generic(user_id)
     if discussion_id is None:
         raise HTTPBadRequest()
-    permissions = get_permissions(user_id, discussion_id)
+    permissions = request.permissions
     json = request.json_body
     if "discussion" not in json:
         json["discussion"] = Discussion.uri_generic(discussion_id)
@@ -117,8 +117,6 @@ def add_local_role(request):
         user.update_agent_status_subscribe(discussion)
 
         view = request.GET.get('view', None) or 'default'
-        permissions = get_permissions(
-            user_id, ctx.get_discussion_id())
         return CreationResponse(first, user_id, permissions, view)
 
 
@@ -149,7 +147,7 @@ def set_local_role(request):
     user_uri = User.uri_generic(user_id)
     if discussion_id is None:
         raise HTTPBadRequest()
-    permissions = get_permissions(user_id, discussion_id)
+    permissions = request.permissions
     json = request.json_body
     requested_user = json.get('user', None)
     if not requested_user:
@@ -196,7 +194,7 @@ def delete_local_role(request):
 
     if discussion_id is None:
         raise HTTPBadRequest()
-    permissions = get_permissions(user_id, discussion_id)
+    permissions = request.permissions
     requested_user = instance.user
     if requested_user.id != user_id and P_ADMIN_DISC not in permissions:
         raise HTTPUnauthorized()
@@ -400,8 +398,7 @@ def do_password_change(request):
 def assembl_register_user(request):
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(
-        user_id, ctx.get_discussion_id())
+    permissions = request.permissions
     localizer = request.localizer
     session = AgentProfile.default_db
     json = request.json
@@ -492,8 +489,7 @@ def assembl_register_user(request):
 def delete_abstract_agent_account(request):
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(
-        user_id, ctx.get_discussion_id())
+    permissions = request.permissions
     instance = ctx._instance
     if not instance.user_can(user_id, CrudPermissions.DELETE, permissions):
         raise HTTPUnauthorized()
@@ -589,8 +585,7 @@ def interesting_ideas(request):
     target = request.context._instance
     user_id = authenticated_userid(request) or Everyone
     discussion_id = ctx.get_discussion_id()
-    permissions = get_permissions(
-        user_id, discussion_id)
+    permissions = request.permissions
     if P_READ not in permissions:
         raise HTTPUnauthorized()
     if user_id != target.id and P_ADMIN_DISC not in permissions:
@@ -611,8 +606,7 @@ def interesting_ideas(request):
 def add_user_language_preference(request):
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(
-        user_id, ctx.get_discussion_id())
+    permissions = request.permissions
     check_permissions(ctx, user_id, permissions, CrudPermissions.CREATE)
     typename = ctx.collection_class.external_typename()
     json = request.json_body
@@ -640,8 +634,7 @@ def modify_user_language_preference(request):
     json_data = request.json_body
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(
-        user_id, ctx.get_discussion_id())
+    permissions = request.permissions
     instance = ctx._instance
     if not instance.user_can(user_id, CrudPermissions.UPDATE, permissions):
         raise HTTPUnauthorized()

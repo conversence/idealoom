@@ -8,7 +8,6 @@ from cornice import Service
 
 from assembl.views.api import API_DISCUSSION_PREFIX
 from assembl.auth import (P_READ, Everyone, P_SYSADMIN, P_ADMIN_DISC)
-from assembl.auth.util import get_permissions
 from assembl.models import (
     Discussion, AgentProfile, EmailAccount, User)
 
@@ -27,10 +26,11 @@ agent = Service(
     description="Retrieve a single agent", renderer='json')
 
 
-def _get_agents_real(discussion, user_id=None, view_def='default'):
+def _get_agents_real(request, user_id=None, view_def='default'):
+    discussion = request.discussion
     user_id = user_id or Everyone
     agents = discussion.get_participants_query()
-    permissions = get_permissions(user_id, discussion.id)
+    permissions = request.permissions
     include_emails = P_ADMIN_DISC in permissions or P_SYSADMIN in permissions
     if include_emails:
         agents = agents.options(joinedload(AgentProfile.accounts))
@@ -52,10 +52,9 @@ def _get_agents_real(discussion, user_id=None, view_def='default'):
 
 @agents.get(permission=P_READ)
 def get_agents(request, discussion_only=False):
-    discussion = request.context
     view_def = request.GET.get('view')
     return _get_agents_real(
-        discussion, authenticated_userid(request), view_def)
+        request, authenticated_userid(request), view_def)
 
 
 @agent.get(permission=P_READ)
@@ -68,7 +67,7 @@ def get_agent(request):
       raise HTTPNotFound("Agent with id '%s' not found." % agent_id)
     discussion = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(user_id, discussion.id)
+    permissions = request.permissions
 
     agent_json = agent.generic_json(view_def, user_id, permissions)
     if user_id == agent.id:

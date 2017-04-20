@@ -5,7 +5,6 @@ from pyramid.security import authenticated_userid, Everyone
 
 from ..traversal import (InstanceContext)
 from assembl.auth import (CrudPermissions, P_EDIT_IDEA)
-from assembl.auth.util import get_permissions
 from assembl.models import (Idea)
 
 
@@ -14,10 +13,8 @@ from assembl.models import (Idea)
 def instance_del(request):
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(
-        user_id, ctx.get_discussion_id())
     idea = ctx._instance
-    if not idea.user_can(user_id, CrudPermissions.DELETE, permissions):
+    if not idea.user_can(user_id, CrudPermissions.DELETE, request.permissions):
         raise HTTPUnauthorized()
     for link in idea.source_links:
         link.is_tombstone = True

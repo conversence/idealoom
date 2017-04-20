@@ -12,7 +12,6 @@ from simplejson import dumps
 from ..traversal import (CollectionContext, InstanceContext)
 from assembl.auth import (
     P_READ, Everyone, CrudPermissions, P_ADMIN_DISC, P_VOTE)
-from assembl.auth.util import get_permissions
 from assembl.models import (
     AbstractIdeaVote, User, AbstractVoteSpecification, VotingWidget)
 from assembl.lib.sqla import get_named_class
@@ -46,8 +45,7 @@ def votes_collection_add_json(request):
     user_id = authenticated_userid(request)
     if not user_id:
         raise HTTPUnauthorized
-    permissions = get_permissions(
-        user_id, ctx.get_discussion_id())
+    permissions = request.permissions
     check_permissions(ctx, user_id, permissions, CrudPermissions.CREATE)
     spec = ctx.get_instance_of_class(AbstractVoteSpecification)
     if spec:
@@ -115,7 +113,7 @@ def vote_results(request):
                 "Please select at most 25 bins in the histogram.")
     widget = ctx._instance.widget
     if widget.activity_state != "ended":
-        permissions = get_permissions(user_id, ctx.get_discussion_id())
+        permissions = request.permissions
         if P_ADMIN_DISC not in permissions:
             raise HTTPUnauthorized()
     return ctx._instance.voting_results(histogram)
@@ -139,7 +137,7 @@ def vote_results_csv(request):
                 "Please select at most 25 bins in the histogram.")
     widget = ctx._instance.widget
     if widget.activity_state != "ended":
-        permissions = get_permissions(user_id, ctx.get_discussion_id())
+        permissions = request.permissions
         if P_ADMIN_DISC not in permissions:
             raise HTTPUnauthorized()
     output = StringIO()

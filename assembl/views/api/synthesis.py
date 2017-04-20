@@ -7,8 +7,8 @@ from cornice import Service
 
 from . import API_DISCUSSION_PREFIX
 from assembl.auth import P_READ, P_EDIT_SYNTHESIS
-from assembl.auth.util import get_permissions
-from assembl.models import Discussion, Synthesis
+from assembl.models import Synthesis
+
 
 syntheses = Service(name='syntheses',
     path=API_DISCUSSION_PREFIX + '/explicit_subgraphs/synthesis',
@@ -23,10 +23,9 @@ synthesis = Service(name='ExplicitSubgraphs',
 def get_syntheses(request):
     discussion = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(user_id, discussion.id)
     syntheses = discussion.get_all_syntheses()
     view_def = request.GET.get('view') or 'default'
-    res = [synthesis.generic_json(view_def, user_id, permissions)
+    res = [synthesis.generic_json(view_def, user_id, request.permissions)
            for synthesis in syntheses]
     return [x for x in res if x is not None]
 
@@ -44,9 +43,8 @@ def get_synthesis(request):
 
     view_def = request.GET.get('view') or 'default'
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(user_id, discussion.id)
 
-    return synthesis.generic_json(view_def, user_id, permissions)
+    return synthesis.generic_json(view_def, user_id, request.permissions)
 
 
 # Update

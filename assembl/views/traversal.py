@@ -584,8 +584,7 @@ class CollectionContext(TraversalContext):
 
     def create_object(self, typename=None, json=None, user_id=None):
         cls = self.get_collection_class(typename)
-        permissions = get_permissions(
-            user_id, self.get_discussion_id())
+        permissions = self.get_request().permissions
         permissions.extend(self.ctx_permissions(permissions))
         with self.parent_instance.db.no_autoflush:
             try:

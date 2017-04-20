@@ -5,17 +5,19 @@ from cornice import Service
 
 from pyramid.security import authenticated_userid, Everyone
 from pyramid.httpexceptions import (
-    HTTPNotFound, HTTPBadRequest, HTTPForbidden, HTTPServerError, HTTPNoContent)
+    HTTPNotFound, HTTPBadRequest, HTTPForbidden, HTTPServerError,
+    HTTPNoContent)
 from sqlalchemy import Unicode
 from sqlalchemy.sql.expression import cast
 from sqlalchemy.orm import joinedload_all
 
 from assembl.views.api import API_DISCUSSION_PREFIX
-from assembl.auth import (P_READ, P_ADD_EXTRACT, P_EDIT_EXTRACT, P_EDIT_MY_EXTRACT)
+from assembl.auth import (
+    P_READ, P_ADD_EXTRACT, P_EDIT_EXTRACT, P_EDIT_MY_EXTRACT)
 from assembl.models import (
     get_database_id, Extract, TextFragmentIdentifier,
-    Discussion, AnnotatorSource, Post, Webpage, Idea)
-from assembl.auth.util import (get_permissions, user_has_permission)
+    AnnotatorSource, Post, Webpage, Idea)
+from assembl.auth.util import user_has_permission
 from assembl.lib.web_token import decode_token
 from assembl.lib import sqla
 
@@ -56,9 +58,8 @@ def get_extract(request):
     extract_id = request.matchdict['id']
     extract = Extract.get_instance(extract_id)
     view_def = request.GET.get('view') or 'default'
-    discussion = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(user_id, discussion.id)
+    permissions = request.permissions
 
     if extract is None:
         raise HTTPNotFound(
@@ -67,7 +68,8 @@ def get_extract(request):
     return extract.generic_json(view_def, user_id, permissions)
 
 
-def _get_extracts_real(discussion, view_def='default', ids=None, user_id=None):
+def _get_extracts_real(request, view_def='default', ids=None, user_id=None):
+    discussion = request.discussion
     user_id = user_id or Everyone
     all_extracts = discussion.db.query(Extract).filter(
         Extract.discussion_id == discussion.id
@@ -76,27 +78,24 @@ def _get_extracts_real(discussion, view_def='default', ids=None, user_id=None):
         ids = [get_database_id("Extract", id) for id in ids]
         all_extracts = all_extracts.filter(Extract.id.in_(ids))
 
-
     all_extracts = all_extracts.options(joinedload_all(
         Extract.content))
     all_extracts = all_extracts.options(
         joinedload_all(Extract.text_fragment_identifiers).joinedload(
             TextFragmentIdentifier.extract, innerjoin=True))
-    permissions = get_permissions(user_id, discussion.id)
+    permissions = request.permissions
 
     return [extract.generic_json(view_def, user_id, permissions)
             for extract in all_extracts]
 
 
-
 @extracts.get(permission=P_READ)
 def get_extracts(request):
-    discussion = request.context
     view_def = request.GET.get('view')
     ids = request.GET.getall('ids')
 
     return _get_extracts_real(
-        discussion, view_def, ids, authenticated_userid(request))
+        request, view_def, ids, authenticated_userid(request))
 
 
 @extracts.post()
@@ -280,7 +279,7 @@ def do_search_extracts(request):
     view_def = request.GET.get('view') or 'default'
     discussion = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(user_id, discussion.id)
+    permissions = request.permissions
 
     if not uri:
         raise HTTPBadRequest("Please specify a search uri")

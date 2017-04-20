@@ -18,7 +18,7 @@ from assembl.auth import (
     R_PARTICIPANT, R_SYSADMIN, R_ADMINISTRATOR, SYSTEM_ROLES,
     P_SYSADMIN, P_ADMIN_DISC, Everyone)
 from assembl.auth.util import (
-    add_multiple_users_csv, user_has_permission, get_permissions)
+    add_multiple_users_csv, user_has_permission)
 from assembl.models.auth import (
     create_default_permissions, User, AgentProfile,
     LanguagePreferenceOrder)
@@ -205,7 +205,7 @@ def discussion_edit(request):
     discussion = Discussion.get_instance(discussion_id)
     user_id = authenticated_userid(request)
     assert user_id
-    permissions = get_permissions(user_id, discussion_id)
+    permissions = request.permissions
     partners = json.dumps([p.generic_json(
         user_id=user_id, permissions=permissions
         ) for p in discussion.partner_organizations])

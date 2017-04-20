@@ -821,10 +821,13 @@ class User(NamedClassMixin, AgentProfile):
 
     @property
     def permissions_for_current_discussion(self):
-        from ..auth.util import get_current_discussion
-        discussion = get_current_discussion()
-        if discussion:
-            return {discussion.uri(): self.get_permissions(discussion.id)}
+        from .discussion import Discussion
+        from pyramid.threadlocal import get_current_request
+        request = get_current_request()
+        discussion_id = request.discussion_id
+        if discussion_id:
+            return {Discussion.uri_generic(discussion_id):
+                    request.permissions}
         return self.get_all_permissions()
 
     def get_permissions(self, discussion_id):
@@ -1006,7 +1009,8 @@ class User(NamedClassMixin, AgentProfile):
 
     def get_notification_subscriptions_for_current_discussion(self):
         "CAN ONLY BE CALLED WITH A CURRENT REQUEST"
-        from ..auth.util import get_current_request
+        from .discussion import Discussion
+        from pyramid.threadlocal import get_current_request
         request = get_current_request()
         discussion = request.discussion
         if discussion is None:

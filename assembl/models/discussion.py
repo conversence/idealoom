@@ -307,15 +307,21 @@ class Discussion(NamedClassMixin, DiscussionBoundBase):
 
     def get_all_agents_preload(self, user=None):
         from assembl.views.api.agent import _get_agents_real
+        from pyramid.threadlocal import get_current_request
+        request = get_current_request()
+        assert request
         return json.dumps(_get_agents_real(
-            self, user.id if user else Everyone, 'partial'))
+            request, user.id if user else Everyone, 'partial'))
 
     def get_readers_preload(self):
         return json.dumps([user.generic_json('partial') for user in self.get_readers()])
 
     def get_ideas_preload(self, user_id):
         from assembl.views.api.idea import _get_ideas_real
-        return json.dumps(_get_ideas_real(discussion=self, user_id=user_id))
+        from pyramid.threadlocal import get_current_request
+        request = get_current_request()
+        assert request
+        return json.dumps(_get_ideas_real(request, user_id=user_id))
 
     def get_idea_links(self):
         from .idea import Idea
@@ -332,9 +338,12 @@ class Discussion(NamedClassMixin, DiscussionBoundBase):
 
     def get_related_extracts_preload(self, user_id):
         from assembl.views.api.extract import _get_extracts_real
+        from pyramid.threadlocal import get_current_request
         from .idea import Idea
         Idea.get_discussion_data(self.id)
-        return json.dumps(_get_extracts_real(discussion=self, user_id=user_id))
+        request = get_current_request()
+        assert request
+        return json.dumps(_get_extracts_real(request, user_id=user_id))
 
     def get_user_permissions(self, user_id):
         from ..auth.util import get_permissions

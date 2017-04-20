@@ -6,7 +6,6 @@ from pyramid.httpexceptions import HTTPUnauthorized, HTTPBadRequest
 from pyramid.security import authenticated_userid
 
 from assembl.auth import P_READ, P_MODERATE, P_DELETE_POST, P_DELETE_MY_POST
-from assembl.auth.util import get_permissions
 from assembl.models import Content, Post, SynthesisPost, User, Extract
 from assembl.models.post import PublicationStates
 from ..traversal import InstanceContext, CollectionContext
@@ -47,8 +46,7 @@ def delete_post_instance(request):
     # - user who has the P_DELETE_POST permission in this discussion
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(
-        user_id, ctx.get_discussion_id())
+    permissions = request.permissions
     instance = ctx._instance
 
     allowed = False
@@ -106,8 +104,7 @@ def raise_if_cannot_moderate(request):
     user_id = authenticated_userid(request)
     if not user_id:
         raise HTTPUnauthorized()
-    permissions = get_permissions(
-        user_id, ctx.get_discussion_id())
+    permissions = request.permissions
     if P_MODERATE not in permissions:
         raise HTTPUnauthorized()
 

@@ -55,7 +55,6 @@ from ..traversal import (
     InstanceContext, CollectionContext, ClassContext, Api2Context)
 from assembl.auth import (
     P_READ, P_SYSADMIN, IF_OWNED, CrudPermissions)
-from assembl.auth.util import get_permissions
 from assembl.semantic.virtuoso_mapping import get_virtuoso
 from assembl.models import (
     User, Discussion, TombstonableMixin)
@@ -96,8 +95,7 @@ class CreationResponse(Response):
 def class_view(request):
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(
-        user_id, ctx.get_discussion_id())
+    permissions = request.permissions
     check = check_permissions(ctx, user_id, permissions, CrudPermissions.READ)
     view = request.GET.get('view', None) or ctx.get_default_view() or 'id_only'
     tombstones = asbool(request.GET.get('tombstones', False))
@@ -124,8 +122,7 @@ def instance_view_jsonld(request):
     from rdflib import URIRef, ConjunctiveGraph
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(
-        user_id, ctx.get_discussion_id())
+    permissions = request.permissions
     instance = ctx._instance
     if not instance.user_can(user_id, CrudPermissions.READ, permissions):
         raise HTTPUnauthorized()
@@ -152,8 +149,7 @@ def instance_view_jsonld(request):
 def instance_view(request):
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(
-        user_id, ctx.get_discussion_id())
+    permissions = request.permissions
     instance = ctx._instance
     if not instance.user_can(user_id, CrudPermissions.READ, permissions):
         raise HTTPUnauthorized()
@@ -167,8 +163,7 @@ def instance_view(request):
 def collection_view(request, default_view='default'):
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(
-        user_id, ctx.get_discussion_id())
+    permissions = request.permissions
     check = check_permissions(ctx, user_id, permissions, CrudPermissions.READ)
     view = request.GET.get('view', None) or ctx.get_default_view() or default_view
     tombstones = asbool(request.GET.get('tombstones', False))
@@ -195,8 +190,7 @@ def instance_put_json(request, json_data=None):
     json_data = json_data or request.json_body
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(
-        user_id, ctx.get_discussion_id())
+    permissions = request.permissions
     instance = ctx._instance
     if not instance.user_can(user_id, CrudPermissions.UPDATE, permissions):
         raise HTTPUnauthorized()
@@ -269,7 +263,7 @@ def instance_put_form(request, form_data=None):
     form_data = form_data or request.params
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(user_id, ctx.get_discussion_id())
+    permissions = request.permissions
     instance = ctx._instance
     if not instance.user_can(user_id, CrudPermissions.UPDATE, permissions):
         raise HTTPUnauthorized()
@@ -286,8 +280,7 @@ def instance_put_form(request, form_data=None):
 def instance_del(request):
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(
-        user_id, ctx.get_discussion_id())
+    permissions = request.permissions
     instance = ctx._instance
     if not instance.user_can(user_id, CrudPermissions.DELETE, permissions):
         raise HTTPUnauthorized()
@@ -317,8 +310,7 @@ def collection_add_json(request, json=None):
     ctx = request.context
     json = request.json_body if json is None else json
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(
-        user_id, ctx.get_discussion_id())
+    permissions = request.permissions
     cls = ctx.get_collection_class(json.get('@type', None))
     typename = cls.external_typename()
     check_permissions(ctx, user_id, permissions, CrudPermissions.CREATE, cls)
