@@ -83,10 +83,13 @@ class BaseContext(object):
 
 class DictContext(BaseContext):
     """A Context defined using a simple dictionary"""
-    def __init__(self, acl, subobjects=None):
+    def __init__(self, name, acl, subobjects=None):
         super(DictContext, self).__init__(None, acl)
-        self.subobjects = subobjects or {}
-        for context in self.subobjects.itervalues():
+        self.__name__ = name
+        subobjects = subobjects or ()
+        self.subobjects = {
+            ctx.__name__: ctx for ctx in subobjects}
+        for context in subobjects:
             context.__parent__ = self
         if acl:
             self.__acl__ = acl
@@ -104,17 +107,15 @@ class AppRoot(DictContext):
     """The root context. Anything not defined by a root comes here."""
     def __init__(self, request=None):
         self.request = request
-        super(AppRoot, self).__init__(ACL_READABLE, {
-            'data': Api2Context(self, ACL_RESTRICTIVE),
-            'admin': DictContext(ACL_RESTRICTIVE, {
-                'permissions': DictContext(None, {
-                    'discussion': DiscussionsContext()})}),
-            'api': DictContext(ACL_RESTRICTIVE, {
-                'v1': DictContext(None, {
-                    'discussion': DiscussionsContext(),
-                    'token': DictContext(ACL_READABLE)})})})
-
-    __name__ = "Assembl"
+        super(AppRoot, self).__init__('', ACL_READABLE, [
+            Api2Context(self, ACL_RESTRICTIVE),
+            DictContext('admin', ACL_RESTRICTIVE, [
+                DictContext('permissions', None, [
+                    DiscussionsContext()])]),
+            DictContext('api', ACL_RESTRICTIVE, [
+                DictContext('v1', None, [
+                    DiscussionsContext(),
+                    DictContext('token', ACL_READABLE)])])])
 
     def __getitem__(self, key):
         if key in self.subobjects:
@@ -163,6 +164,9 @@ class AppRoot(DictContext):
 
 class DiscussionsContext(BaseContext):
     """A context where discussions, named by id, are sub-contexts"""
+
+    __name__ = 'discussion'
+
     def __getitem__(self, key):
         from assembl.models import Discussion
         discussion = Discussion.get(int(key))
@@ -204,6 +208,8 @@ class Api2Context(TraversalContext):
 
     Sub-contexts are :py:class:`ClassContext`"""
     _class_cache = {}
+
+    __name__ = 'data'
 
     def __init__(self, parent, acl=None):
         super(Api2Context, self).__init__(parent, acl)
@@ -276,6 +282,7 @@ class ClassContext(TraversalContext):
         # permission on class context are quite restrictive. review.
         super(ClassContext, self).__init__(parent)
         self._class = cls
+        self.__name__ = cls.external_typename()
         self.class_alias = aliased(cls, name="alias_%s" % (cls.__name__))
 
     def __getitem__(self, key):
@@ -362,6 +369,7 @@ class InstanceContext(TraversalContext):
     def __init__(self, parent, instance):
         # Do not call super, because it will set the acl.
         self._instance = instance
+        self.__name__ = str(instance.id)
         self.__parent__ = parent
         # relations = instance.__class__.__mapper__.relationships
 
@@ -513,6 +521,10 @@ class CollectionContext(TraversalContext):
         if not instance:
             raise KeyError()
         return InstanceContext(self, instance)
+
+    @property
+    def __name__(self):
+        return self.collection.name
 
     def get_collection_class(self, typename=None):
         """Returns the collection class, or subclass designated by typename"""
