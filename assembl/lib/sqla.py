@@ -1076,7 +1076,6 @@ class BaseOps(object):
             not result.user_can(
                 user_id, CrudPermissions.UPDATE, permissions
                 ) and cls.default_db.is_modified(result, False):
-            import pdb; pdb.set_trace()
             raise HTTPUnauthorized(
                 "User id <%s> cannot modify a <%s> object" % (
                     user_id, cls.__name__))
@@ -1101,7 +1100,6 @@ class BaseOps(object):
         permissions = context.get_permissions()
         if not self.user_can(
                 user_id, CrudPermissions.UPDATE, permissions):
-            import pdb; pdb.set_trace()
             raise HTTPUnauthorized(
                 "User id <%s> cannot modify a <%s> object" % (
                     user_id, self.__class__.__name__))
