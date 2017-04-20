@@ -37,16 +37,6 @@ def login_required(request):
     return logged_in is None
 
 
-def get_user(request):
-    user_id = authenticated_userid(request)
-    if user_id:
-        user = User.default_db.query(
-            User).filter(User.id == user_id).first()
-    else:
-        user = None
-    return user
-
-
 @subscriber(BeforeRender)
 def add_social(event):
     request = event['request']
@@ -296,5 +286,3 @@ def includeme(config):
     for k in settings.iterkeys():
         if k.endswith("_SCOPE") and k.startswith("SOCIAL_AUTH_"):
             settings[k] = aslist(settings.get(k, ''))
-    config.add_request_method(
-        'assembl.auth.social_auth.get_user', 'user', reify=True)

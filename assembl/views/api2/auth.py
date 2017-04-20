@@ -111,7 +111,7 @@ def add_local_role(request):
         if not first.requested:
             # relationship may not be initialized
             user = first.user or User.get(first.user_id)
-            user.get_notification_subscriptions(discussion_id, True)
+            user.get_notification_subscriptions(discussion_id, True, request)
 
         # Update the user's AgentStatusInDiscussion
         user.update_agent_status_subscribe(discussion)

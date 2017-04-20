@@ -43,6 +43,10 @@ def get_roles(user_id, discussion_id=None):
     return [x[0] for x in roles.distinct()]
 
 
+def roles_from_request(request):
+    return get_roles(request.unauthenticated_userid, request.discussion_id)
+
+
 def get_permissions(user_id, discussion_id):
     user_id = user_id or Everyone
     session = get_session_maker()()
@@ -84,9 +88,31 @@ def get_permissions(user_id, discussion_id):
     return [x[0] for x in permissions.distinct()]
 
 
+def permissions_from_request(request):
+    return get_permissions(
+        request.discussion_id, request.authenticated_userid)
+
+
+def discussion_id_from_request(request):
+    from assembl.views.traversal import BaseContext
+    if request.matchdict:
+        if 'discussion_id' in request.matchdict:
+            discussion_id = int(request.matchdict['discussion_id'])
+            return discussion_id
+    if getattr(request, "context", None) and isinstance(
+            request.context, BaseContext):
+        discussion_id = request.context.get_discussion_id()
+        if discussion_id:
+            return discussion_id
+    # If using the slug, might as well populate request.discussion
+    discussion = discussion_from_request(request)
+    if discussion:
+        return discussion.id
+
+
 def discussion_from_request(request):
     from ..models import Discussion
-    from assembl.views.traversal import TraversalContext
+    from assembl.views.traversal import BaseContext
     if request.matchdict:
         if 'discussion_id' in request.matchdict:
             discussion_id = int(request.matchdict['discussion_id'])
@@ -103,7 +129,7 @@ def discussion_from_request(request):
                 raise HTTPNotFound("No discussion named %s" % (slug,))
             return discussion
     if getattr(request, "context", None) and isinstance(
-            request.context, TraversalContext):
+            request.context, BaseContext):
         discussion_id = request.context.get_discussion_id()
         if discussion_id:
             return Discussion.get(discussion_id)
@@ -122,7 +148,7 @@ def get_current_discussion():
     r = get_current_request()
     # CAN ONLY BE CALLED IF THERE IS A CURRENT REQUEST.
     assert r
-    return discussion_from_request(r)
+    return r.discussion
 
 
 def get_current_user_id():
@@ -130,7 +156,7 @@ def get_current_user_id():
     r = get_current_request()
     # CAN ONLY BE CALLED IF THERE IS A CURRENT REQUEST.
     assert r
-    return authenticated_userid(r)
+    return r.authenticated_userid
 
 
 class UpgradingSessionAuthenticationPolicy(SessionAuthenticationPolicy):
@@ -184,7 +210,7 @@ class TokenSessionAuthenticationPolicy(SessionAuthenticationPolicy):
                 # except:
                 #     pass
                 p.append(Authenticated)
-                p.extend(get_roles(user_id, discussion))
+                p.extend(request.roles)
         return p
 
     def authenticated_userid(self, request):
@@ -206,8 +232,7 @@ def authentication_callback(user_id, request):
     "This is how pyramid knows the user's permissions"
     connection = User.default_db.connection()
     connection.info['userid'] = user_id
-    discussion = discussion_from_request(request)
-    discussion_id = discussion.id if discussion else None
+    discussion_id = request.discussion_id
     # this is a good time to tell raven about the user
     from raven.base import Raven
     if Raven:
@@ -216,7 +241,7 @@ def authentication_callback(user_id, request):
         if discussion_id:
             Raven.context.merge({'discussion_id': discussion_id})
 
-    return get_roles(user_id, discussion_id)
+    return request.roles
 
 
 def discussions_with_access(userid, permission=P_READ):
@@ -517,3 +542,19 @@ def add_multiple_users_csv(
                 text_body=text_message, html_body=html_message,
                 discussion=discussion, sender_name=sender_name, welcome=True)
     return i
+
+
+def includeme(config):
+    """Pre-parse certain settings for python_social_auth, then load it."""
+    config.add_request_method(
+        'assembl.auth.util.get_user', 'user', reify=True)
+    config.add_request_method(
+        'assembl.auth.util.permissions_from_request',
+        'permissions', reify=True)
+    config.add_request_method(
+        'assembl.auth.util.roles_from_request', 'roles', reify=True)
+    config.add_request_method(
+        'assembl.auth.util.discussion_from_request', 'discussion', reify=True)
+    config.add_request_method(
+        'assembl.auth.util.discussion_id_from_request',
+        'discussion_id', reify=True)

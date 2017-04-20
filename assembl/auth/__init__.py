@@ -101,4 +101,5 @@ class CrudPermissions(object):
 
 
 def includeme(config):
+    config.include('.util')
     config.include('.social_auth')

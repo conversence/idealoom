@@ -159,7 +159,7 @@ def create_get_route(request, discussion=None):
 
 def get_default_context(request, **kwargs):
     kwargs.update(default_context)
-    from ..auth.util import get_user, get_current_discussion
+    from ..auth.util import get_current_discussion
     if request.scheme == "http"\
             and asbool(config.get("require_secure_connection")):
         raise HTTPFound("https://" + request.host + request.path_qs)
@@ -175,7 +175,7 @@ def get_default_context(request, **kwargs):
 
     localizer = request.localizer
     _ = TranslationStringFactory('assembl')
-    user = get_user(request)
+    user = request.user
     if user and user.username:
         user_profile_edit_url = request.route_url(
             'profile_user', type='u', identifier=user.username)

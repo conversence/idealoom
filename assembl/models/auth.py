@@ -927,7 +927,8 @@ class User(NamedClassMixin, AgentProfile):
                     if isinstance(parent_instance, UserTemplate):
                         parent_instance.get_notification_subscriptions()
                     else:
-                        parent_instance.get_notification_subscriptions(discussion.id)
+                        parent_instance.get_notification_subscriptions(
+                            discussion.id, request=ctx.get_request())
                     query = query.filter(last_alias.discussion_id == discussion.id)
                 return query
 
@@ -1004,12 +1005,13 @@ class User(NamedClassMixin, AgentProfile):
                 PreferencePseudoCollection())
 
     def get_notification_subscriptions_for_current_discussion(self):
-        "CAN ONLY BE CALLED FROM API V2"
-        from ..auth.util import get_current_discussion
-        discussion = get_current_discussion()
+        "CAN ONLY BE CALLED WITH A CURRENT REQUEST"
+        from ..auth.util import get_current_request
+        request = get_current_request()
+        discussion = request.discussion
         if discussion is None:
             return []
-        return self.get_notification_subscriptions(discussion.id)
+        return self.get_notification_subscriptions(discussion.id, request=request)
 
     def get_preferences_for_discussion(self, discussion):
         from .user_key_values import UserPreferenceCollection
@@ -1022,7 +1024,7 @@ class User(NamedClassMixin, AgentProfile):
             return self.get_preferences_for_discussion(discussion)
 
     def get_notification_subscriptions(
-            self, discussion_id, reset_defaults=False):
+            self, discussion_id, reset_defaults=False, request=None):
         """the notification subscriptions for this user and discussion.
         Includes materialized subscriptions from the template."""
         from .notification import (
@@ -1073,7 +1075,10 @@ class User(NamedClassMixin, AgentProfile):
             return my_subscriptions
         discussion = Discussion.get(discussion_id)
         assert discussion
-        my_roles = get_roles(self.id, discussion_id)
+        if request is None:
+            my_roles = get_roles(self.id, discussion_id)
+        else:
+            my_roles = request.roles
         subscribed = defaultdict(bool)
         for role in my_roles:
             template, changed = discussion.get_user_template(
