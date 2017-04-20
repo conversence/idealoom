@@ -90,7 +90,7 @@ def get_permissions(user_id, discussion_id):
 
 def permissions_from_request(request):
     return get_permissions(
-        request.discussion_id, request.authenticated_userid)
+        request.authenticated_userid, request.discussion_id)
 
 
 def discussion_id_from_request(request):
