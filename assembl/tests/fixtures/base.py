@@ -190,33 +190,60 @@ def test_adminuser_webrequest(request, admin_user, test_app_no_perm):
 
 
 @pytest.fixture(scope="function")
-def test_app(request, admin_user, test_app_no_perm):
-    """A configured Assembl fixture with permissions
-    and an admin user logged in"""
+def testing_configurator(request, test_app_no_perm):
+    """The testing configurator"""
 
-    config = testing.setUp(
+    return testing.setUp(
         registry=test_app_no_perm.app.registry,
         settings=get_config(),
     )
-    dummy_policy = config.testing_securitypolicy(
+
+
+@pytest.fixture(scope="function")
+def admin_auth_policy(request, admin_user, testing_configurator):
+    """A Dummy authorization/authentication policy
+    with the admin user logged in"""
+
+    return testing_configurator.testing_securitypolicy(
         userid=admin_user.id, permissive=True)
-    config.set_authorization_policy(dummy_policy)
-    config.set_authentication_policy(dummy_policy)
+
+
+@pytest.fixture(scope="function")
+def participant_auth_policy(request, participant1_user, testing_configurator):
+    """A Dummy authorization/authentication policy
+    with a participant user logged in"""
+
+    return testing_configurator.testing_securitypolicy(
+        userid=participant1_user.id, permissive=True)
+
+
+@pytest.fixture(scope="function")
+def nologin_auth_policy(request, participant1_user, testing_configurator):
+    """A Dummy authorization/authentication policy
+    with no user logged in"""
+
+    return testing_configurator.testing_securitypolicy(
+        userid=None, permissive=False)
+
+
+@pytest.fixture(scope="function")
+def test_app(
+        request, test_app_no_perm, testing_configurator, admin_auth_policy):
+    """A configured Assembl fixture with permissions
+    and an admin user logged in"""
+
+    testing_configurator.set_authorization_policy(admin_auth_policy)
+    testing_configurator.set_authentication_policy(admin_auth_policy)
     return test_app_no_perm
 
 
 @pytest.fixture(scope="function")
-def test_app_no_login(request, admin_user, test_app_no_perm):
+def test_app_no_login(
+        request, test_app_no_perm, testing_configurator, nologin_auth_policy):
     """A configured Assembl fixture with permissions
     and no user logged in"""
-    config = testing.setUp(
-        registry=test_app_no_perm.app.registry,
-        settings=get_config(),
-    )
-    dummy_policy = config.testing_securitypolicy(
-        userid=None, permissive=False)
-    config.set_authorization_policy(dummy_policy)
-    config.set_authentication_policy(dummy_policy)
+    testing_configurator.set_authorization_policy(nologin_auth_policy)
+    testing_configurator.set_authentication_policy(nologin_auth_policy)
     return test_app_no_perm
 
 

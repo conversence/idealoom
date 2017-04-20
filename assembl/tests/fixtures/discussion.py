@@ -6,6 +6,7 @@ from sqlalchemy import inspect
 def discussion(request, test_session, default_preferences):
     """An empty Discussion fixture with default preferences"""
     from assembl.models import Discussion
+    from assembl.models.auth import create_default_permissions
     with test_session.no_autoflush:
         d = Discussion(
             topic=u"Jack Layton", slug="jacklayton2",
@@ -13,6 +14,7 @@ def discussion(request, test_session, default_preferences):
             creator=None,
             session=test_session)
         test_session.add(d)
+        create_default_permissions(d)
     test_session.flush()
 
     def fin():
@@ -21,6 +23,8 @@ def discussion(request, test_session, default_preferences):
         if inspect(discussion).detached:
             # How did this happen?
             discussion = test_session.query(Discussion).get(d.id)
+        for acl in discussion.acls:
+            test_session.delete(acl)
         test_session.delete(discussion.table_of_contents)
         test_session.delete(discussion.root_idea)
         test_session.delete(discussion.next_synthesis)
