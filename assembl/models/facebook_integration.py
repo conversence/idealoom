@@ -1139,6 +1139,10 @@ class FacebookAccessToken(Base):
     object_name = Column(String(512))
     object_fb_id = Column(String(512))
 
+    def get_default_parent_context(self, request=None):
+        return self.fb_account.get_collection_context(
+            'access_tokens', request=request)
+
     def container_url(self):
         return "/data/User/%d/accounts/%d/access_tokens" % (
             self.fb_account.profile_id, self.fb_account_id)

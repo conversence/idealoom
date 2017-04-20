@@ -94,6 +94,9 @@ class Action(TombstonableMixin, DiscussionBoundBase):
         return "/data/Discussion/%d/all_users/%d/actions" % (
             self.get_discussion_id(), self.actor_id)
 
+    def get_default_parent_context(self, request=None):
+        return self.user.get_collection_context('actions', request=request)
+
     @classmethod
     def restrict_to_owners(cls, q, user_id):
         return q.filter(cls.actor_id == user_id)

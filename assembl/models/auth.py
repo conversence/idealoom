@@ -408,6 +408,13 @@ class AbstractAgentAccount(Base):
 
     full_name = Column(CoerceUnicode(512))
 
+    def get_default_parent_context(self, request=None):
+        return self.profile.get_collection_context(
+            'accounts', request=request)
+
+    def container_url(self):
+        return "/data/AgentProfile/%d/accounts" % (self.profile_id)
+
     def signature(self):
         "Identity of signature implies identity of underlying account"
         return ('abstract_agent_account', self.id)
@@ -659,6 +666,17 @@ class User(NamedClassMixin, AgentProfile):
             kwargs['password'] = hash_password(kwargs['password'])
 
         super(User, self).__init__(**kwargs)
+
+    def get_default_parent_context(self, request=None):
+        from pyramid.threadlocal import get_current_request
+        from ..auth.util import discussion_from_request
+        if not request:
+            request = get_current_request()
+        if request:
+            d = discussion_from_request(request)
+            if d:
+                return d.get_collection_context('all_users', request=request)
+        return super(User, self).get_default_parent_context(request)
 
     @property
     def real_name_p(self):
@@ -1157,6 +1175,10 @@ class UserRole(Base, PrivateObjectMixin):
     def container_url(self):
         return "/data/User/%d/roles" % (self.user_id)
 
+    def get_default_parent_context(self, request=None):
+        return self.user.get_collection_context(
+            'roles', self.user.get_class_context(), request)
+
     @classmethod
     def special_quad_patterns(cls, alias_maker, discussion_id):
         role_alias = alias_maker.alias_from_relns(cls.role)
@@ -1224,6 +1246,9 @@ class LocalUserRole(DiscussionBoundBase, PrivateObjectMixin):
     def container_url(self):
         return "/data/Discussion/%d/all_users/%d/local_roles" % (
             self.discussion_id, self.user_id)
+
+    def get_default_parent_context(self, request=None):
+        return self.user.get_collection_context('roles', request=request)
 
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):

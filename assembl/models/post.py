@@ -688,6 +688,10 @@ class WidgetPost(AssemblPost):
         # and creativity uses
         # /data/Discussion/%d/widgets/%d/base_idea/-/children/%d/widgetposts
 
+    def get_default_parent_context(self, request=None):
+        return self.widget.get_collection_context(
+            'posts', request=request)
+
     def populate_from_context(self, context):
         if not(self.widget or self.widget_id):
             from .widgets import Widget
@@ -795,6 +799,10 @@ class ImportedPost(Post):
     def container_url(self):
         return "/data/Discussion/%d/sources/%d/contents" % (
             self.discussion_id, self.source_id)
+
+    def get_default_parent_context(self, request=None):
+        return self.source.get_collection_context(
+            'contents', request=request)
 
     def get_body_mime_type(self):
         return self.body_mime_type

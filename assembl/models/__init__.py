@@ -76,6 +76,15 @@ class DiscussionBoundBase(Base):
     def tombstone(self):
         return DiscussionBoundTombstone(self)
 
+    def get_default_parent_context(self, request=None):
+        for r in self.__class__.__mapper__.relationships:
+            if r.mapper.class_ == Discussion and r.back_populates:
+                discussion = getattr(self, r.key)
+                return discussion.get_collection_context(
+                    r.back_populates, request=request)
+        return super(DiscussionBoundBase, self
+                     ).get_default_parent_context(request)
+
     def container_url(self):
         for r in self.__class__.__mapper__.relationships:
             if r.mapper.class_ == Discussion and r.back_populates:

@@ -487,7 +487,10 @@ class BaseOps(object):
         return cls._iri_class
 
     def container_url(self):
+        """What is the URL where we expect to find this resource"""
         return '/data/' + self.__class__.external_typename()
+        # Often but not always equivalent to
+        # resource_path(self.get_default_parent_context())
 
     @classmethod
     def base_conditions(cls, alias=None, alias_maker=None):
@@ -1665,16 +1668,21 @@ class BaseOps(object):
         api_context = cls.get_api_context(request)
         return api_context[cls.external_typename()]
 
-    def get_instance_context(self, parent_context=None):
+    def get_default_parent_context(self, request=None):
+        return self.get_class_context(request)
+
+    def get_instance_context(self, parent_context=None, request=None):
         from assembl.views.traversal import InstanceContext
         return InstanceContext(
-            parent_context or self.get_class_context(), self)
+            parent_context or self.get_default_parent_context(request), self)
 
-    def get_collection_context(self, relation_name, parent_context=None):
+    def get_collection_context(
+            self, relation_name, parent_context=None, request=None):
         from assembl.views.traversal import CollectionContext
         collection = self.get_collections().get(relation_name, None)
         if collection:
-            parent_context = parent_context or self.get_instance_context()
+            parent_context = parent_context or self.get_instance_context(
+                request=request)
             return CollectionContext(parent_context, collection, self)
 
     def is_owner(self, user_id):
