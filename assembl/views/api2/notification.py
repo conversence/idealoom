@@ -41,7 +41,7 @@ def notif_collection_add_json(request):
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
     permissions = request.permissions
-    check_permissions(ctx, user_id, permissions, CrudPermissions.CREATE)
+    check_permissions(ctx, user_id, CrudPermissions.CREATE)
     typename = ctx.collection_class.external_typename()
     typename = request.json_body.get(
         '@type', ctx.collection_class.external_typename())

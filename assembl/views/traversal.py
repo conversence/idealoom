@@ -223,7 +223,9 @@ class Api2Context(TraversalContext):
             raise KeyError()
         if cls not in self._class_cache:
             self._class_cache[cls] = ClassContext(self, cls)
-        return self._class_cache[cls]
+        ctx = self._class_cache[cls]
+        ctx.__parent__ = self
+        return ctx
 
     def all_class_names(self):
         return [k.external_typename()

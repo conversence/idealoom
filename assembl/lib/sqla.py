@@ -1030,15 +1030,13 @@ class BaseOps(object):
             aliases=None, jsonld=None, permissions=None,
             parse_def_name='default_reverse', duplicate_handling=None):
         """Create an object from its JSON representation."""
-        from ..auth.util import get_permissions
         aliases = aliases or {}
         parse_def = get_view_def(parse_def_name)
         context = context or cls.get_class_context()
         user_id = user_id or Everyone
         from assembl.models import Discussion
         discussion = context.get_instance_of_class(Discussion)
-        permissions = permissions or get_permissions(
-            user_id, discussion.id if discussion else None)
+        permissions = permissions or context.get_permissions()
         with cls.default_db.no_autoflush:
             # We need this to allow db.is_modified to work well
             return cls._do_create_from_json(
@@ -1078,6 +1076,7 @@ class BaseOps(object):
             not result.user_can(
                 user_id, CrudPermissions.UPDATE, permissions
                 ) and cls.default_db.is_modified(result, False):
+            import pdb; pdb.set_trace()
             raise HTTPUnauthorized(
                 "User id <%s> cannot modify a <%s> object" % (
                     user_id, cls.__name__))
@@ -1092,7 +1091,6 @@ class BaseOps(object):
                 self, json, user_id=None, context=None, jsonld=None,
                 parse_def_name='default_reverse'):
         """Update (patch) an object from its JSON representation."""
-        from ..auth.util import get_permissions
         parse_def = get_view_def(parse_def_name)
         context = context or self.get_instance_context()
         user_id = user_id or Everyone
@@ -1100,10 +1098,10 @@ class BaseOps(object):
         discussion = context.get_instance_of_class(Discussion)
         if not discussion and isinstance(self, DiscussionBoundBase):
             discussion = Discussion.get(self.get_discussion_id())
-        permissions = get_permissions(
-            user_id, discussion.id if discussion else None)
+        permissions = context.get_permissions()
         if not self.user_can(
                 user_id, CrudPermissions.UPDATE, permissions):
+            import pdb; pdb.set_trace()
             raise HTTPUnauthorized(
                 "User id <%s> cannot modify a <%s> object" % (
                     user_id, self.__class__.__name__))

@@ -26,7 +26,7 @@ def widget_view(request):
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
     permissions = request.permissions
-    check_permissions(ctx, user_id, permissions, CrudPermissions.READ)
+    check_permissions(ctx, user_id, CrudPermissions.READ)
     view = (request.matchdict or {}).get('view', None)\
         or ctx.get_default_view() or 'default'
     json = ctx._instance.generic_json(view, user_id, permissions)
@@ -56,7 +56,7 @@ def widget_instance_put(request):
     user_id = authenticated_userid(request)
     if not user_id:
         raise HTTPUnauthorized
-    check_permissions(ctx, user_id, request.permissions, CrudPermissions.UPDATE)
+    check_permissions(ctx, user_id, CrudPermissions.UPDATE)
     user_state = request.POST.get('user_state')
     if user_state:
         del request.POST['user_state']

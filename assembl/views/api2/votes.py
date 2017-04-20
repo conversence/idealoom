@@ -46,7 +46,7 @@ def votes_collection_add_json(request):
     if not user_id:
         raise HTTPUnauthorized
     permissions = request.permissions
-    check_permissions(ctx, user_id, permissions, CrudPermissions.CREATE)
+    check_permissions(ctx, user_id, CrudPermissions.CREATE)
     spec = ctx.get_instance_of_class(AbstractVoteSpecification)
     if spec:
         required = spec.get_vote_class()

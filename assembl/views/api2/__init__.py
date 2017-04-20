@@ -71,9 +71,9 @@ MULTIPART_HEADER = "Content-Type:multipart/form-data"
 
 
 def check_permissions(
-        ctx, user_id, permissions, operation, cls=None):
+        ctx, user_id, operation, cls=None):
     cls = cls or ctx.get_target_class()
-    permissions.extend(ctx.ctx_permissions(permissions))
+    permissions = ctx.get_permissions()
     allowed = cls.user_can_cls(user_id, operation, permissions)
     if not allowed or (allowed == IF_OWNED and user_id == Everyone):
         raise HTTPUnauthorized()
@@ -95,8 +95,7 @@ class CreationResponse(Response):
 def class_view(request):
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = request.permissions
-    check = check_permissions(ctx, user_id, permissions, CrudPermissions.READ)
+    check = check_permissions(ctx, user_id, CrudPermissions.READ)
     view = request.GET.get('view', None) or ctx.get_default_view() or 'id_only'
     tombstones = asbool(request.GET.get('tombstones', False))
     q = ctx.create_query(view == 'id_only', tombstones)
@@ -164,7 +163,7 @@ def collection_view(request, default_view='default'):
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
     permissions = request.permissions
-    check = check_permissions(ctx, user_id, permissions, CrudPermissions.READ)
+    check = check_permissions(ctx, user_id, CrudPermissions.READ)
     view = request.GET.get('view', None) or ctx.get_default_view() or default_view
     tombstones = asbool(request.GET.get('tombstones', False))
     q = ctx.create_query(view == 'id_only', tombstones)
@@ -313,7 +312,7 @@ def collection_add_json(request, json=None):
     permissions = request.permissions
     cls = ctx.get_collection_class(json.get('@type', None))
     typename = cls.external_typename()
-    check_permissions(ctx, user_id, permissions, CrudPermissions.CREATE, cls)
+    check_permissions(ctx, user_id, CrudPermissions.CREATE, cls)
     try:
         instances = ctx.create_object(typename, json, user_id)
     except Exception as e:
