@@ -22,7 +22,7 @@ from ..models.auth import (
 
 
 def get_user(request):
-    logged_in = authenticated_userid(request)
+    logged_in = request.unauthenticated_userid
     if logged_in:
         return User.get(logged_in)
 
@@ -240,6 +240,10 @@ def authentication_callback(user_id, request):
             Raven.user_context({'user_id': user_id})
         if discussion_id:
             Raven.context.merge({'discussion_id': discussion_id})
+
+    # Check that the user exists
+    if not request.user:
+        return None
 
     return request.roles
 
