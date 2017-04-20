@@ -29,7 +29,8 @@ def patch_dict(request):
     preferences = request.context.preferences
     if not isinstance(request.json, dict):
         raise HTTPBadRequest()
-    permissions = request.permissions
+    ctx = request.context
+    permissions = ctx.get_permissions()
 
     try:
         for k, v in request.json.iteritems():
@@ -62,7 +63,7 @@ def put_value(request):
     value = request.json
     preferences = ctx.collection
     try:
-        preferences.safe_set(ctx.key, value, request.permissions)
+        preferences.safe_set(ctx.key, value, ctx.get_permissions())
     except KeyError:
         raise HTTPNotFound()
     except (AssertionError, ValueError) as e:
@@ -78,7 +79,7 @@ def del_value(request):
     ctx = request.context
     preferences = ctx.collection
     try:
-        preferences.safe_del(ctx.key, request.permissions)
+        preferences.safe_del(ctx.key, ctx.get_permissions())
     except KeyError:
         raise HTTPNotFound()
     except (AssertionError, ValueError) as e:

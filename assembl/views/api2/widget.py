@@ -25,7 +25,7 @@ def widget_view(request):
     # IF_OWNED not applicable for widgets... so far
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = request.permissions
+    permissions = ctx.get_permissions()
     check_permissions(ctx, user_id, CrudPermissions.READ)
     view = (request.matchdict or {}).get('view', None)\
         or ctx.get_default_view() or 'default'
@@ -207,7 +207,7 @@ def get_idea_sibling_criteria(request):
     view = (request.matchdict or {}).get('view', None)\
         or ctx.get_default_view() or 'default'
     user_id = authenticated_userid(request) or Everyone
-    permissions = request.permissions
+    permissions = ctx.get_permissions()
     return [cr.generic_json(view, user_id, permissions) for cr in
             ctx._instance.get_siblings_of_type(Idea)]
 
@@ -229,7 +229,7 @@ def voting_widget_view(request):
     view = (request.matchdict or {}).get('view', None)\
         or ctx.get_default_view() or 'default'
     widget = ctx._instance
-    permissions = request.permissions
+    permissions = ctx.get_permissions()
     json = widget.generic_json(view, user_id, permissions)
     #json['discussion'] = ...
     if user_id != Everyone:
@@ -362,6 +362,6 @@ def vote_results(request):
     if not widget:
         raise HTTPNotFound()
     if widget.activity_state != "ended":
-        if P_ADMIN_DISC not in request.permissions:
+        if P_ADMIN_DISC not in ctx.get_permissions():
             raise HTTPUnauthorized()
     return ctx._instance.all_voting_results()

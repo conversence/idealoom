@@ -42,7 +42,7 @@ def fetch_posts(request):
     if force_restart or reimport or upper_bound or lower_bound or reprocess:
         # Only discussion admins
         user_id = authenticated_userid(request) or Everyone
-        if P_ADMIN_DISC not in request.permissions:
+        if P_ADMIN_DISC not in ctx.get_permissions():
             requested = []
             if reimport:
                 requested.append('reimport')

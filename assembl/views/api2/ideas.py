@@ -14,7 +14,8 @@ def instance_del(request):
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
     idea = ctx._instance
-    if not idea.user_can(user_id, CrudPermissions.DELETE, request.permissions):
+    if not idea.user_can(
+            user_id, CrudPermissions.DELETE, ctx.get_permissions()):
         raise HTTPUnauthorized()
     for link in idea.source_links:
         link.is_tombstone = True

@@ -85,7 +85,7 @@ def upload_file(request):
         raise HTTPServerError
 
     view = 'default'
-    return blob.generic_json(view, user_id, request.permissions)
+    return blob.generic_json(view, user_id, ctx.get_permissions())
 
 
 @view_config(context=InstanceContext, request_method=('PUT', 'PATCH'),

@@ -102,7 +102,7 @@ def read_user_token(request):
     salt = None
     user_id = authenticated_userid(request) or Everyone
     discussion_id = request.context.get_discussion_id()
-    permissions = request.permissions
+    permissions = ctx.get_permissions()
     if P_READ in permissions:
         permissions.append(P_READ_PUBLIC_CIF)
 
@@ -1057,7 +1057,8 @@ def post_discussion(request):
         db.flush()
         view = request.GET.get('view', None) or default_view
         uri = "/".join((API_ETALAB_DISCUSSIONS_PREFIX, str(first.id))) if is_etalab_request else None
-        return CreationResponse(first, user_id, request.permissions, view, uri=uri)
+        return CreationResponse(
+            first, user_id, ctx.get_permissions(), view, uri=uri)
 
 
 class defaultdict_of_dict(defaultdict):
@@ -1076,7 +1077,8 @@ def get_participant_time_series_analytics(request):
     with_email = request.GET.get("email", None)
     discussion = request.context._instance
     user_id = authenticated_userid(request) or Everyone
-    permissions = request.permissions
+    ctx = request.context
+    permissions = ctx.get_permissions()
     if with_email is None:
         with_email = P_ADMIN_DISC in permissions
     else:

@@ -3,7 +3,7 @@ from datetime import datetime
 from pyramid.view import view_config
 from pyramid.response import Response
 from pyramid.httpexceptions import HTTPUnauthorized, HTTPBadRequest
-from pyramid.security import authenticated_userid
+from pyramid.security import authenticated_userid, Everyone
 
 from assembl.auth import P_READ, P_MODERATE, P_DELETE_POST, P_DELETE_MY_POST
 from assembl.models import Content, Post, SynthesisPost, User, Extract
@@ -46,7 +46,7 @@ def delete_post_instance(request):
     # - user who has the P_DELETE_POST permission in this discussion
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = request.permissions
+    permissions = ctx.get_permissions()
     instance = ctx._instance
 
     allowed = False
@@ -104,7 +104,7 @@ def raise_if_cannot_moderate(request):
     user_id = authenticated_userid(request)
     if not user_id:
         raise HTTPUnauthorized()
-    permissions = request.permissions
+    permissions = ctx.get_permissions()
     if P_MODERATE not in permissions:
         raise HTTPUnauthorized()
 

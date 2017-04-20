@@ -45,7 +45,7 @@ def votes_collection_add_json(request):
     user_id = authenticated_userid(request)
     if not user_id:
         raise HTTPUnauthorized
-    permissions = request.permissions
+    permissions = ctx.get_permissions()
     check_permissions(ctx, user_id, CrudPermissions.CREATE)
     spec = ctx.get_instance_of_class(AbstractVoteSpecification)
     if spec:
@@ -113,7 +113,7 @@ def vote_results(request):
                 "Please select at most 25 bins in the histogram.")
     widget = ctx._instance.widget
     if widget.activity_state != "ended":
-        permissions = request.permissions
+        permissions = ctx.get_permissions()
         if P_ADMIN_DISC not in permissions:
             raise HTTPUnauthorized()
     return ctx._instance.voting_results(histogram)
@@ -137,7 +137,7 @@ def vote_results_csv(request):
                 "Please select at most 25 bins in the histogram.")
     widget = ctx._instance.widget
     if widget.activity_state != "ended":
-        permissions = request.permissions
+        permissions = ctx.get_permissions()
         if P_ADMIN_DISC not in permissions:
             raise HTTPUnauthorized()
     output = StringIO()

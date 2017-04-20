@@ -121,7 +121,7 @@ def instance_view_jsonld(request):
     from rdflib import URIRef, ConjunctiveGraph
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = request.permissions
+    permissions = ctx.get_permissions()
     instance = ctx._instance
     if not instance.user_can(user_id, CrudPermissions.READ, permissions):
         raise HTTPUnauthorized()
@@ -148,7 +148,7 @@ def instance_view_jsonld(request):
 def instance_view(request):
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = request.permissions
+    permissions = ctx.get_permissions()
     instance = ctx._instance
     if not instance.user_can(user_id, CrudPermissions.READ, permissions):
         raise HTTPUnauthorized()
@@ -162,7 +162,7 @@ def instance_view(request):
 def collection_view(request, default_view='default'):
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = request.permissions
+    permissions = ctx.get_permissions()
     check = check_permissions(ctx, user_id, CrudPermissions.READ)
     view = request.GET.get('view', None) or ctx.get_default_view() or default_view
     tombstones = asbool(request.GET.get('tombstones', False))
@@ -189,7 +189,7 @@ def instance_put_json(request, json_data=None):
     json_data = json_data or request.json_body
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = request.permissions
+    permissions = ctx.get_permissions()
     instance = ctx._instance
     if not instance.user_can(user_id, CrudPermissions.UPDATE, permissions):
         raise HTTPUnauthorized()
@@ -262,7 +262,7 @@ def instance_put_form(request, form_data=None):
     form_data = form_data or request.params
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = request.permissions
+    permissions = ctx.get_permissions()
     instance = ctx._instance
     if not instance.user_can(user_id, CrudPermissions.UPDATE, permissions):
         raise HTTPUnauthorized()
@@ -279,7 +279,7 @@ def instance_put_form(request, form_data=None):
 def instance_del(request):
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = request.permissions
+    permissions = ctx.get_permissions()
     instance = ctx._instance
     if not instance.user_can(user_id, CrudPermissions.DELETE, permissions):
         raise HTTPUnauthorized()
@@ -309,7 +309,7 @@ def collection_add_json(request, json=None):
     ctx = request.context
     json = request.json_body if json is None else json
     user_id = authenticated_userid(request) or Everyone
-    permissions = request.permissions
+    permissions = ctx.get_permissions()
     cls = ctx.get_collection_class(json.get('@type', None))
     typename = cls.external_typename()
     check_permissions(ctx, user_id, CrudPermissions.CREATE, cls)

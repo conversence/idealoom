@@ -40,7 +40,7 @@ def view_notification_subscription_collection(request):
 def notif_collection_add_json(request):
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = request.permissions
+    permissions = ctx.get_permissions()
     check_permissions(ctx, user_id, CrudPermissions.CREATE)
     typename = ctx.collection_class.external_typename()
     typename = request.json_body.get(
