@@ -17,7 +17,7 @@ from pyramid.httpexceptions import HTTPNotFound
 from abc import ABCMeta, abstractmethod
 
 from assembl.auth import P_READ, R_SYSADMIN
-from assembl.auth.util import get_permissions, discussion_from_request
+from assembl.auth.util import discussion_from_request
 from assembl.lib.sqla import uses_list, get_named_class, Base
 from assembl.lib.decl_enums import DeclEnumType
 
@@ -65,11 +65,11 @@ class BaseContext(object):
         """Look in the context chain for a model instance of a given class"""
         return self.__parent__.get_instance_of_class(cls)
 
-    def ctx_permissions(self, permissions):
-        """Does the context give specific permissions?
+    def get_permissions(self):
+        """Get the permissions from the request, maybe altering on the way.
 
         See e.g. in :py:class:`assembl.models.widgets.IdeaCreatingWidget.BaseIdeaHidingCollection`"""
-        return self.__parent__.ctx_permissions(permissions)
+        return self.__parent__.get_permissions()
 
     def __eq__(self, other):
         return (self.__class__ is other.__class__ and
@@ -158,8 +158,8 @@ class AppRoot(DictContext):
         if user is not None:
             yield user
 
-    def ctx_permissions(self, permissions):
-        return []
+    def get_permissions(self):
+        return self.request.permissions
 
 
 class DiscussionsContext(BaseContext):
@@ -240,9 +240,6 @@ class Api2Context(TraversalContext):
 
     def on_new_instance(self, instance):
         pass
-
-    def ctx_permissions(self, permissions):
-        return []
 
 
 def process_args(args, cls):
@@ -576,16 +573,17 @@ class CollectionContext(TraversalContext):
         self.collection.on_new_instance(instance, self.parent_instance)
         super(CollectionContext, self).on_new_instance(instance)
 
-    def ctx_permissions(self, permissions):
-        new_permissions = self.collection.ctx_permissions(permissions)
-        new_permissions.extend(super(
-            CollectionContext, self).ctx_permissions(permissions))
-        return new_permissions
+    def get_permissions(self):
+        permissions = super(
+            CollectionContext, self).get_permissions()
+        new_permissions = self.collection.extra_permissions(permissions)
+        if new_permissions:
+            permissions = new_permissions.extend(permissions)
+        return permissions
 
     def create_object(self, typename=None, json=None, user_id=None):
         cls = self.get_collection_class(typename)
-        permissions = self.get_request().permissions
-        permissions.extend(self.ctx_permissions(permissions))
+        permissions = self.get_permissions()
         with self.parent_instance.db.no_autoflush:
             try:
                 inst = cls.create_from_json(
@@ -745,8 +743,11 @@ class AbstractCollectionDefinition(object):
         Used in :py:class:`NamedCollectionContextPredicate` and :py:meth:`TraversalContext.find_collection`."""
         return ".".join((self.owner_class.__name__, self.name))
 
-    def ctx_permissions(self, permissions):
-        return []
+    def extra_permissions(self, permissions):
+        """Return a list of extra permissions that could be added along the way.
+
+        See e.g. in :py:class:`assembl.models.widgets.IdeaCreatingWidget.BaseIdeaHidingCollection`"""
+        return None
 
     @staticmethod
     def filter_kwargs(cls, kwargs):
