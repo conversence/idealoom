@@ -23,7 +23,7 @@ synthesis = Service(name='ExplicitSubgraphs',
 def get_syntheses(request):
     discussion = request.context
     user_id = authenticated_userid(request) or Everyone
-    syntheses = discussion.get_all_syntheses()
+    syntheses = discussion.get_all_syntheses_query()
     view_def = request.GET.get('view') or 'default'
     res = [synthesis.generic_json(view_def, user_id, request.permissions)
            for synthesis in syntheses]
