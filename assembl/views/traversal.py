@@ -221,11 +221,7 @@ class Api2Context(TraversalContext):
         cls = get_named_class(key)
         if not cls:
             raise KeyError()
-        if cls not in self._class_cache:
-            self._class_cache[cls] = ClassContext(self, cls)
-        ctx = self._class_cache[cls]
-        ctx.__parent__ = self
-        return ctx
+        return ClassContext(self, cls)
 
     def all_class_names(self):
         return [k.external_typename()
