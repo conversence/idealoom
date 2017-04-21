@@ -42,7 +42,7 @@ from .parsedatetime import parse_datetime
 from ..view_def import get_view_def
 from .zmqlib import get_pub_socket, send_changes
 from ..semantic.namespaces import QUADNAMES
-from ..auth import *
+from ..auth import (Everyone, CrudPermissions, IF_OWNED, P_READ)
 from .decl_enums import EnumSymbol, DeclEnumType
 from .utils import get_global_base_url
 from ..lib.config import get_config
@@ -969,8 +969,7 @@ class BaseOps(object):
 
     def _create_subobject_from_json(
             self, json, target_cls, parse_def, aliases,
-            context, permissions, user_id, accessor_name,
-            jsonld=None):
+            context, accessor_name, jsonld=None):
         instance = None
         target_type = json.get('@type', None)
         if target_type:
@@ -999,15 +998,15 @@ class BaseOps(object):
             sub_context = instance.get_instance_context(context)
             log.info("Chaining context from %s -> %s" % (context, sub_context))
             instance = instance._do_update_from_json(
-                json, parse_def, aliases, sub_context, permissions,
-                user_id, DuplicateHandling.USE_ORIGINAL, jsonld)
+                json, parse_def, aliases, sub_context,
+                DuplicateHandling.USE_ORIGINAL, jsonld)
             instance = instance.handle_duplication(
-                json, parse_def, aliases, sub_context, permissions,
-                user_id, DuplicateHandling.USE_ORIGINAL, jsonld)
+                json, parse_def, aliases, sub_context,
+                DuplicateHandling.USE_ORIGINAL, jsonld)
         else:
             instance = target_cls._do_create_from_json(
-                json, parse_def, aliases, context, permissions,
-                user_id, DuplicateHandling.USE_ORIGINAL, jsonld)
+                json, parse_def, aliases, context,
+                DuplicateHandling.USE_ORIGINAL, jsonld)
             if instance is None:
                 raise HTTPBadRequest(
                     "Could not find or create object %s" % (
@@ -1026,27 +1025,23 @@ class BaseOps(object):
     # We need to give the parse_def (by name or by value?)
     @classmethod
     def create_from_json(
-            cls, json, user_id=None, context=None,
-            aliases=None, jsonld=None, permissions=None,
+            cls, json, context=None, aliases=None, jsonld=None,
             parse_def_name='default_reverse', duplicate_handling=None):
         """Create an object from its JSON representation."""
         aliases = aliases or {}
         parse_def = get_view_def(parse_def_name)
         context = context or cls.get_class_context()
-        user_id = user_id or Everyone
-        from assembl.models import Discussion
-        discussion = context.get_instance_of_class(Discussion)
-        permissions = permissions or context.get_permissions()
         with cls.default_db.no_autoflush:
             # We need this to allow db.is_modified to work well
             return cls._do_create_from_json(
-                json, parse_def, aliases, context, permissions,
-                user_id, duplicate_handling, jsonld)
+                json, parse_def, aliases, context, duplicate_handling, jsonld)
 
     @classmethod
     def _do_create_from_json(
-            cls, json, parse_def, aliases, context, permissions,
-            user_id, duplicate_handling=None, jsonld=None):
+            cls, json, parse_def, aliases, context,
+            duplicate_handling=None, jsonld=None):
+        user_id = context.get_user_id()
+        permissions = context.get_permissions()
         duplicate_handling = \
             duplicate_handling or cls.default_duplicate_handling
         can_create = cls.user_can_cls(
@@ -1059,14 +1054,13 @@ class BaseOps(object):
         inst = cls()
         i_context = inst.get_instance_context(context)
         result = inst._do_update_from_json(
-            json, parse_def, aliases, i_context, permissions,
-            user_id, duplicate_handling, jsonld)
+            json, parse_def, aliases, i_context,
+            duplicate_handling, jsonld)
 
         # Now look for missing relationships
         result.populate_from_context(context)
         result = result.handle_duplication(
-            json, parse_def, aliases, context, permissions,
-            user_id, duplicate_handling, jsonld)
+            json, parse_def, aliases, context, duplicate_handling, jsonld)
 
         if result is inst and not can_create:
             raise HTTPUnauthorized(
@@ -1087,12 +1081,12 @@ class BaseOps(object):
         return result
 
     def update_from_json(
-                self, json, user_id=None, context=None, jsonld=None,
-                parse_def_name='default_reverse'):
+            self, json, user_id=None, context=None, jsonld=None,
+            parse_def_name='default_reverse'):
         """Update (patch) an object from its JSON representation."""
         parse_def = get_view_def(parse_def_name)
         context = context or self.get_instance_context()
-        user_id = user_id or Everyone
+        user_id = context.get_user_id()
         from assembl.models import DiscussionBoundBase, Discussion
         discussion = context.get_instance_of_class(Discussion)
         if not discussion and isinstance(self, DiscussionBoundBase):
@@ -1107,19 +1101,18 @@ class BaseOps(object):
             # We need this to allow db.is_modified to work well
             aliases = {}
             self._do_update_from_json(
-                json, parse_def, aliases, context, permissions, user_id,
-                None, jsonld)
+                json, parse_def, aliases, context, None, jsonld)
             return self.handle_duplication(
-                json, parse_def, aliases, context, permissions, user_id,
-                None, jsonld)
+                json, parse_def, aliases, context, None, jsonld)
 
 
     # TODO: Add security by attribute?
     # Some attributes may be settable only on create.
     def _do_update_from_json(
-            self, json, parse_def, aliases, context, permissions,
-            user_id, duplicate_handling=None, jsonld=None):
+            self, json, parse_def, aliases, context,
+            duplicate_handling=None, jsonld=None):
         assert isinstance(json, dict)
+        user_id = context.get_user_id()
         jsonld = jsonld or {}
         is_created = self.id is None
         typename = json.get("@type", None)
@@ -1130,12 +1123,11 @@ class BaseOps(object):
             assert new_cls
             recast = self.change_class(new_cls, json)
             recast = recast._do_update_from_json(
-                json, parse_def, aliases, context, permissions,
-                user_id, duplicate_handling, jsonld)
+                json, parse_def, aliases, context,
+                duplicate_handling, jsonld)
             recast.populate_from_context(context)
             return recast.handle_duplication(
-                json, parse_def, aliases, context, permissions, user_id,
-                duplicate_handling, jsonld)
+                json, parse_def, aliases, context, duplicate_handling, jsonld)
 
         local_view = self.expand_view_def(parse_def)
         # False means it's illegal to get this.
@@ -1302,10 +1294,9 @@ class BaseOps(object):
                         if instance is not None:
                             aliases[target_id] = instance
                     if instance is None and target_id in jsonld:
-                        instance = _create_subobject_from_json(
+                        instance = self._create_subobject_from_json(
                             jsonld[target_id], target_cls, parse_def,
-                            aliases, c_context, permissions, user_id,
-                            accessor, jsonld)
+                            aliases, c_context, accessor, jsonld)
                         aliases[target_id] = instance
                     if instance is None:
                         raise HTTPBadRequest("Could not find object "+value)
@@ -1316,8 +1307,7 @@ class BaseOps(object):
                 assert not must_be_list
                 instance = self._create_subobject_from_json(
                     value, target_cls, parse_def, aliases,
-                    c_context, permissions, user_id, accessor_name,
-                    jsonld)
+                    c_context, accessor_name, jsonld)
                 if instance is None:
                     if isinstance(accessor, property):
                         # It may not be an object after all
@@ -1336,10 +1326,9 @@ class BaseOps(object):
                             if instance is not None:
                                 aliases[subval] = instance
                         if instance is None and subval in jsonld:
-                            instance = _create_subobject_from_json(
+                            instance = self._create_subobject_from_json(
                                 jsonld[subval], target_cls, parse_def,
-                                aliases, c_context, permissions, user_id,
-                                accessor, jsonld)
+                                aliases, c_context, accessor, jsonld)
                             aliases[subval] = instance
                         if instance is None:
                             raise HTTPBadRequest(
@@ -1349,8 +1338,7 @@ class BaseOps(object):
                     elif isinstance(subval, dict):
                         instance = self._create_subobject_from_json(
                             subval, target_cls, parse_def, aliases,
-                            c_context, permissions, user_id, accessor_name,
-                            jsonld)
+                            c_context, accessor_name, jsonld)
                         if instance is None:
                             raise HTTPBadRequest("No @class in "+dumps(subval))
                     else:
@@ -1521,8 +1509,7 @@ class BaseOps(object):
 
     def handle_duplication(
                 self, json={}, parse_def={}, aliases={}, context=None,
-                permissions=[], user_id=None, duplicate_handling=None,
-                jsonld=None, form_data=None):
+                duplicate_handling=None, jsonld=None):
         """Look for duplicates of this object.
 
         Some uniqueness is handled in the database, but it is difficult to do
@@ -1570,11 +1557,11 @@ class BaseOps(object):
                         # TODO: check the CrudPermissions on subobject,
                         # UNLESS it's they're inherited (eg Langstring)
                         other = other._do_update_from_json(
-                            json, parse_def, aliases, context, permissions,
-                            user_id, duplicate_handling, jsonld)
+                            json, parse_def, aliases, context,
+                            duplicate_handling, jsonld)
                         return other.handle_duplication(
-                            json, parse_def, aliases, context, permissions,
-                            user_id, duplicate_handling, jsonld)
+                            json, parse_def, aliases, context,
+                            duplicate_handling, jsonld)
                 else:
                     raise ValueError("Invalid value of duplicate_handling")
         return self

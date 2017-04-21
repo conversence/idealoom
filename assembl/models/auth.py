@@ -981,7 +981,7 @@ class User(NamedClassMixin, AgentProfile):
                 log.error("This should not happen")
 
             def decorate_instance(
-                    self, instance, parent_instance, assocs, user_id, ctx,
+                    self, instance, parent_instance, assocs, ctx,
                     kwargs):
                 log.error("This should not happen")
 
@@ -1277,8 +1277,9 @@ class LocalUserRole(DiscussionBoundBase, PrivateObjectMixin):
         return User.uri_generic(self.user_id)
 
     def _do_update_from_json(
-            self, json, parse_def, aliases, ctx, permissions,
-            user_id, duplicate_handling=None, jsonld=None):
+            self, json, parse_def, aliases, ctx,
+            duplicate_handling=None, jsonld=None):
+        user_id = ctx.get_user_id()
         json_user_id = json.get('user', None)
         if json_user_id is None:
             json_user_id = user_id

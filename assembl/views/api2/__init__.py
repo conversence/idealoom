@@ -314,7 +314,7 @@ def collection_add_json(request, json=None):
     typename = cls.external_typename()
     check_permissions(ctx, user_id, CrudPermissions.CREATE, cls)
     try:
-        instances = ctx.create_object(typename, json, user_id)
+        instances = ctx.create_object(typename, json)
     except Exception as e:
         raise HTTPBadRequest(e)
     if instances:

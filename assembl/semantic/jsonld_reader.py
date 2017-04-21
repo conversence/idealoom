@@ -146,6 +146,7 @@ class simple_jsonld_reader(object):
                 continue
             if cls:
                 cls = get_named_class(cls)
+            # TODO: Give a context with the admin_user_id
             cls.create_from_json(
-                json, admin_user_id, aliases=handler,
+                json, aliases=handler,
                 parse_def_name='readcif.json', jsonld=by_id)

@@ -282,8 +282,8 @@ class Preferences(MutableMapping, NamedClassMixin, Base):
         return values
 
     def _do_update_from_json(
-            self, json, parse_def, aliases, context, permissions,
-            user_id, duplicate_handling=None, jsonld=None):
+            self, json, parse_def, aliases, context,
+            duplicate_handling=None, jsonld=None):
         for key, value in json.iteritems():
             if key == '@id':
                 if value != self.uri():

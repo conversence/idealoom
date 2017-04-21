@@ -552,13 +552,13 @@ class IdeaCreatingWidget(BaseIdeaWidget):
                 return query
 
             def decorate_instance(
-                    self, instance, parent_instance, assocs, user_id,
-                    ctx, kwargs):
+                    self, instance, parent_instance, assocs, ctx, kwargs):
                 from .langstrings import LangString
                 super(BaseIdeaCollection, self).decorate_instance(
-                    instance, parent_instance, assocs, user_id, ctx, kwargs)
+                    instance, parent_instance, assocs, ctx, kwargs)
                 for inst in assocs[:]:
                     if isinstance(inst, Idea):
+                        user_id = ctx.get_user_id()
                         inst.hidden = self.hide_proposed_ideas
                         post = IdeaProposalPost(
                             proposes_idea=inst, creator_id=user_id,
@@ -607,13 +607,13 @@ class IdeaCreatingWidget(BaseIdeaWidget):
                 return query
 
             def decorate_instance(
-                    self, instance, parent_instance, assocs, user_id,
-                    ctx, kwargs):
+                    self, instance, parent_instance, assocs, ctx, kwargs):
                 from .langstrings import LangString
                 super(BaseIdeaDescendantsCollectionC, self).decorate_instance(
-                    instance, parent_instance, assocs, user_id, ctx, kwargs)
+                    instance, parent_instance, assocs, ctx, kwargs)
                 for inst in assocs[:]:
                     if isinstance(inst, Idea):
+                        user_id = ctx.get_user_id()
                         inst.hidden = self.hide_proposed_ideas
                         post = IdeaProposalPost(
                             proposes_idea=inst, creator_id=user_id,
@@ -895,10 +895,9 @@ class VotingWidget(BaseIdeaWidget):
                     widget).filter(widget.id == parent_instance.id)
 
             def decorate_instance(
-                    self, instance, parent_instance, assocs, user_id, ctx,
-                    kwargs):
+                    self, instance, parent_instance, assocs, ctx, kwargs):
                 super(CriterionCollection, self).decorate_instance(
-                    instance, parent_instance, assocs, user_id, ctx, kwargs)
+                    instance, parent_instance, assocs, ctx, kwargs)
                 for inst in assocs[:]:
                     if isinstance(inst, Idea):
                         assocs.append(VotingCriterionWidgetLink(idea=inst))
@@ -926,10 +925,9 @@ class VotingWidget(BaseIdeaWidget):
                 return query
 
             def decorate_instance(
-                    self, instance, parent_instance, assocs, user_id, ctx,
-                    kwargs):
+                    self, instance, parent_instance, assocs, ctx, kwargs):
                 super(VotableCollection, self).decorate_instance(
-                    instance, parent_instance, assocs, user_id, ctx, kwargs)
+                    instance, parent_instance, assocs, ctx, kwargs)
                 for inst in assocs[:]:
                     if isinstance(inst, Idea):
                         assocs.append(VotableIdeaWidgetLink(

@@ -74,7 +74,7 @@ def votes_collection_add_json(request):
     else:
         pass  # TODO: Check subclass
     try:
-        instances = ctx.create_object(typename, json, user_id)
+        instances = ctx.create_object(typename, json)
     except Exception as e:
         raise HTTPBadRequest(e)
     if instances:

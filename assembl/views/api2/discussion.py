@@ -1034,7 +1034,7 @@ def post_discussion(request):
     else:
         user = None
     try:
-        instances = ctx.create_object(typename, json, user_id)
+        instances = ctx.create_object(typename, json)
         discussion = instances[0]
         # Hackish. Discussion API? Generic post-init method?
         discussion.preferences.name = (

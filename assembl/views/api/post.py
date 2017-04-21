@@ -543,8 +543,6 @@ def create_post(request):
     if not user_id:
         raise HTTPUnauthorized()
 
-    user = Post.default_db.query(User).filter_by(id=user_id).one()
-
     body = request_body.get('body', None)
     html = request_body.get('html', None)  # BG: Is this used now? I cannot see it.
     reply_id = request_body.get('reply_id', None)
@@ -575,14 +573,12 @@ def create_post(request):
         # how to guess locale in this case?
         body = LangString.create(html)
     elif body:
-        body = LangString.create_from_json(
-            body, context=ctx, user_id=user_id)
+        body = LangString.create_from_json(body, context=ctx)
     else:
         body = LangString.EMPTY(discussion.db)
 
     if subject:
-        subject = LangString.create_from_json(
-            subject, context=ctx, user_id=user_id)
+        subject = LangString.create_from_json(subject, context=ctx)
     else:
         # print(in_reply_to_post.subject, discussion.topic)
         if in_reply_to_post:

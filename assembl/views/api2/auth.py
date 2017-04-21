@@ -96,7 +96,7 @@ def add_local_role(request):
         else:
             raise HTTPUnauthorized()
     try:
-        instances = ctx.create_object("LocalUserRole", json, user_id)
+        instances = ctx.create_object("LocalUserRole", json)
     except HTTPClientError as e:
         raise e
     except Exception as e:
@@ -447,7 +447,7 @@ def assembl_register_user(request):
     session.autoflush = False
     try:
         now = datetime.utcnow()
-        instances = ctx.create_object("User", request.json, user_id)
+        instances = ctx.create_object("User", request.json)
         if not instances:
             raise HTTPBadRequest()
         user = instances[0]
@@ -611,7 +611,7 @@ def add_user_language_preference(request):
     typename = ctx.collection_class.external_typename()
     json = request.json_body
     try:
-        instances = ctx.create_object(typename, json, user_id)
+        instances = ctx.create_object(typename, json)
     except ObjectNotUniqueError as e:
         raise JSONError(409, str(e))
     except Exception as e:

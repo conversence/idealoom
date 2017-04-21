@@ -56,6 +56,9 @@ class BaseContext(object):
         for i in self.__parent__.get_all_instances():
             yield i
 
+    def get_user_id(self):
+        return self.get_request().authenticated_userid
+
     def context_chain(self):
         yield self
         for ctx in self.__parent__.context_chain():
@@ -187,11 +190,10 @@ class TraversalContext(BaseContext):
         to this step in the traversal path."""
         return self.__parent__.decorate_query(query, ctx, tombstones)
 
-    def decorate_instance(self, instance, assocs, user_id, ctx, kwargs):
+    def decorate_instance(self, instance, assocs, ctx, kwargs):
         """If a model instance was created in this context, add information
         relevant to this step in the traversal path, often association objects."""
-        self.__parent__.decorate_instance(
-            instance, assocs, user_id, ctx, kwargs)
+        self.__parent__.decorate_instance(instance, assocs, ctx, kwargs)
 
     def on_new_instance(self, instance):
         """If a model instance was created in this context, let the context learn about it.
@@ -233,7 +235,7 @@ class Api2Context(TraversalContext):
     def decorate_query(self, query, ctx, tombstones=False):
         return query
 
-    def decorate_instance(self, instance, assocs, user_id, ctx, kwargs):
+    def decorate_instance(self, instance, assocs, ctx, kwargs):
         pass
 
     def on_new_instance(self, instance):
@@ -324,10 +326,10 @@ class ClassContext(TraversalContext):
     def get_target_alias(self):
         return self.class_alias
 
-    def create_object(self, typename=None, json=None, user_id=None):
+    def create_object(self, typename=None, json=None):
         cls = self.get_class(typename)
         with self._class.default_db.no_autoflush:
-            return [cls.create_from_json(json, user_id, self)]
+            return [cls.create_from_json(json, self)]
 
     def __eq__(self, other):
         return (super(ClassContext, self).__eq__(other) and
@@ -561,11 +563,11 @@ class CollectionContext(TraversalContext):
         return super(CollectionContext, self).decorate_query(
             query, ctx, tombstones=False)
 
-    def decorate_instance(self, instance, assocs, user_id, ctx, kwargs):
+    def decorate_instance(self, instance, assocs, ctx, kwargs):
         self.collection.decorate_instance(
-            instance, self.parent_instance, assocs, user_id, ctx, kwargs)
+            instance, self.parent_instance, assocs, ctx, kwargs)
         super(CollectionContext, self).decorate_instance(
-            instance, assocs, user_id, ctx, kwargs)
+            instance, assocs, ctx, kwargs)
 
     def on_new_instance(self, instance):
         self.collection.on_new_instance(instance, self.parent_instance)
@@ -579,19 +581,17 @@ class CollectionContext(TraversalContext):
             permissions = new_permissions.extend(permissions)
         return permissions
 
-    def create_object(self, typename=None, json=None, user_id=None):
+    def create_object(self, typename=None, json=None):
         cls = self.get_collection_class(typename)
-        permissions = self.get_permissions()
         with self.parent_instance.db.no_autoflush:
             try:
-                inst = cls.create_from_json(
-                    json, user_id, self, permissions=permissions)
+                inst = cls.create_from_json(json, self)
             except Exception as e:
                 print_exc()
                 raise e
             assocs = [inst]
             self.on_new_instance(inst)
-            self.decorate_instance(inst, assocs, user_id, self, json)
+            self.decorate_instance(inst, assocs, self, json)
             # this should disappear
             for inst in assocs[1:]:
                 self.on_new_instance(inst)
@@ -721,7 +721,7 @@ class AbstractCollectionDefinition(object):
         pass
 
     def decorate_instance(
-            self, instance, parent_instance, assocs, user_id, ctx, kwargs):
+            self, instance, parent_instance, assocs, ctx, kwargs):
         pass
 
     def on_new_instance(

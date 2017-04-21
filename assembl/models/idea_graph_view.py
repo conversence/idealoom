@@ -317,8 +317,7 @@ class ExplicitSubGraphView(IdeaGraphView):
                 return query.join(SubGraphIdeaAssociation, owner_alias)
 
             def decorate_instance(
-                    self, instance, parent_instance, assocs, user_id,
-                    ctx, kwargs):
+                    self, instance, parent_instance, assocs, ctx, kwargs):
                 for inst in assocs[:]:
                     if isinstance(inst, Idea):
                         assocs.append(SubGraphIdeaAssociation(
@@ -344,8 +343,7 @@ class ExplicitSubGraphView(IdeaGraphView):
                 return query.join(SubGraphIdeaLinkAssociation, owner_alias)
 
             def decorate_instance(
-                    self, instance, parent_instance, assocs, user_id,
-                    ctx, kwargs):
+                    self, instance, parent_instance, assocs, ctx, kwargs):
                 if isinstance(instance, IdeaLink):
                     assocs.append(
                         SubGraphIdeaLinkAssociation(

@@ -47,7 +47,7 @@ def notif_collection_add_json(request):
         '@type', ctx.collection_class.external_typename())
     json = request.json_body
     try:
-        instances = ctx.create_object(typename, json, user_id)
+        instances = ctx.create_object(typename, json)
     except Exception as e:
         raise HTTPBadRequest(e)
     if instances:

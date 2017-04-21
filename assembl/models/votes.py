@@ -198,8 +198,7 @@ class AbstractVoteSpecification(DiscussionBoundBase):
                     )
 
             def decorate_instance(
-                    self, instance, parent_instance, assocs, user_id, ctx,
-                    kwargs):
+                    self, instance, parent_instance, assocs, ctx, kwargs):
                 for inst in assocs[:]:
                     widgets_coll = ctx.find_collection(
                         'VotingWidget.vote_specifications')

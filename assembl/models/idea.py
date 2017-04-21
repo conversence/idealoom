@@ -833,8 +833,7 @@ class Idea(HistoryMixin, DiscussionBoundBase):
                     children.tombstone_date == None)
 
             def decorate_instance(
-                    self, instance, parent_instance, assocs, user_id,
-                    ctx, kwargs):
+                    self, instance, parent_instance, assocs, ctx, kwargs):
                 if isinstance(instance, Idea):
                     assocs.append(IdeaLink(
                         source=parent_instance, target=instance))
@@ -855,8 +854,7 @@ class Idea(HistoryMixin, DiscussionBoundBase):
                 return query.join(IdeaRelatedPostLink, owner_alias)
 
             def decorate_instance(
-                    self, instance, parent_instance, assocs, user_id,
-                    ctx, kwargs):
+                    self, instance, parent_instance, assocs, ctx, kwargs):
                 from .post import WidgetPost
                 from .attachment import Document, PostAttachment
                 if isinstance(instance, Post):
@@ -912,8 +910,7 @@ class Idea(HistoryMixin, DiscussionBoundBase):
                 return query
 
             def decorate_instance(
-                    self, instance, parent_instance, assocs, user_id,
-                    ctx, kwargs):
+                    self, instance, parent_instance, assocs, ctx, kwargs):
                 # This is going to spell trouble: Sometimes we'll have creator,
                 # other times creator_id
                 if isinstance(instance, Post):

@@ -615,11 +615,10 @@ class Discussion(NamedClassMixin, DiscussionBoundBase):
                     cls, cls.sources)
 
             def decorate_instance(
-                    self, instance, parent_instance, assocs, user_id, ctx,
-                    kwargs):
+                    self, instance, parent_instance, assocs, ctx, kwargs):
 
                 super(SourcesCollection, self).decorate_instance(
-                    instance, parent_instance, assocs, user_id, ctx, kwargs)
+                    instance, parent_instance, assocs, ctx, kwargs)
 
                 from .generic import Content, ContentSourceIDs
                 from .facebook_integration import FacebookGenericSource
