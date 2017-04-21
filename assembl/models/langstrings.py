@@ -553,7 +553,7 @@ class LangStringEntry(TombstonableMixin, Base):
         return cls.mt_trans_of_id != None
 
     def change_value(self, new_value):
-        self.tombstone = datetime.utcnow()
+        self.tombstone_date = datetime.utcnow()
         new_version = self.__class__(
             langstring_id=self.langstring_id,
             locale=self.locale,
