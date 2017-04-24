@@ -18,7 +18,6 @@ from itertools import ifilter, chain
 
 from enum import Enum
 from anyjson import dumps, loads
-from colanderalchemy import SQLAlchemySchemaNode
 from sqlalchemy import (
     DateTime, MetaData, engine_from_config, event, Column, Integer,
     inspect)

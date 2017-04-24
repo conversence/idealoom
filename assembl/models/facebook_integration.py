@@ -16,14 +16,12 @@ from sqlalchemy import (
 )
 import simplejson as json
 # from dateutil.parser import parse as parse_datetime
-from dateutil.tz import tzutc
 from sqlalchemy.orm import (
     relationship,
     backref,
     deferred,
     undefer)
 from .auth import (
-    AgentProfile,
     IdentityProvider,
 )
 from .social_auth import SocialAuthAccount

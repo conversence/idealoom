@@ -6,14 +6,9 @@ from sqlalchemy import (
     UnicodeText,
     DateTime,
     String,
-    Unicode,
     ForeignKey,
-    Binary,
     LargeBinary,
-    Text,
-    or_,
     event,
-    func
 )
 from ..lib.sqla_types import CoerceUnicode
 from sqlalchemy.orm import relationship, backref

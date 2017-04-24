@@ -1,18 +1,13 @@
 """Announcements are similar to messages, but editable."""
 from sqlalchemy import (
     Column,
-    UniqueConstraint,
     Integer,
     UnicodeText,
     DateTime,
     String,
     Boolean,
     ForeignKey,
-    Binary,
-    Text,
-    or_,
     event,
-    func
 )
 from ..lib.sqla_types import CoerceUnicode
 from sqlalchemy.orm import relationship, backref
