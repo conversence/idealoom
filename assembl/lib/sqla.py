@@ -1732,45 +1732,6 @@ class Timestamped(BaseOps):
             .validator(mapping_cls=TimestampedSQLAlchemySchemaNode, **kwargs)
 
 
-class TimestampedSQLAlchemySchemaNode(SQLAlchemySchemaNode):
-    """The ColanderAlchemy schema mapper for TimestampedBase."""
-    def __init__(self, cls, excludes=None, **kwargs):
-        stamps = ['ins_date', 'mod_date']
-        if excludes is None:
-            excludes = stamps
-        elif len(excludes) > 0:
-            excludes = set(excludes) | set(stamps)
-        parent = super(TimestampedSQLAlchemySchemaNode, self)
-        parent.__init__(cls, excludes=excludes, **kwargs)
-
-
-def insert_timestamp(mapper, connection, target):
-    """Initialize timestamps on models that have these fields.
-
-    Event handler for 'before_insert'.
-
-    """
-    timestamp = datetime.utcnow()
-    if hasattr(target, 'ins_date'):
-        target.ins_date = timestamp
-    if hasattr(target, 'mod_date'):
-        target.mod_date = timestamp
-
-
-def update_timestamp(mapper, connection, target):
-    """Update the modified date on models that have this field.
-
-    Event handler for 'before_update'.
-
-    """
-    if hasattr(target, 'mod_date'):
-        target.mod_date = datetime.utcnow()
-
-
-event.listen(mapper, 'before_insert', insert_timestamp)
-event.listen(mapper, 'before_update', update_timestamp)
-
-
 def make_session_maker(zope_tr=True, autoflush=True):
     return scoped_session(sessionmaker(
         autoflush=autoflush,
