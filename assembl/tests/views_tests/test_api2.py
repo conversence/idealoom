@@ -260,7 +260,12 @@ def test_creativity_session_widget(
     # Create a new sub-idea
     new_idea_create = test_app.post_json(idea_hiding_endpoint, {
         "@type": "Idea", "short_title": "This is a brand new idea",
-        "context_url": ctx_url
+        "widget_links": [
+            {
+                "@type": "GeneratedIdeaWidgetLink",
+                "context_url": ctx_url,
+            }
+        ]
     })
     assert new_idea_create.status_code == 201
     # Get the sub-idea from the db

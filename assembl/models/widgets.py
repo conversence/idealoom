@@ -552,30 +552,6 @@ class IdeaCreatingWidget(BaseIdeaWidget):
                         gen_idea_link.widget_id == owner_alias.id))
                 return query
 
-            def decorate_instance(
-                    self, instance, parent_instance, assocs, ctx, kwargs):
-                from .langstrings import LangString
-                for inst in assocs[:]:
-                    if isinstance(inst, Idea):
-                        user_id = ctx.get_user_id()
-                        inst.hidden = self.hide_proposed_ideas
-                        post = IdeaProposalPost(
-                            proposes_idea=inst, creator_id=user_id,
-                            discussion=inst.discussion,
-                            hidden=self.hide_proposed_ideas,
-                            subject=LangString.create(inst.short_title),
-                            body=(LangString.create(instance.definition)
-                                  if instance.definition
-                                  else LangString.EMPTY(instance.db)))  # repeated
-                        assocs.append(post)
-                        assocs.append(IdeaContentWidgetLink(
-                            content=post, idea=inst,
-                            creator_id=user_id))
-                        assocs.append(GeneratedIdeaWidgetLink(
-                            idea=inst,
-                            **self.filter_kwargs(
-                                GeneratedIdeaWidgetLink, kwargs)))
-
         class BaseIdeaHidingCollection(BaseIdeaCollectionC):
             """The BaseIdeaCollection for an IdeaCreatingWidget, which will hide
             created ideas."""
@@ -605,27 +581,59 @@ class IdeaCreatingWidget(BaseIdeaWidget):
                             children_ctx.class_alias.id))
                 return query
 
-            def decorate_instance(
-                    self, instance, parent_instance, assocs, ctx, kwargs):
-                from .langstrings import LangString
-                for inst in assocs[:]:
-                    if isinstance(inst, Idea):
-                        user_id = ctx.get_user_id()
-                        inst.hidden = self.hide_proposed_ideas
-                        post = IdeaProposalPost(
-                            proposes_idea=inst, creator_id=user_id,
-                            discussion=inst.discussion,
-                            hidden=self.hide_proposed_ideas,
-                            body=LangString.EMPTY(instance.db),
-                            subject=LangString.create(inst.short_title))
-                        assocs.append(post)
-                        assocs.append(IdeaContentWidgetLink(
-                            content=post, idea=inst,
-                            creator_id=user_id))
-                        assocs.append(GeneratedIdeaWidgetLink(
-                            idea=inst,
-                            **self.filter_kwargs(
-                                GeneratedIdeaWidgetLink, kwargs)))
+        @collection_creation_side_effects.register(
+            inst_ctx=Idea, ctx='IdeaCreatingWidget.base_idea')
+        @collection_creation_side_effects.register(
+            inst_ctx=Idea, ctx='IdeaCreatingWidget.base_idea_descendants')
+        def add_proposal_post(inst_ctx, ctx):
+            from .langstrings import LangString
+            obj = inst_ctx._instance
+            yield InstanceContext(
+                inst_ctx['proposed_in_post'],
+                IdeaProposalPost(
+                    proposes_idea=obj,
+                    creator=ctx.get_instance_of_class(User),
+                    discussion=obj.discussion,
+                    subject=(obj.short_title.clone()
+                             if obj.short_title
+                             else LangString.EMPTY(obj.db)),
+                    body=(obj.definition.clone()
+                          if obj.definition
+                          else LangString.EMPTY(obj.db))))
+            yield InstanceContext(
+                inst_ctx['widget_links'],
+                GeneratedIdeaWidgetLink(
+                    idea=obj,
+                    widget=ctx.get_instance_of_class(IdeaCreatingWidget)))
+
+        @collection_creation_side_effects.register(
+            inst_ctx=IdeaProposalPost, ctx='BaseIdeaWidget.base_idea')
+        @collection_creation_side_effects.register(
+            inst_ctx=IdeaProposalPost,
+            ctx='IdeaCreatingWidget.base_idea_descendants')
+        def add_proposal_post_link(inst_ctx, ctx):
+            obj = inst_ctx._instance
+            yield InstanceContext(
+                inst_ctx['idea_links_of_content'],
+                IdeaContentWidgetLink(
+                    content=obj, idea=obj.proposes_idea,
+                    creator=obj.creator))
+
+        @collection_creation_side_effects.register(
+            inst_ctx=Idea, ctx='BaseIdeaWidget.base_idea_hiding')
+        def hide_proposal_idea(inst_ctx, ctx):
+            obj = inst_ctx._instance
+            obj.hidden = True
+            for subctx in add_proposal_post(inst_ctx, ctx):
+                yield subctx
+
+        @collection_creation_side_effects.register(
+            inst_ctx=IdeaProposalPost, ctx='BaseIdeaWidget.base_idea_hiding')
+        def hide_proposal_post(inst_ctx, ctx):
+            obj = inst_ctx._instance
+            obj.hidden = True
+            for subctx in add_proposal_post_link(inst_ctx, ctx):
+                yield subctx
 
         return (BaseIdeaCollectionC(),
                 BaseIdeaHidingCollection('base_idea_hiding'),

@@ -248,7 +248,8 @@
         "subtype": "rdf_type",
         "order": false,
         "parentId": false,
-        "parents": false
+        "parents": false,
+        "widget_links": true
     },
     "RootIdea": {
         "@extends": "Idea",
@@ -487,5 +488,11 @@
         "@extends": "Announcement",
         "idObjectAttachedTo": "idea",
         "should_propagate_down": true
+    },
+    "IdeaWidgetLink": {
+        "context_url": true
+    },
+    "GeneratedIdeaWidgetLink": {
+        "@extends": "IdeaWidgetLink"
     }
 }
