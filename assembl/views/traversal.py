@@ -794,13 +794,6 @@ class AbstractCollectionDefinition(object):
         See e.g. in :py:class:`assembl.models.widgets.IdeaCreatingWidget.BaseIdeaHidingCollection`"""
         return None
 
-    @staticmethod
-    def filter_kwargs(cls, kwargs):
-        prefix = cls.__name__ + '__'
-        return {k[len(prefix):]: v
-                for k, v in kwargs.iteritems()
-                if k.startswith(prefix)}
-
     def __repr__(self):
         return "<%s %s -(%s)-> %s>" % (
             self.__class__.__name__,
