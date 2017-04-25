@@ -1292,17 +1292,32 @@ class BaseOps(object):
             # [C] apply side-effects (sub-object creation)
             for sub_i_ctx in context.__parent__.creation_side_effects(context):
                 sub_collection_name = sub_i_ctx.__parent__.__name__
+                sub_instance = sub_i_ctx._instance
                 if sub_collection_name in remaining:
                     (value, accessor, target_cls, s_parse_def, c_context
                         ) = subobject_changes.pop(sub_i_ctx.__parent__.__name__)
-                    # TODO!!! how to check if it's the right object?
-                    # Ah, and value may be a list!
-                    i2 = sub_i_ctx._instance._do_update_from_json(
-                        value, s_parse_def, aliases, i_context,
-                        duplicate_handling, jsonld)
-                    if i2 != sub_i_ctx._instance:
-                        self._assign_subobject(i2, accessor)
-                    self.db.add(i2)
+                    if isinstance(value, list):
+                        untreated_vals = [subval for (treated, subval)
+                                          in value if not treated]
+                        if len(untreated_vals) > 1:
+                            log.error(
+                                "Multiple json values apply to side effect")
+                        elif untreated_vals:
+                            i2 = sub_instance._do_update_from_json(
+                                untreated_vals[0], s_parse_def, aliases,
+                                sub_i_ctx, duplicate_handling, jsonld)
+                            if i2 is not sub_instance:
+                                self._assign_subobject(i2, accessor)
+                            self.db.add(i2)
+                        else:
+                            self.db.add(sub_instance)
+                    else:
+                        i2 = sub_instance._do_update_from_json(
+                            value, s_parse_def, aliases, sub_i_ctx,
+                            duplicate_handling, jsonld)
+                        if i2 != sub_instance:
+                            self._assign_subobject(i2, accessor)
+                        self.db.add(i2)
 
         # create remaining subobjects from json
         for (accessor_name, (
