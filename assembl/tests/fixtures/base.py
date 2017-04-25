@@ -98,12 +98,12 @@ def test_app_no_perm(request, base_registry, db_tables):
         global_config, nosecurity=True, **get_config()))
     app.PyramidWebTestRequest = PyramidWebTestRequest
     PyramidWebTestRequest._pyramid_app = app.app
-    PyramidWebTestRequest._registry = base_registry
+    PyramidWebTestRequest.registry = base_registry
     return app
 
 
 @pytest.fixture(scope="function")
-def test_webrequest(request, test_app_no_perm):
+def test_webrequest(request, test_app_no_perm, base_registry):
     """A Pyramid request fixture with no user authorized"""
     req = PyramidWebTestRequest.blank('/', method="GET")
 
@@ -177,7 +177,7 @@ def admin_user(request, test_session, db_default_data):
 
 
 @pytest.fixture(scope="function")
-def test_adminuser_webrequest(request, admin_user, test_app_no_perm):
+def test_adminuser_webrequest(request, admin_user, test_app_no_perm, base_registry):
     """A Pyramid request fixture with an ADMIN user authorized"""
     req = PyramidWebTestRequest.blank('/', method="GET")
     req.authenticated_userid = admin_user.id

@@ -10,6 +10,7 @@ import transaction
 from sqlalchemy.sql.functions import count
 from webtest import TestRequest
 from webob.request import environ_from_url
+from pyramid.request import apply_request_extensions
 from pyramid.threadlocal import manager
 
 from assembl.lib.sqla import (
@@ -31,9 +32,33 @@ class PyramidWebTestRequest(TestRequest):
     """
     def __init__(self, *args, **kwargs):
         super(PyramidWebTestRequest, self).__init__(*args, **kwargs)
-        manager.push({'request': self, 'registry': self._registry})
+        manager.push({'request': self, 'registry': self.registry})
         self._base_pyramid_request = self._pyramid_app.request_factory(
-            environ_from_url('/'))
+            self.environ)
+        self._base_pyramid_request.registry = self.registry
+        apply_request_extensions(self)
+
+    def populate(self):
+        # This happens if the request is used through the app
+        # but sometimes we need to simulate that
+        routes_mapper = self._pyramid_app.routes_mapper
+        info = routes_mapper(self)
+        match, route = info['match'], info['route']
+        if route:
+            self.matchdict = match
+            self.matched_route = route
+
+        traverser = self._traverser()
+        self.__dict__.update(traverser(self))
+
+    @property
+    def session(self):
+        return self._base_pyramid_request.session
+
+    def _traverser(self):
+        from pyramid.traversal import ResourceTreeTraverser
+        ctx_root = self._pyramid_app.root_factory(self)
+        return ResourceTreeTraverser(ctx_root)
 
     def get_response(self, app, catch_exc_info=True):
         try:
