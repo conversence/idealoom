@@ -338,19 +338,6 @@ def set_idea_criteria(request):
     return HTTPOk()
 
 
-@view_config(context=CollectionContext, request_method='POST',
-             ctx_named_collection="Idea.children",
-             permission=P_ADD_POST, header=JSON_HEADER)
-def add_child_idea_json(request):
-    json = request.json_body
-    if 'context_url' in json:
-        json = dict(json)
-        url = json['context_url']
-        # del request.json['context_url']
-        json['GeneratedIdeaWidgetLink__context_url'] = url
-    return collection_add_json(request, json)
-
-
 @view_config(context=InstanceContext, request_method='GET',
              ctx_instance_class=VotingWidget,
              permission=P_READ, accept="application/json",

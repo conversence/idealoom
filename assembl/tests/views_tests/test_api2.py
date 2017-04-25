@@ -278,6 +278,7 @@ def test_creativity_session_widget(
     assert new_idea1.hidden
     assert new_idea1.proposed_in_post.hidden
     assert not subidea_1.hidden
+    assert new_idea1.widget_links[0].context_url == ctx_url
 
     # Get the sub-idea from the api
     new_idea1_rep = test_app.get(

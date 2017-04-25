@@ -98,8 +98,6 @@ HomeModule.controller('HomeController', [
 
           $scope.formData["@type"] = 'Idea';
           var inspirationSourceUrl = "/static/widget/card/?#/card?deck=" + $scope.deck_pseudo_url + "&card=" + $scope.displayed_cards[$scope.displayed_card_index].originalIndex;
-          // TODO maparent: this is a break of encapsulation. Handle putting that info in sub-json
-          // $scope.formData.IdeaProposalPost__metadata_raw = '{"inspiration_url": "' + inspirationSourceUrl + '"}';
           $scope.formData.proposed_in_post = {
             "@type": "IdeaProposalPost",
             metadata: {
