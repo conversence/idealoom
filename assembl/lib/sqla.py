@@ -1105,16 +1105,115 @@ class BaseOps(object):
             return self.handle_duplication(
                 json, parse_def, aliases, context, None, jsonld)
 
+    @staticmethod
+    def _json_is_known_instance(json, aliases=None):
+        aliases = aliases or {}
+        if isinstance(json, (str, unicode)):
+            instance = aliases.get(json, None)
+            if instance is None:
+                instance = get_named_object(json)
+            if instance:
+                return instance
+        assert isinstance(json, dict)
+        target_id = json.get('@id', None)
+        if target_id is not None:
+            if isinstance(target_id, (str, unicode)):
+                instance = aliases.get(target_id, None)
+                if instance is None:
+                    instance = get_named_object(target_id)
+                    if instance is not None:
+                        aliases[target_id] = instance
+                        return instance
 
-    # TODO: Add security by attribute?
-    # Some attributes may be settable only on create.
+    def _assign_subobject_list(self, instances, accessor):
+        # only known case yet is Langstring.entries
+        if isinstance(accessor, RelationshipProperty):
+            if not accessor.back_populates:
+                # Try the brutal approach
+                setattr(self, accessor.key, instances)
+            else:
+                current_instances = getattr(self, accessor.key)
+                missing = set(instances) - set(current_instances)
+                assert not missing, "what's wrong with back_populates?"
+                extra = set(current_instances) - set(instances)
+                if extra:
+                    assert len(accessor.remote_side) == 1
+                    remote = next(iter(accessor.remote_side))
+                    if remote.nullable:
+                        # TODO: check update permissions on that object.
+                        for inst in missing:
+                            setattr(inst, remote.key, None)
+                    else:
+                        for inst in extra:
+                            if not inst.user_can(
+                                    user_id, CrudPermissions.DELETE,
+                                    permissions):
+                                raise HTTPUnauthorized(
+                                    "Cannot delete object %s", inst.uri())
+                            else:
+                                self.db.delete(inst)
+        elif isinstance(accessor, property):
+            # Note: Does not happen yet.
+            property.fset(self, instances)
+        elif isinstance(accessor, Column):
+            raise HTTPBadRequest(
+                "%s cannot have multiple values" % (accessor.key, ))
+        elif isinstance(accessor, AssociationProxy):
+            # Also never happens
+            current_instances = accessor.__get__(self, self.__class__)
+            missing = set(instances) - set(current_instances)
+            extra =  set(current_instances) - set(instances)
+            for inst in missing:
+                accessor.add(inst)
+            for inst in extra:
+                accessor.remove(inst)
+        else:
+            assert False, "we should not get here"
+
+    def _assign_subobject(self, instance, accessor):
+        if isinstance(accessor, RelationshipProperty):
+            # Let it throw an exception if reln not nullable?
+            # Or would that come too late?
+            setattr(self, accessor.key, instance)
+            # Note: also set the column, because that's what is used
+            # to compute the output json.
+            local_columns = accessor.local_columns
+            # filter out Datetime field
+            if len(local_columns) > 1:
+                local_columns = [c for c in local_columns if c.foreign_keys]
+            if len(local_columns) == 1:
+                for col in local_columns:
+                    setattr(self, col.name, instance.id)
+            else:
+                raise RuntimeError("Multiple column relationship not handled yet")
+        elif isinstance(accessor, property):
+            accessor.fset(self, instance)
+        elif isinstance(accessor, Column):
+            # Seems not to happen in practice
+            if instance is None:
+                if not accessor.nullable:
+                    raise HTTPBadRequest(
+                        "%s is not nullable" % (accessor.key,))
+            else:
+                fk = next(iter(accessor.foreign_keys))
+                instance_key = getattr(instance, fk.column.key)
+                if instance_key is not None:
+                    setattr(self, accessor.key, instance_key)
+                else:
+                    # Maybe delay and flush after identity check?
+                    raise NotImplementedError()
+        elif isinstance(accessor, AssociationProxy):
+            # only for lists, I think
+            assert False, "we should not get here"
+        else:
+            assert False, "we should not get here"
+
     def _do_update_from_json(
             self, json, parse_def, aliases, context,
             duplicate_handling=None, jsonld=None):
-        assert isinstance(json, dict)
-        user_id = context.get_user_id()
-        jsonld = jsonld or {}
-        is_created = self.id is None
+        is_creating = self.id is None
+        # Note: maybe pass as argument, and distinguish case of recasting
+        # Special case of recasts
         typename = json.get("@type", None)
         if typename and typename != self.external_typename() and \
                 typename in self.retypeable_as:
@@ -1129,6 +1228,145 @@ class BaseOps(object):
             return recast.handle_duplication(
                 json, parse_def, aliases, context, duplicate_handling, jsonld)
 
+        # populate_locally (incl. links to existing objects)
+        #  identifying future sub-objects
+        subobject_changes = self._do_local_update_from_json(
+            json, parse_def, aliases, context,
+            duplicate_handling, jsonld)
+        if is_creating:
+            self.populate_from_context(context)
+        # handle duplicates
+        dup = self.handle_duplication(
+            json, parse_def, aliases, context, duplicate_handling, jsonld)
+        if dup is not self:
+            return dup
+        if is_creating:
+            # populate context with new object
+            context.on_new_instance(self)
+            # This should disappear
+            assocs = [self]
+            context.decorate_instance(self, assocs, context, json)
+            for inst in assocs[1:]:
+                self.db.add(inst)
+                context.on_new_instance(inst)
+                inst.populate_from_context(context)
+        #
+        # update existing sub-objects (may reassign)
+        remaining = {}
+        for (accessor_name, (
+                value, accessor, target_cls, s_parse_def, c_context)
+             ) in subobject_changes.iteritems():
+                if isinstance(value, list):
+                    list_remaining = []
+                    for val in value:
+                        if isinstance(val, (str, unicode)) and val in jsonld:
+                            list_remaining.append((False, val))
+                            continue
+                        inst = self._json_is_known_instance(val, aliases)
+                        if inst:
+                            i_context = inst.get_instance_context(c_context)
+                            if isinstance(val, dict):
+                                inst = inst._do_update_from_json(
+                                    val, s_parse_def, aliases, i_context,
+                                    duplicate_handling, jsonld)
+                            list_remaining.append((True, inst))
+                        else:
+                            list_remaining.append((False, val))
+                    remaining[accessor_name] = (
+                        list_remaining, accessor, target_cls, s_parse_def,
+                        c_context)
+                else:
+                    inst = self._json_is_known_instance(value, aliases)
+                    if inst:
+                        i_context = inst.get_instance_context(c_context)
+                        inst2 = inst._do_update_from_json(
+                            value, s_parse_def, aliases, i_context,
+                            duplicate_handling, jsonld)
+                        if inst2 is not inst:
+                            self._assign_subobject(inst2, accessor)
+                    else:
+                        remaining[accessor_name] = (
+                            value, accessor, target_cls, parse_def, c_context)
+        subobject_changes = remaining
+        if is_creating:
+            # [C] apply side-effects (sub-object creation)
+            for sub_i_ctx in context.__parent__.creation_side_effects(context):
+                sub_collection_name = sub_i_ctx.__parent__.__name__
+                if sub_collection_name in remaining:
+                    (value, accessor, target_cls, s_parse_def, c_context
+                        ) = subobject_changes.pop(sub_i_ctx.__parent__.__name__)
+                    # TODO!!! how to check if it's the right object?
+                    # Ah, and value may be a list!
+                    i2 = sub_i_ctx._instance._do_update_from_json(
+                        value, s_parse_def, aliases, i_context,
+                        duplicate_handling, jsonld)
+                    if i2 != sub_i_ctx._instance:
+                        self._assign_subobject(i2, accessor)
+                    self.db.add(i2)
+
+        # create remaining subobjects from json
+        for (accessor_name, (
+                value, accessor, target_cls, s_parse_def, c_context)
+             ) in subobject_changes.iteritems():
+            if isinstance(accessor, property):
+                # instance would have been treated above,
+                # this is a json thingy.
+                # Unless it's a real list? How to know?
+                self._assign_subobject(value, accessor)
+                continue
+            if isinstance(value, list):
+                instances = []
+                for (treated, subval) in value:
+                    if treated:
+                        instances.append(subval)
+                        continue
+                    if isinstance(subval, (str, unicode)):
+                        if subval in jsonld:
+                            instance_ctx = self._create_subobject_from_json(
+                                jsonld[subval], target_cls, parse_def,
+                                aliases, c_context, accessor, jsonld)
+                            if instance_ctx is None:
+                                raise HTTPBadRequest(
+                                    "Could not find object %s" % (
+                                        subval,))
+                            aliases[subval] = instance_ctx._instance
+                            instances.append(instance_ctx._instance)
+                            continue
+                        # TODO: Keys spanning multiple columns
+                    elif isinstance(subval, dict):
+                        instance_ctx = self._create_subobject_from_json(
+                            subval, target_cls, parse_def, aliases,
+                            c_context, accessor_name, jsonld)
+                        if instance_ctx is None:
+                            raise HTTPBadRequest("Could not create " + dumps(subval))
+                        instances.append(instance_ctx._instance)
+                    else:
+                        raise
+                self._assign_subobject_list(instances, accessor)
+            elif isinstance(value, dict):
+                instance_ctx = self._create_subobject_from_json(
+                    value, target_cls, parse_def, aliases,
+                    c_context, accessor_name, jsonld)
+                if not instance_ctx:
+                    raise HTTPBadRequest("Could not create " + dumps(value))
+                instance = instance_ctx._instance.handle_duplication(
+                    value, parse_def, aliases, context, duplicate_handling, jsonld)
+                self._assign_subobject(instance, accessor)
+            else:
+                raise
+        return self.handle_duplication(
+            json, parse_def, aliases, context, duplicate_handling, jsonld)
+
+
+    # TODO: Add security by attribute?
+    # Some attributes may be settable only on create.
+    def _do_local_update_from_json(
+            self, json, parse_def, aliases, context,
+            duplicate_handling=None, jsonld=None):
+        assert isinstance(json, dict)
+        user_id = context.get_user_id()
+        jsonld = jsonld or {}
+
         local_view = self.expand_view_def(parse_def)
         # False means it's illegal to get this.
         assert local_view is not False
@@ -1137,6 +1375,7 @@ class BaseOps(object):
         mapper = inspect(self.__class__)
         treated_foreign_keys = set()
         treated_relns = set()
+        subobject_changes = {}
         # Also: Pre-visit the json to associate @ids to dicts
         # because the object may not be ready in the aliases yet
         for key, value in json.iteritems():
@@ -1306,91 +1545,13 @@ class BaseOps(object):
                     instance = target_id
             elif isinstance(value, dict):
                 assert not must_be_list
-                instance_ctx = self._create_subobject_from_json(
-                    value, target_cls, parse_def, aliases,
-                    c_context, accessor_name, jsonld)
-                if instance_ctx is None:
-                    if isinstance(accessor, property):
-                        # It may not be an object after all
-                        setattr(self, key, value)
-                        continue
-                    raise RuntimeError(
-                        "Could not create a sub-object from "+str(dict))
-                instance = instance_ctx._instance
+                subobject_changes[accessor_name] = (
+                    value, accessor, target_cls, parse_def, c_context)
+                continue
             elif isinstance(value, list):
                 assert can_be_list
-                for subval in value:
-                    if isinstance(subval, (str, unicode)):
-                        instance = aliases.get(subval, None)
-                        if instance is None:
-                            instance = get_named_object(
-                                subval, target_cls.external_typename())
-                            if instance is not None:
-                                aliases[subval] = instance
-                        if instance is None and subval in jsonld:
-                            instance_ctx = self._create_subobject_from_json(
-                                jsonld[subval], target_cls, parse_def,
-                                aliases, c_context, accessor, jsonld)
-                            aliases[subval] = instance
-                            instance = instance_ctx._instance if instance_ctx else None
-                        if instance is None:
-                            raise HTTPBadRequest(
-                                "Could not find object %s" % (
-                                    subval,))
-                        # TODO: Keys spanning multiple columns
-                    elif isinstance(subval, dict):
-                        instance_ctx = self._create_subobject_from_json(
-                            subval, target_cls, parse_def, aliases,
-                            c_context, accessor_name, jsonld)
-                        if instance_ctx is None:
-                            raise HTTPBadRequest("No @class in "+dumps(subval))
-                        instance = instance_ctx._instance
-                    else:
-                        raise
-                    instances.append(instance)
-                    if isinstance(accessor, RelationshipProperty) \
-                            and accessor.back_populates is not None:
-                        # TODO: check update permissions on that object.
-                        setattr(instance, accessor.back_populates, self)
-                # Deal with list case here.
-                if isinstance(accessor, RelationshipProperty):
-                    if not accessor.back_populates:
-                        # Try the brutal approach
-                        setattr(self, accessor_name, instances)
-                    else:
-                        current_instances = getattr(self, accessor_name)
-                        missing = set(instances) - set(current_instances)
-                        assert not missing, "what's wrong with back_populates?"
-                        extra = set(current_instances) - set(instances)
-                        if extra:
-                            assert len(accessor.remote_side) == 1
-                            remote = next(iter(accessor.remote_side))
-                            if remote.nullable:
-                                # TODO: check update permissions on that object.
-                                for inst in missing:
-                                    setattr(inst, remote.key, None)
-                            else:
-                                for inst in extra:
-                                    if not inst.user_can(
-                                            user_id, CrudPermissions.DELETE,
-                                            permissions):
-                                        raise HTTPUnauthorized(
-                                            "Cannot delete object %s", inst.uri())
-                                    else:
-                                        self.db.delete(inst)
-                elif isinstance(accessor, property):
-                    setattr(self, accessor_name, instances)
-                elif isinstance(accessor, Column):
-                    raise HTTPBadRequest(
-                        "%s cannot have multiple values" % (key, ))
-                elif isinstance(accessor, AssociationProxy):
-                    current_instances = getattr(self, accessor_name)
-                    missing = set(instances) - set(current_instances)
-                    extra =  set(current_instances) - set(instances)
-                    for inst in missing:
-                        accessor.add(inst)
-                    for inst in extra:
-                        accessor.remove(inst)
+                subobject_changes[accessor_name] = (
+                    value, accessor, target_cls, parse_def, c_context)
                 continue
             elif isinstance(accessor, property):
                 # Property can be any target type.
@@ -1454,7 +1615,7 @@ class BaseOps(object):
                 assert False, "we should not get here"
             else:
                 assert False, "we should not get here"
-        return self
+        return subobject_changes
 
     def populate_from_context(self, context):
         """If object created in this context, populate some relations from that context.

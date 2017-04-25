@@ -217,7 +217,7 @@ class TraversalContext(BaseContext):
         for inst in self.__parent__.creation_side_effects_rec(inst_ctx, top_ctx):
             yield inst
 
-    def creation_side_effects(self, inst_ctx):
+    def creation_side_effects(self, inst_ctx=None):
         """Generator for objects that are created as side-effect of another
         object's creation. They can have their own side-effect.
         """
@@ -628,26 +628,13 @@ class CollectionContext(TraversalContext):
         with self.parent_instance.db.no_autoflush:
             try:
                 inst_ctx = cls.create_from_json(json, self)
-                inst = inst_ctx._instance
-                for sub_instance_ctx in self.creation_side_effects(inst_ctx):
-                    sub_instance = sub_instance_ctx._instance
-                    self.parent_instance.db.add(sub_instance)
-                    self.on_new_instance(sub_instance)
-                    sub_instance.populate_from_context(self)
-                assocs = [inst]
-                self.on_new_instance(inst)
-                # this should disappear
-                self.decorate_instance(inst, assocs, self, json)
-                for inst in assocs[1:]:
-                    self.parent_instance.db.add(inst)
-                    self.on_new_instance(inst)
-                    inst.populate_from_context(self)
+                if inst_ctx:
+                    return [inst_ctx._instance]
             except Exception as e:
                 # import pdb
                 # pdb.post_mortem()
                 print_exc()
                 raise e
-        return assocs
 
     def creation_side_effects_rec(self, inst_ctx, top_ctx):
         """Apply side-effects through multiple dispatch on the collection"""
