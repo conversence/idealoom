@@ -406,6 +406,7 @@ def assembl_register_user(request):
     localizer = request.localizer
     session = AgentProfile.default_db
     json = request.json
+
     name = json.get('real_name', '').strip()
     errors = {}
     if not name or len(name) < 3:
@@ -459,6 +460,12 @@ def assembl_register_user(request):
         for instance in instances:
             session.add(instance)
         discussion = discussion_from_request(request)
+        if discussion and not (
+                P_SELF_REGISTER in permissions or
+                P_SELF_REGISTER_REQUEST in permissions):
+            # Consider it without context
+            discussion = None
+
         if discussion:
             agent_status = AgentStatusInDiscussion(
                 agent_profile=user, discussion=discussion,
