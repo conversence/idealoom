@@ -400,12 +400,13 @@ def do_password_change(request):
     context=ClassContext, ctx_class=User, header=JSON_HEADER,
     request_method='POST', permission=NO_PERMISSION_REQUIRED)
 def assembl_register_user(request):
-    ctx = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = ctx.get_permissions()
     localizer = request.localizer
     session = AgentProfile.default_db
     json = request.json
+    discussion = discussion_from_request(request)
+    permissions = get_permissions(
+        user_id, discussion.id if discussion else None)
 
     name = json.get('real_name', '').strip()
     errors = {}
@@ -452,20 +453,23 @@ def assembl_register_user(request):
     session.autoflush = False
     try:
         now = datetime.utcnow()
-        instances = ctx.create_object("User", request.json)
-        if not instances:
-            raise HTTPBadRequest()
-        user = instances[0]
-        user.creation_date = now
-        for instance in instances:
-            session.add(instance)
-        discussion = discussion_from_request(request)
+
+        user = User(
+            name=name,
+            password=password,
+            verified=not validate_registration,
+            creation_date=now
+        )
+
+        session.add(user)
+        session.flush()
+
+        user.update_from_json(json, user_id=user.id)
         if discussion and not (
                 P_SELF_REGISTER in permissions or
                 P_SELF_REGISTER_REQUEST in permissions):
             # Consider it without context
             discussion = None
-
         if discussion:
             agent_status = AgentStatusInDiscussion(
                 agent_profile=user, discussion=discussion,
@@ -475,6 +479,8 @@ def assembl_register_user(request):
         session.flush()
         account = user.accounts[0]
         email = account.email
+        account.verified = not validate_registration
+
         if validate_registration:
             send_confirmation_email(request, account)
         else:
