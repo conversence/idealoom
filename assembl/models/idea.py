@@ -863,7 +863,6 @@ class Idea(HistoryMixin, DiscussionBoundBase):
         @collection_creation_side_effects.register(
             inst_ctx=Post, ctx='Idea.linkedposts')
         def add_related_post_link(inst_ctx, ctx):
-            # What was the filter_kwargs user for?
             post = inst_ctx._instance
             idea = ctx.parent_instance
             link = IdeaRelatedPostLink(

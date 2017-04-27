@@ -554,9 +554,10 @@ class Discussion(NamedClassMixin, DiscussionBoundBase):
     def extra_collections(cls):
         from assembl.views.traversal import (
             RelationCollectionDefinition, AbstractCollectionDefinition)
-        from .notification import NotificationSubscription
         from ..views.traversal import (
-            UserNsDictCollection, DiscussionPreferenceCollection)
+            UserNsDictCollection, DiscussionPreferenceCollection,
+            InstanceContext, collection_creation_side_effects)
+        from .facebook_integration import FacebookSinglePostSource
 
         class AllUsersCollection(AbstractCollectionDefinition):
             def __init__(self, cls):
@@ -609,50 +610,33 @@ class Discussion(NamedClassMixin, DiscussionBoundBase):
                     ActiveWidgetsCollection, self).contains(
                     parent_instance, instance)
 
-        class SourcesCollection(RelationCollectionDefinition):
-            def __init__(self, cls):
-                super(SourcesCollection, self).__init__(
-                    cls, cls.sources)
-
-            def decorate_instance(
-                    self, instance, parent_instance, assocs, ctx, kwargs):
-
-                super(SourcesCollection, self).decorate_instance(
-                    instance, parent_instance, assocs, ctx, kwargs)
-
-                from .generic import Content, ContentSourceIDs
-                from .facebook_integration import FacebookGenericSource
-
-                for inst in assocs[:]:
-                    if isinstance(inst, FacebookGenericSource):
-                        if 'is_content_sink' in kwargs:
-                            is_sink = kwargs.get('is_content_sink', None)
-                            data = kwargs.get('sink_data', None)
-                            if is_sink:
-                                if not data:
-                                    raise ValueError("User must pass sink data")
-                                post_id = data.get('post_id', None)
-                                fb_post_id = data.get('facebook_post_id', None)
-                                source = instance
-                                if not post_id:
-                                    raise ValueError(
-                                        "Could not create content because of "
-                                        "improper data input")
-                                else:
-                                    try:
-                                        post_object = Content.\
-                                            get_instance(post_id)
-                                        cs = ContentSourceIDs(source=source,
-                                            post=post_object,
-                                            message_id_in_source=fb_post_id)
-                                        assocs.append(cs)
-                                    except:
-                                        raise ValueError("Failed on content sink transaction")
+        @collection_creation_side_effects.register(
+            inst_ctx=FacebookSinglePostSource, ctx='Discussion.sources')
+        def add_facebook_source_id(inst_ctx, ctx):
+            from .generic import ContentSourceIDs
+            source = inst_ctx._instance
+            fb_post_id = source.fb_post_id
+            # I should add sink_post_id as a column, and probably
+            # a new table for that subclass. Maybe also is_sink as a
+            # Column; it _seems_ all FacebookSinglePostSource are sinks.
+            #
+            # Here is the old code, which assumes kwargs are available:
+            # is_sink = kwargs.get('is_content_sink', None)
+            # data = kwargs.get('sink_data', None)
+            # if is_sink:
+            #     post_id = data.get('post_id', None)
+            #     fb_post_id = data.get('facebook_post_id', None)
+            raise NotImplemented("TODO")
+            post_id = source.sink_post_id
+            cs = ContentSourceIDs(source=source,
+                                  post_id=post_id,
+                                  message_id_in_source=fb_post_id)
+            yield InstanceContext(
+                inst_ctx['pushed_messages'], cs)
 
         return (AllUsersCollection(cls),
                 ConnectedUsersCollection(cls),
                 ActiveWidgetsCollection(cls),
-                SourcesCollection(cls),
                 UserNsDictCollection(cls),
                 DiscussionPreferenceCollection(cls))
 
