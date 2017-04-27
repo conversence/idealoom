@@ -860,8 +860,7 @@ class Idea(HistoryMixin, DiscussionBoundBase):
                     assocs.append(
                         IdeaRelatedPostLink(
                             content=instance, idea=parent_instance,
-                            creator=instance.creator,
-                            **kwargs))
+                            creator=instance.creator))
 
             def contains(self, parent_instance, instance):
                 return instance.db.query(

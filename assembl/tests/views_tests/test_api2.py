@@ -510,22 +510,15 @@ def test_inspiration_widget(
 
     discussion.db.flush()
     assert new_widget.base_idea == subidea_1
-    return
-
-    # WEIRD virtuoso crash in the tests here,
-    # dependent on previous tests being run.
-    ancestor_widgets = test_app.get(
-        '/data/Discussion/%d/ideas/%d/ancestor_inspiration_widgets/' % (
-            discussion.id, subidea_1_1.id))
-    assert ancestor_widgets.status_code == 200
-    ancestor_widgets_rep = ancestor_widgets.json
-    assert new_widget_loc.location in ancestor_widgets_rep
+    endpoint = widget_rep.get('base_idea', {}).get(
+            'widget_add_post_endpoint', {}).get(widget_uri, None)
+    assert endpoint
+    endpoint = '/data/' + endpoint[6:]
 
     # TODO. ajouter la collection descendant_ideas.
     # Comment déduire cet URL du widget????
     r = test_app.post_json(
-        '/data/Discussion/%d/widgets/%d/base_idea_descendants/%d/linkedposts' %
-        (discussion.id, widget_id, subidea_1_1.id), {
+        endpoint, {
             "@type": "WidgetPost",
             "body": {"@type": "LangString", "entries": [{
                 "@type": "LangStringEntry", "value": "body",
@@ -534,12 +527,17 @@ def test_inspiration_widget(
             "metadata_json": {
                 "inspiration_url":
                     "https://www.youtube.com/watch?v=7E2FUSYO374"}})
-    assert r.ok
+    assert r.status_code == 201
     post_location = r.location
     post = Post.get_instance(post_location)
     assert post
     assert post.widget
     assert post.metadata_json['inspiration_url']
+    assert post.idea_links_of_content
+    content_idea_link = post.idea_links_of_content[0]
+    assert content_idea_link.idea == subidea_1
+    post.delete()
+    post.db.flush()
 
 
 def test_voting_widget(

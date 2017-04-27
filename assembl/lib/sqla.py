@@ -1637,7 +1637,6 @@ class BaseOps(object):
 
         This is the magic fallback, ideally define the relationships you want populated
         explicitly in subclasses of this."""
-
         relations = self.__class__.__mapper__.relationships
         non_nullables = []
         nullables = []

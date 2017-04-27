@@ -164,13 +164,13 @@ class AppRoot(DictContext):
         return None # I'm the holder of the user, but not the user's context
 
     def get_instance_of_class(self, cls):
-        from assembl.models import User
-        if issubclass(cls, User):
+        from assembl.models import AgentProfile
+        if issubclass(cls, AgentProfile):
             request = self.get_request()
             if request:
                 user_id = request.authenticated_userid
                 if user_id and user_id != Everyone:
-                    return User.get(user_id)
+                    return AgentProfile.get(user_id)
 
     def get_all_instances(self):
         from assembl.models import User
