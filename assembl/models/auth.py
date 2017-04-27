@@ -980,11 +980,6 @@ class User(NamedClassMixin, AgentProfile):
                     ctx):
                 log.error("This should not happen")
 
-            def decorate_instance(
-                    self, instance, parent_instance, assocs, ctx,
-                    kwargs):
-                log.error("This should not happen")
-
             def contains(self, parent_instance, instance):
                 log.error("This should not happen")
 

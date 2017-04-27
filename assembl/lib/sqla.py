@@ -1243,13 +1243,6 @@ class BaseOps(object):
         if is_creating:
             # populate context with new object
             context.on_new_instance(self)
-            # This should disappear
-            assocs = [self]
-            context.decorate_instance(self, assocs, context, json)
-            for inst in assocs[1:]:
-                self.db.add(inst)
-                context.on_new_instance(inst)
-                inst.populate_from_context(context)
         #
         # update existing sub-objects (may reassign)
         remaining = {}

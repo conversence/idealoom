@@ -207,11 +207,6 @@ class TraversalContext(BaseContext):
         to this step in the traversal path."""
         return self.__parent__.decorate_query(query, ctx, tombstones)
 
-    def decorate_instance(self, instance, assocs, ctx, kwargs):
-        """If a model instance was created in this context, add information
-        relevant to this step in the traversal path, often association objects."""
-        self.__parent__.decorate_instance(instance, assocs, ctx, kwargs)
-
     def creation_side_effects_rec(self, inst_ctx, top_ctx):
         """Recursion"""
         for inst in self.__parent__.creation_side_effects_rec(inst_ctx, top_ctx):
@@ -265,9 +260,6 @@ class Api2Context(TraversalContext):
 
     def decorate_query(self, query, ctx, tombstones=False):
         return query
-
-    def decorate_instance(self, instance, assocs, ctx, kwargs):
-        pass
 
     def on_new_instance(self, instance):
         pass
@@ -605,12 +597,6 @@ class CollectionContext(TraversalContext):
         return super(CollectionContext, self).decorate_query(
             query, ctx, tombstones=False)
 
-    def decorate_instance(self, instance, assocs, ctx, kwargs):
-        self.collection.decorate_instance(
-            instance, self.parent_instance, assocs, ctx, kwargs)
-        super(CollectionContext, self).decorate_instance(
-            instance, assocs, ctx, kwargs)
-
     def on_new_instance(self, instance):
         self.collection.on_new_instance(instance, self.parent_instance)
         super(CollectionContext, self).on_new_instance(instance)
@@ -765,10 +751,6 @@ class AbstractCollectionDefinition(object):
     @abstractmethod
     def decorate_query(
             self, query, owner_alias, coll_alias, parent_instance, ctx):
-        pass
-
-    def decorate_instance(
-            self, instance, parent_instance, assocs, ctx, kwargs):
         pass
 
     def on_new_instance(
