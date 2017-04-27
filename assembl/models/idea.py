@@ -854,14 +854,6 @@ class Idea(HistoryMixin, DiscussionBoundBase):
             def decorate_query(self, query, owner_alias, last_alias, parent_instance, ctx):
                 return query.join(IdeaRelatedPostLink, owner_alias)
 
-            def decorate_instance(
-                    self, instance, parent_instance, assocs, ctx, kwargs):
-                if isinstance(instance, Post):
-                    assocs.append(
-                        IdeaRelatedPostLink(
-                            content=instance, idea=parent_instance,
-                            creator=instance.creator))
-
             def contains(self, parent_instance, instance):
                 return instance.db.query(
                     IdeaRelatedPostLink).filter_by(
@@ -869,27 +861,41 @@ class Idea(HistoryMixin, DiscussionBoundBase):
                     ).count() > 0
 
         @collection_creation_side_effects.register(
+            inst_ctx=Post, ctx='Idea.linkedposts')
+        def add_related_post_link(inst_ctx, ctx):
+            # What was the filter_kwargs user for?
+            post = inst_ctx._instance
+            idea = ctx.parent_instance
+            link = IdeaRelatedPostLink(
+                content=post, idea=idea,
+                creator=post.creator)
+            yield InstanceContext(
+                inst_ctx['idea_links_of_content'], link)
+
+        @collection_creation_side_effects.register(
             inst_ctx=WidgetPost, ctx='Idea.linkedposts')
         def add_youtube_attachment(inst_ctx, ctx):
             from .attachment import Document, PostAttachment
-            obj = inst_ctx._instance
-            insp_url = obj.metadata_json.get('inspiration_url', '')
+            for subctx in add_related_post_link(inst_ctx, ctx):
+                yield subctx
+            post = inst_ctx._instance
+            insp_url = post.metadata_json.get('inspiration_url', '')
             if insp_url.startswith("https://www.youtube.com/"):
                 # TODO: detect all video/image inspirations.
                 # Handle duplicates in docs!
                 # Check whether we already have such an attachment?
                 doc = Document(
-                    discussion=obj.discussion,
+                    discussion=post.discussion,
                     uri_id=insp_url)
                 doc = doc.handle_duplication()
                 attachment_ctx = InstanceContext(
                     inst_ctx['attachments'],
                     PostAttachment(
-                        discussion=obj.discussion,
-                        creator=obj.creator,
+                        discussion=post.discussion,
+                        creator=post.creator,
                         document=doc,
                         attachmentPurpose='EMBED_ATTACHMENT',
-                        post=obj))
+                        post=post))
                 yield attachment_ctx
                 yield InstanceContext(
                     attachment_ctx['document'], doc)
