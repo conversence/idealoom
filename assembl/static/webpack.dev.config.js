@@ -4,6 +4,7 @@ var path = require('path'),
     _ = require('underscore'),
     ExtractTextPlugin = require("extract-text-webpack-plugin"),
     base_config = require('./webpack.config.js'),
+    webpackHost = process.env.WEBPACK_URL.split('://')[1].split(':')[0],
     webpack_port = parseInt(process.env.WEBPACK_URL.split(':')[2]);
 
 base_config.entry.main = [
@@ -21,7 +22,7 @@ module.exports = _.extend(base_config, {
         "Access-Control-Allow-Credentials":true
     },
     port: webpack_port,
-    host: "0.0.0.0",
+    host: webpackHost,
   },
   plugins: [
       new webpack.HotModuleReplacementPlugin(),
