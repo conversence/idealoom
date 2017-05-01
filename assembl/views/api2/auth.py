@@ -27,6 +27,7 @@ from assembl.auth.password import (
     verify_password_change_token, get_data_token_time, Validity)
 from assembl.auth.util import discussion_from_request
 from ..traversal import (CollectionContext, InstanceContext, ClassContext)
+from ..errors import ErrorTypes
 from .. import JSONError
 from . import (
     FORM_HEADER, JSON_HEADER, collection_view, instance_put_json,
@@ -341,15 +342,15 @@ def reset_password(request):
             email = account.email
     else:
         error = localizer(_("Please give an identifier"))
-        raise JSONError(HTTPBadRequest.code, error)
+        raise JSONError(error)
     if not email:
         email = user.get_preferred_email()
         if not email:
             error = localizer(_("This user has no email"))
-            raise JSONError(HTTPPreconditionFailed.code, error)
+            raise JSONError(error, code=HTTPPreconditionFailed.code)
     if not isinstance(user, User):
         error = localizer(_("This is not a user"))
-        raise JSONError(HTTPPreconditionFailed.code, error)
+        raise JSONError(error, code=HTTPPreconditionFailed.code)
     send_change_password_email(request, user, email, discussion=discussion)
     return HTTPOk()
 
@@ -382,9 +383,7 @@ def do_password_change(request):
         else:
             error = localizer.translate(_(
                 "This link has been used. Do you want us to send another?"))
-        raise JSONError(HTTPBadRequest.code, {
-            "error_code": validity.name,
-            "error": error})
+        raise JSONError(error, validity)
     user.password_p = password
     user.last_login = datetime.utcnow()
     headers = remember(request, user.id)
@@ -409,42 +408,43 @@ def assembl_register_user(request):
         user_id, discussion.id if discussion else None)
 
     name = json.get('real_name', '').strip()
-    errors = {}
+    errors = JSONError()
     if not name or len(name) < 3:
-        errors['name'] = localizer.translate(_(
-            "Please use a name of at least 3 characters"))
+        errors.add_error(localizer.translate(_(
+            "Please use a name of at least 3 characters")),
+            ErrorTypes.SHORT_NAME)
     password = json.get('password', '').strip()
     # TODO: Check password strength. maybe pwdmeter?
     email = None
-    error_code = None
     for account in json.get('accounts', ()):
         email = account.get('email', None)
         if not is_email(email):
-            errors['email'] = localizer.translate(_(
-                "This is not a valid email"))
-            error_code = HTTPBadRequest.code
+            errors.add_error(localizer.translate(_(
+                "This is not a valid email")),
+                ErrorTypes.INVALID_EMAIL)
             continue
         email = EmailString.normalize_email_case(email)
         # Find agent account to avoid duplicates!
         if session.query(AbstractAgentAccount).filter_by(
                 email_ci=email, verified=True).count():
-            errors['email'] = localizer.translate(_(
-                "We already have a user with this email."))
-            error_code = HTTPConflict.code
+            errors.add_error(localizer.translate(_(
+                "We already have a user with this email.")),
+                ErrorTypes.EXISTING_EMAIL,
+                HTTPConflict.code)
     if not email:
-        errors['email'] = localizer.translate(_(
-            "No email."))
-        error_code = HTTPBadRequest.code
+        errors.add_error(localizer.translate(_("No email.")),
+                         ErrorTypes.INVALID_EMAIL)
     username = json.get('username', None)
     if username:
         if session.query(User).filter_by(
                 username=username).count():
-            errors['username'] = localizer.translate(_(
-                "We already have a user with this username."))
-            error_code = HTTPConflict.code
+            errors.add_error(localizer.translate(_(
+                "We already have a user with this username.")),
+                ErrorTypes.EXISTING_USERNAME,
+                HTTPConflict.code)
 
     if errors:
-        raise JSONError(error_code, errors)
+        raise errors
 
     validate_registration = asbool(settings.get(
         'assembl.validate_registration_emails'))
@@ -513,12 +513,12 @@ def delete_abstract_agent_account(request):
     if instance.email:
         accounts_with_mail = [a for a in instance.profile.accounts if a.email]
         if len(accounts_with_mail) == 1:
-            raise JSONError(403, "This is the last account")
+            raise JSONError("This is the last account")
         if instance.verified:
             verified_accounts_with_mail = [
                 a for a in accounts_with_mail if a.verified]
             if len(verified_accounts_with_mail) == 1:
-                raise JSONError(403, "This is the last verified account")
+                raise JSONError("This is the last verified account", code=403)
     instance.db.delete(instance)
     return {}
 
@@ -630,7 +630,7 @@ def add_user_language_preference(request):
     try:
         instances = ctx.create_object(typename, json)
     except ObjectNotUniqueError as e:
-        raise JSONError(409, str(e))
+        raise JSONError(str(e), code=409)
     except Exception as e:
         raise HTTPBadRequest(e)
     if instances:
@@ -666,4 +666,4 @@ def modify_user_language_preference(request):
     except NotImplemented:
         raise HTTPNotImplemented()
     except ObjectNotUniqueError as e:
-        raise JSONError(409, str(e))
+        raise JSONError(str(e), code=409)
