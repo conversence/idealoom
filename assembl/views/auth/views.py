@@ -193,12 +193,12 @@ def logout(request):
 def login_view(request):
     if request.scheme == "http"\
             and asbool(config.get("accept_secure_connection")):
-        raise HTTPFound("https://" + request.host + request.path_qs)
+        return HTTPFound("https://" + request.host + request.path_qs)
     force_providers = request.matched_route.name.endswith('_forceproviders')
     if request.matched_route.name == 'contextual_login':
         contextual_login = get_social_autologin(request)
         if contextual_login:
-            raise HTTPFound(contextual_login)
+            return HTTPFound(contextual_login)
     return get_login_context(request, force_providers)
 
 
@@ -347,7 +347,7 @@ def assembl_register_view(request):
     if not request.params.get('email'):
         if request.scheme == "http"\
                 and asbool(config.get("accept_secure_connection")):
-            raise HTTPFound("https://" + request.host + request.path_qs)
+            return HTTPFound("https://" + request.host + request.path_qs)
         response = get_login_context(request)
         return response
     forget(request)
@@ -937,7 +937,7 @@ def do_password_change(request):
         request.session.flash(localizer.translate(_(
                 "Please choose your password for security reasons.")
                 ).format(name=user.name), 'message')
-    raise HTTPFound(location=maybe_contextual_route(
+    return HTTPFound(location=maybe_contextual_route(
             request, 'finish_password_change', _query=dict(
                 token=token, welcome=welcome)))
 
