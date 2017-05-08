@@ -165,7 +165,7 @@ def get_default_context(request, **kwargs):
     from ..auth.util import get_current_discussion
     if request.scheme == "http"\
             and asbool(config.get("require_secure_connection")):
-        return HTTPFound("https://" + request.host + request.path_qs)
+        raise HTTPFound("https://" + request.host + request.path_qs)
     socket_proxied = asbool(config.get('changes.websocket.proxied'))
     websocket_port = None if socket_proxied \
         else config.get('changes.websocket.port')
