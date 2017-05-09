@@ -338,7 +338,9 @@ def reset_password(request):
     if user_id:
         user = AgentProfile.get(int(user_id))
         if not user:
-            raise HTTPNotFound()
+            raise JSONError(
+                localizer.translate(_("The user does not exist")),
+                code=HTTPNotFound.code)
         if identifier:
             for account in user.accounts:
                 if identifier == account.email:
@@ -347,19 +349,21 @@ def reset_password(request):
     elif identifier:
         user, account = from_identifier(identifier)
         if not user:
-            raise HTTPNotFound()
+            raise JSONError(
+                localizer.translate(_("This email does not exist")),
+                code=HTTPNotFound.code)
         if account:
             email = account.email
     else:
-        error = localizer(_("Please give an identifier"))
+        error = localizer.translate(_("Please give an identifier"))
         raise JSONError(error)
     if not email:
         email = user.get_preferred_email()
         if not email:
-            error = localizer(_("This user has no email"))
+            error = localizer.translate(_("This user has no email"))
             raise JSONError(error, code=HTTPPreconditionFailed.code)
     if not isinstance(user, User):
-        error = localizer(_("This is not a user"))
+        error = localizer.translate(_("This is not a user"))
         raise JSONError(error, code=HTTPPreconditionFailed.code)
     send_change_password_email(request, user, email, discussion=discussion)
     return HTTPOk()
