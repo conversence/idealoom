@@ -101,6 +101,7 @@ def userprivate_jsonld(discussion_id):
 
 def read_user_token(request):
     salt = None
+    ctx = request.context
     user_id = authenticated_userid(request) or Everyone
     discussion_id = request.context.get_discussion_id()
     permissions = ctx.get_permissions()
