@@ -6,6 +6,7 @@ from os.path import join, dirname
 from collections import defaultdict
 from datetime import timedelta, datetime
 import isodate
+from assembl.semantic.obfuscation import AESObfuscator
 #import pprint
 
 from sqlalchemy import (
