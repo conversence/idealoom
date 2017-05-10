@@ -70,7 +70,7 @@ def base_admin_view(request):
         process_locale(locale, user, session,
                        LanguagePreferenceOrder.Parameter)
     else:
-        request.locale_name
+        locale = request.locale_name
         process_locale(locale, user, session,
                        LanguagePreferenceOrder.OS_Default)
 
