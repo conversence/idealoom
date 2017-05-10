@@ -196,7 +196,6 @@ def disabledtest_next_synthesis_idea_management(
 
 
 def test_api_register(discussion, test_app_no_perm,
-                      discussion_synth_notification,
                       test_webrequest):
     from assembl.models import AbstractAgentAccount
     test_app_no_perm.app.registry.\
@@ -260,8 +259,7 @@ def test_api_register(discussion, test_app_no_perm,
 
 
 def test_csv_subscribe(discussion, test_app_no_perm,
-                       test_app, discussion_synth_notification,
-                       test_webrequest):
+                       test_app, test_webrequest):
     from assembl.models import User, AbstractAgentAccount
     test_app_no_perm.app.registry.\
         settings['assembl.validate_registration_emails'] = 'true'
