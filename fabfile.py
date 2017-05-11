@@ -933,6 +933,7 @@ def install_single_server():
     execute(install_assembl_server_deps)
     execute(install_redis)
     execute(install_memcached)
+    execute(install_yarn)
 
 
 @task
@@ -1613,6 +1614,18 @@ def create_first_admin_user():
     assert email, "Please set the first_admin_email in the .rc environment"
     venvcmd("assembl-add-user -m %s -u admin -n Admin -p admin --bypass-password %s" % (
         email, env.ini_file))
+
+
+def install_yarn():
+    """Install yarn"""
+    if not env.mac:
+        if not exists('/etc/apt/sources.list.d/yarn.list'):
+            sudo('echo "deb https://dl.yarnpkg.com/debian/ stable main" > /etc/apt/sources.list.d/yarn.list')
+            sudo('curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -')
+            sudo('apt-get update')
+            sudo('apt-get install yarn')
+    else:
+        run('brew install yarn')
 
 
 @task
