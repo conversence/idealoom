@@ -347,7 +347,7 @@ class JoinColumnsVisitor(ClauseVisitor):
 
 def delete_discussion(session, discussion_id):
     from assembl.models import (
-        Discussion, DiscussionBoundBase, Preferences, LangStringEntry)
+        Base, Discussion, DiscussionBoundBase, Preferences, LangStringEntry)
     # delete anything related first
     classes = DiscussionBoundBase._decl_class_registry.itervalues()
     classes_by_table = defaultdict(list)
@@ -355,9 +355,19 @@ def delete_discussion(session, discussion_id):
         if isinstance(cls, type):
             classes_by_table[getattr(cls, '__table__', None)].append(cls)
     # Only direct subclass of abstract
+
+    def is_concrete_class(cls):
+        if isabstract(cls):
+            return False
+        for (i, cls) in enumerate(cls.mro()):
+            if not i:
+                continue
+            if not issubclass(cls, Base):
+                continue
+            return isabstract(cls)
+
     concrete_classes = set(filter(lambda cls:
-        issubclass(cls, DiscussionBoundBase) and (not isabstract(cls))
-        and isabstract(cls.mro()[1]),
+        issubclass(cls, DiscussionBoundBase) and is_concrete_class(cls),
         itertools.chain(*classes_by_table.values())))
     concrete_classes.add(Preferences)
     concrete_classes.add(LangStringEntry)
