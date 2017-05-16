@@ -213,14 +213,8 @@ def as_bool(b):
 
 
 def filter_autostart_processes(processes):
-    config = get_config()
-
-    def is_autostart(p):
-        try:
-            return as_bool(config.get('supervisor', 'autostart_' + p))
-        except NoOptionError:
-            return False
-    return [p for p in processes if is_autostart(p)]
+    return [p for p in processes
+            if as_bool(env.get('supervisor__autostart_' + p, False))]
 
 
 @task
@@ -1002,7 +996,7 @@ def check_and_create_database_user(host=None, user=None, password=None):
     Create a user and a DB for the project
     """
     sanitize_env()
-    host = host or env.postgres_db_host
+    host = host or env.db_host
     user = user or env.db_user
     password = password or env.db_password
     with settings(warn_only=True):
@@ -1048,12 +1042,12 @@ def database_create():
     with settings(warn_only=True):
         checkDatabase = venvcmd('assembl-pypsql -1 -u {user} -p {password} -n {host} "{command}"'.format(
             command="SELECT 1 FROM pg_database WHERE datname='%s'" % (env.db_name),
-            password=env.db_password, host=env.postgres_db_host, user=env.db_user))
+            password=env.db_password, host=env.db_host, user=env.db_user))
     if checkDatabase.failed:
         print(yellow("Cannot connect to database, trying to create"))
         createDatabase = run(
         "PGPASSWORD=%s createdb --username=%s  --host=%s --encoding=UNICODE --template=template0 --owner=%s %s" % (
-            env.db_password, env.db_user, env.postgres_db_host, env.db_user, env.db_name))
+            env.db_password, env.db_user, env.db_host, env.db_user, env.db_name))
         if createDatabase.succeeded:
             print(green("Database created successfully!"))
     else:
@@ -1077,7 +1071,7 @@ def database_dump():
     with prefix(venv_prefix()), cd(env.projectpath):
         run('PGPASSWORD=%s pg_dump --host=%s -U%s --format=custom -b %s > %s' % (
             env.db_password,
-            env.postgres_db_host,
+            env.db_host,
             env.db_user,
             env.db_name,
             absolute_path))
@@ -1127,11 +1121,11 @@ def database_delete():
     with settings(warn_only=True), hide('stdout'):
         checkDatabase = venvcmd('assembl-pypsql -1 -u {user} -p {password} -n {host} "{command}"'.format(
             command="SELECT 1 FROM pg_database WHERE datname='%s'" % (env.db_name),
-            password=env.db_password, host=env.postgres_db_host, user=env.db_user))
+            password=env.db_password, host=env.db_host, user=env.db_user))
     if not checkDatabase.failed:
         print(yellow("Cannot connect to database, trying to create"))
         deleteDatabase = run('PGPASSWORD=%s dropdb --host=%s --username=%s %s' % (
-            env.db_password, env.postgres_db_host, env.db_user, env.db_name))
+            env.db_password, env.db_host, env.db_user, env.db_name))
         if deleteDatabase.succeeded:
             print(green("Database deleted successfully!"))
     else:
@@ -1143,14 +1137,14 @@ def postgres_user_detach():
     """Terminate the PID processes owned by the assembl user"""
     process_list = run('psql -U %s -h %s -d %s -c "SELECT pid FROM pg_stat_activity where pid <> pg_backend_pid()" ' % (
                         env.db_user,
-                        env.postgres_db_host,
+                        env.db_host,
                         env.db_name))
 
     pids = process_list.split("\r\n")[2:-1:]
     for pid in pids:
         run('psql -U %s -h %s -d %s -c "SELECT pg_terminate_backend(%s);"' % (
             env.db_user,
-            env.postgres_db_host,
+            env.db_host,
             env.db_name,
             pid))
 
@@ -1174,7 +1168,7 @@ def database_restore():
     with settings(warn_only=True):
         dropped = run('PGPASSWORD=%s dropdb --host=%s --username=%s --no-password %s' % (
             env.db_password,
-            env.postgres_db_host,
+            env.db_host,
             env.db_user,
             env.db_name))
 
@@ -1189,7 +1183,7 @@ def database_restore():
         run('PGPASSWORD=%s pg_restore --no-owner --role=%s --host=%s --dbname=%s -U%s --schema=public %s' % (
                                                   env.db_password,
                                                   env.db_user,
-                                                  env.postgres_db_host,
+                                                  env.db_host,
                                                   env.db_name,
                                                   env.db_user,
                                                   remote_db_path())
@@ -1344,12 +1338,9 @@ def install_postfix():
     """Install postfx for SMTP."""
     assert not env.mac
     # take mail host from mail.host
-    config = get_config()
-    external_smtp_host = None
-    if config.has_section('app:assembl') and config.has_option('app:assembl', 'mail.host'):
-        external_smtp_host = config.get('app:assembl', 'mail.host')
-        if external_smtp_host in ('localhost', '127.0.0.1'):
-            external_smtp_host = None
+    external_smtp_host = env.smtp_host
+    if external_smtp_host in ('localhost', '127.0.0.1'):
+        external_smtp_host = None
     sudo("debconf-set-selections <<< 'postfix postfix/mailname string %s'" % (env.host_string,))
     if external_smtp_host:
         sudo("debconf-set-selections <<< 'postfix postfix/main_mailer_type string \"Internet with smarthost\"'")
@@ -1387,12 +1378,10 @@ def get_vendor_config():
 @task
 def update_vendor_themes():
     """Update optional themes in assembl/static/css/themes/vendor"""
-    sanitize_env()
-    config = get_vendor_config()
-    config_section_name = 'theme_repositories'
-    if config.has_section(config_section_name):
+    theme_varname = "theme_repositories__git-urls"
+    if env.get(theme_varname, None):
         urls = []
-        urls_string = config.get(config_section_name, 'git-urls')
+        urls_string = env.get(theme_varname)
         if urls_string:
             urls = urls_string.split(',')
         vendor_themes_path = normpath(join(
@@ -1474,18 +1463,10 @@ def commonenv(projectpath, venvpath=None):
     else:
         env.venvpath = join(projectpath, "venv")
 
-    config = get_config()
-    assert config
-
-    env.sqlalchemy_url = config.get('app:assembl', 'sqlalchemy.url')
-    env.db_user = config.get('app:assembl', 'db_user')
-    env.db_password = config.get('app:assembl', 'db_password')
-    env.db_name = config.get("app:assembl", "db_database")
-    # It is recommended you keep localhost even if you have access to
+    # TODO: If db_password is not there, fetch if from random.ini
+    env.sqlalchemy_url = "postgresql+psycopg2://%(db_user)s:%(db_password)s@%(db_host)s/%(db_database)s?sslmode=disable" % env
+    # It is recommended you keep localhost for db_host even if you have access to
     # unix domain sockets, it's more portable across different pg_hba configurations.
-    env.postgres_db_host = 'localhost'
-    if config.has_option("app:assembl", "db_host"):
-        env.postgres_db_host = config.get("app:assembl", "db_host")
 
     env.dbdumps_dir = join(projectpath, '%s_dumps' % env.projectname)
 
