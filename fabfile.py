@@ -62,11 +62,18 @@ def sanitize_env():
         # so that a variable valued "False" in the .ini
         # file is recognized as boolean False
         setattr(env, name, as_bool(getattr(env, name, False)))
-    env.host_string = env.get('public_hostname', 'localhost')
+    public_hostname = env.public_hostname
+    assert public_hostname
     if not env.get('hosts', None):
-        env.hosts = env.get('public_hostname', 'localhost')
-    if not isinstance(env.hosts, list):
-        env.hosts = getattr(env, "hosts", "").split()
+        env.hosts = [public_hostname]
+    elif not isinstance(env.hosts, list):
+        env.hosts = env.hosts.split()
+    # Note: normally, fab would set host_string from hosts.
+    # But since we use the private name _hosts, and fallback
+    # at this stage within task execution, neither env.hosts
+    # nor env.host_string are set properly. Revisit with Fabric2.
+    if not env.get('host_string', None):
+        env.host_string = env.hosts[0]
 
 
 def load_rcfile_config():
@@ -1137,7 +1144,6 @@ def database_restore():
     Restores the database backed up on the remote server
     """
     assert(env.wsginame in ('staging.wsgi', 'dev.wsgi'))
-    env.debug = True
 
     if(env.wsginame != 'dev.wsgi'):
         execute(webservers_stop)
@@ -1504,9 +1510,8 @@ def env_dev(projectpath=None):
     env.hosts = ['localhost']
     execute(commonenv, projectpath, getenv('VIRTUAL_ENV', None))
     env.wsginame = "dev.wsgi"
-    env.urlhost = "localhost"
+    env.public_hostname = "localhost"
     # env.user = "webapp"
-    # env.home = "webapp"
     require('projectname', provided_by=('commonenv',))
 
     env.uses_apache = False
@@ -1531,7 +1536,7 @@ def env_testing(projectpath=None):
     env.hosts = ['localhost']
     execute(commonenv, projectpath, getenv('VIRTUAL_ENV', None))
     env.wsginame = "dev.wsgi"
-    env.urlhost = "localhost"
+    env.public_hostname = "localhost"
     require('projectname', provided_by=('commonenv',))
     env.uses_apache = False
     env.uses_ngnix = False
