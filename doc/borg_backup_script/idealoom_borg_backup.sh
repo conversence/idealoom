@@ -9,7 +9,7 @@ echo "Do not worry if the above command fails, it is expected to fail except the
 
 cd $IDEALOOM_PATH
 #In case the virtuoso file backup fails
-fab env_dev database_dump
+fab -c configs/develop.rc database_dump
 #Make sure we back up the database dump from the last deployment:
 cp --dereference $IDEALOOM_PATH/assembl-virtuoso-backup.bp $IDEALOOM_PATH/assembl-virtuoso-backup-real.bp
 NAME="`hostname`-`basename $IDEALOOM_PATH`-`date --iso-8601='minutes'`"
