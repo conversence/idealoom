@@ -44,7 +44,7 @@ def get_roles(user_id, discussion_id=None):
 
 
 def roles_from_request(request):
-    return get_roles(request.unauthenticated_userid, request.discussion_id)
+    return get_roles(request.unauthenticated_userid, request.discussion_id())
 
 
 def get_permissions(user_id, discussion_id):
@@ -90,10 +90,12 @@ def get_permissions(user_id, discussion_id):
 
 def permissions_from_request(request):
     return get_permissions(
-        request.authenticated_userid, request.discussion_id)
+        request.authenticated_userid, request.discussion_id())
 
 
 def discussion_id_from_request(request):
+    """Obtain the discussion_id from the request,
+    possibly without fetching the discussion"""
     from assembl.views.traversal import BaseContext
     if request.matchdict:
         if 'discussion_id' in request.matchdict:
@@ -104,10 +106,24 @@ def discussion_id_from_request(request):
         discussion_id = request.context.get_discussion_id()
         if discussion_id:
             return discussion_id
-    # If using the slug, might as well populate request.discussion
+    # Note that the direct call does not populate the cache
     discussion = discussion_from_request(request)
     if discussion:
         return discussion.id
+
+
+def discussion_id_from_request_reified(request):
+    # Reify by hand, because it is called before context exists
+    # and we don't want to reify the negative result.
+    if getattr(request, "_discussion_id", -1) is not -1:
+        return request._discussion_id
+    discussion_id = discussion_id_from_request(request)
+    if discussion_id:
+        request._discussion_id = discussion_id
+        return discussion_id
+    elif getattr(request, "context", None) is not None:
+        # we have a context, we can cache the negative result
+        request._discussion_id = None
 
 
 def discussion_from_request(request):
@@ -232,7 +248,7 @@ def authentication_callback(user_id, request):
     "This is how pyramid knows the user's permissions"
     connection = User.default_db.connection()
     connection.info['userid'] = user_id
-    discussion_id = request.discussion_id
+    discussion_id = request.discussion_id()
     # this is a good time to tell raven about the user
     from raven.base import Raven
     if Raven:
@@ -560,5 +576,5 @@ def includeme(config):
     config.add_request_method(
         'assembl.auth.util.discussion_from_request', 'discussion', reify=True)
     config.add_request_method(
-        'assembl.auth.util.discussion_id_from_request',
-        'discussion_id', reify=True)
+        'assembl.auth.util.discussion_id_from_request_reified',
+        'discussion_id', reify=False)
