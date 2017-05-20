@@ -1,15 +1,19 @@
 """Utility APIs"""
 import re
 from urlparse import urlparse
+
 import requests
 from pyramid.httpexceptions import HTTPBadRequest
 from pyramid.response import Response
 from pyramid.view import view_config
+from pyramid.security import NO_PERMISSION_REQUIRED
 
 from assembl.lib import config
 from assembl.models import File
 
-@view_config(route_name='mime_type', request_method='HEAD')
+
+@view_config(route_name='mime_type', request_method='HEAD',
+             permission=NO_PERMISSION_REQUIRED)
 def mime_type(request):
     url = request.params.get('url', None)
     if not url:
