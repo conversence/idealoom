@@ -15,7 +15,7 @@ def maintenance_message(request):
     _ = TranslationStringFactory('assembl')
     localizer = request.localizer
     raise HTTPServiceUnavailable(
-        localizer.translate(_("Assembl is down for maintenance. We'll be back in a few minutes.")),
+        localizer.translate(_("IdeaLoom is down for maintenance. We'll be back in a few minutes.")),
         body_template=maintenance_template)
 
 
