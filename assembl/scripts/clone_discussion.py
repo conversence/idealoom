@@ -50,9 +50,11 @@ fn_for_classes = None
 
 user_refs = None
 
+special_extra_tests = None
+
 
 def init_key_for_classes(db):
-    global fn_for_classes, user_refs
+    global fn_for_classes, user_refs, special_extra_tests
     from assembl.models import (
         AgentProfile, User, Permission, Role, Webpage, Action, LocalUserRole,
         IdentityProvider, EmailAccount, WebLinkAccount, Preferences,
@@ -77,6 +79,9 @@ def init_key_for_classes(db):
         LocalUserRole: 'user',
         DiscussionPerUserNamespacedKeyValue: 'user',
     }
+    special_extra_tests = {
+        Preferences: lambda ob: ob.name == Preferences.BASE_PREFS_NAME
+    }
 
 
 def find_or_create_object(ob):
@@ -86,13 +91,15 @@ def find_or_create_object(ob):
 
 
 def is_special_class(ob):
-    global fn_for_classes
+    global fn_for_classes, special_extra_tests
     if ob.__class__ in fn_for_classes:
+        if ob.__class__ in special_extra_tests:
+            return special_extra_tests[ob.__class__](ob)
         return True
     if ob.__class__.__name__ == 'UserTemplate':
         return False
     assert not isinstance(ob, tuple(fn_for_classes.keys())),\
-        "Missing subclass: "+ob.__class__
+        "Missing subclass: " + ob.__class__
     return False
 
 
@@ -473,6 +480,7 @@ def clone_discussion(
                 if subob_id:
                     target_cls = r._dependency_processor.mapper.class_
                     subob = from_session.query(target_cls).get(subob_id)
+            # TODO: handle the case of an action on a tomstoned idea
             assert subob is not None
             assert subob not in in_process
             print 'recurse ^0', r.key, subob.id
@@ -498,6 +506,7 @@ def clone_discussion(
             values['next_synthesis'] = None
             values['preferences'] = None
         elif isinstance(ob, Preferences):
+            # we got here because we're not the default pref
             target_discussion = copies_of[discussion]
             values['name'] = 'discussion_' + target_discussion.slug
             values['cascade_preferences'] = ob.cascade_preferences
