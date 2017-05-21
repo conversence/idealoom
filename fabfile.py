@@ -14,6 +14,7 @@ from os.path import join, dirname, split, normpath
 # Other calls to os.path rarely mostly don't work remotely. Use locally only.
 import os.path
 from distutils.version import LooseVersion
+import re
 
 import fabric.operations
 from fabric.operations import put, get
