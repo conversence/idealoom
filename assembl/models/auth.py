@@ -1104,13 +1104,15 @@ class User(NamedClassMixin, AgentProfile):
             my_sub_types = self.db.query(NotificationSubscription.type).filter_by(
                 discussion_id=discussion_id, user_id=self.id).distinct().all()
             my_sub_types = {x for (x,) in my_sub_types}
+            discussion_kwarg = (dict(discussion_id=discussion.id)
+                if discussion.id else dict(discussion=discussion))
             return [
                 cls(
-                    discussion_id=discussion_id,
                     user_id=self.id,
                     creation_origin=NotificationCreationOrigin.DISCUSSION_DEFAULT,
                     status=(NotificationSubscriptionStatus.ACTIVE if subscribed[cls]
-                            else NotificationSubscriptionStatus.INACTIVE_DFT)
+                            else NotificationSubscriptionStatus.INACTIVE_DFT),
+                    **discussion_kwarg
                 )
                 for cls in needed_classes
                 if (include_inactive or subscribed[cls]) and
@@ -1535,8 +1537,7 @@ class UserTemplate(DiscussionBoundBase, User):
             NotificationSubscriptionStatus,
             NotificationCreationOrigin,
             NotificationSubscriptionGlobal)
-        # self.id may not be defined
-        self.db.flush()
+
         needed_classes = set(
             self.get_applicable_notification_subscriptions_classes())
         # We need to materialize missing NotificationSubscriptions,
@@ -1545,7 +1546,7 @@ class UserTemplate(DiscussionBoundBase, User):
         query = self.db.query(NotificationSubscription).filter_by(
             discussion_id=self.discussion_id, user_id=self.id)
         changed = False
-        discussion_id = self.discussion_id
+        discussion = self.discussion
         my_id = self.id
         role_name = self.for_role.name.split(':')[-1]
         # TODO: Fill from config.
@@ -1557,7 +1558,7 @@ class UserTemplate(DiscussionBoundBase, User):
             subscribed[role.strip()] = True
 
         def calculate_missing():
-            my_subscriptions = query.all()
+            my_subscriptions = query.all() if self.id else []
             by_class = defaultdict(list)
             for sub in my_subscriptions:
                 by_class[sub.__class__].append(sub)
@@ -1581,14 +1582,16 @@ class UserTemplate(DiscussionBoundBase, User):
             if my_subscriptions_classes - needed_classes:
                 log.error("Unknown subscription class: " + repr(
                     my_subscriptions_classes - needed_classes))
+            discussion_kwarg = (dict(discussion_id=discussion.id)
+                if discussion.id else dict(discussion=discussion))
             return [
                 cls(
-                    discussion_id=discussion_id,
                     user_id=my_id,
                     creation_origin=NotificationCreationOrigin.DISCUSSION_DEFAULT,
                     status=(NotificationSubscriptionStatus.ACTIVE
                             if subscribed[cls.__mapper__.polymorphic_identity.name]
-                            else NotificationSubscriptionStatus.INACTIVE_DFT))
+                            else NotificationSubscriptionStatus.INACTIVE_DFT),
+                    **discussion_kwarg)
                 for cls in missing
             ]
         if on_thread:
@@ -1598,8 +1601,9 @@ class UserTemplate(DiscussionBoundBase, User):
             for ob in calculate_missing():
                 self.db.add(ob)
                 changed = True
-        my_subscriptions = query.all()  # recalculate again...
-        return my_subscriptions, changed
+        if changed:
+            self.db.expire(self, ['notification_subscriptions'])
+        return self.notification_subscriptions, changed
 
 
 Index("user_template", "discussion_id", "role_id")

@@ -422,7 +422,7 @@ class Discussion(NamedClassMixin, DiscussionBoundBase):
 
     def __repr__(self):
         r = super(Discussion, self).__repr__()
-        return r[:-1] + self.slug + ">"
+        return r[:-1] + str(self.slug) + ">"
 
     def get_notifications(self):
         for widget in self.widgets:

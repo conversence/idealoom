@@ -955,7 +955,11 @@ class BaseOps(object):
         lock_table_cls = lock_table_cls or self.__class__
         lock_table_name = lock_table_cls.__mapper__.local_table.name
         to_be_created = object_generator()
-        if not to_be_created:
+        if to_be_created:
+            for ob in to_be_created:
+                if inspect(ob).pending:
+                    self.db.expunge(ob)
+        else:
             return False
         # Do this on another thread to minimize lock time.
         operation = TableLockCreationThread(
