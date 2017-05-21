@@ -156,58 +156,46 @@ class Discussion(NamedClassMixin, DiscussionBoundBase):
         for source in self.sources:
             # refresh after calling
             source = self.db.merge(source)
-            assert source != None
+            assert source is not None
             assert source.id
             try:
                 source.import_content(only_new=only_new)
-            except:
+            except Exception:
                 traceback.print_exc()
 
-    def __init__(self, session=None, *args, **kwargs):
-        session = session or self.default_db
-
-        # TODO: Validate slug
-        kwargs['preferences'] = preferences = Preferences(
-            name='discussion_'+kwargs.get('slug', str(id(self))),
-            cascade_preferences=Preferences.get_default_preferences(session))
-        session.add(preferences)
-        session.flush()
-
-        root_idea = kwargs.get('root_idea', None)
-        table_of_contents = kwargs.get('table_of_contents', None)
-        next_synthesis = kwargs.get('next_synthesis', None)
-        # create unless explicitly set to None
-
-        if root_idea is None:
+    def creation_side_effects(self, context):
+        if not self.root_idea:
             from .idea import RootIdea
-            kwargs['root_idea'] = RootIdea(discussion=self)
-        else:
-            root_idea.discussion = self
-        if table_of_contents is None:
+            self.root_idea = RootIdea(discussion=self)
+            yield self.root_idea.get_instance_context(
+                self.get_collection_context("root_idea", context))
+        if not self.table_of_contents:
             from .idea_graph_view import TableOfContents
-            kwargs['table_of_contents'] = TableOfContents(discussion=self)
-        else:
-            table_of_contents.discussion = self
-        if next_synthesis is None:
+            self.table_of_contents = TableOfContents(discussion=self)
+            yield self.table_of_contents.get_instance_context(
+                self.get_collection_context("table_of_contents", context))
+        if not self.preferences:
+            default_prefs = Preferences.get_default_preferences(self.db)
+            self.preferences = Preferences(name='discussion_' + self.slug,
+                                           cascade_preferences=default_prefs)
+            yield self.preferences.get_instance_context(
+                self.get_collection_context("preferences", context))
+        if not self.next_synthesis:
             from .idea_graph_view import Synthesis
-            kwargs['next_synthesis'] = Synthesis(discussion=self)
-        else:
-            next_synthesis.discussion = self
-
-        super(Discussion, self).__init__(*args, **kwargs)
-        if root_idea is None:
-            session.add(kwargs['root_idea'])
-        if table_of_contents is None:
-            session.add(kwargs['table_of_contents'])
-        if next_synthesis is None:
-            session.add(kwargs['next_synthesis'])
-
-        participant = session.query(Role).filter_by(name=R_PARTICIPANT).one()
-        participant_template = UserTemplate(
+            self.next_synthesis = Synthesis(discussion=self)
+            yield self.next_synthesis.get_instance_context(
+                self.get_collection_context("next_synthesis", context))
+        participant = self.db.query(Role).filter_by(name=R_PARTICIPANT).one()
+        ut = UserTemplate(
             discussion=self, for_role=participant)
-        # Precreate notification subscriptions
-        participant_template.get_notification_subscriptions_and_changed(False)
-        session.add(participant_template)
+        template_ctx = ut.get_instance_context(
+            self.get_collection_context("user_templates", context))
+        yield template_ctx
+        nss, _ = ut.get_notification_subscriptions_and_changed(False)
+        subs_ctx = ut.get_collection_context(
+            "notification_subscriptions", template_ctx)
+        for ns in nss:
+            yield ns.get_instance_context(subs_ctx)
 
     def unique_query(self):
         # DiscussionBoundBase is misleading here

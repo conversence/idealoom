@@ -173,6 +173,7 @@ def discussion_admin(request):
         # Could raise an exception if there is no/incorrect scheme passed
         discussion.homepage = homepage
         session.add(discussion)
+        discussion.apply_side_effects_without_json(request=request)
         discussion.invoke_callbacks_after_creation()
 
         create_default_permissions(discussion)

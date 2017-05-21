@@ -21,6 +21,7 @@ from sqlalchemy.orm.properties import ColumnProperty
 import transaction
 from sqlalchemy.sql.visitors import ClauseVisitor
 from sqlalchemy.sql.expression import and_
+from sqlalchemy import inspect
 
 from assembl.auth import SYSTEM_ROLES, ASSEMBL_PERMISSIONS
 from assembl.lib.config import set_config, get_config
@@ -54,13 +55,14 @@ def init_key_for_classes(db):
     global fn_for_classes, user_refs
     from assembl.models import (
         AgentProfile, User, Permission, Role, Webpage, Action, LocalUserRole,
-        IdentityProvider, EmailAccount, WebLinkAccount,
+        IdentityProvider, EmailAccount, WebLinkAccount, Preferences,
         NotificationSubscription, DiscussionPerUserNamespacedKeyValue)
     fn_for_classes = {
         AgentProfile: partial(find_or_create_agent_profile, db),
         User: partial(find_or_create_agent_profile, db),
         Webpage: partial(find_or_create_object_by_keys, db, ['url']),
         Permission: partial(find_or_create_object_by_keys, db, ['name']),
+        Preferences: partial(find_or_create_object_by_keys, db, ['name']),
         Role: partial(find_or_create_object_by_keys, db, ['name']),
         # SocialAuthAccount: partial(find_or_create_object_by_keys, db, ['provider_id', 'uid']),
         IdentityProvider: partial(find_or_create_object_by_keys, db, ['provider_type', 'name']),
@@ -497,8 +499,8 @@ def clone_discussion(
             values['preferences'] = None
         elif isinstance(ob, Preferences):
             target_discussion = copies_of[discussion]
-            target_discussion.preferences.pref_json = ob.pref_json
-            return target_discussion.preferences
+            values['name'] = 'discussion_' + target_discussion.slug
+            values['cascade_preferences'] = ob.cascade_preferences
         elif isinstance(ob, tuple(user_refs.keys())):
             # WHAT was I trying to do here?
             for cls in ob.__class__.mro():
@@ -517,24 +519,7 @@ def clone_discussion(
         else:
             copy = ob.__class__(**values)
         # Remove objects created by constructor side-effects
-        if isinstance(copy, Discussion):
-            # Except preferences which was flushed (check why)
-            to_session.expunge(copy.root_idea)
-            copy.root_idea = None
-            # lingering reln
-            while copy.ideas:
-                copy.ideas.pop()
-            to_session.expunge(copy.next_synthesis)
-            copy.next_synthesis = None
-            # lingering reln
-            while copy.views:
-                copy.views.pop()
-            to_session.expunge(copy.table_of_contents)
-            copy.table_of_contents = None
-            # lingering reln
-            while copy.user_templates:
-                copy.user_templates.pop()
-        elif isinstance(copy, BaseIdeaWidget):
+        if isinstance(copy, BaseIdeaWidget):
             if copy.base_idea_link:
                 to_session.expunge(copy.base_idea_link)
                 copy.base_idea_link = None

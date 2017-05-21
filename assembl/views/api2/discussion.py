@@ -33,8 +33,8 @@ import simplejson as json
 from pyramid.response import Response
 from pyramid.view import view_config
 from pyramid.httpexceptions import (
-    HTTPOk, HTTPBadRequest, HTTPUnauthorized, HTTPNotAcceptable, HTTPFound,
-    HTTPServerError, HTTPConflict)
+    HTTPOk, HTTPException, HTTPBadRequest, HTTPUnauthorized, HTTPNotAcceptable,
+    HTTPFound, HTTPServerError, HTTPConflict)
 from pyramid_dogpile_cache import get_region
 from pyramid.security import authenticated_userid, Everyone
 from pyramid.renderers import JSONP_VALID_CALLBACK
@@ -1011,9 +1011,7 @@ def post_discussion(request):
         # - adminEmail
         default_view = 'etalab'
         # Fake an APIv2 context
-        from ..traversal import Api2Context
-        ctx = Api2Context(ctx)
-        ctx = ClassContext(ctx, Discussion)
+        ctx = Discussion.get_class_context(request)
         json['topic'] = json.get('name', json.get('slug', ''))
     else:
         default_view = 'default'
@@ -1049,6 +1047,8 @@ def post_discussion(request):
         discussion.invoke_callbacks_after_creation()
     except ObjectNotUniqueError as e:
         raise HTTPConflict(e)
+    except HTTPException as e:
+        raise e
     except Exception as e:
         raise HTTPServerError(e)
     if instances:

@@ -1315,6 +1315,19 @@ class BaseOps(object):
                         if i2 != sub_instance:
                             self._assign_subobject(i2, accessor)
                         self.db.add(i2)
+                else:
+                    # Can I assume that the objects created as side effects are already
+                    # bound to their parent?
+                    collection = sub_i_ctx.__parent__.collection
+                    parent_instance = sub_i_ctx.__parent__.parent_instance
+                    attr = collection.get_attribute(parent_instance)
+                    if isinstance(attr, list):
+                        if sub_instance not in attr:
+                            collection.on_new_instance(self, sub_instance)
+                    elif attr != sub_instance:
+                        collection.on_new_instance(self, sub_instance)
+                    self.db.add(sub_instance)
+
 
         # create remaining subobjects from json
         for (accessor_name, (
@@ -1369,6 +1382,23 @@ class BaseOps(object):
         return self.handle_duplication(
             json, parse_def, aliases, context, duplicate_handling, jsonld)
 
+    def apply_side_effects_without_json(self, context=None, request=None):
+        """Apply side-effects in non-json context"""
+        if context is None:
+            context = self.get_instance_context(request=request)
+        for sub_i_ctx in context.__parent__.creation_side_effects(context):
+            sub_instance = sub_i_ctx._instance
+            # Can I assume that the objects created as side effects are already
+            # bound to their parent?
+            collection = sub_i_ctx.__parent__.collection
+            parent_instance = sub_i_ctx.__parent__.parent_instance
+            attr = collection.get_attribute(parent_instance)
+            if isinstance(attr, list):
+                if sub_instance not in attr:
+                    collection.on_new_instance(self, sub_instance)
+            elif attr != sub_instance:
+                collection.on_new_instance(self, sub_instance)
+            self.db.add(sub_instance)
 
     # TODO: Add security by attribute?
     # Some attributes may be settable only on create.
