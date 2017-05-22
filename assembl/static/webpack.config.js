@@ -80,6 +80,7 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'js/build'),
     filename: '[name].js',
+    sourceMapFilename: "[name].js.map",
     publicPath: '/js/build/',
   },
   resolve: {
