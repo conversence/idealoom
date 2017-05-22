@@ -313,6 +313,7 @@ def get_default_context(request, **kwargs):
         raven_url=config.get('raven_url') or '',
         activate_tour=str(config.get('activate_tour') or False).lower(),
         providers=providers,
+        providers_json=json.dumps(providers),
         translations=codecs.open(jedfilename, encoding='utf-8').read()
         )
 

@@ -84,6 +84,7 @@ def get_login_context(request, force_show_providers=False):
 
     return dict(get_default_context(request),
                 providers=providers,
+                providers_json=json.dumps(providers),
                 saml_providers=request.registry.settings.get(
                     'SOCIAL_AUTH_SAML_ENABLED_IDPS', {}),
                 hide_registration=hide_registration,
