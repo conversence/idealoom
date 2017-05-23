@@ -1,12 +1,13 @@
 
 _extends = base_env.rc
-_projectpath = /opt/assembl
-_venvpath = /opt/assembl/venv
-_dbdumps_dir = /opt/assembl/assembl_dumps
+_projectpath = /opt/idealoom
+_venvpath = /opt/idealoom/venv
+_dbdumps_dir = /opt/idealoom/assembl_dumps
 db_password = __delete_key__
 public_hostname = assembl.cloud
 _hosts = localhost
 _postgres_db_password = 
+_user = idealoom_user
 
 *db_host = database
 smtp_host = localhost
@@ -22,8 +23,8 @@ nginx_host = web
 uses_global_supervisor = false
 
 # Replace with your company information
-saml_country = FR
-saml_state = Hauts-de-Seine
-saml_locality = Levallois-Perret
-saml_org = Bluenove
-saml_email = assembl@bluenove.com
+saml_country = CA
+saml_state = Québec
+saml_locality = Montréal
+saml_org = Conversence
+saml_email = maparent@conversence.com
