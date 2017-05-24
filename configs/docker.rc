@@ -1,8 +1,6 @@
 
 _extends = base_env.rc
 _projectpath = /opt/idealoom
-_venvpath = /opt/idealoom/venv
-_dbdumps_dir = /opt/idealoom/assembl_dumps
 db_password = __delete_key__
 public_hostname = assembl.cloud
 _hosts = localhost
