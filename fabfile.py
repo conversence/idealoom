@@ -73,7 +73,16 @@ def sanitize_env():
     # nor env.host_string are set properly. Revisit with Fabric2.
     if not env.get('host_string', None):
         env.host_string = env.hosts[0]
-    # TODO Take elements from skeleton_env
+    #Are we on localhost
+    if set(env.hosts) - set(['localhost', '127.0.0.1']) == set():
+        #WARNING:  This code will run locally, NOT on the remote server,
+        # so it's only valid if we are connecting to localhost
+        env.mac = system().startswith('Darwin')
+    else:
+        env.mac = False
+    env.venvpath = env.get('venvpath', join(env.projectpath, 'venv'))
+    env.dbdumps_dir = env.get('dbdumps_dir', join(
+        env.projectpath, '%s_dumps' % env.projectname))
 
 
 def load_rcfile_config():
@@ -421,7 +430,7 @@ def build_virtualenv():
     Build the virtualenv
     """
     print(cyan('Creating a fresh virtualenv'))
-    require('venvpath', provided_by=('commonenv'))
+    assert env.venvpath
     import sys
     # This is incorrect, it will check locally instead fo on the remote server
     if hasattr(sys, 'real_prefix'):
@@ -557,10 +566,9 @@ def bootstrap(projectpath):
     #env.projectname = "assembl"
     assert projectpath, "projectpath is mandatory, and corresponds to the directory where assembl will be installed"
 
-    execute(skeleton_env, projectpath)
-    execute(clone_repository)
-    execute(env_dev, projectpath)
-    execute(bootstrap_from_checkout)
+    with settings(projectpath=projectpath):
+        execute(clone_repository)
+        execute(bootstrap_from_checkout)
 
 
 @task
@@ -844,7 +852,6 @@ def install_single_server():
     """
     Will install all assembl components on a single server
     """
-    execute(skeleton_env, None)
     execute(install_database)
     execute(install_assembl_server_deps)
     execute(check_and_create_database_user)
@@ -857,7 +864,6 @@ def install_assembl_server_deps():
     """
     Will install most assembl components on a single server, except db
     """
-    execute(skeleton_env, None)
     execute(install_assembl_deps)
 
 
@@ -866,7 +872,6 @@ def install_assembl_deps():
     """
     Will install commonly needed build deps for pip django virtualenvs.
     """
-    execute(skeleton_env, None)
     execute(install_basetools)
     execute(install_builddeps)
 
@@ -1528,61 +1533,6 @@ def update_vendor_themes():
                 run('git pull --ff-only')
 
 
-# # Server scenarios
-def skeleton_env(projectpath, venvpath=None):
-    """
-    Minimal environement to allow git operations, apt-get and the like
-    Everything not depending on a git checkout
-    """
-    if len(env.hosts) == 0:
-        env.hosts = ['localhost']
-    env.projectpath = getattr(env, 'projectpath', projectpath)
-    env.gitrepo = getenv("GITREPO", "https://github.com/conversence/idealoom.git")
-    env.gitbranch = getenv("GITBRANCH", "master")
-
-    #Are we on localhost
-    if set(env.hosts) - set(['localhost']) == set():
-        #WARNING:  This code will run locally, NOT on the remote server,
-        # so it's only valid if we are connecting to localhost
-        env.mac = system().startswith('Darwin')
-    else:
-        env.mac = False
-
-
-# # Server scenarios
-def commonenv(projectpath, venvpath=None):
-    """
-    Base environment
-    """
-    execute(skeleton_env, projectpath, venvpath)
-    env.projectname = "idealoom"
-    assert env.ini_file, "Define env.ini_file before calling common_env"
-    # Production env will be protected from accidental database restores
-    env.is_production_env = False
-    if venvpath:
-        env.venvpath = venvpath
-    else:
-        env.venvpath = join(projectpath, "venv")
-
-    # TODO: If db_password is not there, fetch if from random.ini
-    env.sqlalchemy_url = "postgresql+psycopg2://%(db_user)s:%(db_password)s@%(db_host)s/%(db_database)s?sslmode=disable" % env
-    # It is recommended you keep localhost for db_host even if you have access to
-    # unix domain sockets, it's more portable across different pg_hba configurations.
-
-    env.dbdumps_dir = join(projectpath, '%s_dumps' % env.projectname)
-
-
-    env.uses_memcache = True
-    env.uses_uwsgi = False
-    env.uses_apache = False
-    env.uses_ngnix = False
-    env.uses_global_supervisor = False
-    env.postgres_db_user = None
-    env.postgres_db_password = None
-
-    # Minimal dependencies versions
-
-
 def system_db_user():
     if env.postgres_db_user:
         return env.postgres_db_user
@@ -1612,64 +1562,3 @@ def build_doc():
         venvcmd('env SPHINX_APIDOC_OPTIONS="members,show-inheritance" sphinx-apidoc -e -f -o doc/autodoc assembl')
         venvcmd('python assembl/scripts/make_er_diagram.py %s -o doc/er_diagram' % (env.ini_file))
         venvcmd('sphinx-build doc assembl/static/techdocs')
-
-
-# Specific environments
-
-@task
-def devenv(projectpath=None):
-    "Alias of env_dev for backward compatibility"
-    execute(env_dev, projectpath)
-
-
-@task
-def env_dev(projectpath=None):
-    """
-    [ENVIRONMENT] Local developpement environment
-    (must be run from the project path: the one where the fabfile is)
-    """
-    if not projectpath:
-        # Legitimate os.path
-        projectpath = dirname(os.path.realpath(__file__))
-    env.host_string = 'localhost'
-    if exists(join(projectpath, 'local.ini')):
-        env.ini_file = 'local.ini'
-    else:
-        env.ini_file = 'development.ini'
-    env.pop('host_string')
-
-    env.hosts = ['localhost']
-    execute(commonenv, projectpath, getenv('VIRTUAL_ENV', None))
-    env.wsginame = "dev.wsgi"
-    env.public_hostname = "localhost"
-    # env.user = "webapp"
-    require('projectname', provided_by=('commonenv',))
-
-    env.uses_apache = False
-    env.uses_ngnix = False
-
-    env.gitbranch = getenv("GITBRANCH", "develop")
-
-
-@task
-def env_testing(projectpath=None):
-    """
-    [ENVIRONMENT] Testing on http://jenkins.coeus.ca/ or locally.
-    Testing environment, uses the testing.ini file.
-    """
-    if not projectpath:
-        # Legitimate os.path
-        projectpath = dirname(os.path.realpath(__file__))
-    env.host_string = 'localhost'
-    env.ini_file = 'testing.ini'
-    env.pop('host_string')
-
-    env.hosts = ['localhost']
-    execute(commonenv, projectpath, getenv('VIRTUAL_ENV', None))
-    env.wsginame = "dev.wsgi"
-    env.public_hostname = "localhost"
-    require('projectname', provided_by=('commonenv',))
-    env.uses_apache = False
-    env.uses_ngnix = False
-
-    env.gitbranch = getenv("GITBRANCH", "develop")
