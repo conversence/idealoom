@@ -5,10 +5,14 @@ networks:
 
 volumes:
   idealoom_static:
+  pgdata:
+  redisdata:
 
 services:
   redis:
     image: redis:3.0-alpine
+    volumes:
+      - redisdata:/data
     networks:
       - my_net
 
@@ -19,6 +23,8 @@ services:
 
   database:
     image: postgres:9.5.5-alpine
+    volumes:
+      - pgdata:/var/lib/postgresql/data
     networks:
       - my_net
 
