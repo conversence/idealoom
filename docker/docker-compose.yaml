@@ -59,6 +59,6 @@ services:
       - redis
       - memcached
       - database
-    command: sh -c 'cd /opt/idealoom; /etc/init.d/ssh start ; . venv/bin/activate ; env BUILDING_DOCKER=false fab -c /var/docker_data/idealoom1.rc docker_startup ; tail -f /dev/null'
+    command: sh -c 'cd /opt/idealoom; /etc/init.d/ssh start ; chown idealoom_user /opt/idealoom_static; . venv/bin/activate ; env BUILDING_DOCKER=false fab -c /var/docker_data/idealoom1.rc docker_startup ; tail -f /dev/null'
     networks:
       - my_net
