@@ -34,7 +34,7 @@ from pyramid_mailer.message import Message
 from celery import current_task
 from jinja2 import Environment, PackageLoader
 
-from . import Base, DiscussionBoundBase
+from . import Base, DiscussionBoundBase, OriginMixin
 from ..lib.model_watcher import IModelEventWatcher
 from ..lib.decl_enums import DeclEnum
 from ..lib.utils import waiting_get
@@ -120,7 +120,7 @@ class NotificationSubscriptionStatus(DeclEnum):
     INACTIVE_DFT = "INACTIVE_DFT", "This subscription is defined in the template, but not subscribed by default."
 
 
-class NotificationSubscription(DiscussionBoundBase):
+class NotificationSubscription(DiscussionBoundBase, OriginMixin):
     """A subscription to a specific type of notification.
 
     Subclasses will implement the actual code."""
@@ -146,10 +146,6 @@ class NotificationSubscription(DiscussionBoundBase):
                         cascade="all, delete-orphan"),
         info={'rdf': QuadMapPatternS(None, ASSEMBL.in_conversation)}
     )
-    creation_date = Column(
-        DateTime,
-        nullable = False,
-        default = datetime.utcnow)
     creation_origin = Column(
         NotificationCreationOrigin.db_type(),
         nullable = False)
@@ -185,7 +181,8 @@ class NotificationSubscription(DiscussionBoundBase):
     user = relationship(
         User,
         backref=backref(
-            'notification_subscriptions', order_by=creation_date,
+            'notification_subscriptions',
+            order_by="NotificationSubscription.creation_date",
             cascade="all, delete-orphan")
     )
 

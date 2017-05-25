@@ -18,7 +18,7 @@ from sqlalchemy import (
 from rdflib import URIRef
 from virtuoso.vmapping import PatternIriClass
 
-from . import DiscussionBoundBase
+from . import DiscussionBoundBase, OriginMixin
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..lib.sqla import (CrudOperation, get_model_watcher)
 from ..lib.utils import get_global_base_url
@@ -35,7 +35,7 @@ from ..semantic.namespaces import (
     CATALYST, ASSEMBL, DCTERMS, OA, QUADNAMES, RDF, SIOC)
 
 
-class IdeaContentLink(DiscussionBoundBase):
+class IdeaContentLink(DiscussionBoundBase, OriginMixin):
     """
     Abstract class representing a generic link between an idea and a Content
     (typically a Post)
@@ -61,9 +61,6 @@ class IdeaContentLink(DiscussionBoundBase):
         'idea_links_of_content', cascade="all, delete-orphan"))
 
     order = Column(Float, nullable=False, default=0.0)
-
-    creation_date = Column(DateTime, nullable=False, default=datetime.utcnow,
-        info={'rdf': QuadMapPatternS(None, DCTERMS.created)})
 
     creator_id = Column(
         Integer,

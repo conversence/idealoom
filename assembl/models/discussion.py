@@ -32,7 +32,7 @@ from ..lib.sqla_types import URLString, CoerceUnicode
 from ..lib.sqla import CrudOperation
 from ..lib.locale import strip_country
 from ..lib.discussion_creation import IDiscussionCreationCallback
-from . import DiscussionBoundBase, NamedClassMixin
+from . import DiscussionBoundBase, NamedClassMixin, OriginMixin
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..auth import (
     P_READ, R_SYSADMIN, P_ADMIN_DISC, R_PARTICIPANT, P_SYSADMIN,
@@ -48,7 +48,7 @@ import logging
 log = logging.getLogger(__name__)
 
 
-class Discussion(NamedClassMixin, DiscussionBoundBase):
+class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
     """
     The context for a specific Assembl discussion.
 
@@ -65,9 +65,6 @@ class Discussion(NamedClassMixin, DiscussionBoundBase):
                    info={'rdf': QuadMapPatternS(None, DCTERMS.title)})
 
     slug = Column(CoerceUnicode, nullable=False, unique=True, index=True)
-
-    creation_date = Column(DateTime, nullable=False, default=datetime.utcnow,
-                           info={'rdf': QuadMapPatternS(None, DCTERMS.created)})
     objectives = Column(UnicodeText)
     instigator = Column(UnicodeText)
     introduction = Column(UnicodeText)

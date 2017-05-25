@@ -18,7 +18,7 @@ from ..lib.sqla import DuplicateHandling
 from ..lib.sqla_types import URLString
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..semantic.namespaces import DCTERMS
-from . import DiscussionBoundBase
+from . import DiscussionBoundBase, OriginMixin
 from .post import Post
 from .idea import Idea
 from .auth import (
@@ -26,7 +26,7 @@ from .auth import (
     P_EDIT_POST, P_ADD_IDEA, P_EDIT_IDEA)
 
 
-class Document(DiscussionBoundBase):
+class Document(DiscussionBoundBase, OriginMixin):
     """
     Represents a Document or file, local to the database or (more typically)
     a remote document
@@ -44,9 +44,6 @@ class Document(DiscussionBoundBase):
     __table_args__ = (UniqueConstraint('discussion_id', 'uri_id'), )
 
     uri_id = Column(URLString)
-    creation_date = Column(DateTime, nullable=False, default=datetime.utcnow,
-                           info={'rdf': QuadMapPatternS(None,
-                                                        DCTERMS.created)})
     discussion_id = Column(Integer, ForeignKey(
         'discussion.id',
         ondelete='CASCADE',
@@ -167,7 +164,7 @@ class File(Document):
                'documents', self.id, 'data')
 
 
-class Attachment(DiscussionBoundBase):
+class Attachment(DiscussionBoundBase, OriginMixin):
     """
     Represents a Document or file, local to the database or (more typically)
     a remote document
@@ -177,9 +174,7 @@ class Attachment(DiscussionBoundBase):
         Integer, primary_key=True)
 
     type = Column(String(60), nullable=False)
-    creation_date = Column(DateTime, nullable=False, default=datetime.utcnow,
-                           info={'rdf': QuadMapPatternS(None,
-                                                        DCTERMS.created)})
+
     discussion_id = Column(Integer, ForeignKey(
         'discussion.id',
         ondelete='CASCADE',

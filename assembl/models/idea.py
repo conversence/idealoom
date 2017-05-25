@@ -35,7 +35,7 @@ from virtuoso.vmapping import IriClass, PatternIriClass
 
 from ..lib.utils import get_global_base_url
 from ..nlp.wordcounter import WordCounter
-from . import DiscussionBoundBase, HistoryMixin
+from . import DiscussionBoundBase, HistoryMixin, HistoryMixinWithOrigin
 from .discussion import Discussion
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..auth import (
@@ -140,7 +140,7 @@ class WordCountVisitor(IdeaVisitor):
         return self.counter.best(num)
 
 
-class Idea(HistoryMixin, DiscussionBoundBase):
+class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
     """
     An idea (or concept) distilled from the conversation flux.
     """
@@ -164,10 +164,6 @@ class Idea(HistoryMixin, DiscussionBoundBase):
     # TODO: Make this autoupdate on change. see
     # http://stackoverflow.com/questions/1035980/update-timestamp-when-row-is-updated-in-postgresql
 
-    creation_date = Column(
-        DateTime, nullable=False, default=datetime.utcnow,
-        info={'rdf': QuadMapPatternS(None, DCTERMS.created)})
-
     discussion_id = Column(Integer, ForeignKey(
         'discussion.id',
         ondelete='CASCADE',
@@ -179,7 +175,7 @@ class Idea(HistoryMixin, DiscussionBoundBase):
     discussion = relationship(
         Discussion,
         backref=backref(
-            'ideas', order_by=creation_date,
+            'ideas', order_by="Idea.creation_date",
             primaryjoin="and_(Idea.discussion_id==Discussion.id, "
                         "Idea.tombstone_date == None)"),
         info={'rdf': QuadMapPatternS(None, ASSEMBL.in_conversation)}
@@ -188,7 +184,7 @@ class Idea(HistoryMixin, DiscussionBoundBase):
     discussion_ts = relationship(
         Discussion,
         backref=backref(
-            'ideas_ts', order_by=creation_date,
+            'ideas_ts', order_by="Idea.creation_date",
             cascade="all, delete-orphan")
     )
 

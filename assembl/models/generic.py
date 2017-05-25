@@ -27,7 +27,7 @@ from bs4 import BeautifulSoup
 
 from ..lib.sqla import (CrudOperation, get_model_watcher, Base)
 from ..lib.utils import get_global_base_url
-from . import DiscussionBoundBase
+from . import DiscussionBoundBase, OriginMixin
 from .langstrings import (LangString, LangStringEntry)
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..auth import (
@@ -35,13 +35,13 @@ from ..auth import (
 from ..semantic.namespaces import (
     SIOC, CATALYST, ASSEMBL, DCTERMS, QUADNAMES, FOAF)
 from .discussion import Discussion
-from ..lib.history_mixin import TombstonableMixin
+from ..lib.history_mixin import TombstonableOriginMixin
 
 
 log = logging.getLogger(__name__)
 
 
-class ContentSource(DiscussionBoundBase):
+class ContentSource(DiscussionBoundBase, OriginMixin):
     """
     A ContentSource is where any outside content comes from. .
     """
@@ -52,9 +52,6 @@ class ContentSource(DiscussionBoundBase):
                 info={'rdf': QuadMapPatternS(None, ASSEMBL.db_id)})
     name = Column(UnicodeText, nullable=False)
     type = Column(String(60), nullable=False)
-
-    creation_date = Column(DateTime, nullable=False, default=datetime.utcnow,
-        info={'rdf': QuadMapPatternS(None, DCTERMS.created)})
 
     discussion_id = Column(Integer, ForeignKey(
         'discussion.id',
@@ -79,7 +76,7 @@ class ContentSource(DiscussionBoundBase):
     discussion = relationship(
         "Discussion",
         backref=backref(
-            'sources', order_by=creation_date,
+            'sources', order_by="ContentSource.creation_date",
             cascade="all, delete-orphan"),
         info={'rdf': QuadMapPatternS(None, ASSEMBL.in_conversation)})
 
@@ -253,7 +250,7 @@ class ContentSourceIDs(Base):
     message_id_in_source = Column(String(256), nullable=False, index=True)
 
 
-class Content(TombstonableMixin, DiscussionBoundBase):
+class Content(TombstonableOriginMixin, DiscussionBoundBase):
     """
     Content is a polymorphic class to describe what is imported from a Source.
     The body and subject properly belong to the Post but were moved here to
@@ -267,8 +264,6 @@ class Content(TombstonableMixin, DiscussionBoundBase):
     id = Column(Integer, primary_key=True,
                 info={'rdf': QuadMapPatternS(None, ASSEMBL.db_id)})
     type = Column(String(60), nullable=False)
-    creation_date = Column(DateTime, nullable=False, default=datetime.utcnow,
-        info={'rdf': QuadMapPatternS(None, DCTERMS.created)})
 
     discussion_id = Column(Integer, ForeignKey(
         'discussion.id',
@@ -280,7 +275,7 @@ class Content(TombstonableMixin, DiscussionBoundBase):
     discussion = relationship(
         "Discussion",
         backref=backref(
-            'posts', order_by=creation_date,
+            'posts', order_by="Content.creation_date",
             cascade="all, delete-orphan"),
         info={'rdf': QuadMapPatternS(None, ASSEMBL.in_conversation)}
     )

@@ -19,7 +19,7 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import join
 import lxml.html as htmlt
 
-from . import DiscussionBoundBase
+from . import DiscussionBoundBase, OriginMixin
 from .discussion import Discussion
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..auth import (
@@ -36,7 +36,7 @@ class defaultdictlist(defaultdict):
         super(defaultdictlist, self).__init__(list)
 
 
-class IdeaGraphView(DiscussionBoundBase):
+class IdeaGraphView(DiscussionBoundBase, OriginMixin):
     """
     A view on the graph of idea.
     """

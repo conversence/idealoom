@@ -21,7 +21,9 @@ from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import relationship, backref, column_property
 from virtuoso.vmapping import IriClass
 
-from . import DiscussionBoundBase, DiscussionBoundTombstone, TombstonableMixin, Post
+from . import (
+    DiscussionBoundBase, DiscussionBoundTombstone, TombstonableMixin,
+    OriginMixin, Post)
 from ..semantic.namespaces import (
     ASSEMBL, QUADNAMES, VERSION, RDF, VirtRDF)
 from ..semantic.virtuoso_mapping import QuadMapPatternS
@@ -32,7 +34,7 @@ from .idea import Idea
 from ..auth import P_READ, P_SYSADMIN, CrudPermissions
 
 
-class Action(TombstonableMixin, DiscussionBoundBase):
+class Action(TombstonableMixin, OriginMixin, DiscussionBoundBase):
     """
     An action that can be taken by an actor (a :py:class:`.auth.User`).
 
@@ -43,8 +45,6 @@ class Action(TombstonableMixin, DiscussionBoundBase):
 
     id = Column(Integer, primary_key=True)
     type = Column(String(255), nullable=False)
-    creation_date = Column(DateTime, nullable=False, default=datetime.utcnow,
-        info={'rdf': QuadMapPatternS(None, VERSION.when)})
 
     __mapper_args__ = {
         'polymorphic_identity': 'action',
@@ -62,7 +62,8 @@ class Action(TombstonableMixin, DiscussionBoundBase):
 
     actor = relationship(
         User,
-        backref=backref('actions', order_by=creation_date, cascade="all, delete-orphan")
+        backref=backref('actions', order_by="Action.creation_date",
+                        cascade="all, delete-orphan")
     )
 
     verb = 'did something to'
@@ -95,7 +96,7 @@ class Action(TombstonableMixin, DiscussionBoundBase):
             self.get_discussion_id(), self.actor_id)
 
     def get_default_parent_context(self, request=None):
-        return self.user.get_collection_context('actions', request=request)
+        return self.actor.get_collection_context('actions', request=request)
 
     @classmethod
     def restrict_to_owners(cls, q, user_id):
@@ -103,6 +104,9 @@ class Action(TombstonableMixin, DiscussionBoundBase):
 
     crud_permissions = CrudPermissions(
         P_READ, P_SYSADMIN, P_SYSADMIN, P_SYSADMIN, P_READ, P_READ, P_READ)
+
+
+Action.creation_date.info['rdf'] = QuadMapPatternS(None, VERSION.when)
 
 
 class ActionOnPost(Action):

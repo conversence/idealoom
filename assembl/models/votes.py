@@ -13,7 +13,7 @@ from sqlalchemy.sql import functions
 from sqlalchemy.orm import (relationship, backref, joinedload, aliased)
 from pyramid.settings import asbool
 
-from . import (Base, DiscussionBoundBase, HistoryMixin)
+from . import (Base, DiscussionBoundBase, HistoryMixinWithOrigin)
 from ..lib.abc import abstractclassmethod
 from ..lib.sqla import DuplicateHandling
 from ..lib.sqla_types import URLString
@@ -676,7 +676,7 @@ class MultipleChoiceVoteSpecification(AbstractVoteSpecification):
         return 0 <= vote.vote_value < self.num_choices
 
 
-class AbstractIdeaVote(HistoryMixin, DiscussionBoundBase):
+class AbstractIdeaVote(HistoryMixinWithOrigin, DiscussionBoundBase):
     __tablename__ = "idea_vote"
 
     type = Column(String(60), nullable=False)
@@ -753,9 +753,6 @@ class AbstractIdeaVote(HistoryMixin, DiscussionBoundBase):
             primaryjoin="and_(Idea.id == AbstractIdeaVote.criterion_id,"
                              "AbstractIdeaVote.tombstone_date == None)",
             ))
-
-    creation_date = Column('vote_date', DateTime, default=datetime.utcnow,
-                       info={'rdf': QuadMapPatternS(None, DCTERMS.created)})
 
     voter_id = Column(
         Integer,

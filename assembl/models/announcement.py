@@ -16,13 +16,14 @@ from datetime import datetime
 from ..lib.sqla_types import URLString
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..semantic.namespaces import DCTERMS
-from . import DiscussionBoundBase
+from . import DiscussionBoundBase, OriginMixin
 from .idea import Idea
 from .auth import (
     AgentProfile, CrudPermissions, P_READ, P_ADMIN_DISC, P_ADD_POST,
     P_EDIT_POST, P_ADD_IDEA, P_EDIT_IDEA)
 
-class Announcement(DiscussionBoundBase):
+
+class Announcement(DiscussionBoundBase, OriginMixin):
     """
     Represents an announcement.  Similar to a message, but editable, meant to be displayed on top of the messagelist for an idea.
     """
@@ -46,10 +47,6 @@ class Announcement(DiscussionBoundBase):
             'announcements',
             cascade="all, delete-orphan"),
     )
-
-    creation_date = Column(DateTime, nullable=False, default=datetime.utcnow,
-                           info={'rdf': QuadMapPatternS(None,
-                                                        DCTERMS.created)})
 
     modification_date = Column(DateTime, nullable=False, default=datetime.utcnow)
 

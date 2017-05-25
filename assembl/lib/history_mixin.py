@@ -3,14 +3,14 @@ from datetime import datetime
 
 from sqlalchemy import (
     Column, DateTime, Integer, UniqueConstraint, event, Table, ForeignKey,
-    Sequence, Index)
+    Sequence, Index, asc)
 from sqlalchemy.ext.declarative import declared_attr
-from sqlalchemy.sql.expression import join
-from sqlalchemy.orm import relationship
+from sqlalchemy.sql.expression import join, nullslast
+from sqlalchemy.orm import relationship, Query
 
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..semantic.namespaces import ASSEMBL
-from . import config
+from ..semantic.namespaces import DCTERMS
 
 
 class TombstonableMixin(object):
@@ -199,6 +199,25 @@ class HistoryMixin(TombstonableMixin):
             ).order_by(cls.tombstone_date.desc().nullsfirst()
             ).first()
 
+    @classmethod
+    def version_at_time_q(cls, base_id, timestamp, db=None):
+        db = db or cls.default_db
+        # Version that can be used without first
+        # return db.query(cls).distinct(cls.base_id).filter(
+        #     cls.base_id == self.base_id,
+        #     (cls.tombstone_date == None) || (cls.tombstone_date > timestamp)
+        #     ).order_by(cls.base_id, nullslast(asc(cls.tombstone_date)))
+        return db.query(cls).filter(
+            cls.base_id == base_id,
+            (cls.tombstone_date == None) | (cls.tombstone_date > timestamp)
+        ).order_by(nullslast(asc(cls.tombstone_date)))
+
+    def version_at_time(self, timestamp):
+        """The object that existed at that time, if any.
+        Note that without a creation date, we may get an object that did not exist.
+        """
+        return self.version_at_time_q(self.base_id, timestamp, self.db).first()
+
     def copy(self, tombstone=None, **kwargs):
         """Clone object, optionally as tombstone
         reuse base_id. Redefine in subclasses to define arguments"""
@@ -210,3 +229,29 @@ class HistoryMixin(TombstonableMixin):
         )
         self.db.add(retval)
         return retval
+
+
+class OriginMixin(object):
+    creation_date = Column(DateTime, nullable=False, default=datetime.utcnow,
+                           info={'rdf': QuadMapPatternS(None, DCTERMS.created)})
+
+    def version_at_time(self, timestamp):
+        if self.creation_date <= timestamp:
+            return self
+
+
+class TombstonableOriginMixin(TombstonableMixin, OriginMixin):
+    def version_at_time(self, timestamp):
+        if self.creation_date <= timestamp and (
+                self.tombstone_date is None or
+                self.tombstone_date > timestamp):
+            return self
+
+
+class HistoryMixinWithOrigin(HistoryMixin, OriginMixin):
+    @classmethod
+    def version_at_time_q(cls, base_id, timestamp, db=None):
+        """The object that existed at that time, if any.
+        """
+        return super(HistoryMixinWithOrigin, self).version_at_time_q(
+            base_id, timestamp, db).filter(cls.creation_date <= timestamp)

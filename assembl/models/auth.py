@@ -46,7 +46,7 @@ from ..lib.sqla import (
 from ..lib.sqla_types import (
     URLString, EmailString, EmailUnicode, CaseInsensitiveWord, CoerceUnicode)
 from ..lib.raven_client import capture_message
-from . import Base, DiscussionBoundBase, PrivateObjectMixin, NamedClassMixin
+from . import Base, DiscussionBoundBase, PrivateObjectMixin, NamedClassMixin, OriginMixin
 from ..auth import *
 from assembl.lib.raven_client import capture_exception, capture_message
 from ..semantic.namespaces import (
@@ -632,7 +632,7 @@ def send_user_to_socket_for_asid(mapper, connection, target):
         connection, CrudOperation.UPDATE, target.discussion_id)
 
 
-class User(NamedClassMixin, AgentProfile):
+class User(NamedClassMixin, OriginMixin, AgentProfile):
     """
     A user of the platform.
     """
@@ -655,9 +655,6 @@ class User(NamedClassMixin, AgentProfile):
     timezone = Column(Time(True))
     last_login = Column(DateTime)
     login_failures = Column(Integer, default=0)
-    creation_date = Column(DateTime, nullable=False, default=datetime.utcnow,
-        info={'rdf': QuadMapPatternS(
-            None, DCTERMS.created, sections=(PRIVATE_USER_SECTION,))})
     username = Column(CoerceUnicode(20), unique=True)
 
     def __init__(self, **kwargs):
@@ -1136,6 +1133,10 @@ class User(NamedClassMixin, AgentProfile):
         if user_id == self.id:
             return True
         return super(User, self).user_can(user_id, operation, permissions)
+
+
+User.creation_date.info['rdf'] = QuadMapPatternS(
+    None, DCTERMS.created, sections=(PRIVATE_USER_SECTION,))
 
 
 class Role(Base):
