@@ -25,7 +25,10 @@ Setup a development environment
 Install fabric and a SSH server
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-You need fabric 1.5.1 and a SSH server installed. Here is how to install them on Mac and on Ubuntu.
+You need fabric 1.5.1 and a SSH server installed.
+Fab should be able to ssh into the target server, even if it's localhost. Fab will repeatedly ask for the login password, unless you set up ``ssh-agent`` on your host and ``~/.ssh/authorized_keys`` on the target server.
+
+Here is how to install the ssh server on Mac and on Ubuntu.
 
 On Mac
 ++++++
