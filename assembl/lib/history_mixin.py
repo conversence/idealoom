@@ -253,5 +253,5 @@ class HistoryMixinWithOrigin(HistoryMixin, OriginMixin):
     def version_at_time_q(cls, base_id, timestamp, db=None):
         """The object that existed at that time, if any.
         """
-        return super(HistoryMixinWithOrigin, self).version_at_time_q(
+        return super(HistoryMixinWithOrigin, cls).version_at_time_q(
             base_id, timestamp, db).filter(cls.creation_date <= timestamp)
