@@ -32,7 +32,6 @@ module.exports = {
       'jquery',
       'underscore',
       'backbone',
-      'backbone.babysitter',
       'backbone.marionette',
       'backbone.modal',
       'backbone-model-file-upload',
