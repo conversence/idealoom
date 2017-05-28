@@ -1,3 +1,5 @@
+process.env.sassStaticUrl = '~/';
+
 var path = require('path'),
     glob = require('glob'),
     webpack = require('webpack'),
@@ -19,22 +21,16 @@ module.exports = _.extend(base_config, {
     inline: true,
     headers: {
         "Access-Control-Allow-Origin": process.env.ASSEMBL_URL,
-        "Access-Control-Allow-Credentials":true
+        "Access-Control-Allow-Credentials": "true"
     },
     port: webpack_port,
     host: webpackHost,
   },
   plugins: [
       new webpack.HotModuleReplacementPlugin(),
-      new webpack.ResolverPlugin(
-        new webpack.ResolverPlugin.DirectoryDescriptionFilePlugin('../../bower.json', ['main'])
-      ),
       new webpack.optimize.CommonsChunkPlugin({
         names: ['infrastructure', 'manifest'] // Specify the common bundle's name.
       }),
-      new ExtractTextPlugin("[name].css"),
+      new ExtractTextPlugin('[name].css'),
   ],
-  sassLoader: {
-    data: '$static_url: "~/";',
-  },
 });

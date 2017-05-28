@@ -2,7 +2,8 @@ var path = require('path'),
     glob = require('glob'),
     webpack = require('webpack'),
     _ = require('underscore'),
-    ExtractTextPlugin = require("extract-text-webpack-plugin");
+    sassStaticUrl = process.env.sassStaticUrl || '~/static/',
+    ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 function theme_entries() {
   var entries = {},
@@ -36,7 +37,6 @@ module.exports = {
       'backbone.modal',
       'backbone-model-file-upload',
       'backbone.radio',
-      'backbone.modal',
       'bootstrap-notify',
       'bluebird',
       'ckeditor',
@@ -48,7 +48,6 @@ module.exports = {
       'd3-selection',
       'd3-format',
       'd3-time',
-      'hopscotch',
       'hopscotch',
       'jed',
       'linkifyjs',
@@ -84,71 +83,97 @@ module.exports = {
     publicPath: '/js/build/',
   },
   resolve: {
-    modulesDirectories: [
-      __dirname + '/node_modules',
-      __dirname + '/js/bower',
-      __dirname + '/js/app',
-      __dirname + '/js/lib',
+    modules: [
+      "node_modules",
+      path.join(__dirname, 'js/bower'),
+      path.join(__dirname, 'js/app'),
+      path.join(__dirname, 'js/lib'),
     ],
+    descriptionFiles: ['package.json', '../../bower.json'],
     alias: {
-      sinon: 'sinon/pkg/sinon',
-      bourbon: 'bourbon/app/assets/stylesheets/_bourbon.scss',
-      'jquery.dotdotdot': 'jquery.dotdotdot/src/js/jquery.dotdotdot.js',
-      'jquery-highlight': 'jquery-highlight/jquery.highlight.js',
+      sinon: path.resolve(__dirname, 'node_modules/sinon/pkg/sinon'),
+      bourbon$: path.resolve(__dirname, 'node_modules/bourbon/app/assets/stylesheets/_bourbon.scss'),
+      'jquery.dotdotdot$': path.resolve(__dirname, 'js/bower/jquery.dotdotdot/src/js/jquery.dotdotdot.js'),
+      'jquery-highlight$': path.resolve(__dirname, 'js/lib/jquery-highlight/jquery.highlight.js'),
     },
   },
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.json$/,
-        loader: 'json',
+        use: [{
+          loader: 'json-loader',
+        }],
       },
       {
         test: /sinon.*\.js$/,
-        loader: 'imports?require=>false,define=>false',
+        use: [
+          {
+            loader: 'imports-loader',
+            options: {
+              require: false,
+              define: false,
+            },
+          }],
       },
       {
         test: /\.scss$/,
-        loader: ExtractTextPlugin.extract(
-          'style-loader', 'css-loader!sass-loader?includePaths[]=' + path.resolve(__dirname, 'node_modules/bourbon/app/assets/stylesheets')),
+        use: ExtractTextPlugin.extract({
+          fallback: 'style-loader',
+          use: [
+            {
+              loader: 'css-loader',
+            },
+            {
+              loader: 'sass-loader',
+              options: {
+                includePaths: [
+                  path.resolve(__dirname, 'node_modules/bourbon/app/assets/stylesheets'),
+                ],
+                data: '$static_url: "' + sassStaticUrl + '";',
+              },
+            },
+          ],
+        }),
       },
       {
         test: /\.css$/,
-        loader: ExtractTextPlugin.extract('style-loader', 'css-loader'),
+        use: ExtractTextPlugin.extract({
+          fallback: 'style-loader',
+          use: 'css-loader',
+        }),
       },
       {
         test: /\.(jpg|png|woff|woff2|eot|ttf|svg|html)$/,
-        loader: 'url-loader',
+        use: [{
+          loader: 'url-loader',
+        }],
       },
       {
         test: /LICENSE$/,
-        loader: 'url-loader',
+        use: [{
+          loader: 'url-loader',
+        }],
       },
     ],
     noParse: [/sinon/],
   },
   node: {
-    fs: "empty",
-    child_process: "empty",
+    fs: 'empty',
+    child_process: 'empty',
   },
-  devtool: "#source-map",
+  devtool: 'source-map',
   plugins: [
-      // this makes mocha choke on requiring supports-color for very obscure reasons.
-      // Revisit.
-      // new webpack.DefinePlugin({
-      //   'process.env': {
-      //     NODE_ENV: JSON.stringify('production')
-      //   }
-      // }),
-      new webpack.ResolverPlugin(
-        new webpack.ResolverPlugin.DirectoryDescriptionFilePlugin('../../bower.json', ['main'])
-      ),
-      new webpack.optimize.CommonsChunkPlugin({
-        names: ['infrastructure', 'manifest'] // Specify the common bundle's name.
-      }),
-      new ExtractTextPlugin("[name].css"),
+    // this makes mocha choke on requiring supports-color for very obscure reasons.
+    // Revisit.
+    // new webpack.DefinePlugin({
+    //   'process.env': {
+    //     NODE_ENV: JSON.stringify('production')
+    //   }
+    // }),
+    new webpack.optimize.CommonsChunkPlugin({
+      names: ['infrastructure', 'manifest'] // Specify the common bundle's name.
+    }),
+    new ExtractTextPlugin('[name].css'),
   ],
-  sassLoader: {
-    data: '$static_url: "~/static/";',
-  }
 };
