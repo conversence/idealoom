@@ -1,5 +1,6 @@
 """Cornice API for ideas"""
 from collections import defaultdict
+import datetime
 
 import simplejson as json
 from cornice import Service
@@ -34,11 +35,13 @@ def create_idea(request):
     discussion = request.context
     session = discussion.db
     idea_data = json.loads(request.body)
+    now = datetime.utcnow()
 
     new_idea = Idea(
         short_title=idea_data['shortTitle'],
         long_title=idea_data['longTitle'],
         discussion=discussion,
+        creation_date=now,
     )
 
     session.add(new_idea)
@@ -48,7 +51,7 @@ def create_idea(request):
     else:
         parent = discussion.root_idea
     session.add(IdeaLink(
-        source=parent, target=new_idea,
+        source=parent, target=new_idea, creation_date=now,
         order=idea_data.get('order', 0.0)))
 
     session.flush()

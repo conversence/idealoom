@@ -32,6 +32,7 @@ def test_load_messages(
     test_session.commit()
     browser.visit(url)
     assert browser.is_element_present_by_css('.js_navigation', wait_time=120)
+    # browser.driver.get_log('browser')
     accordeon_buttons = browser.find_by_css('.js_navigation')
     accordeon_buttons = {b['data-view']: b for b in accordeon_buttons}
     button = accordeon_buttons[u'debate']

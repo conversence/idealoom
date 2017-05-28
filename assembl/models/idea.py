@@ -35,7 +35,7 @@ from virtuoso.vmapping import IriClass, PatternIriClass
 
 from ..lib.utils import get_global_base_url
 from ..nlp.wordcounter import WordCounter
-from . import DiscussionBoundBase, HistoryMixin, HistoryMixinWithOrigin
+from . import DiscussionBoundBase, HistoryMixinWithOrigin
 from .discussion import Discussion
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..auth import (
@@ -1053,7 +1053,7 @@ class RootIdea(Idea):
     crud_permissions = CrudPermissions(P_ADMIN_DISC)
 
 
-class IdeaLink(HistoryMixin, DiscussionBoundBase):
+class IdeaLink(HistoryMixinWithOrigin, DiscussionBoundBase):
     """
     A generic link between two ideas
 
@@ -1163,6 +1163,7 @@ class IdeaLink(HistoryMixin, DiscussionBoundBase):
         kwargs.update(
             tombstone=tombstone,
             order=self.order,
+            creation_date=self.creation_date,
             source_id=self.source_id,
             target_id=self.target_id)
         return super(IdeaLink, self).copy(**kwargs)
