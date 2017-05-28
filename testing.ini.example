@@ -36,7 +36,7 @@ debugtoolbar.intercept_exc = false
 
 # This database will be cleared! Be careful.
 # For postgres:
-sqlalchemy.url = postgresql+psycopg2://assembl_test:assembl_test@localhost/idealoom_test?sslmode=disable
+sqlalchemy.url = postgresql+psycopg2://%(db_user)s:%(db_password)s@%(db_host)s/%(db_database)s?sslmode=disable
 # For virtuoso:
 #sqlalchemy.url = virtuoso://assembl_test:assembl_test@VOSU
 sqlalchemy.echo = True
@@ -47,7 +47,7 @@ db_schema = public
 # For virtuoso:
 #db_schema = assembl_test
 db_database = idealoom_test
-# db_host = localhost
+db_host = localhost
 
 jinja2.directories = assembl:templates
 
