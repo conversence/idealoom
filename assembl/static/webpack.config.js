@@ -131,6 +131,7 @@ module.exports = {
     fs: "empty",
     child_process: "empty",
   },
+  devtool: "#source-map",
   plugins: [
       // this makes mocha choke on requiring supports-color for very obscure reasons.
       // Revisit.
