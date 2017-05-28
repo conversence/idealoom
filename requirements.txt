@@ -152,7 +152,9 @@ snowballstemmer==1.2.1
 SPARQLWrapper==1.8.0
 sphinxcontrib-httpdomain==1.5.0
 sphinxcontrib-zopeext==0.2.1
-Sphinx==1.6.1
+# https://github.com/sphinx-doc/sphinx/issues/3758
+# AND issues with python-autdoc
+Sphinx<1.6
 splinter==0.7.5
 SQLAlchemy==1.1.10
 sqlalchemy-schemadisplay==1.3
