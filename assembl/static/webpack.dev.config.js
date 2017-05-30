@@ -18,7 +18,7 @@ base_config.entry.main = [
 module.exports = _.extend(base_config, {
   devServer: {
     hot: true,
-    inline: true,
+    inline: false,
     headers: {
         "Access-Control-Allow-Origin": process.env.ASSEMBL_URL,
         "Access-Control-Allow-Credentials": "true"
