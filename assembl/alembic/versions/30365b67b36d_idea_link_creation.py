@@ -18,6 +18,7 @@ import transaction
 
 
 from assembl.lib import config
+from assembl.lib.sqla import mark_changed
 
 
 def upgrade(pyramid_env):
@@ -55,6 +56,7 @@ def upgrade(pyramid_env):
                 creation_date = (SELECT creation_date FROM idea_idea_link AS il2 WHERE base_id=%d LIMIT 1)
                 WHERE base_id IN (%s)
                 """ % (first, first, ','.join([str(id) for id in bases[1:]])))
+        mark_changed()
 
 
 def downgrade(pyramid_env):
