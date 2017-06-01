@@ -66,8 +66,6 @@ services:
 {% for hostname in docker_idealoom_hosts %}
   idealoom{{ loop.index }}:
     image: idealoom:latest
-    ports:
-      - "8090:8090"
     volumes:
       - .:/var/docker_data
       - idealoom_static:/opt/idealoom_static
@@ -80,5 +78,3 @@ services:
     networks:
       - my_net
 {% endfor %}
-
-}
