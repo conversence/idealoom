@@ -19,6 +19,7 @@ nginx_host = web
 supervisor__autostart_uwsgi = true
 supervisor__autostart_elasticsearch = false
 uwsgi__socket = 0.0.0.0:9000
+uwsgi__processes = 3
 
 # for now
 _uses_global_supervisor = false
@@ -26,7 +27,7 @@ _uses_global_supervisor = false
 # Override what follows in your specific docker.rc file
 
 # What are the public hostnames of your idealoom hosts? Can be multiple, separated by spaces
-docker_idealoom_hosts = idealoom1.local idealoom2.local
+docker_idealoom_hosts = idealoom1.docker idealoom2.docker
 
 # This is where you give the path to your base docker.rc file,
 # presumably overriding this one.
@@ -42,7 +43,7 @@ saml_org = Conversence
 saml_email = maparent@conversence.com
 
 # Are we using sentry from docker? If not, give a hostname or nothing
-docker_sentry =
+docker_sentry = docker
 
 # Are we using piwik from docker? If not, give a hostname or nothing
 docker_piwik =

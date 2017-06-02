@@ -40,17 +40,77 @@ services:
     depends_on:
 {%- for hostname in docker_idealoom_hosts %}
       - idealoom{{ loop.index }}{% endfor %}
-    command: /bin/sh -c "cp /opt/default_config/nginx_*.conf > /etc/nginx/conf.d && nginx -g 'daemon off;'"
+{%- if docker_sentry == 'docker' %}
+      - sentry
+{%- endif %}
+    command: /bin/sh -c "cp /opt/default_config/nginx_*.conf /etc/nginx/conf.d && nginx -g 'daemon off;'"
     networks:
-      - my_net
+      my_net:
+        aliases:
+{%- for hostname in docker_idealoom_hosts %}
+          - {{ hostname }}
+{%- endfor %}
 
 {% if docker_sentry == 'docker' %}
-  # TODO: Configure sentry
   sentry:
     image: sentry:latest
-  depends_on:
-      - database
-      - redis
+    depends_on:
+     - redis
+     - database
+    links:
+     - redis
+     - database:postgres
+    networks:
+      - my_net
+    ports:
+     - 9000:9000
+    stdin_open: true
+    tty: true
+    environment:
+      SENTRY_POSTGRES_HOST: postgres
+      SENTRY_DB_USER: postgres
+      SENTRY_DB_PASSWORD: postgres
+      SENTRY_REDIS_HOST: redis
+      SENTRY_SINGLE_ORGANIZATION: "true"
+      SENTRY_SECRET_KEY: jran5_Hnoherknoudr65_Ryaboeeenh40_Bloboo
+
+  sentry_celery_beat:
+    image: sentry:latest
+    depends_on:
+     - redis
+     - database
+    links:
+     - redis
+     - database:postgres
+    networks:
+      - my_net
+    command: "sentry run cron"
+    environment:
+      SENTRY_POSTGRES_HOST: postgres
+      SENTRY_DB_USER: postgres
+      SENTRY_DB_PASSWORD: postgres
+      SENTRY_REDIS_HOST: redis
+      SENTRY_SINGLE_ORGANIZATION: "true"
+      SENTRY_SECRET_KEY: jran5_Hnoherknoudr65_Ryaboeeenh40_Bloboo
+
+  sentry_celery_worker:
+    image: sentry:latest
+    depends_on:
+     - redis
+     - database
+    links:
+     - redis
+     - database:postgres
+    networks:
+      - my_net
+    command: "sentry run worker"
+    environment:
+      SENTRY_POSTGRES_HOST: postgres
+      SENTRY_DB_USER: postgres
+      SENTRY_DB_PASSWORD: postgres
+      SENTRY_REDIS_HOST: redis
+      SENTRY_SINGLE_ORGANIZATION: "true"
+      SENTRY_SECRET_KEY: jran5_Hnoherknoudr65_Ryaboeeenh40_Bloboo
 {% endif %}
 
 {% if docker_imap == 'docker' or docker_smtp == 'docker' %}
@@ -77,7 +137,7 @@ services:
       BUILDING_DOCKER: "false"
     depends_on:
       - redis
-    command: sh -c 'cd /opt/idealoom; /etc/init.d/ssh start ; chown idealoom_user /opt/idealoom_static; . venv/bin/activate ; env BUILDING_DOCKER=false fab -c /var/docker_data/idealoom{{ loop.index }}.rc docker_startup ; tail -f /dev/null'
+    command: sh -c 'cd /opt/idealoom; /etc/init.d/ssh start ; chown idealoom_user /opt/idealoom_static; git pull ; . venv/bin/activate ; env BUILDING_DOCKER=false fab -c /var/docker_data/idealoom{{ loop.index }}.rc docker_startup ; tail -f /dev/null'
     networks:
       - my_net
 {% endfor %}

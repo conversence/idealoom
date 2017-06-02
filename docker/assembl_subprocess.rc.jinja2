@@ -8,6 +8,14 @@ public_hostname = {{ public_hostname_ }}
 
 first_admin_email = admin@{{ public_hostname_ }}
 
+redis_socket = {{ idealoom_index }}
+
+uwsgi__socket = 0.0.0.0:{{ 9000 + idealoom_index }}
+
+*sentry_key = a
+*sentry_secret = b
+*sentry_id = {{ idealoom_index }}
+
 {% if docker_sentry == 'docker' %}
 *sentry_host = sentry
 {% elif docker_sentry %}
