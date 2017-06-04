@@ -21,7 +21,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship, backref, aliased
 from ..lib.sqla_types import CoerceUnicode
-from virtuoso.vmapping import PatternIriClass
+from sqla_rdfbridge.mapping import PatternIriClass
 # from virtuoso.textindex import TextIndex, TableWithTextIndex
 from bs4 import BeautifulSoup
 
