@@ -1496,6 +1496,7 @@ def docker_startup():
     Verify if your database environment exists, and create it otherwise."""
     if as_bool(getenv("BUILDING_DOCKER", True)):
         return
+    execute(create_sentry_project)
     if not exists(env.ini_file):
         execute(create_local_ini)
     if not exists("supervisord.conf"):
@@ -1518,7 +1519,6 @@ def docker_startup():
         execute(app_db_update)
     if not check_if_first_user():
         execute(create_first_admin_user)
-    execute(create_sentry_project)
     venvcmd("supervisord")
 
 
