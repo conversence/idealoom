@@ -14,6 +14,8 @@ uwsgi__socket = 0.0.0.0:{{ 9000 + idealoom_index }}
 
 *sentry_id = {{ idealoom_index }}
 
+sentry_api_token = {{ sentry_api_token }}
+
 {% if docker_sentry == 'docker' %}
 *sentry_host = sentry
 {% elif docker_sentry %}
