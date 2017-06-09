@@ -199,7 +199,7 @@ class Attachment(DiscussionBoundBase, OriginMixin):
     document = relationship(
         Document,
         backref=backref(
-            'attachments'),
+            'attachments'), # chronological?
     )
 
     creator_id = Column(Integer, ForeignKey('agent_profile.id'),

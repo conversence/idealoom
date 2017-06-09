@@ -820,7 +820,7 @@ class AbstractIdeaVote(HistoryMixinWithOrigin, DiscussionBoundBase):
             self.vote_spec_id, self.idea_id)
 
     def get_default_parent_context(self, request=None):
-        return self.token_vote_specification.get_collection_context(
+        return self.vote_spec_ts.get_collection_context(
             'votes', request=request)
 
     @classmethod
