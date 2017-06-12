@@ -24,6 +24,9 @@ from fabric.api import (
 from fabric.colors import yellow, cyan, red, green
 
 
+DEFAULT_SECTION = "DEFAULT"
+
+
 def combine_rc(rc_filename, overlay=None):
     """Take a rc filename, load it as fabric would.
 
@@ -1228,9 +1231,9 @@ def create_sentry_project():
     parser.optionxform = str
     if os.path.exists(env.random_file):
         parser.read(env.random_file)
-    parser.set("DEFAULT", "sentry_key", key["public"])
-    parser.set("DEFAULT", "sentry_secret", key["secret"])
-    parser.set("DEFAULT", "sentry_id", key["projectId"])
+    parser.set(DEFAULT_SECTION, "sentry_key", key["public"])
+    parser.set(DEFAULT_SECTION, "sentry_secret", key["secret"])
+    parser.set(DEFAULT_SECTION, "sentry_id", key["projectId"])
     with open(env.random_file, 'w') as f:
         parser.write(f)
 
@@ -1453,7 +1456,7 @@ def as_rc(ini_filename):
         for k, v in cp.items(section):
             if k[0] in ("_*"):
                 k = k[1:]
-            elif section not in ('app:assembl', 'DEFAULT'):
+            elif section not in ('app:assembl', DEFAULT_SECTION):
                 k = "__".join((section, k))
             r[k] = v
     return r
