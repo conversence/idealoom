@@ -13,7 +13,7 @@ backports.ssl-match-hostname==3.5.0.1
 -e git+https://github.com/conversence/Beaker.git@assembl#egg=Beaker
 beautifulsoup4==4.6.0
 billiard==3.5.0.2
-boto==2.46.1
+boto==2.47.0
 bz2file==0.98
 celery==4.0.2
 cffi==1.10.0
@@ -25,13 +25,14 @@ cornice==2.4.0
 -e git+https://github.com/maparent/cornice.ext.sphinx.git@cornice_sphinx_services#egg=cornice_sphinx
 cov-core==1.15.0
 coverage==4.4.1
-cryptography==1.8.1
+cryptography==1.9
 cssselect==1.0.1
 cssutils==1.0.2
 DateTime==4.2
 defusedxml==0.4.1  # rq.filter: <0.5
 # distribute==0.7.3 # This fails with latest pip. Installed properly as a dependency.
-dm.xmlsec.binding==1.3.2
+# constrained by saml
+dm.xmlsec.binding==1.3.2  # rq.filter: < 1.3.3
 docutils==0.13.1
 dogpile.cache==0.6.3
 dogpile.core==0.4.1
@@ -46,7 +47,8 @@ flaky==3.3.0
 funcsigs==1.0.2
 future==0.16.0
 -e git+https://github.com/maparent/fuxi.git#egg=fuxi
-gensim==1.0.1  # 2.0.0?
+#gensim==1.0.1  # 2.0.0?
+gensim==2.1.0
 google-api-python-client==1.6.2
 greenlet==0.4.12
 hiredis==0.2.0
@@ -60,7 +62,7 @@ imaplib2==2.45.0
 ipaddress==1.0.18
 ipykernel==4.6.1
 ipython-genutils==0.2.0
-ipython==5.3.0 # rq.filter: <6
+ipython==5.4.1 # rq.filter: <6
 iso639==0.1.4  # failure with 0.1.3
 isodate==0.5.4
 -e git+https://github.com/assembl/jasmine-splinter-runner.git#egg=jasmine-splinter-runner
@@ -72,20 +74,20 @@ jupyter-core==4.3.0
 kombu==4.0.2
 langdetect==1.0.7
 lingua==4.13
-lxml==3.7.3
+lxml==3.8.0
 Mako==1.0.6
 MarkupSafe==1.0
 meld3==1.0.2
 mock==2.0.0
 ndg_httpsclient==0.4.2
 nodeenv==1.1.2
-numpy==1.12.1
+numpy==1.13.0
 #oauthlib==2.0.2
-oauth2client==4.1.0
-openpyxl==2.4.7
-paramiko==2.1.2
+oauth2client==4.1.1
+openpyxl==2.4.8
+paramiko==2.2.1
 PasteDeploy==1.5.2
-pathlib2==2.2.1
+pathlib2==2.3.0
 pathtools==0.1.2
 PdbSublimeTextSupport==0.2
 pexpect==4.2.1
@@ -93,9 +95,9 @@ pickleshare==0.7.4
 polib==1.0.8
 premailer==3.0.1
 psycopg2==2.7.1
-py==1.4.33
+py==1.4.34
 pyasn1==0.2.3
-pyasn1_modules==0.0.8
+pyasn1_modules==0.0.9
 pycparser==2.17
 pydot==1.2.3
 Pygments==2.2.0
@@ -106,23 +108,24 @@ PyJWT==1.5.0
 pylibmc==1.5.2
 pyOpenSSL==17.0.0
 pyparsing==2.2.0
-pyramid-autodoc==1.0.0
+# Until https://github.com/SurveyMonkey/pyramid_autodoc/pull/12 is merged
+-e git+https://github.com/matthewnorman/pyramid_autodoc@sphinx_161_no_domains_v2#egg=pyramid_autodoc
 -e git+https://github.com/assembl/pyramid_beaker.git@assembl#egg=pyramid_beaker
 pyramid-debugtoolbar-ajax==0.1.0
-pyramid-debugtoolbar==4.0.1
+pyramid-debugtoolbar==4.1
 pyramid-dogpile-cache==0.0.4
 pyramid-ipython==0.2
 pyramid-jinja2==2.7
 pyramid-mailer==0.15.1
 pyramid-mako==1.0.2
-pyramid-tm==2.0
-pyramid==1.8.3
+pyramid-tm==2.1
+pyramid==1.8.4
 PyStemmer==1.3.0
 pytest-cov==2.5.1
 pytest-localserver==0.3.7
 pytest-mock==1.6.0
 pytest-splinter==1.8.5
-pytest==3.0.7
+pytest==3.1.2
 python-dateutil==2.6.0
 python-openid==2.2.5
 python-saml==2.2.2
@@ -130,7 +133,7 @@ python-saml==2.2.2
 pytz==2017.2
 PyYAML==3.12
 pyzmq==16.0.2
-raven==6.0.0
+raven==6.1.0
 rdflib-jsonld==0.4.0
 rdflib==4.2.2
 reg==0.11
@@ -138,11 +141,11 @@ redis==2.10.5
 repoze.lru==0.6
 repoze.sendmail==4.4.1
 requests-oauthlib==0.8.0
-requests==2.14.2
+requests==2.18.1
 rsa==3.4.2
 scikit-learn==0.18.1
 scipy==0.19.0
-selenium==3.4.2
+selenium==3.4.3
 simplejson==3.10.0
 six==1.10.0
 smart-open==1.5.3
@@ -151,16 +154,14 @@ snowballstemmer==1.2.1
 SPARQLWrapper==1.8.0
 sphinxcontrib-httpdomain==1.5.0
 sphinxcontrib-zopeext==0.2.1
-# https://github.com/sphinx-doc/sphinx/issues/3758
-# AND issues with python-autdoc
-Sphinx<1.6
+Sphinx==1.6.2
 splinter==0.7.5
 SQLAlchemy==1.1.10
 -e git+https://github.com/conversence/sqlalchemy-rdfbridge.git#egg=sqlalchemy-rdfbridge
 sqlalchemy-schemadisplay==1.3
 sqlparse==0.2.3
 -e git+https://github.com/assembl/sqltap.git@assembl#egg=sqltap
-supervisor==3.3.1
+supervisor==3.3.2
 tornado==4.5.1
 traitlets==4.3.2
 transaction==2.1.2
@@ -178,7 +179,7 @@ Werkzeug==0.12.2
 zope.component==4.3.0
 zope.deprecation==4.2.0
 zope.event==4.2.0
-zope.interface==4.4.1
+zope.interface==4.4.2
 zope.sqlalchemy==0.7.7
 # To be watched:
 # https://github.com/elliotpeele/pyramid_oauth2_provider
