@@ -57,13 +57,13 @@ _uses_global_supervisor = true
 _uses_memcache = true
 _uses_ngnix = true
 _uses_uwsgi = true
-_gitrepo = https://github.com/assembl/assembl.git
+_gitrepo = https://github.com/conversence/idealoom.git
 _gitbranch = master
 _is_production_env = true
 # Legacy: Can be prod.wsgi, staging.wsgi or dev.wsgi.
 _wsginame = prod.wsgi
 _ini_file = local.ini
-_projectname = assembl
+_projectname = idealoom
 
 # Those need to be overridden in the server-specific file
 # _postgres_db_password

@@ -92,7 +92,7 @@ def sanitize_env():
     env.projectpath = env.get('projectpath', dirname(__file__))
     env.venvpath = env.get('venvpath', join(env.projectpath, 'venv'))
     env.dbdumps_dir = env.get('dbdumps_dir', join(
-        env.projectpath, '%s_dumps' % env.get("projectname", 'assembl')))
+        env.projectpath, '%s_dumps' % env.get("projectname", 'idealoom')))
 
 
 def load_rcfile_config():
@@ -596,7 +596,7 @@ def bootstrap(projectpath):
 
     takes the same arguments at env_dev, but projectpath is mandatory
     """
-    #env.projectname = "assembl"
+    #env.projectname = "idealoom"
     assert projectpath, "projectpath is mandatory, and corresponds to the directory where assembl will be installed"
 
     with settings(projectpath=projectpath):
