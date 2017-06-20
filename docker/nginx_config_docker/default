@@ -2,7 +2,7 @@ server {
     listen 80;
     #listen    443 ssl;
 
-    server_name ${PUBLIC_HOSTNAME};
+    server_name PUBLIC_HOSTNAME;
 
     #ssl_certificate     /etc/ssl/idealoom.yourdomain.com/idealoom.yourdomain.com.crt;
     #ssl_certificate_key /etc/ssl/idealoom.yourdomain.com/idealoom.yourdomain.com.key;
@@ -13,7 +13,7 @@ server {
     }
 
     location /socket {
-        proxy_pass http://${IDEALOOM_HOST}:8090/socket;
+        proxy_pass http://IDEALOOM_HOST:8090/socket;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
@@ -24,14 +24,14 @@ server {
         #Nor will it help your performance after the first hour...
         autoindex on;
 
-        alias /opt/idealoom/assembl/static;
+        alias /opt/idealoom_static/static;
     }
 
     location / {
 
         include uwsgi_params;
         uwsgi_read_timeout 5m;
-        uwsgi_pass unix:///opt/idealoom1_run/uwsgi.sock;
+        uwsgi_pass uwsgi://IDEALOOM_HOST:9000;
     }
 
 # So files uploaded to the database are not artificailly limited by nginx
