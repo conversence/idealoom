@@ -164,7 +164,8 @@ piwik_host:
     The host of your Sentry installation, if any.
 
 theme_repositories__git-urls:
-    Cf. ``vendor_config.ini.example``
+    Themes for version 1 of IdeaLoom's frontend. Comma separated list of git repositories URLs, typically ``git@github.com:mycompany/idealoom-client-themes.git`` .
+    You will have to create a read-only git user, and put its public key on each server where those themes is deployed.
 
 uwsgi__uid:
     The UID of the uwsgi user.
