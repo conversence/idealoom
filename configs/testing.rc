@@ -58,3 +58,4 @@ saml_state = Québec
 saml_locality = Montréal
 saml_org = Conversence
 saml_email = testing@idealoom.org
+mail.tls = false
