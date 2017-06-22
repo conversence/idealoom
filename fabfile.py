@@ -471,7 +471,7 @@ def venv_prefix():
 
 
 def get_db_dump_name():
-    return 'assembl-virtuoso-backup.bp'
+    return 'idealoom-backup.pgdump'
 
 
 def remote_db_path():
