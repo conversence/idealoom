@@ -30,7 +30,7 @@ Only the first time you run it:
 
     sudo -u postgres createuser --createdb --no-createrole --no-superuser assembl_test --pwprompt  # Enter assembl_test as password at the prompt
     PGPASSWORD=assembl_test createdb --host localhost -U assembl_test assembl_test
-    cp testing.ini.example testing.ini
+    fab -c configs/testing.rc create_local_ini
     assembl-db-manage testing.ini bootstrap
 
 Thereafter:
