@@ -76,7 +76,6 @@ _projectname = idealoom
 # _dbdumps_dir
 
 
-supervisor__autostart_celery_imap = true
 supervisor__autostart_celery_notification_dispatch = true
 supervisor__autostart_celery_notify = true
 supervisor__autostart_celery_notify_beat = true
