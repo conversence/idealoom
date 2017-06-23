@@ -1704,7 +1704,7 @@ def update_vendor_themes():
             current_assembl_branch_name = run('git symbolic-ref --short -q HEAD').split('\n')[0]
         for git_url in urls:
             print green("Updating %s" % git_url)
-            matchobj = re.match(r'.*/(.*)\.git', git_url)
+            matchobj = re.match(r'.*/([^\.]+)(\.git)?', git_url)
             git_dir_name = matchobj.group(1)
             git_dir_path = normpath(join(vendor_themes_path, git_dir_name))
             if is_dir(git_dir_path) is False:
