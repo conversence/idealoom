@@ -496,6 +496,8 @@ def main():
         'random', help=short_help(populate_random))
     parser_random.add_argument('--random', '-r', help='random.ini file',
                                default=None)
+    parser_random.add_argument('--output', '-o', type=FileType('w'),
+                               default=sys.stdout, help='The output file')
     parser_random.add_argument('--template', '-t', help='random template files',
                                action='append', default=[])
     parser_random.add_argument('input', help='Input rc file (for saml)')
@@ -532,7 +534,9 @@ def main():
         random_file = args.random or rc_info.get('random_file', RANDOM_FILE)
         templates = args.template or extract_random_templates(
             rc_info.get('ini_files', ''))
-        populate_random(random_file, templates, extract_saml_info(rc_info))
+        random = populate_random(
+            random_file, templates, extract_saml_info(rc_info))
+        random.write(args.output)
     elif args.command == 'compose':
         ini_info = compose(args.input, args.random)
         ini_info.write(args.output)
