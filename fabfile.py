@@ -1497,7 +1497,7 @@ def docker_compose():
     jenv = Environment(
         loader=FileSystemLoader('./docker'),
         autoescape=lambda t: False)
-    rc_template = jenv.get_template('assembl_subprocess.rc.jinja2')
+    rc_template = jenv.get_template('idealoom_subprocess.rc.jinja2')
     nginx_template = jenv.get_template('nginx_default.jinja2')
     compose_template = jenv.get_template('docker-compose.yml.jinja2')
     compose_stage1_template = jenv.get_template('docker-compose-stage1.yml.jinja2')
@@ -1505,7 +1505,7 @@ def docker_compose():
     if os.path.exists(env.random_file):
         env.update(as_rc(env.random_file))
     for i, hostname in enumerate(env.docker_idealoom_hosts):
-        with open('./docker/build/assembl%d.rc' % (i+1,), 'w') as f:
+        with open('./docker/build/idealoom%d.rc' % (i+1,), 'w') as f:
             f.write(rc_template.render(
                 public_hostname_=hostname, idealoom_index=i+1, **env))
         with open('./docker/build/nginx_%s.conf' % (hostname,), 'w') as f:
