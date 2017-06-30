@@ -958,6 +958,20 @@ def install_certbot():
 
 
 @task
+def install_pyftpsync():
+    """Install pyftpsync.
+
+    Useful in case of syncing a local borg backup to a remote FTP server."""
+    if env.mac:
+        run("pip install pyftpsync")
+    else:
+        sudo("apt-get install python-cffi python-colorama python-cryptography "
+             "python-enum34 python-idna python-ipaddress python-keyring "
+             "python-pycparser python-secretstorage")
+        sudo("pip install pyftpsync")
+
+
+@task
 def generate_certificate():
     """Generate a certificate for https, and add renewal to crontab"""
     hostname = env.public_hostname
