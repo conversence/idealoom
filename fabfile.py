@@ -553,7 +553,7 @@ def reset_semantic_mappings():
     Reset semantic mappings after a database restore
     """
     print(cyan('Resetting semantic mappings'))
-    venvcmd("echo 'import assembl.semantic ; assembl.semantic.reset_semantic_mapping()'|pshell %s" % env.ini_file)
+    venvcmd("echo 'import assembl.semantic ; assembl.semantic.reset_semantic_mapping()'|pshell iloom:%s" % env.ini_file)
 
 
 def app_db_install():

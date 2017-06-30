@@ -47,16 +47,25 @@ setup(name='assembl',
       install_requires=requires,
       tests_require=tests_require,
       extras_require=dict(test=tests_require),
-      entry_points="""\
-      [paste.app_factory]
-      main = assembl:main
-      maintenance = assembl.maintenance:main
-      [console_scripts]
-      assembl-db-manage = assembl.scripts.db_manage:main
-      assembl-ini-files = assembl.scripts.ini_files:main
-      assembl-imap-test = assembl.scripts.imap_test:main
-      assembl-add-user  = assembl.scripts.add_user:main
-      assembl-pypsql  = assembl.scripts.pypsql:main
-      assembl-pshell  = assembl.scripts.pshell:main
-      """,
-      )
+      entry_points={
+        "paste.app_factory": [
+            "main = assembl:main",
+            "maintenance = assembl.maintenance:main",
+        ],
+        "console_scripts": [
+            "assembl-db-manage = assembl.scripts.db_manage:main",
+            "assembl-ini-files = assembl.scripts.ini_files:main",
+            "assembl-imap-test = assembl.scripts.imap_test:main",
+            "assembl-add-user = assembl.scripts.add_user:main",
+            "assembl-pypsql = assembl.scripts.pypsql:main",
+        ],
+        'plaster.loader_factory': [
+            'iloom+ini=assembl.lib.plaster:Loader',
+            'iloom=assembl.lib.plaster:Loader',
+        ],
+        'plaster.wsgi_loader_factory': [
+            'iloom+ini=assembl.lib.plaster:Loader',
+            'iloom=assembl.lib.plaster:Loader',
+        ],
+      },
+    )

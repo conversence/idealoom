@@ -52,7 +52,7 @@ Python shell with database connection
 
 .. code:: sh
 
-    pshell local.ini
+    pshell iloom:local.ini
 
 Note:  We recommend you install ipython with ``pip install ipython`` before you
 run pshell.  You will get a much nicer interface
