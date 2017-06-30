@@ -22,7 +22,7 @@ borg create \
     --exclude $IDEALOOM_PATH/venv \
     --exclude $IDEALOOM_PATH/vendor \
     --exclude $IDEALOOM_PATH/assembl/static/js/bower \
-    --exclude $IDEALOOM_PATH/assembl/static/js/node_modules \
+    --exclude $IDEALOOM_PATH/assembl/static/node_modules \
     --exclude $IDEALOOM_PATH'/assembl/static/widget/*/bower_components' \
     --exclude $IDEALOOM_PATH/.git \
     --exclude '*.sass-cache' \
