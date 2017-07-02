@@ -1,6 +1,8 @@
 #!/usr/bin/python
 """Inference library based on FuXi"""
+from __future__ import print_function
 from os.path import exists
+import logging
 
 import requests
 from rdflib import Graph, URIRef, RDF, ConjunctiveGraph
@@ -12,8 +14,10 @@ from FuXi.Rete.RuleStore import SetupRuleStore
 #    DATALOG_SAFETY_NONE, DATALOG_SAFETY_STRICT, DATALOG_SAFETY_LOOSE)
 # from FuXi.Horn.HornRules import NetworkFromN3, HornFromDL
 
+
 DEFAULT_ROOT = URIRef('http://purl.org/catalyst/')
 LOCAL_ROOT = '/Users/maparent/OpenSource/catalyst_ontology/'
+log = logging.getLogger(__name__)
 
 CATALYST_RULES = [
     "rdf-schema.ttl",
@@ -59,7 +63,7 @@ class InferenceStore(object):
     def add_ontologies(self, rules=CATALYST_RULES):
         for r in rules:
             self.add_ontology(self.as_file(r))
-            print r
+            log.debug(r)
 
     def add_ontology(self, source, format='turtle'):
         pass
@@ -90,9 +94,10 @@ class FuXiInferenceStore(InferenceStore):
         network = self.network
         network.reset()
         network.feedFactsToAdd(generateTokenSet(self.ontology))
-        print "ontology loaded"
+        log.debug("ontology loaded")
         network.feedFactsToAdd(generateTokenSet(graph))
         return network.inferredFacts
+
 
 if __name__ == '__main__':
     f = FuXiInferenceStore(LOCAL_ROOT)
@@ -100,4 +105,4 @@ if __name__ == '__main__':
     eg = ConjunctiveGraph()
     eg.parse('/Users/maparent/OpenSource/assembl-feature/personal/d1.rdf')
     cl = f.get_inference(eg)
-    print list(cl.triples((None, RDF.type, None)))
+    print(list(cl.triples((None, RDF.type, None))))

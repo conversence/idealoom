@@ -1,10 +1,12 @@
-from sqlalchemy.orm import joinedload_all
+import logging
+
 from imaplib2 import IMAP4_SSL, IMAP4
 
 from assembl.models import ContentSource
-
 from .source_reader import (
     ReaderStatus, SourceReader, ReaderError, ClientError, IrrecoverableError)
+
+log = logging.getLogger(__name__)
 
 
 def is_ok(response):
@@ -99,13 +101,13 @@ class IMAPReader(SourceReader):
 
     def import_email(self, email_id):
         mailbox = self.mailbox
-        # print "running fetch for message: "+email_id
+        # log.debug( "running fetch for message: "+email_id)
         try:
             status, message_data = mailbox.uid('fetch', email_id, "(RFC822)")
             if not is_ok((status,)):
                 raise ClientError(message_data)
 
-            # print repr(message_data)
+            # log.debug( repr(message_data))
             for response_part in message_data:
                 if isinstance(response_part, tuple):
                     message_string = response_part[1]
@@ -118,8 +120,8 @@ class IMAPReader(SourceReader):
                         raise ReaderError(error)
                     self.source.db.add(email_object)
                 else:
-                    print "Skipped message with imap id %s (bounce or vacation message)" % (email_id)
-                # print "Setting self.source.last_imported_email_uid to "+email_id
+                    log.info("Skipped message with imap id %s (bounce or vacation message)" % (email_id))
+                # log.debug( "Setting self.source.last_imported_email_uid to "+email_id)
                 self.source.last_imported_email_uid = email_id
                 self.source.db.commit()
             finally:
@@ -144,9 +146,9 @@ class IMAPReader(SourceReader):
                 search_status, search_result = mailbox.uid('search', None, command)
                 if not is_ok((search_status,)):
                     raise ReaderError(search_result)
-                #print "UID searched with: "+ command + ", got result "+repr(search_status)+" and found "+repr(search_result)
+                #log.debug( "UID searched with: "+ command + ", got result "+repr(search_status)+" and found "+repr(search_result))
                 email_ids = search_result[0].split()
-                #print email_ids
+                #log.debug( email_ids)
 
             if (only_new and search_status == 'OK' and email_ids
                     and email_ids[0] == self.source.last_imported_email_uid):
@@ -168,11 +170,11 @@ class IMAPReader(SourceReader):
                 search_status, search_result = mailbox.uid('search', None, command)
                 if not is_ok((search_status,)):
                     raise ReaderError(search_result)
-                #print "UID searched with: "+ command + ", got result "+repr(search_status)+" and found "+repr(search_result)
+                #log.debug( "UID searched with: "+ command + ", got result "+repr(search_status)+" and found "+repr(search_result))
                 email_ids = search_result[0].split()
 
             if len(email_ids):
-                print "Processing messages from IMAP: %d "% (len(email_ids))
+                log.info("Processing messages from IMAP: %d "% (len(email_ids)))
                 for email_id in email_ids:
                     self.import_email(email_id)
                     if self.status != ReaderStatus.READING:
@@ -187,7 +189,7 @@ class IMAPReader(SourceReader):
                 AbstractMailbox.thread_mails(emails)
                 self.source.db.flush()
             else:
-                print "No IMAP messages to process"
+                log.debug("No IMAP messages to process")
             self.successful_read()
             self.set_status(ReaderStatus.PAUSED)
         except IMAP4.abort as e:

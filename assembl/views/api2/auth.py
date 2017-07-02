@@ -1,5 +1,5 @@
 from simplejson import dumps, loads
-from string import Template
+import logging
 from datetime import datetime
 
 from pyramid.response import Response
@@ -38,7 +38,7 @@ from ..auth.views import (
     maybe_auto_subscribe)
 
 _ = TranslationStringFactory('assembl')
-
+log = logging.getLogger(__name__)
 
 TOKEN_SECRET = settings.get('session.secret')
 
@@ -504,8 +504,8 @@ def assembl_register_user(request):
             if asbool(settings.get('pyramid.debug_authorization')):
                 # for debugging purposes
                 from assembl.auth.password import email_token
-                print "email token:", request.route_url(
-                    'user_confirm_email', token=email_token(account))
+                log.info("email token: " + request.route_url(
+                         'user_confirm_email', token=email_token(account)))
             if discussion:
                 maybe_auto_subscribe(user, discussion)
         session.flush()

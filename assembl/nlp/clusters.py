@@ -2,13 +2,14 @@
 to clusters found by NLP and machine learning.
 Try to infer new ideas or new harvesting from the difference"""
 
+from __future__ import print_function
 from collections import defaultdict
 from os.path import join, exists
 from os import makedirs, unlink
 from itertools import chain, groupby
 from random import Random
+import logging
 
-from sqlalchemy import (text, column, bindparam)
 from sqlalchemy.orm import defer, with_polymorphic
 from gensim import corpora, models as gmodels, similarities
 from gensim.utils import tokenize as gtokenize
@@ -31,6 +32,7 @@ DICTIONARY_FNAME = 'dico.dict'
 STEMS_FNAME = 'stems.dict'
 PHRASES_FNAME = 'phrases.model'
 CORPUS_FNAME = 'posts.mm'
+log = logging.getLogger(__name__)
 
 
 class Tokenizer(object):
@@ -764,10 +766,10 @@ class SKLearnClusteringSemanticAnalysis(SemanticAnalysisData):
             o = Optics(self.min_samples, metric)
             o.calculate_distances(model_matrix.todense())
             RD = o.RD
-            print "optics result:", RD
+            log.debug("optics result: " + RD)
             a, b = min(RD[1:]), max(RD)
             eps = a + (b - a) * 0.5
-            print "epsilon", eps
+            log.debug("epsilon " + eps)
             self.eps = eps
         algorithm = getattr(sklearn.cluster, algorithm)
         algorithm = algorithm(
@@ -832,7 +834,7 @@ class SKLearnClusteringSemanticAnalysis(SemanticAnalysisData):
         results[None] = self.get_cluster_info()
         posres = {id: r for (id, r) in results.iteritems() if r is not None}
         # for id, (silhouette_score, compare_with_ideas, clusters, post_info) in posres.iteritems():
-        #     print id, silhouette_score, [len(x['cluster']) for x in clusters]
+        #     log.debug(" ".join((id, silhouette_score, repr([len(x['cluster']) for x in clusters]))))
         return posres
 
     def as_html(self, f=None, jinja_env=None):
@@ -1261,9 +1263,9 @@ def show_clusters(clusters):
         Content.id.in_(list(chain(*clusters)))).all()
     posts = {p.id: p for p in posts}
     for n, cluster in enumerate(clusters):
-        print "*"*100, "Cluster", n+1
+        log.info("*"*100 + " Cluster " + str(n+1))
         for post_id in cluster:
-            print (posts[post_id].get_original_body_as_text() or '')
+            log.debug(posts[post_id].get_original_body_as_text() or '')
 
 
 class OpticsSemanticsAnalysisWithSuggestions(OpticsSemanticsAnalysis):
@@ -1493,7 +1495,7 @@ class OpticsSemanticsAnalysisWithSuggestions(OpticsSemanticsAnalysis):
             in_ideas = defaultdict(int)
             cl_score = self.partial_silhouette_score(
                  cl_labels, post_ids.searchsorted(cl_post_ids))
-            # print "cluster:", cl_post_ids, cl_score
+            # log.debug( "cluster:", cl_post_ids, cl_score)
 
             # Looking at direct connections. Of course ancestors often
             # have more, but we lose precision. There are a few cases where
@@ -1655,9 +1657,9 @@ class OpticsSemanticsAnalysisWithSuggestions(OpticsSemanticsAnalysis):
         ideas = self.ideas
 
         def print_idea(id, depth=0):
-            print "  " * depth, id, sizes.get(id, 0),\
+            print("  " * depth, id, sizes.get(id, 0),\
                 silhouette_scores_per_idea.get(id, None), (
-                    ideas[id].short_title or '').encode('utf-8')
+                    ideas[id].short_title or '').encode('utf-8'))
             for child in idea_children.get(id, ()):
                 print_idea(child, depth+1)
 
@@ -1744,18 +1746,18 @@ class OpticsSemanticsAnalysisWithSuggestions(OpticsSemanticsAnalysis):
         (suggestions_add, suggestions_partition) = self.get_suggestions()
 
         if suggestions_add:
-            print "Additions:"
+            print("Additions:")
             for suggestion in suggestions_add:
                 suggestion['new_posts'] = ','.join((
                     str(x) for x in suggestion['new_posts']))
-                print "cluster: %(num_cluster)d (size %(num_posts_cluster)d) idea: %(idea_id)d incluster: %(count)d / %(num_posts_idea)d, union %(num_union_posts)d, score=%(score)f > %(original_score)f, cluster=%(cl_score)f\n%(new_posts)s" % suggestion
+                print("cluster: %(num_cluster)d (size %(num_posts_cluster)d) idea: %(idea_id)d incluster: %(count)d / %(num_posts_idea)d, union %(num_union_posts)d, score=%(score)f > %(original_score)f, cluster=%(cl_score)f\n%(new_posts)s" % suggestion)
         if suggestions_partition:
-            print "Partitions:"
+            print("Partitions:")
             for suggestion in suggestions_partition:
                 if 'new_posts' in suggestion:
                     suggestion['new_posts'] = ','.join((
                         str(x) for x in suggestion['new_posts']))
-                print "cluster: %(num_cluster)d (size %(num_posts_cluster)d) idea: %(idea_id)d incluster: %(count)d / %(num_posts_idea)d, score=%(score)f > %(original_score)f, cluster=%(cl_score)f\n%(cluster_posts)s" % suggestion
+                print("cluster: %(num_cluster)d (size %(num_posts_cluster)d) idea: %(idea_id)d incluster: %(count)d / %(num_posts_idea)d, score=%(score)f > %(original_score)f, cluster=%(cl_score)f\n%(cluster_posts)s" % suggestion)
 
 
 # Taken from sklearn.metrics.cluster.unsupervised

@@ -5,10 +5,10 @@
 from os import listdir, urandom
 from os.path import join
 from inspect import isabstract
-from threading import Lock
 import re
 from itertools import chain
 from base64 import urlsafe_b64encode, urlsafe_b64decode
+import logging
 
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
@@ -29,6 +29,9 @@ from sqla_rdfbridge.quadextractor import ClassPatternExtractor
 #     QuadStorage,  PatternGraphQuadMapPattern)
 # from virtuoso.vstore import Virtuoso
 # from virtuoso.alchemy import SparqlClause
+
+
+log = logging.getLogger(__name__)
 
 
 def get_session():
@@ -70,25 +73,26 @@ formats = dict(
 def load_ontologies(session, reload=None):
     store = Virtuoso(connection=session.bind.connect())
     known_graphs = [g.identifier for g in store.contexts()]
-    print 'known', known_graphs
+    log.debug('known ' + known_graphs)
     for fname in listdir(ontology_dir):
         ending = fname.rsplit('.')[-1]
         if ending not in formats:
             continue
-        print fname,
+        debug_str = fname + ' '
         temp_graph = Graph()
         temp_graph.parse(join(ontology_dir, fname), format=formats[ending])
         ontologies = list(temp_graph.subjects(RDF.type, OWL.Ontology))
-        print ontologies,
+        debug_str += ontologies + ' '
         if len(ontologies) != 1:
+            log.debug(debug_str)
             continue
         ontology = ontologies[0]
         if ontology in known_graphs:
-            print 'already there'
+            log.debug(debug_str + 'already there')
             continue
         for (s, p, o) in temp_graph.triples((None, None, None)):
             store.add((s, p, o), context=ontology)
-        print "loaded"
+        log.debug(debug_str + "loaded")
 
 
 class QuadMapPatternS(QuadMapPattern):
@@ -399,7 +403,7 @@ class AssemblQuadStorageManager(object):
         try:
             qs.drop(self.session, force)
         except Exception as e:
-            print e
+            log.error(e)
 
     def drop_graph(self, graph_iri, force=True):
         gr = GraphQuadMapPattern(graph_iri, None, nsm=self.nsm)
@@ -651,7 +655,7 @@ class AssemblQuadStorageManager(object):
         # add pseudo-accounts
         subjects.extend((URIRef("%sAgentAccount/%d" % (local_uri, id))
                          for id in participant_ids))
-        # print len(subjects)
+        # log.debug( len(subjects))
         cg = ConjunctiveGraph(identifier=d_graph_iri)
         self.add_subject_data(v, cg, subjects)
         # add relationships of non-pseudo accounts

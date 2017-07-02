@@ -1,3 +1,4 @@
+from __future__ import print_function
 import pytest
 
 
@@ -12,7 +13,7 @@ def mailbox(request, discussion, test_session):
     test_session.flush()
 
     def fin():
-        print "finalizer mailbox"
+        print("finalizer mailbox")
         test_session.delete(m)
         test_session.flush()
     request.addfinalizer(fin)
@@ -36,7 +37,7 @@ def jack_layton_mailbox(request, discussion, test_session):
     test_session.flush()
 
     def fin():
-        print "finalizer jack_layton_mailbox"
+        print("finalizer jack_layton_mailbox")
         agents = set()
         for post in m.contents:
             agents.add(post.creator)
@@ -60,7 +61,7 @@ def abstract_mailbox(request, discussion, test_session):
     test_session.flush()
 
     def fin():
-        print "finalizer abstract_mailbox"
+        print("finalizer abstract_mailbox")
         test_session.delete(ps)
         test_session.flush()
     request.addfinalizer(fin)

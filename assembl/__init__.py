@@ -12,6 +12,7 @@ This is the startup module, which sets up the various components:
 .. _models: :py:mod:`assembl.models`
 
 """
+from __future__ import absolute_import
 
 from os import putenv
 from os.path import dirname, join
@@ -54,7 +55,7 @@ def main(global_config, **settings):
         from assembl.lib import signals
         signals.listen()
 
-    from views.traversal import root_factory
+    from .views.traversal import root_factory
     config = Configurator(registry=getGlobalSiteManager())
     config.setup_registry(settings=settings, root_factory=root_factory)
     config.add_translation_dirs('assembl:locale/')
@@ -77,7 +78,7 @@ def main(global_config, **settings):
     config.set_session_factory(session_factory)
     if not settings.get('nosecurity', False):
         # import after session to delay loading of BaseOps
-        from auth.util import authentication_callback
+        from .auth.util import authentication_callback
         auth_policy_name = settings.get(
             "auth_policy_class", "assembl.auth.util.UpgradingSessionAuthenticationPolicy")
         auth_policy = resolver.resolve(auth_policy_name)(
@@ -85,7 +86,7 @@ def main(global_config, **settings):
         config.set_authentication_policy(auth_policy)
         config.set_authorization_policy(ACLAuthorizationPolicy())
     # ensure default roles and permissions at startup
-    from models import get_session_maker
+    from .models import get_session_maker
     with transaction.manager:
         session = get_session_maker()
         from .lib.migration import bootstrap_db_data

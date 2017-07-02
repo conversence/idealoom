@@ -11,6 +11,7 @@ from email.header import decode_header as decode_email_header, Header
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import parseaddr, mktime_tz, parsedate_tz
+import logging
 
 import jwzthreading
 from bs4 import BeautifulSoup, Comment
@@ -40,6 +41,9 @@ from .auth import EmailAccount
 from ..tasks.imap import import_mails
 from ..lib.sqla import mark_changed
 from ..tasks.translate import translate_content
+
+
+log = logging.getLogger(__name__)
 
 
 class AbstractMailbox(PostSource):
@@ -268,8 +272,7 @@ class AbstractMailbox(PostSource):
                 currentQuoteAnnounce = []
             elif line_state == LineState.AllWhiteSpace:
                 currentWhiteSpace.append(line)
-            if debug:
-                print "%-30s %s" % (line_state, line)
+            log.debug("%-30s %s" % (line_state, line))
         #if line_state == LineState.PrefixedQuote | (line_state == LineState.AllWhiteSpace & line_state_before_transition == LineState.PrefixedQuote)
             #We just let trailing quotes and whitespace die...
         return '\n'.join(retval)
@@ -302,9 +305,9 @@ class AbstractMailbox(PostSource):
         #Strip modern Apple Mail quotes
         find = etree.XPath(r"//child::blockquote[contains(@type,'cite')]/preceding-sibling::br[contains(@class,'Apple-interchange-newline')]/parent::node()/parent::node()")
         matches = find(doc)
-        #print len(matches)
+        #log.debug(len(matches))
         #for index,match in enumerate(matches):
-        #    print "Match: %d: %s " % (index, html.tostring(match))
+        #    log.debug("Match: %d: %s " % (index, html.tostring(match)))
         if len(matches) == 1:
             matches[0].drop_tree()
             return html.tostring(doc)
@@ -510,7 +513,8 @@ DELETE
 FROM post WHERE post.id IN (SELECT MAX(post.id) as max_post_id FROM imported_post JOIN post ON (post.id=imported_post.id) GROUP BY message_id, source_id HAVING COUNT(post.id)>1)
 
 """
-            raise MultipleResultsFound("ID %s has duplicates in source %d"%(new_message_id,self.id))
+            raise MultipleResultsFound("ID %s has duplicates in source %d" % (
+                new_message_id, self.id))
         email_object.creator = sender_email_account.profile
         # email_object = self.db.merge(email_object)
         return (email_object, parsed_email, error_description)
@@ -520,7 +524,7 @@ FROM post WHERE post.id IN (SELECT MAX(post.id) as max_post_id FROM imported_pos
     """
     @staticmethod
     def thread_mails(emails):
-        #print('Threading...')
+        #log.debug('Threading...')
         emails_for_threading = []
         for mail in emails:
             email_for_threading = jwzthreading.make_message(email.message_from_string(mail.imported_blob))
@@ -539,17 +543,16 @@ FROM post WHERE post.id IN (SELECT MAX(post.id) as max_post_id FROM imported_pos
             jwzthreading.print_container(container, 0, True)
 
         def update_threading(threaded_emails, parent=None, debug=False):
-            if debug:
-                print "\n\nEntering update_threading() for %s mails:" % len(threaded_emails)
+            log.debug("\n\nEntering update_threading() for %ld mails:" % len(threaded_emails))
             for container in threaded_emails:
-                if debug:
+                # if debug:
                     #jwzthreading.print_container(container)
-                    print("\nProcessing:  " + repr(container.message.subject.first_original().value) + " " + repr(container.message.message_id)+ " " + repr(container.message.message.id))
-                    print "container: " + (repr(container))
-                    print "parent: " + repr(container.parent)
-                    print "children: " + repr(container.children)
-
-
+                log.debug("\nProcessing: %s %s %d " % (
+                    container.message.subject, container.message.message_id,
+                    container.message.message.id))
+                log.debug("container: " + repr(container))
+                log.debug("parent: " + repr(container.parent))
+                log.debug("children: " + repr(container.children))
 
                 if(container.message):
                     current_parent = container.message.message.parent
@@ -563,34 +566,28 @@ FROM post WHERE post.id IN (SELECT MAX(post.id) as max_post_id FROM imported_pos
                             #jwzthreading strips the <>, re-add them
                             algorithm_parent_message_id = unicode("<"+parent.message.message_id+">")
                         else:
-                            if debug:
-                                print "Parent was a dummy container, we may need \
-                                     to handle this case better, as we just \
-                                     potentially lost sibbling relationships"
+                            log.warn("Parent was a dummy container, we may need "
+                                     "to handle this case better, as we just "
+                                     "potentially lost sibling relationships")
                             algorithm_parent_message_id = None
                     else:
                         algorithm_parent_message_id = None
-                    if debug:
-                        print("Current parent from database: " + repr(db_parent_message_id))
-                        print("Current parent from algorithm: " + repr(algorithm_parent_message_id))
-                        print("References: " + repr(container.message.references))
+                    log.debug("Current parent from database: " + repr(db_parent_message_id))
+                    log.debug("Current parent from algorithm: " + repr(algorithm_parent_message_id))
+                    log.debug("References: " + repr(container.message.references))
                     if algorithm_parent_message_id != db_parent_message_id:
                         if current_parent == None or isinstance(current_parent, Email):
-                            if debug:
-                                print("UPDATING PARENT for :" + repr(container.message.message.message_id))
+                            log.debug("UPDATING PARENT for :" + repr(container.message.message.message_id))
                             new_parent = parent.message.message if algorithm_parent_message_id else None
-                            if debug:
-                                print repr(new_parent)
+                            log.debug(repr(new_parent))
                             container.message.message.set_parent(new_parent)
                         else:
-                            if debug:
-                                print "Skipped reparenting:  the current parent \
-                                isn't an email, the threading algorithm only \
-                                considers mails"
+                            log.debug("Skipped reparenting:  the current parent "
+                                      "isn't an email, the threading algorithm only "
+                                      "considers mails")
                     update_threading(container.children, container, debug=debug)
                 else:
-                    if debug:
-                        print "Current message ID: None, was a dummy container"
+                    log.debug("Current message ID: None, was a dummy container")
                     update_threading(container.children, parent, debug=debug)
 
         update_threading(threaded_emails.values(), debug=False)
@@ -651,13 +648,13 @@ FROM post WHERE post.id IN (SELECT MAX(post.id) as max_post_id FROM imported_pos
 
         if addresses:
             addresses = addresses.items()
-            addresses.sort(key=lambda (address, count): count)
+            addresses.sort(key=lambda address_count: address_count[1])
             return addresses[-1][0]
 
 
     def send_post(self, post):
         #TODO benoitg
-        print "TODO: Mail::send_post():  Actually queue message"
+        log.warn("TODO: Mail::send_post():  Actually queue message")
         #make sure you have a request and use the pyramid mailer
 
     def message_ok_to_import(self, message_string):
@@ -734,9 +731,9 @@ class IMAPMailbox(AbstractMailbox):
             command = "(UID %s:*)" % mbox.last_imported_email_uid
 
             search_status, search_result = mailbox.uid('search', None, command)
-            #print "UID searched with: "+ command + ", got result "+repr(search_status)+" and found "+repr(search_result)
+            #log.debug("UID searched with: "+ command + ", got result "+repr(search_status)+" and found "+repr(search_result))
             email_ids = search_result[0].split()
-            #print email_ids
+            #log.debug(email_ids)
 
         if (only_new and search_status == 'OK' and email_ids
                 and email_ids[0] == mbox.last_imported_email_uid):
@@ -756,17 +753,17 @@ class IMAPMailbox(AbstractMailbox):
             # detection
             command = "ALL"
             search_status, search_result = mailbox.uid('search', None, command)
-            #print "UID searched with: "+ command + ", got result "+repr(search_status)+" and found "+repr(search_result)
+            # log.debug("UID searched with: "+ command + ", got result "+repr(search_status)+" and found "+repr(search_result))
             assert search_status == 'OK'
             email_ids = search_result[0].split()
 
         def import_email(mailbox_obj, email_id):
             session = mailbox_obj.db
-            #print "running fetch for message: "+email_id
+            #log.debug("running fetch for message: "+email_id)
             status, message_data = mailbox.uid('fetch', email_id, "(RFC822)")
             assert status == 'OK'
 
-            #print repr(message_data)
+            #log.debug(repr(message_data))
             for response_part in message_data:
                 if isinstance(response_part, tuple):
                     message_string = response_part[1]
@@ -778,17 +775,17 @@ class IMAPMailbox(AbstractMailbox):
                 session.add(email_object)
                 translate_content(email_object)  # should delay
             else:
-                print "Skipped message with imap id %s (bounce or vacation message)"% (email_id)
-            #print "Setting mailbox_obj.last_imported_email_uid to "+email_id
+                log.info("Skipped message with imap id %s (bounce or vacation message)"% (email_id))
+            #log.debug("Setting mailbox_obj.last_imported_email_uid to "+email_id)
             mailbox_obj.last_imported_email_uid = email_id
             transaction.commit()
             mailbox_obj = AbstractMailbox.get(mailbox_obj.id)
 
         if len(email_ids):
-            print "Processing messages from IMAP: %d "% (len(email_ids))
+            log.info("Processing messages from IMAP: %d "% (len(email_ids)))
             new_emails = [import_email(mbox, email_id) for email_id in email_ids]
         else:
-            print "No IMAP messages to process"
+            log.info("No IMAP messages to process")
 
         discussion_id = mbox.discussion_id
         mailbox.close()

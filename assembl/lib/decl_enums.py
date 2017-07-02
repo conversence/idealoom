@@ -1,12 +1,16 @@
 """Enumerations that can be stored in the database.
 
 Mostly from http://techspot.zzzeek.org/2011/01/14/the-enum-recipe/ """
+from __future__ import print_function
+import re
+
+from future.utils import string_types
 from sqlalchemy.types import SchemaType, TypeDecorator, Enum
 from sqlalchemy import __version__
-import re
 
 if __version__ < '0.6.5':
     raise NotImplementedError("Version 0.6.5 or higher of SQLAlchemy is required.")
+
 
 class EnumSymbol(object):
     """Define a fixed symbol tied to a parent class."""
@@ -92,7 +96,7 @@ class DeclEnumType(SchemaType, TypeDecorator):
             return None
         if isinstance(value, EnumSymbol):
             return value.value
-        elif isinstance(value, (str, unicode)):
+        elif isinstance(value, string_types):
             # Should not happen, but mask the error for now.
             return value
 
@@ -100,6 +104,7 @@ class DeclEnumType(SchemaType, TypeDecorator):
         if value is None:
             return None
         return self.enum.from_string(value.strip())
+
 
 if __name__ == '__main__':
     from sqlalchemy.ext.declarative import declarative_base
@@ -137,4 +142,4 @@ if __name__ == '__main__':
     ])
     sess.commit()
 
-    print sess.query(Employee).filter_by(type=EmployeeType.contractor).all()
+    print(sess.query(Employee).filter_by(type=EmployeeType.contractor).all())

@@ -6,12 +6,14 @@ import hashlib
 from datetime import datetime, timedelta
 from base64 import urlsafe_b64encode, urlsafe_b64decode
 from urllib import unquote
+import logging
 
 from enum import IntEnum
 from assembl.lib import config
 from ..models import AbstractAgentAccount, User
 
 SALT_SIZE = 8
+log = logging.getLogger(__name__)
 
 
 class HashEncoding(IntEnum):
@@ -93,7 +95,7 @@ def password_change_token_legacy(user):
     user.last_login = now
     resolution = 19
     token_str = str(user.id)+now.isoformat()[:resolution]
-    print "hashing " + token_str
+    log.debug("hashing " + token_str)
     return str(user.id)+'e'+hash_password(token_str, HashEncoding.HEX)
 
 

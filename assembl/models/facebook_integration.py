@@ -1193,7 +1193,7 @@ class FacebookAccessToken(Base):
                 # that the access token is infinite long?
                 log.warning("Extended Facebook access_token %s to %s, but there was\
                             no expires_in field in the returned token" %
-                            short_token, long_token)
+                            (short_token, long_token))
                 data = debug_token(short_token)
                 if data and isinstance(data, dict):
                     log.warning("The debug Facebook access token is: %s" %

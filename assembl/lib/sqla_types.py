@@ -123,7 +123,7 @@ class UUID(TypeDecorator):
         if value and isinstance(value, uuid.UUID):
             return value.hex
         elif value and not isinstance(value, uuid.UUID):
-            raise ValueError, 'value %s is not a valid uuid.UUID' % value
+            raise ValueError('value %s is not a valid uuid.UUID' % value)
         else:
             return None
 

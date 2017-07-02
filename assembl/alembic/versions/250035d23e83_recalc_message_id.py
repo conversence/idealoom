@@ -5,6 +5,7 @@ Revises: 53875f39d2ff
 Create Date: 2015-12-12 15:07:06.294468
 
 """
+from __future__ import print_function
 
 # revision identifiers, used by Alembic.
 revision = '250035d23e83'
@@ -54,7 +55,7 @@ def upgrade(pyramid_env):
             elif isinstance(c, m.AssemblPost):
                 c.message_id = c.generate_message_id()
             else:
-                print "ERROR: Pure post", id
+                print("ERROR: Pure post", id)
 
 
 def downgrade(pyramid_env):

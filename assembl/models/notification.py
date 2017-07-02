@@ -1,5 +1,6 @@
 # coding=UTF-8
 """Allow users to be notified of certain events happening in a discussion. Depends on subscribing to those events."""
+from __future__ import print_function
 from datetime import datetime
 from collections import defaultdict
 from abc import abstractmethod
@@ -722,8 +723,8 @@ class ModelEventWatcherNotificationSubscriptionDispatcher(object):
             for subscription in applicableInstances:
                 applicableInstancesByUser[subscription.user_id].append(subscription)
         num_instances = len([v for v in applicableInstancesByUser.itervalues() if v])
-        print "processEvent: %d notifications created for %s %s %d" % (
-            num_instances, verb, objectClass.__name__, objectId)
+        print("processEvent: %d notifications created for %s %s %d" % (
+            num_instances, verb, objectClass.__name__, objectId))
         with transaction.manager:
             for userId, applicableInstances in applicableInstancesByUser.iteritems():
                 if(len(applicableInstances) > 0):
@@ -735,32 +736,32 @@ class ModelEventWatcherNotificationSubscriptionDispatcher(object):
 
 
     def processPostCreated(self, id):
-        print "processPostCreated", id
+        print("processPostCreated", id)
         self.processEvent(CrudVerbs.CREATE, Post, id)
 
     def processIdeaCreated(self, id):
-        print "processIdeaCreated", id
+        print("processIdeaCreated", id)
 
     def processIdeaModified(self, id, version):
-        print "processIdeaModified", id, version
+        print("processIdeaModified", id, version)
 
     def processIdeaDeleted(self, id):
-        print "processIdeaDeleted", id
+        print("processIdeaDeleted", id)
 
     def processExtractCreated(self, id):
-        print "processExtractCreated", id
+        print("processExtractCreated", id)
 
     def processExtractModified(self, id, version):
-        print "processExtractModified", id, version
+        print("processExtractModified", id, version)
 
     def processExtractDeleted(self, id):
-        print "processExtractDeleted", id
+        print("processExtractDeleted", id)
 
     def processAccountCreated(self, id):
-        print "processAccountCreated", id
+        print("processAccountCreated", id)
 
     def processAccountModified(self, id):
-        print "processAccountModified", id
+        print("processAccountModified", id)
 
 class NotificationPushMethodType(DeclEnum):
     """

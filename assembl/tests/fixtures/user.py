@@ -1,3 +1,4 @@
+from __future__ import print_function
 import pytest
 
 from assembl.auth import R_PARTICIPANT
@@ -19,7 +20,7 @@ def participant1_user(request, test_session, discussion):
     test_session.flush()
 
     def fin():
-        print "finalizer participant1_user"
+        print("finalizer participant1_user")
         test_session.delete(u)
         test_session.flush()
     request.addfinalizer(fin)
@@ -39,7 +40,7 @@ def participant2_user(request, test_session):
     test_session.flush()
 
     def fin():
-        print "finalizer participant2_user"
+        print("finalizer participant2_user")
         test_session.delete(u)
         test_session.flush()
     request.addfinalizer(fin)

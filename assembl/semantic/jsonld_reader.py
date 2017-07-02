@@ -1,9 +1,15 @@
 """Import JSON-LD into assembl."""
+import logging
+
+from future.utils import string_types
 import simplejson as json
 from rdflib_jsonld.context import Context
+
 from . import (context_url, local_context_loc)
 from assembl.models.import_records import ImportRecordHandler
 from assembl.lib.sqla import get_named_class
+
+log = logging.getLogger(__name__)
 
 class_equivalents = {
     "AbstractionStatement": "IdeaLink",
@@ -106,7 +112,7 @@ class simple_jsonld_reader(object):
         return class_equivalents.get(type, None)
 
     def read(self, jsonld, discussion, admin_user_id, base=None):
-        if isinstance(jsonld, (str, unicode)):
+        if isinstance(jsonld, string_types):
             jsonld = json.loads(jsonld)
         c = jsonld['@context']
         # Avoid loading the main context.
@@ -120,7 +126,7 @@ class simple_jsonld_reader(object):
         site_iri = None
 
         def find_objects(j):
-            if isinstance(jsonld, (str, unicode)):
+            if isinstance(jsonld, string_types):
                 return
             if isinstance(j, list):
                 for x in j:
@@ -142,7 +148,7 @@ class simple_jsonld_reader(object):
         for json in by_id.itervalues():
             cls = self.class_from_type(json['@type'])
             if not cls:
-                print "missing cls for :", json['@type']
+                log.error("missing cls for : " + json['@type'])
                 continue
             if cls:
                 cls = get_named_class(cls)

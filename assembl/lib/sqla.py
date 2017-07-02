@@ -16,6 +16,7 @@ from random import random
 from threading import Thread
 from itertools import ifilter, chain
 
+from future.utils import string_types
 from enum import Enum
 from anyjson import dumps, loads
 from sqlalchemy import (
@@ -524,7 +525,7 @@ class BaseOps(object):
     @classmethod
     def get_database_id(cls, uri):
         """Parse a URI to extract the database ID"""
-        if isinstance(uri, types.StringTypes):
+        if isinstance(uri, string_types):
             if not uri.startswith('local:') or '/' not in uri:
                 return
             uriclsname, num = uri[6:].split('/', 1)
@@ -697,7 +698,7 @@ class BaseOps(object):
                         for r in mapper.relationships}
         methods = dict(pyinspect.getmembers(
             self.__class__, lambda m: pyinspect.ismethod(m)
-            and m.func_code.co_argcount == 1))
+            and m.__code__.co_argcount == 1))
         properties = dict(pyinspect.getmembers(
             self.__class__, lambda p: pyinspect.isdatadescriptor(p)))
         known = set()
@@ -728,7 +729,7 @@ class BaseOps(object):
                 prop_name = name
                 view_name = None
             else:
-                assert isinstance(subspec, types.StringTypes),\
+                assert isinstance(subspec, string_types),\
                     "in viewdef %s, class %s, name %s, spec not a string" % (
                         view_def_name, my_typename, name)
                 if subspec[0] == "'":
@@ -762,7 +763,7 @@ class BaseOps(object):
                     else:
                         return v.uri(base_uri)
                 elif isinstance(v, (
-                        str, unicode, int, long, float, bool, types.NoneType)):
+                        string_types, int, long, float, bool, type(None))):
                     return v
                 elif isinstance(v, EnumSymbol):
                     return v.name
@@ -989,7 +990,7 @@ class BaseOps(object):
             return None
         target_id = json.get('@id', None)
         if target_id is not None:
-            if isinstance(target_id, (str, unicode)):
+            if isinstance(target_id, string_types):
                 instance = aliases.get(target_id, None)
                 if instance is None:
                     instance = get_named_object(
@@ -1112,7 +1113,7 @@ class BaseOps(object):
     @staticmethod
     def _json_is_known_instance(json, aliases=None):
         aliases = aliases or {}
-        if isinstance(json, (str, unicode)):
+        if isinstance(json, string_types):
             instance = aliases.get(json, None)
             if instance is None:
                 instance = get_named_object(json)
@@ -1121,7 +1122,7 @@ class BaseOps(object):
         assert isinstance(json, dict)
         target_id = json.get('@id', None)
         if target_id is not None:
-            if isinstance(target_id, (str, unicode)):
+            if isinstance(target_id, string_types):
                 instance = aliases.get(target_id, None)
                 if instance is None:
                     instance = get_named_object(target_id)
@@ -1256,7 +1257,7 @@ class BaseOps(object):
                 if isinstance(value, list):
                     list_remaining = []
                     for val in value:
-                        if isinstance(val, (str, unicode)) and val in jsonld:
+                        if isinstance(val, string_types) and val in jsonld:
                             list_remaining.append((False, val))
                             continue
                         inst = self._json_is_known_instance(val, aliases)
@@ -1345,7 +1346,7 @@ class BaseOps(object):
                     if treated:
                         instances.append(subval)
                         continue
-                    if isinstance(subval, (str, unicode)):
+                    if isinstance(subval, string_types):
                         if subval in jsonld:
                             instance_ctx = self._create_subobject_from_json(
                                 jsonld[subval], target_cls, parse_def,
@@ -1474,7 +1475,7 @@ class BaseOps(object):
                     setattr(self, key, value)
                     continue
                 if not col.foreign_keys:
-                    if isinstance(value, (str, unicode)):
+                    if isinstance(value, string_types):
                         target_type = col.type.__class__
                         if target_type == DateTime:
                             setattr(self, key, parse_datetime(value, True))
@@ -1490,7 +1491,7 @@ class BaseOps(object):
                                 and value.lower() in ("true", "false"):
                             # common error... tolerate.
                             setattr(self, key, value.lower() == "true")
-                        elif col.type.python_type in (str, unicode):
+                        elif issubclass(col.type.python_type, string_types):
                             setattr(self, key, value)
                         else:
                             assert False, "can't assign json type %s"\
@@ -1562,11 +1563,11 @@ class BaseOps(object):
             log.debug("Chaining context from %s to %s" % (context, c_context))
             if c_context is context:
                 log.info("Could not find collection context: %s %s" % (self, key))
-            if isinstance(value, (str, unicode)):
+            if isinstance(value, string_types):
                 assert not must_be_list
                 target_id = value
                 if target_cls is not None and \
-                        isinstance(target_id, (str, unicode)):
+                        isinstance(target_id, string_types):
                     instance = aliases.get(target_id, None)
                     # TODO: Keys spanning multiple columns
                     if instance is None:

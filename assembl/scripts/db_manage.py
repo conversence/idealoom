@@ -1,5 +1,6 @@
 """ Wrapper over the command line migrate tool to better work with
 config files. """
+from __future__ import print_function
 #To test:  python -m assembl.scripts.db_manage
 import argparse
 import subprocess

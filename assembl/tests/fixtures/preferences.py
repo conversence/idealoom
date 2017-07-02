@@ -1,3 +1,4 @@
+from __future__ import print_function
 import pytest
 
 
@@ -10,7 +11,7 @@ def default_preferences(request, test_session):
     test_session.flush()
 
     def fin():
-        print "finalizer default_preferences"
+        print("finalizer default_preferences")
         test_session.delete(prefs)
         test_session.flush()
     request.addfinalizer(fin)

@@ -4,10 +4,14 @@ PythonSocialAuth_ backend for `WP OAuth Server`_
 .. _PythonSocialAuth: http://psa.matiasaguirre.net/
 .. _`WP OAuth Server`: https://wordpress.org/plugins/oauth2-provider/
 """
+import logging
 from hashlib import md5
 
 from social.p3 import unquote
 from social.backends.oauth import BaseOAuth2
+
+
+log = logging.getLogger(__name__)
 
 
 class WordPressServerOAuth2(BaseOAuth2):
@@ -58,7 +62,7 @@ class WordPressServerOAuth2(BaseOAuth2):
         """Loads user data from service"""
         client_id, client_secret = self.get_key_and_secret()
         response = kwargs.pop('response')
-        print "user_data", response
+        log.debug("user_data " + repr(response))
         # import pdb; pdb.set_trace()
 
         r = self.get_json(

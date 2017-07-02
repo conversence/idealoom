@@ -1,4 +1,5 @@
 """Models for arbitrary key-values storage, bound to a namespace, a user, and some other object (currently only the discussion)."""
+from __future__ import absolute_import
 from collections import Mapping, MutableMapping
 
 import simplejson as json
@@ -24,9 +25,9 @@ from pyramid.httpexceptions import HTTPUnauthorized
 from ..lib.abc import abstractclassmethod
 from . import DiscussionBoundBase
 from assembl.lib import config
-from auth import User
+from .auth import User
 from ..auth.util import user_has_permission
-from discussion import Discussion
+from .discussion import Discussion
 from .preferences import Preferences
 from .idea import Idea
 
@@ -397,7 +398,7 @@ class UserPreferenceCollection(NamespacedUserKVCollection):
     def __delitem__(self, key):
         try:
             return super(UserPreferenceCollection, self).__delitem__(key)
-        except IndexError, e:
+        except IndexError as e:
             if key not in self.dprefs:
                 raise e
 

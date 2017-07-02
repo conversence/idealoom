@@ -1,4 +1,5 @@
 """List icons defined in Fontello"""
+from __future__ import print_function
 # to run: python assembl/scripts/list_css_icons.py
 
 import json

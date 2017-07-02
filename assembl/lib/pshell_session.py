@@ -1,8 +1,9 @@
 """Initial objects for the pshell sessions"""
+from __future__ import absolute_import
 import sys
 
 from pyramid.paster import get_appsettings
-from sqla import get_session_maker, configure_engine
+from .sqla import get_session_maker, configure_engine
 from assembl.semantic import upgrade_semantic_mapping as _usm
 from assembl.lib.config import set_config as _set_config
 

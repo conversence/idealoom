@@ -1,7 +1,9 @@
 """Links between :py:class:`assembl.models.idea.Idea` and :py:class:`assembl.models.generic.Content`."""
+from __future__ import print_function
 import re
 import quopri
 from datetime import datetime
+import logging
 
 from sqlalchemy.orm import (relationship, backref)
 from sqlalchemy import (
@@ -33,6 +35,9 @@ from ..auth import (
     P_EDIT_MY_EXTRACT)
 from ..semantic.namespaces import (
     CATALYST, ASSEMBL, DCTERMS, OA, QUADNAMES, RDF, SIOC)
+
+
+log = logging.getLogger(__name__)
 
 
 class IdeaContentLink(DiscussionBoundBase, OriginMixin):
@@ -112,7 +117,7 @@ class IdeaContentLink(DiscussionBoundBase, OriginMixin):
 @event.listens_for(IdeaContentLink.idea, 'set', propagate=True, active_history=True)
 def idea_content_link_idea_set_listener(target, value, oldvalue, initiator):
     """When an extract changes ideas, send the ideas on the socket."""
-    print "idea_content_link_idea_set_listener for target: %s set to %s, was %s" % (target, value, oldvalue)
+    log.debug("idea_content_link_idea_set_listener for target: %s set to %s, was %s" % (target, value, oldvalue))
     if oldvalue is not None and oldvalue.id:
         with oldvalue.db.no_autoflush:
             oldvalue.send_to_changes()

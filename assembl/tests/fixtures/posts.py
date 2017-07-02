@@ -1,3 +1,4 @@
+from __future__ import print_function
 import pytest
 from datetime import datetime
 
@@ -18,7 +19,7 @@ def root_post_1(request, participant1_user, discussion, test_session):
     test_session.flush()
 
     def fin():
-        print "finalizer root_post_1"
+        print("finalizer root_post_1")
         test_session.delete(p)
         test_session.flush()
     request.addfinalizer(fin)
@@ -41,7 +42,7 @@ def discussion2_root_post_1(request, participant1_user, discussion2, test_sessio
     test_session.flush()
 
     def fin():
-        print "finalizer discussion2_root_post_1"
+        print("finalizer discussion2_root_post_1")
         test_session.delete(p)
         test_session.flush()
     request.addfinalizer(fin)
@@ -65,7 +66,7 @@ def synthesis_post_1(request, participant1_user, discussion, test_session,
     test_session.flush()
 
     def fin():
-        print "finalizer synthesis_post_1"
+        print("finalizer synthesis_post_1")
         test_session.delete(p)
         test_session.flush()
     request.addfinalizer(fin)
@@ -91,7 +92,7 @@ def reply_post_1(request, participant2_user, discussion,
     test_session.flush()
 
     def fin():
-        print "finalizer reply_post_1"
+        print("finalizer reply_post_1")
         test_session.delete(p)
         test_session.flush()
     request.addfinalizer(fin)
@@ -117,7 +118,7 @@ def reply_post_2(request, participant1_user, discussion,
     test_session.flush()
 
     def fin():
-        print "finalizer reply_post_2"
+        print("finalizer reply_post_2")
         test_session.delete(p)
         test_session.flush()
     request.addfinalizer(fin)
@@ -142,7 +143,7 @@ def reply_post_3(request, participant2_user, discussion,
     test_session.flush()
 
     def fin():
-        print "finalizer reply_post_3"
+        print("finalizer reply_post_3")
         test_session.delete(p)
         test_session.flush()
     request.addfinalizer(fin)
@@ -168,7 +169,7 @@ def reply_deleted_post_4(request, participant2_user, discussion,
     test_session.flush()
 
     def fin():
-        print "finalizer reply_deleted_post_4"
+        print("finalizer reply_deleted_post_4")
         test_session.delete(p)
         test_session.flush()
     request.addfinalizer(fin)
@@ -194,7 +195,7 @@ def reply_to_deleted_post_5(
     test_session.flush()
 
     def fin():
-        print "finalizer reply_to_deleted_post_5"
+        print("finalizer reply_to_deleted_post_5")
         test_session.delete(p)
         test_session.flush()
     request.addfinalizer(fin)

@@ -41,6 +41,7 @@
  Extraction section written by Marc-Antoine Parent
  maparent@acm.org
 '''
+from __future__ import print_function
 
 import numpy as N
 from sklearn.metrics.pairwise import pairwise_distances
@@ -104,7 +105,7 @@ class Dendrogram(object):
         self.parent = parent
 
     def pprint(self, level=0):
-        print " "*level, self.cluster
+        print(" "*level, self.cluster)
         for s in self.subclusters:
             s.pprint(level+1)
 
@@ -461,6 +462,6 @@ if __name__ == "__main__":
     testXOrdered = testX[order]
     P.plot(testXOrdered[:, 0], testXOrdered[:, 1], 'b-')
 
-    print order
+    print(order)
 
     P.show()

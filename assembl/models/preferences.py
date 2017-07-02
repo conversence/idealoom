@@ -5,6 +5,7 @@ May be defined at the user, Discussion or server level."""
 from itertools import chain
 from collections import MutableMapping
 
+from future.utils import string_types
 import simplejson as json
 from sqlalchemy import (
     Column,
@@ -239,7 +240,7 @@ class Preferences(MutableMapping, NamedClassMixin, Base):
         elif data_type == "json":
             pass  # no check
         else:
-            assert isinstance(value, (str, unicode)), "Not a string"
+            assert isinstance(value, string_types), "Not a string"
             if data_type in ("string", "text"):
                 pass
             elif data_type == "scalar":

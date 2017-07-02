@@ -1,4 +1,5 @@
 """Rebuild all tables from scratch, because we have had so many cases of corrupt data."""
+from __future__ import print_function
 from itertools import chain
 import logging.config
 import argparse
@@ -55,17 +56,17 @@ def fk_as_str(fk):
 def rebuild_fkey(session, fk, delete_missing=False):
     from virtuoso.alchemy import AddForeignKey, DropForeignKey
     if not delete_rows_with_missing_fkey(fk, delete_missing):
-        print "There are missing keys, will not reset ", fk_as_str(fk)
+        print("There are missing keys, will not reset ", fk_as_str(fk))
         return
     try:
         session.execute(DropForeignKey(fk))
     except Exception as e:
-        print "Could not drop fkey %s, maybe does not exist." % (fk_as_str(fk),)
-        print e
+        print("Could not drop fkey %s, maybe does not exist." % (fk_as_str(fk),))
+        print(e)
     try:
         session.execute(AddForeignKey(fk))
     except Exception as e:
-        print e
+        print(e)
         try:
             session.execute(AddForeignKey(fk))
         except Exception:
@@ -155,9 +156,9 @@ def delete_rows_with_missing_fkey(fkey, delete_missing=True):
                     delete_row(session, source, id)
                 mark_changed(session)
         else:
-            print "There are %d ids in %s with dangling %s:" % (
-                count, source.name, fk_as_str(fkey))
-            print q.all()
+            print("There are %d ids in %s with dangling %s:" % (
+                count, source.name, fk_as_str(fkey)))
+            print(q.all())
             return False
     return True
 
@@ -213,7 +214,7 @@ def ensure_inheritance_of(cls):
 
 def rebuild_table(table, delete_missing=False):
     from virtuoso.alchemy import AddForeignKey, DropForeignKey
-    print "rebuilding", table
+    print("rebuilding", table)
     session = get_session_maker()()
     incoming = set(get_incoming_fks(table))
     outgoing = set(table.foreign_keys)
@@ -222,11 +223,11 @@ def rebuild_table(table, delete_missing=False):
     try:
         for fk in all_fkeys:
             if not delete_rows_with_missing_fkey(fk, delete_missing):
-                print "There are missing keys, will not rebuild " + table.name
+                print("There are missing keys, will not rebuild " + table.name)
                 return
     except Exception as e:
         traceback.print_exc()
-        print "Could not delete missing keys"
+        print("Could not delete missing keys")
         raise e
     # Booleans with NULL values
     for col in table.c:
@@ -237,8 +238,8 @@ def rebuild_table(table, delete_missing=False):
         try:
             session.execute(DropForeignKey(fk))
         except Exception as e:
-            print "Could not drop fkey %s, maybe does not exist." % (fk_as_str(fk),)
-            print e
+            print("Could not drop fkey %s, maybe does not exist." % (fk_as_str(fk),))
+            print(e)
     clone = clone_table(table, table.name+"_temp", False, False)
     clone.create(session.bind)
     column_names = [c.name for c in table.columns]
@@ -254,8 +255,8 @@ def rebuild_table(table, delete_missing=False):
         try:
             session.execute(DropForeignKey(fk))
         except Exception as e:
-            print "Could not drop fkey %s, maybe does not exist." % (fk_as_str(fk),)
-            print e
+            print("Could not drop fkey %s, maybe does not exist." % (fk_as_str(fk),))
+            print(e)
     sel = select([getattr(clone.c, cname) for cname in column_names])
     with transaction.manager:
         session.execute(table.insert().from_select(column_names, sel))

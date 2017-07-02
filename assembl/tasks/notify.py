@@ -1,4 +1,5 @@
 """Celery task for sending :py:class:`assembl.models.notification.Notification` to users."""
+from __future__ import print_function
 import sys
 from time import sleep
 from datetime import datetime, timedelta
@@ -12,7 +13,6 @@ from pyramid_mailer.message import Message
 from ..lib.sqla import mark_changed
 from ..lib.raven_client import capture_exception
 from . import (config_celery_app, CeleryWithConfig)
-
 
 
 log = logging.getLogger(__name__)
@@ -41,7 +41,7 @@ class NotifyCeleryApp(CeleryWithConfig):
                 try:
                     val = timedelta(seconds=float(val))
                 except ValueError:
-                    print "Not a valid value for %s: %s" % (name, val)
+                    log.error("Not a valid value for %s: %s" % (name, val))
                     continue
                 SMTP_DOMAIN_DELAYS[name[len(SETTINGS_SMTP_DELAY):]] = val
         log.info("SMTP_DOMAIN_DELAYS: " + repr(SMTP_DOMAIN_DELAYS))

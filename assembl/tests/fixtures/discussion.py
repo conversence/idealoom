@@ -1,3 +1,4 @@
+from __future__ import print_function
 import pytest
 from sqlalchemy import inspect
 
@@ -20,7 +21,7 @@ def discussion(request, test_session, default_preferences,
     test_session.flush()
 
     def fin():
-        print "finalizer discussion"
+        print("finalizer discussion")
         discussion = d
         if inspect(discussion).detached:
             # How did this happen?
@@ -58,7 +59,7 @@ def discussion2(request, test_session, default_preferences,
     test_session.flush()
 
     def fin():
-        print "finalizer discussion2"
+        print("finalizer discussion2")
         test_session.delete(d.table_of_contents)
         test_session.delete(d.root_idea)
         test_session.delete(d.next_synthesis)

@@ -29,6 +29,7 @@ Different scenarios are defined in ``production.ini``:
 
     An abstract interface for objects that receive CRUD events on some models
 """
+from __future__ import print_function
 
 
 from zope import interface
@@ -72,31 +73,31 @@ class ModelEventWatcherPrinter(object):
     interface.implements(IModelEventWatcher)
 
     def processPostCreated(self, id):
-        print "processPostCreated", id
+        print("processPostCreated", id)
 
     def processIdeaCreated(self, id):
-        print "processIdeaCreated", id
+        print("processIdeaCreated", id)
 
     def processIdeaModified(self, id, version):
-        print "processIdeaModified", id, version
+        print("processIdeaModified", id, version)
 
     def processIdeaDeleted(self, id):
-        print "processIdeaDeleted", id
+        print("processIdeaDeleted", id)
 
     def processExtractCreated(self, id):
-        print "processExtractCreated", id
+        print("processExtractCreated", id)
 
     def processExtractModified(self, id, version):
-        print "processExtractModified", id, version
+        print("processExtractModified", id, version)
 
     def processExtractDeleted(self, id):
-        print "processExtractDeleted", id
+        print("processExtractDeleted", id)
 
     def processAccountCreated(self, id):
-        print "processAccountCreated", id
+        print("processAccountCreated", id)
 
     def processAccountModified(self, id):
-        print "processAccountModified", id
+        print("processAccountModified", id)
 
 
 def configure_model_watcher(registry, task_name):

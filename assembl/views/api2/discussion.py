@@ -729,7 +729,7 @@ def get_contribution_count(request):
             agents[agent.id] = agent
         v['count'] = as_dict
     count_list = total_count.items()
-    count_list.sort(key=lambda (a, c): c, reverse=True)
+    count_list.sort(key=lambda a_c: a_c[1], reverse=True)
     rows = []
     rows.append(['Start']+[
         x['start'] for x in results] + ['Total'])

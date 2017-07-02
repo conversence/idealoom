@@ -1,4 +1,5 @@
 """Models for voting on ideas"""
+from __future__ import print_function
 from abc import abstractproperty, abstractmethod
 from datetime import datetime
 import simplejson as json

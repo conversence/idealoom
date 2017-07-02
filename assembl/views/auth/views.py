@@ -5,6 +5,7 @@ from smtplib import SMTPRecipientsRefused
 from email.header import Header
 import logging
 
+from future.utils import string_types
 from pyramid.i18n import TranslationStringFactory
 from pyramid.view import view_config
 from pyramid_mailer import get_mailer
@@ -78,7 +79,7 @@ def get_login_context(request, force_show_providers=False):
         hide_providers = aslist(request.registry.settings.get(
             'hide_login_providers', ()))
 
-        if isinstance(hide_providers, (str, unicode)):
+        if isinstance(hide_providers, string_types):
             hide_providers = (hide_providers, )
         providers = [p for p in providers if p['type'] not in hide_providers]
 
@@ -414,8 +415,8 @@ def assembl_register_view(request):
         if asbool(config.get('pyramid.debug_authorization')):
             # for debugging purposes
             from assembl.auth.password import email_token
-            print "email token:", request.route_url(
-                'user_confirm_email', token=email_token(email_account))
+            log.debug("email token: " + request.route_url(
+                'user_confirm_email', token=email_token(email_account)))
         headers = remember(request, user.id)
         user.last_login = datetime.utcnow()
         request.response.headerlist.extend(headers)
@@ -891,9 +892,9 @@ def do_password_change(request):
     old_token = (
         user is None or token_date is None or (
             user.last_login and token_date < user.last_login))
-    print "pwc V%sP%sW%sB%sL%s" % tuple(map(lambda b: "-" if b else "+", (
+    log.debug("pwc V%sP%sW%sB%sL%s" % tuple(map(lambda b: "-" if b else "+", (
         validity != Validity.VALID, lacking_password, not welcome,
-        old_token, logged_in is None)))
+        old_token, logged_in is None))))
     if welcome and not lacking_password:
         # W+P+: welcome link sends onwards irrespective of token
         if logged_in:

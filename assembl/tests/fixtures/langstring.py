@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function
 import pytest
 
 
@@ -210,7 +211,7 @@ def fr_from_en_langstring_entry(request, test_session,
     test_session.expire(langstring_body, ["entries"])
 
     def fin():
-        print "Destroying fr_from_en_langstring_entry"
+        print("Destroying fr_from_en_langstring_entry")
         test_session.delete(entry)
         test_session.flush()
 

@@ -2,10 +2,10 @@
 
 Pyramid allows to use model objects as Context objects, but in our cases they're surrogates for model objects.
 """
-
 from traceback import print_exc
 import logging
 
+from future.utils import string_types
 from sqlalchemy.orm import aliased
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from sqlalchemy.sql.expression import and_
@@ -288,7 +288,7 @@ def process_args(args, cls):
             continue
         reln = mapper.relationships.get(key)
         if (reln is not None and reln.direction.name == 'MANYTOONE' and
-                isinstance(value, (str, unicode))):
+                isinstance(value, string_types)):
             assert(len(reln.local_columns) == 1)
             key = next(reln.local_columns.__iter__()).key
             yield (key, reln.mapper.class_.get_database_id(value))
@@ -810,7 +810,7 @@ class RelationCollectionDefinition(AbstractCollectionDefinition):
             try:
                 query = query.join(owner_alias)
             except InvalidRequestError:
-                print "Could not join %s to %s" % (owner_alias, query)
+                log.error("Could not join %s to %s" % (owner_alias, query))
                 # This is very likely to fail downstream
                 return query
         found_key = False

@@ -1,6 +1,7 @@
 """This process obtains JSON representations of modified, created or deleted
 database objects through ZeroMQ, and feeds them to browser clients
 through a websocket."""
+from __future__ import print_function
 import signal
 import time
 import sys
@@ -9,6 +10,7 @@ from os.path import exists, dirname
 import ConfigParser
 import traceback
 from time import sleep
+import logging
 
 import simplejson as json
 import zmq
@@ -23,10 +25,14 @@ from assembl.lib.zmqlib import INTERNAL_SOCKET
 from assembl.lib.raven_client import setup_raven, capture_exception
 from assembl.lib.web_token import decode_token, TokenInvalid
 
+
+log = logging.getLogger(__name__)
+
+
 # Inspired by socksproxy.
 
 if len(sys.argv) != 2:
-    print "usage: python changes_router.py configuration.ini"
+    print("usage: python changes_router.py configuration.ini")
     exit()
 
 
@@ -99,7 +105,7 @@ class ZMQRouter(SockJSConnection):
     def on_message(self, msg):
         try:
             if getattr(self, 'socket', None):
-                print "closing old socket"
+                log.info("closing old socket")
                 self.loop.add_callback(self.do_close)
                 return
             if msg.startswith('discussion:') and self.valid:
@@ -121,7 +127,7 @@ class ZMQRouter(SockJSConnection):
                     '%s://%s:%d/api/v1/discussion/%s/permissions/read/u/%s' %
                     (SERVER_PROTOCOL, SERVER_HOST, SERVER_PORT, self.discussion,
                         self.token['userId']))
-                print r.text
+                log.debug(r.text)
                 if r.text != 'true':
                     return
                 self.socket = context.socket(zmq.SUB)
@@ -130,7 +136,7 @@ class ZMQRouter(SockJSConnection):
                 self.socket.setsockopt(zmq.SUBSCRIBE, str(self.discussion))
                 self.loop = zmqstream.ZMQStream(self.socket, io_loop=io_loop)
                 self.loop.on_recv(self.on_recv)
-                print "connected"
+                log.info("connected")
                 self.send('[{"@type":"Connection"}]')
                 if self.raw_token and self.discussion and self.userId != Everyone:
                     requests.post('%s://%s:%d/data/Discussion/%s/all_users/%d/connecting' %
@@ -144,7 +150,7 @@ class ZMQRouter(SockJSConnection):
         if self.closing:
             return
         try:
-            print "closing"
+            log.info("closing")
             if self.raw_token and self.discussion and self.userId != Everyone:
                 requests.post('%s://%s:%d/data/Discussion/%s/all_users/%d/disconnecting' %
                     (SERVER_PROTOCOL, SERVER_HOST, SERVER_PORT, self.discussion,
@@ -156,7 +162,7 @@ class ZMQRouter(SockJSConnection):
 
 
 def logger(msg):
-    print msg
+    log.info(msg)
 
 
 def log_queue():

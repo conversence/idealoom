@@ -12,6 +12,7 @@ from __future__ import absolute_import
 
 from os.path import join, dirname, realpath, exists
 import ConfigParser
+import logging
 
 from pyramid.paster import get_appsettings
 from pyramid.path import DottedNameResolver
@@ -26,7 +27,7 @@ from zope.component import getGlobalSiteManager
 from ..lib.model_watcher import configure_model_watcher
 
 _settings = None
-
+log = logging.getLogger(__name__)
 resolver = DottedNameResolver(__package__)
 
 
@@ -100,7 +101,7 @@ def config_celery_app(celery_app, settings=None):
             ) or settings.get('celery_tasks.broker')
         celery_app.config_from_object(config, force=True)
     else:
-        print "**** config_celery_app w/o broker. should not happen anymore"
+        log.error("**** config_celery_app w/o broker. should not happen anymore")
         celery_app.config_from_object(config)
 
 

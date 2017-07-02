@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """ Generate various secondary INI files from the main INI file. """
+from __future__ import print_function
 
 import sys
 import os
@@ -8,6 +9,7 @@ from ConfigParser import (
     NoSectionError, SafeConfigParser, RawConfigParser as Parser)
 from argparse import ArgumentParser, FileType
 import logging
+from future.utils import string_types
 
 from fabfile import combine_rc
 
@@ -63,7 +65,7 @@ def asParser(fob, cls=Parser):
     if isinstance(fob, cls):
         return fob
     parser = cls()
-    if isinstance(fob, (str, unicode)):
+    if isinstance(fob, string_types):
         parser.read(fob)
     else:
         parser.readfp(fob)
@@ -169,7 +171,7 @@ def generate_ini_files(config, config_fname):
         vars[var] = config.get('supervisor', var)
 
     for fname in ('supervisord.conf',):
-        print fname
+        print(fname)
         with open(fname + '.tmpl') as tmpl, open(fname, 'w') as inifile:
             inifile.write(tmpl.read() % vars)
 
@@ -219,15 +221,15 @@ def dump(ini_file):
     ini_file = asParser(ini_file, SafeConfigParser)
     ini_file._defaults['here'] = os.getcwd()
     for section in ini_file.sections():
-        print "\n[%s]\n" % section
+        print("\n[%s]\n" % section)
         for option in ini_file._sections[section]:
-            print option, '=',
+            print(option, '=', end=' ')
             try:
-                print ini_file.get(section, option)
+                print(ini_file.get(section, option))
             except Exception as e:
-                print ini_file.get(section, option, True)
-                print "*"*15, "Could not interpolate"
-                print e
+                print(ini_file.get(section, option, True))
+                print("*"*15, "Could not interpolate")
+                print(e)
 
 
 def populate_random(random_file, random_templates=None, saml_info=None):
@@ -342,7 +344,7 @@ def iniconfig_to_rc(parser, dest=None, extends=None, target_dir=None):
             prefix = section + '__'
         for key, value in parser.items(section):
             if '\n' in value:
-                log.warning("avoid multiline values in RC: %s=%s", key, value)
+                log.warning("avoid multiline values in RC: %s=%s" % (key, value))
                 value = ' '.join(value.split('\n'))
             dest.write("%s%s = %s\n" % (prefix, key, value))
     if hasattr(dest, 'seek'):

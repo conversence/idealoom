@@ -4,10 +4,10 @@ Note that Assembl is a `hybrid app`_, and combines routes and :py:mod:`traversal
 
 .. _`hybrid app`: http://docs.pylonsproject.org/projects/pyramid/en/latest/narr/hybrid.html
 """
-
 import os.path
 import codecs
 from collections import defaultdict
+import logging
 
 import simplejson as json
 from pyramid.view import view_config
@@ -27,6 +27,7 @@ from ..lib.utils import get_global_base_url
 from ..lib.raven_client import capture_exception
 from ..auth import R_PARTICIPANT
 
+log = logging.getLogger(__name__)
 default_context = {
 }
 
@@ -66,7 +67,7 @@ def find_theme(theme_name):
             #print repr(dirpath), repr(dirnames) , repr(filenames)
             relpath = os.path.relpath(dirpath, theme_base_path)
             (head, name) = os.path.split(dirpath)
-            print name, relpath
+            log.debug(name+" "+relpath)
             if name == theme_name:
                 return relpath
 
@@ -380,7 +381,7 @@ def csrf_error_view(exc, request):
                 # So first make sure the new session does not kill the old one
                 def callback(request, response):
                     response._headerlist = [(h, v) for (h, v) in response._headerlist if h != 'Set-Cookie']
-                    print "headerlist:", response._headerlist
+                    log.debug("headerlist: "+ response._headerlist)
                 request.add_response_callback(callback)
                 # And return a page that will reload the same request, NOT through a 303.
                 # Also add a "reload" parameter to avoid doing it twice if it failed.

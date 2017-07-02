@@ -3,6 +3,7 @@ from itertools import groupby, chain
 import traceback
 from datetime import datetime
 from collections import defaultdict
+import logging
 
 import simplejson as json
 from pyramid.security import Allow, ALL_PERMISSIONS
@@ -44,7 +45,6 @@ from .preferences import Preferences
 from ..semantic.namespaces import (CATALYST, ASSEMBL, DCTERMS)
 
 resolver = DottedNameResolver(__package__)
-import logging
 log = logging.getLogger(__name__)
 
 
@@ -260,7 +260,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
             DiscussionPermission).join(Role, Permission).filter(
                 DiscussionPermission.discussion_id == self.id).all()
         roleperms.sort()
-        byrole = groupby(roleperms, lambda (r, p): r)
+        byrole = groupby(roleperms, lambda r_p: r_p[0])
         return {r: [p for (r2, p) in rps] for (r, rps) in byrole}
 
     def get_roles_by_permission(self):
@@ -268,7 +268,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
             DiscussionPermission).join(Role, Permission).filter(
                 DiscussionPermission.discussion_id == self.id).all()
         permroles.sort()
-        byperm = groupby(permroles, lambda (p, r): p)
+        byperm = groupby(permroles, lambda p_r: p_r[0])
         return {p: [r for (p2, r) in prs] for (p, prs) in byperm}
 
     def get_readers(self):
@@ -857,8 +857,9 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
             else:
                 level = node_level(idea.id)
                 age = (end_time - idea.last_modified).total_seconds() / (end_time - start_time).total_seconds()
-                print idea.id, start_time, idea.last_modified, end_time
-                print (end_time - idea.last_modified).total_seconds(), (end_time - start_time).total_seconds()
+                log.debug("%d %s %s %s" % (idea.id, start_time, idea.last_modified, end_time))
+                log.debug("%ld %ld" % ((end_time - idea.last_modified).total_seconds(),
+                                       (end_time - start_time).total_seconds()))
                 #empirical
                 color = hsv(180-(135.0 * age), 0.15, 0.85)
                 G.add_node(idea.id,

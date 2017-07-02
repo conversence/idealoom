@@ -58,10 +58,11 @@ def upgrade(pyramid_env):
         for lang in lang_codes:
             if lang not in locale_dict:
                 log.warn("[Migrating from %s -> %s] Language code %s is not in locale. Creating it now..."
-                         % down_revision, revision, lang)
+                         % (down_revision, revision, lang))
                 locale = m.Locale(code=lang)
                 db.add(locale)
-                log.warn("[Migrating from %s -> %s] Created locale %s with id %d" % lang, locale.id)
+                log.warn("[Migrating from %s -> %s] Created locale %s with id %d" % (
+                    down_revision, revision, lang, locale.id))
         mark_changed()
 
     with context.begin_transaction():

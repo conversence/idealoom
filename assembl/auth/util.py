@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from os import urandom
 import base64
 
+from future.utils import string_types
 from sqlalchemy.sql.expression import and_
 from pyramid.security import (
     authenticated_userid, Everyone, Authenticated)
@@ -423,7 +424,7 @@ def add_user(name, email, password, role, force=False, username=None,
     user = None
     created_user = True
     if discussion and localrole:
-        if isinstance(discussion, (str, unicode)):
+        if isinstance(discussion, string_types):
             discussion_ob = db.query(Discussion).filter_by(
                 slug=discussion).first()
             assert discussion_ob,\

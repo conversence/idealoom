@@ -5,6 +5,7 @@ In reality, the set of widget behaviours is constrained here.
 """
 from itertools import chain
 from datetime import datetime
+import logging
 
 from sqlalchemy import (
     Column, Integer, ForeignKey, Text, String, Boolean, DateTime, inspect)
@@ -32,6 +33,9 @@ from ..views.traversal import (
     collection_creation_side_effects, InstanceContext)
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..semantic.namespaces import (ASSEMBL, QUADNAMES)
+
+
+log = logging.getLogger(__name__)
 
 
 class Widget(DiscussionBoundBase):
@@ -761,20 +765,20 @@ class VotingWidget(BaseIdeaWidget):
                     criterion_idea = Idea.get_instance(criterion["@id"])
                     self.add_criterion(criterion_idea)
                 except Exception as e:
-                    print "Missing criterion. Discarded.", criterion
+                    log.error("Missing criterion. Discarded. " + criterion)
         if 'votables' in settings:
             for votable_id in settings['votables']:
                 try:
                     votable_idea = Idea.get_instance(votable_id)
                     self.add_votable(votable_idea)
                 except Exception as e:
-                    print "Missing votable. Discarded.", votable_id
+                    log.error("Missing votable. Discarded. " + votable_id)
         elif 'votable_root_id' in settings:
             try:
                 votable_root_idea = Idea.get_instance(
                     settings['votable_root_id'])
             except Exception as e:
-                print "Cannot find votable root.", settings['votable_root_id']
+                log.error("Cannot find votable root. " + settings['votable_root_id'])
                 return
             if len(votable_root_idea.children):
                 for child in votable_root_idea.children:

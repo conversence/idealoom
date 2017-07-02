@@ -1,7 +1,12 @@
 """Abstract the existence and use of ravenJS"""
+import logging
 from traceback import print_exc
+import ConfigParser
+
 
 _raven_client = None
+log = logging.getLogger(__name__)
+
 
 def get_raven_client():
     from raven.base import Raven
@@ -29,7 +34,7 @@ def setup_raven(settings):
     this is useful for other processes."""
     global _raven_client
     if _raven_client is not None:
-        print "Calling setup_raven when raven is already set up."
+        log.error("Calling setup_raven when raven is already set up.")
         return
     try:
         pipeline = settings.get('pipeline:main', 'pipeline').split()

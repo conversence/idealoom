@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function
 import pytest
 from datetime import datetime, timedelta
 import simplejson as json
@@ -242,7 +243,7 @@ def test_creativity_session_widget(
     )
     assert widget_rep.status_code == 200
     widget_rep = widget_rep.json
-    print widget_rep
+    print(widget_rep)
     assert 'messages_url' in widget_rep
     assert 'ideas_url' in widget_rep
     assert 'user' in widget_rep
@@ -363,7 +364,7 @@ def test_creativity_session_widget(
     assert new_post1_rep.status_code == 200
 
     # It should mention its idea
-    print new_post1_rep.json
+    print(new_post1_rep.json)
     assert new_idea1_id in new_post1_rep.json['widget_ideas']
 
     new_post1 = Post.get_instance(new_post1_id)
@@ -435,7 +436,7 @@ def test_creativity_session_widget(
     new_post2 = Post.get_instance(new_post2_id)
 
     def clear_data():
-        print "finalizing test data"
+        print("finalizing test data")
         test_session.delete(new_post1)
         test_session.delete(new_post2)
         test_session.delete(new_idea1.proposed_in_post)
@@ -453,7 +454,7 @@ def test_creativity_session_widget(
     # Only one active session
     assert len(notifications) == 1
     notification = notifications[0]
-    print notification
+    print(notification)
     assert notification['widget_url']
     assert notification['time_to_end'] > 23 * 60 * 60
     assert notification['num_participants'] == 2  # participant and admin
@@ -495,7 +496,7 @@ def test_inspiration_widget(
     )
     assert widget_rep.status_code == 200
     widget_rep = widget_rep.json
-    print widget_rep
+    print(widget_rep)
     assert 'messages_url' in widget_rep
     assert 'ideas_url' in widget_rep
     assert 'user' in widget_rep
@@ -710,7 +711,7 @@ def test_voting_widget(
     # print ideas_data
 
     def fin():
-        print "finalizer test_voting_widget"
+        print("finalizer test_voting_widget")
         new_widget.delete()
         # this should cascade to specs and votes
         test_session.flush()

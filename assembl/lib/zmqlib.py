@@ -1,11 +1,13 @@
 """ZMQ setup for the changes socket"""
 import atexit
 from itertools import count
+import logging
 
 import zmq
 import zmq.devices
 from time import sleep
 
+log = logging.getLogger(__name__)
 context = zmq.Context.instance()
 
 INTERNAL_SOCKET = 'inproc://assemblchanges'
@@ -35,7 +37,7 @@ def start_dispatch_thread():
 
 @atexit.register
 def stop_sockets():
-    #print "STOPPING SOCKETS"
+    # log.debug("STOPPING SOCKETS")
     global CHANGES_SOCKET, MULTIPLEX, INITED, DISPATCHER
     for socket in _active_sockets:
         socket.close()
@@ -60,11 +62,11 @@ def get_pub_socket():
 
 
 def send_changes(socket, discussion, changeset):
-    order = _counter.next()
+    order = next(_counter)
     socket.send(discussion, zmq.SNDMORE)
     socket.send(str(order), zmq.SNDMORE)
     socket.send_json(changeset)
-    print "sent", order, discussion, changeset
+    log.debug("sent %d %s %s " % (order, discussion, changeset))
 
 
 def configure_zmq(sockdef, multiplex):

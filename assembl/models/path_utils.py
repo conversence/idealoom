@@ -217,7 +217,7 @@ class PostPathLocalCollection(object):
         return clone
 
     def __repr__(self):
-        return " ; ".join((`x` for x in self.paths))
+        return " ; ".join((repr(x) for x in self.paths))
 
     def as_clause_base(self, db, include_breakpoints=False,
                        include_deleted=False):

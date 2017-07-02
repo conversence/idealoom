@@ -1,3 +1,4 @@
+from __future__ import print_function
 import datetime
 
 from cryptography.hazmat.backends import default_backend
@@ -103,6 +104,6 @@ if __name__ == '__main__':
                  "email": "assembl@bluenove.com"}
     key_text, key = make_saml_key()
     crt_text, crt = make_saml_cert(key, **saml_info)
-    print key_text
-    print
-    print crt_text
+    print(key_text)
+    print()
+    print(crt_text)

@@ -1,3 +1,4 @@
+from __future__ import print_function
 import pytest
 
 
@@ -18,7 +19,7 @@ def user_language_preference_en_cookie(request, test_session, admin_user):
         source_of_evidence=LanguagePreferenceOrder.Cookie.value)
 
     def fin():
-        print "finalizer user_language_preference_cookie"
+        print("finalizer user_language_preference_cookie")
         test_session.delete(ulp)
         test_session.flush()
 
@@ -45,7 +46,7 @@ def user_language_preference_fr_cookie(request, test_session, admin_user):
         source_of_evidence=LanguagePreferenceOrder.Cookie.value)
 
     def fin():
-        print "finalizer user_language_preference_cookie"
+        print("finalizer user_language_preference_cookie")
         test_session.delete(ulp)
         test_session.flush()
 
@@ -71,7 +72,7 @@ def user_language_preference_it_cookie(request, test_session, admin_user):
         source_of_evidence=LanguagePreferenceOrder.Cookie.value)
 
     def fin():
-        print "finalizer user_language_preference_cookie"
+        print("finalizer user_language_preference_cookie")
         test_session.delete(ulp)
         test_session.flush()
 
@@ -99,7 +100,7 @@ def user_language_preference_en_explicit(request, test_session,
         source_of_evidence=LanguagePreferenceOrder.Explicit.value)
 
     def fin():
-        print "finalizer user_language_preference_cookie"
+        print("finalizer user_language_preference_cookie")
         test_session.delete(ulp)
         test_session.flush()
 
@@ -126,7 +127,7 @@ def user_language_preference_fr_explicit(request, test_session,
         source_of_evidence=LanguagePreferenceOrder.Explicit.value)
 
     def fin():
-        print "finalizer user_language_preference_cookie"
+        print("finalizer user_language_preference_cookie")
         test_session.delete(ulp)
         test_session.flush()
 
@@ -153,7 +154,7 @@ def user_language_preference_it_explicit(request, test_session,
         source_of_evidence=LanguagePreferenceOrder.Explicit.value)
 
     def fin():
-        print "finalizer user_language_preference_cookie"
+        print("finalizer user_language_preference_cookie")
         test_session.delete(ulp)
         test_session.flush()
 
@@ -180,7 +181,7 @@ def user_language_preference_de_explicit(request, test_session,
         source_of_evidence=LanguagePreferenceOrder.Explicit.value)
 
     def fin():
-        print "finalizer user_language_preference_cookie"
+        print("finalizer user_language_preference_cookie")
         test_session.delete(ulp)
         test_session.flush()
 
@@ -207,7 +208,7 @@ def user_language_preference_tr_explicit(request, test_session,
         source_of_evidence=LanguagePreferenceOrder.Explicit.value)
 
     def fin():
-        print "finalizer user_language_preference_cookie"
+        print("finalizer user_language_preference_cookie")
         test_session.delete(ulp)
         test_session.flush()
 

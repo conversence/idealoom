@@ -8,6 +8,7 @@ The core fixtures that will:
     6) create a databse session
     7) A fixture for a headless browser (phantomjs)
 """
+from __future__ import print_function
 
 import pytest
 import transaction
@@ -38,7 +39,7 @@ def session_factory(request):
     session_factory = get_session_maker()
 
     def fin():
-        print "finalizer session_factory"
+        print("finalizer session_factory")
         session_factory.remove()
     request.addfinalizer(fin)
     return session_factory
@@ -64,7 +65,7 @@ def db_tables(request, empty_db):
     transaction.commit()
 
     def fin():
-        print "finalizer db_tables"
+        print("finalizer db_tables")
         session = empty_db()
         drop_tables(get_config(), session)
         transaction.commit()
@@ -108,7 +109,7 @@ def test_webrequest(request, test_app_no_perm, base_registry):
     req = PyramidWebTestRequest.blank('/', method="GET")
 
     def fin():
-        print "finalizer test_webrequest"
+        print("finalizer test_webrequest")
         # The request was not called
         manager.pop()
     request.addfinalizer(fin)
@@ -125,7 +126,7 @@ def db_default_data(
     transaction.commit()
 
     def fin():
-        print "finalizer db_default_data"
+        print("finalizer db_default_data")
         session = db_tables()
         clear_rows(get_config(), session)
         transaction.commit()
@@ -141,7 +142,7 @@ def test_session(request, db_default_data):
     session = db_default_data()
 
     def fin():
-        print "finalizer test_session"
+        print("finalizer test_session")
         try:
             session.commit()
             #session.close()
@@ -165,7 +166,7 @@ def admin_user(request, test_session, db_default_data):
     uid = u.id
 
     def fin():
-        print "finalizer admin_user"
+        print("finalizer admin_user")
         # I often get expired objects here, and I need to figure out why
         user = test_session.query(User).get(uid)
         user_role = user.roles[0]
@@ -255,7 +256,7 @@ def test_server(request, test_app, empty_db):
     server.start()
 
     def fin():
-        print "finalizer test_server"
+        print("finalizer test_server")
         server.stop()
     request.addfinalizer(fin)
     return server
@@ -274,7 +275,7 @@ def browser(request):
 
     def fin():
         import signal
-        print "finalizer browser"
+        print("finalizer browser")
         # Kill process so it does not linger
         # https://github.com/seleniumhq/selenium/issues/767
         browser.driver.service.process.send_signal(signal.SIGTERM)

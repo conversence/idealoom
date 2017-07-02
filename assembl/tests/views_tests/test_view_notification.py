@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import print_function
 from datetime import datetime
 
 import simplejson as json
@@ -92,7 +93,7 @@ def test_default_notifications(
             discussion.id, participant1_user.id))
     assert response.status_code == 200
     user_notif_subsc_3 = response.json
-    print user_notif_subsc_3
+    print(user_notif_subsc_3)
     corresponding = [s for s in user_notif_subsc_3 if s['@type'] == t_unsub['@type']]
     assert len(corresponding) == 1
     assert corresponding[0]['status'] != "ACTIVE"

@@ -3,6 +3,7 @@
 Note that the ModelEventWatcher are Mapper-level flush events, so they cannot
 create objects. This pushes the logic on another thread, so we're already
 using another thread-specific session."""
+from __future__ import print_function
 
 from threading import Thread
 from Queue import Queue
@@ -33,9 +34,9 @@ class ThreadDispatcher(Thread):
 
     def run(self):
         while not self.dying:
-            print "*"*20,
+            print("*"*20, end=' ')
             event = self.queue.get()
-            print event
+            print(event)
             method_name = event[0]
             method = getattr(self.mw, method_name)
             method(*event[1:])

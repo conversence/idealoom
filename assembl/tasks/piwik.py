@@ -1,6 +1,8 @@
+from __future__ import print_function
 
 import string
 import random
+import logging
 
 import requests
 from zope import interface
@@ -9,6 +11,8 @@ from pyramid.settings import asbool
 
 from assembl.lib import config
 from assembl.lib.discussion_creation import IDiscussionCreationCallback
+
+log = logging.getLogger(__name__)
 
 
 class AutomaticPiwikBindingAtDiscussionCreation(object):
@@ -57,12 +61,12 @@ def bind_piwik(discussion, admin=None):
             user_created = piwik_UsersManager_addUser(piwik_url, piwik_api_token, user_email, user_password, user_email)
             if not user_created:
                 # Try to find if creation failed because of rare/edge case of a Piwik user already existing with the user_email as login but not as email
-                print("##### user not created, trying to find why")
+                log.error("##### user not created, trying to find why")
                 user_with_email_as_login_exists = piwik_UsersManager_userExists(piwik_url, piwik_api_token, user_email)
                 if user_with_email_as_login_exists:
                     # We will use this strange Piwik user
                     user_login = user_email
-                    print("##### we are in the rare case of a Piwik user already existing with the user_email as login but not as email")
+                    log.error("##### we are in the rare case of a Piwik user already existing with the user_email as login but not as email")
                 else:
                     raise requests.ConnectionError()
         else:
@@ -102,7 +106,7 @@ def bind_piwik(discussion, admin=None):
                 user_has_super_user_access = piwik_UsersManager_hasSuperUserAccess(piwik_url, piwik_api_token, user_login)
                 if user_has_super_user_access:
                     permission_given = True
-                    print("##### This Piwik user exists and is Super User, so he has access to any Piwik site")
+                    log.error("##### This Piwik user exists and is Super User, so he has access to any Piwik site")
                 else:
                     raise RuntimeError("Could not give view permission to Piwik user on Piwik site (and user does not seem to have Super User access)")
             # Set discussion's piwik id_site property
@@ -136,7 +140,7 @@ def piwik_UsersManager_userExists(piwik_url, piwik_api_token, userLogin):
         raise requests.ConnectionError()
 
     content = result.json()
-    # print "piwik_UsersManager_userExists", content
+    # log.info( "piwik_UsersManager_userExists", content)
     if not content:
         raise requests.ConnectionError()
 
@@ -156,7 +160,7 @@ def piwik_UsersManager_getUserByEmail(piwik_url, piwik_api_token, userEmail):
         raise requests.ConnectionError()
 
     content = result.json() # returns something like [{"login":"aaa","email":"aaa@aaa.com"}] or {"result":"error","message":"L'utilisateur 'aaa@aaa.com' est inexistant."}
-    # print "piwik_UsersManager_getUserByEmail", content
+    # log.info( "piwik_UsersManager_getUserByEmail", content)
     if not content:
         raise requests.ConnectionError()
 
@@ -185,7 +189,7 @@ def piwik_UsersManager_addUser(piwik_url, piwik_api_token, userLogin, password, 
         raise requests.ConnectionError()
 
     content = result.json()
-    # print "piwik_UsersManager_addUser", content
+    # log.debug( "piwik_UsersManager_addUser", content)
     if not content:
         raise requests.ConnectionError()
 
@@ -206,7 +210,7 @@ def piwik_SitesManager_getSitesIdFromSiteUrl(piwik_url, piwik_api_token, url):
     if result.status_code != 200:
         raise requests.ConnectionError()
     content = result.json() # Content should be either an empty array, or an array like [{"idsite":"44"}]
-    # print "piwik_SitesManager_getSitesIdFromSiteUrl", content
+    # log.debug( "piwik_SitesManager_getSitesIdFromSiteUrl", content)
     if not isinstance(content, list):
         raise requests.ConnectionError()
 
@@ -261,7 +265,7 @@ def piwik_SitesManager_addSite(piwik_url, piwik_api_token, siteName, urls, ecomm
         raise requests.ConnectionError()
 
     content = result.json() # Content should be something like {"value": 47}
-    # print "piwik_SitesManager_addSite", content
+    # log.debug( "piwik_SitesManager_addSite", content)
 
     if not content:
         raise requests.ConnectionError()
@@ -286,7 +290,7 @@ def piwik_UsersManager_setUserAccess(piwik_url, piwik_api_token, userLogin, acce
     if result.status_code != 200:
         raise requests.ConnectionError()
     content = result.json() # Content should be either an empty array, or an array like [{"idsite":"44"}]
-    # print "piwik_UsersManager_setUserAccess", content
+    # log.debug( "piwik_UsersManager_setUserAccess", content)
 
     if not content:
         raise requests.ConnectionError()
@@ -308,7 +312,7 @@ def piwik_UsersManager_hasSuperUserAccess(piwik_url, piwik_api_token, userLogin)
     if result.status_code != 200:
         raise requests.ConnectionError()
     content = result.json() # Content should be like {"value": true}
-    # print "piwik_UsersManager_hasSuperUserAccess", content
+    # log.debug( "piwik_UsersManager_hasSuperUserAccess", content)
 
     if not content:
         raise requests.ConnectionError()

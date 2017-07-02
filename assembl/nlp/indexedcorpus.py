@@ -61,7 +61,7 @@ class IdMmCorpus(MmCorpus):
             for k, c in corpus:
                 key_order.append(k)
                 yield c
-        IndexedCorpus.serialize.im_func(
+        IndexedCorpus.serialize.__func__(
             serializer, fname, corpus_as_list(), id2word,
             index_fname, progress_cnt, labels, metadata)
         dockeys_fname = dockeys_fname or utils.smart_extension(
