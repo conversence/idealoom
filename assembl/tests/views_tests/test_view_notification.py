@@ -8,6 +8,8 @@ from assembl.models import (
     NotificationSubscription,
 )
 
+accept_json = {"Accept": "application/json"}
+
 
 def local_to_absolute(uri):
     if uri.startswith('local:'):
@@ -36,7 +38,7 @@ def test_default_notifications(
     # Get the user's notifications. Should not be empty.
     response = test_app.get(
         '/data/Discussion/%d/all_users/%d/notification_subscriptions' % (
-            discussion.id, participant1_user.id))
+            discussion.id, participant1_user.id), headers=accept_json)
     assert response.status_code == 200
     user_notif_subsc = response.json
     assert len(user_notif_subsc)
@@ -46,7 +48,7 @@ def test_default_notifications(
     # Get the template's subscriptions.
     response = test_app.get(
         '/data/Discussion/%d/user_templates/-/notification_subscriptions' % (
-            discussion.id,))
+            discussion.id,), headers=accept_json)
     assert response.status_code == 200
     template_notif_subsc = response.json
     assert len(template_notif_subsc) >= 3
@@ -70,7 +72,7 @@ def test_default_notifications(
     # Check if the user's subscriptions were affected
     response = test_app.get(
         '/data/Discussion/%d/all_users/%d/notification_subscriptions' % (
-            discussion.id, participant1_user.id))
+            discussion.id, participant1_user.id), headers=accept_json)
     assert response.status_code == 200
     user_notif_subsc_new = response.json
     assert len(user_notif_subsc_new) > len(user_notif_subsc)
@@ -90,7 +92,7 @@ def test_default_notifications(
     # Check if the user's subscriptions were affected again
     response = test_app.get(
         '/data/Discussion/%d/all_users/%d/notification_subscriptions' % (
-            discussion.id, participant1_user.id))
+            discussion.id, participant1_user.id), headers=accept_json)
     assert response.status_code == 200
     user_notif_subsc_3 = response.json
     print(user_notif_subsc_3)
@@ -111,7 +113,7 @@ def test_user_unsubscribed_stable(
     # Get the user's notifications. Should not be empty.
     response = test_app.get(
         '/data/Discussion/%d/all_users/%d/notification_subscriptions' % (
-            discussion.id, participant1_user.id))
+            discussion.id, participant1_user.id), headers=accept_json)
     assert response.status_code == 200
     user_notif_subsc = response.json
     assert len(user_notif_subsc)
@@ -122,7 +124,7 @@ def test_user_unsubscribed_stable(
     # Get the template's subscriptions.
     response = test_app.get(
         '/data/Discussion/%d/user_templates/-/notification_subscriptions' % (
-            discussion.id,))
+            discussion.id,), headers=accept_json)
     assert response.status_code == 200
     template_notif_subsc = response.json
     assert len(template_notif_subsc) >= 3
@@ -159,7 +161,7 @@ def test_user_unsubscribed_stable(
     response = test_app.get(
         '/data/Discussion/%d/all_users/%d/notification_subscriptions/%d' % (
         discussion.id, participant1_user.id, default_subscribed_id),
-        default_subscribed)
+        default_subscribed, headers=accept_json)
     assert response.status_code == 200
     default_subscribed_after = response.json
     assert default_subscribed_after['status'] == 'UNSUBSCRIBED'
@@ -177,7 +179,7 @@ def test_user_subscribed_stable(
     # Get the user's notifications. Should not be empty.
     response = test_app.get(
         '/data/Discussion/%d/all_users/%d/notification_subscriptions' % (
-            discussion.id, participant1_user.id))
+            discussion.id, participant1_user.id), headers=accept_json)
     assert response.status_code == 200
     user_notif_subsc = response.json
     assert len(user_notif_subsc)
@@ -188,7 +190,7 @@ def test_user_subscribed_stable(
     # Get the template's subscriptions.
     response = test_app.get(
         '/data/Discussion/%d/user_templates/-/notification_subscriptions' % (
-            discussion.id,))
+            discussion.id,), headers=accept_json)
     assert response.status_code == 200
     template_notif_subsc = response.json
     assert len(template_notif_subsc) >= 3
@@ -231,7 +233,7 @@ def test_user_subscribed_stable(
     response = test_app.get(
         '/data/Discussion/%d/all_users/%d/notification_subscriptions/%d' % (
         discussion.id, participant1_user.id, new_subscription_id),
-        default_subscribed)
+        default_subscribed, headers=accept_json)
     assert response.status_code == 200
     default_subscribed_after = response.json
     assert default_subscribed_after['status'] == 'ACTIVE'

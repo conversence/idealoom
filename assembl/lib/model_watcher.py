@@ -32,6 +32,7 @@ Different scenarios are defined in ``production.ini``:
 from __future__ import print_function
 
 
+from builtins import object
 from zope import interface
 from pyramid.path import DottedNameResolver
 
@@ -68,9 +69,9 @@ class IModelEventWatcher(interface.Interface):
         pass
 
 
+@interface.implementer(IModelEventWatcher)
 class ModelEventWatcherPrinter(object):
     """A dummy :py:class:`IModelEventWatcher` for testing purposes"""
-    interface.implements(IModelEventWatcher)
 
     def processPostCreated(self, id):
         print("processPostCreated", id)

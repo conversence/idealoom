@@ -3,6 +3,7 @@ A plugin api for processes that will be run when a discussion is created
 """
 from __future__ import print_function
 
+from builtins import object
 from zope import interface
 from pyramid.path import DottedNameResolver
 from pyramid.config import aslist
@@ -24,9 +25,9 @@ class IDiscussionCreationCallback(interface.Interface):
         pass
 
 
+@interface.implementer(IDiscussionCreationCallback)
 class DiscussionCreationPrinter(object):
     """A dummy :py:class:`IDiscussionCreationCallback` for testing purposes"""
-    interface.implements(IDiscussionCreationCallback)
 
     def discussionCreated(self, discussion):
         print("discussionCreated", discussion)

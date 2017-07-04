@@ -1,5 +1,7 @@
 """Celery task for sending :py:class:`assembl.models.notification.Notification` to users."""
 from __future__ import print_function
+from builtins import str
+from builtins import range
 import sys
 from time import sleep
 from datetime import datetime, timedelta
@@ -36,7 +38,7 @@ class NotifyCeleryApp(CeleryWithConfig):
         global notify_process_mailer
         notify_process_mailer = mailer_factory_from_settings(settings)
         # setup SETTINGS_SMTP_DELAY
-        for name, val in settings.iteritems():
+        for name, val in settings.items():
             if name.startswith(SETTINGS_SMTP_DELAY):
                 try:
                     val = timedelta(seconds=float(val))

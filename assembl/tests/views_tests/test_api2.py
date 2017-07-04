@@ -20,6 +20,8 @@ from assembl.models import (
 )
 
 
+accept_json = {"Accept": "application/json"}
+
 
 def local_to_absolute(uri):
     if uri.startswith('local:'):
@@ -251,7 +253,7 @@ def test_creativity_session_widget(
     # should be empty, despite the idea having a non-widget child
     idea_endpoint = local_to_absolute(widget_rep['ideas_url'])
     idea_hiding_endpoint = local_to_absolute(widget_rep['ideas_hiding_url'])
-    test = test_app.get(idea_endpoint)
+    test = test_app.get(idea_endpoint, headers=accept_json)
     assert test.status_code == 200
     assert test.json == []
 
@@ -306,7 +308,7 @@ def test_creativity_session_widget(
     assert content_link
 
     # The new idea should now be in the collection api
-    test = test_app.get(idea_endpoint)
+    test = test_app.get(idea_endpoint, headers=accept_json)
     assert test.status_code == 200
     test = test.json
     assert new_idea1_id in test or new_idea1_id in [
@@ -351,7 +353,7 @@ def test_creativity_session_widget(
     assert post.parent == new_idea1.proposed_in_post
 
     # The new post should now be in the collection api
-    test = test_app.get(local_to_absolute(post_endpoint))
+    test = test_app.get(local_to_absolute(post_endpoint), headers=accept_json)
     assert test.status_code == 200
     assert new_post1_id in test.json or new_post1_id in [
         x['@id'] for x in test.json]
@@ -388,7 +390,7 @@ def test_creativity_session_widget(
     discussion.db.flush()
 
     # Get it back
-    get_back = test_app.get(confirm_idea_url)
+    get_back = test_app.get(confirm_idea_url, headers=accept_json)
     assert get_back.status_code == 200
 
     # The first idea should now be unhidden, but not the second
@@ -426,7 +428,7 @@ def test_creativity_session_widget(
     discussion.db.flush()
 
     # Get it back
-    get_back = test_app.get(confirm_messages_url)
+    get_back = test_app.get(confirm_messages_url, headers=accept_json)
     assert get_back.status_code == 200
     assert get_back.json == [new_post1_id]
 
@@ -505,7 +507,7 @@ def test_inspiration_widget(
     # should be empty, despite the idea having a non-widget child
     idea_endpoint = local_to_absolute(widget_rep['ideas_url'])
     idea_hiding_endpoint = local_to_absolute(widget_rep['ideas_hiding_url'])
-    test = test_app.get(idea_endpoint)
+    test = test_app.get(idea_endpoint, headers=accept_json)
     assert test.status_code == 200
     assert test.json == []
 
@@ -628,7 +630,7 @@ def test_voting_widget(
 
     # User votes should be empty
     user_votes_url = local_to_absolute(widget_rep['user_votes_url'])
-    test = test_app.get(user_votes_url)
+    test = test_app.get(user_votes_url, headers=accept_json)
     assert test.status_code == 200
     assert len(test.json) == 0
 
@@ -636,7 +638,7 @@ def test_voting_widget(
     # Here we're using the voting_urls of the widget based on a single target;
     # The alternative is to look at the voting_urls of a vote_spec
     # and to get an url per target. The end result should be the same.
-    for i, (vote_spec_id, voting_url) in enumerate(voting_urls.iteritems()):
+    for i, (vote_spec_id, voting_url) in enumerate(voting_urls.items()):
         voting_url = local_to_absolute(voting_url)
         for spec in vote_spec_reps:
             if spec['@id'] == vote_spec_id:
@@ -660,7 +662,7 @@ def test_voting_widget(
         assert test.status_code == 201
 
     # Get them back
-    test = test_app.get(user_votes_url)
+    test = test_app.get(user_votes_url, headers=accept_json)
     assert test.status_code == 200
     assert len(test.json) == len(vote_spec_reps)
 
@@ -672,7 +674,7 @@ def test_voting_widget(
         assert spec_rep['@id'] in vote_results_urls
         vote_results_url = vote_results_urls.get(spec_rep['@id'], None)
         assert vote_results_url
-        vote_results = test_app.get(local_to_absolute(vote_results_url))
+        vote_results = test_app.get(local_to_absolute(vote_results_url), headers=accept_json)
         assert vote_results.status_code == 200
         vote_results = vote_results.json
         assert vote_results[subidea_1_1.uri()]['n'] == 1
@@ -699,7 +701,7 @@ def test_voting_widget(
         assert spec_rep['@id'] in vote_results_urls
         vote_results_url = vote_results_urls.get(spec_rep['@id'], None)
         assert vote_results_url
-        vote_results = test_app.get(local_to_absolute(vote_results_url))
+        vote_results = test_app.get(local_to_absolute(vote_results_url), headers=accept_json)
         assert vote_results.status_code == 200
         vote_results = vote_results.json
         assert vote_results[subidea_1_1.uri()]['n'] == 1
@@ -764,7 +766,7 @@ def DISABLEDtest_voting_widget_criteria(
 
     # The criteria should also be in the criteria url
     criteria_url = local_to_absolute(widget_rep['criteria_url'])
-    test = test_app.get(criteria_url)
+    test = test_app.get(criteria_url, headers=accept_json)
     assert test.status_code == 200
     assert len(test.json) == 2
     assert {x['@id'] for x in test.json} == {c.uri() for c in criteria}
@@ -783,7 +785,7 @@ def DISABLEDtest_voting_widget_criteria(
     db.expire(new_widget, ('criteria', ))
 
     # Get them back
-    test = test_app.get(criteria_url)
+    test = test_app.get(criteria_url, headers=accept_json)
     assert test.status_code == 200
     assert len(test.json) == 2
     assert {x['@id'] for x in test.json} == {c.uri() for c in criteria}
@@ -798,7 +800,7 @@ def test_add_user_description(test_app, discussion, participant1_user):
     assert r.status_code == 200
 
     # Check it
-    r = test_app.get(url)
+    r = test_app.get(url, headers=accept_json)
     assert r.status_code == 200
     res_data = json.loads(r.body)
     assert res_data['description'] == description
@@ -820,10 +822,10 @@ def test_add_partner_organization(test_app, discussion):
 
     # Check it
     link = local_to_absolute(r.location)
-    r = test_app.get(link)
+    r = test_app.get(link, headers=accept_json)
     assert r.status_code == 200
     res_data = json.loads(r.body)
-    for k, v in org.iteritems():
+    for k, v in org.items():
         assert res_data[k] == v
 
 
@@ -878,12 +880,12 @@ def test_add_timeline_event(test_app, discussion):
 
     # Check it
     uri2 = r.location
-    r = test_app.get(local_to_absolute(uri2))
+    r = test_app.get(local_to_absolute(uri2), headers=accept_json)
     assert r.status_code == 200
     phase2_data = json.loads(r.body)
 
     # Get phase 1
-    r = test_app.get(local_to_absolute(uri1))
+    r = test_app.get(local_to_absolute(uri1), headers=accept_json)
     assert r.status_code == 200
     phase1_data = json.loads(r.body)
 

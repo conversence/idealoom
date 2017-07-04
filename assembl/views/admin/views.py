@@ -1,3 +1,4 @@
+from builtins import object
 import simplejson as json
 
 from pyramid.i18n import TranslationStringFactory

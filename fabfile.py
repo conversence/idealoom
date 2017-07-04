@@ -1,13 +1,18 @@
 #!/bin/env python
 # -*- coding:utf-8 -*-
+from __future__ import print_function
 from __future__ import with_statement
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import range
 
 from os import getenv
 from getpass import getuser
 from platform import system
 from time import sleep, strftime, time
-from ConfigParser import ConfigParser, SafeConfigParser, NoOptionError
-from StringIO import StringIO
+from configparser import ConfigParser, SafeConfigParser, NoOptionError
+from io import StringIO
 # Importing the "safe" os.path commands
 from os.path import join, dirname, split, normpath
 # Other calls to os.path rarely mostly don't work remotely. Use locally only.
@@ -59,7 +64,7 @@ def filter_global_names(rc_data):
     Some keys in rc files are prefixed with * or _ for ini conversion purposes,
     those are stripped. If the value is '__delete_key__',
     the pair is filtered out."""
-    return {k.lstrip('*').lstrip('_'): v for (k, v) in rc_data.iteritems()
+    return {k.lstrip('*').lstrip('_'): v for (k, v) in list(rc_data.items())
             if v != '__delete_key__'}
 
 
@@ -872,7 +877,7 @@ def bower_cmd(cmd, relative_path='.'):
         bower_cmd = normpath(join(get_node_bin_path(), 'bower'))
         po2json_cmd = normpath(join(get_node_bin_path(), 'po2json'))
         if not exists(bower_cmd) or not exists(po2json_cmd):
-            print "Bower not present, installing..."
+            print("Bower not present, installing...")
             execute(install_bower)
         with cd(relative_path):
             print("Running a bower command in path %s" % relative_path)
@@ -1010,7 +1015,7 @@ def install_basetools():
 
 def install_builddeps():
     print(cyan('Installing compilers and required libraries'))
-    print "env.hosts" + repr(env.hosts)
+    print("env.hosts" + repr(env.hosts))
     if env.mac:
         run('brew install libevent')
         # may require a sudo
@@ -1163,7 +1168,7 @@ def start_edit_fontello_fonts():
 def compile_fontello_fonts():
     """Compile the fontello fonts once you have edited them in Fontello. Run start_edit_fontello_fonts first."""
     from zipfile import ZipFile
-    from StringIO import StringIO
+    from io import StringIO
     assert env.hosts == ['localhost'], "Meant to be run locally"
     import requests
     font_dir = join(
@@ -1237,7 +1242,7 @@ def create_sentry_project():
     if env.get("sentry_key", None) and env.get("sentry_secret", None):
         return
     import requests
-    from ConfigParser import RawConfigParser
+    from configparser import RawConfigParser
     assert env.sentry_host, env.sentry_api_token
     headers = {"Authorization": "Bearer " + env.sentry_api_token}
     organization = env.get("sentry_organization", "sentry")
@@ -1720,30 +1725,30 @@ def update_vendor_themes():
             urls = urls_string.split(',')
         vendor_themes_path = normpath(join(
                 env.projectpath, "assembl/static/css/themes/vendor"))
-        print vendor_themes_path
+        print(vendor_themes_path)
         with settings(warn_only=True), cd(env.projectpath):
             # We do not use env.gitbranch, because in env_deb it may not match the real current branch
             current_assembl_branch_name = run('git symbolic-ref --short -q HEAD').split('\n')[0]
         for git_url in urls:
-            print green("Updating %s" % git_url)
+            print(green("Updating %s" % git_url))
             matchobj = re.match(r'.*/([^\.]+)(\.git)?', git_url)
             git_dir_name = matchobj.group(1)
             git_dir_path = normpath(join(vendor_themes_path, git_dir_name))
             if is_dir(git_dir_path) is False:
-                print cyan("Cloning git repository")
+                print(cyan("Cloning git repository"))
                 with cd(vendor_themes_path):
                     run('git clone %s' % git_url)
 
             with cd(git_dir_path):
                 current_vendor_themes_branch_name = run('git symbolic-ref --short -q HEAD').split('\n')[0]
                 if current_vendor_themes_branch_name != current_assembl_branch_name:
-                    print yellow("Vendor theme branch %s does not match current assembl branch %s" % (current_vendor_themes_branch_name, current_assembl_branch_name))
+                    print(yellow("Vendor theme branch %s does not match current assembl branch %s" % (current_vendor_themes_branch_name, current_assembl_branch_name)))
                     if current_assembl_branch_name in ('develop', 'master'):
                         run('git fetch --all')
-                        print yellow("Changing branch to %s" % current_assembl_branch_name)
+                        print(yellow("Changing branch to %s" % current_assembl_branch_name))
                         run('git checkout %s' % current_assembl_branch_name)
                     else:
-                        print red("Branch %s not known to fabfile.  Leaving theme branch on %s" % (current_assembl_branch_name, current_vendor_themes_branch_name))
+                        print(red("Branch %s not known to fabfile.  Leaving theme branch on %s" % (current_assembl_branch_name, current_vendor_themes_branch_name)))
                 run('git pull --ff-only')
 
 

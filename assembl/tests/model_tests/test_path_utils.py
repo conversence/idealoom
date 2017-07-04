@@ -1,3 +1,4 @@
+from builtins import str
 import pytest
 from assembl.models.post import Post, PublicationStates
 from assembl.models.idea_content_link import IdeaContentPositiveLink
@@ -17,7 +18,7 @@ def test_jack_layton_linked_discussion(
     posts = [x for (x,) in posts]
     posts.insert(0, None)  # We are using 1-offset indices below.
     posts_id_by_num = dict(enumerate(posts))
-    posts_num_by_id = {v: k for (k, v) in posts_id_by_num.iteritems()}
+    posts_num_by_id = {v: k for (k, v) in posts_id_by_num.items()}
 
     def as_post_nums(path):
         path2 = ",".join((str(posts_num_by_id[int(id)])

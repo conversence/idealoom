@@ -1,16 +1,23 @@
 # -*- coding: utf-8 -*-
 
+from future import standard_library
+standard_library.install_aliases()
+from future.utils import PY3
+from builtins import str
 import json
 import re
 import quopri
 import mock
-from urlparse import urlparse
-from urllib import unquote
-from urllib import urlencode, quote_plus
+from urllib.parse import urlparse
+from urllib.parse import unquote
+from urllib.parse import urlencode, quote_plus
 
 from assembl.models import (
     Idea, Post, Email, User
 )
+
+
+accept_json = {"Accept": "application/json"}
 
 
 def get_url(discussion, suffix):
@@ -230,20 +237,22 @@ def test_api_register(discussion, test_app_no_perm,
         assert not account.profile.verified
         assert len(account.profile.notification_subscriptions) == 0
         # Register step 2
-        r = test_app_no_perm.get(r.location)
+        r = test_app_no_perm.get(r.location, headers=accept_json)
         # Sent
         assert r.status_code == 200
         assert mailer.sendmail.call_count == 1
         # Get token
         mail_text = mailer.sendmail.call_args[0][2]
         mail_text = quopri.decodestring(mail_text)
+        if PY3:
+            mail_text = mail_text.decode('iso-8859-1')
         token = re.search(r'email_confirm/([^>]+)>', mail_text)
         assert token
         token = token.group(1)
         assert token
         # Confirm token
         path = test_webrequest.route_path('user_confirm_email', token=token)
-        r = test_app_no_perm.get(path)
+        r = test_app_no_perm.get(path, headers=accept_json)
         assert r.status_code == 302 and urlparse(r.location).path == '/'
         assert account.verified
         assert account.profile.verified
@@ -277,8 +286,8 @@ def test_csv_subscribe(discussion, test_app_no_perm,
         discussion.subscribe_to_notifications_on_signup = True
         discussion.db.flush()
         # Register
-        email = "bsmith@example.com"
-        csv_text = "Bob Smith,%s\n" % (email,)
+        email = b"bsmith@example.com"
+        csv_text = b"Bob Smith,%s\n" % (email,)
         data = dict(
             add_with_role="r:participant",
             send_invite="checked",
@@ -304,6 +313,8 @@ def test_csv_subscribe(discussion, test_app_no_perm,
         # Get token
         mail_text = mailer.sendmail.call_args[0][2]
         mail_text = quopri.decodestring(mail_text)
+        if PY3:
+            mail_text = mail_text.decode('iso-8859-1')
         link = re.search(r'href="(http:[^"]+)"', mail_text)
         assert link
         link = link.group(1)
@@ -312,7 +323,7 @@ def test_csv_subscribe(discussion, test_app_no_perm,
         r = test_app_no_perm.get(link)
         discussion.db.flush()
         assert r.status_code == 302
-        r = test_app_no_perm.get(r.location)
+        r = test_app_no_perm.get(r.location, headers=accept_json)
         assert r.status_code == 200
         form = r.lxml.xpath('//form')[0]
         r = test_app_no_perm.post(form.attrib['action'], params=dict(

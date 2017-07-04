@@ -1,6 +1,9 @@
 # coding=UTF-8
 """Allow users to be notified of certain events happening in a discussion. Depends on subscribing to those events."""
 from __future__ import print_function
+from past.builtins import cmp
+from builtins import str
+from builtins import object
 from datetime import datetime
 from collections import defaultdict
 from abc import abstractmethod
@@ -604,7 +607,7 @@ class NotificationSubscriptionOnUserAccount(NotificationSubscriptionOnObject):
         return updated
 
 
-class CrudVerbs():
+class CrudVerbs(object):
     CREATE = "CREATE"
     UPDATE = "UPDATE"
     DELETE = "DELETE"
@@ -701,12 +704,12 @@ class NotificationSubscriptionFollowOwnMessageDirectReplies(NotificationSubscrip
     }
 
 
+@interface.implementer(IModelEventWatcher)
 class ModelEventWatcherNotificationSubscriptionDispatcher(object):
     """Calls :py:meth:`NotificationSubscription.process` on the appropriate
     :py:class:`NotificationSubscription` subclass when a certain CRUD event
     is detected through the :py:class:`assembl.lib.model_watcher.IModelEventWatcher`
     protocol"""
-    interface.implements(IModelEventWatcher)
 
     def processEvent(self, verb, objectClass, objectId):
         from ..lib.utils import get_concrete_subclasses_recursive
@@ -722,13 +725,13 @@ class ModelEventWatcherNotificationSubscriptionDispatcher(object):
             applicableInstances = subscriptionClass.findApplicableInstances(objectInstance.get_discussion_id(), CrudVerbs.CREATE, objectInstance)
             for subscription in applicableInstances:
                 applicableInstancesByUser[subscription.user_id].append(subscription)
-        num_instances = len([v for v in applicableInstancesByUser.itervalues() if v])
+        num_instances = len([v for v in applicableInstancesByUser.values() if v])
         print("processEvent: %d notifications created for %s %s %d" % (
             num_instances, verb, objectClass.__name__, objectId))
         with transaction.manager:
-            for userId, applicableInstances in applicableInstancesByUser.iteritems():
+            for userId, applicableInstances in applicableInstancesByUser.items():
                 if(len(applicableInstances) > 0):
-                    applicableInstances.sort(cmp=lambda x,y: cmp(x.priority, y.priority))
+                    applicableInstances.sort(key=lambda n: n.priority)
                     applicableInstances[0].process(objectInstance.get_discussion_id(), verb, objectInstance, applicableInstances[1:])
         if bool(current_task):
             # In a celery task, there's no one else to commit
@@ -805,7 +808,7 @@ class NotificationDeliveryConfirmationType(DeclEnum):
     LINK_FOLLOWED = "LINK_FOLLOWED", "The user followed a link in the notification"
     NOTIFICATION_DISMISSED = "NOTIFICATION_DISMISSED", "The user dismissed the notification"
 
-class NotificationClasses():
+class NotificationClasses(object):
 
     ABSTRACT_NOTIFICATION = "ABSTRACT_NOTIFICATION"
     ABSTRACT_NOTIFICATION_ON_POST = "ABSTRACT_NOTIFICATION_ON_POST"
@@ -903,14 +906,8 @@ class Notification(Base):
             CrudVerbs.CREATE,
             self.event_source_object(),
             self.first_matching_subscription.user)
-        def sortSubscriptions(x,y):
-            if x.id == self.first_matching_subscription_id:
-                return -1
-            elif y.id == self.first_matching_subscription_id:
-                return 1
-            else:
-                return cmp(x.priority, y.priority)
-        applicableInstances.sort(cmp=sortSubscriptions)
+        applicableInstances.sort(key=lambda n: (
+            n.id != self.first_matching_subscription_id, n.priority))
         return applicableInstances
     
     def render_to_email_html_part(self):

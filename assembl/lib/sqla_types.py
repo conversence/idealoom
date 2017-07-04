@@ -1,4 +1,7 @@
 """Some specialized SQLAlchemy column types"""
+from future.utils import as_native_str
+from past.builtins import basestring
+from past.builtins import str as oldstr
 from sqlalchemy.types import (
     TypeDecorator, String, PickleType, Text)
 from sqlalchemy.ext.hybrid import Comparator
@@ -25,7 +28,7 @@ class URLString(TypeDecorator):
     def process_bind_param(self, value, dialect):
         if not value:
             return value
-        if isinstance(value, str):
+        if isinstance(value, oldstr):
             value = value.decode('utf-8')
         # TODO: Ensure NFC order.
         value = iri_to_uri(value)
@@ -45,9 +48,8 @@ class EmailString(TypeDecorator):
         (name, domain) = email.split('@')
         return name+'@'+domain.lower()
 
+    @as_native_str(encoding='ascii')
     def normalize_to_type(self, value, dialect):
-        if isinstance(value, unicode):
-            return value.encode('ascii')
         return value
 
     def process_bind_param(self, value, dialect):

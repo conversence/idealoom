@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import
 
+from builtins import object
 from abc import abstractmethod
 
 from .config import get
@@ -69,7 +70,7 @@ class FunctionManager(object):
         return {}
 
     def ensureFunctionsExist(self):
-        for fname, fdef in self.functionList().iteritems():
+        for fname, fdef in self.functionList().items():
             if not self.testFunctionExists(fname):
                 self.session.execute(fdef)
                 mark_changed()

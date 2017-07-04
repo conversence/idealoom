@@ -3,6 +3,10 @@ to clusters found by NLP and machine learning.
 Try to infer new ideas or new harvesting from the difference"""
 
 from __future__ import print_function
+from __future__ import division
+from builtins import zip
+from builtins import str
+from builtins import object
 from collections import defaultdict
 from os.path import join, exists
 from os import makedirs, unlink
@@ -232,7 +236,7 @@ class SemanticAnalysisData(object):
                     ideas_by_post[post_id] = self.get_ideas_of_post(post_id)
             # now that we have everything, populate _posts_by_idea
             posts_by_idea = defaultdict(list)
-            for post_id, idea_ids in ideas_by_post.iteritems():
+            for post_id, idea_ids in ideas_by_post.items():
                 for idea_id in idea_ids:
                     posts_by_idea[idea_id].append(post_id)
             self._posts_by_idea = posts_by_idea
@@ -357,7 +361,7 @@ class SemanticAnalysisData(object):
             if self.discussion == discussion:
                 my_discussion_lang = main_lang
         corpora = {}
-        for lang, discussion_ids in by_main_lang.iteritems():
+        for lang, discussion_ids in by_main_lang.items():
             if my_discussion_lang != lang and not all_languages:
                 continue
             dirname = join(nlp_data, lang)
@@ -483,7 +487,7 @@ class SemanticAnalysisData(object):
                 gensim_model = gensim_model.load(model_fname)
                 same_kwargs = all((
                     getattr(gensim_model, k) == v
-                    for (k, v) in model_kwargs.iteritems()))
+                    for (k, v) in model_kwargs.items()))
                 same_kwargs = same_kwargs and getattr(
                     gensim_model, 'num_updates', doc_count) == doc_count
                 if not (same_kwargs
@@ -629,9 +633,9 @@ class SemanticAnalysisData(object):
             for id in chain(difference[0:5], difference[-1:-6:-1]):
                 factor = difference_vals[id]
                 terms = self.parse_topic(gensim_model.print_topic(id), trans)
-                for term, val in terms.iteritems():
+                for term, val in terms.items():
                     extremes[term] += val * factor
-            extremes = [(val, term) for (term, val) in extremes.iteritems()]
+            extremes = [(val, term) for (term, val) in extremes.items()]
             extremes.sort()
             pos_terms = [t for (v, t) in extremes if v > 0][-1:-16:-1]
             neg_terms = [t for (v, t) in extremes if v < 0][0:15]
@@ -703,7 +707,7 @@ class SKLearnClusteringSemanticAnalysis(SemanticAnalysisData):
             posts_of_children = {
                 child_id: self.get_posts_of_idea(child_id)
                 for child_id in children_ids}
-            for idea_id, c_post_ids in posts_of_children.iteritems():
+            for idea_id, c_post_ids in posts_of_children.items():
                 for post_id in c_post_ids:
                     ideas_of_post[post_id].append(idea_id)
                 children_remainder -= set(c_post_ids)
@@ -832,7 +836,7 @@ class SKLearnClusteringSemanticAnalysis(SemanticAnalysisData):
         results = {id: self.get_cluster_info(id)
                    for (id,) in idea_ids}
         results[None] = self.get_cluster_info()
-        posres = {id: r for (id, r) in results.iteritems() if r is not None}
+        posres = {id: r for (id, r) in results.items() if r is not None}
         # for id, (silhouette_score, compare_with_ideas, clusters, post_info) in posres.iteritems():
         #     log.debug(" ".join((id, silhouette_score, repr([len(x['cluster']) for x in clusters]))))
         return posres
@@ -845,7 +849,7 @@ class SKLearnClusteringSemanticAnalysis(SemanticAnalysisData):
         results = [(
             silhouette_score, idea_id, compare_with_ideas, clusters, post_info)
             for idea_id, (silhouette_score, compare_with_ideas, clusters, post_info)
-            in results.iteritems()]
+            in results.items()]
         results.sort(reverse=True)
         f.write("<html><body>")
         for (silhouette_score, idea_id, compare_with_ideas, clusters, post_info
@@ -864,14 +868,14 @@ class SKLearnClusteringSemanticAnalysis(SemanticAnalysisData):
                     len(clusters[-1]['cluster'])))
             if (compare_with_ideas):
                 f.write("<dl>\n")
-                for k, v in compare_with_ideas.iteritems():
+                for k, v in compare_with_ideas.items():
                     f.write("<dt>%s</dt><dd>%s</dd>\n" % (k, v))
                 f.write("</dl>\n")
             children_ids = set(chain(*(
                 cli['idea_scores'].keys() for cli in clusters)))
             post_counts_per_idea = {
                 child_id: len([post_id for (post_id, pinfo)
-                               in post_info.iteritems()
+                               in post_info.items()
                                if child_id in pinfo['ideas']])
                 for child_id in children_ids}
             for n, cluster_info in enumerate(clusters):
@@ -883,7 +887,7 @@ class SKLearnClusteringSemanticAnalysis(SemanticAnalysisData):
                     f.write("<h3 id='remainder'>Remainder:</h3>\n<ol>")
                 else:
                     f.write("<h3 id='cluster_%d'>Cluster %d</h3>\n" % (n,n))
-                for idea_id, score in idea_scores.iteritems():
+                for idea_id, score in idea_scores.items():
                     idea = self.ideas[idea_id]
                     f.write("<li>Idea %d: %d/%d %s</li>\n" % (
                         idea_id, score, post_counts_per_idea[idea_id],
@@ -948,8 +952,9 @@ class OpticsSemanticsAnalysis(SemanticAnalysisData):
                     if not set(self.get_ideas_of_post(pid)).intersection(children_ids)])
             else:
                 only_here = cluster_count
-            children_data = filter(None, [
-                data_for_idea(child, post_ids) for child in idea.children])
+            children_data = [
+                data_for_idea(child, post_ids) for child in idea.children]
+            children_data = [d for d in children_data if d]
             if isinstance(idea, RootIdea):
                 orphan_cluster_count = len([
                     pid for pid in post_ids
@@ -1097,7 +1102,7 @@ class OpticsSemanticsAnalysis(SemanticAnalysisData):
             clusters = self.clusters
             post_clusters = [post_clusters_by_cluster[cl] for cl in clusters]
             cluster_features = self.calc_features(post_clusters)
-            self._cluster_features = dict(zip(clusters, cluster_features))
+            self._cluster_features = dict(list(zip(clusters, cluster_features)))
         return self._cluster_features
 
     def get_cluster_info(self):
@@ -1388,7 +1393,7 @@ class OpticsSemanticsAnalysisWithSuggestions(OpticsSemanticsAnalysis):
         idea_post_ids = self.get_posts_of_idea(idea_id)
         if base_labels:
             idea_post_ids = set(idea_post_ids)
-            idea_post_ids.update(base_labels.keys())
+            idea_post_ids.update(list(base_labels.keys()))
             idea_post_ids = np.array(list(idea_post_ids))
             idea_post_ids.sort()
         idea_post_ids = np.array(idea_post_ids)
@@ -1503,7 +1508,7 @@ class OpticsSemanticsAnalysisWithSuggestions(OpticsSemanticsAnalysis):
             for post_id in cl_post_ids:
                 for idea_id in narrowest_ideas_by_post[post_id]:
                     in_ideas[idea_id] += 1
-            in_ideas = list(in_ideas.iteritems())
+            in_ideas = list(in_ideas.items())
             in_ideas.sort(key=lambda x: -x[1])
             if not in_ideas:
                 # TODO: Orphan cluster
@@ -1603,8 +1608,7 @@ class OpticsSemanticsAnalysisWithSuggestions(OpticsSemanticsAnalysis):
                 suggestions.append(suggestion)
                 break
         suggestions.sort(key=lambda x: polarity * x['score_delta'])
-        suggestions = filter(
-            lambda x: polarity * x['score_delta'] < 0, suggestions)
+        suggestions = [x for x in suggestions if polarity * x['score_delta'] < 0]
         return suggestions
 
     def select_suggestions(self, add_suggestions, partition_suggestions):
@@ -1618,11 +1622,11 @@ class OpticsSemanticsAnalysisWithSuggestions(OpticsSemanticsAnalysis):
             (s['idea_id'], s['num_cluster']): s['score_delta']
             for s in add_suggestions}
         eliminate_add = {
-            x for (x, v) in add_deltas.iteritems()
+            x for (x, v) in add_deltas.items()
             if x in part_add_deltas
             and part_add_deltas[x] < v}
         eliminate_partitions = {
-            x for (x, v) in part_add_deltas.iteritems()
+            x for (x, v) in part_add_deltas.items()
             if x in add_deltas
             and add_deltas[x] < v}
         partition_suggestions = [

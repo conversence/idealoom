@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
+from future import standard_library
+standard_library.install_aliases()
 import json
 import pytest
-from urllib import urlencode, quote_plus
+from urllib.parse import urlencode, quote_plus
 import lxml.html
 
 from assembl.models import (

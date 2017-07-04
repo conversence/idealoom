@@ -7,6 +7,7 @@ Create Date: 2015-05-24 22:18:38.437603
 """
 
 # revision identifiers, used by Alembic.
+from builtins import next
 revision = '453f5e773eff'
 down_revision = '227f09c8b8d4'
 

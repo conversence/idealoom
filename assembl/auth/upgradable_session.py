@@ -1,11 +1,11 @@
 from abc import ABCMeta, abstractmethod
 
 from beaker.session import Session
+from future.utils import with_metaclass
 
 # Note: pull request soon to propose this in Beaker.
-class UpgradableSession(Session):
+class UpgradableSession(with_metaclass(ABCMeta, Session)):
     "A Session with different expiry parameters for elevated privileges"
-    __metaclass__ = ABCMeta
 
     def __init__(self, request, elevated=False,
                  cookie_expires=True, elevated_expires=False, **kwargs):

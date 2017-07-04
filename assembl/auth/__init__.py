@@ -2,6 +2,7 @@
 
 This module defines basic roles and permissions."""
 
+from builtins import object
 from pyramid.security import (
     Everyone, Authenticated, ALL_PERMISSIONS)
 

@@ -1,13 +1,12 @@
 """Sundry utility functions having to do with users or permissions"""
 from csv import reader
 from datetime import datetime, timedelta
-from os import urandom
+from io import TextIOWrapper
 import base64
 
 from future.utils import string_types
 from sqlalchemy.sql.expression import and_
-from pyramid.security import (
-    authenticated_userid, Everyone, Authenticated)
+from pyramid.security import (Everyone, Authenticated)
 from pyramid.httpexceptions import HTTPNotFound
 from pyisemail import is_email
 from pyramid.authentication import SessionAuthenticationPolicy
@@ -18,8 +17,7 @@ from . import R_SYSADMIN, P_READ, SYSTEM_ROLES
 from .password import verify_data_token, Validity
 from ..models.auth import (
     User, Role, UserRole, LocalUserRole, Permission,
-    DiscussionPermission, IdentityProvider, AgentProfile,
-    EmailAccount)
+    DiscussionPermission, AgentProfile, EmailAccount)
 
 
 def get_user(request):
@@ -524,13 +522,14 @@ def add_multiple_users_csv(
         send_password_change=False, message_subject=None,
         text_message=None, html_message=None, sender_name=None,
         resend_if_not_logged_in=False):
+    csv_file = TextIOWrapper(csv_file, 'utf-8')
     r = reader(csv_file, skipinitialspace=True)
     localizer = request.localizer
     for i, l in enumerate(r):
         if not len(l):
             # tolerate empty lines
             continue
-        l = [x.decode('utf-8').strip() for x in l]
+        l = [x.strip() for x in l]
         if len(l) != 2:
             raise RuntimeError(localizer.translate(_(
                 "The CSV file must have two columns")))

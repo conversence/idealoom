@@ -2,6 +2,8 @@
 All utility methods, classes and functions needed for testing applications
 """
 
+from builtins import str
+from builtins import object
 import logging
 import sys
 from itertools import chain
@@ -150,17 +152,18 @@ def drop_tables(app_settings, session):
         # postgres. Thank you to
         # http://stackoverflow.com/questions/5408156/how-to-drop-a-postgresql-database-if-there-are-active-connections-to-it
         session.close()
-        session.execute(
-            """SELECT pg_terminate_backend(pg_stat_activity.pid)
-                FROM pg_stat_activity
-                WHERE pg_stat_activity.datname = '%s'
-                  AND pid <> pg_backend_pid()""" % (
-                    app_settings.get("db_database")))
+        # session.execute(
+        #     """SELECT pg_terminate_backend(pg_stat_activity.pid)
+        #         FROM pg_stat_activity
+        #         WHERE pg_stat_activity.datname = '%s'
+        #           AND pid <> pg_backend_pid()""" % (
+        #             app_settings.get("db_database")))
 
     try:
         for row in get_all_tables(app_settings, session):
             log.debug("Dropping table: %s" % row)
             session.execute("drop table \"%s\"" % row)
+            session.commit()
         mark_changed()
     except:
         raise Exception('Error dropping tables: %s' % (
@@ -184,7 +187,7 @@ def api_call_to_fname(api_call, method="GET", **args):
     api_dir = base_fixture_dir + api_dir
     if not os.path.isdir(api_dir):
         os.makedirs(api_dir)
-    args = args.items()
+    args = list(args.items())
     args.sort()
     args = "_".join(["%s_%s" % x for x in args])
     if args:
@@ -211,7 +214,7 @@ class RecordingApp(object):
             assert 200 <= r.status_code < 300
             params = params or {}
             methodname = name.split("_")[0].upper()
-            with open(api_call_to_fname(url, methodname, **params), "w") as f:
+            with open(api_call_to_fname(url, methodname, **params), "wb") as f:
                 f.write(r.body)
             return r
         return appmethod

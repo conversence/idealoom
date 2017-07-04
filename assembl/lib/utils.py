@@ -1,12 +1,15 @@
 """Sundry utility functions"""
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 import re
 import unidecode
 import inspect
 from time import sleep
-from StringIO import StringIO
+from io import StringIO
 
 from pyramid.settings import asbool
-from urlparse import urlparse
+from urllib.parse import urlparse
 from bs4 import UnicodeDammit
 
 from . import config
@@ -121,5 +124,5 @@ def normalize_email_name(name):
     # sanitize, keep only words, spaces and minimal punctuation
     # includes unicode apostrophes, though.
     name = re.sub(
-        ur"[^-\w\s'\u2019\u2032\u00b4\.\(\)]", '', name, 0, re.UNICODE)
+        r"[^-\w\s'\u2019\u2032\u00b4\.\(\)]", '', name, 0, re.UNICODE)
     return name

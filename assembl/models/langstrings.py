@@ -1,7 +1,10 @@
 """Classes for multilingual strings, using automatic or manual translation"""
+from builtins import next
+from builtins import filter
 from collections import defaultdict
 from datetime import datetime
 
+from future.utils import as_native_str
 from sqlalchemy import (
     Column, ForeignKey, Integer, Boolean, String, SmallInteger,
     UnicodeText, UniqueConstraint, event, inspect, Sequence, events,
@@ -138,6 +141,7 @@ class LangString(Base):
         if entry and isinstance(entry, LangStringEntry):
             self.entries.append(entry)
 
+    @as_native_str()
     def __repr__(self):
         return 'LangString (%d): %s\n' % (
             self.id or -1, "\n".join((repr(x) for x in self.entries)))
@@ -352,11 +356,10 @@ class LangString(Base):
                 # Often worth doing upstream
                 user_prefs = LanguagePreferenceCollection.getCurrent()
             for use_originals in (True, False):
-                entries = filter(
-                    lambda e: e.is_machine_translated != use_originals,
-                    self.entries)
+                entries = [e for e in self.entries
+                           if e.is_machine_translated != use_originals]
                 if not allow_errors:
-                    entries = filter(lambda e: not e.error_code, entries)
+                    entries = [e for e in entries if not e.error_code]
                 if not entries:
                     continue
                 candidates = []
@@ -373,7 +376,7 @@ class LangString(Base):
                     candidates.sort()
                     entries = list(self.entries)
                     if not allow_errors:
-                        entries = filter(lambda e: not e.error_code, entries)
+                        entries = [e for e in entries if not e.error_code]
                     for pref in candidates:
                         if pref.translate:
                             target_locale = pref.translate
@@ -381,7 +384,7 @@ class LangString(Base):
                             def common_len(e):
                                 return locale_compatible(
                                     target_locale, e.locale)
-                            common_entries = filter(common_len, entries)
+                            common_entries = [e for e in entries if common_len(e)]
                             if common_entries:
                                 common_entries.sort(
                                     key=common_len, reverse=True)
@@ -512,6 +515,7 @@ class LangStringEntry(TombstonableMixin, Base):
             self.langstring = context.get_instance_of_class(LangString)
         super(LangStringEntry, self).populate_from_context(context)
 
+    @as_native_str()
     def __repr__(self):
         value = self.value or ''
         if len(value) > 50:
@@ -521,11 +525,11 @@ class LangStringEntry(TombstonableMixin, Base):
                 self.id or -1,
                 self.locale or "missing",
                 self.error_code,
-                value)).encode('utf-8')
+                value))
         return (u'%d: [%s] "%s"' % (
             self.id or -1,
             self.locale or "missing",
-            value)).encode('utf-8')
+            value))
 
     @property
     def locale_code(self):

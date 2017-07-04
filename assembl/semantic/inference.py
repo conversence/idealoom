@@ -1,6 +1,7 @@
 #!/usr/bin/python
 """Inference library based on FuXi"""
 from __future__ import print_function
+from builtins import object
 from os.path import exists
 import logging
 

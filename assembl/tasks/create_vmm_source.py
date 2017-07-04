@@ -1,4 +1,5 @@
 
+from builtins import object
 from os import urandom
 from base64 import b64encode
 from subprocess import call
@@ -10,13 +11,13 @@ from assembl.lib import config
 from assembl.lib.discussion_creation import IDiscussionCreationCallback
 
 
+@interface.implementer(IDiscussionCreationCallback)
 class CreateVMMMailboxAtDiscussionCreation(object):
     """A :py:class:`IDiscussionCreationCallback` that creates an IMAP account with VMM
 
     Ensure that the following is in /etc/sudoers:
     assembl_user ALL=NOPASSWD: /usr/sbin/vmm ua *
     """
-    interface.implements(IDiscussionCreationCallback)
 
     def discussionCreated(self, discussion):
         from assembl.models import IMAPMailbox

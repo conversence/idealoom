@@ -1,8 +1,12 @@
 """Utilities for extracting posts and comments from Facebook, using the facebook API."""
+from future import standard_library
+standard_library.install_aliases()
+from past.builtins import basestring
+from builtins import object
 from abc import abstractmethod
 from collections import defaultdict
 from datetime import datetime, timedelta
-from urlparse import urlparse, parse_qs
+from urllib.parse import urlparse, parse_qs
 import logging
 
 import facebook
@@ -73,7 +77,7 @@ def fetch_facebook_sdk_locales():
 
 def run_setup():
     from requests.exceptions import ConnectionError
-    if not facebook_sdk_locales.keys():
+    if not list(facebook_sdk_locales.keys()):
         try:
             fetch_facebook_sdk_locales()
         except ConnectionError:
@@ -384,7 +388,7 @@ class FacebookParser(object):
                         if x['type'] == entity_type]
             else:
                 ordinal_dict = source['message_tags']
-                return [y for y in ordinal_dict.itervalues()
+                return [y for y in ordinal_dict.values()
                         if y['type'] == entity_type]
         else:
             return []
@@ -993,8 +997,11 @@ class FacebookGenericSource(PostSource):
         users_db = self._get_current_users()
         posts_db = self._get_current_posts(load_json=True)
 
-        for post in posts_db.itervalues():
-            data = json.loads(post.imported_blob)
+        for post in posts_db.values():
+            blob = post.imported_blob
+            if not isinstance(blob, str):
+                blob = blob.decode('utf-8')
+            data = json.loads(blob)
             user_data = data.get('from')
             user = users_db[user_data.get('id')]
 
@@ -1299,13 +1306,16 @@ class FacebookPost(ImportedPost):
             discussion=discussion,
             creator=creator_agent,
             # post_type=post_type,
-            imported_blob=blob,
+            imported_blob=blob.encode('utf-8'),
             subject=LangString.create(subject),
             body=LangString.create(body)
         )
 
     def update_from_imported_json(self):
-        data = json.loads(self.imported_blob)
+        blob = self.imported_blob
+        if not isinstance(blob, str):
+            blob = blob.decode('utf-8')
+        data = json.loads(blob)
         self.update_fields(data, None, reprocess=True)
 
     def update_fields(self, post, user, reprocess=False):
@@ -1325,6 +1335,8 @@ class FacebookPost(ImportedPost):
             attach = json.loads(self.attachment_blob)
             self.source.clear_post_attachments(self)
             post_json = self.imported_blob
+            if not isinstance(post_json, str):
+                post_json = post_json.decode('utf-8')
             self.source._create_attachments(post_json, self,
                                             get_attachment=None,
                                             attachment_blob=attach)

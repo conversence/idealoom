@@ -1,5 +1,6 @@
 """Models for arbitrary key-values storage, bound to a namespace, a user, and some other object (currently only the discussion)."""
 from __future__ import absolute_import
+from builtins import object
 from collections import Mapping, MutableMapping
 
 import simplejson as json
@@ -378,7 +379,7 @@ class UserPreferenceCollection(NamespacedUserKVCollection):
 
     def iteritems(self):
         keys = set()
-        for k, v in super(UserPreferenceCollection, self).iteritems():
+        for k, v in super(UserPreferenceCollection, self).items():
             keys.add(k)
             yield k, v
         for k, v in self.dprefs.items():
@@ -387,7 +388,7 @@ class UserPreferenceCollection(NamespacedUserKVCollection):
 
     def items(self):
         # the inherited items makes multiple requests
-        return list(self.iteritems())
+        return list(self.items())
 
     def __getitem__(self, key):
         try:

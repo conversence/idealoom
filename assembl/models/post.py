@@ -1,4 +1,6 @@
 """Posts are a kind of :py:class:`assembl.models.generic.Content` that has an author, and reply to some other content."""
+from builtins import str
+from builtins import object
 from datetime import datetime
 from abc import ABCMeta, abstractmethod
 import uuid
@@ -34,14 +36,14 @@ from ..semantic.namespaces import SIOC, ASSEMBL, QUADNAMES
 from ..lib import config
 from .langstrings import LangString, LangStringEntry
 from assembl.views.traversal import AbstractCollectionDefinition
+from future.utils import with_metaclass
 
 
 log = logging.getLogger(__name__)
 
 
-class PostVisitor(object):
+class PostVisitor(with_metaclass(ABCMeta, object)):
     CUT_VISIT = object()
-    __metaclass__ = ABCMeta
 
     @abstractmethod
     def visit_post(self, post):
@@ -435,8 +437,7 @@ class Post(Content):
     def indirect_idea_content_links_without_cache(self):
         "Return all ideaContentLinks related to this post or its ancestors"
         from .idea_content_link import IdeaContentLink
-        ancestors = filter(None, self.ancestry.split(","))
-        ancestors = [int(x) for x in ancestors]
+        ancestors = [int(a) for a in self.ancestry.split(",") if a]
         ancestors.append(self.id)
         return self.db.query(IdeaContentLink).filter(
             IdeaContentLink.content_id.in_(ancestors)).all()
@@ -542,8 +543,7 @@ class Post(Content):
                     ctx):
                 parent = owner_alias
                 children = last_alias
-                ancestors = filter(None, parent_instance.ancestry.split(","))
-                ancestors = [int(x) for x in ancestors]
+                ancestors = [int(a) for a in parent_instance.ancestry.split(",") if a]
                 ancestors.append(parent_instance.id)
                 return query.join(
                     parent, children.content_id.in_(ancestors))

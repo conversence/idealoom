@@ -1,11 +1,14 @@
 """Models for voting on ideas"""
 from __future__ import print_function
+from __future__ import division
+from builtins import range
 from abc import abstractproperty, abstractmethod
 from datetime import datetime
 import simplejson as json
 import math
 from collections import defaultdict
 from csv import DictWriter
+from io import TextIOWrapper
 
 from sqlalchemy import (
     Column, Integer, ForeignKey, Boolean, String, Float, DateTime, Unicode,
@@ -139,7 +142,7 @@ class AbstractVoteSpecification(DiscussionBoundBase):
         results = {
             Idea.uri_generic(votable_id):
             self.results_for(voting_results, histogram_size)
-            for (votable_id, voting_results) in by_idea.iteritems()
+            for (votable_id, voting_results) in by_idea.items()
         }
         results["n_voters"] = self.db.query(
             getattr(self.get_vote_class(), "voter_id")).filter_by(
@@ -276,8 +279,8 @@ class TokenVoteSpecification(AbstractVoteSpecification):
             sums[v.token_category_id] += v.vote_value
             nums[v.token_category_id] += 1
         specs = {spec.id: spec.typename for spec in self.token_categories}
-        sums = {specs[id]: total for (id, total) in sums.iteritems()}
-        nums = {specs[id]: total for (id, total) in nums.iteritems()}
+        sums = {specs[id]: total for (id, total) in sums.items()}
+        nums = {specs[id]: total for (id, total) in nums.items()}
         return {
             "n": len(voting_results),
             "nums": nums,
@@ -285,11 +288,12 @@ class TokenVoteSpecification(AbstractVoteSpecification):
         }
 
     def csv_results(self, csv_file, histogram_size=None):
+        csv_file = TextIOWrapper(csv_file, 'utf-8')
         specs = self.token_categories
         names_from_type = {
-            spec.typename: spec.name.first_original().value.encode('utf-8') for spec in specs
+            spec.typename: spec.name.first_original().value for spec in specs
         }
-        spec_names = names_from_type.values()
+        spec_names = list(names_from_type.values())
         spec_names.sort()
         spec_names.insert(0, "idea")
         dw = DictWriter(csv_file, spec_names, dialect='excel', delimiter=';')
@@ -297,18 +301,16 @@ class TokenVoteSpecification(AbstractVoteSpecification):
         by_idea = self._gather_results()
         values = {
             votable_id: self.results_for(voting_results)
-            for (votable_id, voting_results) in by_idea.iteritems()
+            for (votable_id, voting_results) in by_idea.items()
         }
         idea_names = dict(self.db.query(Idea.id, Idea.short_title).filter(
-            Idea.id.in_(by_idea.keys())))
-        idea_names = {
-            id: name.encode('utf-8') for (id, name) in idea_names.iteritems()}
+            Idea.id.in_(list(by_idea.keys()))))
         ordered_idea_ids = Idea.visit_idea_ids_depth_first(
             AppendingVisitor(), self.get_discussion_id())
         ordered_idea_ids = [id for id in ordered_idea_ids if id in values]
         for idea_id in ordered_idea_ids:
             base = values[idea_id]
-            sums = {names_from_type[k]: v for (k, v) in base['sums'].iteritems()}
+            sums = {names_from_type[k]: v for (k, v) in base['sums'].items()}
             sums['idea'] = idea_names[idea_id]
             dw.writerow(sums)
 
@@ -462,7 +464,7 @@ class LickertVoteSpecification(AbstractVoteSpecification):
             votes_by_idea_user_spec = defaultdict(lambda: defaultdict(dict))
             for spec in group_specs:
                 votes_by_idea = spec._gather_results()
-                for idea_id, votes in votes_by_idea.iteritems():
+                for idea_id, votes in votes_by_idea.items():
                     for vote in votes:
                         votes_by_idea_user_spec[idea_id][
                             vote.voter_id][spec] = vote
@@ -476,12 +478,12 @@ class LickertVoteSpecification(AbstractVoteSpecification):
         sums = [0] * len(group_specs)
         sum_squares = [0] * len(group_specs)
         sum_prods = 0
-        for idea_id, votes_by_user_spec in votes_by_idea_user_spec.iteritems():
+        for idea_id, votes_by_user_spec in votes_by_idea_user_spec.items():
             histogram = empty_matrix(histogram_size, len(group_specs))
             results = dict(histogram=histogram)
             histograms_by_idea[Idea.uri_generic(idea_id)] = results
             n = 0
-            for votes_by_spec in votes_by_user_spec.itervalues():
+            for votes_by_spec in votes_by_user_spec.values():
                 spec_ids = {spec.id for spec in votes_by_spec}
                 if group_spec_ids <= spec_ids:  # only full
                     n += 1
@@ -492,8 +494,7 @@ class LickertVoteSpecification(AbstractVoteSpecification):
                         sums[gn] += vote_val
                         sum_squares[gn] += vote_val*vote_val
                         prod *= vote_val
-                        bin_num = int((vote_val - spec.minimum)
-                                      / bin_sizes[spec])
+                        bin_num = int((vote_val - spec.minimum) / bin_sizes[spec])
                         bin_num = min(bin_num, histogram_size-1)
                         bin_num = max(bin_num, 0)
                         if gn == len(group_specs) - 1:
@@ -504,9 +505,9 @@ class LickertVoteSpecification(AbstractVoteSpecification):
             results['n'] = n
             if len(group_specs) == 2 and n > 1:
                 try:
-                    b1 = (sums[0]*sums[1] - n*sum_prods
-                          ) / (sums[0]*sums[0] - n*sum_squares[0])
-                    b0 = (sums[1] - b1*sums[0])/n
+                    b1 = (sums[0] * sums[1] - n * sum_prods) / (
+                        sums[0] * sums[0] - n * sum_squares[0])
+                    b0 = (sums[1] - b1 * sums[0]) / n
                     results['b0'] = b0
                     results['b1'] = b1
                 except ZeroDivisionError:
@@ -530,7 +531,7 @@ class LickertVoteSpecification(AbstractVoteSpecification):
         base.update(dict(avg=avg, std_dev=std_dev))
         if histogram_size:
             histogram = [0] * histogram_size
-            bin_size = float(self.maximum - self.minimum) / histogram_size
+            bin_size = (self.maximum - self.minimum) / histogram_size
             for vote in voting_results:
                 bin_num = int((vote.vote_value - self.minimum) / bin_size)
                 bin_num = min(bin_num, histogram_size-1)
@@ -541,21 +542,20 @@ class LickertVoteSpecification(AbstractVoteSpecification):
 
     def csv_results(self, csv_file, histogram_size=None):
         histogram_size = histogram_size or 10
-        bin_size = float(self.maximum - self.minimum) / histogram_size
-        bins = range(histogram_size)
+        bin_size = (self.maximum - self.minimum) / histogram_size
+        bins = list(range(histogram_size))
         bins.insert(0, "idea")
         bins.extend(["avg", "std_dev"])
+        csv_file = TextIOWrapper(csv_file, 'utf-8')
         dw = DictWriter(csv_file, bins, dialect='excel', delimiter=';')
         dw.writeheader()
         by_idea = self._gather_results()
         values = {
             votable_id: self.results_for(voting_results, histogram_size)
-            for (votable_id, voting_results) in by_idea.iteritems()
+            for (votable_id, voting_results) in by_idea.items()
         }
         idea_names = dict(self.db.query(Idea.id, Idea.short_title).filter(
-            Idea.id.in_(by_idea.keys())))
-        idea_names = {
-            id: name.encode('utf-8') for (id, name) in idea_names.iteritems()}
+            Idea.id.in_(list(by_idea.keys()))))
         ordered_idea_ids = Idea.visit_idea_ids_depth_first(
             AppendingVisitor(), self.get_discussion_id())
         ordered_idea_ids = [id for id in ordered_idea_ids if id in values]
@@ -590,18 +590,17 @@ class BinaryVoteSpecification(AbstractVoteSpecification):
         return (0, 1)
 
     def csv_results(self, csv_file, histogram_size=None):
+        csv_file = TextIOWrapper(csv_file, 'utf-8')
         dw = DictWriter(csv_file, ["idea", "yes", "no"],
                         dialect='excel', delimiter=';')
         dw.writeheader()
         by_idea = self._gather_results()
         values = {
             votable_id: self.results_for(voting_results)
-            for (votable_id, voting_results) in by_idea.iteritems()
+            for (votable_id, voting_results) in by_idea.items()
         }
         idea_names = dict(self.db.query(Idea.id, Idea.short_title).filter(
-            Idea.id.in_(by_idea.keys())))
-        idea_names = {
-            id: name.encode('utf-8') for (id, name) in idea_names.iteritems()}
+            Idea.id.in_(list(by_idea.keys()))))
         ordered_idea_ids = Idea.visit_idea_ids_depth_first(
             AppendingVisitor(), self.get_discussion_id())
         ordered_idea_ids = [id for id in ordered_idea_ids if id in values]
@@ -643,8 +642,8 @@ class MultipleChoiceVoteSpecification(AbstractVoteSpecification):
         return base
 
     def csv_results(self, csv_file, histogram_size=None):
-        candidates = [
-            c.encode('utf-8') for c in self.settings_json['candidates']]
+        csv_file = TextIOWrapper(csv_file, 'utf-8')
+        candidates = self.settings_json['candidates']
         cols = candidates[:]
         cols.insert(0, "idea")
         dw = DictWriter(csv_file, cols, dialect='excel', delimiter=';')
@@ -652,12 +651,10 @@ class MultipleChoiceVoteSpecification(AbstractVoteSpecification):
         by_idea = self._gather_results()
         values = {
             votable_id: self.results_for(voting_results)
-            for (votable_id, voting_results) in by_idea.iteritems()
+            for (votable_id, voting_results) in by_idea.items()
         }
         idea_names = dict(self.db.query(Idea.id, Idea.short_title).filter(
-            Idea.id.in_(by_idea.keys())))
-        idea_names = {
-            id: name.encode('utf-8') for (id, name) in idea_names.iteritems()}
+            Idea.id.in_(list(by_idea.keys()))))
         ordered_idea_ids = Idea.visit_idea_ids_depth_first(
             AppendingVisitor(), self.get_discussion_id())
         ordered_idea_ids = [id for id in ordered_idea_ids if id in values]

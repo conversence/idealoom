@@ -1,6 +1,10 @@
 """Defines the existing frontend routes so the Pyramid router can pass them along."""
-from urlparse import urljoin, urlparse
-import urllib
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import object
+from urllib.parse import urljoin, urlparse
+import urllib.request, urllib.parse, urllib.error
 
 from ..models import Discussion
 
@@ -67,7 +71,7 @@ class FrontendUrls(object):
     @classmethod
     def register_frontend_routes(cls, config):
         from assembl.views.discussion.views import home_view
-        for name, route in cls.frontend_discussion_routes.iteritems():
+        for name, route in cls.frontend_discussion_routes.items():
             config.add_route(name, route)
             config.add_view(
                 home_view, route_name=name, request_method='GET',
@@ -76,7 +80,7 @@ class FrontendUrls(object):
     @classmethod
     def register_frontend_admin_routes(cls, config):
         from assembl.views.admin.views import base_admin_view
-        for name, route in cls.frontend_admin_routes.iteritems():
+        for name, route in cls.frontend_admin_routes.items():
             config.add_route(name, route)
             config.add_view(
                 base_admin_view, route_name=name, request_method='GET',
@@ -116,13 +120,13 @@ class FrontendUrls(object):
         return self.getUserNotificationSubscriptionsConfigurationUrl()
 
     def get_relative_post_url(self, post):
-        return '/posts/' + urllib.quote(post.uri(), '')
+        return '/posts/' + urllib.parse.quote(post.uri(), '')
 
     def get_post_url(self, post):
         return self.get_discussion_url() + self.get_relative_post_url(post)
 
     def get_relative_idea_url(self, idea):
-        return '/idea/' + urllib.quote(idea.original_uri, '')
+        return '/idea/' + urllib.parse.quote(idea.original_uri, '')
 
     def get_idea_url(self, idea):
         return self.get_discussion_url() + self.get_relative_idea_url(idea)
@@ -137,7 +141,7 @@ class FrontendUrls(object):
             url = url[:-1]
         url_base = url + '?'
         f = lambda k, v: "%s=%s" % (k, v)
-        qs = [f(k, v) for k, v in kwargs.iteritems() if k]
+        qs = [f(k, v) for k, v in kwargs.items() if k]
         return url_base + ('&'.join(qs)) if kwargs else ''
 
     def get_agentprofile_avatar_url(self, profile, pixelSize):

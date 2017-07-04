@@ -7,11 +7,16 @@ import time
 import sys
 from os import makedirs, access, R_OK, W_OK
 from os.path import exists, dirname
-import ConfigParser
+import configparser
 import traceback
 from time import sleep
 import logging
+import logging.config
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import range
 import simplejson as json
 import zmq
 from zmq.eventloop import ioloop
@@ -25,47 +30,16 @@ from assembl.lib.zmqlib import INTERNAL_SOCKET
 from assembl.lib.raven_client import setup_raven, capture_exception
 from assembl.lib.web_token import decode_token, TokenInvalid
 
-
-log = logging.getLogger(__name__)
-
-
 # Inspired by socksproxy.
 
-if len(sys.argv) != 2:
-    print("usage: python changes_router.py configuration.ini")
-    exit()
-
+log = logging.getLogger("assembl.tasks.changes_router")
 
 SECTION = 'app:assembl'
 Everyone = 'system.Everyone'
 
-settings = ConfigParser.ConfigParser({'changes.prefix': ''})
-settings.read(sys.argv[-1])
-CHANGES_SOCKET = settings.get(SECTION, 'changes.socket')
-CHANGES_PREFIX = settings.get(SECTION, 'changes.prefix')
-TOKEN_SECRET = settings.get(SECTION, 'session.secret')
-WEBSERVER_PORT = settings.getint(SECTION, 'changes.websocket.port')
-# NOTE: Not sure those are always what we want.
-SERVER_PROTOCOL = 'https' if settings.getboolean(SECTION, 'require_secure_connection') else 'http'
-SERVER_HOST = settings.get(SECTION, 'public_hostname')
-SERVER_PORT = 443 if SERVER_PROTOCOL == 'https' else settings.getint(SECTION, 'public_port')
-setup_raven(settings)
-
-context = zmq.Context.instance()
-ioloop.install()
-io_loop = ioloop.IOLoop.instance()  # ZMQ loop
-
-if CHANGES_SOCKET.startswith('ipc://'):
-    dir = dirname(CHANGES_SOCKET[6:])
-    if not exists(dir):
-        makedirs(dir)
-
-td = zmq.devices.ThreadDevice(zmq.FORWARDER, zmq.XSUB, zmq.XPUB)
-td.bind_in(CHANGES_SOCKET)
-td.bind_out(INTERNAL_SOCKET)
-td.setsockopt_in(zmq.IDENTITY, 'XSUB')
-td.setsockopt_out(zmq.IDENTITY, 'XPUB')
-td.start()
+global TOKEN_SECRET, SERVER_URL
+TOKEN_SECRET = None
+SERVER_URL = None
 
 
 class ZMQRouter(SockJSConnection):
@@ -81,7 +55,7 @@ class ZMQRouter(SockJSConnection):
     def on_recv(self, data):
         try:
             data = data[-1]
-            if '@private' in data:
+            if b'@private' in data:
                 jsondata = json.loads(data)
                 jsondata = [x for x in jsondata
                             if x.get('@private', self.userId) == self.userId]
@@ -124,24 +98,24 @@ class ZMQRouter(SockJSConnection):
             if self.token and self.discussion:
                 # Check if token authorizes discussion
                 r = requests.get(
-                    '%s://%s:%d/api/v1/discussion/%s/permissions/read/u/%s' %
-                    (SERVER_PROTOCOL, SERVER_HOST, SERVER_PORT, self.discussion,
-                        self.token['userId']))
+                    '%s/api/v1/discussion/%s/permissions/read/u/%s' % (
+                        SERVER_URL, self.discussion, self.token['userId']
+                        ), headers={"Accept": "application/json"})
                 log.debug(r.text)
                 if r.text != 'true':
                     return
                 self.socket = context.socket(zmq.SUB)
                 self.socket.connect(INTERNAL_SOCKET)
-                self.socket.setsockopt(zmq.SUBSCRIBE, '*')
-                self.socket.setsockopt(zmq.SUBSCRIBE, str(self.discussion))
+                self.socket.setsockopt(zmq.SUBSCRIBE, b'*')
+                self.socket.setsockopt(zmq.SUBSCRIBE, bytes(self.discussion, 'ascii'))
                 self.loop = zmqstream.ZMQStream(self.socket, io_loop=io_loop)
                 self.loop.on_recv(self.on_recv)
                 log.info("connected")
                 self.send('[{"@type":"Connection"}]')
                 if self.raw_token and self.discussion and self.userId != Everyone:
-                    requests.post('%s://%s:%d/data/Discussion/%s/all_users/%d/connecting' %
-                        (SERVER_PROTOCOL, SERVER_HOST, SERVER_PORT, self.discussion,
-                            self.token['userId']), data={'token': self.raw_token})
+                    requests.post('%s/data/Discussion/%s/all_users/%d/connecting' % (
+                        SERVER_URL, self.discussion, self.token['userId']
+                        ), data={'token': self.raw_token})
         except Exception:
             capture_exception()
             self.do_close()
@@ -152,9 +126,9 @@ class ZMQRouter(SockJSConnection):
         try:
             log.info("closing")
             if self.raw_token and self.discussion and self.userId != Everyone:
-                requests.post('%s://%s:%d/data/Discussion/%s/all_users/%d/disconnecting' %
-                    (SERVER_PROTOCOL, SERVER_HOST, SERVER_PORT, self.discussion,
-                        self.token['userId']), data={'token': self.raw_token})
+                requests.post('%s/data/Discussion/%s/all_users/%d/disconnecting' % (
+                    SERVER_URL, self.discussion, self.token['userId']
+                    ), data={'token': self.raw_token})
             self.do_close()
         except Exception:
             capture_exception()
@@ -162,46 +136,85 @@ class ZMQRouter(SockJSConnection):
 
 
 def logger(msg):
-    log.info(msg)
+    log.debug(msg)
 
 
 def log_queue():
     socket = context.socket(zmq.SUB)
     socket.connect(INTERNAL_SOCKET)
-    socket.setsockopt(zmq.SUBSCRIBE, '')
+    socket.setsockopt(zmq.SUBSCRIBE, b'')
     loop = zmqstream.ZMQStream(socket, io_loop=io_loop)
     loop.on_recv(logger)
 
-log_queue()
-
-sockjs_router = SockJSRouter(
-    ZMQRouter, prefix=CHANGES_PREFIX, io_loop=io_loop)
-routes = sockjs_router.urls
-web_app = web.Application(routes, debug=False)
 
 
-def term(*_ignore):
-    web_server.stop()
-    io_loop.add_timeout(time.time() + 0.3, io_loop.stop)
+if __name__ == '__main__':
+    if len(sys.argv) != 2:
+        print("usage: python changes_router.py configuration.ini")
+        exit()
 
-signal.signal(signal.SIGTERM, term)
+    logging.config.fileConfig(sys.argv[1],)
 
-web_server = HTTPServer(web_app)
-web_server.listen(WEBSERVER_PORT)
-try:
-    if CHANGES_SOCKET.startswith('ipc://'):
-        sname = CHANGES_SOCKET[6:]
-        for i in range(5):
-            if exists(sname):
-                break
-            sleep(0.1)
-        else:
-            raise RuntimeError("could not create socket " + sname)
-        if not access(sname, R_OK | W_OK):
-            raise RuntimeError(sname + " cannot be accessed")
-    io_loop.start()
-except KeyboardInterrupt:
-    term()
-except Exception:
-    capture_exception()
-    raise
+    settings = configparser.ConfigParser({'changes.prefix': ''})
+    settings.read(sys.argv[-1])
+
+
+    changes_socket = settings.get(SECTION, 'changes.socket')
+    changes_prefix = settings.get(SECTION, 'changes.prefix')
+    TOKEN_SECRET = settings.get(SECTION, 'session.secret')
+    webserver_port = settings.getint(SECTION, 'changes.websocket.port')
+    # NOTE: Not sure those are always what we want.
+    server_protocol = 'https' if settings.getboolean(SECTION, 'require_secure_connection') else 'http'
+    server_host = settings.get(SECTION, 'public_hostname')
+    server_port = 443 if server_protocol == 'https' else settings.getint(SECTION, 'public_port')
+    SERVER_URL = "%s://%s:%d" % (server_protocol, server_host, server_port)
+    setup_raven(settings)
+
+    context = zmq.Context.instance()
+    ioloop.install()
+    io_loop = ioloop.IOLoop.instance()  # ZMQ loop
+
+    if changes_socket.startswith('ipc://'):
+        dir = dirname(changes_socket[6:])
+        if not exists(dir):
+            makedirs(dir)
+
+    td = zmq.devices.ThreadDevice(zmq.FORWARDER, zmq.XSUB, zmq.XPUB)
+    td.bind_in(changes_socket)
+    td.bind_out(INTERNAL_SOCKET)
+    td.setsockopt_in(zmq.IDENTITY, b'XSUB')
+    td.setsockopt_out(zmq.IDENTITY, b'XPUB')
+    td.start()
+    log_queue()
+
+    sockjs_router = SockJSRouter(
+        ZMQRouter, prefix=changes_prefix, io_loop=io_loop)
+    routes = sockjs_router.urls
+    web_app = web.Application(routes, debug=False)
+
+    def term(*_ignore):
+        web_server.stop()
+        io_loop.add_timeout(time.time() + 0.3, io_loop.stop)
+
+    signal.signal(signal.SIGTERM, term)
+
+    web_server = HTTPServer(web_app)
+    web_server.listen(webserver_port)
+
+    try:
+        if changes_socket.startswith('ipc://'):
+            sname = changes_socket[6:]
+            for i in range(5):
+                if exists(sname):
+                    break
+                sleep(0.1)
+            else:
+                raise RuntimeError("could not create socket " + sname)
+            if not access(sname, R_OK | W_OK):
+                raise RuntimeError(sname + " cannot be accessed")
+        io_loop.start()
+    except KeyboardInterrupt:
+        term()
+    except Exception:
+        capture_exception()
+        raise

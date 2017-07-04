@@ -285,6 +285,6 @@ def includeme(config):
         val = settings.get(name, '')
         if val:
             settings[name] = json.loads(val)
-    for k in settings.iterkeys():
+    for k in settings.keys():
         if k.endswith("_SCOPE") and k.startswith("SOCIAL_AUTH_"):
             settings[k] = aslist(settings.get(k, ''))

@@ -4,6 +4,7 @@
 
 from datetime import datetime
 
+from future.utils import as_native_str
 from sqlalchemy import (
     Boolean,
     Column,
@@ -81,6 +82,7 @@ class Action(TombstonableMixin, OriginMixin, DiscussionBoundBase):
             self.actor = context.get_instance_of_class(User)
         super(Action, self).populate_from_context(context)
 
+    @as_native_str()
     def __repr__(self):
         return "%s %s %s %s>" % (
             super(Action, self).__repr__()[:-1],

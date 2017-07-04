@@ -1,4 +1,6 @@
 """Cornice API for posts"""
+from __future__ import division
+from builtins import next
 from math import ceil
 import logging
 
@@ -461,7 +463,7 @@ def get_posts(request):
     data["page"] = page
     data["unread"] = no_of_posts - no_of_posts_viewed_by_user
     data["total"] = no_of_posts
-    data["maxPage"] = max(1, ceil(float(data["total"])/page_size))
+    data["maxPage"] = max(1, ceil(data["total"]/page_size))
     #TODO:  Check if we want 1 based index in the api
     data["startIndex"] = (page_size * page) - (page_size-1)
 

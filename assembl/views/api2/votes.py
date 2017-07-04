@@ -1,5 +1,7 @@
+from future import standard_library
+standard_library.install_aliases()
 from datetime import datetime
-from cStringIO import StringIO
+from io import BytesIO
 
 from pyramid.view import view_config
 from pyramid.httpexceptions import (
@@ -140,7 +142,7 @@ def vote_results_csv(request):
         permissions = ctx.get_permissions()
         if P_ADMIN_DISC not in permissions:
             raise HTTPUnauthorized()
-    output = StringIO()
+    output = BytesIO()
     ctx._instance.csv_results(output, histogram)
     output.seek(0)
-    return Response(body_file=output, content_type='text/csv')
+    return Response(body_file=output, content_type='text/csv', charset="utf-8")

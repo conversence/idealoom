@@ -36,7 +36,7 @@ def upgrade(pyramid_env):
                 assoc.idea.tombstone_date = synth.creation_date
             # AND change the links. Sigh.
             synth.db.flush()
-            snapshots = {id: idea.id for (id, idea) in snapshots.iteritems()}
+            snapshots = {id: idea.id for (id, idea) in snapshots.items()}
             for link in synth.idea_links:
                 assert link.is_tombstone
                 id = link.source_id

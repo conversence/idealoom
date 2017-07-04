@@ -1,5 +1,7 @@
 from __future__ import print_function
 
+from builtins import range
+from builtins import object
 import string
 import random
 import logging
@@ -15,9 +17,9 @@ from assembl.lib.discussion_creation import IDiscussionCreationCallback
 log = logging.getLogger(__name__)
 
 
+@interface.implementer(IDiscussionCreationCallback)
 class AutomaticPiwikBindingAtDiscussionCreation(object):
     """A :py:class:`IDiscussionCreationCallback` that creates a Piwik site and user at discussion creation"""
-    interface.implements(IDiscussionCreationCallback)
 
     def discussionCreated(self, discussion):
         bind_piwik(discussion)

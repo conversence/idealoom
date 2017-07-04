@@ -87,7 +87,7 @@ def upgrade(pyramid_env):
         # save those that we have just updated for next step
         known_logged_in = {
             profile_id for ((profile_id, discussion_id), (first_date, last_date))
-                in min_maxes.items() if first_date == last_date}
+                in list(min_maxes.items()) if first_date == last_date}
 
     # Clear last_login for non-social users without m.AgentStatusInDiscussion,
     # or where for all m.AgentStatusInDiscussion, last_visit == first_subscribed

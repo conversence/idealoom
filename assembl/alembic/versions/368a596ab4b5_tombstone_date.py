@@ -52,7 +52,7 @@ def reconstruct_idea_history(db):
     idea_links=db.query(IdeaLink).all()
     synthesis_dates = dict(db.query(IdeaLink.id, SynthesisPost.creation_date).join(SubGraphIdeaLinkAssociation).join(Synthesis).join(SynthesisPost).all())
     link_by_id = {l.id: l for l in idea_links}
-    link_ids = link_by_id.keys()
+    link_ids = list(link_by_id.keys())
     link_ids.sort()
     end = datetime.datetime.now()
     min_creation = {
@@ -60,7 +60,7 @@ def reconstruct_idea_history(db):
     }
     max_end = {id:end for id in link_ids}
 
-    for id, date in synthesis_dates.iteritems():
+    for id, date in synthesis_dates.items():
         min_creation[id] = date
         max_end[id] = date
         link_by_id[id].tombstone_date = date
@@ -83,7 +83,7 @@ def reconstruct_idea_history(db):
 
     live_ids = {}
     # if same target, one replaces the other.
-    for l in by_target.itervalues():
+    for l in by_target.values():
         l.sort()
         live_id=[id for id in l if not link_by_id[id].is_tombstone]
         assert len(live_id) < 2
@@ -131,7 +131,7 @@ def reconstruct_vote_history(db):
     by_key = defaultdict(list)
     for vote in votes:
         by_key[vote_key(vote)].append(vote)
-    for similar_votes in by_key.itervalues():
+    for similar_votes in by_key.values():
         similar_votes.sort(key=lambda v: v.id)
         previous = None
         assert not similar_votes[-1].is_tombstone

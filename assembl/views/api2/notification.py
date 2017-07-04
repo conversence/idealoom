@@ -1,3 +1,4 @@
+from builtins import str
 from simplejson import dumps
 
 from pyramid.view import view_config
@@ -68,7 +69,7 @@ def notif_collection_add_json(request):
              accept="text/html", name="mail_html_preview")
 def mail_html_preview(request):
     return Response(request.context._instance.render_to_email_html_part(),
-                    content_type='text/html')
+                    content_type='text/html', charset="utf-8")
 
 
 @view_config(context=InstanceContext, request_method='GET',
@@ -76,7 +77,7 @@ def mail_html_preview(request):
              accept="text/html", name="mail_text_preview")
 def mail_text_preview(request):
     return Response(request.context._instance.render_to_email_text_part(),
-                    content_type='text/plain')
+                    content_type='text/plain', charset="utf-8")
 
 
 @view_config(context=InstanceContext, request_method='GET',
@@ -84,7 +85,7 @@ def mail_text_preview(request):
              accept="text/html", name="mail")
 def mail(request):
     return Response(request.context._instance.render_to_message().to_message().as_string(),
-                    content_type='text/plain')
+                    content_type='text/plain', charset="utf-8")
 
 
 @view_config(context=InstanceContext, request_method='GET',
@@ -95,7 +96,7 @@ def process_now(request):
     notify.delay(request.context._instance.id)
     return Response("Celery notified to process notification " +
                     str(request.context._instance.id),
-                    content_type='text/plain')
+                    content_type='text/plain', charset="ascii")
 
 
 @view_config(context=ClassContext, request_method='GET',
@@ -105,7 +106,7 @@ def process_all_now(request):
     from ...tasks.notify import process_pending_notifications
     process_pending_notifications.delay()
     return Response("Celery notified to process all notifications",
-                    content_type='text/plain')
+                    content_type='text/plain', charset="ascii")
 
 
 @view_config(context=InstanceContext, request_method='PUT',

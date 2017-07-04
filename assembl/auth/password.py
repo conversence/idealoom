@@ -1,13 +1,18 @@
 """Utilities to encrypt hashes, tokens, etc."""
+from __future__ import division
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 from os import urandom
 from binascii import hexlify, unhexlify
 import hashlib
 from datetime import datetime, timedelta
 from base64 import urlsafe_b64encode, urlsafe_b64decode
-from urllib import unquote
+from urllib.parse import unquote
 import logging
 
+from future.utils import text_type, bytes_to_native_str
 from enum import IntEnum
 from assembl.lib import config
 from ..models import AbstractAgentAccount, User
@@ -36,16 +41,17 @@ def hash_password(password, encoding=HashEncoding.BINARY, salt_size=SALT_SIZE):
     """
     salt = urandom(salt_size)
     hasher = hashlib.new(config.get('security.hash_algorithm') or 'sha256')
-    if not isinstance(password, unicode):
-        password = password.decode('utf-8')
-    hasher.update(password.encode('utf-8'))
+    if isinstance(password, text_type):
+        password = password.encode('utf-8')
+    hasher.update(password)
     hasher.update(salt)
     if encoding == HashEncoding.BINARY:
         return salt + hasher.digest()
     elif encoding == HashEncoding.HEX:
-        return hexlify(salt) + hasher.hexdigest()
+        return bytes_to_native_str(hexlify(salt)) + hasher.hexdigest()
     elif encoding == HashEncoding.BASE64:
-        return urlsafe_b64encode(salt) + urlsafe_b64encode(hasher.digest())
+        return bytes_to_native_str(
+            urlsafe_b64encode(salt) + urlsafe_b64encode(hasher.digest()))
     raise ValueError()
 
 
@@ -61,16 +67,16 @@ def verify_password(password, hash, encoding=HashEncoding.BINARY,
         salt, hash = unhexlify(hash[:salt_len]), unhexlify(hash[salt_len:])
     elif encoding == HashEncoding.BASE64:
         hash = str(unquote(hash))
-        salt_len = 4 * int((salt_size+2)/3)
+        salt_len = 4 * int((salt_size + 2) / 3)
         salt, hash = (urlsafe_b64decode(hash[:salt_len]),
                       urlsafe_b64decode(hash[salt_len:]))
     else:
         raise ValueError()
 
     hasher = hashlib.new(config.get('security.hash_algorithm') or 'sha256')
-    if not isinstance(password, unicode):
-        password = password.decode('utf-8')
-    hasher.update(password.encode('utf-8'))
+    if isinstance(password, text_type):
+        password = password.encode('utf-8')
+    hasher.update(password)
     hasher.update(salt)
     return hasher.digest() == hash
 

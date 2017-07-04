@@ -1,6 +1,7 @@
 """Count number of occurences of stemmed words for the creativity widget."""
 import re
 from collections import defaultdict
+from future.utils import as_native_str
 
 from . import (
     locale_to_lang, get_stop_words, known_languages, get_stemmer)
@@ -20,6 +21,7 @@ class StemSet(set):
         all_words.sort(key=len)
         return all_words[0]
 
+    @as_native_str()
     def __repr__(self):
         return super(StemSet, self).__repr__()[:-1] + ", %f)" % (
             self.counter)
@@ -57,7 +59,7 @@ class WordCounter(defaultdict):
         self[stemmed].add(word, weight)
 
     def best(self, num=10):
-        all_words = self.values()
+        all_words = list(self.values())
         all_words.sort(key=lambda x: x.counter, reverse=True)
         if len(all_words) > num:
             all_words = all_words[:num]

@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
+from future import standard_library
+standard_library.install_aliases()
+from builtins import next
 from collections import OrderedDict
-import urlparse
+import urllib.parse
 
 import pytest
 import simplejson as json
@@ -21,7 +24,7 @@ def test_assembl_login(discussion, participant1_user,
     res = test_app_no_login.post(url, OrderedDict([
         ('identifier', participant1_user.get_preferred_email()),
         ('password', 'password')]))
-    assert (res.status_code == 302 and urlparse.urlparse(
+    assert (res.status_code == 302 and urllib.parse.urlparse(
         res.location).path == '/' + discussion.slug + '/')
     assert test_app_no_login.app.registry.getUtility(
         IAuthorizationPolicy).remembered == participant1_user.id
@@ -38,7 +41,7 @@ def test_assembl_login_mixed_case(discussion, participant1_user,
         ('identifier',
          participant1_user.get_preferred_email().title()),
         ('password', 'password')]))
-    assert (res.status_code == 302 and urlparse.urlparse(
+    assert (res.status_code == 302 and urllib.parse.urlparse(
         res.location).path == '/' + discussion.slug + '/')
     assert test_app_no_login.app.registry.getUtility(
         IAuthorizationPolicy).remembered == participant1_user.id
@@ -104,7 +107,7 @@ def fake_response_handler(url=None, **kwargs):
     r.status_code = 200
     r.encoding = "utf-8"
     assert url in fake_responses, "unknown URL: " + url
-    r._content = fake_responses[url]
+    r._content = fake_responses[url].encode("utf-8")
     return r
 
 
@@ -115,8 +118,8 @@ def test_social_login(
         'social.auth', backend=google_identity_provider.provider_type)
     res = test_app.get(path)
     assert res.status_code == 302  # Found
-    url = urlparse.urlparse(res.location)
-    qs = urlparse.parse_qs(url.query)
+    url = urllib.parse.urlparse(res.location)
+    qs = urllib.parse.parse_qs(url.query)
     state = qs['state']
     code = 'code'
     session_state = 'session_state'
@@ -151,8 +154,8 @@ def test_add_social_account(
         'social.auth', backend=google_identity_provider.provider_type)
     res = test_app.get(path)
     assert res.status_code == 302  # Found
-    url = urlparse.urlparse(res.location)
-    qs = urlparse.parse_qs(url.query)
+    url = urllib.parse.urlparse(res.location)
+    qs = urllib.parse.parse_qs(url.query)
     state = qs['state']
     code = 'code'
     session_state = 'session_state'
@@ -191,8 +194,8 @@ def test_merge_social_account(
         'social.auth', backend=google_identity_provider.provider_type)
     res = test_app.get(path)
     assert res.status_code == 302  # Found
-    url = urlparse.urlparse(res.location)
-    qs = urlparse.parse_qs(url.query)
+    url = urllib.parse.urlparse(res.location)
+    qs = urllib.parse.parse_qs(url.query)
     state = qs['state']
     code = 'code'
     session_state = 'session_state'

@@ -1,5 +1,9 @@
 """Utilities for extracting posts and from a RSS or Atom feed."""
-from cStringIO import StringIO
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import object
+from io import StringIO
 from importlib import import_module
 from datetime import datetime
 from calendar import timegm
@@ -14,7 +18,7 @@ from sqlalchemy import (
 from pyisemail import is_email
 import feedparser
 import requests
-from urlparse import urlparse
+from urllib.parse import urlparse
 
 from ..lib.sqla_types import URLString
 from .langstrings import LangString

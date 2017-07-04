@@ -1,6 +1,10 @@
 """Abstract and concrete classes for a machine translation service."""
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import object
 from abc import abstractmethod
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 from traceback import print_exc
 import re
 
@@ -428,8 +432,8 @@ class DummyGoogleTranslationService(TranslationService):
             self.asKnownLocale(target),
             self.asKnownLocale(source) if source else "",
             text.replace(" ", "+"))
-        request = urllib2.Request(link, headers=self.agents)
-        page = urllib2.urlopen(request).read()
+        request = urllib.request.Request(link, headers=self.agents)
+        page = urllib.request.urlopen(request).read()
         before_trans = 'class="t0">'
         result = page[page.find(before_trans)+len(before_trans):]
         result = result.split("<")[0]

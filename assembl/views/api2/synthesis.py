@@ -1,3 +1,4 @@
+from builtins import str
 from pyramid.view import view_config
 from pyramid.httpexceptions import (HTTPBadRequest, HTTPNotFound)
 from pyramid.response import Response
@@ -70,8 +71,9 @@ def add_idea_to_synthesis(request):
     graph_view.send_to_changes()
     # special location
     return Response(
-        json.dumps(idea.generic_json()), 201, content_type='application/json',
-        location=request.url + "/" + str(idea.id))
+        json.dumps(idea.generic_json(), ensure_ascii=False),
+        201, content_type='application/json',
+        charset="utf-8", location=request.url + "/" + str(idea.id))
 
 
 @view_config(context=InstanceContext, renderer='json', request_method='DELETE',

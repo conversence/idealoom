@@ -5,8 +5,11 @@ create objects. This pushes the logic on another thread, so we're already
 using another thread-specific session."""
 from __future__ import print_function
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
 from threading import Thread
-from Queue import Queue
+from queue import Queue
 
 from zope import interface
 
@@ -46,10 +49,10 @@ class ThreadDispatcher(Thread):
         cls.get_instance()
 
 
+@interface.implementer(IModelEventWatcher)
 class ThreadedModelEventWatcher(object):
     """A IModelEventWatcher that will dispatch events to its
     :py:class:`ThreadDispatcher`"""
-    interface.implements(IModelEventWatcher)
 
     def __init__(self):
         self.queue = ThreadDispatcher.get_instance().queue

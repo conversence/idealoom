@@ -45,7 +45,7 @@ def upgrade(pyramid_env):
 
 def downgrade(pyramid_env):
     with context.begin_transaction():
-        for table_name, type_name in post_tables.items():
+        for table_name, type_name in list(post_tables.items()):
             op.create_table(
                 table_name,
                 sa.Column(

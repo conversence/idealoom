@@ -1,3 +1,4 @@
+from builtins import object
 from datetime import datetime
 from itertools import chain
 
@@ -154,7 +155,7 @@ class ImportRecordHandler(object):
         q = self.db.query(ImportRecord).filter_by(
             discussion_id=self.discussion_id,
             server_iri=self.server_iri)
-        return chain(self.future.iterkeys(), (i.external_iri for i in q))
+        return chain(iter(self.future.keys()), (i.external_iri for i in q))
 
     def __len__(self):
         return len(self.future) + self.db.query(ImportRecord).filter_by(

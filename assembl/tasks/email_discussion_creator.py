@@ -1,4 +1,5 @@
 
+from builtins import object
 from email.header import Header
 
 from zope import interface
@@ -17,12 +18,12 @@ from assembl.auth.password import password_change_token
 _ = TranslationStringFactory('assembl')
 
 
+@interface.implementer(IDiscussionCreationCallback)
 class EmailCreatorAtDiscussionCreation(object):
     """A :py:class:`IDiscussionCreationCallback` that emails the discussion creator
     with various relevant links. Cc is sent to emails in the config's
     discussion_creation_cc. (TODO: preference?)
     """
-    interface.implements(IDiscussionCreationCallback)
 
     def discussionCreated(self, discussion):
         from assembl.models import Notification

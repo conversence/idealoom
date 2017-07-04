@@ -33,7 +33,7 @@ def patch_dict(request):
     permissions = ctx.get_permissions()
 
     try:
-        for k, v in request.json.iteritems():
+        for k, v in request.json.items():
             if v is None:
                 preferences.safe_del(k, permissions)
             else:
@@ -70,7 +70,7 @@ def put_value(request):
         raise HTTPBadRequest(e)
     return Response(
         dumps(preferences[ctx.key]), status_code=201,
-        content_type='application/json')
+        content_type='application/json', charset="utf-8")
 
 
 @view_config(context=PreferenceValueContext, renderer='json',

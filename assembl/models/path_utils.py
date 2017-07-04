@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 """Utilities for traversing the set of content related to an idea and vice-versa."""
 
+from builtins import range
+from builtins import object
 from functools import total_ordering
 from collections import defaultdict
 from bisect import bisect_right
 
+from future.utils import as_native_str
 from sqlalchemy import String
 from sqlalchemy.orm import (with_polymorphic, aliased)
 from sqlalchemy.sql.expression import or_, union, except_
@@ -100,6 +103,7 @@ class PostPathData(object):
     def __hash__(self):
         return hash(self.post_path) + int(self.positive)
 
+    @as_native_str()
     def __repr__(self):
         return "<%s%s>" % (
             self.post_path, "+" if self.positive else "-")
@@ -141,7 +145,7 @@ class PostPathLocalCollection(object):
         paths = []
         ancestors_by_polarity = {True: [], False: [], None: []}
         for path in self.paths:
-            for ancestors in ancestors_by_polarity.itervalues():
+            for ancestors in ancestors_by_polarity.values():
                 while ancestors:
                     if not path.post_path.startswith(ancestors[-1].post_path):
                         ancestors.pop()
@@ -197,7 +201,7 @@ class PostPathLocalCollection(object):
         # Weirdly, same logic as path cancellation.
         return self.is_cancelled(PostPathData(post_path, False))
 
-    def __nonzero__(self):
+    def __bool__(self):
         return bool(self.paths)
 
     def __eq__(self, other):
@@ -216,6 +220,7 @@ class PostPathLocalCollection(object):
         clone.reduced = self.reduced
         return clone
 
+    @as_native_str()
     def __repr__(self):
         return " ; ".join((repr(x) for x in self.paths))
 
@@ -393,7 +398,7 @@ class PostPathGlobalCollection(object):
                 self.paths[idea_id].add_path(PostPathData(path, True))
             elif typename in self.negatives:
                 self.paths[idea_id].add_path(PostPathData(path, False))
-        for ppc in self.paths.itervalues():
+        for ppc in self.paths.values():
             ppc.reduce()
 
 
@@ -406,7 +411,7 @@ class PostPathCombiner(PostPathGlobalCollection, IdeaVisitor):
         super(PostPathCombiner, self).__init__(discussion)
 
     def init_from(self, post_path_global_collection):
-        for id, paths in post_path_global_collection.paths.iteritems():
+        for id, paths in post_path_global_collection.paths.items():
             self.paths[id] = paths.clone()
         self.discussion = post_path_global_collection.discussion
 
@@ -621,7 +626,7 @@ class DiscussionGlobalData(object):
                 self._children_dict = {None: (root_id,), root_id: ()}
                 return self._children_dict
             children = defaultdict(list)
-            for child, parent in self.parent_dict.iteritems():
+            for child, parent in self.parent_dict.items():
                 children[parent].append(child)
             root = set(children.keys()) - set(self.parent_dict.keys())
             assert len(root) == 1

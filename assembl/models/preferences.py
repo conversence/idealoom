@@ -2,6 +2,10 @@
 """A set of preferences that apply to a Discussion.
 
 May be defined at the user, Discussion or server level."""
+from future import standard_library
+from future.utils import text_type
+standard_library.install_aliases()
+from builtins import str
 from itertools import chain
 from collections import MutableMapping
 
@@ -18,7 +22,7 @@ from sqlalchemy.orm import relationship
 from ..lib.sqla_types import CoerceUnicode
 from pyramid.httpexceptions import HTTPUnauthorized
 
-from . import Base, DeclarativeAbstractMeta, NamedClassMixin
+from . import AbstractBase, NamedClassMixin
 from ..auth import *
 from ..lib.abc import classproperty
 from ..lib.locale import _, strip_country
@@ -30,7 +34,7 @@ def merge_json(base, patch):
     if not (isinstance(base, dict) and isinstance(patch, dict)):
         return patch
     base = dict(base)
-    for k, v in patch.iteritems():
+    for k, v in patch.items():
         if k in base:
             base[k] = merge_json(base[k], v)
         else:
@@ -38,11 +42,10 @@ def merge_json(base, patch):
     return base
 
 
-class Preferences(MutableMapping, NamedClassMixin, Base):
+class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
     """
     Cascading preferences
     """
-    __metaclass__ = DeclarativeAbstractMeta
     __tablename__ = "preferences"
     BASE_PREFS_NAME = "default"
     id = Column(Integer, primary_key=True)
@@ -144,7 +147,7 @@ class Preferences(MutableMapping, NamedClassMixin, Base):
     def __setitem__(self, key, value):
         if key == 'name':
             old_value = self.name
-            self.name = unicode(value)
+            self.name = text_type(value)
             return old_value
         elif key == '@extends':
             old_value = self.get('@extends')
@@ -225,14 +228,14 @@ class Preferences(MutableMapping, NamedClassMixin, Base):
             return {
                 self.validate_single_value(key, k, pref_data, key_type):
                 self.validate_single_value(key, v, pref_data, value_type)
-                for (k, v) in value.iteritems()}
+                for (k, v) in value.items()}
         elif data_type == "langstr":
             # Syntactic sugar for dict_of_locale_to_string
             assert isinstance(value, (dict)), "Not a dict"
             return {
                 self.validate_single_value(key, k, pref_data, "locale"):
                 self.validate_single_value(key, v, pref_data, "string")
-                for (k, v) in value.iteritems()}
+                for (k, v) in value.items()}
         elif data_type == "bool":
             assert isinstance(value, bool), "Not a boolean"
         elif data_type == "int":
@@ -247,7 +250,7 @@ class Preferences(MutableMapping, NamedClassMixin, Base):
                 assert value in pref_data.get("scalar_values", ()), (
                     "value not allowed: " + value)
             elif data_type == "url":
-                from urlparse import urlparse
+                from urllib.parse import urlparse
                 assert urlparse(value).scheme in (
                     'http', 'https'), "Not a HTTP URL"
             elif data_type == "email":
@@ -285,7 +288,7 @@ class Preferences(MutableMapping, NamedClassMixin, Base):
     def _do_update_from_json(
             self, json, parse_def, aliases, context,
             duplicate_handling=None, jsonld=None):
-        for key, value in json.iteritems():
+        for key, value in json.items():
             if key == '@id':
                 if value != self.uri():
                     raise RuntimeError("Wrong id")
@@ -294,7 +297,7 @@ class Preferences(MutableMapping, NamedClassMixin, Base):
         return self
 
     def __hash__(self):
-        return Base.__hash__(self)
+        return AbstractBase.__hash__(self)
 
     @classproperty
     def property_defaults(cls):

@@ -1,3 +1,4 @@
+from builtins import str
 from pyramid.view import view_config
 from pyramid.response import Response
 from pyramid.httpexceptions import HTTPServerError

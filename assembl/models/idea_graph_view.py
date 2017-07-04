@@ -4,6 +4,7 @@ from datetime import datetime
 from abc import abstractmethod
 from itertools import chain
 
+from future.utils import as_native_str
 from sqlalchemy.orm import (
     relationship, backref)
 from sqlalchemy import (
@@ -277,7 +278,7 @@ class ExplicitSubGraphView(IdeaGraphView):
         children_links = defaultdict(list)
         for link in self.get_idea_links():
             children_links[link.source_id].append(link)
-        for links in children_links.itervalues():
+        for links in children_links.values():
             links.sort(key=lambda l: l.order)
         root = self.discussion.root_idea
         root = ideas_by_id.get(root.base_id, root)
@@ -416,6 +417,7 @@ class TableOfContents(IdeaGraphView):
     def get_ideas(self):
         return self.discussion.ideas
 
+    @as_native_str()
     def __repr__(self):
         r = super(TableOfContents, self).__repr__()
         return r[:-1] + self.discussion.slug + ">"
@@ -517,10 +519,11 @@ class Synthesis(ExplicitSubGraphView):
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):
         return (cls.discussion_id == discussion_id,)
 
+    @as_native_str()
     def __repr__(self):
         r = super(Synthesis, self).__repr__()
         subject = self.subject or ""
-        return r[:-1] + subject.encode("ascii", "ignore") + ">"
+        return r[:-1] + subject + ">"
 
     crud_permissions = CrudPermissions(P_EDIT_SYNTHESIS)
 

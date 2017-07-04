@@ -1,4 +1,6 @@
 """Clone all data from a database to another. Mostly useful for database migration."""
+from builtins import str
+from builtins import zip
 import argparse
 import logging.config
 import traceback
@@ -60,7 +62,7 @@ def copy_table(source_session, dest_session, source_table, dest_table):
     columns = [maybe_cast(c) for c in source_table.c]
     cnames = [c.name for c in source_table.c]
     values = source_session.query(*columns)
-    values = [dict(zip(cnames, val)) for val in values]
+    values = [dict(list(zip(cnames, val))) for val in values]
     if not len(values):
         return
     if source_table.name in recursive_tables:

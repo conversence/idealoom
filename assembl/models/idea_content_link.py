@@ -5,6 +5,7 @@ import quopri
 from datetime import datetime
 import logging
 
+from future.utils import as_native_str
 from sqlalchemy.orm import (relationship, backref)
 from sqlalchemy import (
     Column,
@@ -335,10 +336,11 @@ class Extract(IdeaContentPositiveLink):
             retval['url'] = self.content.url
         return retval
 
+    @as_native_str()
     def __repr__(self):
         r = super(Extract, self).__repr__()
         body = self.body or ""
-        return r[:-1] + body[:20].encode("ascii", "ignore") + ">"
+        return r[:-1] + body[:20] + ">"
 
     def get_target(self):
         return self.content

@@ -2,6 +2,7 @@
 
 Lifted with thanks from
 https://github.com/okfn/annotator-store/blob/master/annotator/auth.py """
+from builtins import str
 import datetime
 
 import isodate
@@ -25,12 +26,8 @@ def encode_token(token, secret):
 def decode_token(token, secret='', ttl=DEFAULT_TTL, verify=True):
     try:
         token = jwt.decode(str(token), secret, verify=verify)
-    except jwt.DecodeError:
-        import sys
-        exc_class, exc, tb = sys.exc_info()
-        new_exc = TokenInvalid("error decoding JSON Web Token: %s" %
-                               exc or exc_class)
-        raise new_exc.__class__, new_exc, tb
+    except jwt.DecodeError as e:
+        raise TokenInvalid("error decoding JSON Web Token", e)
 
     if verify:
         issue_time = token.get('issuedAt')

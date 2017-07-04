@@ -42,7 +42,12 @@
  maparent@acm.org
 '''
 from __future__ import print_function
+from __future__ import division
 
+from future.utils import as_native_str
+from past.builtins import cmp
+from builtins import range
+from builtins import object
 import numpy as N
 from sklearn.metrics.pairwise import pairwise_distances
 
@@ -56,6 +61,7 @@ class Interval(object):
         self.start = start
         self.end = end
 
+    @as_native_str()
     def __repr__(self):
         return "[%d, %d]" % (self.start, self.end)
 
@@ -162,7 +168,7 @@ class Optics(object):
         self.CD = CD = N.zeros(m)
         self.RD = RD = N.ones(m)*1E10
 
-        for i in xrange(m):
+        for i in range(m):
             # again you can use the euclid function if you don't want scipy
             # d = euclid(x[i],x)
             # d.sort()
@@ -427,8 +433,8 @@ class Optics(object):
         RD = self.RDO
         down_area = self.max_steep_down_area(cluster.start)
         up_area = self.max_steep_up_area(cluster.end)
-        return N.amax(RD[down_area.end+1:up_area.start+1]) / max(
-            RD[cluster.start], RD[cluster.end+1])
+        return int(N.amax(RD[down_area.end+1:up_area.start+1]) / max(
+            RD[cluster.start], RD[cluster.end+1]))
 
     def as_labels(self, clusters):
         labels = N.zeros(len(self.RD), dtype=N.int)

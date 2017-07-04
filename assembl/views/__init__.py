@@ -4,6 +4,7 @@ Note that Assembl is a `hybrid app`_, and combines routes and :py:mod:`traversal
 
 .. _`hybrid app`: http://docs.pylonsproject.org/projects/pyramid/en/latest/narr/hybrid.html
 """
+from builtins import str
 import os.path
 import codecs
 from collections import defaultdict
@@ -135,7 +136,7 @@ def get_provider_data(get_route, providers=None):
                     "idp": prov_id
                 }
             }
-            for prov_id, data in saml_providers.iteritems()
+            for prov_id, data in saml_providers.items()
         ])
 
     return provider_data
@@ -238,7 +239,7 @@ def get_default_context(request, **kwargs):
 
     def process_export_list(ls):
         import string
-        return map(lambda s: s.strip(), ls.split(","))
+        return [s.strip() for s in ls.split(",")]
 
     social_settings = {
         'fb_export_permissions': config.get('facebook.export_permissions'),
@@ -355,7 +356,7 @@ class JSONError(HTTPException):
         if code is not None:
             self.code = code
 
-    def __nonzero__(self):
+    def __bool__(self):
         return bool(self.errors)
 
 
@@ -388,7 +389,7 @@ def csrf_error_view(exc, request):
                 template = ('<html><head><script>document.location = "' +
                     request.path_info + '?' + request.query_string +
                     '&reload=true"</script></head></html>')
-                return Response(template, content_type='text/html')
+                return Response(template, content_type='text/html', charset="ascii")
             else:
                 # The hack failed. Tell the user what to do.
                 raise HTTPBadRequest(explanation="Missing cookies", detail="""Note that we need active cookies.

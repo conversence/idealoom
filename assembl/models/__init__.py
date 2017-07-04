@@ -12,6 +12,7 @@ Here, we also define some other base-level classes, such as :py:class:`Discussio
 .. _SQLAlchemy: http://www.sqlalchemy.org/
 """
 
+from builtins import object
 from abc import abstractmethod, ABCMeta
 
 from sqlalchemy import and_
@@ -24,6 +25,7 @@ from ..lib.sqla import (
 from ..lib.history_mixin import (
     TombstonableMixin, HistoryMixin, OriginMixin, HistoryMixinWithOrigin,
     TombstonableOriginMixin)
+from future.utils import with_metaclass
 
 
 class DeclarativeAbstractMeta(DeclarativeMeta, ABCMeta):
@@ -31,7 +33,11 @@ class DeclarativeAbstractMeta(DeclarativeMeta, ABCMeta):
     pass
 
 
-class DiscussionBoundBase(Base):
+class AbstractBase(with_metaclass(DeclarativeAbstractMeta, Base)):
+    __abstract__ = True
+
+
+class DiscussionBoundBase(AbstractBase):
     """Base class for models that are bound to a specific discussion.
 
     These models will deleted if the discussion is deleted.
@@ -39,7 +45,6 @@ class DiscussionBoundBase(Base):
     need not be direct. Subclasses need to define :py:meth:`get_discussion_id`
     and :py:meth:`get_discussion_conditions`.
     """
-    __metaclass__ = DeclarativeAbstractMeta
     __abstract__ = True
     __external_typename = None
 

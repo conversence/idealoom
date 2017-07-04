@@ -2,11 +2,13 @@
 
 Mostly from http://techspot.zzzeek.org/2011/01/14/the-enum-recipe/ """
 from __future__ import print_function
+from builtins import object
 import re
 
 from future.utils import string_types
 from sqlalchemy.types import SchemaType, TypeDecorator, Enum
 from sqlalchemy import __version__
+from future.utils import with_metaclass, as_native_str
 
 if __version__ < '0.6.5':
     raise NotImplementedError("Version 0.6.5 or higher of SQLAlchemy is required.")
@@ -29,8 +31,10 @@ class EnumSymbol(object):
     def __iter__(self):
         return iter([self.value, self.description])
 
+    @as_native_str()
     def __repr__(self):
         return "<%s>" % self.name
+
 
 class EnumMeta(type):
     """Generate new DeclEnum classes."""
@@ -44,12 +48,11 @@ class EnumMeta(type):
         super(EnumMeta, cls).__init__(classname, bases, dict_)
 
     def __iter__(self):
-        return iter(self._reg.values())
+        return iter(list(self._reg.values()))
 
-class DeclEnum(object):
+
+class DeclEnum(with_metaclass(EnumMeta, object)):
     """Declarative enumeration."""
-
-    __metaclass__ = EnumMeta
     _reg = {}
 
     @classmethod
@@ -76,7 +79,7 @@ class DeclEnumType(SchemaType, TypeDecorator):
         super(DeclEnumType, self).__init__(**kwargs)
         self.enum = enum
         self.impl = Enum(
-                        *enum.values(), 
+                        *list(enum.values()), 
                         name="ck%s" % re.sub(
                                     '([A-Z])', 
                                     lambda m:"_" + m.group(1).lower(), 
@@ -125,6 +128,7 @@ if __name__ == '__main__':
         name = Column(String(60), nullable=False)
         type = Column(EmployeeType.db_type())
 
+        @as_native_str()
         def __repr__(self):
             return "Employee(%r, %r)" % (self.name, self.type)
 

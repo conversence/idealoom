@@ -19,7 +19,8 @@ from assembl.lib import config
 
 
 def upgrade(pyramid_env):
-    from assembl.models.notification import *
+    from assembl.models.notification import (
+        NotificationSubscriptionStatus, NotificationSubscriptionStatus)
     schema = config.get('db_schema')+"."+config.get('db_user')
     with context.begin_transaction():
             #No clean way to address constraints, and I didn't find a way to add JUST the constraint from sqlalchemy data structures

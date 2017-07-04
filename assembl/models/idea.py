@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 """Defining the idea and links between ideas."""
 
+from builtins import str
+from builtins import object
 from itertools import chain, groupby
 from collections import defaultdict
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
 import threading
 
+from future.utils import as_native_str
 from bs4 import BeautifulSoup
 from rdflib import URIRef
 from sqlalchemy.orm import (
@@ -47,6 +50,7 @@ from ..lib.sqla import (CrudOperation, get_model_watcher)
 from assembl.views.traversal import (
     AbstractCollectionDefinition, RelationCollectionDefinition,
     collection_creation_side_effects, InstanceContext)
+from future.utils import with_metaclass
 
 if DiscussionBoundBase.using_virtuoso:
     from virtuoso.alchemy import Timestamp
@@ -60,7 +64,7 @@ class defaultdictlist(defaultdict):
         super(defaultdictlist, self).__init__(list)
 
 
-class IdeaVisitor(object):
+class IdeaVisitor(with_metaclass(ABCMeta, object)):
     """A Visitor_ for the structure of :py:class:`Idea`
 
     The visit is started by :py:meth:`Idea.visit_ideas_depth_first`,
@@ -70,7 +74,6 @@ class IdeaVisitor(object):
     .. _Visitor: https://sourcemaking.com/design_patterns/visitor
     """
     CUT_VISIT = object()
-    __metaclass__ = ABCMeta
 
     @abstractmethod
     def visit_idea(self, idea, level, prev_result):
@@ -80,10 +83,9 @@ class IdeaVisitor(object):
         return result
 
 
-class IdeaLinkVisitor(object):
+class IdeaLinkVisitor(with_metaclass(ABCMeta, object)):
     """A Visitor for the structure of :py:class:`IdeaLink`"""
     CUT_VISIT = object()
-    __metaclass__ = ABCMeta
 
     @abstractmethod
     def visit_link(self, link):
@@ -499,7 +501,7 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
         children_id_dict = self.children_dict(self.discussion_id)
         return {
             id: [ideas_by_id[child_id] for child_id in child_ids]
-            for (id, child_ids) in children_id_dict.iteritems()
+            for (id, child_ids) in children_id_dict.items()
         }
 
     def visit_ideas_depth_first(self, idea_visitor):
@@ -723,10 +725,11 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
         elif operation == CrudOperation.CREATE:
             watcher.processIdeaCreated(self.id)
 
+    @as_native_str()
     def __repr__(self):
         r = super(Idea, self).__repr__()
         title = self.short_title or ""
-        return r[:-1] + title.encode("ascii", "ignore") + ">"
+        return r[:-1] + title + ">"
 
     @classmethod
     def invalidate_ideas(cls, discussion_id, post_id):
@@ -763,7 +766,7 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
                 if idea_id in idea_contains:
                     break
                 idea_contains[idea_id] = counter.paths[idea_id].includes_post(post_path)
-        ideas = [id for (id, incl) in idea_contains.iteritems() if incl]
+        ideas = [id for (id, incl) in idea_contains.items() if incl]
         return ideas
 
     @classmethod

@@ -25,7 +25,7 @@ class Loader(pLoader):
         parser = self._get_parser(defaults=defaults)
         try:
             d = OrderedDict(parser._sections.get(section, None))
-            d.pop('__name__')
+            d.pop('__name__', None)
             return d
         except configparser.NoSectionError:
             return {}

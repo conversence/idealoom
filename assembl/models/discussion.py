@@ -1,10 +1,15 @@
 """Definition of the discussion class."""
+from __future__ import division
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 from itertools import groupby, chain
 import traceback
 from datetime import datetime
 from collections import defaultdict
 import logging
 
+from future.utils import as_native_str
 import simplejson as json
 from pyramid.security import Allow, ALL_PERMISSIONS
 from pyramid.settings import asbool
@@ -101,7 +106,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
         if url == '':
             url = None
         if url is not None:
-            from urlparse import urlparse
+            from urllib.parse import urlparse
             parsed_url = urlparse(url)
             from pyramid.httpexceptions import HTTPBadRequest
             if not parsed_url.scheme:
@@ -405,6 +410,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
         acls.append((Allow, R_SYSADMIN, ALL_PERMISSIONS))
         return acls
 
+    @as_native_str()
     def __repr__(self):
         r = super(Discussion, self).__repr__()
         return r[:-1] + str(self.slug) + ">"
@@ -533,7 +539,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
         # be added to the database (Discussion is not created).
         known_callbacks = reg.getUtilitiesFor(IDiscussionCreationCallback)
         if callbacks is not None:
-            known_callbacks = {k: v for (k, v) in known_callbacks.iteritems() if k in callbacks}
+            known_callbacks = {k: v for (k, v) in known_callbacks.items() if k in callbacks}
         for name, callback in known_callbacks:
             callback.discussionCreated(self)
 
@@ -702,7 +708,9 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
             }
 
     def get_discussion_graph_cif(self):
-        from . import *
+        from .post import Post
+        from .action import ActionOnPost
+        from .votes import AbstractIdeaVote, LickertIdeaVote, TokenIdeaVote
         yield self.generic_json(view_def_name="cif")
         for i in chain(
                 self.views, self.ideas, self.idea_links,

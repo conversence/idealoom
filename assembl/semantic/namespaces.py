@@ -23,7 +23,7 @@ VirtRDF = Namespace('http://www.openlinksw.com/schemas/virtrdf#')
 
 namespace_manager = _NamespaceManager(_Graph())
 _name, _var = None, None
-for _name, _var in locals().iteritems():
+for _name, _var in locals().items():
     if _name[0] == '_':
         continue
     if isinstance(_var, Namespace):

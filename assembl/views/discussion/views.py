@@ -135,7 +135,7 @@ def home_view(request):
             IJinja2Environment, name='.jinja2')
         template = jinja_env.get_template('cannot_read_discussion.jinja2')
         body = template.render(get_default_context(request))
-        return Response(body, 401)
+        return Response(body, 401, charset="utf-8")
 
     # if the route asks for a post, get post content (because this is needed for meta tags)
     route_name = request.matched_route.name

@@ -2,10 +2,14 @@
 """ Generate various secondary INI files from the main INI file. """
 from __future__ import print_function
 
+from future import standard_library
+standard_library.install_aliases()
+standard_library.install_hooks()
+from builtins import str
 import sys
 import os
 from os.path import exists, join, dirname, abspath
-from ConfigParser import (
+from configparser import (
     NoSectionError, SafeConfigParser, RawConfigParser as Parser)
 from argparse import ArgumentParser, FileType
 import logging
@@ -301,7 +305,7 @@ def rc_to_ini(rc_info, default_section=SECTION):
     Value of '__delete_key__' is eliminated if existing.
     """
     p = Parser()
-    for key, val in rc_info.iteritems():
+    for key, val in rc_info.items():
         if not key or key.startswith('_'):
             continue
         if key[0] == '*':
@@ -327,7 +331,7 @@ def iniconfig_to_rc(parser, dest=None, extends=None, target_dir=None):
 
     That file is written to dest, or to a returned file-like object
     extends specifies an extended ini file."""
-    from cStringIO import StringIO
+    from io import StringIO
     if dest is None:
         dest = StringIO()
     if extends:
@@ -354,7 +358,7 @@ def iniconfig_to_rc(parser, dest=None, extends=None, target_dir=None):
 
 def extract_saml_info(rc_info):
     """Extract SAML variables from the state"""
-    saml_info = {k[5:]: v for (k, v) in rc_info.iteritems()
+    saml_info = {k[5:]: v for (k, v) in rc_info.items()
                  if k.startswith('saml_')}
     saml_info['cn'] = rc_info['public_hostname']
     return saml_info
@@ -366,7 +370,7 @@ def diff_ini(first, second, diff=None, existing_only=False):
     Generate a parser with any value in the second that is different in the first.
     Returns a ConfigParser.
     Takes interpolation into account. Does not include values that disappeared."""
-    from ConfigParser import _Chainmap
+    from configparser import _Chainmap
     first = asParser(first)
     second = asParser(second)
     # TODO: Look at first both in raw and formatted versions

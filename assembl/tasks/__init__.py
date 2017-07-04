@@ -10,8 +10,11 @@ and :py:mod:`changes_router`.
 """
 from __future__ import absolute_import
 
+from future import standard_library
+standard_library.install_aliases()
+standard_library.install_hooks()
 from os.path import join, dirname, realpath, exists
-import ConfigParser
+import configparser
 import logging
 
 from pyramid.paster import get_appsettings
@@ -77,7 +80,7 @@ def get_celery_routes():
     global _celery_routes
     if not _celery_routes:
         _celery_routes = {}
-        for module, app in ASSEMBL_CELERY_APPS.iteritems():
+        for module, app in ASSEMBL_CELERY_APPS.items():
             full_module_name = "assembl.tasks."+module
             mod = __import__(full_module_name, fromlist=[app])
             app = getattr(mod, app)
@@ -129,7 +132,7 @@ def init_from_celery(celery_app):
     if not exists(settings_file):
         settings_file = join(rootdir, 'production.ini')
     _settings = settings = get_appsettings(settings_file, 'assembl')
-    config = ConfigParser.SafeConfigParser()
+    config = configparser.SafeConfigParser()
     config.read(settings_file)
     registry = getGlobalSiteManager()
     registry.settings = settings

@@ -1,7 +1,12 @@
 """All classes relative to users and their online identities."""
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import object
 from datetime import datetime
 from itertools import chain, permutations
-import urllib
+from functools import total_ordering
+import urllib.request, urllib.parse, urllib.error
 import hashlib
 import simplejson as json
 from collections import defaultdict
@@ -9,6 +14,7 @@ from enum import IntEnum
 import logging
 from abc import abstractmethod
 
+from future.utils import as_native_str
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy import (
     Boolean,
@@ -107,10 +113,11 @@ class AgentProfile(Base):
         'with_polymorphic': '*'
     }
 
+    @as_native_str()
     def __repr__(self):
         r = super(AgentProfile, self).__repr__()
         name = self.name or ""
-        return r[:-1] + name.encode("ascii", "ignore") + ">"
+        return r[:-1] + name + ">"
 
     def get_preferred_email_account(self):
         if inspect(self).attrs.accounts.loaded_value is NO_VALUE:
@@ -504,7 +511,7 @@ class EmailAccount(AbstractAgentAccount):
         if default:
             args['d'] = default
         return "//www.gravatar.com/avatar/%s?%s" % (
-            hashlib.md5(email.lower()).hexdigest(), urllib.urlencode(args))
+            hashlib.md5(email.lower().encode('utf-8')).hexdigest(), urllib.parse.urlencode(args))
 
     @staticmethod
     def get_or_make_profile(session, email, name=None):
@@ -1066,7 +1073,7 @@ class User(NamedClassMixin, OriginMixin, AgentProfile):
                             break  # inner, re-permute w/o b
         if changed:
             self.db.flush()
-            my_subscriptions = list(chain(*by_class.items()))
+            my_subscriptions = list(chain(*list(by_class.items())))
         if (not missing) and not reset_defaults:
             return my_subscriptions
         discussion = Discussion.get(discussion_id)
@@ -1422,7 +1429,7 @@ def create_default_permissions(discussion):
     permissions = {p.name: p for p in session.query(Permission).all()}
     roles = {r.name: r for r in session.query(Role).all()}
     defaults = discussion.preferences['default_permissions']
-    for role_name, permission_names in defaults.iteritems():
+    for role_name, permission_names in defaults.items():
         role = roles.get(role_name, None)
         assert role, "Unknown role: " + role_name
         for permission_name in permission_names:
@@ -1566,7 +1573,7 @@ class UserTemplate(DiscussionBoundBase, User):
             my_subscriptions_classes = set(by_class.keys())
             # We should have at most one subscription of a class, but we've had more.
             # Delete excess subscriptions
-            for cl, subs in by_class.iteritems():
+            for cl, subs in by_class.items():
                 if not issubclass(cl, NotificationSubscriptionGlobal):
                     # Should not happen, all global on template
                     continue
@@ -1578,7 +1585,7 @@ class UserTemplate(DiscussionBoundBase, User):
                         first_sub.merge(sub)
                         sub.delete()
                 by_class[cl] = subs[0]
-            my_subscriptions = by_class.values()
+            my_subscriptions = list(by_class.values())
             missing = needed_classes - my_subscriptions_classes
             if my_subscriptions_classes - needed_classes:
                 log.error("Unknown subscription class: " + repr(
@@ -1745,7 +1752,7 @@ class UserLanguagePreferenceCollection(LanguagePreferenceCollection):
         prefs_without_trans_by_loc = {
             up.locale: up for up in prefs_without_trans}
         # First look for translation targets
-        for (loc, pref) in prefs_by_locale.items():
+        for (loc, pref) in list(prefs_by_locale.items()):
             for n, l in enumerate(locale_ancestry(loc)):
                 if n == 0:
                     continue
@@ -1801,6 +1808,7 @@ class UserLanguagePreferenceCollection(LanguagePreferenceCollection):
             user=None)  # Do not give the user or this gets added to session
 
 
+@total_ordering
 class UserLanguagePreference(Base):
     """Does this user wants data in this language to be displayed or translated?"""
     __tablename__ = 'user_language_preference'
@@ -1837,20 +1845,27 @@ class UserLanguagePreference(Base):
     def is_owner(self, user_id):
         return user_id == self.user_id
 
-    def __cmp__(self, other):
-        if not isinstance(other, self.__class__):
-            return -1
-        s = self.source_of_evidence - other.source_of_evidence
-        if s:
-            return s
-        s = (self.preferred_order or 0) - (other.preferred_order or 0)
-        if s:
-            return s
-        s = (self.id or 0) - (other.id or 0)
-        if s:
-            return s
-        return id(self) - id(other)
+    def __eq__(self, other):
+        return self is other
 
+    def __ne__(self, other):
+        return self is not other
+
+    def __lt__(self, other):
+        if not isinstance(other, self.__class__):
+            return True
+        if self.source_of_evidence != other.source_of_evidence:
+            return self.source_of_evidence < other.source_of_evidence
+        if (self.preferred_order or 0) != (other.preferred_order or 0):
+            return (self.preferred_order or 0) < (other.preferred_order or 0)
+        if (self.id or 0) != (other.id or 0):
+            return (self.id or 0) < (other.id or 0)
+        return id(self) < id(other)
+
+    def __hash__(self):
+        if self.id:
+            return hash(self.id)
+        return hash(self.user_id) ^ hash(self.source_of_evidence) ^ hash(self.locale)
     # def set_priority_order(self, code):
     #     # code can be ignored. This value should be updated for each user
     #     # as each preferred language is committed
@@ -1870,6 +1885,7 @@ class UserLanguagePreference(Base):
             source_of_evidence=self.source_of_evidence)
         return query, True
 
+    @as_native_str()
     def __repr__(self):
         return \
             "{user_id: %d, locale: %s, translated_to: %s "\

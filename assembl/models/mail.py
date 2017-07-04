@@ -1,5 +1,7 @@
 # coding=UTF-8
 """:py:class:`assembl.models.post.Post` that came as email, and utility code for handling email."""
+from builtins import str
+from builtins import object
 import email
 import mailbox
 import re
@@ -13,11 +15,13 @@ from email.mime.text import MIMEText
 from email.utils import parseaddr, mktime_tz, parsedate_tz
 import logging
 
+from future.utils import as_native_str, binary_type
+from past.builtins import str as oldstr
 import jwzthreading
 from bs4 import BeautifulSoup, Comment
 from pyramid.threadlocal import get_current_registry
 from datetime import datetime
-from imaplib2 import IMAP4_SSL, IMAP4
+# from imaplib2 import IMAP4_SSL, IMAP4
 import transaction
 from pyisemail import is_email
 from sqlalchemy.orm import deferred
@@ -140,7 +144,7 @@ class AbstractMailbox(PostSource):
             if tag.name not in valid_tags:
                 tag.hidden = True
             else: # it might have bad attributes
-                for attr in tag.attrs.keys():
+                for attr in list(tag.attrs.keys()):
                     if attr not in valid_attributes:
                         del tag[attr]
 
@@ -202,7 +206,7 @@ class AbstractMailbox(PostSource):
 
             if len(keysStillMatching) == 0:
                 #Restart from scratch
-                keysStillMatching = quote_announcement_lines_regexes.keys()
+                keysStillMatching = list(quote_announcement_lines_regexes.keys())
             nextIndexToMatch = len(currentQuoteAnnounce)
             keys = list(keysStillMatching)
             matchComplete = False
@@ -226,7 +230,7 @@ class AbstractMailbox(PostSource):
         keysStillMatching = []
         currentQuote = []
         currentWhiteSpace = []
-        class LineState:
+        class LineState(object):
             Normal="Normal"
             PrefixedQuote='PrefixedQuote'
             PotentialQuoteAnnounce='PotentialQuoteAnnounce'
@@ -411,17 +415,14 @@ class AbstractMailbox(PostSource):
         (mimeType, body) = get_payload(parsed_email)
 
         def email_header_to_unicode(header_string, join_crlf=True):
-            decoded_header = decode_email_header(header_string)
-            default_charset = 'ASCII'
-
-            text = ''.join(
+            text = u''.join(
                 [
-                    unicode(t[0], t[1] or default_charset) for t in
-                    decoded_header
+                    txt.decode(enc) if enc else txt.decode('ascii') if isinstance(txt, bytes) else txt
+                    for (txt, enc) in decode_email_header(header_string)
                 ]
             )
             if join_crlf:
-                text = u''.join(text.split('\r\n'))
+                text = u''.join(text.split(u'\r\n'))
 
             return text
 
@@ -451,6 +452,8 @@ class AbstractMailbox(PostSource):
         # Try/except for a normal situation is an anti-pattern,
         # but sqlalchemy doesn't have a function that returns
         # 0, 1 result or an exception
+        if not isinstance(message_string, binary_type):
+            message_string = message_string.encode('utf-8')
         try:
             email_object = self.db.query(Email).filter(
                 Email.source_post_id == new_message_id,
@@ -527,7 +530,10 @@ FROM post WHERE post.id IN (SELECT MAX(post.id) as max_post_id FROM imported_pos
         #log.debug('Threading...')
         emails_for_threading = []
         for mail in emails:
-            email_for_threading = jwzthreading.make_message(email.message_from_string(mail.imported_blob))
+            blob = mail.imported_blob
+            if not isinstance(blob, str):
+                blob = blob.decode('ascii')
+            email_for_threading = jwzthreading.make_message(email.message_from_string(blob))
             #Store our emailsubject, jwzthreading does not decode subject itself
             email_for_threading.subject = mail.subject.first_original().value
             #Store our email object pointer instead of the raw message text
@@ -537,7 +543,7 @@ FROM post WHERE post.id IN (SELECT MAX(post.id) as max_post_id FROM imported_pos
         threaded_emails = jwzthreading.thread(emails_for_threading)
 
         # Output
-        L = threaded_emails.items()
+        L = list(threaded_emails.items())
         L.sort()
         for subj, container in L:
             jwzthreading.print_container(container, 0, True)
@@ -564,7 +570,7 @@ FROM post WHERE post.id IN (SELECT MAX(post.id) as max_post_id FROM imported_pos
                     if parent:
                         if parent.message:
                             #jwzthreading strips the <>, re-add them
-                            algorithm_parent_message_id = unicode("<"+parent.message.message_id+">")
+                            algorithm_parent_message_id = u"<" + parent.message.message_id + u">"
                         else:
                             log.warn("Parent was a dummy container, we may need "
                                      "to handle this case better, as we just "
@@ -590,7 +596,7 @@ FROM post WHERE post.id IN (SELECT MAX(post.id) as max_post_id FROM imported_pos
                     log.debug("Current message ID: None, was a dummy container")
                     update_threading(container.children, parent, debug=debug)
 
-        update_threading(threaded_emails.values(), debug=False)
+        update_threading(list(threaded_emails.values()), debug=False)
 
     def reprocess_content(self):
         """ Allows re-parsing all content as if it were imported for the first time
@@ -604,8 +610,10 @@ FROM post WHERE post.id IN (SELECT MAX(post.id) as max_post_id FROM imported_pos
         for email in emails:
             #session = self.db
             #session.add(email)
-            (email_object, dummy, error) = self.parse_email(
-                email.imported_blob, email)
+            blob = email.imported_blob
+            if not isinstance(blob, str):
+                blob = blob.decode('ascii')
+            (email_object, dummy, error) = self.parse_email(blob, email)
             #session.add(email_object)
             session.commit()
             #session.remove()
@@ -647,7 +655,7 @@ FROM post WHERE post.id IN (SELECT MAX(post.id) as max_post_id FROM imported_pos
                 addresses[address] += 1
 
         if addresses:
-            addresses = addresses.items()
+            addresses = list(addresses.items())
             addresses.sort(key=lambda address_count: address_count[1])
             return addresses[-1][0]
 
@@ -901,7 +909,7 @@ class MaildirMailbox(AbstractFilesystemMailbox):
                     os.mkdir(tmp_folder_path)
 
         mbox = mailbox.Maildir(abstract_mbox.filesystem_path, factory=None, create=False)
-        mails = mbox.values()
+        mails = list(mbox.values())
         #import pdb; pdb.set_trace()
         def import_email(abstract_mbox, message_data):
             session = abstract_mbox.db
@@ -1009,6 +1017,7 @@ class Email(ImportedPost):
 
         smtp_connection.quit()
 
+    @as_native_str()
     def __repr__(self):
         return "%s from %s to %s>" % (
             super(Email, self).__repr__(),

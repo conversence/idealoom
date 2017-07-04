@@ -45,7 +45,7 @@ with_default = {"uri_id", "oembed_type", "mime_type"}
 
 def upgrade(pyramid_env):
     with context.begin_transaction():
-        for f, stype in new_types.iteritems():
+        for f, stype in new_types.items():
             op.add_column(
                 'document', sa.Column(f+'_temp', stype))
 
@@ -53,7 +53,7 @@ def upgrade(pyramid_env):
             ("{f}_temp = cast({f} as varchar)"
                 if stype == sa.String else
                 "{f}_temp = {f}").format(f=f)
-            for (f, stype) in new_types.iteritems())))
+            for (f, stype) in new_types.items())))
         mark_changed()
     # Why do two variants exist???
     try:
@@ -69,7 +69,7 @@ def upgrade(pyramid_env):
     with context.begin_transaction():
         for f in new_types:
             op.drop_column('document', f)
-        for f, stype in new_types.iteritems():
+        for f, stype in new_types.items():
             op.add_column('document', sa.Column(
                 f, stype,
                 server_default="" if f in with_default else None))
@@ -88,12 +88,12 @@ def upgrade(pyramid_env):
 
 def downgrade(pyramid_env):
     with context.begin_transaction():
-        for f, stype in old_types.iteritems():
+        for f, stype in old_types.items():
             op.add_column(
                 'document', sa.Column(f+'_temp', stype))
         op.execute("UPDATE document SET " + ",".join((
             "{f}_temp = {f}".format(f=f)
-            for (f, stype) in old_types.iteritems())))
+            for (f, stype) in old_types.items())))
         mark_changed()
     # Why do two variants exist???
     try:
@@ -108,7 +108,7 @@ def downgrade(pyramid_env):
     with context.begin_transaction():
         for f in old_types:
             op.drop_column('document', f)
-        for f, stype in old_types.iteritems():
+        for f, stype in old_types.items():
             op.add_column('document', sa.Column(
                 f, stype,
                 server_default="" if f in with_default else None))

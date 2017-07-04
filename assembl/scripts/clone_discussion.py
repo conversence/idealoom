@@ -5,6 +5,8 @@ from __future__ import print_function
 # Put something like this in the crontab:
 # 10 3 * * * cd /var/www/assembl ; ./venv/bin/python assembl/scripts/clone_discussion.py -n assembldemosandbox -d -p system.Authenticated+admin_discussion -p system.Authenticated+add_post -p system.Authenticated+add_extract -p system.Authenticated+edit_extract -p system.Authenticated+add_idea -p system.Authenticated+edit_idea -p system.Authenticated+edit_synthesis -p system.Authenticated+vote -p system.Authenticated+read local.ini assembldemo
 
+from builtins import next
+from builtins import str
 import itertools
 from collections import defaultdict
 import argparse
@@ -320,9 +322,8 @@ class JoinColumnsVisitor(ClauseVisitor):
             return True
         if all((not self.is_known_class(c) for c in classes)):
             return False
-        orm_relns = filter(
-            lambda r: column in r.local_columns and r.secondary is None,
-            source_cls.__mapper__.relationships)
+        orm_relns = [r for r in source_cls.__mapper__.relationships
+                     if column in r.local_columns and r.secondary is None]
         if len(orm_relns) > 1 and (
                 issubclass(dest_cls, TombstonableMixin) or
                 issubclass(source_cls, TombstonableMixin)):
@@ -359,7 +360,7 @@ def delete_discussion(session, discussion_id):
     from assembl.models import (
         Base, Discussion, DiscussionBoundBase, Preferences, LangStringEntry)
     # delete anything related first
-    classes = DiscussionBoundBase._decl_class_registry.itervalues()
+    classes = DiscussionBoundBase._decl_class_registry.values()
     classes_by_table = defaultdict(list)
     for cls in classes:
         if isinstance(cls, type):
@@ -376,9 +377,10 @@ def delete_discussion(session, discussion_id):
                 continue
             return isabstract(cls)
 
-    concrete_classes = set(filter(lambda cls:
-        issubclass(cls, DiscussionBoundBase) and is_concrete_class(cls),
-        itertools.chain(*classes_by_table.values())))
+    concrete_classes = set([cls for cls in itertools.chain(
+                                *list(classes_by_table.values()))
+                            if issubclass(cls, DiscussionBoundBase) and
+                            is_concrete_class(cls)])
     concrete_classes.add(Preferences)
     concrete_classes.add(LangStringEntry)
     tables = DiscussionBoundBase.metadata.sorted_tables

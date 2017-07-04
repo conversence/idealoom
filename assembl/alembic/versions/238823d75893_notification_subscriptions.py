@@ -20,7 +20,11 @@ from assembl.lib import config
 def upgrade(pyramid_env):
     schema = config.get('db_schema')+"."+config.get('db_user')
     with context.begin_transaction():
-        from assembl.models.notification import *
+        from assembl.models.notification import (
+            NotificationSubscriptionClasses, NotificationCreationOrigin,
+            NotificationSubscriptionStatus, NotificationEventSourceType,
+            NotificationPushMethodType, NotificationDeliveryStateType,
+            NotificationDeliveryConfirmationType)
         op.create_table('notification_subscription',
             sa.Column('id',
                       sa.Integer,

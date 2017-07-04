@@ -1,7 +1,9 @@
 """Abstract the existence and use of ravenJS"""
+from future import standard_library
+standard_library.install_aliases()
 import logging
 from traceback import print_exc
-import ConfigParser
+import configparser
 
 
 _raven_client = None
@@ -42,5 +44,5 @@ def setup_raven(settings):
             raven_dsn = settings.get('filter:raven', 'dsn')
             from raven import Client
             _raven_client = Client(raven_dsn)
-    except ConfigParser.Error:
+    except configparser.Error:
         pass

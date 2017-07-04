@@ -1,3 +1,4 @@
+from builtins import str
 from simplejson import dumps, loads
 import logging
 from datetime import datetime

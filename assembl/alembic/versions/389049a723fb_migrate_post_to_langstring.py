@@ -7,6 +7,7 @@ Create Date: 2015-12-22 11:16:15.894438
 """
 
 # revision identifiers, used by Alembic.
+from builtins import next
 revision = '389049a723fb'
 down_revision = 'e4edf454f09'
 
@@ -41,7 +42,7 @@ def upgrade(pyramid_env):
             for (id, locs) in discussion_locales}
         locales = dict(list(db.execute("select code, id from locale")))
         locale_id_for_discussion = {
-            id: locales[loc] for (id, loc) in discussion_locales.iteritems()}
+            id: locales[loc] for (id, loc) in discussion_locales.items()}
         for target in ("subject", "body"):
             posts = db.execute(
                 "select id, discussion_id, %s from content" % target)

@@ -7,6 +7,7 @@ Create Date: 2016-03-23 16:05:53.638027
 """
 
 # revision identifiers, used by Alembic.
+from builtins import str
 revision = '525b7451056e'
 down_revision = '5c1bfc79039'
 
@@ -103,14 +104,14 @@ def downgrade(pyramid_env):
             'google_oauth2': 'accounts.google.com',
             'twitter': 'twitter.com',
             'facebook': 'facebook.com'}
-        providers = {k: v for (k, v) in providers.iteritems()
+        providers = {k: v for (k, v) in providers.items()
                      if v in old_domains}
         prov_to_dom = {
             id: old_domains[prov]
-            for (id, prov) in providers.iteritems()}
+            for (id, prov) in providers.items()}
         case_clause = "CASE provider_id %s END" % "\n ".join([
             "WHEN %d THEN '%s'" % (id, dom)
-            for (id, dom) in prov_to_dom.iteritems()])
+            for (id, dom) in prov_to_dom.items()])
         db.execute("""INSERT INTO idprovider_agent_account
             (id, provider_id, username, userid, profile_info, picture_url,
                 domain)
@@ -119,7 +120,7 @@ def downgrade(pyramid_env):
         FROM social_auth_account
         WHERE provider_id IN (%s)""" % (
             case_clause, ",".join((str(s) for s in providers))))
-        providers_inv = {v: k for (k, v) in providers.iteritems()}
+        providers_inv = {v: k for (k, v) in providers.items()}
         facebook_id = providers_inv['facebook']
         db.execute("""INSERT INTO facebook_account
             (id, app_id)

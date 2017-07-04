@@ -2,10 +2,13 @@
 
 Pyramid allows to use model objects as Context objects, but in our cases they're surrogates for model objects.
 """
+from builtins import str
+from builtins import next
+from builtins import object
 from traceback import print_exc
 import logging
 
-from future.utils import string_types
+from future.utils import string_types, as_native_str
 from sqlalchemy.orm import aliased
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from sqlalchemy.sql.expression import and_
@@ -21,6 +24,7 @@ from assembl.auth import P_READ, R_SYSADMIN
 from assembl.auth.util import discussion_from_request
 from assembl.lib.sqla import uses_list, get_named_class, Base
 from assembl.lib.decl_enums import DeclEnumType
+from future.utils import with_metaclass
 
 log = logging.getLogger(__name__)
 
@@ -253,7 +257,7 @@ class Api2Context(TraversalContext):
 
     def all_class_names(self):
         return [k.external_typename()
-                for k in Base._decl_class_registry.itervalues()
+                for k in Base._decl_class_registry.values()
                 if getattr(k, 'external_typename', False)]
 
     # Base of recursion for methods defined in TraversalContext
@@ -272,7 +276,7 @@ class Api2Context(TraversalContext):
 
 def process_args(args, cls):
     mapper = sqlainspect(cls)
-    for key, value in args.iteritems():
+    for key, value in args.items():
         column = mapper.c.get(key)
         if column is not None:
             if isinstance(column.type, DeclEnumType):
@@ -406,7 +410,7 @@ class InstanceContext(TraversalContext):
         return for_class.get_collections()
 
     def get_collection_names(self):
-        return self._instance.get_collections().keys()
+        return list(self._instance.get_collections().keys())
 
     def get_default_view(self):
         my_default = getattr(self._instance, 'default_view', None)
@@ -469,6 +473,7 @@ class InstanceContext(TraversalContext):
     def get_target_alias(self):
         return self.__parent__.get_target_alias()
 
+    @as_native_str()
     def __repr__(self):
         return "<InstanceContext (%s)>" % (self._instance,)
 
@@ -631,6 +636,7 @@ class CollectionContext(TraversalContext):
         for ins in collection_creation_side_effects(inst_ctx, self):
             yield ins
 
+    @as_native_str()
     def __repr__(self):
         return "<CollectionContext (%s)>" % (
             self.collection,)
@@ -729,9 +735,8 @@ class CollectionContextClassPredicate(object):
             issubclass(context.collection_class, self.val)
 
 
-class AbstractCollectionDefinition(object):
+class AbstractCollectionDefinition(with_metaclass(ABCMeta, object)):
     """Represents a collection of objects related to an instance."""
-    __metaclass__ = ABCMeta
 
     def __init__(self, owner_class, name, collection_class):
         self.owner_class = owner_class
@@ -776,6 +781,7 @@ class AbstractCollectionDefinition(object):
         See e.g. in :py:class:`assembl.models.widgets.IdeaCreatingWidget.BaseIdeaHidingCollection`"""
         return None
 
+    @as_native_str()
     def __repr__(self):
         return "<%s %s -(%s)-> %s>" % (
             self.__class__.__name__,
@@ -887,6 +893,7 @@ class RelationCollectionDefinition(AbstractCollectionDefinition):
             raise KeyError("This instance does not live in this collection.")
         return instance
 
+    @as_native_str()
     def __repr__(self):
         if self.back_relation:
             return "<%s %s <-(%s/%s)-> %s>" % (

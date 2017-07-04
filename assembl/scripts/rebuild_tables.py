@@ -1,5 +1,6 @@
 """Rebuild all tables from scratch, because we have had so many cases of corrupt data."""
 from __future__ import print_function
+from builtins import next
 from itertools import chain
 import logging.config
 import argparse
@@ -167,7 +168,7 @@ def ensure_inheritance():
     from assembl.models import Base
     subs = {c:c.mro()[1] for c in Base.get_subclasses()}
     subof = defaultdict(set)
-    for sub, cls in subs.iteritems():
+    for sub, cls in subs.items():
         subof[cls].add(sub)
     treated = set()
     def rec_rebuild(cls):

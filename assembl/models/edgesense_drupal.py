@@ -2,8 +2,11 @@
 
 .. _`Edgesense Drupal module`: https://github.com/Wikitalia/edgesense/tree/master/php/drupal
 """
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
 from datetime import datetime
-from urlparse import urlparse, urljoin
+from urllib.parse import urlparse, urljoin
 import uuid
 import re
 
@@ -223,7 +226,7 @@ class EdgeSenseNode(EdgeSenseSpecificPost):
         return cls(import_date=import_date, source=source,
                    body_mime_type=body_mime_type,
                    source_post_id=node_id, creator=agent,
-                   creation_date=created, imported_blob=blob,
+                   creation_date=created, imported_blob=blob.encode('utf-8'),
                    discussion=discussion, body=LangString.create(body))
 
 
@@ -251,7 +254,8 @@ class EdgeSenseComment(EdgeSenseSpecificPost):
         return cls(import_date=import_date, source_post_id=comment_id,
                    source=source, creator=agent,
                    creation_date=created, discussion=discussion,
-                   body_mime_type=body_mime_type, imported_blob=blob,
+                   body_mime_type=body_mime_type,
+                   imported_blob=blob.encode('utf-8'),
                    body=LangString.create(body))
 
 

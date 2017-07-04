@@ -2,6 +2,7 @@
 
 Useful to populate the first sysadmin from the command line."""
 from __future__ import print_function
+from builtins import input
 import argparse
 from getpass import getpass, getuser
 from json import load
@@ -80,14 +81,14 @@ def main():
             print("Not a valid user file")
         exit()
     while not args.name:
-        args.name = raw_input("Full name:")
+        args.name = input("Full name:")
     while not args.email or not is_email(args.email):
-        args.email = raw_input("Email address:")
+        args.email = input("Email address:")
     if not args.username:
         print("You did not set a username. Enter an empty string"\
             " for no username, or simply s for your system username, '%s'"\
             % (getuser(),))
-        args.username = raw_input()
+        args.username = input()
     if args.username.lower() == 's':
         args.username = getuser()
     if not args.bypass_password:

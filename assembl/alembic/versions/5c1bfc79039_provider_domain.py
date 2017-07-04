@@ -7,6 +7,8 @@ Create Date: 2016-03-22 10:03:51.658027
 """
 
 # revision identifiers, used by Alembic.
+from builtins import next
+from builtins import str
 revision = '5c1bfc79039'
 down_revision = '56eda83b3116'
 
@@ -44,7 +46,7 @@ def upgrade(pyramid_env):
                        for id in preference_ids}
         pref_data = {
             id: (p["authorization_server_backend"], p["authorization_server"])
-            for (id, p) in preferences.iteritems()
+            for (id, p) in preferences.items()
         }
         servers_for_account = defaultdict(set)
         for (account_id, provider, pref_id) in account_data:
@@ -52,14 +54,14 @@ def upgrade(pyramid_env):
             if d_provider == provider:
                 servers_for_account[account_id].add(server)
         # choose a server arbitrarily for each account
-        for servers in servers_for_account.itervalues():
+        for servers in servers_for_account.values():
             while len(servers) > 1:
                 servers.pop()
         accounts_for_server = defaultdict(list)
-        for account, servers in servers_for_account.iteritems():
+        for account, servers in servers_for_account.items():
             server = next(iter(servers))
             accounts_for_server[server].append(str(account))
-        for server, accounts in accounts_for_server.iteritems():
+        for server, accounts in accounts_for_server.items():
             db.execute(
                 """UPDATE social_auth_account SET provider_domain='%s'
                     WHERE id IN (%s)""" % (server, ','.join(accounts)))

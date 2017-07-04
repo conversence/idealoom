@@ -300,4 +300,4 @@ def saml_metadata_view(request):
     metadata, errors = saml_backend.generate_metadata_xml()
     if errors:
         raise HTTPServerError("SAML issue:" + errors)
-    return Response(metadata, content_type='text/xml')
+    return Response(metadata, content_type='text/xml', charset="utf-8")

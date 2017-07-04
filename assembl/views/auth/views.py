@@ -1,6 +1,9 @@
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 from datetime import datetime
 import simplejson as json
-from urllib import quote
+from urllib.parse import quote
 from smtplib import SMTPRecipientsRefused
 from email.header import Header
 import logging
@@ -892,9 +895,9 @@ def do_password_change(request):
     old_token = (
         user is None or token_date is None or (
             user.last_login and token_date < user.last_login))
-    log.debug("pwc V%sP%sW%sB%sL%s" % tuple(map(lambda b: "-" if b else "+", (
+    log.debug("pwc V%sP%sW%sB%sL%s" % tuple(["-" if b else "+" for b in (
         validity != Validity.VALID, lacking_password, not welcome,
-        old_token, logged_in is None))))
+        old_token, logged_in is None)]))
     if welcome and not lacking_password:
         # W+P+: welcome link sends onwards irrespective of token
         if logged_in:

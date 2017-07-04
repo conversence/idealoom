@@ -87,7 +87,8 @@ class CreationResponse(Response):
         uri = uri or ob_created.uri()
         super(CreationResponse, self).__init__(
             dumps(ob_created.generic_json(view, user_id, permissions)),
-            location=uri, status_code=201, content_type="application/json")
+            location=uri, status_code=201, content_type="application/json",
+            charset="utf-8")
 
 
 @view_config(context=ClassContext, renderer='json',
@@ -113,10 +114,10 @@ def class_view(request):
 
 @view_config(context=InstanceContext, renderer='json', name="jsonld",
              request_method='GET', permission=P_READ,
-             accept="application/ld+json")
+             accept="application/ld+json;q=0.9")
 @view_config(context=InstanceContext, renderer='json',
              request_method='GET', permission=P_READ,
-             accept="application/ld+json")
+             accept="application/ld+json;q=0.9")
 def instance_view_jsonld(request):
     from assembl.semantic.virtuoso_mapping import AssemblQuadStorageManager
     from rdflib import URIRef, ConjunctiveGraph
@@ -245,7 +246,7 @@ def update_from_form(instance, form_data=None):
                 and isinstance(value, string_types):
             try:
                 params[key] = int(value)
-            except ValueError as err:
+            except ValueError:
                 raise HTTPBadRequest("Not a number: " + value)
         elif key in columns and not isinstance(value, columns[key].type.python_type):
             raise HTTPBadRequest("Value %s for key %s should be a %s" % (

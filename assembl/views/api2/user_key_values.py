@@ -35,7 +35,7 @@ def patch_u_dict(request):
     if not isinstance(request.json, dict):
         raise HTTPBadRequest()
     try:
-        for k, v in request.json.iteritems():
+        for k, v in request.json.items():
             if v is None:
                 del user_ns_b_kvdict[k]
             else:
@@ -54,7 +54,7 @@ def put_u_dict(request):
     if not isinstance(request.json, dict):
         raise HTTPBadRequest()
     try:
-        for k, v in request.json.iteritems():
+        for k, v in request.json.items():
             if v is None:
                 del user_ns_b_kvdict[k]
             else:
@@ -108,7 +108,8 @@ def put_u_value(request):
     except (AssertionError, ValueError) as e:
         raise HTTPBadRequest(e)
     return Response(
-        dumps(value), status_code=201, content_type='application/json')
+        dumps(value), status_code=201, content_type='application/json',
+        charset="utf-8")
 
 
 @view_config(context=UserNSKeyBoundDictItemContext, renderer='json',
@@ -146,7 +147,7 @@ def patch_dict(request):
     if not isinstance(request.json, dict):
         raise HTTPBadRequest()
     try:
-        for k, v in request.json.iteritems():
+        for k, v in request.json.items():
             if v is None:
                 del ns_b_kvdict[k]
             else:
@@ -165,7 +166,7 @@ def put_dict(request):
     if not isinstance(request.json, dict):
         raise HTTPBadRequest()
     try:
-        for k, v in request.json.iteritems():
+        for k, v in request.json.items():
             if v is None:
                 del ns_b_kvdict[k]
             else:
@@ -219,7 +220,8 @@ def put_value(request):
     except (AssertionError, ValueError) as e:
         raise HTTPBadRequest(e)
     return Response(
-        dumps(value), status_code=201, content_type='application/json')
+        dumps(value), status_code=201, content_type='application/json',
+        charset="utf-8")
 
 
 @view_config(context=NSKeyBoundDictItemContext, renderer='json',

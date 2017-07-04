@@ -1,4 +1,6 @@
 """ZMQ setup for the changes socket"""
+from builtins import next
+from builtins import str
 import atexit
 from itertools import count
 import logging
@@ -27,8 +29,8 @@ def start_dispatch_thread():
     DISPATCHER = zmq.devices.ThreadDevice(zmq.FORWARDER, zmq.XSUB, zmq.XPUB)
     DISPATCHER.bind_in(INTERNAL_SOCKET)
     DISPATCHER.connect_out(CHANGES_SOCKET)
-    DISPATCHER.setsockopt_in(zmq.IDENTITY, 'XSUB')
-    DISPATCHER.setsockopt_out(zmq.IDENTITY, 'XPUB')
+    DISPATCHER.setsockopt_in(zmq.IDENTITY, b'XSUB')
+    DISPATCHER.setsockopt_out(zmq.IDENTITY, b'XPUB')
     DISPATCHER.start()
     #Fix weird nosetests problems. TODO: find and fix underlying problem
     sleep(0.01)
@@ -63,8 +65,8 @@ def get_pub_socket():
 
 def send_changes(socket, discussion, changeset):
     order = next(_counter)
-    socket.send(discussion, zmq.SNDMORE)
-    socket.send(str(order), zmq.SNDMORE)
+    socket.send(str(discussion).encode('ascii'), zmq.SNDMORE)
+    socket.send(str(order).encode('ascii'), zmq.SNDMORE)
     socket.send_json(changeset)
     log.debug("sent %d %s %s " % (order, discussion, changeset))
 

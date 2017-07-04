@@ -1,5 +1,6 @@
 """Utilities for locale conversion, between posix, iso639 1 & 2;
 and for pyramid locale negotiation."""
+from builtins import range
 from pyramid.i18n import TranslationStringFactory, Localizer
 from pyramid.i18n import default_locale_negotiator
 from iso639 import (is_valid639_2, is_valid639_1, to_iso639_1)
@@ -81,8 +82,7 @@ def get_language(locale):
 def get_country(locale):
     locale = use_underscore(locale)
     if '_' in locale:
-        import string
-        return string.upper(locale.split('_')[1])
+        return locale.split('_')[1].upper()
     # otherwise None
 
 

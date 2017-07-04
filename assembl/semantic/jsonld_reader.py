@@ -1,4 +1,5 @@
 """Import JSON-LD into assembl."""
+from builtins import object
 import logging
 
 from future.utils import string_types
@@ -138,14 +139,14 @@ class simple_jsonld_reader(object):
                 for x in j.values():
                     find_objects(x)
         find_objects(jsonld)
-        for json in by_id.itervalues():
+        for json in by_id.values():
             if json.get('@type', None) == 'Site':
                 site_iri = json['@id']
                 break
         site_iri = site_iri or base
         assert site_iri is not None
         handler = ImportRecordHandler(discussion, site_iri)
-        for json in by_id.itervalues():
+        for json in by_id.values():
             cls = self.class_from_type(json['@type'])
             if not cls:
                 log.error("missing cls for : " + json['@type'])

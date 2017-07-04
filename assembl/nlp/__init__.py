@@ -1,4 +1,5 @@
 """Natural language processing utilities"""
+from builtins import object
 from os.path import dirname, join, exists
 import pickle
 

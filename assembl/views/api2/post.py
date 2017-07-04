@@ -82,7 +82,7 @@ def html_export(request):
     jinja_env = request.registry.queryUtility(
         IJinja2Environment, name='.jinja2')
     return Response(request.context._instance.as_html(jinja_env),
-                    content_type='text/html')
+                    content_type='text/html', charset="utf-8")
 
 
 moderation_fields = [

@@ -28,7 +28,7 @@ def upgrade(pyramid_env):
         op.drop_constraint(cname, tname)
         op.create_check_constraint(
             cname, tname, NotificationSubscription.type.in_(
-                NotificationSubscriptionClasses.values()))
+                list(NotificationSubscriptionClasses.values())))
 
 
 def downgrade(pyramid_env):

@@ -13,7 +13,7 @@ sys.path.append(dirname(__file__))
 
 # Import does not like this filename
 _m = __import__('5a0ce18bf2b2_deduplicate_subscriptions',
-                globals(), locals(), ['upgrade', 'downgrade'], -1)
+                globals(), locals(), ['upgrade', 'downgrade'], 0)
 
 # revision identifiers, used by Alembic.
 revision = '2e75c694f2d9'

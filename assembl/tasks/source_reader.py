@@ -2,6 +2,7 @@
 """A long-running process that receives requests to read data from various ContentSources,
 and reads at reasonable intervals. It can also handle sources that can push changes. """
 from __future__ import print_function
+from builtins import str
 import sys
 import signal
 from random import uniform
@@ -13,6 +14,7 @@ from abc import ABCMeta, abstractmethod
 import logging
 from logging.config import fileConfig
 
+from future.utils import as_native_str
 from pyramid.paster import get_appsettings
 from zope.component import getGlobalSiteManager
 from kombu import BrokerConnection, Exchange, Queue
@@ -26,6 +28,7 @@ from assembl.lib.raven_client import capture_exception
 from assembl.lib.config import set_config
 from assembl.lib.enum import OrderedEnum
 from assembl.lib.sqla import configure_engine
+from future.utils import with_metaclass
 
 log = logging.getLogger(__name__)
 pool_counter = 0
@@ -127,9 +130,8 @@ class ReadingForTooLong(ClientError):
     pass
 
 
-class SourceReader(Thread):
+class SourceReader(with_metaclass(ABCMeta, Thread)):
     """ """
-    __metaclass__ = ABCMeta
     deamon = True
 
     # Timings. Those should vary per source type, maybe even by source?
@@ -445,6 +447,7 @@ class SourceReader(Thread):
         self.set_status(ReaderStatus.SHUTDOWN)
         self.event.set()
 
+    @as_native_str()
     def __repr__(self):
         return "<%s.%d in %s>" % (
             self.__class__.__name__, self.source_id, self._Thread__name)
@@ -556,7 +559,7 @@ class SourceDispatcher(ConsumerMixin):
 
     def shutdown(self):
         self.should_stop = True
-        for reader in self.readers.itervalues():
+        for reader in self.readers.values():
             if reader is not None:
                 reader.shutdown()
 

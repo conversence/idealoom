@@ -20,7 +20,7 @@ from assembl.lib import config
 
 def upgrade(pyramid_env):
     with context.begin_transaction():
-    	op.add_column(
+        op.add_column(
             'discussion',
             sa.Column('show_help_in_debate_section', sa.SmallInteger, server_default='1'))
         op.execute('UPDATE discussion set show_help_in_debate_section = 1')

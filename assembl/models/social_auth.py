@@ -2,6 +2,9 @@
 
 .. _`Python Social Auth`: http://psa.matiasaguirre.net/
 """
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 import logging
 import six
 import re
@@ -32,7 +35,7 @@ from social.storage.sqlalchemy_orm import (
     SQLAlchemyMixin, SQLAlchemyUserMixin, SQLAlchemyNonceMixin, UserMixin,
     SQLAlchemyAssociationMixin, SQLAlchemyCodeMixin, BaseSQLAlchemyStorage)
 from sqlalchemy.ext.mutable import MutableDict
-from urllib import quote, unquote
+from urllib.parse import quote, unquote
 
 from ..lib import config
 from ..lib.sqla_types import (

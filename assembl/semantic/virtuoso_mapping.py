@@ -2,6 +2,7 @@
 
 .. _`Linked Data Views`: http://docs.openlinksw.com/virtuoso/rdfviewsrdbms.html
 """
+from builtins import object
 from os import listdir, urandom
 from os.path import join
 from inspect import isabstract
@@ -371,7 +372,7 @@ class AssemblQuadStorageManager(object):
         gqm = AssemblGraphQuadMapPattern(
             section.graph_name, qs, section.name, discussion_id, section.graph_iri,
             'exclusive' if exclusive else None)
-        for cls in class_registry.itervalues():
+        for cls in class_registry.values():
             # TODO: Take pattern's graph into account!
             cpe.add_class(cls, gqm)
         return gqm

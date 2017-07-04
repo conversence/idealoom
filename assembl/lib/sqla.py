@@ -1,7 +1,13 @@
 """Some utilities for working with SQLAlchemy, and the definition of BaseOps."""
 
 from __future__ import absolute_import
+from __future__ import division
 
+from builtins import bytes
+from builtins import str
+from builtins import next
+from builtins import range
+from builtins import object
 import re
 import sys
 from datetime import datetime
@@ -14,9 +20,10 @@ import logging
 from time import sleep
 from random import random
 from threading import Thread
-from itertools import ifilter, chain
+from itertools import chain
 
-from future.utils import string_types
+from future.utils import string_types, as_native_str
+from past.builtins import str as past_str, unicode as past_unicode, long
 from enum import Enum
 from anyjson import dumps, loads
 from sqlalchemy import (
@@ -114,7 +121,7 @@ def get_target_class(column):
     # There should be an easier way???
     fk = next(iter(column.foreign_keys))
     target_table = fk.column.table
-    for cls in class_registry.itervalues():
+    for cls in class_registry.values():
         if cls.__mapper__.__table__ == target_table:
             return cls
 
@@ -351,7 +358,7 @@ class BaseOps(object):
     @classmethod
     def polymorphic_identities(cls):
         """Return the list of polymorphic identities defined in subclasses."""
-        return [k for (k, v) in cls.__mapper__.polymorphic_map.iteritems()
+        return [k for (k, v) in cls.__mapper__.polymorphic_map.items()
                 if issubclass(v.class_, cls)]
 
     @classmethod
@@ -361,7 +368,7 @@ class BaseOps(object):
 
     def update(self, **values):
         fields = self._col_names()
-        for name, value in values.iteritems():
+        for name, value in values.items():
             if name in fields:
                 setattr(self, name, value)
 
@@ -432,9 +439,10 @@ class BaseOps(object):
             if c.__module__.startswith('sqlalchemy'):
                 mro = mro[:i]
                 break
-        return filter(None, (c.external_typename() for c in mro
-                             if getattr(c, 'external_typename', False)))
+        return [c.external_typename() for c in mro
+                if getattr(c, 'external_typename', False)]
 
+    @as_native_str()
     def __repr__(self):
         return "<%s id=%d >" % (
             self.external_typename(), getattr(self, 'id', None) or -1)
@@ -549,7 +557,7 @@ class BaseOps(object):
         """Return the list of subclasses of this class"""
         global class_registry
         from inspect import isclass
-        return (c for c in class_registry.itervalues()
+        return (c for c in class_registry.values()
                 if isclass(c) and issubclass(c, cls))
 
     @classmethod
@@ -697,12 +705,13 @@ class BaseOps(object):
         fkey_of_reln = {r.key: r._calculated_foreign_keys
                         for r in mapper.relationships}
         methods = dict(pyinspect.getmembers(
-            self.__class__, lambda m: pyinspect.ismethod(m)
-            and m.__code__.co_argcount == 1))
+            self.__class__, lambda m: (
+                pyinspect.ismethod(m) or pyinspect.isfunction(m))
+                and m.__code__.co_argcount == 1))
         properties = dict(pyinspect.getmembers(
             self.__class__, lambda p: pyinspect.isdatadescriptor(p)))
         known = set()
-        for name, spec in local_view.iteritems():
+        for name, spec in local_view.items():
             if name == "_default":
                 continue
             elif spec is False:
@@ -1253,7 +1262,7 @@ class BaseOps(object):
         remaining = {}
         for (accessor_name, (
                 value, accessor, target_cls, s_parse_def, c_context)
-             ) in subobject_changes.iteritems():
+             ) in subobject_changes.items():
                 if isinstance(value, list):
                     list_remaining = []
                     for val in value:
@@ -1333,7 +1342,7 @@ class BaseOps(object):
         # create remaining subobjects from json
         for (accessor_name, (
                 value, accessor, target_cls, s_parse_def, c_context)
-             ) in subobject_changes.iteritems():
+             ) in subobject_changes.items():
             if isinstance(accessor, property):
                 # instance would have been treated above,
                 # this is a json thingy.
@@ -1421,7 +1430,7 @@ class BaseOps(object):
         subobject_changes = {}
         # Also: Pre-visit the json to associate @ids to dicts
         # because the object may not be ready in the aliases yet
-        for key, value in json.iteritems():
+        for key, value in json.items():
             if key in local_view:
                 parse_instruction = local_view[key]
             else:
@@ -1441,7 +1450,7 @@ class BaseOps(object):
                 if not setter:
                     raise HTTPBadRequest("No setter %s in class %s" % (
                         parse_instruction[1:], self.__class__.__name__))
-                if not pyinspect.ismethod(setter):
+                if not (pyinspect.ismethod(setter) or pyinspect.isfunction(setter)):
                     raise HTTPBadRequest("Not a setter: %s in class %s" % (
                         parse_instruction[1:], self.__class__.__name__))
                 (args, varargs, keywords, defaults) = \
@@ -1481,11 +1490,11 @@ class BaseOps(object):
                             setattr(self, key, parse_datetime(value, True))
                         elif isinstance(col.type, DeclEnumType):
                             setattr(self, key, col.type.enum.from_string(value))
-                        elif col.type.python_type is unicode \
-                                and isinstance(value, str):
+                        elif col.type.python_type is past_unicode \
+                                and isinstance(value, past_str):  # python2
                             setattr(self, key, value.decode('utf-8'))
-                        elif col.type.python_type is str \
-                                and isinstance(value, unicode):
+                        elif col.type.python_type is past_str \
+                                and isinstance(value, past_unicode):  # python2
                             setattr(self, key, value.encode('ascii'))  # or utf-8?
                         elif col.type.python_type is bool \
                                 and value.lower() in ("true", "false"):
@@ -1510,10 +1519,9 @@ class BaseOps(object):
                     # Non-scalar
                     # TODO: Keys spanning multiple columns
                     fk = next(iter(col.foreign_keys))
-                    orm_relns = filter(
-                        lambda r: col in r.local_columns
-                        and r.secondary is None,
-                        mapper.relationships)
+                    orm_relns = [
+                        r for r in mapper.relationships
+                        if col in r.local_columns and r.secondary is None]
                     assert(len(orm_relns) <= 1)
                     if orm_relns:
                         accessor = next(iter(orm_relns))
@@ -1680,9 +1688,7 @@ class BaseOps(object):
                 related_objects.add(obj)
                 continue
             # Do not decorate nullable relations
-            if any(map(lambda c: c.nullable,
-                       ifilter(lambda x: x.foreign_keys,
-                               chain(*reln.local_remote_pairs)))):
+            if any([x.nullable for x in chain(*reln.local_remote_pairs) if x.foreign_keys]):
                 nullables.append(reln)
             else:
                 non_nullables.append(reln)
@@ -2034,8 +2040,8 @@ def before_commit_listener(session):
     if 'cdict' in info:
         changes = defaultdict(list)
         for ((uri, view_def), (discussion, target)) in \
-                info['cdict'].iteritems():
-            discussion = bytes(discussion or "*")
+                info['cdict'].items():
+            discussion = discussion or "*"
             json = target.generic_json(view_def)
             if json:
                 changes[discussion].append(json)
@@ -2051,7 +2057,7 @@ def after_commit_listener(session):
     if not getattr(session, 'zsocket', None):
         session.zsocket = get_pub_socket()
     if getattr(session, 'cdict2', None):
-        for discussion, changes in session.cdict2.iteritems():
+        for discussion, changes in session.cdict2.items():
             send_changes(session.zsocket, discussion, changes)
         del session.cdict2
 
@@ -2135,7 +2141,7 @@ def get_named_class(typename):
     if not aliased_class_registry:
         aliased_class_registry = {
             cls.external_typename(): cls
-            for cls in class_registry.itervalues()
+            for cls in class_registry.values()
             if getattr(cls, 'external_typename', None)
         }
     return aliased_class_registry.get(typename, None)

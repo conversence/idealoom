@@ -1,6 +1,10 @@
+from __future__ import division
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 import re
 import base64
-from cStringIO import StringIO
+from io import StringIO
 from os import urandom
 from os.path import join, dirname
 from collections import defaultdict
@@ -220,7 +224,7 @@ def discussion_instance_view_jsonld(request):
         content_type = "application/json-p"
     else:
         content_type = "application/ld+json"
-    return Response(body=jdata, content_type=content_type)
+    return Response(body=jdata, content_type=content_type, charset="utf-8")
 
 
 @view_config(context=InstanceContext, name="private_jsonld",
@@ -246,7 +250,7 @@ def user_private_view_jsonld(request):
         content_type = "application/json-p"
     else:
         content_type = "application/ld+json"
-    return Response(body=jdata, content_type=content_type)
+    return Response(body=jdata, content_type=content_type, charset="utf-8")
 
 
 JSON_MIMETYPE = 'application/json'
@@ -271,7 +275,7 @@ def get_format(request, stats_formats=default_stats_formats):
         format = stats_formats_mimetypes.get(format, None)
         if not format:
             raise HTTPBadRequest("format: use one of " + ", ".join(
-                [k for (k, v) in stats_formats_mimetypes.iteritems()
+                [k for (k, v) in stats_formats_mimetypes.items()
                  if v in stats_formats]))
     else:
         format = request.accept.best_match(stats_formats)
@@ -613,7 +617,7 @@ def get_time_series_analytics(request):
     if format == JSON_MIMETYPE:
             # json default
         return Response(json.dumps(results, cls=DateJSONEncoder),
-                        content_type='application/json')
+                        content_type='application/json', charset="utf-8")
 
     fieldnames = [
         "interval_id",
@@ -680,7 +684,7 @@ def csv_response(results, format, fieldnames=None):
         writer.save('')
 
     output.seek(0)
-    return Response(body_file=output, content_type=format)
+    return Response(body_file=output, content_type=format, charset="utf-8")
 
 
 @view_config(context=InstanceContext, name="contribution_count",
@@ -717,7 +721,7 @@ def get_contribution_count(request):
             v['count'] = {agent.display_name(): count
                           for (agent, count) in v['count']}
         return Response(json.dumps(results, cls=DateJSONEncoder),
-            content_type='application/json')
+            content_type='application/json', charset="utf-8")
 
     total_count = defaultdict(int)
     agents = {}
@@ -728,7 +732,7 @@ def get_contribution_count(request):
             as_dict[agent.id] = count
             agents[agent.id] = agent
         v['count'] = as_dict
-    count_list = total_count.items()
+    count_list = list(total_count.items())
     count_list.sort(key=lambda a_c: a_c[1], reverse=True)
     rows = []
     rows.append(['Start']+[
@@ -780,7 +784,7 @@ def get_visit_count(request):
     if format == JSON_MIMETYPE:
         # json default
         return Response(json.dumps(results, cls=DateJSONEncoder),
-            content_type='application/json')
+            content_type='application/json', charset="utf-8")
     # otherwise assume csv
     fieldnames=['start', 'end', 'first_visitors', 'readers']
     return csv_response(results, format, fieldnames)
@@ -802,7 +806,7 @@ def get_visitors(request):
     visitors.reverse()
     body = "\n".join(("%s: %s <%s>" % (x[0].isoformat(), x[1], x[2])
                       for x in visitors))
-    return Response(body=body, content_type='text/text')
+    return Response(body=body, content_type='text/text', charset="utf-8")
 
 
 pygraphviz_formats = {
@@ -831,7 +835,7 @@ def as_mind_map(request):
         if mimetype in pygraphviz_formats:
             break
     else:
-        mimetype = request.accept.best_match(pygraphviz_formats.keys())
+        mimetype = request.accept.best_match(list(pygraphviz_formats.keys()))
         if not mimetype:
             raise HTTPNotAcceptable("Not known to pygraphviz: "+mimetype)
     discussion = request.context._instance
@@ -890,7 +894,7 @@ def get_activity_alerts(request):
         discussion, user_id,
         ["lurking_user", "inactive_user", "user_gone_inactive"],
         True)
-    return Response(body=result, content_type='application/json')
+    return Response(body=result, content_type='application/json', charset="utf-8")
 
 
 @view_config(context=InstanceContext, name="interest_alerts",
@@ -903,7 +907,7 @@ def get_interest_alerts(request):
         discussion, user_id,
         ["interesting_to_me"],
         True)
-    return Response(body=result, content_type='application/json')
+    return Response(body=result, content_type='application/json', charset="utf-8")
 
 
 @view_config(context=InstanceContext, name="clusters",
@@ -916,7 +920,7 @@ def show_cluster(request):
     analysis = SKLearnClusteringSemanticAnalysis(discussion)
     analysis.as_html(output)
     output.seek(0)
-    return Response(body_file=output, content_type='text/html')
+    return Response(body_file=output, content_type='text/html', charset="utf-8")
 
 
 @view_config(context=InstanceContext, name="optics",
@@ -946,7 +950,7 @@ def show_optics_cluster(request):
         IJinja2Environment, name='.jinja2')
     analysis.as_html(output, jinja_env)
     output.seek(0)
-    return Response(body_file=output, content_type='text/html')
+    return Response(body_file=output, content_type='text/html', charset="utf-8")
 
 
 @view_config(context=InstanceContext, name="suggestions_test",
@@ -956,7 +960,7 @@ def show_suggestions_test(request):
     discussion = request.context._instance
     user_id = authenticated_userid(request)
     if not user_id:
-        from urllib import quote
+        from urllib.parse import quote
         return HTTPFound(location="/login?next="+quote(request.path))
     discussion = request.context._instance
     output = StringIO()
@@ -968,7 +972,7 @@ def show_suggestions_test(request):
         IJinja2Environment, name='.jinja2')
     analysis.as_html(output, jinja_env)
     output.seek(0)
-    return Response(body_file=output, content_type='text/html')
+    return Response(body_file=output, content_type='text/html', charset="utf-8")
 
 
 @view_config(context=InstanceContext, name="test_results",
@@ -983,7 +987,7 @@ def test_results(request):
         recipients=["maparent@acm.org"],
         body=json.dumps(request.POST.dict_of_lists()))
     mailer.send(message)
-    return Response(body="Thank you!", content_type="text/text")
+    return Response(body="Thank you!", content_type="text/text", charset="ascii")
 
 
 @view_config(context=InstanceContext, name="test_sentry",
@@ -1060,7 +1064,7 @@ def post_discussion(request):
         view = request.GET.get('view', None) or default_view
         uri = "/".join((API_ETALAB_DISCUSSIONS_PREFIX, str(first.id))) if is_etalab_request else None
         return CreationResponse(
-            first, user_id, ctx.get_permissions(), view, uri=uri)
+            first, user_id, ctx.get_permissions(), view, uri=uri, charset="utf-8")
 
 
 class defaultdict_of_dict(defaultdict):
@@ -1435,9 +1439,9 @@ def get_participant_time_series_analytics(request):
                     if with_email:
                         data['email'] = participant_emails.get(participant_id, '')
         for interval_data in combined:
-            interval_data['data'] = interval_data['data'].values()
+            interval_data['data'] = list(interval_data['data'].values())
         return Response(json.dumps(combined, cls=DateJSONEncoder),
-                        content_type=format)
+                        content_type=format, charset="utf-8")
 
     by_participant = defaultdict(defaultdict_of_dict)
     interval_ids = set()
@@ -1477,15 +1481,15 @@ def get_participant_time_series_analytics(request):
     rows.append(empty_start + ['Interval start'] + interval_starts * len(data_descriptors))
     rows.append(empty_start + ['Interval end'] + interval_ends * len(data_descriptors))
     if sort_key == 'name':
-        sorted_participants = [(name, id) for (id, name) in participant_names.iteritems()]
+        sorted_participants = [(name, id) for (id, name) in participant_names.items()]
     elif sort_key == 'domain':
         sorted_participants = [(
             participant_emails.get(id, '').split('@')[-1],
-            name, id) for (id, name) in participant_names.iteritems()]
+            name, id) for (id, name) in participant_names.items()]
     else:
         sorted_participants = [
             (-by_participant[id].get(interval_ids[-1], {}).get(sort_key, 0), id)
-            for id in participant_names.iterkeys()]
+            for id in participant_names.keys()]
     sorted_participants.sort()
     sorted_participants = [x[-1] for x in sorted_participants]
     for participant_id in sorted_participants:
@@ -1496,7 +1500,7 @@ def get_participant_time_series_analytics(request):
             row.append(email.encode('utf-8'))
         for data_descriptor in data_descriptors:
             row_part = [''] * len(interval_ids)
-            for interval_id, data in interval_data.iteritems():
+            for interval_id, data in interval_data.items():
                 row_part[interval_id - 1] = data.get(data_descriptor, '')
             row += row_part
         rows.append(row)

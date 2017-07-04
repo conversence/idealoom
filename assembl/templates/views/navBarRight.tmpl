@@ -65,7 +65,7 @@
     <!-- LANGUAGE  -->
     <li class="fl">
         <div class="dropdown fl mhs">
-            {% if locales.__len__ > 1 %}
+            {% if locales.__len__() > 1 %}
             <a href="#" class="dropdown-toggle user-lang fl" data-toggle="dropdown" aria-expanded="false">
                 {% if show_locale_country[locale] %}
                     {{locale | upper}}
