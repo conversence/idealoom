@@ -267,6 +267,12 @@ def browser(request):
     """A Splinter-based browser fixture - used for integration
     testing"""
 
+    import sys
+    import os
+    from os.path import exists
+    if sys.platform == 'linux2' and exists(
+            '/usr/lib/chromium-browser/chromedriver'):
+        os.environ["PATH"] += ":/usr/lib/chromium-browser"
     browser = Browser('chrome', headless=True)
 
     def fin():
