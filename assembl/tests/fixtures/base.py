@@ -267,18 +267,10 @@ def browser(request):
     """A Splinter-based browser fixture - used for integration
     testing"""
 
-    from os.path import dirname
-    # interference from system phantomjs
-    phantomjs = dirname(dirname(dirname(dirname(__file__)))) +\
-        "/assembl/static/node_modules/.bin/phantomjs"
-    browser = Browser('phantomjs', executable_path=phantomjs)
+    browser = Browser('chrome', headless=True)
 
     def fin():
-        import signal
         print("finalizer browser")
-        # Kill process so it does not linger
-        # https://github.com/seleniumhq/selenium/issues/767
-        browser.driver.service.process.send_signal(signal.SIGTERM)
         browser.quit()
     request.addfinalizer(fin)
 

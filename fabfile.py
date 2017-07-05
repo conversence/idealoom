@@ -1016,7 +1016,7 @@ def install_builddeps():
         # may require a sudo
         if not run('brew link libevent', quiet=True):
             sudo('brew link libevent')
-        run('brew install zeromq libtool libmemcached gawk')
+        run('brew install zeromq libtool libmemcached gawk snappy')
         if not exists('/usr/local/bin/pkg-config'):
             run('brew install pkg-config')
         if not exists('/usr/local/bin/autoconf'):
@@ -1041,8 +1041,15 @@ def install_builddeps():
         sudo('apt-get install -y build-essential python-dev pandoc')
         sudo('apt-get install -y automake bison flex gperf gawk')
         sudo('apt-get install -y graphviz pkg-config gfortran python-jinja2')
-        sudo('apt-get install -y phantomjs', warn_only=True)
     execute(update_python_package_builddeps)
+
+
+@task
+def install_testdeps():
+    if env.mac:
+        run("brew install chromedriver")
+    else:
+        sudo('apt-get install -y chromium-browser chromium-chromedriver')
 
 
 @task
@@ -1058,7 +1065,7 @@ def update_python_package_builddeps():
         sudo('apt-get install -y libpq-dev libmemcached-dev libzmq3-dev '
              'libxslt1-dev libffi-dev libhiredis-dev libxml2-dev libssl-dev '
              'libreadline-dev liblapack-dev libatlas-dev libblas-dev '
-             'libxmlsec1-dev libgraphviz-dev')
+             'libxmlsec1-dev libgraphviz-dev libsnappy-dev')
         print ("We are still trying to get some requirements right for linux, "
                "See http://www.scipy.org/scipylib/building/linux.html "
                "for details.")

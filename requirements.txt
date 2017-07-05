@@ -159,7 +159,9 @@ SPARQLWrapper==1.8.0
 sphinxcontrib-httpdomain==1.5.0
 sphinxcontrib-zopeext==0.2.1
 Sphinx==1.6.2
-splinter==0.7.5
+# we want the latest
+#splinter==0.7.5
+-e git+https://github.com/cobrateam/splinter.git#egg=splinter
 SQLAlchemy==1.1.11
 -e git+https://github.com/conversence/sqlalchemy-rdfbridge.git#egg=sqlalchemy-rdfbridge
 sqlalchemy-schemadisplay==1.3
