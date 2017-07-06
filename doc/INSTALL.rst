@@ -16,7 +16,7 @@ Prerequisites
 .. code:: sh
 
    apt-add-repository ppa:chris-lea/uwsgi
-   apt-get install nginx uwsgi uwsgi-plugin-python
+   apt-get install nginx uwsgi uwsgi-plugin-python3
 
 
 Setup a development environment
@@ -242,7 +242,7 @@ Start as a user with sudo access
 .. code:: sh
 
     sudo apt-get install fabric git openssh-server
-    sudo apt-get install nginx uwsgi uwsgi-plugin-python
+    sudo apt-get install nginx uwsgi uwsgi-plugin-python3
     sudo addgroup idealoom_group
     sudo adduser idealoom_user
     sudo usermod -G www-data -G idealoom_group idealoom_user

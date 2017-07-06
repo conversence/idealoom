@@ -14,9 +14,15 @@ from configparser import (
 from argparse import ArgumentParser, FileType
 import logging
 from future.utils import string_types
+import locale
 
 from fabfile import combine_rc
 
+
+if sys.platform == 'darwin':
+    locale.setlocale(locale.LC_CTYPE, "UTF-8")
+else:
+    locale.setlocale(locale.LC_CTYPE, "C.UTF-8")
 
 log = logging.getLogger('assembl')
 logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)

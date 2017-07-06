@@ -7,6 +7,8 @@ Create a JED_ localization file from localized strings used by JS.
 
 from os.path import dirname, join
 import os
+import sys
+import locale
 import subprocess
 
 from babel.messages.pofile import read_po, write_po
@@ -16,6 +18,11 @@ extra_files = {
     "assembl/models/notification.py",
     "assembl/nlp/translation_service.py"
 }
+
+if sys.platform == 'darwin':
+    locale.setlocale(locale.LC_CTYPE, "UTF-8")
+else:
+    locale.setlocale(locale.LC_CTYPE, "C.UTF-8")
 
 
 def is_js(msg):

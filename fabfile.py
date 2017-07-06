@@ -13,6 +13,7 @@ from platform import system
 from time import sleep, strftime, time
 from configparser import ConfigParser, SafeConfigParser, NoOptionError
 from io import StringIO
+import sys
 # Importing the "safe" os.path commands
 from os.path import join, dirname, split, normpath
 # Other calls to os.path rarely mostly don't work remotely. Use locally only.
@@ -95,12 +96,13 @@ def sanitize_env():
         env.host_string = env.hosts[0]
     #Are we on localhost
     is_local = set(env.hosts) - set(['localhost', '127.0.0.1']) == set()
-    if is_local:
-        #WARNING:  This code will run locally, NOT on the remote server,
-        # so it's only valid if we are connecting to localhost
-        env.mac = system().startswith('Darwin')
-    else:
-        env.mac = False
+    if env.get('mac', None) is None:
+        if is_local:
+            #WARNING:  This code will run locally, NOT on the remote server,
+            # so it's only valid if we are connecting to localhost
+            env.mac = system().startswith('Darwin')
+        else:
+            env.mac = False
     env.projectpath = env.get('projectpath', dirname(__file__))
     if not env.get('venvpath', None):
         if is_local:
@@ -167,7 +169,7 @@ def create_local_ini():
 
     if env.host_string == 'localhost':
         # The easy case: create a local.ini locally.
-        venvcmd("python assembl/scripts/ini_files.py compose -o %s %s" % (
+        venvcmd("python -massembl.scripts.ini_files compose -o %s %s" % (
             env.ini_file, env.rcfile))
     else:
         # Create a local.ini file on the remote server
@@ -175,7 +177,7 @@ def create_local_ini():
 
         # OK, this is horrid because I need the local venv.
         local_venv = env.get("local_venv", "./venv")
-        assert os.path.exists(local_venv + "/bin/python"),\
+        assert os.path.exists(local_venv + "/bin/python3"),\
             "No usable local venv"
         # get placeholder filenames
         with NamedTemporaryFile(delete=False) as f:
@@ -191,7 +193,7 @@ def create_local_ini():
             # create the local.ini in a temp file
             with settings(host_string="localhost", venvpath=local_venv,
                           user=getuser(), projectpath=os.getcwd()):
-                venvcmd("python assembl/scripts/ini_files.py compose -o %s -r %s %s" % (
+                venvcmd("python -massembl.scripts.ini_files compose -o %s -r %s %s" % (
                     local_file_name, random_file_name, env.rcfile))
             # send the random file if changed
             if rt != os.path.getmtime(random_file_name):
@@ -229,18 +231,18 @@ def migrate_local_ini():
         if not exists(random_ini_path):
             # Create a random.ini from specified random*.tmpl files.
             templates = get_random_templates()
-            venvcmd("python assembl/scripts/ini_files.py combine -o " +
+            venvcmd("python -massembl.scripts.ini_files combine -o " +
                     random_ini_path + " " + " ".join(templates))
         # Note: we do not handle the case of an existing but incomplete
         # random.ini file. migrate is designed to be run only once.
-        venvcmd("python assembl/scripts/ini_files.py diff -e -o %s %s %s" % (
+        venvcmd("python -massembl.scripts.ini_files diff -e -o %s %s %s" % (
                 random_ini_path, random_ini_path, local_ini_path))
-        venvcmd("python assembl/scripts/ini_files.py migrate -o %s %s " % (
+        venvcmd("python -massembl.scripts.ini_files migrate -o %s %s " % (
             dest_path, env.rcfile))
     else:
         # OK, this is horrid because I need the local venv.
         local_venv = env.get("local_venv", "./venv")
-        assert os.path.exists(local_venv + "/bin/python"),\
+        assert os.path.exists(local_venv + "/bin/python3"),\
             "No usable local venv"
         # get placeholder filenames
         with NamedTemporaryFile(delete=False) as f:
@@ -265,14 +267,14 @@ def migrate_local_ini():
                           user=getuser(), projectpath=os.getcwd()):
                 if not has_random:
                     templates = get_random_templates()
-                    venvcmd("python assembl/scripts/ini_files.py combine -o " +
+                    venvcmd("python -massembl.scripts.ini_files combine -o " +
                             base_random_file_name + " " + " ".join(templates))
                 # Create the new random file with the local.ini data
-                venvcmd("python assembl/scripts/ini_files.py diff -e -o %s %s %s" % (
+                venvcmd("python -massembl.scripts.ini_files diff -e -o %s %s %s" % (
                         dest_random_file_name, base_random_file_name,
                         local_file_name))
                 # Create the new rc file.
-                venvcmd("python assembl/scripts/ini_files.py migrate -o %s -i %s -r %s %s" % (
+                venvcmd("python -massembl.scripts.ini_files migrate -o %s -i %s -r %s %s" % (
                         dest_path, local_file_name, dest_random_file_name,
                         env.rcfile))
             # Overwrite the random file
@@ -504,12 +506,12 @@ def build_virtualenv():
         print(cyan('The virtualenv seems to already exist, so we don\'t try to create it again'))
         print(cyan('(otherwise the virtualenv command would produce an error)'))
         return
-    run('virtualenv %(venvpath)s' % env)
+    run('python3 -mvenv %(venvpath)s' % env)
     if env.mac:
         # Virtualenv does not reuse distutils.cfg from the homebrew python,
         # and that sometimes precludes building python modules.
-        bcfile = "/usr/local/Frameworks/Python.framework/Versions/2.7/lib/python2.7/distutils/distutils.cfg"
-        vefile = env.venvpath + "/lib/python2.7/distutils/distutils.cfg"
+        bcfile = "/usr/local/Frameworks/Python.framework/Versions/3.6/lib/python3.6/distutils/distutils.cfg"
+        vefile = env.venvpath + "/lib/python3.6/distutils/distutils.cfg"
         sec = "build_ext"
         if exists(bcfile):
             brew_config = SafeConfigParser()
@@ -535,11 +537,12 @@ def update_pip_requirements(force_reinstall=False):
     """
     print(cyan('Updating requirements using PIP'))
     venvcmd('pip install -U "pip>=6" ')
+    env['req_file'] = "requirements_%d.txt" % sys.version_info.major
 
     if force_reinstall:
-        cmd = "%(venvpath)s/bin/pip install --ignore-installed -r %(projectpath)s/requirements.txt" % env
+        cmd = "%(venvpath)s/bin/pip install --ignore-installed -r %(projectpath)s/%(req_file)s" % env
     else:
-        cmd = "%(venvpath)s/bin/pip install -r %(projectpath)s/requirements.txt" % env
+        cmd = "%(venvpath)s/bin/pip install -r %(projectpath)s/%(req_file)s" % env
         run("yes w | %s" % cmd)
 
 
@@ -686,7 +689,7 @@ def app_setup():
     execute(setup_var_directory)
     if not exists(env.ini_file):
         execute(create_local_ini)
-    venvcmd('assembl-ini-files populate %s' % (env.ini_file))
+    venvcmd('assembl-python -massembl.scripts.ini_files populate %s' % (env.ini_file))
 
 
 @task
@@ -960,7 +963,7 @@ def install_certbot():
             sudo("apt-get update")
         else:
             raise NotImplementedError("Unknown distribution")
-        sudo("apt-get install python-certbot-nginx")
+        sudo("apt-get install python3-certbot-nginx")
 
 
 @task
@@ -971,9 +974,9 @@ def install_pyftpsync():
     if env.mac:
         run("pip install pyftpsync")
     else:
-        sudo("apt-get install python-cffi python-colorama python-cryptography "
-             "python-enum34 python-idna python-ipaddress python-keyring "
-             "python-pycparser python-secretstorage")
+        sudo("apt-get install python3-cffi python3-colorama python3-cryptography "
+             "python3-enum34 python3-idna python3-ipaddress python3-keyring "
+             "python3-pycparser python3-secretstorage")
         sudo("pip install pyftpsync")
 
 
@@ -1000,16 +1003,16 @@ def install_basetools():
             run("brew update")
             run("brew upgrade")
         # Standardize on brew python
-        if not exists('/usr/local/bin/python'):
-            run('brew install python')
-        assert exists('/usr/local/bin/pip'), "Brew python should come with pip"
-        path_pip = run('which pip')
-        assert path_pip == '/usr/local/bin/pip',\
+        if not exists('/usr/local/bin/python3'):
+            run('brew install python3')
+        assert exists('/usr/local/bin/pip3'), "Brew python should come with pip"
+        path_pip = run('which pip3')
+        assert path_pip == '/usr/local/bin/pip3',\
             "Make sure homebrew is in the bash path, got " + path_pip
-        run('pip install virtualenv psycopg2 requests')
+        run('pip3 install virtualenv psycopg2 requests')
     else:
-        sudo('apt-get install -y python-virtualenv python-pip python-psycopg2')
-        sudo('apt-get install -y python-requests git')
+        sudo('apt-get install -y python3-virtualenv python3-pip python3-psycopg2')
+        sudo('apt-get install -y python3-requests git')
         # sudo('apt-get install -y gettext')
 
 
@@ -1043,9 +1046,9 @@ def install_builddeps():
         if not run('pip install -U jinja2', quiet=True):
             sudo('pip install -U jinja2')
     else:
-        sudo('apt-get install -y build-essential python-dev pandoc')
+        sudo('apt-get install -y build-essential python3-dev pandoc')
         sudo('apt-get install -y automake bison flex gperf gawk')
-        sudo('apt-get install -y graphviz pkg-config gfortran python-jinja2')
+        sudo('apt-get install -y graphviz pkg-config gfortran python3-jinja2')
     execute(update_python_package_builddeps)
 
 
@@ -1131,8 +1134,8 @@ def set_file_permissions():
             sudo('{usermod} -a -G {webgrp} {user}'.format(
                 usermod=usermod_path, webgrp=webgrp, user=env.user))
     with cd(env.projectpath):
-        run('chmod -R o-rwx .')
-        run('chmod -R g-rw .')
+        run('chmod -R o-rwx .', warn_only=True)
+        run('chmod -R g-rw .', warn_only=True)
         run('chgrp {webgrp} . assembl var var/run'.format(webgrp=webgrp))
         run('chgrp -R {webgrp} assembl/static'.format(webgrp=webgrp))
         run('chmod -R g+rxs var/run')
@@ -1556,7 +1559,7 @@ def docker_startup():
     if not exists(env.ini_file):
         execute(create_local_ini)
     if not exists("supervisord.conf"):
-        venvcmd('assembl-ini-files populate %s' % (env.ini_file))
+        venvcmd('python -massembl.scripts.ini_files populate %s' % (env.ini_file))
     # Copy the static file. This needs improvements.
     copied = False
     if not exists("/opt/idealoom_static/static"):
@@ -1602,6 +1605,11 @@ def install_database():
             sudo('/etc/init.d/postgresql start')
         else:
             print(red("Make sure that postgres is running"))
+
+
+@task
+def install_nginx():
+    sudo("apt-get install -y nginx uwsgi uwsgi-plugin-python3")
 
 
 def install_php():
@@ -1710,8 +1718,8 @@ def install_dovecot_vmm():
     assert not env.mac
     execute(install_postfix)
     sudo("apt-get -y install dovecot-core dovecot-imapd dovecot-lmtpd"
-         " dovecot-pgsql vmm postfix postfix-pgsql python-egenix-mxdatetime"
-         " python-crypto libsasl2-modules libsasl2-modules-db sasl2-bin")
+         " dovecot-pgsql vmm postfix postfix-pgsql python3-egenix-mxdatetime"
+         " python3-crypto libsasl2-modules libsasl2-modules-db sasl2-bin")
 
 
 @task
