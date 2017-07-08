@@ -689,7 +689,7 @@ def app_setup():
     execute(setup_var_directory)
     if not exists(env.ini_file):
         execute(create_local_ini)
-    venvcmd('assembl-python -massembl.scripts.ini_files populate %s' % (env.ini_file))
+    venvcmd('python -massembl.scripts.ini_files populate %s' % (env.ini_file))
 
 
 @task

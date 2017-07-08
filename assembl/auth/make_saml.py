@@ -3,6 +3,7 @@ from builtins import str
 from past.builtins import basestring
 import datetime
 
+from future.utils import bytes_to_native_str
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
@@ -21,10 +22,10 @@ except ImportError:
 
 
 def cleanup_x509_text(txt):
-    kts = txt.split('\n')
-    kt = ['  ' + x for x in kts if len(x) and
-          not (x.startswith('----') and x.endswith('----'))]
-    return '  ' + '\n  '.join(kt) + '\n'
+    kts = txt.split(b'\n')
+    kt = [b'  ' + x for x in kts if len(x) and
+          not (x.startswith(b'----') and x.endswith(b'----'))]
+    return bytes_to_native_str(b'  ' + b'\n  '.join(kt) + b'\n')
 
 
 def make_saml_key():
@@ -53,15 +54,15 @@ def make_saml_cert(key, country='', state='', locality='', org='', cn='',
     if isinstance(key, basestring):
         key = private_key_from_cleaned_text(key)
     if alt_names and isinstance(alt_names, basestring):
-        alt_names = alt_names.decode('utf-8').split()
+        alt_names = alt_names.split()
     subject = x509.Name([
         # Provide various details about who we are.
-        x509.NameAttribute(NameOID.COUNTRY_NAME, country.decode('utf-8')),
-        x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, state.decode('utf-8')),
-        x509.NameAttribute(NameOID.LOCALITY_NAME, locality.decode('utf-8')),
-        x509.NameAttribute(NameOID.ORGANIZATION_NAME, org.decode('utf-8')),
-        x509.NameAttribute(NameOID.COMMON_NAME, cn.decode('utf-8')),
-        x509.NameAttribute(NameOID.EMAIL_ADDRESS, email.decode('utf-8')),
+        x509.NameAttribute(NameOID.COUNTRY_NAME, country),
+        x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, state),
+        x509.NameAttribute(NameOID.LOCALITY_NAME, locality),
+        x509.NameAttribute(NameOID.ORGANIZATION_NAME, org),
+        x509.NameAttribute(NameOID.COMMON_NAME, cn),
+        x509.NameAttribute(NameOID.EMAIL_ADDRESS, email),
     ])
     pkey = key.public_key()
     skid = x509.SubjectKeyIdentifier.from_public_key(pkey)
@@ -106,6 +107,6 @@ if __name__ == '__main__':
                  "email": "assembl@bluenove.com"}
     key_text, key = make_saml_key()
     crt_text, crt = make_saml_cert(key, **saml_info)
-    print(key_text)
+    print(key_text.decode('ascii'))
     print()
-    print(crt_text)
+    print(crt_text.decode('ascii'))
