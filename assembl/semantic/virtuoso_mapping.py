@@ -35,12 +35,6 @@ from sqla_rdfbridge.quadextractor import ClassPatternExtractor
 log = logging.getLogger(__name__)
 
 
-def get_session():
-    admin_engine = create_engine('virtuoso://dba:dba@VOSU')
-    SessionMaker = sessionmaker(admin_engine)
-    return SessionMaker()
-
-
 def get_nsm(session):
     from .namespaces import namespace_manager
     from virtuoso.vstore import VirtuosoNamespaceManager
@@ -345,7 +339,7 @@ class AssemblQuadStorageManager(object):
     current_discussion_storage_version = 16
 
     def __init__(self, session=None, nsm=None):
-        self.session = session or get_session()
+        self.session = session or Base.default_db
         self.nsm = nsm or get_nsm(self.session)
         # Fails if not full schema
         assert Base.metadata.schema.split('.')[1]

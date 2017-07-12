@@ -8,7 +8,6 @@ import simplejson as json
 import math
 from collections import defaultdict
 from csv import DictWriter
-from io import TextIOWrapper
 
 from sqlalchemy import (
     Column, Integer, ForeignKey, Boolean, String, Float, DateTime, Unicode,
@@ -288,7 +287,6 @@ class TokenVoteSpecification(AbstractVoteSpecification):
         }
 
     def csv_results(self, csv_file, histogram_size=None):
-        csv_file = TextIOWrapper(csv_file, 'utf-8')
         specs = self.token_categories
         names_from_type = {
             spec.typename: spec.name.first_original().value for spec in specs
@@ -546,7 +544,6 @@ class LickertVoteSpecification(AbstractVoteSpecification):
         bins = list(range(histogram_size))
         bins.insert(0, "idea")
         bins.extend(["avg", "std_dev"])
-        csv_file = TextIOWrapper(csv_file, 'utf-8')
         dw = DictWriter(csv_file, bins, dialect='excel', delimiter=';')
         dw.writeheader()
         by_idea = self._gather_results()
@@ -590,7 +587,6 @@ class BinaryVoteSpecification(AbstractVoteSpecification):
         return (0, 1)
 
     def csv_results(self, csv_file, histogram_size=None):
-        csv_file = TextIOWrapper(csv_file, 'utf-8')
         dw = DictWriter(csv_file, ["idea", "yes", "no"],
                         dialect='excel', delimiter=';')
         dw.writeheader()
@@ -642,7 +638,6 @@ class MultipleChoiceVoteSpecification(AbstractVoteSpecification):
         return base
 
     def csv_results(self, csv_file, histogram_size=None):
-        csv_file = TextIOWrapper(csv_file, 'utf-8')
         candidates = self.settings_json['candidates']
         cols = candidates[:]
         cols.insert(0, "idea")

@@ -376,7 +376,7 @@ class Optics(object):
             mib = max(mib, RD[index])
             ivl = self.is_start_of_steep_down(index)
             if ivl is not None:
-                for a in steep_down_areas.keys():
+                for a in list(steep_down_areas.keys()):
                     if RD[a.start] * (1-eps) < mib:
                         # print "removing ", a
                         del steep_down_areas[a]
@@ -389,7 +389,7 @@ class Optics(object):
                 continue
             ivl = self.is_start_of_steep_up(index)
             if ivl is not None:
-                for a in steep_down_areas.keys():
+                for a in list(steep_down_areas.keys()):
                     if RD[a.start] * (1-eps) < mib:
                         # print "removing ", a
                         del steep_down_areas[a]

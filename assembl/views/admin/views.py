@@ -245,8 +245,8 @@ def discussion_edit(request):
 
 def order_by_domain_and_name(user):
     email = user.get_preferred_email()
-    domain = email.split('@')[1] if email else None
-    return (domain, user.name)
+    domain = email.split('@')[1] if email else ''
+    return (domain, user.name or '')
 
 
 @view_config(route_name='discussion_permissions', permission=P_ADMIN_DISC,

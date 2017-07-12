@@ -5,7 +5,7 @@ Try to infer new ideas or new harvesting from the difference"""
 from __future__ import print_function
 from __future__ import division
 from builtins import zip
-from builtins import str
+from builtins import str as new_str
 from builtins import object
 from collections import defaultdict
 from os.path import join, exists
@@ -178,7 +178,7 @@ class SemanticAnalysisData(object):
     def get_ideas_of_post(self, post_id):
         if post_id not in self._ideas_by_post:
             self._ideas_by_post[post_id] = \
-                Idea.get_idea_ids_showing_post(post_id)
+                Idea.get_idea_ids_showing_post(int(post_id))
         return self._ideas_by_post[post_id]
 
     def get_posts_of_idea(self, idea_id):
@@ -770,10 +770,10 @@ class SKLearnClusteringSemanticAnalysis(SemanticAnalysisData):
             o = Optics(self.min_samples, metric)
             o.calculate_distances(model_matrix.todense())
             RD = o.RD
-            log.debug("optics result: " + RD)
+            log.debug("optics result: " + str(RD))
             a, b = min(RD[1:]), max(RD)
             eps = a + (b - a) * 0.5
-            log.debug("epsilon " + eps)
+            log.debug("epsilon " + str(eps))
             self.eps = eps
         algorithm = getattr(sklearn.cluster, algorithm)
         algorithm = algorithm(
@@ -851,26 +851,26 @@ class SKLearnClusteringSemanticAnalysis(SemanticAnalysisData):
             for idea_id, (silhouette_score, compare_with_ideas, clusters, post_info)
             in results.items()]
         results.sort(reverse=True)
-        f.write("<html><body>")
+        f.write(u"<html><body>")
         for (silhouette_score, idea_id, compare_with_ideas, clusters, post_info
              ) in results:
             if idea_id:
                 idea = self.ideas[idea_id]
-                f.write("<h1>Idea %d: [%f] %s</h1>\n" % (
+                f.write(u"<h1>Idea %d: [%f] %s</h1>\n" % (
                     idea_id, silhouette_score or 0,
-                    (idea.short_title or '').encode('utf-8')))
+                    (idea.short_title or '')))
             else:
-                f.write("<h1>Discussion %s</h1>" %
-                        discussion.topic.encode('utf-8'))
+                f.write(u"<h1>Discussion %s</h1>" %
+                        discussion.topic)
             if len(clusters) > 1:
-                f.write("<p><b>Cluster size: %s</b>, remainder %d</p>\n" % (
-                    ', '.join((str(len(ci['cluster'])) for ci in clusters[:-1])),
+                f.write(u"<p><b>Cluster size: %s</b>, remainder %d</p>\n" % (
+                    u', '.join((str(len(ci['cluster'])) for ci in clusters[:-1])),
                     len(clusters[-1]['cluster'])))
             if (compare_with_ideas):
-                f.write("<dl>\n")
+                f.write(u"<dl>\n")
                 for k, v in compare_with_ideas.items():
-                    f.write("<dt>%s</dt><dd>%s</dd>\n" % (k, v))
-                f.write("</dl>\n")
+                    f.write(u"<dt>%s</dt><dd>%s</dd>\n" % (k, v))
+                f.write(u"</dl>\n")
             children_ids = set(chain(*(
                 cli['idea_scores'].keys() for cli in clusters)))
             post_counts_per_idea = {
@@ -884,31 +884,31 @@ class SKLearnClusteringSemanticAnalysis(SemanticAnalysisData):
                 features = cluster_info.get('features', {})
                 idea_scores = cluster_info['idea_scores']
                 if is_remainder:
-                    f.write("<h3 id='remainder'>Remainder:</h3>\n<ol>")
+                    f.write(u"<h3 id='remainder'>Remainder:</h3>\n<ol>")
                 else:
-                    f.write("<h3 id='cluster_%d'>Cluster %d</h3>\n" % (n,n))
+                    f.write(u"<h3 id='cluster_%d'>Cluster %d</h3>\n" % (n,n))
                 for idea_id, score in idea_scores.items():
                     idea = self.ideas[idea_id]
-                    f.write("<li>Idea %d: %d/%d %s</li>\n" % (
+                    f.write(u"<li>Idea %d: %d/%d %s</li>\n" % (
                         idea_id, score, post_counts_per_idea[idea_id],
-                        (idea.short_title or '').encode('utf-8')))
-                f.write("</ol>\n")
+                        (idea.short_title or '')))
+                f.write(u"</ol>\n")
                 if features:
-                    f.write("<p><b>Positive:</b> %s</p>\n" % (
-                        u", ".join(features[0])).encode('utf-8'))
-                    f.write("<p><b>Negative:</b> %s</p>\n" % (
-                        u", ".join(features[1])).encode('utf-8'))
-                f.write("<dl>\n")
+                    f.write(u"<p><b>Positive:</b> %s</p>\n" % (
+                        u", ".join(features[0])))
+                    f.write(u"<p><b>Negative:</b> %s</p>\n" % (
+                        u", ".join(features[1])))
+                f.write(u"<dl>\n")
                 for post_id in cluster:
-                    f.write("<dt><a target='out' href='%(url)sposts/local:Content/%(post_id)d'>Post %(post_id)d</a> (%(ideas)s):</dt>\n" % dict(
+                    f.write(u"<dt><a target='out' href='%(url)sposts/local:Content/%(post_id)d'>Post %(post_id)d</a> (%(ideas)s):</dt>\n" % dict(
                         url=self.discussion_url,
                         post_id=post_id,
                         ideas=','.join((
                             str(p) for p in post_info[post_id]['ideas']))))
                     f.write("<dd>%s</dd>" % (
-                        (self.post_texts[post_id] or '').encode('utf-8')))
-                f.write("</dl>\n")
-        f.write("</body></html>")
+                        (self.post_texts[post_id] or '')))
+                f.write(u"</dl>\n")
+        f.write(u"</body></html>")
         return f
 
 
@@ -1131,15 +1131,15 @@ class OpticsSemanticsAnalysis(SemanticAnalysisData):
 
     def write_title(self, f):
         discussion = self.discussion
-        f.write("<h1>Discussion %s</h1>" % discussion.topic.encode('utf-8'))
+        f.write(u"<h1>Discussion %s</h1>" % discussion.topic)
 
     def as_html(self, f=None, jinja_env=None):
         if not f:
             f = open('output.html', 'w')
-        f.write("<html><body>")
+        f.write(u"<html><body>")
         self.write_title(f)
         self.write_cluster_info(f)
-        f.write("</body></html>")
+        f.write(u"</body></html>")
         return f
 
     def write_cluster_info(self, f):
@@ -1187,7 +1187,7 @@ class OpticsSemanticsAnalysis(SemanticAnalysisData):
                     else:
                         f.write("{id}: <b>{cluster_count}</b>/{count} "
                                 .format(**idea_info))
-                    f.write(idea_info['title'].encode('utf-8'))
+                    f.write(idea_info['title'])
                     if idea_info['id'] in alerts:
                         f.write("</b>")
                     if idea_info.get('children', None):
@@ -1213,9 +1213,9 @@ class OpticsSemanticsAnalysis(SemanticAnalysisData):
         features = self.cluster_features.get(cluster, {})
         if features:
             f.write("<p><b>Positive:</b> %s</p>\n" % (
-                u", ".join(features[0])).encode('utf-8'))
+                u", ".join(features[0])))
             f.write("<p><b>Negative:</b> %s</p>\n" % (
-                u", ".join(features[1])).encode('utf-8'))
+                u", ".join(features[1])))
 
     def write_post_cluster(self, f, pcluster, title_function):
         stack = []
@@ -1244,7 +1244,7 @@ class OpticsSemanticsAnalysis(SemanticAnalysisData):
             title = title_function(post_id)
             f.write("<dt>%s</dt>\n" % (title,))
             f.write("<dd>%s</dd>" % (
-                self.post_texts[post_id].encode('utf-8')))
+                self.post_texts[post_id]))
             f.write("</dl>\n")
         while len(stack):
             f.write('</li></ul>')
@@ -1663,7 +1663,7 @@ class OpticsSemanticsAnalysisWithSuggestions(OpticsSemanticsAnalysis):
         def print_idea(id, depth=0):
             print("  " * depth, id, sizes.get(id, 0),\
                 silhouette_scores_per_idea.get(id, None), (
-                    ideas[id].short_title or '').encode('utf-8'))
+                    ideas[id].short_title or ''))
             for child in idea_children.get(id, ()):
                 print_idea(child, depth+1)
 
@@ -1682,11 +1682,11 @@ class OpticsSemanticsAnalysisWithSuggestions(OpticsSemanticsAnalysis):
             if outer_score is None:
                 f.write("<li>%d (%f) (%d posts) %s" % (
                     idea_id, inner_score or 0,
-                    size, (idea.short_title or '').encode('utf-8')))
+                    size, (idea.short_title or '')))
             else:
                 f.write("<li>%d (%f ; %f) (%d posts) %s" % (
                     idea_id, inner_score or 0, outer_score,
-                    size, (idea.short_title or '').encode('utf-8')))
+                    size, (idea.short_title or '')))
         if children:
             f.write("<ul>")
             for child_id in children:
@@ -1712,7 +1712,7 @@ class OpticsSemanticsAnalysisWithSuggestions(OpticsSemanticsAnalysis):
             server=get_config()['public_hostname'],
             suggestions_add=suggestions_add,
             suggestions_partition=suggestions_partition,
-            ).encode('utf-8'))
+            ))
         return
 
     def reformulate_suggestion(self, suggestion, is_add=True):

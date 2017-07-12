@@ -4,7 +4,7 @@ standard_library.install_aliases()
 from builtins import str
 import re
 import base64
-from io import StringIO
+from io import StringIO, BytesIO, TextIOWrapper
 from os import urandom
 from os.path import join, dirname
 from collections import defaultdict
@@ -653,11 +653,12 @@ def get_time_series_analytics(request):
 
 
 def csv_response(results, format, fieldnames=None):
-    output = StringIO()
+    output = BytesIO()
+    output_utf8 = TextIOWrapper(output, encoding="utf-8")
 
     if format == CSV_MIMETYPE:
         from csv import writer
-        csv = writer(output, dialect='excel', delimiter=';')
+        csv = writer(output_utf8, dialect='excel', delimiter=';')
         writerow =  csv.writerow
         empty = ''
     elif format == XSLX_MIMETYPE:
@@ -678,7 +679,9 @@ def csv_response(results, format, fieldnames=None):
         for r in results:
             writerow(r)
 
-    if format == XSLX_MIMETYPE:
+    if format == CSV_MIMETYPE:
+        output_utf8.detach()
+    elif format == XSLX_MIMETYPE:
         from openpyxl.writer.excel import ExcelWriter
         writer = ExcelWriter(workbook, archive)
         writer.save('')
@@ -915,10 +918,12 @@ def get_interest_alerts(request):
              permission=P_DISC_STATS)
 def show_cluster(request):
     discussion = request.context._instance
-    output = StringIO()
+    output = BytesIO()
+    output_utf8 = TextIOWrapper(output, encoding='utf-8')
     from assembl.nlp.clusters import SKLearnClusteringSemanticAnalysis
     analysis = SKLearnClusteringSemanticAnalysis(discussion)
-    analysis.as_html(output)
+    analysis.as_html(output_utf8)
+    output_utf8.detach()
     output.seek(0)
     return Response(body_file=output, content_type='text/html', charset="utf-8")
 
@@ -933,7 +938,8 @@ def show_optics_cluster(request):
     test_code = request.GET.get("test_code", None)
     suggestions = request.GET.get("suggestions", True)
     discussion = request.context._instance
-    output = StringIO()
+    output = BytesIO()
+    output_utf8 = TextIOWrapper(output, encoding='utf-8')
     user_id = authenticated_userid(request) or Everyone
     from assembl.nlp.clusters import (
         OpticsSemanticsAnalysis, OpticsSemanticsAnalysisWithSuggestions)
@@ -948,7 +954,8 @@ def show_optics_cluster(request):
     from pyramid_jinja2 import IJinja2Environment
     jinja_env = request.registry.queryUtility(
         IJinja2Environment, name='.jinja2')
-    analysis.as_html(output, jinja_env)
+    analysis.as_html(output_utf8, jinja_env)
+    output_utf8.detach()
     output.seek(0)
     return Response(body_file=output, content_type='text/html', charset="utf-8")
 
