@@ -5,17 +5,18 @@ from __future__ import print_function
 from future import standard_library
 standard_library.install_aliases()
 standard_library.install_hooks()
-from builtins import str
+from builtins import str as new_str
 import sys
 import os
+import io
 from os.path import exists, join, dirname, abspath
-from configparser import (
-    NoSectionError, SafeConfigParser, RawConfigParser as Parser)
+from configparser import (NoSectionError, ConfigParser)
 from argparse import ArgumentParser, FileType
 import logging
 from future.utils import string_types
 import locale
 
+from future.utils import PY2
 from fabfile import combine_rc
 
 
@@ -28,7 +29,7 @@ log = logging.getLogger('assembl')
 logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 
 # Case sensitive options
-Parser.optionxform = str
+ConfigParser.optionxform = lambda self, option: option
 
 
 SECTION = 'app:assembl'
@@ -70,11 +71,14 @@ DEFAULTS = {
 }
 
 
-def asParser(fob, cls=Parser):
+def asParser(fob, interpolation=None):
     """ConfigParser from a .ini filename or open file object. Idempotent."""
-    if isinstance(fob, cls):
+    if isinstance(fob, ConfigParser):
         return fob
-    parser = cls()
+    if interpolation is True:
+        parser = ConfigParser()
+    else:
+        parser = ConfigParser(interpolation=interpolation)
     if isinstance(fob, string_types):
         parser.read(fob)
     else:
@@ -228,7 +232,7 @@ def migrate_beaker_config(random_ini, overlay):
 
 def dump(ini_file):
     """Dump the ini file, showing interpolations and errors."""
-    ini_file = asParser(ini_file, SafeConfigParser)
+    ini_file = asParser(ini_file, True)
     ini_file._defaults['here'] = os.getcwd()
     for section in ini_file.sections():
         print("\n[%s]\n" % section)
@@ -250,12 +254,12 @@ def populate_random(random_file, random_templates=None, saml_info=None):
     from base64 import b64encode
     from os import urandom
     from assembl.auth.make_saml import make_saml_key, make_saml_cert
-    base = Parser()
+    base = ConfigParser(interpolation=None)
     assert random_templates, "Please give one or more templates"
     for template in random_templates:
         assert exists(template), "Cannot find template " + template
         base.read(template)
-    existing = Parser()
+    existing = ConfigParser(interpolation=None)
     if exists(random_file):
         existing.read(random_file)
     combine_ini(base, existing)
@@ -310,7 +314,7 @@ def rc_to_ini(rc_info, default_section=SECTION):
     Keys prefixed with a star are put in the global (DEFAULT) section.
     Value of '__delete_key__' is eliminated if existing.
     """
-    p = Parser()
+    p = ConfigParser(interpolation=None)
     for key, val in rc_info.items():
         if not key or key.startswith('_'):
             continue
@@ -380,8 +384,8 @@ def diff_ini(first, second, diff=None, existing_only=False):
     first = asParser(first)
     second = asParser(second)
     # TODO: Look at first both in raw and formatted versions
-    diff = diff or Parser()
-    interpolating = SafeConfigParser()
+    diff = diff or ConfigParser(interpolation=None)
+    interpolating = ConfigParser()
     for section in second.sections():
         if section != 'DEFAULT' and not first.has_section(section):
             if not existing_only:
@@ -416,7 +420,7 @@ def compose(rc_filename, random_file=None):
     ini_sequence = rc_info.get('ini_files', None)
     assert ini_sequence, "Define ini_files"
     ini_sequence = ini_sequence.split()
-    base = Parser()
+    base = ConfigParser(interpolation=None)
     random_file = random_file or rc_info.get('random_file', RANDOM_FILE)
     for overlay in ini_sequence:
         if overlay == 'RC_DATA':
@@ -459,6 +463,14 @@ def migrate(rc_filename, expected_ini, random_file=None, target_dir=None):
     return iniconfig_to_rc(diff, extends=rc_filename, target_dir=target_dir)
 
 
+def write_parser(parser, dest=None):
+    if dest is None:
+        dest.write(sys.stdout)
+    else:
+        with io.open(dest, 'w', encoding='utf-8') as destf:
+            parser.write(destf)
+
+
 def main():
     parser = ArgumentParser(prog=os.path.basename(__file__))
     subparsers = parser.add_subparsers(dest='command', title="subcommands")
@@ -476,16 +488,15 @@ def main():
     # ini combine
     parser_combine = subparsers.add_parser(
         'combine', help=short_help(combine_ini))
-    parser_combine.add_argument('--output', '-o', type=FileType('w'),
-                                default=sys.stdout,
+    parser_combine.add_argument('--output', '-o', default=None,
                                 help='The output file')
     parser_combine.add_argument('input', type=FileType('r'), nargs='+',
                                 help='Input ini files')
 
     # ini compose
     parser_compose = subparsers.add_parser('compose', help=short_help(compose))
-    parser_compose.add_argument('--output', '-o', type=FileType('w'),
-                                default=sys.stdout, help='The output file')
+    parser_compose.add_argument('--output', '-o', default=None,
+                                help='The output file')
     parser_compose.add_argument('--random', '-r', help='random.ini file',
                                 default=None)
     parser_compose.add_argument('input', help='Input rc file')
@@ -493,8 +504,8 @@ def main():
     # ini migrate
     parser_migrate = subparsers.add_parser(
         'migrate', help=short_help(migrate))
-    parser_migrate.add_argument('--output', '-o', type=FileType('w'),
-                                default=sys.stdout, help='The output file')
+    parser_migrate.add_argument('--output', '-o', default=None,
+                                help='The output file')
     parser_migrate.add_argument(
         '--ini', '-i', type=FileType('r'), default=None,
         help="INI file we're migrating, usually local.ini")
@@ -508,8 +519,8 @@ def main():
         'random', help=short_help(populate_random))
     parser_random.add_argument('--random', '-r', help='random.ini file',
                                default=None)
-    parser_random.add_argument('--output', '-o', type=FileType('w'),
-                               default=sys.stdout, help='The output file')
+    parser_random.add_argument('--output', '-o', default=None,
+                               help='The output file')
     parser_random.add_argument('--template', '-t', help='random template files',
                                action='append', default=[])
     parser_random.add_argument('input', help='Input rc file (for saml)')
@@ -521,8 +532,8 @@ def main():
 
     # ini diff
     parser_diff = subparsers.add_parser('diff', help=short_help(diff_ini))
-    parser_diff.add_argument('--output', '-o', type=FileType('w'),
-                             default=sys.stdout, help='The output file')
+    parser_diff.add_argument('--output', '-o', default=None,
+                             help='The output file')
     parser_diff.add_argument(
         '--existing_only', '-e', action="store_true", default=False,
         help='Only show changes to keys existing in first file')
@@ -533,14 +544,14 @@ def main():
 
     args = parser.parse_args()
     if args.command == 'populate':
-        config = SafeConfigParser(defaults=DEFAULTS)
+        config = ConfigParser(defaults=DEFAULTS)
         config.read(args.config)
         generate_ini_files(config, args.config)
     elif args.command == 'combine':
         base = asParser(args.input[0])
         for overlay in args.input[1:]:
             combine_ini(base, overlay)
-        base.write(args.output)
+        write_parser(base, args.stdout)
     elif args.command == 'random':
         rc_info = combine_rc(args.input)
         random_file = args.random or rc_info.get('random_file', RANDOM_FILE)
@@ -548,23 +559,28 @@ def main():
             rc_info.get('ini_files', ''))
         random = populate_random(
             random_file, templates, extract_saml_info(rc_info))
-        random.write(args.output)
+        write_parser(random, args.stdout)
     elif args.command == 'compose':
         ini_info = compose(args.input, args.random)
-        ini_info.write(args.output)
+        write_parser(ini_info, args.stdout)
     elif args.command == 'migrate':
         ini_file = args.ini
         if ini_file is None:
             ini_file = asParser('local.ini')
         else:
             ini_file = asParser(ini_file)
-        target_dir = os.path.dirname(args.output.name) if args.output.name[0] != '<' else None
+
+        target_dir = os.path.dirname(args.output) if args.output else None
         rc_file = migrate(args.rc, ini_file, args.random, target_dir=target_dir)
-        args.output.write(rc_file.getvalue())
+        if args.output:
+            with io.open(args.output, 'w', encoding='utf-8') as output:
+                output.write(rc_file.getvalue())
+        else:
+            sys.stdout.write(rc_file.getvalue())
     elif args.command == 'diff':
         diff = diff_ini(args.base, args.second,
                         existing_only=args.existing_only)
-        diff.write(args.output)
+        write_parser(diff, args.stdout)
     if args.command == 'dump':
         dump(args.ini)
 
