@@ -551,7 +551,7 @@ def main():
         base = asParser(args.input[0])
         for overlay in args.input[1:]:
             combine_ini(base, overlay)
-        write_parser(base, args.stdout)
+        write_parser(base, args.output)
     elif args.command == 'random':
         rc_info = combine_rc(args.input)
         random_file = args.random or rc_info.get('random_file', RANDOM_FILE)
@@ -559,10 +559,10 @@ def main():
             rc_info.get('ini_files', ''))
         random = populate_random(
             random_file, templates, extract_saml_info(rc_info))
-        write_parser(random, args.stdout)
+        write_parser(random, args.output)
     elif args.command == 'compose':
         ini_info = compose(args.input, args.random)
-        write_parser(ini_info, args.stdout)
+        write_parser(ini_info, args.output)
     elif args.command == 'migrate':
         ini_file = args.ini
         if ini_file is None:
@@ -580,7 +580,7 @@ def main():
     elif args.command == 'diff':
         diff = diff_ini(args.base, args.second,
                         existing_only=args.existing_only)
-        write_parser(diff, args.stdout)
+        write_parser(diff, args.output)
     if args.command == 'dump':
         dump(args.ini)
 

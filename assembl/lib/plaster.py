@@ -1,6 +1,10 @@
 from collections import OrderedDict
 from plaster_pastedeploy import Loader as pLoader
-from plaster_pastedeploy.compat import configparser
+try:
+    from plaster_pastedeploy import NoSectionError
+except ImportError:
+    from plaster_pastedeploy.compat import configparser
+    NoSectionError = configparser.NoSectionError
 
 
 class Loader(pLoader):
@@ -27,5 +31,5 @@ class Loader(pLoader):
             d = OrderedDict(parser._sections.get(section, None))
             d.pop('__name__', None)
             return d
-        except configparser.NoSectionError:
+        except NoSectionError:
             return {}

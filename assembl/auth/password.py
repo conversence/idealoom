@@ -3,7 +3,7 @@ from __future__ import division
 
 from future import standard_library
 standard_library.install_aliases()
-from builtins import str
+from builtins import str as new_str
 from os import urandom
 from binascii import hexlify, unhexlify
 import hashlib

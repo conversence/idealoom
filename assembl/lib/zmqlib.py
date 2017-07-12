@@ -5,6 +5,7 @@ import atexit
 from itertools import count
 import logging
 
+from future.utils import native_str
 import zmq
 import zmq.devices
 from time import sleep
@@ -73,7 +74,7 @@ def send_changes(socket, discussion, changeset):
 
 def configure_zmq(sockdef, multiplex):
     global CHANGES_SOCKET, MULTIPLEX
-    assert isinstance(sockdef, str)
+    assert isinstance(sockdef, native_str)
     CHANGES_SOCKET = sockdef
     MULTIPLEX = multiplex
 

@@ -15,7 +15,7 @@ from email.mime.text import MIMEText
 from email.utils import parseaddr, mktime_tz, parsedate_tz
 import logging
 
-from future.utils import as_native_str, binary_type
+from future.utils import native_str, as_native_str, binary_type
 from past.builtins import str as oldstr
 import jwzthreading
 from bs4 import BeautifulSoup, Comment
@@ -531,7 +531,7 @@ FROM post WHERE post.id IN (SELECT MAX(post.id) as max_post_id FROM imported_pos
         emails_for_threading = []
         for mail in emails:
             blob = mail.imported_blob
-            if not isinstance(blob, str):
+            if not isinstance(blob, native_str):
                 blob = blob.decode('ascii')
             email_for_threading = jwzthreading.make_message(email.message_from_string(blob))
             #Store our emailsubject, jwzthreading does not decode subject itself
@@ -611,7 +611,7 @@ FROM post WHERE post.id IN (SELECT MAX(post.id) as max_post_id FROM imported_pos
             #session = self.db
             #session.add(email)
             blob = email.imported_blob
-            if not isinstance(blob, str):
+            if not isinstance(blob, native_str):
                 blob = blob.decode('ascii')
             (email_object, dummy, error) = self.parse_email(blob, email)
             #session.add(email_object)

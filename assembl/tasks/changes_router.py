@@ -15,7 +15,8 @@ import logging.config
 
 from future import standard_library
 standard_library.install_aliases()
-from builtins import str
+from future.utils import native_str_to_bytes
+from builtins import str as new_str
 from builtins import range
 import simplejson as json
 import zmq
@@ -107,7 +108,7 @@ class ZMQRouter(SockJSConnection):
                 self.socket = context.socket(zmq.SUB)
                 self.socket.connect(INTERNAL_SOCKET)
                 self.socket.setsockopt(zmq.SUBSCRIBE, b'*')
-                self.socket.setsockopt(zmq.SUBSCRIBE, bytes(self.discussion, 'ascii'))
+                self.socket.setsockopt(zmq.SUBSCRIBE, native_str_to_bytes(str(self.discussion)))
                 self.loop = zmqstream.ZMQStream(self.socket, io_loop=io_loop)
                 self.loop.on_recv(self.on_recv)
                 log.info("connected")

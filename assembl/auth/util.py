@@ -1,7 +1,7 @@
 """Sundry utility functions having to do with users or permissions"""
 from csv import reader
 from datetime import datetime, timedelta
-from io import TextIOWrapper
+from io import TextIOWrapper, BytesIO
 import base64
 
 from future.utils import string_types
@@ -522,7 +522,7 @@ def add_multiple_users_csv(
         send_password_change=False, message_subject=None,
         text_message=None, html_message=None, sender_name=None,
         resend_if_not_logged_in=False):
-    csv_file = TextIOWrapper(csv_file, 'utf-8')
+    csv_file = TextIOWrapper(BytesIO(csv_file.read()), 'utf-8')
     r = reader(csv_file, skipinitialspace=True)
     localizer = request.localizer
     for i, l in enumerate(r):
