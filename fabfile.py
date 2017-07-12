@@ -176,8 +176,8 @@ def create_local_ini():
         # without disturbing local random/local.ini files.
 
         # OK, this is horrid because I need the local venv.
-        local_venv = env.get("local_venv", "./venv")
-        assert os.path.exists(local_venv + "/bin/python3"),\
+        local_venv = env.get("venvpath", "./venv")
+        assert os.path.exists(local_venv + "/bin/python"),\
             "No usable local venv"
         # get placeholder filenames
         with NamedTemporaryFile(delete=False) as f:
@@ -241,8 +241,8 @@ def migrate_local_ini():
             dest_path, env.rcfile))
     else:
         # OK, this is horrid because I need the local venv.
-        local_venv = env.get("local_venv", "./venv")
-        assert os.path.exists(local_venv + "/bin/python3"),\
+        local_venv = env.get("venvpath", "./venv")
+        assert os.path.exists(local_venv + "/bin/python"),\
             "No usable local venv"
         # get placeholder filenames
         with NamedTemporaryFile(delete=False) as f:
