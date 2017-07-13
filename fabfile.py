@@ -47,7 +47,7 @@ def combine_rc(rc_filename, overlay=None):
         # Use project-path-relative names to that effect.
         if fname.startswith('~/'):
             path = dirname(__file__)
-            if env.host_string != 'localhost':
+            if not is_local(env.host_string):
                 path = env.get('projectpath', path)
             fname = join(path, fname[2:])
         else:
@@ -73,6 +73,15 @@ def as_bool(b):
     return str(b).lower() in {"1", "true", "yes", "t", "on"}
 
 
+def is_local(hostname):
+    return hostname in ['localhost', '127.0.0.1']
+    # TODO: look at sys('hostname')
+
+
+def are_local(hostnames):
+    return all((is_local(h) for h in hostnames))
+
+
 def sanitize_env():
     """Ensure boolean and list env variables are such"""
     for name in (
@@ -95,7 +104,7 @@ def sanitize_env():
     if not env.get('host_string', None):
         env.host_string = env.hosts[0]
     #Are we on localhost
-    is_local = set(env.hosts) - set(['localhost', '127.0.0.1']) == set()
+    is_local = are_local(env.hosts)
     if env.get('mac', None) is None:
         if is_local:
             #WARNING:  This code will run locally, NOT on the remote server,
@@ -167,7 +176,7 @@ def create_local_ini():
         run('cp %s %s.%d' % (
             local_ini_path, local_ini_path, int(time())))
 
-    if env.host_string == 'localhost':
+    if is_local(env.host_string):
         # The easy case: create a local.ini locally.
         venvcmd("python -massembl.scripts.ini_files compose -o %s %s" % (
             env.ini_file, env.rcfile))
@@ -177,6 +186,8 @@ def create_local_ini():
 
         # OK, this is horrid because I need the local venv.
         local_venv = env.get("venvpath", "./venv")
+        if not os.path.exists(local_venv):
+            local_venv = os.environ.get("VIRTUAL_ENV", None)
         assert os.path.exists(local_venv + "/bin/python"),\
             "No usable local venv"
         # get placeholder filenames
@@ -225,7 +236,7 @@ def migrate_local_ini():
     local_ini_path = os.path.join(env.projectpath, env.ini_file)
     dest_path = env.rcfile + '.' + str(time())
 
-    if env.host_string == 'localhost':
+    if is_local(env.host_string):
         # The easy case
         # first protect or generate the random data
         if not exists(random_ini_path):
@@ -1149,7 +1160,7 @@ def set_file_permissions():
 @task
 def start_edit_fontello_fonts():
     """Prepare to edit the fontello fonts in Fontello."""
-    assert env.hosts == ['localhost'], "Meant to be run locally"
+    assert are_local(env.hosts), "Meant to be run locally"
     import requests
     font_dir = join(
         env.projectpath, 'assembl', 'static', 'css', 'fonts')
@@ -1162,7 +1173,7 @@ def start_edit_fontello_fonts():
     fid = r.text
     with open(id_file, 'w') as f:
         f.write(fid)
-    if (env.host_string == 'localhost'):
+    if are_local(env.hosts):
         import webbrowser
         webbrowser.open('http://fontello.com/' + fid)
 
@@ -1172,7 +1183,7 @@ def compile_fontello_fonts():
     """Compile the fontello fonts once you have edited them in Fontello. Run start_edit_fontello_fonts first."""
     from zipfile import ZipFile
     from io import StringIO
-    assert env.hosts == ['localhost'], "Meant to be run locally"
+    assert are_local(env.hosts), "Meant to be run locally"
     import requests
     font_dir = join(
         env.projectpath, 'assembl', 'static', 'css', 'fonts')
@@ -1209,7 +1220,7 @@ def check_and_create_database_user(host=None, user=None, password=None):
     if checkUser.failed:
         print(yellow("User does not exist, let's try to create it. (The error above is not problematic if the next command which is going to be run now will be successful. This next command tries to create the missing Postgres user.)"))
         db_user = system_db_user()
-        if host in ("localhost", "127.0.0.1") and db_user:
+        if is_local(env.host_string) and db_user:
             db_password_string = ''
             sudo_user = db_user
         else:
@@ -1701,7 +1712,7 @@ def install_postfix():
     assert not env.mac
     # take mail host from mail.host
     external_smtp_host = env.smtp_host
-    if external_smtp_host in ('localhost', '127.0.0.1'):
+    if is_local(env.external_smtp_host):
         external_smtp_host = None
     sudo("debconf-set-selections <<< 'postfix postfix/mailname string %s'" % (env.host_string,))
     if external_smtp_host:

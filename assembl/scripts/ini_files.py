@@ -16,7 +16,7 @@ import logging
 from future.utils import string_types
 import locale
 
-from future.utils import PY2
+from future.utils import PY2, bytes_to_native_str
 from fabfile import combine_rc
 
 
@@ -282,7 +282,7 @@ def populate_random(random_file, random_templates=None, saml_info=None):
             elif value.startswith('{random') and value.endswith("}"):
                 size = int(value[7:-1])
                 assert 0 < size < 100
-                value = b64encode(urandom(size))
+                value = bytes_to_native_str(b64encode(urandom(size)))
                 base.set(section, key, value)
                 changed = True
 
@@ -465,7 +465,7 @@ def migrate(rc_filename, expected_ini, random_file=None, target_dir=None):
 
 def write_parser(parser, dest=None):
     if dest is None:
-        dest.write(sys.stdout)
+        parser.write(sys.stdout)
     else:
         with io.open(dest, 'w', encoding='utf-8') as destf:
             parser.write(destf)
