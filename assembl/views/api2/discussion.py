@@ -831,7 +831,7 @@ pygraphviz_formats = {
 def as_mind_map(request):
     """Provide a mind-map like representation of the table of ideas"""
     for mimetype in request.GET.getall('mimetype'):
-        mimetype = mimetype.encode('utf-8')
+        mimetype = mimetype
         if mimetype in pygraphviz_formats:
             break
     else:
@@ -841,7 +841,7 @@ def as_mind_map(request):
     discussion = request.context._instance
     G = discussion.as_mind_map()
     G.layout(prog='twopi')
-    io = StringIO()
+    io = BytesIO()
     G.draw(io, format=pygraphviz_formats[mimetype])
     io.seek(0)
     return Response(body_file=io, content_type=mimetype)
