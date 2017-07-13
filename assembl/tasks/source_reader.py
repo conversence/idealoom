@@ -148,6 +148,7 @@ class SourceReader(with_metaclass(ABCMeta, Thread)):
 
     def __init__(self, source_id):
         super(SourceReader, self).__init__()
+        log.disabled = False
         self.source_id = source_id
         self.source = None
         self.status = ReaderStatus.CREATED
@@ -269,7 +270,7 @@ class SourceReader(with_metaclass(ABCMeta, Thread)):
                 > self.transient_error_backoff):
             # Exception: transient backoff escalation can be cancelled by wake
             self.event.set()
-        elif (self.status == ReaderStatus.READING
+        elif (self.status in (ReaderStatus.READING, ReaderStatus.WAIT_FOR_PUSH)
             and (datetime.utcnow() - self.last_read_started)
                 > self.reading_takes_too_long):
             try:
@@ -364,6 +365,8 @@ class SourceReader(with_metaclass(ABCMeta, Thread)):
                 else:
                     self.event.wait(self.time_between_reads.total_seconds())
                     self.event.clear()
+        if self.status == ReaderStatus.SHUTDOWN and self.is_connected():
+            self.close()
         if self.source and not inspect(self.source).detached:
             self.source.db.close()
 
@@ -381,8 +384,6 @@ class SourceReader(with_metaclass(ABCMeta, Thread)):
     @abstractmethod
     def end_wait_for_push(self):
         # redefine in push-capable readers
-        if (self.status in (ReaderStatus.READING, ReaderStatus.WAIT_FOR_PUSH)):
-            self.set_status(ReaderStatus.PAUSED)
         self.source.db.close()
 
     def close(self):
@@ -398,7 +399,8 @@ class SourceReader(with_metaclass(ABCMeta, Thread)):
             self.new_error(e, min(e.status, ReaderStatus.CLIENT_ERROR))
         finally:
             self.set_status(ReaderStatus.SHUTDOWN)
-            self.source.db.close()
+            if self.source:
+                self.source.db.close()
 
     def try_close(self):
         try:
@@ -441,16 +443,14 @@ class SourceReader(with_metaclass(ABCMeta, Thread)):
         pass
 
     def shutdown(self):
-        # TODO: lock.
-        if self.is_connected():
-            self.close()
+        # Must return quickly
         self.set_status(ReaderStatus.SHUTDOWN)
         self.event.set()
 
     @as_native_str()
     def __repr__(self):
         return "<%s.%d in %s>" % (
-            self.__class__.__name__, self.source_id, self._Thread__name)
+            self.__class__.__name__, self.source_id, self.name)
 
 
 class PullSourceReader(SourceReader):
@@ -504,6 +504,7 @@ class SourceDispatcher(ConsumerMixin):
         super(SourceDispatcher, self).__init__()
         self.connection = connection
         self.readers = {}
+        log.disabled = False
 
     def get_consumers(self, Consumer, channel):
         global _queue
@@ -530,6 +531,7 @@ class SourceDispatcher(ConsumerMixin):
 
         if force_restart and reader is not None:
             reader.shutdown()
+            self.readers.pop(source_id)
             reader = None
 
         if not (reader and reader.is_connected()):
@@ -544,7 +546,7 @@ class SourceDispatcher(ConsumerMixin):
             self.readers[source_id] = reader
             if reader is None:
                 return False
-            
+
             reader.setup_read(reimport, **kwargs)
             reader.start()
             return True
@@ -600,6 +602,7 @@ if __name__ == '__main__':
         print_stack()
 
     configure(registry, 'source_reader')
+    log.disabled = False
     url = (settings.get('celery_tasks.broker') or
            settings.get('celery_tasks.imap.broker'))
     with BrokerConnection(url) as conn:

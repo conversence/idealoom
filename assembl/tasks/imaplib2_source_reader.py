@@ -1,6 +1,7 @@
 import logging
 
 from imaplib2 import IMAP4_SSL, IMAP4
+from sqlalchemy.orm import undefer
 
 from assembl.models import ContentSource
 from .source_reader import (
@@ -183,8 +184,9 @@ class IMAPReader(SourceReader):
                 # We imported mails, we need to re-thread
                 self.source.db.flush()
                 # Rethread emails globally (sigh)
-                emails = self.source.db.query(Post).filter(
-                    discussion_id=self.source.discussion_id).all()
+                emails = self.source.db.query(Post).filter_by(
+                    discussion_id=self.source.discussion_id
+                ).options(undefer(ImportedPost.imported_blob)).all()
 
                 AbstractMailbox.thread_mails(emails)
                 self.source.db.flush()

@@ -15,7 +15,7 @@ from email.mime.text import MIMEText
 from email.utils import parseaddr, mktime_tz, parsedate_tz
 import logging
 
-from future.utils import native_str, as_native_str, binary_type
+from future.utils import native_str, as_native_str, binary_type, PY2
 from past.builtins import str as oldstr
 import jwzthreading
 from bs4 import BeautifulSoup, Comment
@@ -377,6 +377,11 @@ class AbstractMailbox(PostSource):
 
     def parse_email(self, message_string, existing_email=None):
         """ Creates or replace a email from a string """
+        if isinstance(message_string, binary_type):
+            message_bytes = message_string
+            message_string = message_bytes.decode('utf-8')
+        else:
+            message_bytes = message_string.encode('utf-8')
         parsed_email = email.message_from_string(message_string)
         body = None
         error_description = None
@@ -452,8 +457,6 @@ class AbstractMailbox(PostSource):
         # Try/except for a normal situation is an anti-pattern,
         # but sqlalchemy doesn't have a function that returns
         # 0, 1 result or an exception
-        if not isinstance(message_string, binary_type):
-            message_string = message_string.encode('utf-8')
         try:
             email_object = self.db.query(Email).filter(
                 Email.source_post_id == new_message_id,
@@ -468,7 +471,7 @@ class AbstractMailbox(PostSource):
             email_object.source_post_id = new_message_id
             email_object.in_reply_to = new_in_reply_to
             email_object.body_mime_type = mimeType
-            email_object.imported_blob = message_string
+            email_object.imported_blob = message_bytes
             # TODO MAP: Make this nilpotent.
             email_object.subject = LangString.create(subject)
             email_object.body = LangString.create(body)
@@ -484,7 +487,7 @@ class AbstractMailbox(PostSource):
                 in_reply_to=new_in_reply_to,
                 body=LangString.create(body),
                 body_mime_type = mimeType,
-                imported_blob=message_string
+                imported_blob=message_bytes
             )
         except MultipleResultsFound:
             """ TO find duplicates (this should no longer happen, but in case it ever does...
@@ -553,12 +556,11 @@ FROM post WHERE post.id IN (SELECT MAX(post.id) as max_post_id FROM imported_pos
             for container in threaded_emails:
                 # if debug:
                     #jwzthreading.print_container(container)
-                log.debug("\nProcessing: %s %s %d " % (
+                message_string = "%s %s %d " % (
                     container.message.subject, container.message.message_id,
-                    container.message.message.id))
-                log.debug("container: " + repr(container))
-                log.debug("parent: " + repr(container.parent))
-                log.debug("children: " + repr(container.children))
+                    container.message.message.id) if container.message else "null "
+                log.debug("Processing: %s container: %s parent: %s children :%s" % (
+                    message_string, container, container.parent, container.children))
 
                 if(container.message):
                     current_parent = container.message.message.parent
@@ -595,7 +597,6 @@ FROM post WHERE post.id IN (SELECT MAX(post.id) as max_post_id FROM imported_pos
                 else:
                     log.debug("Current message ID: None, was a dummy container")
                     update_threading(container.children, parent, debug=debug)
-
         update_threading(list(threaded_emails.values()), debug=False)
 
     def reprocess_content(self):
@@ -672,6 +673,8 @@ FROM post WHERE post.id IN (SELECT MAX(post.id) as max_post_id FROM imported_pos
         The reference is La référence est http://tools.ietf.org/html/rfc3834
         """
         #TODO:  This is a double-parse, refactor parse_message so we can reuse it
+        if isinstance(message_string, binary_type):
+            message_string = message_string.decode('utf-8')
         parsed_email = email.message_from_string(message_string)
         if parsed_email.get('Return-Path', None) == '<>':
             #TODO:  Check if a report-type=delivery-status; is present,
@@ -812,7 +815,7 @@ class IMAPMailbox(AbstractMailbox):
                 mark_changed()
 
     def make_reader(self):
-        from assembl.tasks.imaplib2_source_reader import IMAPReader
+        from assembl.tasks.imapclient_source_reader import IMAPReader
         return IMAPReader(self.id)
 
     def get_send_address(self):
