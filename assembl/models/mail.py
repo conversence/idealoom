@@ -15,7 +15,7 @@ from email.mime.text import MIMEText
 from email.utils import parseaddr, mktime_tz, parsedate_tz
 import logging
 
-from future.utils import native_str, as_native_str, binary_type, PY2
+from future.utils import native_str, as_native_str, binary_type, PY2, bytes_to_native_str
 from past.builtins import str as oldstr
 import jwzthreading
 from bs4 import BeautifulSoup, Comment
@@ -382,7 +382,8 @@ class AbstractMailbox(PostSource):
             message_string = message_bytes.decode('utf-8')
         else:
             message_bytes = message_string.encode('utf-8')
-        parsed_email = email.message_from_string(message_string)
+        parsed_email = email.message_from_string(
+            bytes_to_native_str(message_bytes))
         body = None
         error_description = None
 
