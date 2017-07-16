@@ -1020,10 +1020,15 @@ def install_basetools():
         path_pip = run('which pip3')
         assert path_pip == '/usr/local/bin/pip3',\
             "Make sure homebrew is in the bash path, got " + path_pip
+        run('pip3 install setuptools wheel')
         run('pip3 install virtualenv psycopg2 requests')
+        run('pip3 install paramiko future nose Fabric3')
     else:
-        sudo('apt-get install -y python3-virtualenv python3-pip python3-psycopg2')
-        sudo('apt-get install -y python3-requests git')
+        sudo('apt-get install -y git python3-virtualenv python3-pip')
+        sudo('apt-get install -y python3-psycopg2 python3-setuptools')
+        sudo('apt-get install -y python3-paramiko python3-future')
+        sudo('apt-get install -y python3-wheel python3-requests python3-nose')
+        sudo('pip3 install Fabric3')
         # sudo('apt-get install -y gettext')
 
 
