@@ -10,10 +10,12 @@ var path = require('path'),
     webpack_port = parseInt(process.env.WEBPACK_URL.split(':')[2]);
 
 base_config.entry.main = [
-  'webpack-dev-server/client?'+process.env.WEBPACK_URL,
+  'webpack-dev-server/client?' + process.env.WEBPACK_URL,
   'webpack/hot/only-dev-server',
   './js/app/index.js',
 ];
+
+base_config.output.publicPath = process.env.WEBPACK_URL + '/js/build';
 
 module.exports = _.extend(base_config, {
   devServer: {
