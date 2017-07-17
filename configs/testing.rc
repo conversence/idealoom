@@ -10,6 +10,7 @@ pipeline:main__pipeline = assembl
 pyramid.default_locale_name = en
 assembl_handle_exceptions = false
 tm.attempts = 2
+login_providers = google-oauth2
 debugtoolbar.enabled = false
 sqlalchemy.echo = True
 db_user = assembl_test
