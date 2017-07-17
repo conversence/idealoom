@@ -80,7 +80,8 @@ MarkupSafe==1.0
 meld3==1.0.2
 mock==2.0.0
 ndg_httpsclient==0.4.2
-nodeenv==1.1.4
+# Wait for https://github.com/ekalinin/nodeenv/issues/189
+nodeenv==1.1.2
 numpy==1.13.1
 #oauthlib==2.0.2
 oauth2client==4.1.2

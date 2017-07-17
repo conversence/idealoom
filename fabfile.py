@@ -754,7 +754,7 @@ def update_node(force_reinstall=False):
     """
     Install node and npm to a known-good version
     """
-    node_version_cmd_regex = re.compile('^v7\.2\.1')
+    node_version_cmd_regex = re.compile('^v8\.1\.4')
     with settings(warn_only=True), hide('running', 'stdout'):
         node_version_cmd_result = venvcmd("node --version")
     match = node_version_cmd_regex.match(node_version_cmd_result)
@@ -762,7 +762,7 @@ def update_node(force_reinstall=False):
         print(cyan('Upgrading node'))
         #Because otherwise node may be busy
         supervisor_process_stop('dev:webpack')
-        venvcmd("nodeenv --node=7.2.1 --npm=4.0.5 --python-virtualenv assembl/static")
+        venvcmd("nodeenv --node=8.1.4 --npm=5.0.3 --python-virtualenv assembl/static")
         with cd(get_node_base_path()):
             venvcmd("npm install reinstall -g", chdir=False)
     else:
