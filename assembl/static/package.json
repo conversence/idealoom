@@ -69,7 +69,7 @@
     "fixtures": "0.0.2",
     "imports-loader": "~0.7",
     "js-fixtures": "~1.5.3",
-    "jsdoc-rst-template": "git+https://github.com/assembl/jsdoc-rst-template",
+    "jsdoc-rst-template": "git+https://github.com/assembl/jsdoc-rst-template.git",
     "json-loader": "~0.5.4",
     "lolex": "~2.0",
     "mocha-loader": "~1.1.0",

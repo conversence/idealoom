@@ -1095,7 +1095,7 @@ class NotificationOnPostCreated(NotificationOnPost):
                        'notification': self,
                        'frontendUrls': FrontendUrls(discussion),
                        'ink_css': ink_css.read(),
-                       'assembl_notification_css': assembl_css.read().decode('utf_8'),
+                       'assembl_notification_css': assembl_css.read(),
                        'discriminants': {
                                             'url': URL_DISCRIMINANTS,
                                             'source': SOURCE_DISCRIMINANTS
