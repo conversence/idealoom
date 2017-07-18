@@ -874,7 +874,7 @@ def install_bower():
 
 def update_bower():
     with cd(get_node_base_path()):
-        venvcmd('npm update bower po2json', chdir=False)
+        venvcmd('npm update --no-save bower po2json', chdir=False)
 
 def get_node_base_path():
     return normpath(join(
@@ -927,7 +927,7 @@ def update_npm_requirements(force_reinstall=False):
         if force_reinstall:
             venvcmd('reinstall', chdir=False)
         else:
-            venvcmd('npm update', chdir=False)
+            venvcmd('npm update --no-save', chdir=False)
 
 
 @task
