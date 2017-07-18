@@ -764,9 +764,9 @@ def update_node(force_reinstall=False):
         print(cyan('Upgrading node'))
         #Because otherwise node may be busy
         supervisor_process_stop('dev:webpack')
-        venvcmd("nodeenv --node=8.1.4 --npm=5.0.3 --python-virtualenv assembl/static")
+        venvcmd("nodeenv --node=8.1.4 --npm=5.3.0 --python-virtualenv assembl/static")
         with cd(get_node_base_path()):
-            venvcmd("npm install reinstall -g", chdir=False)
+            venvcmd("npm install --no-save reinstall -g", chdir=False)
     else:
         print(green('Node version ok'))
 
@@ -869,7 +869,7 @@ def webservers_start():
 
 def install_bower():
     with cd(get_node_base_path()):
-        venvcmd('npm install bower po2json requirejs', chdir=False)
+        venvcmd('npm install --no-save bower po2json requirejs', chdir=False)
 
 
 def update_bower():
