@@ -36,8 +36,8 @@ def test_load_messages(
     accordeon_buttons = browser.find_by_css('.js_navigation')
     accordeon_buttons = {b['data-view']: b for b in accordeon_buttons}
     button = accordeon_buttons[u'debate']
-    # if not button.has_class('active'):
-    button.click()
+    if not button.has_class('active'):
+        button.click()
     assert browser.is_element_present_by_css('.allMessagesView .idealist-title', wait_time=10)
     all_messages_button = browser.find_by_css('.allMessagesView .idealist-title')
     sleep(0.1)  # the button is not immediately visible

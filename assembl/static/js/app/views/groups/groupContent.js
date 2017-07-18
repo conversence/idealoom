@@ -69,9 +69,13 @@ var groupContent = Marionette.View.extend({
       parent: this,
     });
   },
-  onRender:function(){
+  onRender: function(){
     if (!this.isDestroyed()) {
       this.showChildView('body', this.body);
+    }
+  },
+  onAttach: function(){
+    if (!this.isDestroyed()) {
       var navView = this.findViewByType(PanelSpecTypes.NAV_SIDEBAR);
       if (navView) {
         navView.setViewByName(this.model.get('navigationState'), null);
