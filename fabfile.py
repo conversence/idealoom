@@ -1023,12 +1023,13 @@ def install_basetools():
             "Make sure homebrew is in the bash path, got " + path_pip
         run('pip3 install setuptools wheel')
         run('pip3 install virtualenv psycopg2 requests')
-        run('pip3 install paramiko future nose Fabric3')
+        run('pip3 install paramiko future nose Fabric3 jinja2')
     else:
         sudo('apt-get install -y git python3-virtualenv python3-pip')
         sudo('apt-get install -y python3-psycopg2 python3-setuptools')
         sudo('apt-get install -y python3-paramiko python3-future')
         sudo('apt-get install -y python3-wheel python3-requests python3-nose')
+        sudo('apt-get install -y python3-jinja2')
         sudo('pip3 install Fabric3')
         # sudo('apt-get install -y gettext')
 
@@ -1060,12 +1061,10 @@ def install_builddeps():
         # They exist on macports, but do we want to install that?
         if not exists('/usr/local/bin/gfortran'):
             run('brew install gcc isl')
-        if not run('pip install -U jinja2', quiet=True):
-            sudo('pip install -U jinja2')
     else:
         sudo('apt-get install -y build-essential python3-dev pandoc')
         sudo('apt-get install -y automake bison flex gperf gawk')
-        sudo('apt-get install -y graphviz pkg-config gfortran python3-jinja2')
+        sudo('apt-get install -y graphviz pkg-config gfortran')
     execute(update_python_package_builddeps)
 
 
