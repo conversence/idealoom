@@ -547,14 +547,13 @@ def update_pip_requirements(force_reinstall=False):
     update external dependencies on remote host
     """
     print(cyan('Updating requirements using PIP'))
-    venvcmd('pip install -U "pip>=6" ')
-    env['req_file'] = "requirements_%d.txt" % sys.version_info.major
-
-    if force_reinstall:
-        cmd = "%(venvpath)s/bin/pip install --ignore-installed -r %(projectpath)s/%(req_file)s" % env
-    else:
-        cmd = "%(venvpath)s/bin/pip install -r %(projectpath)s/%(req_file)s" % env
-        run("yes w | %s" % cmd)
+    venvcmd('pip install -U "pip>=6"')
+    req_file = "requirements_%d.txt" % sys.version_info.major
+    force_flag = "--ignore-installed" if force_reinstall else ""
+    base_cmd = "%s/bin/pip install %s -r %s" % (
+        env['venvpath'], force_flag, env['projectpath'])
+    run("yes w | %s/requirements.txt" % base_cmd)
+    run("yes w | %s/%s" % (base_cmd, req_file))
 
 
 @task
