@@ -1,5 +1,6 @@
 import os
 import sys
+from itertools import chain
 
 from setuptools import setup, find_packages
 
@@ -11,8 +12,10 @@ from pip.download import PipSession
 from pip.req import parse_requirements
 
 # parse_requirements() returns generator of pip.req.InstallRequirement objects
-install_reqs = parse_requirements(
-    'requirements_%d.txt' % sys.version_info.major, session=PipSession())
+install_reqs = chain(
+    parse_requirements('requirements.txt', session=PipSession()),
+    parse_requirements('requirements_%d.txt' % sys.version_info.major,
+                       session=PipSession()))
 
 # requires is a list of requirement
 # e.g. ['django==1.5.1', 'mezzanine==1.4.6']
