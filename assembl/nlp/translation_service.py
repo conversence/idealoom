@@ -7,9 +7,11 @@ from abc import abstractmethod
 import urllib.request, urllib.error, urllib.parse
 from traceback import print_exc
 import re
+from collections import defaultdict
+from math import log
 
 import simplejson as json
-from langdetect import detect_langs
+from langdetect.detector_factory import init_factory
 from langdetect.detector import LangDetectException
 from sqlalchemy import inspect
 from pyramid.i18n import TranslationStringFactory
@@ -60,9 +62,10 @@ class TranslationService(object):
         return {"translation_notice": "Machine-translated",
                 "idiosyncrasies": {}}
 
-    def strlen_nourl(self, data):
+    @classmethod
+    def strlen_nourl(cls, data):
         # a fancy strlen that removes urls.
-        return len(self._url_regexp.sub(' ', data))
+        return len(cls._url_regexp.sub(' ', data))
 
     @property
     def discussion(self):
@@ -119,29 +122,40 @@ class TranslationService(object):
 
     def identify(
             self, text,
-            constrain_to_discussion_locales=SECURE_IDENTIFICATION_LIMIT):
+            constrain_locale_threshold=SECURE_IDENTIFICATION_LIMIT):
+        return self.base_identify(
+            text, self.discussion.discussion_locales,
+            constrain_locale_threshold=constrain_locale_threshold)
+
+    @classmethod
+    def base_identify(
+            cls, text, expected_locales,
+            constrain_locale_threshold=SECURE_IDENTIFICATION_LIMIT):
         "Try to identify locale of text. Boost if one of the expected locales."
+        # Note that it is unreliable for very short text; especially it does not
+        # give multiple probabilities when appropriate.
         if not text:
             return LocaleLabel.UNDEFINED, {LocaleLabel.UNDEFINED: 1}
-        len_nourl = self.strlen_nourl(text)
+        len_nourl = cls.strlen_nourl(text)
         if len_nourl < 5:
             return LocaleLabel.NON_LINGUISTIC
-        expected_locales = set(self.discussion.discussion_locales)
-        language_data = detect_langs(text)
-        if constrain_to_discussion_locales and (
-                len_nourl < constrain_to_discussion_locales):
-            data = [(x.prob, x.lang)
-                    for x in language_data
-                    if any_locale_compatible(
-                        x.lang,
-                        expected_locales)]
+        init_factory()
+        from langdetect.detector_factory import _factory as detector_factory
+        detector = detector_factory.create()
+        if constrain_locale_threshold and (
+                len_nourl < constrain_locale_threshold):
+            excluded_probability = 0
         else:
-            # boost with discussion locales.
-            data = [
-                (x.prob * (
-                    5 if x.lang
-                    in expected_locales else 1
-                ), x.lang) for x in language_data]
+            # Give less probability to excluded languages for shorter texts
+            excluded_probability = min(1, log(len_nourl) / 10)
+        expected_locales = {
+            Locale.extract_root_locale(locale) for locale in expected_locales}
+        priors = {loc: 1 if loc in expected_locales else excluded_probability
+                  for loc in detector.langlist}
+        detector.set_prior_map(priors)
+        detector.append(text)
+        language_data = detector.get_probabilities()
+        data = [(x.prob, x.lang) for x in language_data]
         data.sort(reverse=True)
         top = data[0][1] if (data and (data[0][0] > 0.5)
                              ) else LocaleLabel.UNDEFINED
@@ -149,11 +163,11 @@ class TranslationService(object):
 
     def confirm_locale(
             self, langstring_entry,
-            constrain_to_discussion_locales=SECURE_IDENTIFICATION_LIMIT):
+            constrain_locale_threshold=SECURE_IDENTIFICATION_LIMIT):
         try:
             lang, data = self.identify(
                 langstring_entry.value,
-                constrain_to_discussion_locales)
+                constrain_locale_threshold)
             data["service"] = self.__class__.__name__
             changed = langstring_entry.identify_locale(lang, data)
             if changed:
@@ -188,7 +202,7 @@ class TranslationService(object):
 
     def translate_lse(
             self, source_lse, target, retranslate=False,
-            constrain_to_discussion_locales=SECURE_IDENTIFICATION_LIMIT):
+            constrain_locale_threshold=SECURE_IDENTIFICATION_LIMIT):
         if not source_lse.value:
             # don't translate empty strings
             return source_lse
@@ -202,7 +216,7 @@ class TranslationService(object):
             return source_lse
         if (source_locale == LocaleLabel.UNDEFINED
                 and self.distinct_identify_step):
-            self.confirm_locale(source_lse, constrain_to_discussion_locales)
+            self.confirm_locale(source_lse, constrain_locale_threshold)
             # TODO: bail if identification failed
             source_locale = source_lse.locale
         # TODO: Handle script differences
@@ -237,9 +251,9 @@ class TranslationService(object):
                 lang = self.asPosixLocale(lang)
                 # What if detected language is not a discussion language?
                 if source_locale == LocaleLabel.UNDEFINED:
-                    if constrain_to_discussion_locales and (
+                    if constrain_locale_threshold and (
                             self.strlen_nourl(source_lse.value) <
-                            constrain_to_discussion_locales):
+                            constrain_locale_threshold):
                         if (not lang) or not any_locale_compatible(
                                 lang, self.discussion.discussion_locales):
                             self.set_error(
@@ -317,13 +331,13 @@ class DummyTranslationServiceTwoStepsWithErrors(
         DummyTranslationServiceTwoSteps):
     def identify(
             self, text,
-            constrain_to_discussion_locales=SECURE_IDENTIFICATION_LIMIT):
+            constrain_locale_threshold=SECURE_IDENTIFICATION_LIMIT):
         from random import random
         if random() > 0.9:
             raise RuntimeError()
         return super(DummyTranslationServiceTwoStepsWithErrors, self).identify(
             text,
-            constrain_to_discussion_locales=constrain_to_discussion_locales)
+            constrain_locale_threshold=constrain_locale_threshold)
 
     def translate(self, text, target, source=None, db=None):
         if not text:
