@@ -105,8 +105,8 @@ var scrollToElement = function(el, callback, margin, animate, watch) {
     console.warn("scrollUtils::scrollToElement(): Warning: element to scroll to not found, aborting");
     return;
     }
-  if(!_.isFunction(scrollableElement.size)) {
-    console.warn("scrollUtils::scrollToElement(): Warning: scrollableElement has no size, aborting");
+  if(!_.isFunction(scrollableElement.offset)) {
+    console.warn("scrollUtils::scrollToElement(): Warning: scrollableElement has no offset, aborting");
     return;
   } 
   if(scrollableElement.offset() === undefined) {
