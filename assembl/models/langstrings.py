@@ -417,7 +417,7 @@ class LangString(Base):
             return Locale.compatible(
                 target_locale,
                 Locale.extract_base_locale(e.locale_code))
-        entries = [(common_len(e), e) for e in self.entries]
+        entries = [(common_len(e), e) for e in self.entries if not e.error_code]
         entries.sort(reverse=True)
         if entries[0][0]:
             return entries[0][1]
