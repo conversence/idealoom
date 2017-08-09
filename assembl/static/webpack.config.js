@@ -2,6 +2,7 @@ var path = require('path'),
     glob = require('glob'),
     webpack = require('webpack'),
     _ = require('underscore'),
+    UglifyJSPlugin = require('uglifyjs-webpack-plugin'),
     sassStaticUrl = process.env.sassStaticUrl || '~/static/',
     ExtractTextPlugin = require('extract-text-webpack-plugin');
 
@@ -173,6 +174,7 @@ module.exports = {
     new webpack.optimize.CommonsChunkPlugin({
       names: ['infrastructure', 'manifest'] // Specify the common bundle's name.
     }),
+    new UglifyJSPlugin({ sourceMap: true }),
     new ExtractTextPlugin('[name].css'),
   ],
 };
