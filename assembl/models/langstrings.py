@@ -379,16 +379,9 @@ class LangString(Base):
                         entries = [e for e in entries if not e.error_code]
                     for pref in candidates:
                         if pref.translate:
-                            target_locale = pref.translate
-
-                            def common_len(e):
-                                return locale_compatible(
-                                    target_locale, e.locale)
-                            common_entries = [e for e in entries if common_len(e)]
-                            if common_entries:
-                                common_entries.sort(
-                                    key=common_len, reverse=True)
-                                return common_entries[0]
+                            best = self.closest_entry(pref.translate)
+                            if best:
+                                return best
                         else:
                             return entriesByLocale[pref.locale]
         # give up and give first original
@@ -418,6 +411,16 @@ class LangString(Base):
         if all((e.is_machine_translated for e in entries)):
             entries.extend(self.non_mt_entries())
         return entries
+
+    def closest_entry(self, target_locale):
+        def common_len(e):
+            return Locale.compatible(
+                target_locale,
+                Locale.extract_base_locale(e.locale_code))
+        entries = [(common_len(e), e) for e in self.entries]
+        entries.sort(reverse=True)
+        if entries[0][0]:
+            return entries[0][1]
 
     def remove_translations(self, forget_identification=True):
         for entry in list(self.entries):
