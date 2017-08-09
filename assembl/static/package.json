@@ -4,7 +4,7 @@
   "description": "Conversence online debate and synthesis platform",
   "main": "./js/app/index.js",
   "author": "Benoit Grégoire <benoitg@coeus.ca>, André Farzat <andrefarzat@gmail.com>, Gaby Hourlier <gaby.hourlier@gmail.com>, Marc-Antoine Parent <maparent@acm.org>",
-  "license": "AGPL",
+  "license": "AGPL-3.0",
   "bugs": {
     "url": "https://github.com/assembl/assembl/issues"
   },
