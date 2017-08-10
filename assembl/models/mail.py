@@ -1027,7 +1027,7 @@ class Email(ImportedPost):
         email_obj = email.message_from_string(
             bytes_to_native_str(self.imported_blob))
         locales = {part.get('Content-Language') for part in email_obj.walk()
-                   if part.get_content_type in (
+                   if part.get_content_type() in (
                        'text/plain', 'text/html', 'multipart/alternative')}
         locales.discard(None)
         if locales:
