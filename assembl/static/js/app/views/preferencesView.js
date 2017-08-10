@@ -587,10 +587,11 @@ var ListSubviewCollectionView = Marionette.CollectionView.extend({
     this.listView = options.listView;
     this.preferenceData = options.preferenceData;
   },
-  childViewOptions: function(model, index) {
+  childViewOptions: function(model) {
     // This is bizarrely called before initialize;
     // then we have the options in the object
-    var options = this.options;
+    var options = this.options,
+        index = this.collection.indexOf(model);
     if (options === undefined) {
       options = this;
     }
@@ -629,10 +630,11 @@ var DictSubviewCollectionView = Marionette.CollectionView.extend({
     this.listView = options.listView;
     this.preferenceData = options.preferenceData;
   },
-  childViewOptions: function(model, index) {
+  childViewOptions: function(model) {
     // This is bizarrely called before initialize;
     // then we have the options in the object
-    var options = this.options;
+    var options = this.options,
+        index = this.collection.indexOf(model);
     if (options === undefined) {
       options = this;
     }

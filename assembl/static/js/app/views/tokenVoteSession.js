@@ -915,9 +915,9 @@ var TokenVoteCollectionViewBody = Marionette.CollectionView.extend({
   },
   tagName: 'tbody',
   childView: TokenVoteItemView,
-  childViewOptions: function(model, index){
+  childViewOptions: function(model){
     return {
-      childIndex: index,
+      childIndex: this.collection.indexOf(model),
       parent: this.parent,
     };
   },

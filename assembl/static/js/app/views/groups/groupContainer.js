@@ -149,7 +149,7 @@ var groupContainer = Marionette.CollectionView.extend({
         });
     return groups;
   },
-  childViewOptions: function(child, index) {
+  childViewOptions: function(child) {
     return {
       groupContainer: this
     }

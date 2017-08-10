@@ -32,7 +32,7 @@ var groupContentBody = Marionette.CollectionView.extend({
   /**
    * Tell the panelWrapper which view to put in its contents
    */
-  childViewOptions: function(child, index) {
+  childViewOptions: function(child) {
     return {
       groupContent: this.parent,
       contentSpec: child,

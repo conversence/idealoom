@@ -205,7 +205,7 @@ var AnnouncementEditableCollectionView = Marionette.CollectionView.extend({
   },
   childView: AnnouncementEditableView,
   emptyView: AnnouncementListEmptyEditableView,
-  childViewOptions:  function(model, index) {
+  childViewOptions:  function(model) {
     return {
       objectAttachedTo: this.objectAttachedTo,
       collection: this.collection
