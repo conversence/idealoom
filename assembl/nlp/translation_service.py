@@ -195,10 +195,6 @@ class TranslationService(object):
                 lang, data = cls.base_identify(langstring_entry.value, expected_locales)
                 data["service"] = cls.__name__
             changed = langstring_entry.identify_locale(lang, data)
-            if changed:
-                langstring_entry.db.expire(langstring_entry, ["locale"])
-                langstring_entry.db.expire(
-                    langstring_entry.langstring, ["entries"])
             if lang == LocaleLabel.UNDEFINED:
                 pass  # say you can't identify
         except Exception as e:
