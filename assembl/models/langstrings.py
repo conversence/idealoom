@@ -149,18 +149,21 @@ class LangString(Base):
                 # create an add_entries method.
                 if ex_entry is entry:
                     continue
+                if ex_entry.value == entry.value:
+                    entry.delete()
+                    return ex_entry
                 ex_locale = ex_entry.locale
                 if entry_locale == ex_locale:
                     if ex_entry.is_machine_translated:
                         ex_entry.delete()
                     else:
                         if not allow_replacement:
-                            return False
+                            return None
                         ex_entry.is_tombstone = True
                         self.remove_translations_of(ex_entry)
                         self.db.expire(self, ["entries"])
             entry.langstring = self
-            return True
+            return entry
 
     def remove_translations_of(self, entry):
         """Remove all translations based on this code."""
@@ -183,7 +186,7 @@ class LangString(Base):
 
     def add_value(self, value, locale_code=LocaleLabel.UNDEFINED,
                   allow_replacement=True):
-        self.add_entry(LangStringEntry(
+        return self.add_entry(LangStringEntry(
             langstring=self, value=value,
             locale=locale_code),
             allow_replacement=allow_replacement)
@@ -611,15 +614,6 @@ class LangStringEntry(TombstonableMixin, Base):
         # Only works if the Locale is part of the join
         return cls.mt_trans_of_id != None
 
-    def change_value(self, new_value):
-        self.tombstone_date = datetime.utcnow()
-        new_version = self.__class__(
-            langstring_id=self.langstring_id,
-            locale=self.locale,
-            value=new_value)
-        self.db.add(new_version)
-        return new_version
-
     def identify_locale(self, locale_code, data, certainty=False):
         # A translation service proposes a data identification.
         # the information is deemed confirmed if it fits the initial
@@ -672,7 +666,7 @@ class LangStringEntry(TombstonableMixin, Base):
                 langstring.remove_translations_of(self)
                 # Re-adding to verify there's no conflict
                 added = langstring.add_entry(self, certainty)
-                if not added:
+                if added is None:
                     # We identified an entry with something that existed
                     # as a known original. Not sure what to do now,
                     # reverting just in case.
