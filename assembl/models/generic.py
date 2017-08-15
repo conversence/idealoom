@@ -475,7 +475,7 @@ class Content(TombstonableOriginMixin, DiscussionBoundBase):
         from assembl.tasks.translate import (
             translate_content, PrefCollectionTranslationTable)
         service = self.discussion.translation_service()
-        if service:
+        if service.canTranslate is not None:
             translations = PrefCollectionTranslationTable(
                 service, pref_collection)
             translate_content(
@@ -518,32 +518,28 @@ class Content(TombstonableOriginMixin, DiscussionBoundBase):
                 name=QUADNAMES.post_external_link_map)
         ]
 
-    def language_priors(self):
-        from .langstrings import Locale
+    def language_priors(self, translation_service):
         discussion = self.discussion
         discussion_locales = discussion.discussion_locales
-        return {Locale.extract_root_locale(loc): 1
+        return {translation_service.asKnownLocale(loc): 1
                 for loc in discussion_locales}
 
     def guess_languages(self):
-        from ..nlp.translation_service import TranslationService
         if self.discussion is None:
             self.discussion = Discussion.get(self.discussion_id)
         assert self.discussion
         ts = self.discussion.translation_service()
-        priors = self.language_priors()
+        priors = self.language_priors(ts)
         if self.body:
             body_original = self.body.first_original()
-            TranslationService.confirm_locale_c(
-                body_original, self.discussion, ts, priors)
+            ts.confirm_locale(body_original, priors)
         if self.subject:
             if self.body:
                 # boost the body's language
                 priors = {k: v * 0.8 for (k, v) in priors.items()}
                 priors[body_original.locale_code] = 1
             subject_original = self.subject.first_original()
-            TranslationService.confirm_locale_c(
-                subject_original, self.discussion, ts, priors)
+            ts.confirm_locale(subject_original, priors)
 
     widget_idea_links = relationship('IdeaContentWidgetLink')
 

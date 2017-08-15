@@ -52,7 +52,7 @@ def translate_content(
     from ..models import LocaleLabel
     discussion = content.discussion
     service = service or discussion.translation_service()
-    if not service:
+    if service.canTranslate is None:
         return
     if translation_table is None:
         translation_table = DiscussionPreloadTranslationTable(
@@ -151,7 +151,7 @@ def translate_discussion(
     from ..models import Discussion
     discussion = Discussion.get(discussion_id)
     service = discussion.translation_service()
-    if not service:
+    if service.canTranslate is None:
         return
     if translation_table is None:
         translation_table = DiscussionPreloadTranslationTable(
