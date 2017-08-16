@@ -64,7 +64,7 @@ jupyter-client==5.1.0
 jupyter-core==4.3.0
 -e git+https://github.com/benoitg/jwzthreading.git@master#egg=jwzthreading
 kombu==4.1.0
-langdetect==1.0.7
+-e git+https://github.com/maparent/langdetect.git@no_sample#egg=langdetect
 lingua==4.13
 lxml==3.8.0
 Mako==1.0.7
