@@ -17,6 +17,7 @@ def discussion(request, test_session, default_preferences,
     test_session.flush()
     d.apply_side_effects_without_json(
         request=test_adminuser_webrequest._base_pyramid_request)
+    d.discussion_locales = ['en', 'fr', 'de']
     create_default_permissions(d)
     test_session.flush()
 
