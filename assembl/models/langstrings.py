@@ -474,10 +474,10 @@ class LangString(Base):
     def closest_entry(self, target_locale):
         def common_len(e):
             return locale_compatible(target_locale, e.locale)
-        entries = [(common_len(e), e) for e in self.entries if not e.error_code]
+        entries = [(common_len(e), id(e), e) for e in self.entries if not e.error_code]
         entries.sort(reverse=True)
         if entries[0][0]:
-            return entries[0][1]
+            return entries[0][2]
 
     def remove_translations(self, forget_identification=True):
         for entry in list(self.entries):
@@ -507,7 +507,7 @@ if LangString.using_virtuoso:
 
 
 class LangStringEntry(TombstonableMixin, Base):
-    """A string bound to a given :py:class:`Locale`. Many of those form a :py:class:`LangString`"""
+    """A string bound to a given locale. Many of those form a :py:class:`LangString`"""
     __tablename__ = "langstring_entry"
     __table_args__ = (
         UniqueConstraint("langstring_id", "locale", "tombstone_date"),
