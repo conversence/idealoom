@@ -784,7 +784,7 @@ class SKLearnClusteringSemanticAnalysis(SemanticAnalysisData):
         labels = r.labels_
         n_clusters_raw = len(set(labels))
         # n_clusters_ = n_clusters_raw - (1 if -1 in labels else 0)
-        silhouette_score = None
+        silhouette_score = 0
         if n_clusters_raw > 1:
             silhouette_score = metrics.silhouette_score(
                 model_matrix, labels, metric=metric)

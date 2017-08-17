@@ -108,7 +108,7 @@ class ReversibleStemmer(object):
         if not exists(self.fname):
             return
         try:
-            with open(self.fname) as f:
+            with open(self.fname, 'b') as f:
                 ob = pickle.load(f)
                 if isinstance(ob, dict):
                     self.reverse = ob
@@ -116,7 +116,7 @@ class ReversibleStemmer(object):
             pass
 
     def save(self):
-        with open(self.fname, 'w') as f:
+        with open(self.fname, 'wb') as f:
             pickle.dump(self.reverse, f)
 
     def stemWord(self, word):
