@@ -1,4 +1,3 @@
-from builtins import str
 from pyramid.view import view_config
 from pyramid.httpexceptions import (HTTPBadRequest, HTTPNotFound)
 from pyramid.response import Response
