@@ -6,6 +6,7 @@ var path = require('path'),
     _ = require('underscore'),
     ExtractTextPlugin = require("extract-text-webpack-plugin"),
     base_config = require('./webpack.config.js'),
+    DashboardPlugin = require('webpack-dashboard/plugin'),
     webpackHost = process.env.WEBPACK_URL.split('://')[1].split(':')[0],
     webpack_port = parseInt(process.env.WEBPACK_URL.split(':')[2]);
 
@@ -34,5 +35,6 @@ module.exports = _.extend(base_config, {
         names: ['infrastructure', 'manifest'] // Specify the common bundle's name.
       }),
       new ExtractTextPlugin('[name].css'),
+      new DashboardPlugin(),
   ],
 });
