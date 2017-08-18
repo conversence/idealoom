@@ -136,6 +136,13 @@ var cKEditorField = Marionette.View.extend({
     this._viewIsAlreadyShown = false;
   },
 
+  onDomRemove: function() {
+    if (this._viewIsAlreadyShown) {
+      // onDetach seems not to happen?
+      this.onDetach();
+    }
+  },
+
   requestEllipsis: function() {
     var that = this;
     setTimeout(function() {

@@ -186,8 +186,7 @@ var SynthesisPanel = AssemblPanel.extend({
       function renderSynthesis(ideasCollection, ideaLinksCollection) {
         // Getting the scroll position
         var body = that.$('.body-synthesis'),
-            ideasRegion = that.getRegion("ideas"),
-        y = body.get(0) ? body.get(0).scrollTop : 0,
+            y = body.get(0) ? body.get(0).scrollTop : 0,
             synthesis_is_published = that.model.get("published_in_post"),
             rootIdea = that.ideas.getRootIdea();
 
@@ -215,7 +214,8 @@ var SynthesisPanel = AssemblPanel.extend({
           }
         });
 
-        ideasRegion.show(synthesisIdeaRootsView);
+        that.detachChildView('ideas');
+        that.showChildView('ideas', synthesisIdeaRootsView);
         body.get(0).scrollTop = y;
         if (canEdit && !synthesis_is_published) {
           var titleField = new EditableField({
@@ -250,7 +250,7 @@ var SynthesisPanel = AssemblPanel.extend({
           that.$('.synthesisPanel-introduction').html(that.model.get('introduction'));
           that.$('.synthesisPanel-conclusion').html(that.model.get('conclusion'));
         }
-        
+
         Ctx.initTooltips(that.$el);
 
         if (that.getContainingGroup().model.get('navigationState') == "synthesis") {
@@ -262,20 +262,20 @@ var SynthesisPanel = AssemblPanel.extend({
           }
         }
 
-      }
+    }
 
-      if (this.model.get('is_next_synthesis')) {
-        collectionManager.getAllIdeaLinksCollectionPromise().then(function (ideaLinks) {
-            renderSynthesis(that.synthesisIdeas, ideaLinks);
-        });
-      } else {
-        var synthesisIdeaLinksCollection = new ideaLink.Collection(that.model.get("idea_links"), {parse: true});
-        synthesisIdeaLinksCollection.collectionManager = collectionManager;
-        renderSynthesis(this.synthesisIdeas, synthesisIdeaLinksCollection);
-      }
+    if (this.model.get('is_next_synthesis')) {
+      collectionManager.getAllIdeaLinksCollectionPromise().then(function (ideaLinks) {
+          renderSynthesis(that.synthesisIdeas, ideaLinks);
+      });
+    } else {
+      var synthesisIdeaLinksCollection = new ideaLink.Collection(that.model.get("idea_links"), {parse: true});
+      synthesisIdeaLinksCollection.collectionManager = collectionManager;
+      renderSynthesis(this.synthesisIdeas, synthesisIdeaLinksCollection);
+    }
 
-      return this;
-    },
+    return this;
+  },
 
   /* This will show/hide the checkboxes next to each idea of the tables of ideas when a synthesis creation panel is present/absent. */
   propagateVisibility: function(isVisible) {
