@@ -10,14 +10,15 @@ var Marionette = require('backbone.marionette'),
     Ctx = require('../../common/context.js'),
     CollectionManager = require('../../common/collectionManager.js'),
     Roles = require('../../utils/roles.js'),
+    LoaderView = require('../loaderView.js'),
     Permissions = require('../../utils/permissions.js');
 
-var userNavigationMenu = Marionette.View.extend({
+var userNavigationMenu = LoaderView.extend({
   constructor: function userNavigationMenu() {
-    Marionette.View.apply(this, arguments);
+    LoaderView.apply(this, arguments);
   },
 
-  template: '#tmpl-loader',
+  template: '#tmpl-userNavigationMenu',
   tagName: 'nav',
   className: 'sidebar-nav',
   selectedSection: undefined,
@@ -25,6 +26,7 @@ var userNavigationMenu = Marionette.View.extend({
   initialize: function(options) {
     var that = this,
         collectionManager = new CollectionManager();
+    this.setLoading(true);
 
     if ( "selectedSection" in options ){
       this.selectedSection = options.selectedSection;
@@ -32,14 +34,14 @@ var userNavigationMenu = Marionette.View.extend({
     collectionManager.getLocalRoleCollectionPromise().then(function(localRoles) {
       if(!that.isDestroyed()) {
         that.localRoles = localRoles;
-        that.template = '#tmpl-userNavigationMenu';
+        that.setLoading(false);
         that.render();
       }
     });
   },
 
   serializeData: function() {
-    if(this.template === '#tmpl-loader') {
+    if(this.isLoading()) {
       return {};
     }
     return {

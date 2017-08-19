@@ -12,6 +12,7 @@ var Marionette = require('backbone.marionette'),
     Types = require('../utils/types.js'),
     Growl = require('../utils/growl.js'),
     LangString = require('../models/langstring.js'),
+    LoaderView = require('./loaderView.js'),
     LanguagePreference = require('../models/languagePreference.js');
 
 /**
@@ -121,26 +122,23 @@ var LanguageSelectionView = Marionette.View.extend({
     },
 
     serializeData: function(){
-        if ( this.template === "#tmpl-message_translation_question_selection" ){
-            return {
-                supportedLanguages: Ctx.localesAsSortedList(),
-                translatedTo: this.translatedTo,
-                question: i18n.sprintf(i18n.gettext("Select the language you wish to translate %s to:"),
-                    this.nameOfLocale(LangString.LocaleUtils.stripCountry(this.translatedFrom))),
-                translatedTo: this.translatedTo,
-                translatedFrom: this.translatedFrom
-            };
-        }
-        else return {};
+        return {
+            supportedLanguages: Ctx.localesAsSortedList(),
+            translatedTo: this.translatedTo,
+            question: i18n.sprintf(i18n.gettext("Select the language you wish to translate %s to:"),
+                this.nameOfLocale(LangString.LocaleUtils.stripCountry(this.translatedFrom))),
+            translatedTo: this.translatedTo,
+            translatedFrom: this.translatedFrom
+        };
     }
 });
 
-var TranslationView = Marionette.View.extend({
+var TranslationView = LoaderView.extend({
   constructor: function TranslationView() {
-    Marionette.View.apply(this, arguments);
+    LoaderView.apply(this, arguments);
   },
 
-    template: '#tmpl-loader',
+    template: '#tmpl-message_translation_question',
 
     ui: {
         langChoiceConfirm: '.js_language-of-choice-confirm',
@@ -164,6 +162,7 @@ var TranslationView = Marionette.View.extend({
     },
 
     initialize: function(options){
+        this.setLoading(true);
         this.message = options.messageModel;
         this.messageView = options.messageView;
 
@@ -196,7 +195,7 @@ var TranslationView = Marionette.View.extend({
                     that.translatedFrom = translatedFromLocale;
                     that.preferredTarget = preferredTarget;
                     that.languagePreferences = preferences; //Should be sorted already
-                    that.template = '#tmpl-message_translation_question';
+                    that.setLoading(false);
                     that.render();
                 }
             });
@@ -284,7 +283,7 @@ var TranslationView = Marionette.View.extend({
     },
 
     serializeData: function(){
-        if (this.template !== "#tmpl-loader") {
+        if (this.isLoading()) {
             var translationQuestion, noAnswer, yesAnswer, toAnother;
             if (this.preferredTarget) {
                 translationQuestion = i18n.sprintf(

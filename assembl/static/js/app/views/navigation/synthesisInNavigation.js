@@ -16,20 +16,22 @@ var Marionette = require('backbone.marionette'),
     i18n = require('../../utils/i18n.js'),
     PanelSpecTypes = require('../../utils/panelSpecTypes.js'),
     scrollUtils = require('../../utils/scrollUtils.js'),
+    LoaderView = require('../loaderView.js'),
     Analytics = require('../../internal_modules/analytics/dispatcher.js');
 
-var SynthesisItem = Marionette.View.extend({
+var SynthesisItem = LoaderView.extend({
   constructor: function SynthesisItem() {
-    Marionette.View.apply(this, arguments);
+    LoaderView.apply(this, arguments);
   },
 
-  template: '#tmpl-loader',
+  template: '#tmpl-synthesisItemInNavigation',
   initialize: function(options) {
     var that = this;
+    this.setLoading(true);
     this.panel = options.panel;
     this.model.collection.collectionManager.getUserLanguagePreferencesPromise(Ctx).then(function(ulp) {
         that.translationData = ulp.getTranslationData();
-        that.template = '#tmpl-synthesisItemInNavigation';
+        that.setLoading(false);
         that.render();
     });
   },
@@ -37,7 +39,7 @@ var SynthesisItem = Marionette.View.extend({
     'click .js_synthesisList': 'onSelectedSynthesis'
   },
   serializeData: function() {
-    if (this.template == "#tmpl-loader") {
+    if (this.isLoading()) {
         return {};
     }
     return {
@@ -88,7 +90,7 @@ var SynthesisInNavigationPanel = AssemblPanel.extend({
     AssemblPanel.apply(this, arguments);
   },
 
-  template: '#tmpl-loader',
+  template: '#tmpl-synthesisInNavigationPanel',
   panelType: PanelSpecTypes.NAVIGATION_PANEL_SYNTHESIS_SECTION,
   className: 'synthesisNavPanel',
   ui: {
@@ -102,12 +104,13 @@ var SynthesisInNavigationPanel = AssemblPanel.extend({
     AssemblPanel.prototype.initialize.apply(this, arguments);
     var that = this,
         collectionManager = new CollectionManager();
+    this.setLoading(true);
 
     Promise.join(collectionManager.getAllMessageStructureCollectionPromise(),
       collectionManager.getAllSynthesisCollectionPromise(),
       function(allMessageStructureCollection, allSynthesisCollection) {
       if(!that.isDestroyed()) {
-        that.template = '#tmpl-synthesisInNavigationPanel';
+        that.setLoading(false);
         that.allMessageStructureCollection = allMessageStructureCollection;
         that.allSynthesisCollection = allSynthesisCollection;
         that.render();
@@ -164,7 +167,7 @@ var SynthesisInNavigationPanel = AssemblPanel.extend({
     var that = this,
     collectionManager = new CollectionManager();
 
-    if (this.template !== '#tmpl-loader' && !this.isDestroyed()) {
+    if (!this.isLoading() && !this.isDestroyed()) {
         this.displaySynthesisList(this.allMessageStructureCollection, this.allSynthesisCollection);
         this.listenTo(this.allSynthesisCollection, 'add reset', function() {
           //console.log("Re-displaying synthesis list from collection update...", allSynthesisCollection.length);

@@ -9,6 +9,7 @@ var Marionette = require('backbone.marionette'),
     i18n = require('../utils/i18n.js'),
     Permissions = require('../utils/permissions.js'),
     $ = require('jquery'),
+    LoaderView = require('./loaderView.js'),
     AgentViews = require('./agent.js');
 
 
@@ -16,13 +17,13 @@ var Marionette = require('backbone.marionette'),
 /**
  * @class app.views.message.MessageDeletedByUserView
  */
-var MessageDeletedByUserView = Marionette.View.extend({
+var MessageDeletedByUserView = LoaderView.extend({
   constructor: function MessageDeletedByUserView() {
-    Marionette.View.apply(this, arguments);
+    LoaderView.apply(this, arguments);
   },
   className: 'message message-deleted',
 
-  template: "#tmpl-loader",
+  template: "#tmpl-messageDeletedByUser",
 
   ui: {
     avatar: ".js_avatarContainer",
@@ -39,6 +40,7 @@ var MessageDeletedByUserView = Marionette.View.extend({
 
   initialize: function(options) {
     var that = this;
+    this.setLoading(true);
 
     if ("subject" in options){
       this.subject = options.subject;
@@ -56,7 +58,7 @@ var MessageDeletedByUserView = Marionette.View.extend({
     this.model.getCreatorPromise().then(function(creator){
       if(!that.isDestroyed()) {
         that.creator = creator;
-        that.template = "#tmpl-messageDeletedByUser";
+        that.setLoading(false);
         that.render();
       }
     });
@@ -76,7 +78,7 @@ var MessageDeletedByUserView = Marionette.View.extend({
   onRender: function(){
     this.$el.attr("id", "message-" + this.model.get('@id'));
     
-    if (this.template === "#tmpl-loader") {
+    if (this.isLoading()) {
       return {};
     }
 

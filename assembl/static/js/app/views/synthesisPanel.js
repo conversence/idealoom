@@ -31,8 +31,7 @@ var SynthesisPanel = AssemblPanel.extend({
     AssemblPanel.apply(this, arguments);
   },
 
-  template: '#tmpl-loader',
-  realTemplate: '#tmpl-synthesisPanel',
+  template: '#tmpl-synthesisPanel',
   panelType: PanelSpecTypes.SYNTHESIS_EDITOR,
   className: 'synthesisPanel',
   gridSize: AssemblPanel.prototype.SYNTHESIS_PANEL_GRID_SIZE,
@@ -44,9 +43,10 @@ var SynthesisPanel = AssemblPanel.extend({
     var that = this,
         collectionManager = new CollectionManager();
 
-    if (obj.realTemplate) {
-      this.realTemplate = obj.realTemplate;
+    if (obj.template) {
+      this.template = obj.template;
     }
+    this.setLoading(true);
 
     if ( "showAsMessage" in obj ){
       this.showAsMessage = obj.showAsMessage;
@@ -80,7 +80,7 @@ var SynthesisPanel = AssemblPanel.extend({
                   //console.log("RE_RENDER FROM CHANGE ON allIdeaLinksCollection");
                   that.render()
                 });
-                that.template = that.realTemplate;
+                that.setLoading(false);
 
                 that.render();
               }
@@ -170,7 +170,7 @@ var SynthesisPanel = AssemblPanel.extend({
       if (this.isDestroyed()) {
         return;
       }
-      if (this.template !== this.realTemplate) {
+      if (this.isLoading()) {
         return;
       }
 

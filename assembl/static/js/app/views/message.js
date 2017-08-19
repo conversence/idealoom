@@ -37,6 +37,7 @@ var Marionette = require('backbone.marionette'),
     ConfirmModal = require('./confirmModal.js'),
     Growl = require('../utils/growl.js'),
     Widget = require('../models/widget.js'),
+    LoaderView = require('./loaderView.js'),
     MessageModel = require('../models/message.js');
 
 var MIN_TEXT_TO_TOOLTIP = 5,
@@ -48,12 +49,12 @@ var MIN_TEXT_TO_TOOLTIP = 5,
  * @class app.views.message.IdeaClassificationNameListView
  * Classification view that is shown in the underneath each message
  */
-var IdeaClassificationNameListView = Marionette.View.extend({
+var IdeaClassificationNameListView = LoaderView.extend({
   constructor: function IdeaClassificationNameListView() {
-    Marionette.View.apply(this, arguments);
+    LoaderView.apply(this, arguments);
   },
 
-  template: '#tmpl-loader',
+  template: '#tmpl-ideaClassificationInMessage',
 
   ui: {
     'idea': '.js_idea-classification-idea'
@@ -65,6 +66,7 @@ var IdeaClassificationNameListView = Marionette.View.extend({
 
 
   initialize: function(options){
+    this.setLoading(true);
     var cm = new CollectionManager(),
         that = this,
         ideaContentLinks = cm.getIdeaContentLinkCollectionOnMessage(this.model);
@@ -139,7 +141,7 @@ var IdeaClassificationNameListView = Marionette.View.extend({
               that.messageView.removeIdeaClassificationView();
             }
             else {
-              that.template = "#tmpl-ideaClassificationInMessage"
+              that.setLoading(false);
               that.render();
             }
           }
@@ -152,7 +154,7 @@ var IdeaClassificationNameListView = Marionette.View.extend({
   },
 
   serializeData: function(){
-    if (this.template === '#tmpl-loader'){
+    if (this.isLoading()){
       return {};
     }
 
@@ -210,12 +212,12 @@ var IdeaClassificationNameListView = Marionette.View.extend({
 /**
  * @class app.views.message.MessageView
  */
-var MessageView = Marionette.View.extend({
+var MessageView = LoaderView.extend({
   constructor: function MessageView() {
-    Marionette.View.apply(this, arguments);
+    LoaderView.apply(this, arguments);
   },
 
-  template: '#tmpl-loader',
+  template: '#tmpl-message',
   availableMessageViewStyles: Ctx.AVAILABLE_MESSAGE_VIEW_STYLES,
   /**
    * @type {string}
@@ -271,6 +273,7 @@ var MessageView = Marionette.View.extend({
    * @param {MessageModel} obj: the model
    */
   initialize: function(options) {
+    this.setLoading(true);
     var that = this;
 
     /*this.listenTo(this, "all", function(eventName) {
@@ -372,11 +375,11 @@ var MessageView = Marionette.View.extend({
   isCompleteDataLoaded: function(){
     var that = this;
 
-    if (this.template === '#tmpl-message' && this.model.get('@view') ===  'default') {
+    if (!this.isLoading() && this.model.get('@view') ===  'default') {
       return true;
     }
     else {
-      this.template = '#tmpl-loader';
+      this.setLoading(true);
       Promise.join(
           this.model.getCreatorPromise(),
           this.model.collection.collectionManager.getUserLanguagePreferencesPromise(Ctx),
@@ -391,7 +394,7 @@ var MessageView = Marionette.View.extend({
               that.initiateTranslationState(ulp);
               that.processContent();
 
-              that.template = '#tmpl-message';
+              that.setLoading(false);
               that.render();
             }
         });
@@ -589,7 +592,7 @@ var MessageView = Marionette.View.extend({
   },
 
   serializeData: function() {
-    if (this.template == "#tmpl-loader") {
+    if (this.isLoading()) {
         return {};
     }
     this.processContent();
@@ -738,18 +741,6 @@ var MessageView = Marionette.View.extend({
       return likeFound;
     },
 
-  render: function() {
-    //This code was used to get the Marionette Render method.
-    //TODO: Check to see if this is still valid code. AY
-    var base_object = Object.getPrototypeOf(this),
-        base_render = base_object.render;
-    while (Object.getPrototypeOf(base_object).render === base_render) {
-      base_object = Object.getPrototypeOf(base_object);
-    }
-
-    Object.getPrototypeOf(base_object).render.apply(this, arguments);
-  },
-
   onBeforeRender: function(){
     this.isCompleteDataLoaded();
     //Check if the message is moderated
@@ -766,7 +757,7 @@ var MessageView = Marionette.View.extend({
    * @returns {MessageView}
    */
   onRender: function() {
-    if (this.template == "#tmpl-loader") {
+    if (this.isLoading()) {
         return {};
     }
 

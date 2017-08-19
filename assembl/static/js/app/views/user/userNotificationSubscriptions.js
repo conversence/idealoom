@@ -17,6 +17,7 @@ var Marionette = require('backbone.marionette'),
     Roles = require('../../utils/roles.js'),
     Accounts = require('../../models/accounts.js'),
     UserNavigationMenu = require('./userNavigationMenu.js'),
+    LoaderView = require('../loaderView.js'),
     Analytics = require('../../internal_modules/analytics/dispatcher.js');
 
 /**
@@ -40,9 +41,8 @@ var Notification = Marionette.View.extend({
       });
 
       if (this.model === 'undefined') {
-        this.template = "#tmpl-loader";
+        this.setLoading(true);
       }
-
     },
   ui: {
       currentSubscribeCheckbox: ".js_userNotification"

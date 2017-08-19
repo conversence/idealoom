@@ -15,6 +15,7 @@ var Marionette = require('backbone.marionette'),
     Moment = require('moment'),
     CollectionManager = require('../common/collectionManager.js'),
     Social = require('../models/social.js'),
+    LoaderView = require('./loaderView.js'),
     Source = require('../models/sources.js');
 
 var _allFacebookPermissions = undefined;
@@ -586,15 +587,15 @@ var errorView = Marionette.View.extend({
   }
 });
 
-var groupView = Marionette.View.extend({
+var groupView = LoaderView.extend({
   constructor: function groupView() {
-    Marionette.View.apply(this, arguments);
+    LoaderView.apply(this, arguments);
   },
 
-  template: "#tmpl-loader",
+  template: "#tmpl-exportPostModal-fb-group",
 
-  //template: '#tmpl-exportPostModal-fb-group',
   initialize: function(options) {
+      this.setLoading(true);
       this.bundle = options.bundle;
       this.vent = options.vent;
       var that = this;
@@ -607,7 +608,7 @@ var groupView = Marionette.View.extend({
         var cleanData = uniqify(groupData);
         that.userGroups = cleanData;
 
-        that.template = '#tmpl-exportPostModal-fb-group';
+        that.setLoading(false);
         that.vent.trigger('clearError');
         that.render();
       });
@@ -646,15 +647,14 @@ var groupView = Marionette.View.extend({
     }
 });
 
-var pageView = Marionette.View.extend({
+var pageView = LoaderView.extend({
   constructor: function pageView() {
-    Marionette.View.apply(this, arguments);
+    LoaderView.apply(this, arguments);
   },
 
-  template: '#tmpl-loader',
-
-  //template: '#tmpl-exportPostModal-fb-page',
+  template: '#tmpl-exportPostModal-fb-page',
   initialize: function(options) {
+      this.setLoading(true);
       this.bundle = options.bundle;
       this.vent = options.vent;
       var that = this;
@@ -677,7 +677,7 @@ var pageView = Marionette.View.extend({
           var cleanedPages = uniqify(pageData);
           that.pages = cleanedPages;
 
-          that.template = '#tmpl-exportPostModal-fb-page';
+          that.setLoading(false);
           that.render();
           that.vent.trigger('clearError');
         });
@@ -754,13 +754,11 @@ var exportPostForm = Marionette.View.extend({
     Marionette.View.apply(this, arguments);
   },
 
-  template: '#tmpl-loader',
-
-  //template: "#tmpl-exportPostModal-fb",
+  template: "#tmpl-exportPostModal-fb",
   regions: {
     subform: '.fb-targeted-form'
   },
-  
+
   ui: {
     test: '.fb-js_test_area',
     supportedList: '.js_fb-supportedList',
@@ -773,6 +771,7 @@ var exportPostForm = Marionette.View.extend({
     'click @ui.test': 'test'
   },
   initialize: function(options) {
+    this.setLoading(true);
     // this.token = options.token;
     this.exportedMessage = options.exportedMessage;
     this.vent = options.vent; //Event Aggregator
@@ -797,14 +796,14 @@ var exportPostForm = Marionette.View.extend({
       }).then(function(d){
         that.topic = d.get('topic');
         that.desc = i18n.sprintf(i18n.gettext('%s is a collective intelligence tool designed to enable open, democratic discussions that lead to idea generation and innovation.'), platform_name);
-        that.template = '#tmpl-exportPostModal-fb';
+        that.setLoading(false);
         that.render();
         that.vent.trigger('clearError');
       });
   },
 
   serializeData: function() {
-    if (this.template == "#tmpl-loader") {
+    if (this.isLoading()) {
         return {};
     }
     return {

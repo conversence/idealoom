@@ -37,7 +37,7 @@ var MessageList = BaseMessageList.extend({
     BaseMessageList.apply(this, arguments);
   },
 
-  message_template: '#tmpl-messageList',
+  template: '#tmpl-messageList',
   panelType: PanelSpecTypes.MESSAGE_LIST,
   className: 'panel messageList',
   lockable: true,
@@ -76,6 +76,7 @@ var MessageList = BaseMessageList.extend({
 
   initialize: function(options) {
     //console.log("messageList::initialize()");
+    this.setLoading(true);
     BaseMessageList.prototype.initialize.apply(this, arguments);
     var that = this;
     this.isUsingExpertView = (Ctx.getCurrentInterfaceType() === Ctx.InterfaceTypes.EXPERT); // TODO?: have a dedicated flag
@@ -331,16 +332,16 @@ var MessageList = BaseMessageList.extend({
       BaseMessageList.prototype.onBeforeRender.apply(this, arguments);
 
       if (this.currentQuery.isQueryValid()) {
-        this.template = this.message_template;
+        this.setLoading(false);
       }
       else if (this.getGroupState().get('currentIdea') !== null) {
-        this.template = this.message_template;
+        this.setLoading(false);
 
         //We will sync with current idea in onRender
       }
       else {
         //Display the help message to select an idea
-        this.template = '#tmpl-helperDebate';
+        this.setLoading(false, '#tmpl-helperDebate');
 
         //This used to be conditional, but makes no sense now as there would be 
         // nothing to display unless we chose to diaplay all messages

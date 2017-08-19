@@ -7,7 +7,7 @@
 var AllMessagesInIdeaListView = require('./allMessagesInIdeaList.js'),
     OrphanMessagesInIdeaListView = require('./orphanMessagesInIdeaList.js'),
     SynthesisInIdeaListView = require('./synthesisInIdeaList.js'),
-    LoaderView = require('./loader.js'),
+    Loader = require('./loader.js'),
     Permissions = require('../utils/permissions.js'),
     ObjectTreeRenderVisitor = require('./visitors/objectTreeRenderVisitor.js'),
     IdeaSiblingChainVisitor = require('./visitors/ideaSiblingChainVisitor'),
@@ -37,7 +37,7 @@ var IdeaList = AssemblPanel.extend({
     AssemblPanel.apply(this, arguments);
   },
 
-  template: '#tmpl-loader',
+  template: '#tmpl-ideaList',
   panelType: PanelSpecTypes.TABLE_OF_IDEAS,
   className: 'ideaList',
   regions: {
@@ -91,6 +91,7 @@ var IdeaList = AssemblPanel.extend({
   },
 
   initialize: function(options) {
+    this.setLoading(true);
     AssemblPanel.prototype.initialize.apply(this, arguments);
     var that = this,
         collectionManager = new CollectionManager();
@@ -143,7 +144,7 @@ var IdeaList = AssemblPanel.extend({
       defaultTableOfIdeasCollapsedStateFetchPromise, // now that we have the collapsed state of each idea, we can (re)render the table of ideas
       function(allIdeasCollection, allIdeaLinksCollection, collapsedState, defaultCollapsedState) {
         if(!that.isDestroyed()) {
-          that.template = '#tmpl-ideaList';
+          that.setLoading(false);
           that.render();
         }
       }
@@ -317,7 +318,7 @@ var IdeaList = AssemblPanel.extend({
         return idea != rootIdea && !idea.hidden;
       }
 
-      if (this.template != '#tmpl-loader') {
+      if (!this.isLoading()) {
         var analytics = Analytics.getInstance();
         analytics.trackEvent(analytics.events.NAVIGATION_OPEN_DEBATE_SECTION);
         if (!this.allIdeasCollection || !this.allIdeaLinksCollection) {
@@ -359,7 +360,7 @@ var IdeaList = AssemblPanel.extend({
         this.addLabelToMostRecentIdeas(this.allIdeasCollection, view_data);
 
 
-        that.showChildView('ideaView', new LoaderView());
+        that.showChildView('ideaView', new Loader());
 
         Ctx.getCurrentSynthesisDraftPromise().then(function(synthesis) {
           //console.log("About to set ideas on ideaList",that.cid, "with panelWrapper",that.getPanelWrapper().cid, "with group",that.getContainingGroup().cid);

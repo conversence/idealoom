@@ -13,15 +13,16 @@ var Marionette = require('backbone.marionette'),
     Types = require('../utils/types.js'),
     Announcement = require('../models/announcement.js'),
     AgentViews = require('./agent.js'),
+    LoaderView = require('./loaderView.js'),
     EditableField = require('./reusableDataFields/editableField.js'),
     CKEditorField = require('./reusableDataFields/ckeditorField.js'),
     TrueFalseField = require('./reusableDataFields/trueFalseField.js');
 
 /** 
  */
-var AbstractAnnouncementView = Marionette.View.extend({
+var AbstractAnnouncementView = LoaderView.extend({
   constructor: function AbstractAnnouncementView() {
-    Marionette.View.apply(this, arguments);
+    LoaderView.apply(this, arguments);
   },
 
 
@@ -64,7 +65,7 @@ var AnnouncementMessageView = AbstractAnnouncementView.extend({
     AbstractAnnouncementView.apply(this, arguments);
   },
 
-  template: '#tmpl-loader',
+  template: '#tmpl-announcementMessage',
 
 
   attributes: {
@@ -90,12 +91,13 @@ var AnnouncementMessageView = AbstractAnnouncementView.extend({
 
   initialize: function(options) {
     var that = this;
+    this.setLoading(true);
     this.hideCreator = options.hide_creator;
     this.creator = undefined;
     this.model.getCreatorPromise().then(function(creator) {
       if(!that.isDestroyed()) {
         that.creator = creator;
-        that.template = '#tmpl-announcementMessage';
+        that.setLoading(false);
         that.render();
       }
     });
@@ -103,7 +105,7 @@ var AnnouncementMessageView = AbstractAnnouncementView.extend({
 
   onRender: function() {
     AbstractAnnouncementView.prototype.onRender.call(this);
-    if (!this.hideCreator && this.template === '#tmpl-announcementMessage') {
+    if (!this.hideCreator && !this.isLoading()) {
       this.renderCreator();
     }
   },

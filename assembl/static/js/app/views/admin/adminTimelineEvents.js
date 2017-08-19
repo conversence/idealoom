@@ -18,17 +18,18 @@ var Assembl = require('../../app.js'),
     AdminNavigationMenu = require('./adminNavigationMenu.js'),
     $ = require('jquery'),
     _ = require('underscore'),
+    LoaderView = require('../loaderView.js'),
     Promise = require('bluebird');
 
 
 /**
  * @class  app.views.admin.adminTimelineEvents.AdminTimelineEventPanel
  */
-var AdminTimelineEventPanel = Marionette.View.extend({
+var AdminTimelineEventPanel = LoaderView.extend({
   constructor: function AdminTimelineEventPanel() {
-    Marionette.View.apply(this, arguments);
+    LoaderView.apply(this, arguments);
   },
-  template: '#tmpl-loader',
+  template: '#tmpl-adminTimelineEvents',
 
   ui: {
     addTimelineEvent: '.js_add_event',
@@ -50,12 +51,13 @@ var AdminTimelineEventPanel = Marionette.View.extend({
     var that = this,
         collectionManager = new CollectionManager();
     this.timelineEventCollection = null;
+    this.setLoading(true);
     if(this.isDestroyed()) {
       return;
     }
     this.timelinePromise = collectionManager.getAllTimelineEventCollectionPromise().then(function(timeline) {
       that.timelineEventCollection = timeline;
-      that.template = '#tmpl-adminTimelineEvents';
+      that.setLoading(false);
       that.render();
     })
   },
@@ -99,7 +101,7 @@ var AdminTimelineEventPanel = Marionette.View.extend({
   },
 
   onRender: function() {
-    if (this.isDestroyed() || this.template === '#tmpl-loader') {
+    if (this.isDestroyed() || this.isLoading()) {
       return;
     }
     if (this.timelineEventCollection != null) {

@@ -17,6 +17,7 @@ var Marionette = require('backbone.marionette'),
   openIdeaInModal = require('./modals/ideaInModal.js'),
   Backbone=require('backbone'),
   BackboneModal = require('backbone.modal'),
+  LoaderView = require('./loaderView.js'),
   Analytics = require('../internal_modules/analytics/dispatcher.js');
 
 // // root class
@@ -28,13 +29,13 @@ var Marionette = require('backbone.marionette'),
 /**
  * Abstract Class of Idea Classification Views
  */
-var IdeaClassificationView = Marionette.View.extend({
+var IdeaClassificationView = LoaderView.extend({
   constructor: function IdeaClassificationView() {
-    Marionette.View.apply(this, arguments);
+    LoaderView.apply(this, arguments);
   },
 
   template: false,
-  
+
   ui: {
     viewIdea: ".js_seeIdea",
     breadcrumbs: ".js_breadcrumb"
@@ -53,6 +54,7 @@ var IdeaClassificationView = Marionette.View.extend({
     along with the groupContent
    */
   initialize: function(options){
+    this.setLoading(true);
     this._groupContent = options.groupContent;
     this.messageView = options.messageView;
     this.canRender = false;
@@ -117,7 +119,7 @@ var IdeaClassificationView = Marionette.View.extend({
 
   onRender: function(){
     if (this.canRender) {
-      
+
       if (! this.ideaAncestry) {
         throw new Error("Idea Ancestry Collection was undefined on message ", this.model.get('idPost'));
       }
@@ -172,11 +174,11 @@ var DirectMessageView = IdeaClassificationView.extend({
     IdeaClassificationView.apply(this, arguments);
   },
 
-  template: '#tmpl-loader',
+  template: '#tmpl-ideaClassification_directMessage',
 
   onEndInitialization: function(){
-    this.template = '#tmpl-ideaClassification_directMessage';
-    this.render(); 
+    this.setLoading(false);
+    this.render();
   },
 
   serializeData: function(){
@@ -195,10 +197,10 @@ var DirectExtractView = IdeaClassificationView.extend({
     IdeaClassificationView.apply(this, arguments);
   },
 
-  template: '#tmpl-loader',
+  template: '#tmpl-ideaClassification_directExtract',
 
   onEndInitialization: function(){
-    this.template = '#tmpl-ideaClassification_directExtract';
+    this.setLoading(false);
     this.render();
   },
 
@@ -220,10 +222,10 @@ var IndirectMessageView = IdeaClassificationView.extend({
     IdeaClassificationView.apply(this, arguments);
   },
 
-  template: '#tmpl-loader',
+  template: '#tmpl-ideaClassification_indirectMessage',
 
   onEndInitialization: function(){
-    this.template = '#tmpl-ideaClassification_indirectMessage';
+    this.setLoading(false);
     this.render();
   },
 
@@ -243,11 +245,11 @@ var IndirectExtractView = IdeaClassificationView.extend({
     IdeaClassificationView.apply(this, arguments);
   },
 
-  template: '#tmpl-loader',
+  template: '#tmpl-ideaClassification_indirectExtract',
 
   onEndInitialization: function(){
-    this.template = '#tmpl-ideaClassification_indirectExtract';
-    this.render(); 
+    this.setLoading(false);
+    this.render();
   },
 
   serializeData: function() {

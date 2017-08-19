@@ -16,17 +16,18 @@ var Marionette = require('backbone.marionette'),
     MessageDeletedByUserView = require('./messageDeletedByUser.js'),
     MessageDeletedByAdminView = require('./messageDeletedByAdmin.js'),
     Analytics = require('../internal_modules/analytics/dispatcher.js'),
+    LoaderView = require('./loaderView.js'),
     availableFilters = require('./postFilters.js');
 
 /**
  * @class app.views.messageFamily.MessageFamilyView
  */
-var MessageFamilyView = Marionette.View.extend({
+var MessageFamilyView = LoaderView.extend({
   constructor: function MessageFamilyView() {
-    Marionette.View.apply(this, arguments);
+    LoaderView.apply(this, arguments);
   },
 
-  template: '#tmpl-loader',
+  template: '#tmpl-messageFamily',
   /**
    * @type {string}
    */
@@ -45,6 +46,7 @@ var MessageFamilyView = Marionette.View.extend({
    *   are the last child of their respective parents.
    */
   initialize: function(options) {
+    this.setLoading(true);
     var that = this;
     if (_.isUndefined(options.last_sibling_chain)) {
       this.last_sibling_chain = [];
@@ -73,7 +75,7 @@ var MessageFamilyView = Marionette.View.extend({
     }
     this.model.collection.collectionManager.getUserLanguagePreferencesPromise(Ctx).then(function(ulp) {
         that.translationData = ulp.getTranslationData();
-        that.template = '#tmpl-messageFamily';
+        that.setLoading(false);
         that.render();
     });
   },
@@ -146,7 +148,7 @@ var MessageFamilyView = Marionette.View.extend({
    * @returns {MessageView}
    */
   onRender: function() {
-    if (this.template == "#tmpl-loader") {
+    if (this.isLoading()) {
         return {};
     }
 
@@ -178,7 +180,7 @@ var MessageFamilyView = Marionette.View.extend({
 
     this._messageView = new messageViewClass(messageViewOptions);
 
-    this._messageView.render();
+    this._messageView.guardedRender();
     this.messageListView.renderedMessageViewsCurrent[this.model.id] = this._messageView;
 
     //data['id'] = data['@id'];
@@ -255,7 +257,7 @@ var MessageFamilyView = Marionette.View.extend({
    * @event
    */
   onCollapsedChange: function() {
-    if (this.template == "#tmpl-loader") {
+    if (this.isLoading()) {
         return;
     }
     var collapsed = this.collapsed,

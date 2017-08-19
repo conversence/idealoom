@@ -19,12 +19,13 @@ var Marionette = require('backbone.marionette'),
     viewsFactory = require('../objects/viewsFactory'),
     groupSpec = require('../models/groupSpec'),
     Promise = require('bluebird'),
+    LoaderView = require('./loaderView.js'),
     Analytics = require('../internal_modules/analytics/dispatcher.js'),
     openIdeaInModal = require('./modals/ideaInModal.js');
 
-var IdeaInSynthesisView = Marionette.View.extend({
+var IdeaInSynthesisView = LoaderView.extend({
   constructor: function IdeaInSynthesisView() {
-    Marionette.View.apply(this, arguments);
+    LoaderView.apply(this, arguments);
   },
 
   synthesis: null,
@@ -32,7 +33,7 @@ var IdeaInSynthesisView = Marionette.View.extend({
    * The template
    * @type {template}
    */
-  template: '#tmpl-loader',
+  template: '#tmpl-ideaInSynthesis',
 
   /**
    * The events
@@ -64,6 +65,7 @@ var IdeaInSynthesisView = Marionette.View.extend({
       this.editing = false;
       this.authors = [];
       this.original_idea = undefined;
+      this.setLoading(true);
 
       this.parentPanel = options.parentPanel;
       if (this.parentPanel === undefined) {
@@ -88,7 +90,7 @@ var IdeaInSynthesisView = Marionette.View.extend({
             }
           });
 
-          that.template = '#tmpl-ideaInSynthesis';
+          that.setLoading(false);
           that.render();
         }
       }
@@ -172,7 +174,7 @@ var IdeaInSynthesisView = Marionette.View.extend({
     /*if (Ctx.debugRender) {
       console.log("idesInSynthesis:onRender() is firing");
     }*/
-    if(this.template != "#tmpl-loader") {
+    if(!this.isLoading()) {
       Ctx.removeCurrentlyDisplayedTooltips(this.$el);
 
       if (this.canEdit()) {

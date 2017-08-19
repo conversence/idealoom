@@ -25,6 +25,7 @@ var Marionette = require('backbone.marionette'),
     WidgetLinks = require('./widgetLinks.js'),
     Analytics = require('../internal_modules/analytics/dispatcher.js'),
     StatisticsModal = require('./modals/discussionStatisticsModal.js'),
+    LoaderView = require('./loaderView.js'),
     AgentViews = require('./agent.js');
 
 var navBarLeft = Marionette.View.extend({
@@ -105,24 +106,24 @@ var navBarLeft = Marionette.View.extend({
   },
 });
 
-var navBarRight = Marionette.View.extend({
+var navBarRight = LoaderView.extend({
   constructor: function navBarRight() {
-    Marionette.View.apply(this, arguments);
+    LoaderView.apply(this, arguments);
   },
 
-  template: '#tmpl-loader',
+  template: '#tmpl-navBarRight',
   className: 'navbar-right',
   initialize: function(options) {
     var that = this,
-        collectionManager = new CollectionManager(),
-        realTemplate = '#tmpl-navBarRight';
+        collectionManager = new CollectionManager();
 
     if (Ctx.getDiscussionId() && Ctx.getCurrentUserId()) {
+      this.setLoading(true);
       collectionManager.getLocalRoleCollectionPromise()
       .then(function(localRoles) {
         that.localRoles = localRoles;
         that.isUserSubscribedToDiscussion = localRoles.isUserSubscribedToDiscussion();
-        that.template = realTemplate;
+        that.setLoading(false);
 
         that.render();
         // that.onBeforeRender();
@@ -137,7 +138,6 @@ var navBarRight = Marionette.View.extend({
     }
     else {
       this.isUserSubscribedToDiscussion = false;
-      this.template = realTemplate;
     }
 
   },
@@ -158,7 +158,7 @@ var navBarRight = Marionette.View.extend({
   },
 
   onRender: function() {
-    if(this.template === '#tmpl-loader') {
+    if(this.isLoading()) {
       return {};
     }
 
@@ -172,7 +172,7 @@ var navBarRight = Marionette.View.extend({
   },
 
   serializeData: function() {
-    if(this.template === '#tmpl-loader') {
+    if(this.isLoading()) {
       return {};
     }
     var retval = {}

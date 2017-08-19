@@ -4,16 +4,16 @@
  * @module app.views.assemblPanel
  */
 
-var Marionette = require('backbone.marionette'),
+var LoaderView = require('./loaderView.js'),
     _ = require('underscore');
 
 /**
  * An abstract class every panel should eventually extend
  * @class app.views.assemblPanel.AssemblPanel
  */
-var AssemblPanel = Marionette.View.extend({
+var AssemblPanel = LoaderView.extend({
   constructor: function AssemblPanel() {
-    Marionette.View.apply(this, arguments);
+    LoaderView.apply(this, arguments);
   },
 
   template: _.template(""),

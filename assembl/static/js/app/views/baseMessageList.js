@@ -49,9 +49,7 @@ return cls.extend({
     cls.apply(this, arguments);
   },
 
-  template: '#tmpl-loader',
   // define in subclass
-  message_template: null,
   debugPaging: false,
   debugScrollLogging: false,
   _renderId: 0,
@@ -144,10 +142,10 @@ return cls.extend({
     Ctx.removeCurrentlyDisplayedTooltips(this.$el);
 
     if (this.currentQuery.isQueryValid()) {
-      this.template = this.message_template;
+      this.setLoading(false);
     }
     else if (this.getGroupState().get('currentIdea') !== null) {
-      this.template = this.message_template;
+      this.setLoading(false);
 
       //We will sync with current idea in onRender
     }
@@ -1062,7 +1060,7 @@ return cls.extend({
         options.reply_idea = currentIdea;
       }
 
-      if(Ctx.getCurrentUser().can(Permissions.ADD_POST) && this.template !== '#tmpl-loader') {
+      if(Ctx.getCurrentUser().can(Permissions.ADD_POST) && !this.isLoading()) {
         this.showTopPostBox(options);
       }
 

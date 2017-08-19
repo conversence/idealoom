@@ -15,6 +15,7 @@ var Marionette = require('backbone.marionette'),
     CollectionManager = require("../common/collectionManager.js"),
     AdminNavigationMenu = require('./admin/adminNavigationMenu.js'),
     UserNavigationMenu = require('./user/userNavigationMenu.js'),
+    LoaderView = require('./loaderView.js'),
     Growl = require('../utils/growl.js');
 
 
@@ -852,11 +853,11 @@ var GlobalPreferenceCollectionSubset = PreferenceCollectionSubset.extend({
  * The preferences window
  * @class app.views.preferencesView.PreferencesView
  */
-var PreferencesView = Marionette.View.extend({
+var PreferencesView = LoaderView.extend({
   constructor: function PreferencesView() {
-    Marionette.View.apply(this, arguments);
+    LoaderView.apply(this, arguments);
   },
-  template: "#tmpl-loader",
+  template: "#tmpl-preferenceView",
   ui: {
       saveButton: "#js_savePreferences"
   },
@@ -867,8 +868,11 @@ var PreferencesView = Marionette.View.extend({
     preferenceCollView: "#js_preferences",
     navigationMenuHolder: '.navigation-menu-holder'
   },
+  initialize: function() {
+    this.setLoading(true);
+  },
   onRender: function() {
-    if (this.template === "#tmpl-loader") {
+    if (this.isLoading()) {
         return;
     }
     var prefList = new PreferencesCollectionView({
@@ -885,7 +889,7 @@ var PreferencesView = Marionette.View.extend({
     });
     this.allPreferences = prefs;
     this.preferenceData = prefData;
-    this.template = "#tmpl-preferenceView";
+    this.setLoading(false);
     this.render();
   },
   save: function() {

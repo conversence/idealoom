@@ -632,7 +632,7 @@ var IdeaPanel = AssemblPanel.extend({
             if ( that.ideaPanelOpensAutomatically ){
               this.panelWrapper.unminimizePanel();
             }
-            this.template = '#tmpl-loader';
+            this.setLoading(true);
             if (!this.model.id) {
               //console.log("setIdeaModel:  we have a model, but no id ")
               if (this.isRenderedAndNotYetDestroyed()) {
@@ -662,7 +662,7 @@ var IdeaPanel = AssemblPanel.extend({
         //on if the panel was opened by selection, or by something else.
         //If we don't call render here, the panel will not refresh if we delete an idea.
         if (!this.isDestroyed()) {
-          this.template = '#tmpl-ideaPanel';
+          this.setLoading(false);
           if ( that.ideaPanelOpensAutomatically ){
             this.panelWrapper.minimizePanel();
           }
@@ -688,7 +688,7 @@ var IdeaPanel = AssemblPanel.extend({
               that.listenTo(that.extractListSubset, "add remove reset change", that.renderTemplateGetExtractsLabel);
 
               //console.log("The region:", that.segmentList);
-              that.template = '#tmpl-ideaPanel';
+              that.setLoading(false);
               that.render();
             }
           }
