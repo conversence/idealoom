@@ -10,7 +10,7 @@ from datetime import datetime
 import threading
 
 from future.utils import as_native_str
-from bs4 import BeautifulSoup
+from ..lib.clean_input import sanitize_text
 from rdflib import URIRef
 from sqlalchemy.orm import (
     relationship, backref, aliased, contains_eager, joinedload, deferred,
@@ -110,7 +110,7 @@ class WordCountVisitor(IdeaVisitor):
         self.count_posts = True
 
     def cleantext(self, text):
-        return BeautifulSoup(text or '').get_text().strip()
+        return sanitize_text(text)
 
     def visit_idea(self, idea, level, prev_result):
         if idea.short_title:
@@ -686,7 +686,7 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
         shortened = False
         html_len = 2 * target_len
         while True:
-            text = BeautifulSoup(body[:html_len]).get_text().strip()
+            text = sanitize_text(body[:html_len])
             if html_len >= len(body) or len(text) > target_len:
                 shortened = html_len < len(body)
                 body = text

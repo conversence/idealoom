@@ -148,8 +148,8 @@
         "date": "creation_date",
         "like_count": false,
         "bodyMimeType": false,
-        "body": true,
-        "subject": true,
+        "body": "&safe_set_body",
+        "subject": "&safe_set_subject",
         "widget_ideas": false
     },
     "Post": {
