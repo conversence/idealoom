@@ -189,7 +189,8 @@ if __name__ == '__main__':
     log_queue()
 
     sockjs_router = SockJSRouter(
-        ZMQRouter, prefix=changes_prefix, io_loop=io_loop)
+        ZMQRouter, prefix=changes_prefix, io_loop=io_loop,
+        user_settings={"websocket_allow_origin": SERVER_URL})
     routes = sockjs_router.urls
     web_app = web.Application(routes, debug=False)
 
