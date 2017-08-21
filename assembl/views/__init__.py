@@ -165,9 +165,10 @@ def create_get_route(request, discussion=0):
 def get_default_context(request, **kwargs):
     kwargs.update(default_context)
     from ..auth.util import get_current_discussion
+    application_url = get_global_base_url()
     if request.scheme == "http"\
             and asbool(config.get("require_secure_connection")):
-        raise HTTPFound("https://" + request.host + request.path_qs)
+        raise HTTPFound(application_url + request.path_qs)
     socket_proxied = asbool(config.get('changes.websocket.proxied'))
     websocket_port = None if socket_proxied \
         else config.get('changes.websocket.port')
@@ -292,6 +293,7 @@ def get_default_context(request, **kwargs):
         STATIC_URL=static_url,
         WIDGET_URL=widget_url,
         request=request,
+        application_url=application_url,
         get_route=get_route,
         user=user,
         templates=get_template_views(),
