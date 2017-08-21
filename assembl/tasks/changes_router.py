@@ -165,9 +165,13 @@ if __name__ == '__main__':
     TOKEN_SECRET = settings.get(SECTION, 'session.secret')
     webserver_port = settings.getint(SECTION, 'changes.websocket.port')
     # NOTE: Not sure those are always what we want.
-    server_protocol = 'https' if settings.getboolean(SECTION, 'require_secure_connection') else 'http'
+    REQUIRES_SECURE = settings.getboolean(SECTION, 'require_secure_connection')
+    SERVER_PROTOCOL = 'https' if REQUIRES_SECURE else 'http'
+    server_port = settings.getint(SECTION, 'public_port')
+    if REQUIRES_SECURE and SERVER_PORT == 80:
+        # old misconfiguration
+        server_port = 443
     server_host = settings.get(SECTION, 'public_hostname')
-    server_port = 443 if server_protocol == 'https' else settings.getint(SECTION, 'public_port')
     SERVER_URL = "%s://%s:%d" % (server_protocol, server_host, server_port)
     setup_raven(settings)
 
