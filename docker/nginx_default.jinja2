@@ -36,6 +36,7 @@ server {
   {% endif %}
 
   server_tokens off;
+  add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' data: {{ docker_piwik }} ; frame-src 'self' www.youtube.com ; connect-src 'self' wss://{{public_hostname_}}; style-src 'self' 'unsafe-inline' http://fonts.googleapis.com ; font-src 'self' data: fonts.gstatic.com; img-src 'self' data: {{ docker_piwik }} www.gravatar.com *.googleusercontent.com graph.facebook.com *.twimg.com *.twitter.com framapic.org";
 
   # This is the server name, if you're running multiple servers
   server_name {{public_hostname_}};
