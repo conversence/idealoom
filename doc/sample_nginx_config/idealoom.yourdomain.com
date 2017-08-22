@@ -33,6 +33,10 @@ server {
 
     # resolver <IP DNS resolver>;
 
+    add_header x-xss-protection "1; mode=block" always;
+    add_header x-frame-options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+
     server_tokens off;
     # Optional for extra security
     # add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' data: piwik_server.example.com ; frame-src 'self' www.youtube.com ; connect-src 'self' wss://assembl.yourdomain.com; style-src 'self' 'unsafe-inline' http://fonts.googleapis.com ; font-src 'self' data: fonts.gstatic.com; img-src 'self' data: piwik_server.example.com www.gravatar.com *.googleusercontent.com graph.facebook.com *.twimg.com *.twitter.com framapic.org";
