@@ -475,9 +475,10 @@ class LangString(Base):
         def common_len(e):
             return locale_compatible(target_locale, e.locale)
         entries = [(common_len(e), id(e), e) for e in self.entries if not e.error_code]
-        entries.sort(reverse=True)
-        if entries[0][0]:
-            return entries[0][2]
+        if entries:
+            entries.sort(reverse=True)
+            if entries[0][0]:
+                return entries[0][2]
 
     def remove_translations(self, forget_identification=True):
         for entry in list(self.entries):
