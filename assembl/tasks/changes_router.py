@@ -171,8 +171,8 @@ if __name__ == '__main__':
     if REQUIRES_SECURE and SERVER_PORT == 80:
         # old misconfiguration
         SERVER_PORT = 443
-    server_host = settings.get(SECTION, 'public_hostname')
-    SERVER_URL = "%s://%s:%d" % (server_protocol, server_host, SERVER_PORT)
+    SERVER_HOST = settings.get(SECTION, 'public_hostname')
+    SERVER_URL = "%s://%s:%d" % (SERVER_PROTOCOL, SERVER_HOST, SERVER_PORT)
     setup_raven(settings)
 
     context = zmq.Context.instance()
