@@ -163,16 +163,16 @@ if __name__ == '__main__':
     changes_socket = settings.get(SECTION, 'changes.socket')
     changes_prefix = settings.get(SECTION, 'changes.prefix')
     TOKEN_SECRET = settings.get(SECTION, 'session.secret')
-    webserver_port = settings.getint(SECTION, 'changes.websocket.port')
+    websocket_port = settings.getint(SECTION, 'changes.websocket.port')
     # NOTE: Not sure those are always what we want.
     REQUIRES_SECURE = settings.getboolean(SECTION, 'require_secure_connection')
     SERVER_PROTOCOL = 'https' if REQUIRES_SECURE else 'http'
-    server_port = settings.getint(SECTION, 'public_port')
+    SERVER_PORT = settings.getint(SECTION, 'public_port')
     if REQUIRES_SECURE and SERVER_PORT == 80:
         # old misconfiguration
-        server_port = 443
+        SERVER_PORT = 443
     server_host = settings.get(SECTION, 'public_hostname')
-    SERVER_URL = "%s://%s:%d" % (server_protocol, server_host, server_port)
+    SERVER_URL = "%s://%s:%d" % (server_protocol, server_host, SERVER_PORT)
     setup_raven(settings)
 
     context = zmq.Context.instance()
@@ -205,7 +205,7 @@ if __name__ == '__main__':
     signal.signal(signal.SIGTERM, term)
 
     web_server = HTTPServer(web_app)
-    web_server.listen(webserver_port)
+    web_server.listen(websocket_port)
 
     try:
         if changes_socket.startswith('ipc://'):
