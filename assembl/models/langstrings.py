@@ -104,6 +104,7 @@ class LocaleLabel(Base):
 
     @classmethod
     def populate_db(cls, db=None):
+        db.execute("lock table %s in exclusive mode" % cls.__table__.name)
         cls.load_names(db)
 
     crud_permissions = CrudPermissions(P_READ, P_ADMIN_DISC)
