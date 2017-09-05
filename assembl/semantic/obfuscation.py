@@ -32,7 +32,7 @@ class AESObfuscator(Obfuscator):
         from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
         from cryptography.hazmat.backends import default_backend
         key = key or urandom(blocklen)
-        iv = urandom(blocklen)
+        iv = b' ' * blocklen
         self.blocklen = blocklen
         self.cipher = Cipher(algorithms.AES(key), modes.CTR(iv), backend=default_backend())
 

@@ -147,7 +147,7 @@ def handle_jsonp(callback_fn, json):
     # TODO: Use an augmented JSONP renderer with ld content-type
     if not JSONP_VALID_CALLBACK.match(callback_fn):
         raise HTTPBadRequest("invalid callback name")
-    return "/**/{0}({1});".format(callback_fn.encode('ascii'), json)
+    return "/**/{0}({1});".format(callback_fn, json)
 
 
 def permission_token(
@@ -222,7 +222,7 @@ def discussion_instance_view_jsonld(request):
     # TODO: Add age
     if "callback" in request.GET:
         jdata = handle_jsonp(request.GET['callback'], jdata)
-        content_type = "application/json-p"
+        content_type = "application/javascript"
     else:
         content_type = "application/ld+json"
     return Response(body=jdata, content_type=content_type, charset="utf-8")
@@ -248,7 +248,7 @@ def user_private_view_jsonld(request):
         jdata = obfuscator.obfuscate(jdata)
     if "callback" in request.GET:
         jdata = handle_jsonp(request.GET['callback'], jdata)
-        content_type = "application/json-p"
+        content_type = "application/javascript"
     else:
         content_type = "application/ld+json"
     return Response(body=jdata, content_type=content_type, charset="utf-8")

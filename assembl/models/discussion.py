@@ -780,7 +780,9 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
             "@graph": [x for x in self.get_discussion_graph_cif() if x]
         })
         return {
-            "@context": "http://purl.org/catalyst/jsonld",
+            "@context": [
+                "http://purl.org/catalyst/jsonld",
+                {"local": get_global_base_url() + '/data/'}],
             "@graph": graphs
         }
 
@@ -794,7 +796,9 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
     def get_private_graphs_cif(self):
         graphs = [x for x in self.get_user_graph_cif() if x]
         return {
-            "@context": "http://purl.org/catalyst/jsonld",
+            "@context": [
+                "http://purl.org/catalyst/jsonld",
+                {"local": get_global_base_url() + '/data/'}],
             "@graph": graphs
         }
 
