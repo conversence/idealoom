@@ -29,22 +29,24 @@ class Obfuscator(object):
 
 class AESObfuscator(Obfuscator):
     def __init__(self, key=None, blocklen=16):
+        from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+        from cryptography.hazmat.backends import default_backend
         key = key or urandom(blocklen)
-        self.key = self.pad(key, blocklen)
+        iv = urandom(blocklen)
         self.blocklen = blocklen
-        self.IV = ' ' * blocklen
+        self.cipher = Cipher(algorithms.AES(key), modes.CTR(iv), backend=default_backend())
 
     def encrypt(self, text):
-        from Crypto.Cipher import AES
-        encoder = AES.new(self.key, AES.MODE_CFB, self.IV)
-        return urlsafe_b64encode(encoder.encrypt(text))
+        text = text.encode('utf-8')
+        encryptor = self.cipher.encryptor()
+        return urlsafe_b64encode(encryptor.update(text) + encryptor.finalize()).decode('iso-8859-1')
 
     def decrypt(self, code):
-        from Crypto.Cipher import AES
-        encoder = AES.new(self.key, AES.MODE_CFB, self.IV)
-        code = code.encode('utf-8')
-        code = urlsafe_b64decode(code)
-        return encoder.decrypt(code)
+        decryptor = self.cipher.decryptor()
+        code = code.encode('iso-8859-1')
+        text = decryptor.update(urlsafe_b64decode(code)) + decryptor.finalize()
+        return text.decode('utf-8')
 
-    def pad(self, key, blocklen=16, padding=' '):
+    def pad(self, key, blocklen=None, padding=b' '):
+        blocklen = blocklen or self.blocklen
         return key + padding * (blocklen - (len(key) % blocklen))

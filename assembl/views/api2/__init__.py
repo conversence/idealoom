@@ -112,12 +112,12 @@ def class_view(request):
         return [x for x in r if x is not None]
 
 
-@view_config(context=InstanceContext, renderer='json', name="jsonld",
-             request_method='GET', permission=P_READ,
-             accept="application/ld+json;q=0.9")
-@view_config(context=InstanceContext, renderer='json',
-             request_method='GET', permission=P_READ,
-             accept="application/ld+json;q=0.9")
+# @view_config(context=InstanceContext, renderer='json', name="jsonld",
+#              request_method='GET', permission=P_READ,
+#              accept="application/ld+json;q=0.9")
+# @view_config(context=InstanceContext, renderer='json',
+#              request_method='GET', permission=P_READ,
+#              accept="application/ld+json;q=0.9")
 def instance_view_jsonld(request):
     from assembl.semantic.virtuoso_mapping import AssemblQuadStorageManager
     from rdflib import URIRef, ConjunctiveGraph

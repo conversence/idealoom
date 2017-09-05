@@ -114,7 +114,7 @@ def read_user_token(request):
         permissions.append(P_READ_PUBLIC_CIF)
 
     if 'token' in request.GET:
-        token = request.GET['token'].encode('ascii')
+        token = request.GET['token']
         data, valid = verify_data_token(token, max_age=timedelta(hours=1))
         if valid != Validity.VALID:
             raise HTTPBadRequest("Invalid token")
@@ -167,7 +167,7 @@ def permission_token(
     data = [str(user_id), str(discussion_id)]
     data.extend([str(x) for (x,) in Permission.default_db.query(
             Permission.id).filter(Permission.name.in_(req_permissions)).all()])
-    data = ','.join(data) + '.' + base64.urlsafe_b64encode(random_str)
+    data = ','.join(data) + '.' + base64.urlsafe_b64encode(random_str).decode('iso-8859-1')
     return data_token(data)
 
 
@@ -189,7 +189,7 @@ def get_token(request):
                            for permissions in permission_sets]
     else:
         permission_sets = [[P_READ, P_READ_PUBLIC_CIF]]
-    random_str = urandom(8)
+    random_str = urandom(16)
     data = {','.join(permissions): permission_token(
         user_id, discussion_id, permissions, random_str)
         for permissions in permission_sets}
