@@ -607,7 +607,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
 
             def __init__(self, cls):
                 super(ActiveWidgetsCollection, self).__init__(
-                    cls, Discussion.widgets)
+                    cls, Discussion.widgets, 'active_widgets')
 
             def decorate_query(self, query, owner_alias, last_alias, parent_instance, ctx):
                 from .widgets import Widget
