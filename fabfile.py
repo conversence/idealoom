@@ -1072,7 +1072,13 @@ def install_testdeps():
     if env.mac:
         run("brew install chromedriver")
     else:
-        sudo('apt-get install -y chromium-browser chromium-chromedriver')
+        sudo('apt-get install -y chromium-browser')
+        release_info = run("lsb_release -i")
+        if "Debian" in release_info:
+            sudo('apt-get install -y chromedriver', warn_only=True)  # jessie
+            sudo('apt-get install -y chromium-driver', warn_only=True)  # stretch
+        if "Ubuntu" in release_info:
+            sudo('apt-get install -y chromium-chromedriver')
 
 
 @task
