@@ -255,35 +255,35 @@ class AbstractMailbox(PostSource):
         if len(matches) > 0:
             if not matches[0].text or "---------- Forwarded message ----------" not in matches[0].text:
                 matches[0].drop_tree()
-                return html.tostring(doc)
+                return html.tostring(doc, encoding="unicode")
 
         #Strip modern Apple Mail quotes
         find = etree.XPath(r"//child::blockquote[contains(@type,'cite')]/preceding-sibling::br[contains(@class,'Apple-interchange-newline')]/parent::node()/parent::node()")
         matches = find(doc)
         #log.debug(len(matches))
         #for index,match in enumerate(matches):
-        #    log.debug("Match: %d: %s " % (index, html.tostring(match)))
+        #    log.debug("Match: %d: %s " % (index, html.tostring(match, encoding="unicode")))
         if len(matches) == 1:
             matches[0].drop_tree()
-            return html.tostring(doc)
+            return html.tostring(doc, encoding="unicode")
 
 
         #Strip old AppleMail quotes (french)
         regexpNS = "http://exslt.org/regular-expressions"
         ##Trying to match:  Le 6 juin 2011 à 11:02, Jean-Michel Cornu a écrit :
         find = etree.XPath(r"//child::div[re:test(text(), '^.*Le .*\d{4} .*:\d{2}, .* a .*crit :.*$', 'i')]/following-sibling::br[contains(@class,'Apple-interchange-newline')]/parent::node()",
-                    namespaces={'re':regexpNS})
+                    namespaces={'re': regexpNS})
         matches = find(doc)
         if len(matches) == 1:
             matches[0].drop_tree()
-            return html.tostring(doc)
+            return html.tostring(doc, encoding="unicode")
 
         #Strip Outlook quotes (when outlook gives usable structure)
         find = etree.XPath(r"//body/child::blockquote/child::div[contains(@class,'OutlookMessageHeader')]/parent::node()")
         matches = find(doc)
         if len(matches) == 1:
             matches[0].drop_tree()
-            return html.tostring(doc)
+            return html.tostring(doc, encoding="unicode")
 
         #Strip Outlook quotes (when outlook gives NO usable structure)
         successiveStringsToMatch = [
@@ -310,7 +310,7 @@ class AbstractMailbox(PostSource):
                 quoteElement.drop_tree()
             matches[0].tail = None
             matches[0].drop_tree()
-            return html.tostring(doc)
+            return html.tostring(doc, encoding="unicode")
 
         #Strip Thunderbird quotes
         mainXpathFragment = "//child::blockquote[contains(@type,'cite') and boolean(@cite)]"
@@ -321,10 +321,10 @@ class AbstractMailbox(PostSource):
             if len(matchQuoteAnnounce) > 0:
                 matchQuoteAnnounce[-1].tail = None
                 matches[0].drop_tree()
-                return html.tostring(doc)
+                return html.tostring(doc, encoding="unicode")
 
         #Nothing was stripped...
-        return html.tostring(doc)
+        return html.tostring(doc, encoding="unicode")
 
     def parse_email(self, message_string, existing_email=None):
         """ Creates or replace a email from a string """
