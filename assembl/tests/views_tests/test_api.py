@@ -11,6 +11,7 @@ import mock
 from urllib.parse import urlparse
 from urllib.parse import unquote
 from urllib.parse import urlencode, quote_plus
+import simplejson as json
 
 from assembl.models import (
     Idea, Post, Email, User

@@ -10,6 +10,7 @@ from pyramid.httpexceptions import (
 from sqlalchemy import Unicode
 from sqlalchemy.sql.expression import cast
 from sqlalchemy.orm import joinedload_all
+import simplejson as json
 
 from assembl.views.api import API_DISCUSSION_PREFIX
 from assembl.auth import (
