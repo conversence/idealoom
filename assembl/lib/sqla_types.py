@@ -91,7 +91,7 @@ class EmailString(TypeDecorator):
         return value
 
     def copy(self, **kw):
-        return EmailString(self.impl.length)
+        return self.__class__(self.impl.length)
 
 
 # if using virtuoso
@@ -166,3 +166,6 @@ class UUID(TypeDecorator):
 
     def is_mutable(self):
         return False
+
+    def copy(self, **kw):
+        return UUID()
