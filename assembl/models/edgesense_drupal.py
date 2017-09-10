@@ -520,7 +520,6 @@ class EdgeSenseParser(object):
                     old_node.source = self.source
                     old_node.discussion = self.source.discussion
                     old_node.source_post_id = nid
-                    old_node.message_id = self.source.generate_message_id(nid)
                     body = nde['Body']
                     body = old_node.process_body(body, self.source.node_root)
                     old_node.body = body
@@ -557,8 +556,6 @@ class EdgeSenseParser(object):
                     old_comm.source = self.source
                     old_comm.discussion = self.source.discussion
                     old_comm.source_post_id = comment_id
-                    old_comm.message_id = \
-                        self.source.generate_message_id(comment_id)
 
                     body = comm['Comment']
                     body = old_comm.process_body(body, self.source.node_root)

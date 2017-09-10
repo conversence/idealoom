@@ -775,21 +775,21 @@ class ImportedPost(Post):
     """
     __tablename__ = "imported_post"
     __table_args__ = (
-                UniqueConstraint('source_post_id', 'source_id'),
-            )
+        UniqueConstraint('source_post_id', 'source_id'),
+    )
 
     def __init__(self, *args, **kwargs):
-        if 'message_id' not in kwargs:
-            assert 'source_post_id' in kwargs
-            source = kwargs.get('source', None)
-            if not source:
-                source_id = kwargs.get('source_id', None)
-                assert source_id
-                source = ContentSource.get(int(source_id))
-                assert source
-            kwargs['message_id'] = source.generate_message_id(
-                kwargs['source_post_id'])
+        source_post_id = kwargs.pop('source_post_id', None)
+        # delay source_post_id because of the listener
+        # Note that message_id will get clobbered
+        # if source_post_id is present (which it should)
+        message_id = kwargs.get('message_id', None)
+        source = kwargs.get('source', None)
+        source_id = kwargs.get('source_id', None)
+        assert message_id or (source_post_id and (source or source_id))
         super(Post, self).__init__(*args, **kwargs)
+        if source_post_id is not None:
+            self.source_post_id = source_post_id
 
     id = Column(Integer, ForeignKey(
         'post.id',
