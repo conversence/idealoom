@@ -134,7 +134,9 @@ class NamedClassMixin(object):
         return cls.getByName(id, session)
 
 
-
+from .uriref import (
+    URIRefDb,
+)
 from .auth import (
     AbstractAgentAccount,
     AgentProfile,

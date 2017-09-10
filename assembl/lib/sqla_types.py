@@ -1,4 +1,6 @@
 """Some specialized SQLAlchemy column types"""
+import uuid
+
 from future.utils import as_native_str
 from past.builtins import basestring
 from past.builtins import str as oldstr
@@ -13,7 +15,7 @@ from pyisemail import is_email
 from sqlalchemy import Unicode as CoerceUnicode
 from sqlalchemy.databases import postgresql
 import simplejson as json
-import uuid
+from rdflib import URIRef
 
 
 class URLString(TypeDecorator):
@@ -33,6 +35,30 @@ class URLString(TypeDecorator):
         # TODO: Ensure NFC order.
         value = iri_to_uri(value)
         return value
+
+    def copy(self, **kw):
+        return URLString(self.impl.length)
+
+
+class URIRefString(TypeDecorator):
+    """Safely coerce URIRefs to Strings."""
+
+    impl = CoerceUnicode
+
+    @property
+    def python_type(self):
+        return URIRef
+
+    def process_bind_param(self, value, dialect):
+        if value is not None:
+            return URIRef(value)
+
+    def process_result_value(self, value, dialect):
+        if value is not None:
+            return URIRef(value)
+
+    def copy(self, **kw):
+        return URIRefString(self.impl.length)
 
 
 class EmailString(TypeDecorator):
@@ -63,6 +89,9 @@ class EmailString(TypeDecorator):
             raise ValueError(value+" is not a valid email")
         value = self.normalize_email_case(value)
         return value
+
+    def copy(self, **kw):
+        return EmailString(self.impl.length)
 
 
 # if using virtuoso
