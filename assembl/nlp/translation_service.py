@@ -19,6 +19,7 @@ from pyramid.i18n import TranslationStringFactory
 from assembl.lib.abc import (abstractclassmethod, classproperty)
 from assembl.lib import config
 from assembl.lib.enum import OrderedEnum
+from assembl.lib.clean_input import unescape
 from assembl.models.langstrings import (
     LangString, LangStringEntry, LocaleLabel)
 from assembl.lib.locale import (
@@ -26,7 +27,6 @@ from assembl.lib.locale import (
 
 
 _ = TranslationStringFactory('assembl')
-
 
 # Minimum length (chars) before we trust the language identifications outside
 # discussion languages
@@ -203,7 +203,7 @@ class AbstractTranslationService(LanguageIdentificationService):
             list(self.target_locales()), target_locale)
 
     @abstractmethod
-    def translate(self, text, target, source=None, db=None):
+    def translate(self, text, target, is_html=False, source=None, db=None):
         if not text:
             return text, LocaleLabel.NON_LINGUISTIC
         if not source or source == LocaleLabel.UNDEFINED:
@@ -214,7 +214,7 @@ class AbstractTranslationService(LanguageIdentificationService):
         return create_mt_code(source_name, target_name)
 
     def translate_lse(
-            self, source_lse, target, retranslate=False,
+            self, source_lse, target, retranslate=False, is_html=False,
             constrain_locale_threshold=SECURE_IDENTIFICATION_LIMIT):
         if not source_lse.value:
             # don't translate empty strings
@@ -260,9 +260,10 @@ class AbstractTranslationService(LanguageIdentificationService):
                 trans, lang = self.translate(
                     source_lse.value,
                     target,
-                    source_locale if source_locale != LocaleLabel.UNDEFINED
-                    else None,
-                    source_lse.db)
+                    is_html,
+                    source=(source_locale
+                        if source_locale != LocaleLabel.UNDEFINED else None),
+                    db=source_lse.db)
                 lang = self.asPosixLocale(lang)
                 # What if detected language is not a discussion language?
                 if source_locale == LocaleLabel.UNDEFINED:
@@ -326,7 +327,7 @@ class DummyTranslationServiceTwoSteps(AbstractTranslationService):
     def canTranslate(cls, source, target):
         return True
 
-    def translate(self, text, target, source=None, db=None):
+    def translate(self, text, target, is_html=False, source=None, db=None):
         if not text:
             return text, LocaleLabel.NON_LINGUISTIC
         if not source:
@@ -353,18 +354,18 @@ class DummyTranslationServiceTwoStepsWithErrors(
         return super(DummyTranslationServiceTwoStepsWithErrors, self).identify(
             text, expected_locales, constrain_locale_threshold)
 
-    def translate(self, text, target, source=None, db=None):
+    def translate(self, text, target, is_html=False, source=None, db=None):
         if not text:
             return text, LocaleLabel.NON_LINGUISTIC
         from random import random
         if random() > 0.8:
             raise RuntimeError()
         return super(DummyTranslationServiceTwoStepsWithErrors, self
-                     ).translate(text, target, source=source, db=db)
+                     ).translate(text, target, is_html, source=source, db=db)
 
 
 class DummyTranslationServiceOneStepWithErrors(DummyTranslationServiceOneStep):
-    def translate(self, text, target, source=None, db=None):
+    def translate(self, text, target, is_html=False, source=None, db=None):
         if not text:
             return text, LocaleLabel.NON_LINGUISTIC
         from random import random
@@ -373,7 +374,7 @@ class DummyTranslationServiceOneStepWithErrors(DummyTranslationServiceOneStep):
         if source is None or source == LocaleLabel.UNDEFINED:
             source, _ = self.identify(text)
         return super(DummyTranslationServiceOneStepWithErrors, self).translate(
-            text, target, source=source, db=db)
+            text, target, is_html, source=source, db=db)
 
 
 class DummyGoogleTranslationService(AbstractTranslationService):
@@ -442,7 +443,7 @@ class DummyGoogleTranslationService(AbstractTranslationService):
                  self.asKnownLocale(source)) and
                 self.asKnownLocale(target))
 
-    def translate(self, text, target, source=None, db=None):
+    def translate(self, text, target, is_html=False, source=None, db=None):
         if not text:
             return text, LocaleLabel.NON_LINGUISTIC
         # Initial implementation from
@@ -470,6 +471,23 @@ class GoogleTranslationService(DummyGoogleTranslationService):
         self._known_locales = None
         self.client = apiclient.discovery.build(
             'translate', 'v2', developerKey=apikey) if apikey else None
+
+    @staticmethod
+    def unescape_text(text):
+        return unescape(text)
+
+    @staticmethod
+    def unescape_html(text):
+        # TODO: copy HTMLEntities.unescape but leaving
+        # &, <, > alone. Just leave it unchanged for now.
+        return text
+
+    @staticmethod
+    def unescape_string(text, is_html):
+        if is_html:
+            return unescape_text(text)
+        else:
+            return unescape_html(text)
 
     @property
     def known_locales(self):
@@ -508,7 +526,7 @@ class GoogleTranslationService(DummyGoogleTranslationService):
         return self.asPosixLocale(r[0][u"language"]), {
             self.asPosixLocale(x[u'language']): x[u'confidence'] for x in r}
 
-    def translate(self, text, target, source=None, db=None):
+    def translate(self, text, target, is_html=False, source=None, db=None):
         if not text:
             return text, LocaleLabel.NON_LINGUISTIC
         if not self.client:
@@ -521,7 +539,10 @@ class GoogleTranslationService(DummyGoogleTranslationService):
         if source is None:
             source = self.asPosixLocale(
                 r[u"translations"][0][u'detectedSourceLanguage'])
-        return r[u"translations"][0][u'translatedText'], source
+        translated = r[u"translations"][0][u'translatedText']
+        # Google uses unnecessary entities in translation
+        translated = self.unescape_string(translated, is_html)
+        return translated, source
 
     def decode_exception(self, exception, identify_phase=False):
         from googleapiclient.http import HttpError

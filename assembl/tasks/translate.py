@@ -115,12 +115,14 @@ def translate_content(
                     if locale_compatible(dest, source_loc):
                         continue
                     entry = entries.get(dest, None)
+                    is_html = (prop == "body" and
+                        content.get_body_mime_type() == 'text/html')
                     if entry is None or (
                             entry.error_code and
                             not service.has_fatal_error(entry)):
                         try:
                             result = service.translate_lse(
-                                original, dest)
+                                original, dest, is_html=is_html)
                         except:
                             capture_exception()
                             return changed
