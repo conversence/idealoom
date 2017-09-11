@@ -106,6 +106,12 @@ module.exports = {
         }],
       },
       {
+        test: /\.pegjs$/,
+        use: [{
+          loader: 'pegjs-loader',
+        }],
+      },
+      {
         test: /sinon.*\.js$/,
         use: [
           {
