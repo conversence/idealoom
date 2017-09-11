@@ -2152,7 +2152,7 @@ def get_named_class(typename):
             for cls in class_registry.values()
             if getattr(cls, 'external_typename', None)
         }
-        for k, v in legacy_typenames.iteritems():
+        for k, v in legacy_typenames.items():
             aliased_class_registry[k] = aliased_class_registry[v]
     return aliased_class_registry.get(typename, None)
 

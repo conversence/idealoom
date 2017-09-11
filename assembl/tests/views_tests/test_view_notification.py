@@ -71,7 +71,7 @@ def test_default_notifications(
     testing_configurator.set_authentication_policy(participant_auth_policy)
     # Check if the user's subscriptions were affected
     response = test_app.get(
-        'data/Conversation/%d/all_users/%d/notification_subscriptions' % (
+        '/data/Conversation/%d/all_users/%d/notification_subscriptions' % (
             discussion.id, participant1_user.id), headers=accept_json)
     assert response.status_code == 200
     user_notif_subsc_new = response.json
