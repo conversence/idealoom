@@ -172,7 +172,7 @@ webencodings==0.5.1
 WebOb==1.7.3
 WebTest==2.0.28
 Werkzeug==0.12.2
-wheel==0.29.0
+wheel==0.30.0
 zope.component==4.4.0
 zope.deprecation==4.3.0
 zope.event==4.3.0
