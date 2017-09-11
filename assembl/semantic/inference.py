@@ -8,6 +8,7 @@ from abc import abstractmethod
 
 import requests
 from rdflib import Graph, URIRef, ConjunctiveGraph, RDF, RDFS, OWL
+from rdflib.graph import ReadOnlyGraphAggregate
 
 
 REMOTE_ROOT = URIRef('http://purl.org/catalyst/')
@@ -35,6 +36,48 @@ CATALYST_RULES = [
 ]
 
 
+class GraphOverlay(ReadOnlyGraphAggregate):
+    def __init__(self, base_graph, overlay=None):
+        self.base_graph = base_graph
+        if not overlay:
+            if isinstance(base_graph, ConjunctiveGraph):
+                overlay = ConjunctiveGraph()
+            else:
+                overlay = Graph()
+        self.overlay = overlay
+        super(GraphOverlay, self).__init__([self.overlay, base_graph])
+
+    def add(self, triple):
+        self.overlay.add(triple)
+
+    def destroy(self, configuration):
+        self.overlay.destroy(configuration)
+
+    def commit(self):
+        self.overlay.commit()
+
+    def rollback(self):
+        self.overlay.rollback()
+
+    def addN(self, quads):
+        self.overlay.addN(quads)
+
+    def remove(self, triple):
+        self.overlay.remove(triple)
+
+    def __iadd__(self, other):
+        return self.overlay.__iadd__(other)
+
+    def __isub__(self, other):
+        return self.overlay.__isub__(other)
+
+    def contexts(self, triple=None):
+        assert isinstance(self.base_graph, ConjunctiveGraph)
+        for context in self.base_graph.contexts(triple):
+            yield GraphOverlay(
+                context, self.overlay.get_context(context.identifier))
+
+
 class InferenceStore(object):
     def __init__(self, ontology_root=DEFAULT_ROOT):
         self.ontology_root = ontology_root
@@ -54,7 +97,6 @@ class InferenceStore(object):
                 graph.remove(triple)
         assert not len(graph)
 
-    @abstractmethod
     def load_ontology(self, reload=False):
         self.ontology = self.get_graph()
         if reload:
@@ -99,7 +141,6 @@ class InferenceStore(object):
     def getSuperProperties(self, cls):
         return self.ontology.transitive_objects(cls, RDFS.subPropertyOf)
 
-
     @abstractmethod
     def get_inference(self, graph):
         return graph
@@ -109,7 +150,8 @@ class SimpleInferenceStore(InferenceStore):
     """A simple inference engine that adds class closures"""
     def add_ontologies(self, rules=CATALYST_RULES):
         super(SimpleInferenceStore, self).add_ontologies(rules)
-        self.enrichOntology()
+        self.base_ontology = self.ontology
+        self.ontology = self.enrichOntology()
 
     @staticmethod
     def addTransitiveClosure(graph, property):
@@ -137,11 +179,12 @@ class SimpleInferenceStore(InferenceStore):
                         graph.add(t)
 
     def enrichOntology(self):
-        graph = self.ontology
+        graph = self.rich_ontology = GraphOverlay(self.ontology)
         self.addTransitiveClosure(graph, RDFS.subPropertyOf)
         self.addTransitiveClosure(graph, RDFS.subClassOf)
         self.addInstanceStatements(graph, RDFS.Class, RDFS.subClassOf)
         self.addInstanceStatements(graph, RDF.Property, RDFS.subPropertyOf)
+        return graph
 
     def add_inheritance(self, graph, root_class, sub_property):
         changes = False
@@ -174,10 +217,15 @@ class SimpleInferenceStore(InferenceStore):
         return changes
 
     def get_inference(self, graph):
+        composite = GraphOverlay(graph)
         if isinstance(graph, ConjunctiveGraph):
-            for g in graph.contexts():
-                self.get_inference(g)
-            return
+            for g in composite.contexts():
+                self.calc_inference(g)
+        else:
+            self.calc_inference(composite)
+        return composite
+
+    def calc_inference(self, graph):
         first = changes = True
         while first or changes:
             if first or changes:
@@ -204,6 +252,18 @@ class SimpleInferenceStore(InferenceStore):
                 if t not in graph:
                     graph.add(t)
         self.add_inheritance(graph, RDFS.Class, RDFS.subClassOf)
+
+    def getDirectSubClasses(self, cls):
+        return self.base_ontology.subjects(RDFS.subClassOf, cls)
+
+    def getDirectSuperClasses(self, cls):
+        return self.base_ontology.objects(cls, RDFS.subClassOf)
+
+    def getDirectSubProperties(self, cls):
+        return self.base_ontology.subjects(RDFS.subPropertyOf, cls)
+
+    def getDirectSuperProperties(self, cls):
+        return self.base_ontology.objects(cls, RDFS.subPropertyOf)
 
 
 class FuXiInferenceStore(InferenceStore):
