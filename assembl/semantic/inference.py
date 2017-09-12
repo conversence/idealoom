@@ -9,7 +9,7 @@ from abc import abstractmethod
 import requests
 from rdflib import Graph, URIRef, ConjunctiveGraph, RDF, RDFS, OWL
 from rdflib.graph import ReadOnlyGraphAggregate
-
+from rdflib_jsonld.context import Context
 
 REMOTE_ROOT = URIRef('http://purl.org/catalyst/')
 DEFAULT_ROOT = path.abspath(path.join(path.dirname(__file__), 'ontology')) + "/"
@@ -129,6 +129,11 @@ class InferenceStore(object):
     def add_ontology(self, source, format='turtle'):
         self.ontology.parse(source, format=format)
 
+
+    def ontology_classes(self):
+        return [c for c in self.ontology.subjects(
+            RDF.type, RDFS.Class) if isinstance(c, URIRef)]
+
     def getSubClasses(self, cls):
         return self.ontology.transitive_subjects(RDFS.subClassOf, cls)
 
@@ -152,6 +157,39 @@ class SimpleInferenceStore(InferenceStore):
         super(SimpleInferenceStore, self).add_ontologies(rules)
         self.base_ontology = self.ontology
         self.ontology = self.enrichOntology()
+        ontology_root = self.ontology_root
+        if ontology_root[:4] not in ('file', 'http'):
+            ontology_root = 'file:' + ontology_root
+        self.context = Context(ontology_root + 'context.jsonld')
+
+    def ontology_inheritance(self, base_classes=()):
+        classes = self.ontology_classes()
+        class_terms = {c: self.context.find_term(str(c)) for c in classes}
+        class_terms = {c: t for (c, t) in class_terms.items() if t}
+        inheritance = {}
+        for cls, term in class_terms.items():
+            super = self.getDirectSuperClasses(cls)
+            super = [class_terms[k].name for k in super if k in class_terms]
+            if super:
+                inheritance[term.name] = super
+        if base_classes:
+            cache = {}
+            def is_under_base(cls):
+                if cls not in cache:
+                    clsuri = URIRef(self.context.expand(cls))
+                    for kls in self.getSuperClasses(clsuri):
+                        klst = class_terms.get(kls, None)
+                        if klst and klst.name in base_classes:
+                            cache[cls] = True
+                            break
+                    else:
+                        cache[cls] = False
+                return cache[cls]
+            inheritance = {cls: [k for k in supers if is_under_base(k)]
+                           for (cls, supers) in inheritance.items()
+                           if is_under_base(cls)}
+            inheritance = {cls: supers for (cls, supers) in inheritance.items() if supers}
+        return inheritance
 
     @staticmethod
     def addTransitiveClosure(graph, property):
