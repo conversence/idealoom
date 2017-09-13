@@ -5,6 +5,7 @@
 import re
 from datetime import datetime
 import logging
+from pprint import pprint
 
 from pyramid.events import subscriber, BeforeRender
 from pyramid.security import (
@@ -145,7 +146,7 @@ def auto_subscribe(backend, social, user, *args, **kwargs):
 
 
 def print_details(backend, details, *args, **kwargs):
-    print details, args, kwargs
+    pprint(details, args, kwargs)
 
 
 class AssemblStrategy(PyramidStrategy):
