@@ -86,7 +86,7 @@
     "url-loader": "~0.5.7",
     "watchify": "~3.9.0",
     "webpack": "~3.5",
-    "webpack-dashboard": "^1.0.0-2",
-    "webpack-dev-server": "~2.7"
+    "webpack-dashboard": "^1.0.0-6",
+    "webpack-dev-server": "~2.8"
   }
 }
