@@ -57,7 +57,7 @@ def bootstrap_db_data(db, mark=True):
         Permission, Role, IdentityProvider, LocaleLabel, URIRefDb)
     from assembl.lib.database_functions import ensure_functions
     session = db()
-    for cls in (Permission, Role, IdentityProvider, LocaleLabel):
+    for cls in (Permission, Role, IdentityProvider, LocaleLabel, URIRefDb):
         cls.populate_db(session)
     ensure_functions(session)
     if mark:

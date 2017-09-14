@@ -10,6 +10,7 @@ from ..semantic.namespaces import *
 base_urirefs = [
     IDEA.GenericIdeaNode,
     IDEA.InclusionRelation,
+    ASSEMBL.RootIdea,
 ]
 
 
@@ -49,10 +50,11 @@ class URIRefDb(Base):
         existing = {r.id: r.val for r in existing}
         missing = []
         for (num, uriref) in enumerate(base_urirefs):
+            num += 1  # counting from 1
             if num in existing:
                 assert uriref == existing[num]
             else:
-                missing.append(cls(id=num + 1, val=uriref))
+                missing.append(cls(id=num, val=uriref))
         if missing:
             db.bulk_save_objects(missing)
         maxid = db.query(functions.max(cls.id)).one()[0] or 0

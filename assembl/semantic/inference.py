@@ -334,6 +334,16 @@ class FuXiInferenceStore(InferenceStore):
         return network.inferredFacts
 
 
+_base_inference_store = None
+
+def get_inference_store():
+    global _base_inference_store
+    if _base_inference_store is None:
+        _base_inference_store = SimpleInferenceStore()
+        _base_inference_store.load_ontology()
+    return _base_inference_store
+
+
 if __name__ == '__main__':
     f = FuXiInferenceStore(LOCAL_ROOT)
     f.add_ontologies()

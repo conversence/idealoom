@@ -40,6 +40,7 @@ from ..lib.utils import get_global_base_url
 from ..nlp.wordcounter import WordCounter
 from . import DiscussionBoundBase, HistoryMixinWithOrigin
 from .discussion import Discussion
+from .uriref import URIRefDb
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..auth import (
     CrudPermissions, P_READ, P_ADMIN_DISC, P_EDIT_IDEA,
@@ -150,8 +151,9 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
     __external_typename = "GenericIdeaNode"
     ORPHAN_POSTS_IDEA_ID = 'orphan_posts'
     sqla_type = Column(String(60), nullable=False)
-    rdf_type = Column(
-        String(60), nullable=False, server_default='idea:GenericIdeaNode')
+    rdf_type_id = Column(
+        Integer, ForeignKey(URIRefDb.id),
+        server_default=str(URIRefDb.index_of(IDEA.GenericIdeaNode)))
 
     long_title = Column(
         UnicodeText,
@@ -213,7 +215,7 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
         return [
             QuadMapPatternS(
                 None, RDF.type,
-                IriClass(VirtRDF.QNAME_ID).apply(Idea.rdf_type),
+                IriClass(VirtRDF.QNAME_ID).apply(Idea.rdf_type_db.val),
                 name=QUADNAMES.class_Idea_class),
             QuadMapPatternS(
                 None, FOAF.homepage,
@@ -240,6 +242,12 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
         'target_links', 'target',
         creator=lambda idea: IdeaLink(target=idea))
 
+    rdf_type_db = relationship(URIRefDb)
+
+    @property
+    def rdf_type_url(self):
+        return self.rdf_type_db.val
+
     def get_children(self):
         return self.db.query(Idea).join(
             IdeaLink, (IdeaLink.target_id == Idea.id)
@@ -262,7 +270,6 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
     @property
     def children_uris(self):
         return [Idea.uri_generic(l.target_id) for l in self.target_links]
-
 
     @property
     def widget_add_post_endpoint(self):
@@ -996,6 +1003,11 @@ class RootIdea(Idea):
         'polymorphic_identity': 'root_idea',
     }
 
+
+    def __init__(self, *args, **kwargs):
+        kwargs['rdf_type_id'] = 3
+        super(RootIdea, self).__init__(*args, **kwargs)
+
     @property
     def num_posts(self):
         """ In the root idea, num_posts is the count of all non-deleted mesages in the discussion """
@@ -1068,8 +1080,9 @@ class IdeaLink(HistoryMixinWithOrigin, DiscussionBoundBase):
     __tablename__ = 'idea_idea_link'
     __external_typename = "InclusionRelation"
     rdf_class = IDEA.InclusionRelation
-    rdf_type = Column(
-        String(60), nullable=False, server_default='idea:InclusionRelation')
+    rdf_type_id = Column(
+            Integer, ForeignKey('uriref.id'),
+            server_default=str(URIRefDb.index_of(IDEA.InclusionRelation)))
     source_id = Column(
         Integer, ForeignKey(
             'idea.id', ondelete="CASCADE", onupdate="CASCADE"),
@@ -1109,6 +1122,12 @@ class IdeaLink(HistoryMixinWithOrigin, DiscussionBoundBase):
     order = Column(
         Float, nullable=False, default=0.0,
         info={'rdf': QuadMapPatternS(None, ASSEMBL.link_order)})
+
+    rdf_type_db = relationship(URIRefDb)
+
+    @property
+    def rdf_type_url(self):
+        return self.rdf_type_db.val
 
     def populate_from_context(self, context):
         if not(self.source or self.source_ts or self.source_id):
@@ -1161,7 +1180,7 @@ class IdeaLink(HistoryMixinWithOrigin, DiscussionBoundBase):
                 name=QUADNAMES.col_pattern_IdeaLink_source_id
                 ),
             QuadMapPatternS(
-                None, RDF.type, IriClass(VirtRDF.QNAME_ID).apply(IdeaLink.rdf_type),
+                None, RDF.type, IriClass(VirtRDF.QNAME_ID).apply(IdeaLink.rdf_type_db.val),
                 name=QUADNAMES.class_IdeaLink_class),
         ]
 

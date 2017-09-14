@@ -96,10 +96,12 @@ class LocaleLabel(Base):
             names = json.load(f)
         locales = {x[0] for x in names}.union({x[1] for x in names})
         existing = set(db.query(cls.named_locale, cls.locale_of_label).all())
+        missing = []
         for (lcode, tcode, name) in names:
             if (lcode, tcode) not in existing:
-                cls.default_db.add(cls(
+                missing.append(cls(
                     named_locale=lcode, locale_of_label=tcode, name=name))
+        db.bulk_save_objects(missing)
         db.flush()
 
     @classmethod
