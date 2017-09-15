@@ -47,6 +47,18 @@ class URIRefDb(Base):
         return r
 
     @classmethod
+    def get_or_create_from_curie(cls, curie, session=None):
+        ctx = jsonld_context()
+        return cls.get_or_create(ctx.expand(curie), session=session)
+
+    @classmethod
+    def get_or_create_from_ctx(cls, ctx_name, session=None):
+        ctx = jsonld_context()
+        term = ctx.terms.get(ctx_name, None)
+        if term is not None:
+            return cls.get_or_create(term.id, session=session)
+
+    @classmethod
     def index_of(cls, uri_ref):
         index =  cls.base_uriref_nums.get(uri_ref, None)
         if index is not None:

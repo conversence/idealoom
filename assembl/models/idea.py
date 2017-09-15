@@ -248,6 +248,26 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
     def rdf_type_url(self):
         return self.rdf_type_db.val
 
+    @rdf_type_url.setter
+    def rdf_type_url(self, val):
+        self.rdf_type_db = URIRefDb.get_or_create(val, self.db)
+
+    @property
+    def rdf_type(self):
+        return self.rdf_type_db.as_curie
+
+    @rdf_type.setter
+    def rdf_type(self, val):
+        self.rdf_type_db = URIRefDb.get_or_create_from_curie(val, self.db)
+
+    @property
+    def rdf_type_ctx(self):
+        return self.rdf_type_db.as_context
+
+    @rdf_type_ctx.setter
+    def rdf_type_ctx(self, val):
+        self.rdf_type_db = URIRefDb.get_or_create_from_ctx(val, self.db)
+
     def get_children(self):
         return self.db.query(Idea).join(
             IdeaLink, (IdeaLink.target_id == Idea.id)
@@ -1128,6 +1148,26 @@ class IdeaLink(HistoryMixinWithOrigin, DiscussionBoundBase):
     @property
     def rdf_type_url(self):
         return self.rdf_type_db.val
+
+    @rdf_type_url.setter
+    def rdf_type_url(self, val):
+        self.rdf_type_db = URIRefDb.get_or_create(val, self.db)
+
+    @property
+    def rdf_type(self):
+        return self.rdf_type_db.as_curie
+
+    @rdf_type.setter
+    def rdf_type(self, val):
+        self.rdf_type_db = URIRefDb.get_or_create_from_curie(val, self.db)
+
+    @property
+    def rdf_type_ctx(self):
+        return self.rdf_type_db.as_context
+
+    @rdf_type_ctx.setter
+    def rdf_type_ctx(self, val):
+        self.rdf_type_db = URIRefDb.get_or_create_from_ctx(val, self.db)
 
     def populate_from_context(self, context):
         if not(self.source or self.source_ts or self.source_id):
