@@ -1,14 +1,14 @@
 pip==9.0.1
-setuptools==36.4.0
+setuptools==36.5.0
 alabaster==0.7.10
 alembic==0.9.5
-amqp==2.2.1
+amqp==2.2.2
 anyjson==0.3.3
 anykeystore==0.2
 argh==0.26.2
 # Do not specify argparse, jenkins chokes on system version.
 # argparse==1.2.2
-Babel==2.5.0
+Babel==2.5.1
 -e git+https://github.com/conversence/Beaker.git@assembl#egg=Beaker
 beautifulsoup4==4.6.0
 billiard==3.5.0.3
@@ -102,7 +102,7 @@ pyIsEmail  # 1.3.1 was pushed to pypi as "v1.3.1", which confuses pip.
 dnspython==1.15.0   # must come after pyisemail?
 PyJWT==1.5.3
 pylibmc==1.5.2
-pyOpenSSL==17.2.0
+pyOpenSSL==17.3.0
 pyparsing==2.2.0
 # Until https://github.com/SurveyMonkey/pyramid_autodoc/pull/12 is merged
 -e git+https://github.com/matthewnorman/pyramid_autodoc@sphinx_161_no_domains_v2#egg=pyramid_autodoc
