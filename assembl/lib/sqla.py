@@ -582,14 +582,23 @@ class BaseOps(object):
         return inheritance
 
     @staticmethod
-    def get_json_inheritance_for(*classnames):
-        """Return :py:meth:`get_inheritance` as a json string"""
+    def get_inheritance_for(*classnames, with_ontology=True):
+        """Return :py:meth:`get_inheritance` for some classes"""
         inheritance = {}
         classnames = set(classnames)
         for name in classnames:
             cls = get_named_class(name)
             inheritance.update(cls.get_inheritance())
-        return dumps(inheritance)
+        if with_ontology:
+            from assembl.semantic.inference import get_inference_store
+            store = get_inference_store()
+            inheritance = store.combined_inheritance(inheritance)
+        return inheritance
+
+    @staticmethod
+    def get_json_inheritance_for(*classnames, with_ontology=True):
+        """Return :py:meth:`get_inheritance` as a json string"""
+        return dumps(Base.get_inheritance_for(*classnames, with_ontology=with_ontology))
 
     retypeable_as = ()
     """If it is possible to mutate the class of this object after its creation,

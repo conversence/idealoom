@@ -1,4 +1,7 @@
 'use strict';
+
+var _ = require('underscore');
+
 /**
  * 
  * @module app.utils.types
@@ -85,21 +88,21 @@ Utilities for javascript to access python inheritance relationships
     if (this.inheritance === undefined)
         return type;
     while (this.inheritance[type] !== undefined) {
-      type = this.inheritance[type];
+      type = this.inheritance[type][0];
     }
 
     return type;
   },
   isInstance: function(type, parentType) {
-    if (this.inheritance === undefined)
-        return type == parentType;
-    while (this.inheritance[type] !== undefined) {
-      if (type == parentType)
-          return true;
-      type = this.inheritance[type];
+    var that = this;
+    if (type == parentType)
+      return true;
+    if (this.inheritance !== undefined && this.inheritance[type] !== undefined) {
+      return _.any(this.inheritance[type], function(t) {
+        return that.isInstance(t, parentType);
+      });
     }
-
-    return type == parentType;
+    return false;
   }
 };
 Types.initInheritance();
