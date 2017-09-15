@@ -122,7 +122,8 @@ def _get_ideas_real(request, view_def=None, ids=None, user_id=None):
     ideas = ideas.filter(and_(*Idea.base_conditions()))
     ideas = ideas.options(
         joinedload_all(Idea.source_links),
-        joinedload_all(Idea.has_showing_widget_links),
+        joinedload_all(Idea.widget_links),
+        joinedload_all(Idea.attachments),
         undefer(Idea.num_children))
 
     permissions = request.permissions
