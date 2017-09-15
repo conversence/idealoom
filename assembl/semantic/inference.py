@@ -10,7 +10,7 @@ import requests
 from rdflib import Graph, URIRef, ConjunctiveGraph, RDF, RDFS, OWL
 from rdflib.graph import ReadOnlyGraphAggregate
 
-from . import jsonld_context
+from . import jsonld_context, DEFAULT_ROOT
 
 log = logging.getLogger(__name__)
 
@@ -188,6 +188,33 @@ class SimpleInferenceStore(InferenceStore):
                            for (cls, supers) in inheritance.items()
                            if is_under_base(cls)}
             inheritance = {cls: supers for (cls, supers) in inheritance.items() if supers}
+        return inheritance
+
+    def combined_inheritance(self, base_inheritance):
+        base_classes = set(base_inheritance.keys()).union(base_inheritance.values())
+        inheritance = self.ontology_inheritance(base_classes)
+        for base_cls, super_cls in base_inheritance.items():
+            if base_cls in inheritance:
+                ontology_supers = inheritance[base_cls]
+                if super_cls not in ontology_supers:
+                    import pdb; pdb.set_trace()
+                    # super_cls is a subclass of (some) ontology supers?
+                    def is_base_super(supc, subc):
+                        while subc:
+                            if supc == subc:
+                                return True
+                            subc = base_inheritance.get(subc, None)
+                    inheritance[base_cls] = [supc for supc in ontology_supers if not is_base_super(supc, super_cls)]
+                    # super_cls is a superclass of (any) ontology supers?
+                    def is_onto_super(supc, subc):
+                        if subc:
+                            if supc == subc:
+                                return True
+                            return any((is_onto_super(supc, subsubc) for subsubc in inheritance.get(subc, ())))
+                    if not any((is_onto_super(super_cls, subc) for subc in ontology_supers)):
+                        inheritance[base_cls].append(super_cls)
+            else:
+                inheritance[base_cls] = [super_cls]
         return inheritance
 
     @staticmethod
