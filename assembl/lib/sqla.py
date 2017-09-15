@@ -582,7 +582,7 @@ class BaseOps(object):
         return inheritance
 
     @staticmethod
-    def get_inheritance_for(*classnames, with_ontology=True):
+    def get_inheritance_for(classnames, with_ontology=True):
         """Return :py:meth:`get_inheritance` for some classes"""
         inheritance = {}
         classnames = set(classnames)
@@ -596,9 +596,9 @@ class BaseOps(object):
         return inheritance
 
     @staticmethod
-    def get_json_inheritance_for(*classnames, with_ontology=True):
+    def get_json_inheritance_for(classnames, with_ontology=True):
         """Return :py:meth:`get_inheritance` as a json string"""
-        return dumps(Base.get_inheritance_for(*classnames, with_ontology=with_ontology))
+        return dumps(Base.get_inheritance_for(classnames, with_ontology=with_ontology))
 
     retypeable_as = ()
     """If it is possible to mutate the class of this object after its creation,
