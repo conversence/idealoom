@@ -614,6 +614,33 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
             "default": False
         },
 
+        # Idea and link types
+        {
+            "id": "idea_typology",
+            "name": _("Idea Typology"),
+            "value_type": "json",
+            "description": _(
+                "Idea types, must be present in ontology"),
+            "allow_user_override": None,
+            "modification_permission": P_ADMIN_DISC,
+            # "frontend_validator_function": func_name...?,
+            # "backend_validator_function": func_name...?,
+            "default": {}
+        },
+
+        # Extra CSS
+        {
+            "id": "extra_css",
+            "name": _("Extra CSS"),
+            "value_type": "text",
+            "description": _("CSS"),
+            "allow_user_override": None,
+            "modification_permission": P_ADMIN_DISC,
+            # "frontend_validator_function": func_name...?,
+            # "backend_validator_function": func_name...?,
+            "default": ""
+        },
+
         # Configuration of the visualizations shown in the CI Dashboard
         {
             "id": "ci_dashboard_url",

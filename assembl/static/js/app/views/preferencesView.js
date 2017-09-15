@@ -944,6 +944,7 @@ var DiscussionPreferencesView = PreferencesView.extend({
     PreferencesView.apply(this, arguments);
   },
   initialize: function() {
+    this.setLoading(true);
     var that = this,
         collectionManager = new CollectionManager();
     collectionManager.getDiscussionPreferencePromise().then(function(prefs) {
@@ -969,6 +970,7 @@ var DiscussionPreferencesView = PreferencesView.extend({
  */
 var GlobalPreferencesView = PreferencesView.extend({
   constructor: function GlobalPreferencesView() {
+    this.setLoading(true);
     PreferencesView.apply(this, arguments);
   },
   initialize: function() {
@@ -999,6 +1001,7 @@ var UserPreferencesView = PreferencesView.extend({
     PreferencesView.apply(this, arguments);
   },
   initialize: function() {
+    this.setLoading(true);
     var that = this,
         collectionManager = new CollectionManager();
     collectionManager.getUserPreferencePromise().then(function(prefs) {

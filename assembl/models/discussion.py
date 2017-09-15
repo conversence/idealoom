@@ -436,6 +436,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
             role = self.db.query(Role).filter_by(name=role_name).one()
             template = UserTemplate(for_role=role, discussion=self)
             self.db.add(template)
+            self.db.flush()
             subs, changed = template.get_notification_subscriptions_and_changed(on_thread)
             self.db.flush()
         return template, changed

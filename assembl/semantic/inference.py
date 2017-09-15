@@ -329,6 +329,21 @@ class SimpleInferenceStore(InferenceStore):
     def getDirectSuperProperties(self, cls):
         return self.base_ontology.objects(cls, RDFS.subPropertyOf)
 
+    def cls_to_ctx(self, cls):
+        t = self.context.find_term(str(cls))
+        if t:
+            return t.name
+
+    def getSubClassesCtx(self, cls):
+        cls = URIRef(self.context.expand(cls))
+        return list(filter(None, [
+            self.cls_to_ctx(cls) for cls in self.getSubClasses(cls)]))
+
+    def getSuperClassesCtx(self, cls):
+        cls = URIRef(self.context.expand(cls))
+        return list(filter(None, [
+            self.cls_to_ctx(cls) for cls in self.getSuperClasses(cls)]))
+
 
 class FuXiInferenceStore(InferenceStore):
     def __init__(self, ontology_root=DEFAULT_ROOT, use_owl=False):
