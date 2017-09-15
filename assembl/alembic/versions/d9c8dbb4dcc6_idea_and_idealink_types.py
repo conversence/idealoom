@@ -15,7 +15,7 @@ import sqlalchemy as sa
 import transaction
 
 from assembl.lib.sqla import mark_changed
-from assembl.semantic.inference import get_inference_store
+from assembl.semantic import jsonld_context
 from assembl.lib import config
 
 
@@ -41,7 +41,7 @@ def upgrade(pyramid_env):
             """SELECT id, rdf_type FROM idea
             WHERE rdf_type != 'idea:GenericIdeaNode'"""))
         if different:
-            ctx = get_inference_store().context
+            ctx = jsonld_context()
             missing = [{"id": id, "rdf_type_id": m.URIRefDb.get_or_create(
                             ctx.expand(rdf_type)).id}
                         for id, rdf_type in different]
@@ -51,7 +51,7 @@ def upgrade(pyramid_env):
             """SELECT id, rdf_type FROM idea_idea_link
             WHERE rdf_type != 'idea:InclusionRelation'"""))
         if different:
-            ctx = get_inference_store().context
+            ctx = jsonld_context()
             missing = [{"id": id, "rdf_type_id": m.URIRefDb.get_or_create(
                             ctx.expand(rdf_type)).id}
                         for id, rdf_type in different]
@@ -82,7 +82,7 @@ def downgrade(pyramid_env):
             WHERE idea.rdf_type_id != 1"""))
         db.execute("UPDATE idea SET rdf_type_id=3 WHERE sqla_type='root_idea'")
         if different:
-            ctx = get_inference_store().context
+            ctx = jsonld_context()
             missing = [{"id": id, "rdf_type": ctx.shrink_iri(uri)}
                         for id, uri in different]
             db.bulk_update_mappings(m.Idea.__mapper__, missing)
@@ -92,7 +92,7 @@ def downgrade(pyramid_env):
             JOIN uriref ON (rdf_type_id=uriref.id)
             WHERE idea_idea_link.rdf_type_id != 2"""))
         if different:
-            ctx = get_inference_store().context
+            ctx = jsonld_context()
             missing = [{"id": id, "rdf_type": ctx.shrink_iri(uri)}
                         for id, uri in different]
             db.bulk_update_mappings(m.IdeaLink.__mapper__, missing)

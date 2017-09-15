@@ -4,6 +4,7 @@ from sqlalchemy.sql import functions
 from ..lib.sqla_types import URIRefString
 from . import Base
 from ..semantic.namespaces import *
+from ..semantic import jsonld_context
 
 
 # Base values. Only ever append to this, order cannot be changed
@@ -23,6 +24,18 @@ class URIRefDb(Base):
     _protected_id = 1000
 
     base_uriref_nums = {uriref: num + 1 for (num, uriref) in enumerate(base_urirefs)}
+
+    @property
+    def as_curie(self):
+        ctx = jsonld_context()
+        return ctx.shrink_iri(self.val)
+
+    @property
+    def as_context(self):
+        ctx = jsonld_context()
+        t = ctx.find_term(str(self.val))
+        if t:
+            return t.name
 
     @classmethod
     def get_or_create(cls, uri_ref, session=None):

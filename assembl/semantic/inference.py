@@ -9,10 +9,9 @@ from abc import abstractmethod
 import requests
 from rdflib import Graph, URIRef, ConjunctiveGraph, RDF, RDFS, OWL
 from rdflib.graph import ReadOnlyGraphAggregate
-from rdflib_jsonld.context import Context
 
-REMOTE_ROOT = URIRef('http://purl.org/catalyst/')
-DEFAULT_ROOT = path.abspath(path.join(path.dirname(__file__), 'ontology')) + "/"
+from . import jsonld_context
+
 log = logging.getLogger(__name__)
 
 CATALYST_RULES = [
@@ -160,7 +159,7 @@ class SimpleInferenceStore(InferenceStore):
         ontology_root = self.ontology_root
         if ontology_root[:4] not in ('file', 'http'):
             ontology_root = 'file:' + ontology_root
-        self.context = Context(ontology_root + 'context.jsonld')
+        self.context = jsonld_context()
 
     def ontology_inheritance(self, base_classes=()):
         classes = self.ontology_classes()
