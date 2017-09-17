@@ -60,12 +60,12 @@ def init_key_for_classes(db):
     global fn_for_classes, user_refs, special_extra_tests
     from assembl.models import (
         AgentProfile, User, Permission, Role, Webpage, Action, LocalUserRole,
-        IdentityProvider, EmailAccount, WebLinkAccount, Preferences, URLRefDb,
+        IdentityProvider, EmailAccount, WebLinkAccount, Preferences, URIRefDb,
         NotificationSubscription, DiscussionPerUserNamespacedKeyValue)
     fn_for_classes = {
         AgentProfile: partial(find_or_create_agent_profile, db),
         User: partial(find_or_create_agent_profile, db),
-        URLRefDb: partial(find_or_create_urlref, db),
+        URIRefDb: partial(find_or_create_urlref, db),
         Webpage: partial(find_or_create_object_by_keys, db, ['url']),
         Permission: partial(find_or_create_object_by_keys, db, ['name']),
         Preferences: partial(find_or_create_object_by_keys, db, ['name']),
@@ -128,11 +128,11 @@ def find_or_create_provider_account(db, account):
 
 
 def find_or_create_urlref(db, urlref):
-    from assembl.models import URLRefDb
-    assert isinstance(urlref, URLRefDb)
-    to_urlref = db.query(URLRefDb).filter_by(val=urlref.val).first()
+    from assembl.models import URIRefDb
+    assert isinstance(urlref, URIRefDb)
+    to_urlref = db.query(URIRefDb).filter_by(val=urlref.val).first()
     if to_urlref is None:
-        to_urlref = URLRefDb(val=urlref.val)
+        to_urlref = URIRefDb(val=urlref.val)
         db.add(to_urlref)
     return to_urlref
 
