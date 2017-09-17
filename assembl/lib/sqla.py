@@ -1518,6 +1518,9 @@ class BaseOps(object):
                                     self.__class__.__name__)
                     elif isinstance(value, col.type.python_type):
                         setattr(self, key, value)
+                    elif isinstance(value, int) and col.type.python_type == float:
+                        # upcast
+                        setattr(self, key, float(value))
                     else:
                         assert False, "can't assign json type %s"\
                             " to column %s of class %s" % (
