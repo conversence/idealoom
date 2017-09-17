@@ -1,6 +1,6 @@
 """Cornice API for ideas"""
 from collections import defaultdict
-import datetime
+from datetime import datetime
 
 import simplejson as json
 from cornice import Service
