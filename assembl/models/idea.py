@@ -337,7 +337,7 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
             inclusive=True):
         if cls.using_virtuoso:
             if isinstance(target_id, list):
-                raise NotImplemented()
+                raise NotImplementedError()
             sql = text(
                 """SELECT transitive t_in (1) t_out (2) T_DISTINCT T_NO_CYCLES
                     source_id, target_id FROM idea_idea_link
@@ -372,7 +372,7 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
             if isinstance(target_id, int):
                 target_id = literal_column(str(target_id), Integer)
             elif isinstance(target_id, list):
-                raise NotImplemented()
+                raise NotImplementedError()
                 # postgres: select * from unnest(ARRAY[1,6,7]) as id
             else:
                 select_exp = select_exp.union(
@@ -762,7 +762,7 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
 
     @classmethod
     def invalidate_ideas(cls, discussion_id, post_id):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     @classmethod
     def get_idea_ids_showing_post(cls, post_id):

@@ -639,7 +639,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
             # if is_sink:
             #     post_id = data.get('post_id', None)
             #     fb_post_id = data.get('facebook_post_id', None)
-            raise NotImplemented("TODO")
+            raise NotImplementedError("TODO")
             post_id = source.sink_post_id
             cs = ContentSourceIDs(source=source,
                                   post_id=post_id,

@@ -678,7 +678,7 @@ def modify_user_language_preference(request):
         else:
             return updated.generic_json(view, user_id, permissions)
 
-    except NotImplemented:
+    except NotImplementedError:
         raise HTTPNotImplemented()
     except ObjectNotUniqueError as e:
         raise JSONError(str(e), code=409)

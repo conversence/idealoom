@@ -203,7 +203,7 @@ def instance_put_json(request, json_data=None):
         else:
             return updated.generic_json(view, user_id, permissions)
 
-    except NotImplemented:
+    except NotImplementedError:
         raise HTTPNotImplemented()
 
 
