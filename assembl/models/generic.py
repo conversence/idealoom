@@ -8,6 +8,7 @@ from datetime import datetime
 import logging
 from abc import abstractmethod
 import re
+import uuid
 
 from sqlalchemy import (
     Column,
@@ -22,6 +23,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship, backref, aliased
 from ..lib.sqla_types import CoerceUnicode
+from ..lib import config
 from sqla_rdfbridge.mapping import PatternIriClass
 
 from ..lib.sqla import (CrudOperation, get_model_watcher, Base)
@@ -221,6 +223,10 @@ class AnnotatorSource(ContentSource):
     __mapper_args__ = {
         'polymorphic_identity': 'annotator_source',
     }
+
+    def generate_message_id(self, source_post_id):
+        return source_post_id or (uuid.uuid1().hex +
+            "_annotator@" + config.get('public_hostname'))
 
 
 class ContentSourceIDs(Base):
