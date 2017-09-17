@@ -133,9 +133,10 @@ var IdeaInIdeaListView = Marionette.View.extend({
   },
 
   serializeData: function() {
-    var data = this.model.toJSON();
+    var data = this.model.toJSON(),
+        model_type = this.model.get('@type');
     _.extend(data, render_data);
-    
+
     data.shortTitle = this.model.getShortTitleDisplayText();
     if (data.longTitle) {
       data.longTitle = ' - ' + data.longTitle.substr(0, 50);
@@ -143,7 +144,7 @@ var IdeaInIdeaListView = Marionette.View.extend({
 
     data.Ctx = Ctx;
     data.idea_css_class = this.model.getCssClassFromId();
-    if(this.model.get('@type') === Types.IDEA) {
+    if (Types.isInstance(model_type, Types.IDEA) && model_type != Types.ROOT_IDEA) {
       var visitorData = this.visitorData,
       render_data = visitorData[this.model.getId()];
       data.inNextSynthesis = this.synthesis.getIdeasCollection().get(this.model.id) !== undefined;

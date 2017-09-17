@@ -46,7 +46,6 @@ var IdeaPanel = AssemblPanel.extend({
 
   initialize: function(options) {
     AssemblPanel.prototype.initialize.apply(this, arguments);
-    this.setLoading(true);
     var that = this, collectionManager = new CollectionManager();
     this.panelWrapper = options.panelWrapper;
 
@@ -104,6 +103,7 @@ var IdeaPanel = AssemblPanel.extend({
       });
 
       if (this.model) {
+        this.setLoading(true);
         //This is a silly hack to go through setIdeaModel properly - benoitg
         var model = this.model;
         this.model = null;
