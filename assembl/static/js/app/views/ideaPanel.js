@@ -46,6 +46,7 @@ var IdeaPanel = AssemblPanel.extend({
 
   initialize: function(options) {
     AssemblPanel.prototype.initialize.apply(this, arguments);
+    this.setLoading(true);
     var that = this, collectionManager = new CollectionManager();
     this.panelWrapper = options.panelWrapper;
 
@@ -112,6 +113,7 @@ var IdeaPanel = AssemblPanel.extend({
   },
   ui: {
     'postIt': '.postitlist',
+    'type_selection': '.js_type_selection',
     'definition': '.js_editDefinitionRegion',
     'longTitle': '.js_editLongTitleRegion',
     'deleteIdea': '.js_ideaPanel-deleteBtn',
@@ -150,8 +152,9 @@ var IdeaPanel = AssemblPanel.extend({
     
     'dragenter': 'onDragEnter', //Fired on drop targets. So when the user is dragging something from anywhere and moving the mouse towards this panel
     'dragover': 'onDragOver', //Fired on drop targets.  Formerly these events were limited to  @ui.postIt, but that resulted in terrible UX.  Let's make the entire idea panel a drop zone
-    'dragleave': 'onDragLeave', //Fired on drop targets.  
-    'drop': 'onDrop', //Fired on drop targets.  
+    'dragleave': 'onDragLeave', //Fired on drop targets.
+    'drop': 'onDrop', //Fired on drop targets.
+    'change @ui.type_selection': 'onTypeSelectionChange',
     'click @ui.closeExtract': 'onSegmentCloseButtonClick',
     'click @ui.clearIdea': 'onClearAllClick',
     'click @ui.deleteIdea': 'onDeleteButtonClick',
@@ -303,15 +306,30 @@ var IdeaPanel = AssemblPanel.extend({
     }
 
     var subIdeas = {},
+        that = this,
         currentUser = Ctx.getCurrentUser(),
         canEdit = currentUser.can(Permissions.EDIT_IDEA) || false,
         canEditNextSynthesis = currentUser.can(Permissions.EDIT_SYNTHESIS),
         direct_link_relative_url = null,
         share_link_url = null,
+        currentTypes = null,
+        currentTypeDescriptions = ['', ''],
+        possibleTypes = [],
+        possibleTypeDescriptions = {},
+        locale = Ctx.getLocale(),
         contributors = undefined;
 
     if (this.model) {
       subIdeas = this.model.getChildren();
+      if (this.parentLink != undefined) {
+        currentTypes = this.model.getCombinedSubtypes(this.parentLink);
+        possibleTypes = this.model.getPossibleCombinedSubtypes(this.parentLink);
+        currentTypeDescriptions = this.model.combinedTypeNamesOf(currentTypes, locale);
+        _.map(possibleTypes, function(types) {
+          var names = that.model.combinedTypeNamesOf(types, locale);
+          possibleTypeDescriptions[types] = names[0] + ' → ' + names[1];
+        });
+      }
 
       direct_link_relative_url = this.model.getRouterUrl({
         parameters: {
@@ -343,6 +361,11 @@ var IdeaPanel = AssemblPanel.extend({
       canAddExtracts: currentUser.can(Permissions.EDIT_EXTRACT), //TODO: This is a bit too coarse
       Ctx: Ctx,
       direct_link_relative_url: direct_link_relative_url,
+      currentTypes: currentTypes,
+      possibleTypes: possibleTypes,
+      possibleTypeDescriptions: possibleTypeDescriptions,
+      linkTypeDescription: currentTypeDescriptions[0],
+      nodeTypeDescription: currentTypeDescriptions[1],
       share_link_url: share_link_url
     };
 
@@ -677,8 +700,9 @@ var IdeaPanel = AssemblPanel.extend({
       var that = this,
       collectionManager = new CollectionManager(),
       fetchPromise = this.model.fetch({ data: $.param({ view: 'contributors'}) });
-      Promise.join(collectionManager.getAllExtractsCollectionPromise(), fetchPromise,
-          function(allExtractsCollection, fetchedJQHR) {
+      Promise.join(collectionManager.getAllExtractsCollectionPromise(),
+                   collectionManager.getAllIdeaLinksCollectionPromise(), fetchPromise,
+          function(allExtractsCollection, allLinksCollection, fetchedJQHR) {
             //View could be gone, or model may have changed in the meantime
             if (that.isRenderedAndNotYetDestroyed() && that.model) {
               that.extractListSubset = new SegmentList.IdeaSegmentListSubset([], {
@@ -687,6 +711,8 @@ var IdeaPanel = AssemblPanel.extend({
               });
               that.listenTo(that.extractListSubset, "add remove reset change", that.renderTemplateGetExtractsLabel);
 
+              // temporary code: single parent link for now.
+              that.parentLink = allLinksCollection.findWhere({ 'target': that.model.id });
               //console.log("The region:", that.segmentList);
               that.setLoading(false);
               that.render();
@@ -695,6 +721,15 @@ var IdeaPanel = AssemblPanel.extend({
 
       );
     },
+
+  onTypeSelectionChange: function(ev) {
+    var vals = ev.target.selectedOptions[0].value.split(/;/, 2);
+    this.model.set('subtype', vals[1]);
+    this.parentLink.set('subtype', vals[0]);
+    // trick: how to make the save atomic?
+    this.model.save();
+    this.parentLink.save();
+  },
 
   deleteCurrentIdea: function() {
     // to be deleted, an idea cannot have any children nor segments

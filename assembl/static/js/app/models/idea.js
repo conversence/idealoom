@@ -286,8 +286,66 @@ var IdeaModel = Base.Model.extend({
     rec(this);
     return ideas.reverse();
   },
+
   /**
-   * Returns the indentantion level
+   * Returns an array of possible linktype;nodetype from a given parent.
+   */
+  getPossibleCombinedSubtypes: function(parentLink) {
+    var preferences = Ctx.getPreferences();
+    if (parentLink.get('target') != this.id) {
+      console.error("this is not my link");
+    } else if (preferences && preferences.idea_typology.ideas) {
+      var preferences = Ctx.getPreferences(),
+          parent =  this.collection.findWhere({ '@id': parentLink.get('source') }),
+          parentSubtype = parent.get('subtype'),
+          typologyParentInfo = preferences.idea_typology.ideas[parentSubtype];
+      if (typologyParentInfo && typologyParentInfo.rules) {
+        var result = [];
+        _.mapObject(typologyParentInfo.rules, function(objectTypes, linkType) {
+          _.map(objectTypes, function(objectType) {
+            result.push(linkType + ';' + objectType);
+          });
+        });
+        return result;
+      }
+    }
+    return ['InclusionRelation;GenericIdeaNode'];
+  },
+
+  getCombinedSubtypes: function(parentLink) {
+    return parentLink.get('subtype') + ';' + this.get('subtype');
+  },
+
+  combinedTypeNamesOf: function(combined, lang) {
+    var preferences = Ctx.getPreferences(),
+        LNTypes = combined.split(/;/, 2),
+        linkName = LNTypes[0], nodeName = LNTypes[1],
+        info = preferences.idea_typology;
+    if (!info) {
+      console.error('No typology!');
+      if (linkName == 'InclusionRelation') {
+        linkName = _('includes');
+      }
+      if (nodeName == 'GenericIdeaNode') {
+        nodeName = _('Unspecifed idea');
+      }
+      return [linkName, nodeName];
+    }
+    try {
+      linkName = info.links[linkName].title[lang];
+    } catch (Exception) {}
+    try {
+      nodeName = info.ideas[nodeName].title[lang];
+    } catch (Exception) {}
+    return [linkName, nodeName];
+  },
+
+  combinedTypeNames: function(parentLink, lang) {
+    return this.combinedPresentationOf(
+      this.getCombinedSubtypes(parentLink), lang);
+  },
+  /**
+   * Returns the indentation level
    * @returns {number}
    * @function app.models.idea.IdeaModel.getLevel
    */

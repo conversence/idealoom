@@ -253,19 +253,19 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
         self.rdf_type_db = URIRefDb.get_or_create(val, self.db)
 
     @property
-    def rdf_type(self):
+    def rdf_type_curie(self):
         return self.rdf_type_db.as_curie
 
-    @rdf_type.setter
-    def rdf_type(self, val):
+    @rdf_type_curie.setter
+    def rdf_type_curie(self, val):
         self.rdf_type_db = URIRefDb.get_or_create_from_curie(val, self.db)
 
     @property
-    def rdf_type_ctx(self):
+    def rdf_type(self):
         return self.rdf_type_db.as_context
 
-    @rdf_type_ctx.setter
-    def rdf_type_ctx(self, val):
+    @rdf_type.setter
+    def rdf_type(self, val):
         self.rdf_type_db = URIRefDb.get_or_create_from_ctx(val, self.db)
 
     def get_children(self):
@@ -1154,19 +1154,19 @@ class IdeaLink(HistoryMixinWithOrigin, DiscussionBoundBase):
         self.rdf_type_db = URIRefDb.get_or_create(val, self.db)
 
     @property
-    def rdf_type(self):
+    def rdf_type_curie(self):
         return self.rdf_type_db.as_curie
 
-    @rdf_type.setter
-    def rdf_type(self, val):
+    @rdf_type_curie.setter
+    def rdf_type_curie(self, val):
         self.rdf_type_db = URIRefDb.get_or_create_from_curie(val, self.db)
 
     @property
-    def rdf_type_ctx(self):
+    def rdf_type(self):
         return self.rdf_type_db.as_context
 
-    @rdf_type_ctx.setter
-    def rdf_type_ctx(self, val):
+    @rdf_type.setter
+    def rdf_type(self, val):
         self.rdf_type_db = URIRefDb.get_or_create_from_ctx(val, self.db)
 
     def populate_from_context(self, context):

@@ -214,6 +214,8 @@ def save_idea(request):
             parent_link.source.send_to_changes()
             parent_link.db.flush()
 
+    if 'subtype' in idea_data:
+        idea.rdf_type = idea_data['subtype']
     idea.send_to_changes()
 
     return {'ok': True, 'id': idea.uri()}
