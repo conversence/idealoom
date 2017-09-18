@@ -172,7 +172,7 @@
         "num_orphan_posts": true,
         "num_synthesis_posts": true
     },
-    "InclusionRelation": {
+    "DirectedIdeaRelation": {
         "target": true,
         "source": true,
         "subtype": "rdf_type",

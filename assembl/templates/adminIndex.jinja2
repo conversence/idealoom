@@ -13,7 +13,7 @@
     {% endif %}
 
     <script type="text/javascript">start_application = true;</script>
-{#     <script type="application/json" id="inheritance-json">{{ discussion.get_json_inheritance_for(['User', 'GenericIdeaNode', 'InclusionRelation', 'Post', 'Widget']) |safe }}</script>
+{#     <script type="application/json" id="inheritance-json">{{ discussion.get_json_inheritance_for(['User', 'GenericIdeaNode', 'DirectedIdeaRelation', 'Post', 'Widget']) |safe }}</script>
  #}
     <script type="application/json" id="login-providers">{{providers_json|safe}}</script>
     {% if user %}

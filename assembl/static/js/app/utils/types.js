@@ -16,7 +16,7 @@ var Types = {
   EXTRACT: 'Excerpt',
   ROOT_IDEA: 'RootIdea',
   IDEA: 'GenericIdeaNode',
-  IDEA_LINK: 'InclusionRelation',
+  IDEA_LINK: 'DirectedIdeaRelation',
   IDEA_CONTENT_LINK: 'IdeaContentLink',
   IDEA_CONTENT_WIDGET_LINK: 'IdeaContentWidgetLink',
   IDEA_CONTENT_POSITIVE_LINK: 'IdeaContentPositiveLink',

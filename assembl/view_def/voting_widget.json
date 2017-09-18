@@ -241,7 +241,7 @@
         "num_orphan_posts": true,
         "num_synthesis_posts": true
     },
-    "InclusionRelation": {
+    "DirectedIdeaRelation": {
         "original_uri": true,
         "target": true,
         "source": true,

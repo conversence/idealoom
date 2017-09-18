@@ -256,7 +256,7 @@
         "root": "'true",
         "parentId": false
     },
-    "InclusionRelation": {
+    "DirectedIdeaRelation": {
         "original_uri": false,
         "target": true,
         "source": true,

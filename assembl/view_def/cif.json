@@ -174,7 +174,7 @@
     "RootIdea": {
         "@extends": "GenericIdeaNode"
     },
-    "InclusionRelation": {
+    "DirectedIdeaRelation": {
         "in_conversation": "&get_discussion",
         "link_order": "order",
         "target_idea": "target",

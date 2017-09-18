@@ -144,7 +144,7 @@
         "parentId": false,
         "root": "'true"
     },
-    "InclusionRelation": {
+    "DirectedIdeaRelation": {
         "source": true,
         "target": true,
         "is_tombstone": true,

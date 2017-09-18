@@ -1098,8 +1098,8 @@ class IdeaLink(HistoryMixinWithOrigin, DiscussionBoundBase):
     Note: it's reversed in the RDF model.
     """
     __tablename__ = 'idea_idea_link'
-    __external_typename = "InclusionRelation"
-    rdf_class = IDEA.InclusionRelation
+    __external_typename = "DirectedIdeaRelation"
+    rdf_class = IDEA.DirectedIdeaRelation
     rdf_type_id = Column(
             Integer, ForeignKey('uriref.id'),
             server_default=str(URIRefDb.index_of(IDEA.InclusionRelation)))
