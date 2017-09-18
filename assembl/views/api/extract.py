@@ -155,8 +155,7 @@ def post_extract(request):
                 cast(AnnotatorSource.name, Unicode) == 'Annotator').first()
             if not source:
                 source = AnnotatorSource(
-                    name='Annotator', discussion=discussion,
-                    type='source')
+                    name='Annotator', discussion=discussion)
             content = Webpage(url=uri, discussion=discussion)
     extract_body = extract_data.get('quote', '')
 
