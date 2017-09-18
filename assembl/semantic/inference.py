@@ -28,9 +28,10 @@ CATALYST_RULES = [
     "catalyst_ibis.ttl",
     # "catalyst_ibis_extra.ttl",
     "catalyst_idea.ttl",
-    # "catalyst_idea_extra.ttl",
+    "catalyst_idea_extra.ttl",
     "catalyst_vote.ttl",
     "assembl_core.ttl",
+    "situation.ttl",
     "version.ttl",
 ]
 
