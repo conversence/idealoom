@@ -589,10 +589,12 @@ class BaseOps(object):
         for name in classnames:
             cls = get_named_class(name)
             inheritance.update(cls.get_inheritance())
+            inheritance[name] = None
         if with_ontology:
             from assembl.semantic.inference import get_inference_store
             store = get_inference_store()
             inheritance = store.combined_inheritance(inheritance)
+        inheritance = {k: v for (k, v) in inheritance.items() if v and v[0]}
         return inheritance
 
     @staticmethod
