@@ -1192,7 +1192,7 @@ def start_edit_fontello_fonts():
 def compile_fontello_fonts():
     """Compile the fontello fonts once you have edited them in Fontello. Run start_edit_fontello_fonts first."""
     from zipfile import ZipFile
-    from io import StringIO
+    from io import BytesIO
     assert are_local(env.hosts), "Meant to be run locally"
     import requests
     font_dir = join(
@@ -1205,7 +1205,7 @@ def compile_fontello_fonts():
     r = requests.get("http://fontello.com/%s/get" % fid)
     if not r.ok:
         raise RuntimeError("Could not get the data")
-    with ZipFile(StringIO(r.content)) as data:
+    with ZipFile(BytesIO(r.content)) as data:
         for name in data.namelist():
             dirname, fname = split(name)
             dirname, subdir = split(dirname)
