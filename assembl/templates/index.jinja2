@@ -97,6 +97,15 @@
 
 {% endblock %}
 
+{% if discussion.preferences.extra_css %}
+{% block extra_css %}
+<style type="text/css">
+{{ discussion.preferences.extra_css | safe }}
+</style>
+{% endblock %}
+{% endif %}
+
+
 {% block backboneTemplates %}
     <div id="templates">
         {% for template in templates %}
