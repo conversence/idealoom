@@ -6,7 +6,7 @@ from cornice import Service
 from pyramid.security import authenticated_userid, Everyone
 from pyramid.httpexceptions import (
     HTTPNotFound, HTTPBadRequest, HTTPForbidden, HTTPServerError,
-    HTTPNoContent)
+    HTTPNoContent, HTTPClientError)
 from sqlalchemy import Unicode
 from sqlalchemy.sql.expression import cast
 from sqlalchemy.orm import joinedload_all
@@ -273,13 +273,26 @@ def delete_extract(request):
     return HTTPNoContent()
 
 
-@search_extracts.get(permission=P_READ)
+@search_extracts.get()
 def do_search_extracts(request):
-    uri = request.GET['uri']
+    uri = request.GET.get('uri', None)
+    if not uri:
+        raise HTTPClientError("Please specify a URI")
     view_def = request.GET.get('view') or 'default'
     discussion = request.context
-    user_id = authenticated_userid(request) or Everyone
-    permissions = request.permissions
+    user_id = authenticated_userid(request)
+    if not user_id:
+        # Straight from annotator
+        token = request.headers.get('X-Annotator-Auth-Token')
+        if token:
+            token = decode_token(
+                token, request.registry.settings['session.secret'])
+            if token:
+                user_id = token['userId']
+    user_id = user_id or Everyone
+    if not user_has_permission(discussion.id, user_id, P_READ):
+        raise HTTPForbidden()
+    permissions = [P_READ]
 
     if not uri:
         raise HTTPBadRequest("Please specify a search uri")
