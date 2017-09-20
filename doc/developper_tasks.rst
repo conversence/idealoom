@@ -18,7 +18,7 @@ Download a copy of a remote database to develop locally
     fab -c configs/develop.rc app_compile #(To make sure the database schema is up to date and restore.  You can also use app_compile_noupdate if you are in a hurry)
     # Grab a coffee...
     exit
-    supervisorctl restart dev:
+    circusctl restart pserve
 
 
 Run tests
@@ -37,7 +37,7 @@ Thereafter:
 
 .. code:: sh
 
-    supervisord
+    circusd circusd.conf
     #(wait for virtuoso to start)
     py.test --cov assembl assembl
 

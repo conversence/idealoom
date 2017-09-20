@@ -17,8 +17,8 @@ redis_host = redis
 memcached_host = memcached
 elasticsearch_host = elasticsearch
 nginx_host = web
-supervisor__autostart_uwsgi = true
-supervisor__autostart_elasticsearch = false
+circus__autostart_uwsgi = true
+circus__autostart_elasticsearch = false
 uwsgi__socket = 0.0.0.0:9000
 uwsgi__processes = 3
 

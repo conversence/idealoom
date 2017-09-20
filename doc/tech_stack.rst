@@ -535,11 +535,9 @@ Operations
 ----------
 
 Administrative tasks are executed both remotely and locally through Fabric_. 
-The various processes that constitute the backend are kept running by 
-Supervisord_. Those two components are also the ones that are blocking the 
-Python 3 transition.
+The various processes that constitute the backend are kept running by Circus_.
 
-Supervisord_
+Circus_
 
 Sentry_
 
@@ -675,7 +673,7 @@ We have used multiple processes rather than threads.
 .. _splinter: https://github.com/cobrateam/splinter
 .. _SQLAlchemy: http://www.sqlalchemy.org/
 .. _sqltap: http://sqltap.inconshreveable.com/
-.. _Supervisord: http://supervisord.org/
+.. _Circus: http://circus.readthedocs.io/en/latest/
 .. _Tornado: http://www.tornadoweb.org/en/stable/
 .. _transaction: http://transaction.readthedocs.org/en/latest
 .. _Underscore: http://underscorejs.org/

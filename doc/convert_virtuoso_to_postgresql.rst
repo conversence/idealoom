@@ -4,7 +4,7 @@ If you have an existing assembl discussion that was defined using virtuoso, you 
 The procedure is as follows:
 
 0. Update your assembl on the virtuoso branch, and run: python setup.py develop
-1. Make sure that both postgresql and virtuoso are running. (postgresql is assumed to be controlled by the system, virtuoso by supervisor.) Stop other assembl processes (use supervisorctl status to see which ones are running and then run supervisorctl stop process_name for all the processes one by one except virtuoso).
+1. Make sure that both postgresql and virtuoso are running. (postgresql is assumed to be controlled by the system, virtuoso by supervisor, before we went to circus.) Stop other assembl processes (use supervisorctl status to see which ones are running and then run supervisorctl stop process_name for all the processes one by one except virtuoso).
 2. Make sure that your local.ini uses virtuoso. (this means sqlalchemy.url value starts with virtuoso://) (If you were using development.ini or production.ini directly, take a slightly older version from git.)
 3. cp local.ini local_virtuoso.ini; cp local.ini local_pg.ini
 4. In the local_pg.ini file, change the following parameters:

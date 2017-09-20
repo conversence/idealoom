@@ -96,7 +96,7 @@ Only the first time you run it:
 .. code:: sh
 
     source venv/bin/activate
-    supervisord
+    circusd circusd.conf
 
 Creating a user the first time you run IdeaLoom (so you have a
 superuser):
@@ -105,7 +105,7 @@ superuser):
 
     assembl-add-user --email your_email@email.com --name "Your Name" --username desiredusername --password yourpassword local.ini
 
-Note: Just running ``$venv/bin/supervisord`` will NOT work, as celery will
+Note: Just running ``$venv/bin/circusd`` will NOT work, as celery will
 run command line tools, thus breaking out of the environment. You need
 to run ``source venv/bin/activate`` from the same terminal before running
 the above
@@ -113,13 +113,13 @@ the above
 Note: If you do not want to ``source activate`` every time, you can hook it in your shell using something like `Autoenv <https://github.com/kennethreitz/autoenv>`_. Another option is to use `VirtualenvWrapper <https://bitbucket.org/virtualenvwrapper/virtualenvwrapper>`_ and its `Helper <https://justin.abrah.ms/python/virtualenv_wrapper_helper.html>`_. At least one of us uses `VirtualFish <https://github.com/adambrenecki/virtualfish>`_ with auto-activation.
 
 
-On subsequent runs, just make sure supervisord is running.
+On subsequent runs, just make sure circusd is running.
 
 Then, start the development server and compass with this command:
 
 .. code:: sh
 
-    supervisorctl start dev:
+    circusctl start pserve webpack
 
 You can now type http://localhost:6543 in your browser and log in using the credentials you created.
 
@@ -158,7 +158,7 @@ A note on vagrant
 If you use vagrant, we have a few processes that expect to use socket
 files in %(here)s. Vagrant does not allow creating sockets in a shared
 folder; so if you insist on using vagrant, make sure to move sockets
-locations. Some are defined in supervisord.conf.tmpl, and changes.socket
+locations. Some are defined in circusd.conf.tmpl, and changes.socket
 is defined in the .ini files.
 
 Updating an environment
@@ -169,22 +169,22 @@ Updating an environment
     cd ~/idealoom
     #Any git operations (ex:  git pull)
     fab -c configs/develop.rc app_compile
-    $venv/bin/supervisorctl start dev:*
+    $venv/bin/circusctl start pserve webpack
 
 You can monitor any of the processes, for example pserve, with these
 commands:
 
 .. code:: sh
 
-    $venv/bin/supervisorctl tail -f dev:pserve
-    $venv/bin/supervisorctl tail -f dev:pserve stderr
+    tail -f var/log/pserve.log
+    tail -f var/log/pserve.err.log
 
 In production:
 
 .. code:: sh
 
     #(Instead of dev:*. You may have to stop dev:*)
-    $venv/bin/supervisorctl start prod:*
+    $venv/bin/circusctl start uwsgi
 
 Updating an environment after switching branch locally (will regenerate
 css, all compiled files, update dependencies, database schema, etc.):

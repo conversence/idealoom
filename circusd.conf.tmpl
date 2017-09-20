@@ -1,0 +1,293 @@
+[circus]
+umask = 022
+virtualenv = %(VIRTUAL_ENV)s
+copy_env = True
+httpd = %(circus_webapp)s
+httpd_port = %(circus_webapp_port)d
+statsd = %(circus_statsd)s
+pidfile = %(here)s/var/run/circusd.pid
+endpoint = ipc://%(here)s/var/run/circus_endpoint
+pubsub_endpoint = ipc://%(here)s/var/run/circus_pubsub
+stats_endpoint = ipc://%(here)s/var/run/circus_stats
+logoutput = %(here)s/var/log/circus.log
+
+[plugin:statsd]
+use = circus.plugins.statsd.FullStats
+host = localhost
+port = 8125
+sample_rate = 1.0
+application_name = idealoom
+
+
+[watcher:celery_imap]
+working_dir = %(here)s
+virtualenv = %(VIRTUAL_ENV)s
+copy_env = True
+cmd = celery worker -E -l info -A assembl.tasks.imap -n imap -c %(IMAP_CELERY_NUM_WORKERS)s -b %(IMAP_CELERY_BROKER)s -Q imap
+autostart = %(autostart_celery_imap)s
+startsecs = 2
+stopasgroup = false
+stopwaitsecs = 60
+# If the process didn't kill it's children after 60 seconds, it's unlikely to
+# ever reap them, so kill them all
+killasgroup = true
+
+[env:celery*]
+LC_CTYPE = %(lcctype)s
+
+[watcher:source_reader]
+working_dir = %(here)s
+virtualenv = %(VIRTUAL_ENV)s
+copy_env = True
+cmd = python -m assembl.tasks.source_reader %(CONFIG_FILE)s
+autostart = %(autostart_source_reader)s
+startsecs = 2
+stopasgroup = false
+stopwaitsecs = 60
+killasgroup = true
+stdout_stream.class = FileStream
+stdout_stream.filename = %(here)s/var/log/source_reader.log
+stdout_stream.max_bytes = 1073741824
+stdout_stream.backup_count = 3
+stderr_stream.class = FileStream
+stderr_stream.filename = %(here)s/var/log/source_reader.err.log
+stderr_stream.max_bytes = 1073741824
+stderr_stream.backup_count = 3
+
+[env:source_reader]
+LC_CTYPE = %(lcctype)s
+
+[watcher:celery_notification_dispatch]
+working_dir = %(here)s
+virtualenv = %(VIRTUAL_ENV)s
+copy_env = True
+cmd = celery worker -E -l info -A assembl.tasks.notification_dispatch -n notification_dispatch -c %(NOTIF_DISPATCH_CELERY_NUM_WORKERS)s -b %(NOTIF_DISPATCH_CELERY_BROKER)s -Q notification_dispatch
+autostart = %(autostart_celery_notification_dispatch)s
+startsecs = 2
+stopasgroup = false
+stopwaitsecs = 60
+# If the process didn't kill it's children after 60 seconds, it's unlikely to
+# ever reap them, so kill them all
+killasgroup = true
+stdout_stream.class = FileStream
+stdout_stream.filename = %(here)s/var/log/celery_notification_dispatch.log
+stdout_stream.max_bytes = 1073741824
+stdout_stream.backup_count = 3
+stderr_stream.class = FileStream
+stderr_stream.filename = %(here)s/var/log/celery_notification_dispatch.err.log
+stderr_stream.max_bytes = 1073741824
+stderr_stream.backup_count = 3
+
+[watcher:celery_notify]
+working_dir = %(here)s
+virtualenv = %(VIRTUAL_ENV)s
+copy_env = True
+cmd = celery worker -E -l info -A assembl.tasks.notify -n notify -c %(NOTIFY_CELERY_NUM_WORKERS)s -b %(NOTIFY_CELERY_BROKER)s -Q notify
+autostart = %(autostart_celery_notify)s
+startsecs = 2
+stopasgroup = false
+stopwaitsecs = 60
+# If the process didn't kill it's children after 60 seconds, it's unlikely to
+# ever reap them, so kill them all
+killasgroup = true
+stdout_stream.class = FileStream
+stdout_stream.filename = %(here)s/var/log/celery_notify.log
+stdout_stream.max_bytes = 1073741824
+stdout_stream.backup_count = 3
+stderr_stream.class = FileStream
+stderr_stream.filename = %(here)s/var/log/celery_notify.err.log
+stderr_stream.max_bytes = 1073741824
+stderr_stream.backup_count = 3
+
+[watcher:celery_notify_beat]
+working_dir = %(here)s
+virtualenv = %(VIRTUAL_ENV)s
+copy_env = True
+cmd = celery -A assembl.tasks.notify beat -b %(NOTIFY_CELERY_BROKER)s
+autostart = %(autostart_celery_notify_beat)s
+startsecs = 2
+stopasgroup = false
+stopwaitsecs = 60
+# If the process didn't kill it's children after 60 seconds, it's unlikely to
+# ever reap them, so kill them all
+killasgroup = true
+stdout_stream.class = FileStream
+stdout_stream.filename = %(here)s/var/log/celery_notify_beat.log
+stdout_stream.max_bytes = 1073741824
+stdout_stream.backup_count = 3
+stderr_stream.class = FileStream
+stderr_stream.filename = %(here)s/var/log/celery_notify_beat.err.log
+stderr_stream.max_bytes = 1073741824
+stderr_stream.backup_count = 3
+
+[watcher:celery_translate]
+working_dir = %(here)s
+virtualenv = %(VIRTUAL_ENV)s
+copy_env = True
+cmd = celery worker -E -l info -A assembl.tasks.translate -n translate -c %(TRANSLATE_CELERY_NUM_WORKERS)s -b %(TRANSLATE_CELERY_BROKER)s -Q translate
+autostart = %(autostart_celery_translate)s
+startsecs = 2
+stopasgroup = false
+stopwaitsecs = 60
+# If the process didn't kill it's children after 60 seconds, it's unlikely to
+# ever reap them, so kill them all
+killasgroup = true
+
+[watcher:changes_router]
+working_dir = %(here)s
+virtualenv = %(VIRTUAL_ENV)s
+copy_env = True
+cmd = python assembl/tasks/changes_router.py %(CONFIG_FILE)s
+autostart = %(autostart_changes_router)s
+stopasgroup = false
+stopwaitsecs = 5
+startretries = 3
+startsecs = 5
+stdout_stream.class = FileStream
+stdout_stream.filename = %(here)s/var/log/changes_router.log
+stdout_stream.max_bytes = 1073741824
+stdout_stream.backup_count = 3
+stderr_stream.class = FileStream
+stderr_stream.filename = %(here)s/var/log/changes_router.err.log
+stderr_stream.max_bytes = 1073741824
+stderr_stream.backup_count = 3
+
+[env:changes_router]
+LC_CTYPE = %(lcctype)s
+
+[watcher:pserve]
+working_dir = %(here)s
+virtualenv = %(VIRTUAL_ENV)s
+copy_env = True
+cmd = pserve --reload %(CONFIG_FILE)s
+autostart = %(autostart_pserve)s
+respawn = false
+stdout_stream.class = FileStream
+stdout_stream.filename = %(here)s/var/log/pserve.log
+stdout_stream.max_bytes = 1073741824
+stdout_stream.backup_count = 3
+stderr_stream.class = FileStream
+stderr_stream.filename = %(here)s/var/log/pserve.err.log
+stderr_stream.max_bytes = 1073741824
+stderr_stream.backup_count = 3
+
+[env:pserve]
+LC_CTYPE = %(lcctype)s
+
+[watcher:chaussette]
+working_dir = %(here)s
+virtualenv = %(VIRTUAL_ENV)s
+copy_env = True
+cmd = chaussette --fd $(circus.sockets.web) --backend waitress paste:%(CONFIG_FILE)s
+autostart = %(autostart_chaussette)s
+respawn = false
+stdout_stream.class = FileStream
+stdout_stream.filename = %(here)s/var/log/chaussette.log
+stdout_stream.max_bytes = 1073741824
+stdout_stream.backup_count = 3
+stderr_stream.class = FileStream
+stderr_stream.filename = %(here)s/var/log/chaussette.err.log
+stderr_stream.max_bytes = 1073741824
+stderr_stream.backup_count = 3
+
+[env:chaussette]
+LC_CTYPE = %(lcctype)s
+
+[socket:web]
+host = 127.0.0.1
+port = %(server_port)d
+
+[watcher:webpack]
+working_dir = %(here)s/assembl/static
+virtualenv = %(VIRTUAL_ENV)s
+copy_env = True
+cmd = %(here)s/assembl/static/node_modules/.bin/webpack-dev-server -d --config webpack.dev.config.js
+autostart = %(autostart_webpack)s
+stdout_stream.class = FileStream
+stdout_stream.filename = %(here)s/var/log/webpack.log
+stdout_stream.max_bytes = 1073741824
+stdout_stream.backup_count = 3
+stderr_stream.class = FileStream
+stderr_stream.filename = %(here)s/var/log/webpack.err.log
+stderr_stream.max_bytes = 1073741824
+stderr_stream.backup_count = 3
+
+[env:webpack]
+ASSEMBL_URL = %(ASSEMBL_URL)s
+WEBPACK_URL = %(WEBPACK_URL)s
+LC_CTYPE = %(lcctype)s
+
+[watcher:uwsgi]
+working_dir = %(here)s
+cmd = uwsgi --die-on-term --ini %(CONFIG_FILE)s
+umask=002
+autostart = %(autostart_uwsgi)s
+#user=www-data
+stdout_stream.class = FileStream
+stdout_stream.filename = %(here)s/var/log/uwsgi.log
+stdout_stream.max_bytes = 1073741824
+stdout_stream.backup_count = 3
+stderr_stream.class = FileStream
+stderr_stream.filename = %(here)s/var/log/uwsgi.err.log
+stderr_stream.max_bytes = 1073741824
+stderr_stream.backup_count = 3
+
+[env:uwsgi]
+LC_CTYPE = %(lcctype)s
+
+[watcher:maintenance_uwsgi]
+working_dir = %(here)s
+cmd = uwsgi --die-on-term --ini maintenance.ini
+umask=002
+autostart = false
+stdout_stream.class = FileStream
+stdout_stream.filename = %(here)s/var/log/uwsgi.log
+stdout_stream.max_bytes = 1073741824
+stdout_stream.backup_count = 3
+stderr_stream.class = FileStream
+stderr_stream.filename = %(here)s/var/log/uwsgi.err.log
+stderr_stream.max_bytes = 1073741824
+stderr_stream.backup_count = 3
+
+[watcher:metrics]
+working_dir = %(metrics_code_dir)s
+cmd = %(metrics_cl)s -l %(metrics_code_dir)s/metrics-startup.lisp
+autostart = %(autostart_metrics_server)s
+stdout_stream.class = FileStream
+stdout_stream.filename = %(here)s/var/log/metrics.log
+stdout_stream.max_bytes = 1073741824
+stdout_stream.backup_count = 3
+stderr_stream.class = FileStream
+stderr_stream.filename = %(here)s/var/log/metrics.err.log
+stderr_stream.max_bytes = 1073741824
+stderr_stream.backup_count = 3
+
+[watcher:metrics_py]
+working_dir = %(metrics_code_dir)s
+cmd =  %(metrics_code_dir)s/startup.py
+autostart = %(autostart_metrics_server)s
+stdout_stream.class = FileStream
+stdout_stream.filename = %(here)s/var/log/metrics_py.log
+stdout_stream.max_bytes = 1073741824
+stdout_stream.backup_count = 3
+stderr_stream.class = FileStream
+stderr_stream.filename = %(here)s/var/log/metrics_py.err.log
+stderr_stream.max_bytes = 1073741824
+stderr_stream.backup_count = 3
+
+[watcher:edgesense]
+%(edgesense_venv)s
+copy_env = True
+cmd = edgesense_catalyst_server
+autostart = %(autostart_edgesense_server)s
+stdout_stream.class = FileStream
+stdout_stream.filename = %(here)s/var/log/edgesense.log
+stdout_stream.max_bytes = 1073741824
+stdout_stream.backup_count = 3
+stderr_stream.class = FileStream
+stderr_stream.filename = %(here)s/var/log/edgesense.err.log
+stderr_stream.max_bytes = 1073741824
+stderr_stream.backup_count = 3
+
+[env:edgesense]
+LC_CTYPE = %(lcctype)s

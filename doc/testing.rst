@@ -285,8 +285,8 @@ Outgoing emails will be viewable in the terminal. To test it, run a local assemb
 .. code:: sh
 
     source venv/bin/activate
-    supervisord
-    supervisorctl start dev:server
+    circusd circusd.conf
+    circusctl start pserve webpack
 
 Enter the login page, and choose the option "Forgot my password". Enter your username or email, assuming that you already
 have an account in your local Assembl instance. Submit. You should now see the outbound email in your `DebuggingServer` terminal.

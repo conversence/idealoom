@@ -17,6 +17,9 @@ bz2file==0.98
 celery==4.1.0
 cffi==1.10.0
 Chameleon==3.1
+chaussette==1.3.0
+circus==0.14.0
+-e git+https://github.com/maparent/circus-web.git@p3#egg=circus_web
 colander==1.4
 colour==0.1.4
 contextlib2==0.5.5
@@ -53,6 +56,7 @@ imagesize==0.7.1
 ipaddress==1.0.18
 ipykernel==4.6.1
 ipython-genutils==0.2.0
+iowait==0.2
 iso639==0.1.4  # failure with 0.1.3
 isodate==0.5.4
 -e git+https://github.com/conversence/jasmine-splinter-runner.git#egg=jasmine-splinter-runner
@@ -68,7 +72,6 @@ lingua==4.13
 lxml==3.8.0
 Mako==1.0.7
 MarkupSafe==1.0
-meld3==1.0.2
 mock==2.0.0
 ndg_httpsclient==0.4.3
 # Wait for https://github.com/ekalinin/nodeenv/issues/189
@@ -89,6 +92,7 @@ plaster-pastedeploy==0.4.1
 plaster==0.5
 polib==1.0.8
 premailer==3.1.1
+psutil==5.2.2
 psycopg2==2.7.3.1
 ptyprocess==0.5.2
 py==1.4.34
@@ -158,7 +162,9 @@ SQLAlchemy==1.1.14
 sqlalchemy-schemadisplay==1.3
 sqlparse==0.2.3
 -e git+https://github.com/assembl/sqltap.git@assembl#egg=sqltap
+tomako==0.1.0.post1
 tornado==4.5.2
+-e git+https://github.com/maparent/tornadio2.git@session_id_str#egg=tornadIO2
 traitlets==4.3.2
 transaction==2.1.2
 translationstring==1.3

@@ -34,7 +34,7 @@ The enriched .rc file format
     hosts = localhost
     *db_user = idealoom
     *db_password = idealoom
-    supervisor__autostart_changes_router = true
+    circus__autostart_changes_router = true
 
 And fabric is called with ``fab -c configs/instance.rc``, then its ``env`` would contain the following:
 
@@ -48,7 +48,7 @@ And fabric is called with ``fab -c configs/instance.rc``, then its ``env`` would
       "ini_file": "local.ini",
       "random_file": "random.ini",
       "ini_files": "production.ini RANDOM:random.ini.tmpl RC_DATA",
-      "supervisor__autostart_changes_router": "true",
+      "circus__autostart_changes_router": "true",
     }
 
 The same dictionary composition method is used to compose the ``local.ini`` file, in :py:func:`assembl.scripts.ini_files.compose`. The basis is the ``ini_files`` variable: each ``.ini`` file mentioned (path relative to project root) is combined in turn, with values overriding the previous one in the sequence, and the resulting combination file is written out to ``local.ini`` in the ``create_local_ini`` fab task. There are two magic values that can be used in the ``ini_files`` list: ``RANDOM:...`` and ``RC_DATA``. Those are mostly useful when creating the ``local.ini`` file used by pyramid.

@@ -76,17 +76,17 @@ _projectname = idealoom
 # _dbdumps_dir
 
 
-supervisor__autostart_celery_notification_dispatch = true
-supervisor__autostart_celery_notify = true
-supervisor__autostart_celery_notify_beat = true
-supervisor__autostart_celery_translate = false
-supervisor__autostart_source_reader = true
-supervisor__autostart_changes_router = true
-supervisor__autostart_pserve = false
-supervisor__autostart_nodesass = false
-supervisor__autostart_gulp = false
-supervisor__autostart_webpack = false
-supervisor__autostart_uwsgi = true
-supervisor__autostart_metrics_server = false
-supervisor__autostart_edgesense_server = false
+circus__autostart_celery_notification_dispatch = true
+circus__autostart_celery_notify = true
+circus__autostart_celery_notify_beat = true
+circus__autostart_celery_translate = false
+circus__autostart_source_reader = true
+circus__autostart_changes_router = true
+circus__autostart_pserve = false
+circus__autostart_nodesass = false
+circus__autostart_gulp = false
+circus__autostart_webpack = false
+circus__autostart_uwsgi = true
+circus__autostart_metrics_server = false
+circus__autostart_edgesense_server = false
 

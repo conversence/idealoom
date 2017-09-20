@@ -297,97 +297,93 @@ def migrate_local_ini():
 
 
 @task
-def supervisor_restart():
-    "Restart supervisor itself."
+def circus_restart():
+    "Restart circusd itself."
     with hide('running', 'stdout'):
-        supervisord_cmd_result = venvcmd("supervisorctl shutdown")
-    # Another supervisor,upstart, etc may be watching it, give it a little while
-    # Ideally we should wait, but I didn't have time to code it.
-    sleep(30);
-    # If supervisor is already started, this will do nothing
+        venvcmd("circusctl stop")
+        venvcmd("circusctl quit")
+    if env.uses_global_supervisor:
+        # Another supervisor, upstart, etc. may be watching it, give it a little while
+        # Ideally we should wait, but I didn't have time to code it.
+        sleep(30);
+        # If circus is already started, this will do nothing
+    else:
+        venvcmd("circusd circusd.conf")
 
 
-def is_supervisor_running():
+def is_circus_running():
     with settings(warn_only=True), hide('running', 'stdout', 'stderr'):
-        supervisord_cmd_result = venvcmd("supervisorctl avail")
-        if supervisord_cmd_result.failed:
+        circusd_cmd_result = venvcmd("circusctl dstats")
+        if circusd_cmd_result.failed:
             return False
         else:
             return True
 
-def supervisor_process_start(process_name):
+def circus_process_start(process_name):
     """
-    Starts a supervisord process, and waits till it started to return
+    Starts a circusd process, and waits till it started to return
     """
-    print(cyan('Asking supervisor to start %s' % process_name))
-    supervisor_pid_regex = re.compile('^\d+')
-    status_regex = re.compile('^%s\s*(\S*)' % process_name)
+    print(cyan('Asking circus to start %s' % process_name))
     with hide('running', 'stdout'):
-        supervisord_cmd_result = venvcmd("supervisorctl pid")
-    match = supervisor_pid_regex.match(supervisord_cmd_result)
-    if not match:
+        circusd_cmd_result = venvcmd("circusctl dstats")
+    if not circusd_cmd_result.startswith("Main Process:"):
         if env.uses_global_supervisor:
-            print(red('Supervisord doesn\'t seem to be running, aborting'))
+            print(red('Circusd doesn\'t seem to be running, aborting'))
             exit()
         else:
-            print(red('Supervisord doesn\'t seem to be running, trying to start it'))
-            supervisord_cmd_result = venvcmd("supervisord -c %s" % get_supervisord_conf())
-            if supervisord_cmd_result.failed:
-                print(red('Failed starting supervisord'))
+            print(red('Circusd doesn\'t seem to be running, trying to start it'))
+            circusd_cmd_result = venvcmd("circusd %s" % get_circusd_conf())
+            if circusd_cmd_result.failed:
+                print(red('Failed starting circusd'))
                 exit()
     for try_num in range(20):
         with hide('running', 'stdout'):
-            status_cmd_result = venvcmd("supervisorctl status %s" % process_name)
+            status = venvcmd("circusctl status %s" % process_name)
 
-        match = status_regex.match(status_cmd_result)
-        if match:
-            status = match.group(1)
-            if(status == 'RUNNING'):
+        if status:
+            if status == 'active':
                 print(green("%s is running" % process_name))
                 break
-            elif(status == 'STOPPED'):
-                venvcmd("supervisorctl start %s" % process_name)
-            elif(status == 'STARTING'):
+            elif status == 'stopped':
+                venvcmd("circusctl start %s" % process_name)
+            elif status == 'starting':
                 print(status)
             else:
                 print("unexpected status: %s" % status)
             sleep(1)
         else:
-            print(red('Unable to parse status (bad regex?)'))
-            print(status_cmd_result)
+            print(red('No status given? Is that the right process name?'))
+            print(status)
             exit()
 
 
-def supervisor_process_stop(process_name):
+def circus_process_stop(process_name):
     """
-    Assuming the supervisord process is running, stop one of its processes
+    Assuming the circusd process is running, stop one of its processes
     """
-    print(cyan('Asking supervisor to stop %s' % process_name))
-    supervisor_pid_regex = re.compile('^\d+')
+    print(cyan('Asking circus to stop %s' % process_name))
+    circus_pid_regex = re.compile('Main Process:\n\s*(\d+)', re.MULTILINE)
     status_regex = re.compile('^%s\s*(\S*)' % process_name)
     with settings(warn_only=True), hide('running', 'stdout'):
-        supervisord_cmd_result = venvcmd("supervisorctl pid")
-    match = supervisor_pid_regex.match(supervisord_cmd_result)
+        circusd_cmd_result = venvcmd("circusctl dstats")
+    match = circus_pid_regex.match(circusd_cmd_result)
     if not match:
-        print(cyan('Supervisord doesn\'t seem to be running, nothing to stop'))
+        print(cyan('Circusd doesn\'t seem to be running, nothing to stop'))
         return
     for try_num in range(20):
-        venvcmd("supervisorctl stop %s" % process_name)
+        venvcmd("circusctl stop %s" % process_name)
         with hide('running', 'stdout'):
-            status_cmd_result = venvcmd("supervisorctl status %s" % process_name)
+            status_cmd_result = venvcmd("circusctl status %s" % process_name)
 
         match = status_regex.match(status_cmd_result)
         if match:
             status = match.group(1)
-            if(status == 'STOPPED'):
+            if status == 'stopped':
                 print(green("%s is stopped" % process_name))
                 break
-            if(status == 'FATAL'):
-                print(red("%s had a fatal error" % process_name))
-                break
-            elif(status == 'RUNNING'):
-                venvcmd("supervisorctl stop %s" % process_name)
-            elif(status == 'STOPPING'):
+            elif status == 'active':
+                venvcmd("circusctl stop %s" % process_name)
+            elif status == 'stopping':
                 print(status)
             else:
                 print("unexpected status: %s" % status)
@@ -400,23 +396,23 @@ def supervisor_process_stop(process_name):
 
 def maintenance_mode_start():
     assert env.uses_uwsgi
-    supervisor_process_stop('prod:uwsgi')
-    supervisor_process_start('maintenance_uwsgi')
-    supervisor_process_stop('celery_notify_beat')
-    supervisor_process_stop('source_reader')
+    circus_process_stop('prod:uwsgi')
+    circus_process_start('maintenance_uwsgi')
+    circus_process_stop('celery_notify_beat')
+    circus_process_stop('source_reader')
 
 
 def maintenance_mode_stop():
     assert env.uses_uwsgi
-    supervisor_process_start('celery_notify_beat')
-    supervisor_process_start('source_reader')
-    supervisor_process_stop('maintenance_uwsgi')
-    supervisor_process_start('prod:uwsgi')
+    circus_process_start('celery_notify_beat')
+    circus_process_start('source_reader')
+    circus_process_stop('maintenance_uwsgi')
+    circus_process_start('prod:uwsgi')
 
 
 def filter_autostart_processes(processes):
     return [p for p in processes
-            if as_bool(env.get('supervisor__autostart_' + p, False))]
+            if as_bool(env.get('circus__autostart_' + p, False))]
 
 
 @task
@@ -429,17 +425,16 @@ def app_majorupdate():
     maintenance_mode_start()
     execute(app_db_update)
     if env.uses_global_supervisor:
-        print(cyan('Asking supervisor to restart %(projectname)s' % env))
-        run("sudo /usr/bin/supervisorctl restart %(projectname)s" % env)
+        print(cyan('Asking circus to restart %(projectname)s' % env))
+        run("sudo /usr/bin/circusctl restart %(projectname)s" % env)
     else:
-        if is_supervisor_running():
-            # supervisor config file may have changed
-            venvcmd("supervisorctl reread")
-            venvcmd("supervisorctl update")
+        if is_circus_running():
+            # circus config file may have changed
+            venvcmd("circusctl reloadconfig")
             processes = filter_autostart_processes([
                 "celery_imap", "changes_router", "celery_notification_dispatch",
                 "celery_notify"])
-            venvcmd("supervisorctl restart " + " ".join(processes))
+            venvcmd("circusctl restart " + " ".join(processes))
             maintenance_mode_stop()
     execute(webservers_reload)
 
@@ -450,20 +445,19 @@ def app_reload():
     Restart all necessary processes after an update
     """
     if env.uses_global_supervisor:
-        print(cyan('Asking supervisor to restart %(projectname)s' % env))
-        run("sudo /usr/bin/supervisorctl restart %(projectname)s" % env)
+        print(cyan('Asking circus to restart %(projectname)s' % env))
+        run("sudo /usr/bin/circusctl restart %(projectname)s" % env)
     else:
-        if is_supervisor_running():
-            venvcmd("supervisorctl stop dev:")
-            # supervisor config file may have changed
-            venvcmd("supervisorctl reread")
-            venvcmd("supervisorctl update")
+        if is_circus_running():
+            venvcmd("circusctl stop dev:")
+            # circus config file may have changed
+            venvcmd("circusctl reloadconfig")
             processes = filter_autostart_processes([
                 "celery_imap", "changes_router", "celery_notification_dispatch",
                 "celery_notify", "celery_notify_beat", "source_reader"])
-            venvcmd("supervisorctl restart " + " ".join(processes))
+            venvcmd("circusctl restart " + " ".join(processes))
             if env.uses_uwsgi:
-                venvcmd("supervisorctl restart prod:uwsgi")
+                venvcmd("circusctl restart prod:uwsgi")
     """ This will log everyone out, hopefully the code is now resilient enough
     that it isn't necessary
     if env.uses_memcache:
@@ -762,7 +756,7 @@ def update_node(force_reinstall=False):
     if not match or force_reinstall:
         print(cyan('Upgrading node'))
         #Because otherwise node may be busy
-        supervisor_process_stop('dev:webpack')
+        circus_process_stop('dev:webpack')
         venvcmd("nodeenv --node=8.1.4 --npm=5.3.0 --python-virtualenv assembl/static")
         with cd(get_node_base_path()):
             venvcmd("npm install --no-save reinstall -g", chdir=False)
@@ -1459,7 +1453,7 @@ def database_restore():
         processes.append("prod:uwsgi")  # possibly not autostarted
 
     for process in processes:
-        supervisor_process_stop(process)
+        circus_process_stop(process)
 
     # Kill postgres processes in order to be able to drop tables
     execute(postgres_user_detach)
@@ -1490,7 +1484,7 @@ def database_restore():
         )
 
     for process in processes:
-        supervisor_process_start(process)
+        circus_process_start(process)
 
     if(env.wsginame != 'dev.wsgi'):
         execute(webservers_start)
@@ -1517,8 +1511,8 @@ def setup_var_directory():
     run('mkdir -p %s' % normpath(join(env.projectpath, 'var', 'db')))
 
 
-def get_supervisord_conf():
-    return join(env.projectpath, "supervisord.conf")
+def get_circusd_conf():
+    return join(env.projectpath, "circusd.conf")
 
 
 @task
@@ -1590,7 +1584,7 @@ def docker_startup():
     execute(create_sentry_project)
     if not exists(env.ini_file):
         execute(create_local_ini)
-    if not exists("supervisord.conf"):
+    if not exists("circusd.conf"):
         venvcmd('python -massembl.scripts.ini_files populate %s' % (env.ini_file))
     # Copy the static file. This needs improvements.
     copied = False
@@ -1610,7 +1604,7 @@ def docker_startup():
         execute(app_db_update)
     if not check_if_first_user_exists():
         execute(create_first_admin_user)
-    venvcmd("supervisord")
+    venvcmd("circusd circusd.conf")
 
 
 @task

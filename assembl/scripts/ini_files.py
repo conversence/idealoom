@@ -93,7 +93,7 @@ def ensureSection(config, section):
 
 
 def generate_ini_files(config, config_fname):
-    """Generate the supervisor.conf from its template and .ini file."""
+    """Generate the circusd.conf from its template and .ini file."""
     # TODO: Use .rc file instead of .ini file.
     try:
         metrics_code_dir = config.get('metrics', 'metrics_code_dir')
@@ -112,10 +112,13 @@ def generate_ini_files(config, config_fname):
             edgesense_code_dir and exists(edgesense_code_dir) and
             exists(join(
                 edgesense_venv, 'bin', 'edgesense_catalyst_server')))
+        edgesense_venv_directive = 'virtualenv = '+edgesense_venv
     except NoSectionError:
         has_edgesense_server = False
         edgesense_venv = '/tmp'  # innocuous
         edgesense_code_dir = ''
+    if not has_edgesense_server:
+        edgesense_venv_directive = ''
     default_celery_broker = config.get(
         SECTION, 'celery_tasks.broker')
     imap_celery_broker = config.get(
@@ -158,20 +161,25 @@ def generate_ini_files(config, config_fname):
             SECTION, 'celery_tasks.notify.num_workers'),
         'TRANSLATE_CELERY_NUM_WORKERS': config.get(
             SECTION, 'celery_tasks.translate.num_workers'),
-        'here': dirname(abspath('supervisord.conf')),
+        'here': dirname(abspath('circusd.conf')),
         'CONFIG_FILE': config_fname,
         'autostart_metrics_server': (config.get(
-            'supervisor', 'autostart_metrics_server')
+            'circus', 'autostart_metrics_server')
             if has_metrics_server else 'false'),
         'metrics_code_dir': metrics_code_dir,
         'metrics_cl': metrics_cl,
+        'circus_statsd': config.get('circus', 'use_statsd'),
+        'circus_webapp': config.get('circus', 'use_webapp'),
+        'lcctype': config.get(SECTION, 'lcctype'),
+        'circus_webapp_port': int(config.get('circus', 'webapp_port')),
         'autostart_edgesense_server': (config.get(
-            'supervisor', 'autostart_edgesense_server')
+            'circus', 'autostart_edgesense_server')
             if has_edgesense_server else 'false'),
-        'edgesense_venv': edgesense_venv,
+        'edgesense_venv': edgesense_venv_directive,
         'VIRTUAL_ENV': os.environ['VIRTUAL_ENV'],
         'edgesense_code_dir': edgesense_code_dir,
         'WEBPACK_URL': webpack_url,
+        'server_port': config.getint('server:main', 'port'),
         'ASSEMBL_URL': url,
     }
     for var in (
@@ -184,10 +192,11 @@ def generate_ini_files(config, config_fname):
             'autostart_changes_router',
             'autostart_pserve',
             'autostart_webpack',
+            'autostart_chaussette',
             'autostart_uwsgi'):
-        vars[var] = config.get('supervisor', var)
+        vars[var] = config.get('circus', var)
 
-    for fname in ('supervisord.conf',):
+    for fname in ('circusd.conf',):
         print(fname)
         with open(fname + '.tmpl') as tmpl, open(fname, 'w') as inifile:
             inifile.write(tmpl.read() % vars)
