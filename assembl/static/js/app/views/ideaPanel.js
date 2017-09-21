@@ -24,6 +24,7 @@ var Assembl = require('../app.js'),
     AttachmentViews = require('./attachments.js'),
     ConfirmModal = require('./confirmModal.js'),
     AttachmentModels = require('../models/attachments.js'),
+    Loader = require('./loader.js'),
     $ = require('jquery'),
     _ = require('underscore'),
     highlight = require('jquery-highlight'),
@@ -655,7 +656,9 @@ var IdeaPanel = AssemblPanel.extend({
             if ( that.ideaPanelOpensAutomatically ){
               this.panelWrapper.unminimizePanel();
             }
-            this.setLoading(true);
+            if (this.isAttached()) {
+              this.showChildView('segmentList', new Loader());
+            }
             if (!this.model.id) {
               //console.log("setIdeaModel:  we have a model, but no id ")
               if (this.isRenderedAndNotYetDestroyed()) {
