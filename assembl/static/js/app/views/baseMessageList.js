@@ -6,7 +6,7 @@
 
 var Backbone = require('backbone'),
     Raven = require('raven-js'),
-    MessageRenderVisitor = require('./visitors/MessageRenderVisitor.js'),
+    MessageRenderVisitor = require('./visitors/messageRenderVisitor.js'),
     MessageRenderVisitorReSort = require('./visitors/messageRenderVisitorReSort.js'),
     MessageFamilyView = require('./messageFamily.js'),
     _ = require('underscore'),
