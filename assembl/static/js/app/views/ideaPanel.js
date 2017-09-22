@@ -49,6 +49,7 @@ var IdeaPanel = AssemblPanel.extend({
     AssemblPanel.prototype.initialize.apply(this, arguments);
     var that = this, collectionManager = new CollectionManager();
     this.panelWrapper = options.panelWrapper;
+    this.lastRenderHadModel = false;
 
     if (!this.model) {
       this.model = this.getGroupState().get('currentIdea');
@@ -442,6 +443,9 @@ var IdeaPanel = AssemblPanel.extend({
             idea: that.model
           }));
       }
+      this.lastRenderHadModel = true;
+    } else {
+      this.lastRenderHadModel = false;
     }
 
   },
@@ -656,7 +660,7 @@ var IdeaPanel = AssemblPanel.extend({
             if ( that.ideaPanelOpensAutomatically ){
               this.panelWrapper.unminimizePanel();
             }
-            if (this.isAttached()) {
+            if (this.isAttached() && this.lastRenderHadModel) {
               this.showChildView('segmentList', new Loader());
             }
             if (!this.model.id) {
