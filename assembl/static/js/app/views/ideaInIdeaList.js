@@ -148,6 +148,7 @@ var IdeaInIdeaListView = Marionette.View.extend({
       var visitorData = this.visitorData,
       render_data = visitorData[this.model.getId()];
       data.inNextSynthesis = this.synthesis.getIdeasCollection().get(this.model.id) !== undefined;
+      data.linkType = render_data.last_link.get('subtype');
       _.extend(data, render_data);
     }
     return data;
