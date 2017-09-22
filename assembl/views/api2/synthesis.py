@@ -63,7 +63,7 @@ def add_idea_to_synthesis(request):
     link = SubGraphIdeaAssociation(idea=idea, sub_graph=graph_view)
     duplicate = link.find_duplicate(False)
     if duplicate:
-        link.delete()
+        link.db.expunge(link)
         return duplicate.idea.generic_json()
     graph_view.db.add(link)
     graph_view.db.expire(graph_view, ["idea_assocs"])

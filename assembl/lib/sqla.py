@@ -1817,12 +1817,13 @@ class BaseOps(object):
             # and many downstream usage tests for None in a way that would.
             # fail with True. TODO: Cleanup must_define_uniqueness
             return None
-        for other in query:
-            if other is self:
-                continue
-            if expunge and inspect(self).pending:
-                other.db.expunge(self)
-            return other
+        with self.db.no_autoflush:
+            for other in query:
+                if other is self:
+                    continue
+                if expunge and inspect(self).pending:
+                    other.db.expunge(self)
+                return other
 
     def get_unique_from_db(self, expunge=True):
         """Returns the object, or a unique object from the DB"""
