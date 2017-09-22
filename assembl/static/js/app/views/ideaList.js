@@ -354,8 +354,8 @@ var IdeaList = AssemblPanel.extend({
 
 
 
-        this.allIdeasCollection.visitDepthFirst(this.allIdeaLinksCollection, new IdeaRenderVisitor(view_data, order_lookup_table, roots, excludeRoot), rootIdea.getId());
-        this.allIdeasCollection.visitDepthFirst(this.allIdeaLinksCollection, new IdeaSiblingChainVisitor(view_data), rootIdea.getId());
+        this.allIdeasCollection.visitDepthFirst(this.allIdeaLinksCollection, new IdeaRenderVisitor(view_data, order_lookup_table, roots, excludeRoot));
+        this.allIdeasCollection.visitDepthFirst(this.allIdeaLinksCollection, new IdeaSiblingChainVisitor(view_data));
 
         this.addLabelToMostRecentIdeas(this.allIdeasCollection, view_data);
 

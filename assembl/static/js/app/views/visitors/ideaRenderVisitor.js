@@ -43,10 +43,12 @@ IdeaRenderVisitor.prototype.visit = function(object, ancestry) {
     var level = 0;
     var in_ancestry = true;
     var ancestor_id, last_ancestor_id = null;
+    var link, last_link = null;
     var true_sibling = true;
 
     for (var i in ancestry) {
-      var ancestor_id = ancestry[i];
+      link = ancestry[i];
+      var ancestor_id = link.get('source');
       var ancestor = object.collection.get(ancestor_id);
       if (!ancestor) {
         // in synthesis, not all ancestors present
@@ -57,6 +59,7 @@ IdeaRenderVisitor.prototype.visit = function(object, ancestry) {
       if (in_ancestry) {
         level++;
         last_ancestor_id = ancestor_id;
+        last_link = link;
       }
     }
 
@@ -83,6 +86,7 @@ IdeaRenderVisitor.prototype.visit = function(object, ancestry) {
       'true_sibling': true_sibling,
       'children': [],
       'last_ancestor_id': last_ancestor_id,
+      'last_link': link,
       'traversal_order': order_lookup_table.length,
     };
     data_by_object[object_id] = data;

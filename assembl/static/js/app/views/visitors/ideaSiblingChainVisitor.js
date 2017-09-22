@@ -26,10 +26,11 @@ IdeaSiblingChainVisitor.prototype.visit = function(idea, ancestry) {
   if (data_by_idea.hasOwnProperty(idea_id)) {
     var level = 0;
     var in_ancestry = true;
-    var ancestor_id, last_ancestor_id = null;
+    var link, ancestor_id, last_ancestor_id = null;
     var last_sibling_chain = [];
     for (var i in ancestry) {
-      ancestor_id = ancestry[i];
+      link = ancestry[i];
+      ancestor_id = link.get('source');
       if (data_by_idea.hasOwnProperty(ancestor_id)) {
         last_sibling_chain.push(data_by_idea[ancestor_id]['is_last_sibling']);
       }

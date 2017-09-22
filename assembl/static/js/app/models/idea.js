@@ -344,22 +344,7 @@ var IdeaModel = Base.Model.extend({
     return this.combinedPresentationOf(
       this.getCombinedSubtypes(parentLink), lang);
   },
-  /**
-   * Returns the indentation level
-   * @returns {number}
-   * @function app.models.idea.IdeaModel.getLevel
-   */
-  getLevel: function() {
-    var counter = 0,
-        parent = this;
-    do {
-      if (parent.get('root') === true)
-          break;
-      parent = parent.get('parentId') !== null ? parent.getParent() : null;
-      counter += 1;
-    } while (parent);
-    return counter;
-  },
+
   /**
    * Returns the order number for a new child
    * @returns {number}
@@ -581,21 +566,34 @@ var IdeaCollection = Base.Collection.extend({
    * @param {Object} ancestry - Internal recursion parameter, do not set or use
    * @function app.models.idea.IdeaCollection.visitDepthFirst
    */
-  visitDepthFirst: function(idea_links, visitor, origin_id, include_ts, ancestry, includeHidden) {
+  visitDepthFirst: function(idea_links, visitor, origin_link, include_ts, ancestry, includeHidden) {
     if (ancestry === undefined) {
       ancestry = [];
     }
-    var that = this,
-        idea = this.get(origin_id);
+    var that = this, idea, origin_id;
+    if (origin_link == undefined) {
+      idea = this.getRootIdea();
+      origin_id = idea.id;
+    } else if (origin_link.get('@type') == Types.IDEA_LINK) {
+      origin_id = origin_link.get('target');
+      idea = this.get(origin_id);
+    } else {
+      // idea was passed
+      idea = origin_link;
+      origin_link = undefined;
+      origin_id = idea.id;
+    }
     if (idea !== undefined && idea.get('is_tombstone') && include_ts !== true) {
-      return;
+      return undefined;
     }
     if (idea !== undefined && includeHidden !== true && idea.get('hidden')) {
-      return;
+      return undefined;
+    }
+    ancestry = ancestry.slice(0);
+    if (origin_link != undefined) {
+      ancestry.push(origin_link);
     }
     if (idea === undefined || visitor.visit(idea, ancestry)) {
-      ancestry = ancestry.slice(0);
-      ancestry.push(origin_id);
       var child_links = _.sortBy(
           idea_links.where({ source: origin_id }),
                 function(link) {
@@ -603,10 +601,10 @@ var IdeaCollection = Base.Collection.extend({
                 });
       // break most cycles. (TODO: handle cycles of missing ideas)
       child_links = child_links.filter(function(l) {
-        return ancestry.indexOf(l.get('target')) === -1;
+        return ancestry.indexOf(l) === -1;
       });
       var results = _.map(child_links, function(child_link) {
-        return that.visitDepthFirst(idea_links, visitor, child_link.get('target'), include_ts, ancestry, includeHidden);
+        return that.visitDepthFirst(idea_links, visitor, child_link, include_ts, ancestry, includeHidden);
       });
       return visitor.post_visit(idea, results);
     }
@@ -618,12 +616,24 @@ var IdeaCollection = Base.Collection.extend({
    * @param {Object} ancestry - Internal recursion parameter, do not set or use
    * @function app.models.idea.IdeaCollection.visitBreadthFirst
    */
-  visitBreadthFirst: function(idea_links, visitor, origin_id, include_ts, ancestry, includeHidden) {
+  visitBreadthFirst: function(idea_links, visitor, origin_link, include_ts, ancestry, includeHidden) {
     var that = this,
         continue_visit = true,
-        idea = this.get(origin_id);
+        origin_id, idea;
+    if (origin_link == undefined) {
+      idea = this.getRootIdea();
+      origin_id = idea.id;
+    } else if (origin_link.get('@type') == Types.IDEA_LINK) {
+      origin_id = origin_link.get('target');
+      idea = this.get(origin_id);
+    } else {
+      // idea was passed
+      idea = origin_link;
+      origin_link = undefined;
+      origin_id = idea.id;
+    }
     if (idea !== undefined && includeHidden !== true && idea.get('hidden')) {
-      return;
+      return undefined;
     }
     if (ancestry === undefined) {
       ancestry = [];
@@ -633,7 +643,9 @@ var IdeaCollection = Base.Collection.extend({
     }
     if (continue_visit) {
       ancestry = ancestry.slice(0);
-      ancestry.push(origin_id);
+      if (origin_link) {
+        ancestry.push(origin_link);
+      }
       var child_links = _.sortBy(
           idea_links.where({ source: origin_id }),
                 function(link) {
@@ -641,9 +653,9 @@ var IdeaCollection = Base.Collection.extend({
                 });
       // break most cycles. (TODO: handle cycles of missing ideas)
       child_links = child_links.filter(function(l) {
-        return ancestry.indexOf(l.get('target')) === -1;
+        return ancestry.indexOf(l) === -1;
       });
-      var children_to_visit = [];
+      var childlinks_to_visit = [];
       for (var i in child_links) {
         var link = child_links[i],
             target_id = link.get('target'),
@@ -651,15 +663,15 @@ var IdeaCollection = Base.Collection.extend({
         if (target.get('is_tombstone') && include_ts !== true)
             continue;
         if (visitor.visit(target, ancestry)) {
-          children_to_visit.push(target_id);
+          childlinks_to_visit.push(link);
         }
       }
-      var results = _.map(children_to_visit, function(child) {
-        that.visitBreadthFirst(idea_links, visitor, child, include_ts, ancestry, includeHidden);
+      var results = _.map(childlinks_to_visit, function(child_link) {
+        that.visitBreadthFirst(idea_links, visitor, child_link, include_ts, ancestry, includeHidden);
       });
       return visitor.post_visit(idea, results);
     }
-  }
+  },
 });
 
 module.exports = {

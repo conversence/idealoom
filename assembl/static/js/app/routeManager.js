@@ -497,7 +497,7 @@ var routeManager = Marionette.Object.extend({
                      collectionManager.getAllIdeaLinksCollectionPromise(),
                              function(ideas, extracts, links) {
                                var visitor = new FirstIdeaToShowVisitor(extracts);
-                               ideas.visitBreadthFirst(links, visitor, ideas.getRootIdea().getId());
+                               ideas.visitBreadthFirst(links, visitor);
                                var idea = visitor.ideaWithExtract || visitor.firstIdea;
                                if (idea !== undefined) {
                                  // the table of ideas view did not start listening yet.
