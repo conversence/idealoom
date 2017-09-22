@@ -4,7 +4,7 @@
  * @module app.views.synthesisPanel
  */
 
-var ObjectTreeRenderVisitor = require('./visitors/objectTreeRenderVisitor.js'),
+var IdeaRenderVisitor = require('./visitors/ideaRenderVisitor.js'),
     Raven = require('raven-js'),
     _ = require('underscore'),
     $ = require('jquery'),
@@ -196,7 +196,7 @@ var SynthesisPanel = AssemblPanel.extend({
         }
 
         if (rootIdea) {
-          ideasCollection.visitDepthFirst(ideaLinksCollection, new ObjectTreeRenderVisitor(view_data, order_lookup_table, roots, inSynthesis), rootIdea.getId(), true);
+          ideasCollection.visitDepthFirst(ideaLinksCollection, new IdeaRenderVisitor(view_data, order_lookup_table, roots, inSynthesis), rootIdea.getId(), true);
         }
 
         that.synthesisIdeaRoots.reset(roots);

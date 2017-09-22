@@ -1,7 +1,7 @@
 'use strict';
 /**
  * 
- * @module app.views.visitors.objectTreeRenderVisitor
+ * @module app.views.visitors.messageRenderVisitor
  */
 
 var Visitor = require("./visitor.js");
@@ -19,7 +19,7 @@ var Visitor = require("./visitor.js");
 *  - false the object won't be part of the returned set.
 *  - 0 instead of false, all descendants of the object will also be excluded
 */
-var ObjectTreeRenderVisitor = function(data_by_object, order_lookup_table, roots, filter_function) {
+var MessageRenderVisitor = function(data_by_object, order_lookup_table, roots, filter_function) {
   this.data_by_object = data_by_object;
   this.order_lookup_table = order_lookup_table;
   this.roots = roots;
@@ -32,9 +32,9 @@ var ObjectTreeRenderVisitor = function(data_by_object, order_lookup_table, roots
   this.filter_function = filter_function;
 };
 
-ObjectTreeRenderVisitor.prototype = new Visitor();
+MessageRenderVisitor.prototype = new Visitor();
 
-ObjectTreeRenderVisitor.prototype.visit = function(object, ancestry) {
+MessageRenderVisitor.prototype.visit = function(object, ancestry) {
   var data_by_object = this.data_by_object,
       order_lookup_table = this.order_lookup_table,
       filter_result = this.filter_function(object);
@@ -105,7 +105,7 @@ ObjectTreeRenderVisitor.prototype.visit = function(object, ancestry) {
   return filter_result !== 0;
 };
 
-ObjectTreeRenderVisitor.prototype.post_visit = function(object, children_data) {
+MessageRenderVisitor.prototype.post_visit = function(object, children_data) {
   //console.log(object, children_data);
   var filtered_descendant_count = 0,
       real_descendant_count = 0,
@@ -171,4 +171,4 @@ ObjectTreeRenderVisitor.prototype.post_visit = function(object, children_data) {
   return retval;
 };
 
-module.exports = ObjectTreeRenderVisitor;
+module.exports = MessageRenderVisitor;

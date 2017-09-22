@@ -9,7 +9,7 @@ var AllMessagesInIdeaListView = require('./allMessagesInIdeaList.js'),
     SynthesisInIdeaListView = require('./synthesisInIdeaList.js'),
     Loader = require('./loader.js'),
     Permissions = require('../utils/permissions.js'),
-    ObjectTreeRenderVisitor = require('./visitors/objectTreeRenderVisitor.js'),
+    IdeaRenderVisitor = require('./visitors/ideaRenderVisitor.js'),
     IdeaSiblingChainVisitor = require('./visitors/ideaSiblingChainVisitor'),
     Backbone = require('backbone'),
     Assembl = require('../app.js'),
@@ -354,7 +354,7 @@ var IdeaList = AssemblPanel.extend({
 
 
 
-        this.allIdeasCollection.visitDepthFirst(this.allIdeaLinksCollection, new ObjectTreeRenderVisitor(view_data, order_lookup_table, roots, excludeRoot), rootIdea.getId());
+        this.allIdeasCollection.visitDepthFirst(this.allIdeaLinksCollection, new IdeaRenderVisitor(view_data, order_lookup_table, roots, excludeRoot), rootIdea.getId());
         this.allIdeasCollection.visitDepthFirst(this.allIdeaLinksCollection, new IdeaSiblingChainVisitor(view_data), rootIdea.getId());
 
         this.addLabelToMostRecentIdeas(this.allIdeasCollection, view_data);
