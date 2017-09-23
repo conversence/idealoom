@@ -728,7 +728,7 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
                     if supertype in rules:
                         break
                 else:
-                    supertype = 'DirectedIdeaRelation'
+                    supertype = 'InclusionRelation'
                 child_link.rdf_type = link_type = supertype
             node_rules = rules.get(child_link, ())
             child = child_link.target
@@ -738,7 +738,7 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
                     if supertype in node_rules:
                         break
                 else:
-                    supertype = 'DirectedIdeaRelation'
+                    supertype = 'GenericIdeaNode'
                 child.rdf_type = supertype
                 child.applyTypeRules()
 
