@@ -250,7 +250,10 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
 
     @rdf_type_url.setter
     def rdf_type_url(self, val):
-        self.rdf_type_db = URIRefDb.get_or_create(val, self.db)
+        val = URIRefDb.get_or_create(val, self.db)
+        if val != self.rdf_type_db:
+            self.rdf_type_db = val
+            self.applyTypeRules()
 
     @property
     def rdf_type_curie(self):
@@ -258,7 +261,10 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
 
     @rdf_type_curie.setter
     def rdf_type_curie(self, val):
-        self.rdf_type_db = URIRefDb.get_or_create_from_curie(val, self.db)
+        val = URIRefDb.get_or_create_from_curie(val, self.db)
+        if val != self.rdf_type_db:
+            self.rdf_type_db = val
+            self.applyTypeRules()
 
     @property
     def rdf_type(self):
@@ -266,7 +272,10 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
 
     @rdf_type.setter
     def rdf_type(self, val):
-        self.rdf_type_db = URIRefDb.get_or_create_from_ctx(val, self.db)
+        val = URIRefDb.get_or_create_from_ctx(val, self.db)
+        if val != self.rdf_type_db:
+            self.rdf_type_db = val
+            self.applyTypeRules()
 
     def get_children(self):
         return self.db.query(Idea).join(
@@ -705,6 +714,33 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
                 count(post.id.distinct()).desc())
 
         return ['local:Agent/' + str(i) for (i,) in query]
+
+    def applyTypeRules(self):
+        from ..semantic.inference import get_inference_store
+        ontology = get_inference_store()
+        typology = self.discussion.preferences['idea_typology'] or {}
+        rules = typology.get('ideas', {}).get('rules', {}).get(self.rdf_type, {})
+        for child_link in self.target_links:
+            link_type = child_link.rdf_type
+            if link_type not in rules:
+                # TODO: no real guarantee of mro ordering in that function
+                for supertype in ontology.getSuperClassesCtx(link_type):
+                    if supertype in rules:
+                        break
+                else:
+                    supertype = 'DirectedIdeaRelation'
+                child_link.rdf_type = link_type = supertype
+            node_rules = rules.get(child_link, ())
+            child = child_link.target
+            child_type = child.rdf_type
+            if child_type not in node_rules:
+                for supertype in ontology.getSuperClassesCtx(child_type):
+                    if supertype in node_rules:
+                        break
+                else:
+                    supertype = 'DirectedIdeaRelation'
+                child.rdf_type = supertype
+                child.applyTypeRules()
 
     def get_discussion_id(self):
         return self.discussion_id or self.discussion.id
