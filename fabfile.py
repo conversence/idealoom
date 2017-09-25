@@ -757,7 +757,7 @@ def update_node(force_reinstall=False):
         print(cyan('Upgrading node'))
         #Because otherwise node may be busy
         circus_process_stop('dev:webpack')
-        venvcmd("nodeenv --node=8.1.4 --npm=5.3.0 --python-virtualenv assembl/static")
+        venvcmd("nodeenv --node=8.1.4 --npm=5.4.2 --python-virtualenv assembl/static")
         with cd(get_node_base_path()):
             venvcmd("npm install --no-save reinstall -g", chdir=False)
     else:
@@ -918,9 +918,8 @@ def update_npm_requirements(force_reinstall=False):
     """ Normally not called manually """
     with cd(get_node_base_path()):
         if force_reinstall:
-            venvcmd('reinstall', chdir=False)
-        else:
-            venvcmd('npm update --no-save', chdir=False)
+            run('rf -rm yarn.lock node_modules')
+        venvcmd('yarn', chdir=False)
 
 
 @task
