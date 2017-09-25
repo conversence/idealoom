@@ -732,9 +732,8 @@ def app_update_dependencies(force_reinstall=False):
     #Nodeenv is installed by python , so this must be after update_pip_requirements
     execute(update_node, force_reinstall=force_reinstall)
     #bower is installed by node, so this must be after update_node
-    execute(update_bower)
-    execute(update_bower_requirements, force_reinstall=force_reinstall)
     execute(update_npm_requirements, force_reinstall=force_reinstall)
+    execute(update_bower_requirements, force_reinstall=force_reinstall)
 
 @task
 def app_reinstall_all_dependencies():
@@ -860,15 +859,6 @@ def webservers_start():
             sudo('/usr/local/nginx/sbin/nginx')
 
 
-def install_bower():
-    with cd(get_node_base_path()):
-        venvcmd('npm install --no-save bower po2json requirejs', chdir=False)
-
-
-def update_bower():
-    with cd(get_node_base_path()):
-        venvcmd('npm update --no-save bower po2json', chdir=False)
-
 def get_node_base_path():
     return normpath(join(
             env.projectpath, 'assembl', 'static'))
@@ -885,9 +875,6 @@ def bower_cmd(cmd, relative_path='.'):
     with cd(env.projectpath):
         bower_cmd = normpath(join(get_node_bin_path(), 'bower'))
         po2json_cmd = normpath(join(get_node_bin_path(), 'po2json'))
-        if not exists(bower_cmd) or not exists(po2json_cmd):
-            print("Bower not present, installing...")
-            execute(install_bower)
         with cd(relative_path):
             print("Running a bower command in path %s" % relative_path)
             venvcmd(' '.join(("node", bower_cmd, '--allow-root', cmd)), chdir=False)
@@ -919,7 +906,10 @@ def update_npm_requirements(force_reinstall=False):
     with cd(get_node_base_path()):
         if force_reinstall:
             run('rf -rm yarn.lock node_modules')
-        venvcmd('yarn', chdir=False)
+        if exists('node_modules/.bin/yarn'):
+            venvcmd('./node_modules/.bin/yarn', chdir=False)
+        else:
+            venvcmd('yarn', chdir=False)
 
 
 @task
@@ -1615,9 +1605,12 @@ def create_first_admin_user():
         email, env.ini_file))
 
 
-def install_yarn():
+def install_yarn(local=True):
     """Install yarn"""
-    if not env.mac:
+    if local:
+        with cd(get_node_base_path()):
+            venvcmd('npm install --no-save yarn', chdir=False)
+    elif not env.mac:
         if not exists('/etc/apt/sources.list.d/yarn.list'):
             sudo('echo "deb https://dl.yarnpkg.com/debian/ stable main" > /etc/apt/sources.list.d/yarn.list')
             sudo('curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -')
