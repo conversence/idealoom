@@ -904,6 +904,7 @@ def update_bower_requirements(force_reinstall=False):
 def update_npm_requirements(force_reinstall=False):
     """ Normally not called manually """
     with cd(get_node_base_path()):
+        execute(install_yarn, True)
         if force_reinstall:
             run('rf -rm yarn.lock node_modules')
         if exists('node_modules/.bin/yarn'):
@@ -922,7 +923,7 @@ def install_single_server():
     execute(install_assembl_server_deps)
     execute(install_redis)
     execute(install_memcached)
-    execute(install_yarn)
+    execute(install_yarn, False)
 
 
 @task
@@ -1608,8 +1609,9 @@ def create_first_admin_user():
 def install_yarn(local=True):
     """Install yarn"""
     if local:
-        with cd(get_node_base_path()):
-            venvcmd('npm install --no-save yarn', chdir=False)
+        if not exists('node_modules/.bin/yarn'):
+            with cd(get_node_base_path()):
+                venvcmd('npm install --no-save yarn', chdir=False)
     elif not env.mac:
         if not exists('/etc/apt/sources.list.d/yarn.list'):
             sudo('echo "deb https://dl.yarnpkg.com/debian/ stable main" > /etc/apt/sources.list.d/yarn.list')
