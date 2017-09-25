@@ -237,9 +237,3 @@ def frontend_test_view(request):
     context['translation_service_data_json'] = '{}'
     context['preferences_json'] = json.dumps(dict(discussion.preferences))
     return context
-
-
-@view_config(context=HTTPNotFound, renderer='assembl:templates/includes/404.jinja2')
-def not_found(context, request):
-    request.response.status = 404
-    return {}
