@@ -12,7 +12,7 @@ from sqlalchemy.orm import (joinedload_all, undefer)
 from assembl.views.api import API_DISCUSSION_PREFIX
 from assembl.models import (
     get_database_id, Idea, RootIdea, IdeaLink, Discussion,
-    Extract, SubGraphIdeaAssociation)
+    Extract, SubGraphIdeaAssociation, LangStringEntry, LangString)
 from assembl.auth import (P_READ, P_ADD_IDEA, P_EDIT_IDEA)
 
 
@@ -29,6 +29,13 @@ idea_extracts = Service(
     description="Get the extracts of a single idea")
 
 
+langstring_fields = {
+    "longTitle": "synthesis_title",
+    "shortTitle": "title",
+    "definition": "description"
+}
+
+
 # Create
 @ideas.post(permission=P_ADD_IDEA)
 def create_idea(request):
@@ -37,12 +44,22 @@ def create_idea(request):
     idea_data = json.loads(request.body)
     now = datetime.utcnow()
 
-    new_idea = Idea(
-        short_title=idea_data['shortTitle'],
-        long_title=idea_data['longTitle'],
-        discussion=discussion,
-        creation_date=now,
-    )
+    kwargs = {
+        "discussion": discussion,
+        "creation_date": now,
+    }
+
+    for key, attr_name in langstring_fields.iteritems():
+        if key in idea_data:
+            ls_data = idea_data[key]
+            if ls_data is None:
+                continue
+            assert isinstance(ls_data, dict)
+            user_id = authenticated_userid(request)
+            current = LangString.create_from_json(ls_data, user_id)
+            kwargs[attr_name] = current
+
+    new_idea = Idea(**kwargs)
 
     session.add(new_idea)
 
@@ -171,14 +188,26 @@ def save_idea(request):
         raise HTTPBadRequest("Cannot edit root idea.")
     if(idea.discussion_id != discussion.id):
         raise HTTPBadRequest(
-            "Idea from discussion %s cannot saved from different discussion (%s)." % (
+            "Idea from discussion %s cannot be saved from different discussion (%s)." % (
                 idea.discussion_id, discussion.id))
-    if 'shortTitle' in idea_data:
-        idea.short_title = idea_data['shortTitle']
-    if 'longTitle' in idea_data:
-        idea.long_title = idea_data['longTitle']
-    if 'definition' in idea_data:
-        idea.definition = idea_data['definition']
+
+    for key, attr_name in langstring_fields.iteritems():
+        if key in idea_data:
+            current = getattr(idea, attr_name)
+            ls_data = idea_data[key]
+            user_id = authenticated_userid(request)
+            # TODO: handle legacy string instance?
+            assert isinstance(ls_data, (dict, type(None)))
+            if current:
+                if ls_data:
+                    current.update_from_json(
+                        ls_data, user_id)
+                else:
+                    current.delete()
+            elif ls_data:
+                current = LangString.create_from_json(
+                    ls_data, user_id)
+                setattr(idea, attr_name, current)
 
     if 'parentId' in idea_data and idea_data['parentId'] is not None:
         # TODO: Make sure this is sent as a list!
