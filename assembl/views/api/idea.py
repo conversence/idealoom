@@ -7,12 +7,12 @@ from cornice import Service
 from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPNoContent
 from pyramid.security import authenticated_userid, Everyone
 from sqlalchemy import and_
-from sqlalchemy.orm import (joinedload_all, undefer)
+from sqlalchemy.orm import (joinedload, subqueryload, undefer)
 
 from assembl.views.api import API_DISCUSSION_PREFIX
 from assembl.models import (
     get_database_id, Idea, RootIdea, IdeaLink, Discussion,
-    Extract, SubGraphIdeaAssociation, LangStringEntry, LangString)
+    Extract, SubGraphIdeaAssociation, LangString)
 from assembl.auth import (P_READ, P_ADD_IDEA, P_EDIT_IDEA)
 
 
@@ -105,7 +105,7 @@ def _get_ideas_real(request, view_def=None, ids=None, user_id=None):
             Widget.test_active(),
             Discussion.id == discussion.id,
             IdeaDescendantsShowingWidgetLink.polymorphic_filter()
-        ).options(joinedload_all(IdeaWidgetLink.idea)).all()
+        ).options(joinedload(IdeaWidgetLink.idea)).all()
     for wlink in widget_links:
         if isinstance(wlink.idea, RootIdea):
             universal_widget_links.append({
@@ -117,14 +117,14 @@ def _get_ideas_real(request, view_def=None, ids=None, user_id=None):
                     '@type': wlink.external_typename(),
                     'widget': Widget.uri_generic(wlink.widget_id)})
 
-    next_synthesis = discussion.get_next_synthesis()
+    next_synthesis_id = discussion.get_next_synthesis_id()
     ideas = discussion.db.query(Idea).filter_by(
         discussion=discussion
     )
 
     ideas = ideas.outerjoin(
         SubGraphIdeaAssociation,
-        and_(SubGraphIdeaAssociation.sub_graph_id == next_synthesis.id,
+        and_(SubGraphIdeaAssociation.sub_graph_id == next_synthesis_id,
              SubGraphIdeaAssociation.idea_id == Idea.id))
 
     ideas = ideas.outerjoin(
@@ -138,9 +138,12 @@ def _get_ideas_real(request, view_def=None, ids=None, user_id=None):
     # remove tombstones
     ideas = ideas.filter(and_(*Idea.base_conditions()))
     ideas = ideas.options(
-        joinedload_all(Idea.source_links),
-        joinedload_all(Idea.widget_links),
-        joinedload_all(Idea.attachments),
+        joinedload(Idea.source_links),
+        subqueryload(Idea.attachments).joinedload("document"),
+        subqueryload(Idea.widget_links),
+        joinedload(Idea.title).subqueryload("entries"),
+        joinedload(Idea.synthesis_title).subqueryload("entries"),
+        joinedload(Idea.description).subqueryload("entries"),
         undefer(Idea.num_children))
 
     permissions = request.permissions
