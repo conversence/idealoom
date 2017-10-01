@@ -73,11 +73,11 @@ var cKEditorField = Marionette.View.extend({
     this.showPlaceholderOnEditIfEmpty = (options.showPlaceholderOnEditIfEmpty) ? options.showPlaceholderOnEditIfEmpty : null;
 
     this.canEdit = (options.canEdit !== undefined) ? options.canEdit : true;
-    
+
     this.readMoreAfterHeightPx = (options.readMoreAfterHeightPx !== undefined) ? options.readMoreAfterHeightPx : 170;
-    
+
     this.hideSeeMoreButton = (options.hideSeeMoreButton) ? options.hideSeeMoreButton : false;
-    
+
     this.listenTo(this.model, 'add remove change', this.render);
   },
 
@@ -98,8 +98,22 @@ var cKEditorField = Marionette.View.extend({
     'click @ui.seeLess': 'seeLessContent'
   },
 
+  getTextValue: function() {
+    return this.model.get(this.modelProp);
+  },
+
+  setTextValue: function(text) {
+    this.model.save(this.modelProp, text, {
+      success: function(model, resp) {},
+      error: function(model, resp) {
+        console.error('ERROR: saveEdition', resp.toJSON());
+      }
+    });
+  },
+
   serializeData: function() {
-    var textToShow = (this.showPlaceholderOnEditIfEmpty && !this.model.get(this.modelProp)) ? this.placeholder : this.model.get(this.modelProp);
+    var text = this.getTextValue(),
+        textToShow = (this.showPlaceholderOnEditIfEmpty && !text) ? this.placeholder : text;
 
     return {
       topId: this.topId,
@@ -109,8 +123,8 @@ var cKEditorField = Marionette.View.extend({
       editing: this.editing,
       canEdit: this.canEdit,
       placeholder: this.placeholder,
-      hideButton: this.hideButton
-    }
+      hideButton: this.hideButton,
+    };
   },
 
   onRender: function() {
@@ -181,9 +195,13 @@ var cKEditorField = Marionette.View.extend({
       this.ui.seeLess.removeClass('hidden');
     }else{
       //Open ckeditor in modal when click on seeMore button
-      var modalView = new CkeditorFieldInModal({model:this.model, modelProp:this.modelProp, canEdit:this.canEdit});
+      var modalView = this.createModal();
       Assembl.rootView.showChildView('slider', modalView);
     }
+  },
+
+  createModal: function() {
+    return new CkeditorFieldInModal({model:this.model, modelProp:this.modelProp, canEdit:this.canEdit});
   },
 
   seeLessContent: function(e) {
@@ -195,7 +213,7 @@ var cKEditorField = Marionette.View.extend({
     // seeMoreContent was called before
 
     this.render();
-    
+
     this.ui.seeLess.addClass('hidden');
 
     this.ellipsis(this.ui.mainfield, this.ui.seeMore);
@@ -268,17 +286,11 @@ var cKEditorField = Marionette.View.extend({
     text = $.trim(text);
     if (text != $.trim(this.placeholder) || Ctx.stripHtml(text) == '') {
       /* We never save placeholder values to the model */
-      if (this.model.get(this.modelProp) != text) {
+      if (this.getTextValue() != text) {
         /* Nor save to the database and fire change events
          * if the value didn't change from the model
          */
-        this.model.save(this.modelProp, text, {
-          success: function(model, resp) {
-                    },
-          error: function(model, resp) {
-            console.error('ERROR: saveEdition', resp.toJSON());
-          }
-        });
+        this.setTextValue(text);
         this.trigger('save', [this]);
       }
     }
@@ -293,7 +305,7 @@ var cKEditorField = Marionette.View.extend({
     }
 
     if (this.ckInstance) {
-      var text = this.model.get(this.modelProp);
+      var text = this.getTextValue();
       this.ckInstance.setData(text);
     }
 
@@ -323,9 +335,13 @@ var CkeditorFieldInModal = Backbone.Modal.extend({
     this.autosave = options.autosave;
   },
   serializeData: function(){
+    var title = this.model.get('shortTitle');
     return {
-      modal_title: this.model.get('shortTitle')
-    }
+      // this assumes the model is an idea, which should now be another case.
+      // Probably used for other objects like announcements.
+      // REVISIT. Probably use a substring of getTextValue.
+      modal_title: title ? title.originalValue() : '',
+    };
   },
   onRender: function(){
     var ckeditorField = new cKEditorField({
@@ -338,4 +354,7 @@ var CkeditorFieldInModal = Backbone.Modal.extend({
     this.$(this.ui.body).html(ckeditorField.render().el);
   }
 });
+
+cKEditorField.modalClass = CkeditorFieldInModal;
+
 module.exports = cKEditorField;

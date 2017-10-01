@@ -36,6 +36,19 @@ var EditableField = Marionette.View.extend({
     'keydown': 'onKeyDown'
   },
 
+  getTextValue: function() {
+    return this.model.get(this.modelProp);
+  },
+
+  setTextValue: function(text) {
+    this.model.save(this.modelProp, text, {
+      success: function(model, resp) {},
+      error: function(model, resp) {
+        console.error('ERROR: saveEdition', resp.toJSON());
+      }
+    });
+  },
+
   onRender: function() {
     if (this.canEdit) {
       if (!(this.$el.attr('contenteditable'))) {
@@ -51,7 +64,7 @@ var EditableField = Marionette.View.extend({
       }
     }
 
-    var text = this.model.get(this.modelProp);
+    var text = this.getTextValue();
     this.el.innerHTML = text || this.placeholder;
   },
 
@@ -72,17 +85,11 @@ var EditableField = Marionette.View.extend({
 
       if (data != this.placeholder || data == '') {
         /* we never save placeholder values to the model */
-        if (this.model.get(this.modelProp) != data) {
+        if (this.getTextValue() != data) {
           /* Nor save to the database and fire change events
            * if the value didn't change from the model
            */
-          this.model.save(this.modelProp, data, {
-            success: function(model, resp) {
-                        },
-            error: function(model, resp) {
-              console.error('ERROR: onBlur', resp);
-            }
-          });
+          this.setTextValue(data);
         }
       }
     }

@@ -177,17 +177,15 @@ var TranslationView = LoaderView.extend({
                 if (!that.isDestroyed()){
                     var translationData = that.messageView.translationData || preferences.getTranslationData();
                     that.langCache = that.messageView.langCache; //For reference
-                    var bestSuggestedTranslation = that.message.get('body').best(translationData),
-                        original = that.message.get("body").original(),
+                    var body = that.message.get('body') || LangString.Model.empty,
+                        bestSuggestedTranslation = body.best(translationData),
+                        original = body.original(),
                         originalLocale = original.getLocaleValue(),
                         translatedFromLocale = bestSuggestedTranslation.getTranslatedFromLocale(),
                         translatedTo = bestSuggestedTranslation.getBaseLocale(),
                         prefsForLocale = translationData.getPreferenceForLocale(originalLocale),
                         preferredTarget = prefsForLocale ? prefsForLocale.get("translate_to_name") : Ctx.getLocale();
                     if ( !(translatedFromLocale) ){
-                        // Get the original's locale and name
-                        var original = that.message.get("body").original();
-
                         translatedFromLocale = translatedTo;
                     }
                     that.originalLocale = originalLocale;

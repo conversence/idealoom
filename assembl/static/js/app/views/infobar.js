@@ -11,6 +11,8 @@ var Backbone=require('backbone'),
     CookiesManager = require("../utils/cookiesManager.js"),
     Widget = require('../models/widget.js'),
     Ctx = require('../common/context.js'),
+    LoaderView = require('./loaderView.js'),
+    CollectionManager = require('../common/collectionManager.js'),
     $ = require('jquery');
 
 var CookieInfobarItemView = Marionette.View.extend({
@@ -69,9 +71,9 @@ var PiwikIframeModal = Backbone.Modal.extend({
   cancelEl: '.close'
 });
 
-var WidgetInfobarItemView = Marionette.View.extend({
+var WidgetInfobarItemView = LoaderView.extend({
   constructor: function InfobarItem() {
-    Marionette.View.apply(this, arguments);
+    LoaderView.apply(this, arguments);
   },
   template: '#tmpl-infobar',
   className: 'content-infobar',
@@ -83,6 +85,16 @@ var WidgetInfobarItemView = Marionette.View.extend({
     'click .js_closeInfobar': 'closeInfobar',
     'click .js_openSession': 'openSession',
     'click .js_openTargetInModal': 'openTargetInModal'
+  },
+  initialize: function() {
+    var that = this,
+        collectionManager = new CollectionManager();
+    this.setLoading(true);
+    collectionManager.getUserLanguagePreferencesPromise(Ctx).then(function (ulp) {
+      that.translationData = ulp;
+      that.setLoading(false);
+      that.render();
+    });
   },
   onButtonClick: function(evt) {
     if ( evt && _.isFunction(evt.preventDefault) ){
@@ -105,7 +117,7 @@ var WidgetInfobarItemView = Marionette.View.extend({
     var model = this.model;
     return {
       model: model,
-      message: model.getDescriptionText(Widget.Model.prototype.INFO_BAR),
+      message: model.getDescriptionText(Widget.Model.prototype.INFO_BAR, undefined, this.translationData),
       call_to_action_msg: model.getLinkText(Widget.Model.prototype.INFO_BAR),
       share_link: model.getShareUrl(Widget.Model.prototype.INFO_BAR),
       widget_endpoint: model.getUrl(Widget.Model.prototype.INFO_BAR),

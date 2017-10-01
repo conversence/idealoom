@@ -69,7 +69,7 @@ var IdeaInIdeaListView = Marionette.View.extend({
     var that = this;
     this.visitorData = options.visitorData;
     this.parentPanel = options.parentPanel;
-    this.synthesis = options.synthesis;
+    this.translationData = options.translationData;
     if (this.parentPanel === undefined) {
       throw new Error("parentPanel is mandatory");
     }
@@ -92,6 +92,8 @@ var IdeaInIdeaListView = Marionette.View.extend({
     // TODO: Detect a change in current synthesis
     Ctx.getCurrentSynthesisDraftPromise().then(function(synthesis) {
       if(!that.isDestroyed()) {
+        that.synthesis = synthesis;
+        that.render();
         that.listenTo(synthesis.getIdeasCollection(), 'add remove reset', function() {
           if(!that.isDestroyed()) {
             that.render();
@@ -137,9 +139,9 @@ var IdeaInIdeaListView = Marionette.View.extend({
         model_type = this.model.get('@type');
     _.extend(data, render_data);
 
-    data.shortTitle = this.model.getShortTitleDisplayText();
+    data.shortTitle = this.model.getShortTitleDisplayText(this.translationData);
     if (data.longTitle) {
-      data.longTitle = ' - ' + data.longTitle.substr(0, 50);
+      data.longTitle = ' - ' + data.longTitle.bestValue(this.translationData).substr(0, 50);
     }
 
     data.Ctx = Ctx;
@@ -147,7 +149,12 @@ var IdeaInIdeaListView = Marionette.View.extend({
     if (Types.isInstance(model_type, Types.IDEA) && model_type != Types.ROOT_IDEA) {
       var visitorData = this.visitorData,
       render_data = visitorData[this.model.getId()];
-      data.inNextSynthesis = this.synthesis.getIdeasCollection().get(this.model.id) !== undefined;
+      if (this.synthesis != undefined) {
+        data.inNextSynthesis = this.synthesis.getIdeasCollection().get(this.model.id) !== undefined;
+      } else {
+        // will get re-rendered
+        data.inNextSynthesis = false;
+      }
       data.linkType = render_data.last_link.get('subtype');
       _.extend(data, render_data);
     }
@@ -178,6 +185,7 @@ var IdeaInIdeaListView = Marionette.View.extend({
         groupContent: that._groupContent,
         visitorData: visitorData,
         synthesis: that.synthesis,
+        translationData: that.translationData,
     };
     that.showChildView('regionChildren', ideaFamilies);
     if(Ctx.isSmallScreen()){
@@ -277,7 +285,7 @@ var IdeaInIdeaListView = Marionette.View.extend({
    */
   doIdeaChange: function(is_unread) {
     var analytics = Analytics.getInstance();
-    //console.log('Tracking event on idea ', this.model.getShortTitleDisplayText())
+    //console.log('Tracking event on idea ', this.model.getShortTitleDisplayText(this.translationData))
     if(!is_unread) {
       analytics.trackEvent(analytics.events.OPEN_IDEA_IN_TABLE_OF_IDEAS);
     }
@@ -355,7 +363,7 @@ var IdeaInIdeaListView = Marionette.View.extend({
       ev.originalEvent.dataTransfer.effectAllowed = 'move';
       ev.originalEvent.dataTransfer.dropEffect = 'move';
 
-      Ctx.showDragbox(ev, this.model.get('shortTitle'));
+      Ctx.showDragbox(ev, this.model.getShortTitlSafe(this.translationData));
       Ctx.draggedIdea = this.model;
     }
   },

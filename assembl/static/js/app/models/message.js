@@ -71,11 +71,11 @@ var MessageModel = Base.Model.extend({
     checked: false,
     read: false,
     parentId: null,
-    subject: LangString.Model.empty,
+    subject: null,
     like_count: 0,
     liked: false,
     hidden: false,
-    body: LangString.Model.empty,
+    body: null,
     idCreator: null,
     avatarUrl: null,
     date: null,
@@ -111,12 +111,13 @@ var MessageModel = Base.Model.extend({
    * @returns {string} the subject, with any re: stripped
    */
   getSubjectNoRe: function() {
-      var subject = this.get('subject').originalValue();
-      if (subject) {
-        return subject.replace(/( *)?(RE) *(:|$) */igm, "");
+      var subject = this.get('subject'),
+          subjectText = subject ? subject.originalValue() : '';
+      if (subjectText) {
+        return subjectText.replace(/( *)?(RE) *(:|$) */igm, "");
       }
       else {
-        return subject;
+        return subjectText;
       }
     },
 

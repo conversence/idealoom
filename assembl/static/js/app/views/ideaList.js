@@ -120,11 +120,13 @@ var IdeaList = AssemblPanel.extend({
     });
     var tableOfIdeasCollapsedStateFetchPromise = Ctx.isUserConnected() ? this.tableOfIdeasCollapsedState.fetch() : Promise.resolve(true);
 
-    // Should we show the table of ideas even when we have not yet received the tableOfIdeasCollapsedStateFetchPromise and then re-render once we have received it ? Or accept to wait potentially a bit more before displaying the table of ideas? => comment/uncomment that.render(); in the following block of code to toggle.
     Promise.join(
       collectionManager.getAllIdeasCollectionPromise(),
       collectionManager.getAllIdeaLinksCollectionPromise(),
-      function(allIdeasCollection, allIdeaLinksCollection, collapsedState) {
+      tableOfIdeasCollapsedStateFetchPromise,
+      defaultTableOfIdeasCollapsedStateFetchPromise, // now that we have the collapsed state of each idea, we can (re)render the table of ideas
+      collectionManager.getUserLanguagePreferencesPromise(Ctx),
+      function(allIdeasCollection, allIdeaLinksCollection, collapsedState, defaultCollapsedState, translationData) {
         if(!that.isDestroyed()) {
           var events = ['reset', 'change:parentId', 'change:@id', 'change:hidden', 'remove', 'add', 'destroy'];
           that.listenTo(allIdeasCollection, events.join(' '), requestRender);
@@ -133,17 +135,7 @@ var IdeaList = AssemblPanel.extend({
           var events = ['reset', 'change:source', 'change:target', 'change:order', 'remove', 'add', 'destroy'];
           that.listenTo(allIdeaLinksCollection, events.join(' '), requestRender);
           that.allIdeaLinksCollection = allIdeaLinksCollection;
-        }
-      }
-    );
-
-    Promise.join(
-      collectionManager.getAllIdeasCollectionPromise(),
-      collectionManager.getAllIdeaLinksCollectionPromise(),
-      tableOfIdeasCollapsedStateFetchPromise,
-      defaultTableOfIdeasCollapsedStateFetchPromise, // now that we have the collapsed state of each idea, we can (re)render the table of ideas
-      function(allIdeasCollection, allIdeaLinksCollection, collapsedState, defaultCollapsedState) {
-        if(!that.isDestroyed()) {
+          that.translationData = translationData;
           that.setLoading(false);
           that.render();
         }
@@ -362,33 +354,35 @@ var IdeaList = AssemblPanel.extend({
 
         that.showChildView('ideaView', new Loader());
 
-        Ctx.getCurrentSynthesisDraftPromise().then(function(synthesis) {
-          //console.log("About to set ideas on ideaList",that.cid, "with panelWrapper",that.getPanelWrapper().cid, "with group",that.getContainingGroup().cid);
+        //console.log("About to set ideas on ideaList",that.cid, "with panelWrapper",that.getPanelWrapper().cid, "with group",that.getContainingGroup().cid);
 
-          var ideaFamilies = new ideaInIdeaList.IdeaFamilyCollectionView ({
-            collection: new Backbone.Collection(roots)
-          });
-          ideaFamilies.childViewOptions = {
-              parentPanel: that,
-              groupContent: that.getContainingGroup(),
-              visitorData: view_data,
-              synthesis: synthesis
-          };
-
-          that.showChildView('ideaView', ideaFamilies);
-
-          Ctx.initTooltips(that.$el);
-          if (Ctx.debugRender) {
-            console.log("Restoring scroll position to ", that.bodyTopPosition);
+        var ideaFamilies = new ideaInIdeaList.IdeaFamilyCollectionView ({
+          collection: new Backbone.Collection(roots),
+          options: {
+            translationData: that.translationData,
           }
-          that.body = that.$('.panel-body');
-          that.body.scrollTop(that.bodyTopPosition);
         });
+        ideaFamilies.childViewOptions = {
+            parentPanel: that,
+            groupContent: that.getContainingGroup(),
+            visitorData: view_data,
+            translationData: that.translationData
+        };
+
+        that.showChildView('ideaView', ideaFamilies);
+
+        Ctx.initTooltips(that.$el);
+        if (Ctx.debugRender) {
+          console.log("Restoring scroll position to ", that.bodyTopPosition);
+        }
+        that.body = that.$('.panel-body');
+        that.body.scrollTop(that.bodyTopPosition);
 
         //sub menu other
         var OtherView = new OtherInIdeaListView({
           model: rootIdea,
           parentPanel: that,
+          translationData: that.translationData,
           groupContent: that.getContainingGroup()
         });
         that.showChildView('otherView', OtherView);
@@ -397,6 +391,7 @@ var IdeaList = AssemblPanel.extend({
         var synthesisView = new SynthesisInIdeaListView({
           model: rootIdea,
           parentPanel: that,
+          translationData: that.translationData,
           groupContent: that.getContainingGroup()
         });
         that.showChildView('synthesisView', synthesisView);
@@ -405,6 +400,7 @@ var IdeaList = AssemblPanel.extend({
         var orphanView = new OrphanMessagesInIdeaListView({
           model: rootIdea,
           parentPanel: that,
+          translationData: that.translationData,
           groupContent: that.getContainingGroup()
         });
         that.showChildView('orphanView', orphanView);
@@ -413,6 +409,7 @@ var IdeaList = AssemblPanel.extend({
         var allMessagesInIdeaListView = new AllMessagesInIdeaListView({
           model: rootIdea,
           parentPanel: that,
+          translationData: that.translationData,
           groupContent: that.getContainingGroup()
         });
         that.showChildView('allMessagesView', allMessagesInIdeaListView);
@@ -507,7 +504,7 @@ var IdeaList = AssemblPanel.extend({
       var crierion_value = idea_criterion_value(idea);
       if ( highlight_if_newer_than && crierion_value && crierion_value >= highlight_if_newer_than ){
         var idea_id = idea.getId();
-        //console.log("we are going to highlight idea: ", idea_id, idea.get("shortTitle"));
+        //console.log("we are going to highlight idea: ", idea_id, idea.get("shortTitle").bestValue(that.translationData));
         if ( !(idea_id in view_data) ){
           view_data[idea_id] = {};
         }
