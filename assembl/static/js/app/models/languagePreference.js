@@ -91,6 +91,10 @@ var LanguagePreferenceCollection = Base.Collection.extend({
    * @function app.models.languagePreference.LanguagePreferenceCollection.comparator
    */
     comparator: function(lp) {
+      if (LangString.LocaleUtils.stripCountry(lp.get("locale_code")) == Ctx.getLocale()
+        && !lp.get("translate_to_name")) {
+        return 0;
+      }
       return lp.get("source_of_evidence") + (lp.get("preferred_order") / 100.0);
     },
   /**
@@ -98,6 +102,10 @@ var LanguagePreferenceCollection = Base.Collection.extend({
    * @function app.models.languagePreference.LanguagePreferenceCollection.interface_comparator
    */
     interface_comparator: function(lp) {
+      if (LangString.LocaleUtils.stripCountry(lp.get("locale_code")) == Ctx.getLocale()
+        && !lp.get("translate_to_name")) {
+        return 0;
+      }
       var evidence = lp.get("source_of_evidence");
       if (!evidence) {
         evidence = 100;
