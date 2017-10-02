@@ -539,6 +539,7 @@ class LangStringEntry(TombstonableMixin, Base):
             "entries",
             primaryjoin="and_(LangString.id==LangStringEntry.langstring_id, "
                         "LangStringEntry.tombstone_date == None)",
+            lazy="subquery",
             cascade="all, delete-orphan"))
     # Should we allow locale-less LangStringEntry? (for unknown...)
 
