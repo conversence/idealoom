@@ -29,7 +29,9 @@ class PrefCollectionTranslationTable(TranslationTable):
     def languages_for(self, locale_code, db=None):
         pref = self.prefCollection.find_locale(locale_code, db)
         if pref.translate:
-            return (self.service.asKnownLocale(pref.translate),)
+            loc = self.service.asKnownLocale(pref.translate)
+            if loc:
+                return (loc,)
         return ()
 
 
@@ -39,6 +41,7 @@ class DiscussionPreloadTranslationTable(TranslationTable):
         self.base_languages = {
             service.asKnownLocale(lang)
             for lang in discussion.discussion_locales}
+        self.base_languages.discard(None)
 
     def languages_for(self, locale_code, db=None):
         locale_code = self.service.asKnownLocale(locale_code)
@@ -106,6 +109,7 @@ def translate_content(
                     entries = ls.entries_as_dict
             entries = {service.asKnownLocale(entry.locale): entry
                        for entry in entries.values()}
+            entries.pop(None, None)
             originals = ls.non_mt_entries()
             # pick randomly. TODO: Recency order?
             for original in originals:
@@ -131,7 +135,8 @@ def translate_content(
                             service.asKnownLocale(original.locale) or
                             original.locale)
                         ls.db.expire(ls, ["entries"])
-                        entries[service.asKnownLocale(result.locale)] = result
+                        entries[service.asKnownLocale(result.locale)
+                                or original.locale] = result
                         changed = True
     if changed and send_to_changes:
         content.send_to_changes()
