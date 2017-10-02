@@ -520,7 +520,7 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
         counters = cls.prepare_counters(discussion_id)
         if partial:
             return counters.paths[root_idea_id].as_clause_base(
-                cls.default_db(), include_deleted=include_deleted)
+                cls.default_db(), discussion_id, include_deleted=include_deleted)
         else:
             return counters.paths[root_idea_id].as_clause(
                 cls.default_db(), discussion_id, counters.user_id, Content,

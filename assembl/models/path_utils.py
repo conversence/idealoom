@@ -224,7 +224,7 @@ class PostPathLocalCollection(object):
     def __repr__(self):
         return " ; ".join((repr(x) for x in self.paths))
 
-    def as_clause_base(self, db, include_breakpoints=False,
+    def as_clause_base(self, db, discussion_id, include_breakpoints=False,
                        include_deleted=False):
         """Express collection as a SQLAlchemy query clause.
 
@@ -246,7 +246,8 @@ class PostPathLocalCollection(object):
                 query = db.query(post.id.label("post_id"))
             else:
                 query = db.query(post.id)
-            query = query.join(content, content.id == post.id)
+            query = query.join(content, (content.id == post.id) &
+                               (content.discussion_id==discussion_id))
             if include_deleted is not None:
                 if include_deleted:
                     query = query.filter(
@@ -329,7 +330,7 @@ class PostPathLocalCollection(object):
 
     def as_clause(self, db, discussion_id, user_id=None, content=None,
                   include_deleted=False):
-        subq = self.as_clause_base(db, include_deleted=include_deleted)
+        subq = self.as_clause_base(db, discussion_id, include_deleted=include_deleted)
         content = content or with_polymorphic(
             Content, [], Content.__table__,
             aliased=False, flat=True)
@@ -442,7 +443,7 @@ class PostPathCombiner(PostPathGlobalCollection, IdeaVisitor):
     def orphan_clause(self, user_id=None, content=None, include_deleted=False):
         root_path = self.paths[self.root_idea_id]
         db = self.discussion.default_db
-        subq = root_path.as_clause_base(db, include_deleted=include_deleted)
+        subq = root_path.as_clause_base(db, self.discussion.id, include_deleted=include_deleted)
         content = content or with_polymorphic(
             Content, [], Content.__table__,
             aliased=False, flat=True)
