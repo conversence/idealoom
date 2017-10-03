@@ -1609,7 +1609,10 @@ def create_first_admin_user():
 def install_yarn(local=True):
     """Install yarn"""
     if local:
-        if not exists('node_modules/.bin/yarn'):
+        node_modules = get_node_modules_path()
+        if not exists(join(node_modules, '.bin', 'yarn')):
+            # Start fresh if installing local yarn
+            run('rm -rf '+node_modules)
             with cd(get_node_base_path()):
                 venvcmd('npm install --no-save yarn', chdir=False)
     elif not env.mac:

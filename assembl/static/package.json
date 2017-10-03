@@ -88,6 +88,7 @@
     "watchify": "~3.9.0",
     "webpack": "~3.6",
     "webpack-dashboard": "^1.0.0-5",
-    "webpack-dev-server": "~2.8"
+    "webpack-dev-server": "~2.8",
+    "yarn": "1.1.0"
   }
 }
