@@ -45,6 +45,7 @@ from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..auth import (
     CrudPermissions, P_READ, P_ADMIN_DISC, P_EDIT_IDEA,
     P_ADD_IDEA)
+from .langstrings import LangString
 from ..semantic.namespaces import (
     SIOC, IDEA, ASSEMBL, DCTERMS, QUADNAMES, FOAF, RDF, VirtRDF)
 from ..lib.sqla import (CrudOperation, get_model_watcher)
@@ -155,19 +156,53 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
         Integer, ForeignKey(URIRefDb.id),
         server_default=str(URIRefDb.index_of(IDEA.GenericIdeaNode)))
 
-    long_title = Column(
-        UnicodeText,
-        info={'rdf': QuadMapPatternS(None, DCTERMS.alternative)})
-    short_title = Column(
-        UnicodeText,
-        info={'rdf': QuadMapPatternS(None, DCTERMS.title)})
-    definition = Column(
-        UnicodeText,
-        info={'rdf': QuadMapPatternS(None, DCTERMS.description)})
+    title_id = Column(
+        Integer(), ForeignKey(LangString.id))
+    synthesis_title_id = Column(
+        Integer(), ForeignKey(LangString.id))
+    description_id = Column(
+        Integer(), ForeignKey(LangString.id))
+    title = relationship(
+        LangString,
+        lazy="joined",
+        primaryjoin=title_id == LangString.id,
+        backref=backref("idea_from_title", lazy="dynamic"),
+        cascade="all")
+    synthesis_title = relationship(
+        LangString,
+        lazy="joined",
+        primaryjoin=synthesis_title_id == LangString.id,
+        backref=backref("idea_from_synthesis_title", lazy="dynamic"),
+        cascade="all")
+    description = relationship(
+        LangString,
+        lazy="joined",
+        primaryjoin=description_id == LangString.id,
+        backref=backref("idea_from_description", lazy="dynamic"),
+        cascade="all")
     hidden = Column(Boolean, server_default='0')
     last_modified = Column(Timestamp)
     # TODO: Make this autoupdate on change. see
     # http://stackoverflow.com/questions/1035980/update-timestamp-when-row-is-updated-in-postgresql
+
+    # temporary placeholders
+    @property
+    def definition(self):
+        if self.description_id:
+            return self.description.first_original().value
+        return ""
+
+    @property
+    def long_title(self):
+        if self.synthesis_title_id:
+            return self.synthesis_title.first_original().value
+        return ""
+
+    @property
+    def short_title(self):
+        if self.title_id:
+            return self.title.first_original().value
+        return ""
 
     discussion_id = Column(Integer, ForeignKey(
         'discussion.id',
@@ -332,12 +367,16 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
     def copy(self, tombstone=None, **kwargs):
         kwargs.update(
             tombstone=tombstone,
-            long_title=self.long_title,
-            short_title=self.short_title,
-            definition=self.definition,
             hidden=self.hidden,
             creation_date=self.creation_date,
             discussion=self.discussion)
+        if self.title:
+            kwargs['title'] = self.title.clone()
+        if self.synthesis_title:
+            kwargs['synthesis_title'] = self.synthesis_title.clone()
+        if self.description:
+            kwargs['description'] = self.description.clone()
+
         return super(Idea, self).copy(**kwargs)
 
     @classmethod
@@ -1042,6 +1081,9 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
     crud_permissions = CrudPermissions(
         P_ADD_IDEA, P_READ, P_EDIT_IDEA, P_ADMIN_DISC, P_ADMIN_DISC,
         P_ADMIN_DISC)
+
+LangString.setup_ownership_load_event(Idea,
+    ['title', 'description', 'synthesis_title'])
 
 
 class RootIdea(Idea):
