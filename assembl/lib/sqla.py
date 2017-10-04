@@ -1021,6 +1021,7 @@ class BaseOps(object):
             # Interesting that it works here and not upstream
             sub_context = instance.get_instance_context(context)
             log.info("Chaining context from %s -> %s" % (context, sub_context))
+            # NOTE: Here we could tombstone the instance if tombstonable.
             instance = instance._do_update_from_json(
                 json, parse_def, aliases, sub_context,
                 DuplicateHandling.USE_ORIGINAL, jsonld)
@@ -1157,13 +1158,23 @@ class BaseOps(object):
                 # Try the brutal approach
                 setattr(self, accessor.key, instances)
             else:
+                from ..lib.history_mixin import TombstonableMixin
                 current_instances = getattr(self, accessor.key)
                 missing = set(instances) - set(current_instances)
+                if missing:
+                    # Maybe tombstones
+                    missing = filter(
+                        lambda a: not isinstance(a, TombstonableMixin) or
+                        not a.is_tombstone, missing)
                 assert not missing, "what's wrong with back_populates?"
                 extra = set(current_instances) - set(instances)
                 if extra:
-                    assert len(accessor.remote_side) == 1
-                    remote = next(iter(accessor.remote_side))
+                    remote_columns = list(accessor.remote_side)
+                    if len(accessor.remote_side) > 1:
+                        if issubclass(accessor.mapper.class_, TombstonableMixin):
+                            remote_columns = filter(lambda c: c.name != 'tombstone_date', remote_columns)
+                    assert len(remote_columns) == 1
+                    remote = remote_columns[0]
                     if remote.nullable:
                         # TODO: check update permissions on that object.
                         for inst in missing:
@@ -1176,7 +1187,10 @@ class BaseOps(object):
                                 raise HTTPUnauthorized(
                                     "Cannot delete object %s", inst.uri())
                             else:
-                                self.db.delete(inst)
+                                if isinstance(inst, TombstonableMixin):
+                                    inst.is_tombstone = True
+                                else:
+                                    self.db.delete(inst)
         elif isinstance(accessor, property):
             # Note: Does not happen yet.
             property.fset(self, instances)
