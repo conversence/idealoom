@@ -269,12 +269,14 @@ def browser(request):
 
     import sys
     import os
-    from os.path import exists
+    from os.path import exists, join
     if sys.platform in ('linux', 'linux2'):
-        if exists('/usr/lib/chromium-browser/chromedriver'):  # ubuntu
-            os.environ["PATH"] += ":/usr/lib/chromium-browser"
-        if exists('/usr/lib/chromium/chromedriver'):  # debian jessie (on stretch it's /usr/bin/chromedriver)
-            os.environ["PATH"] += ":/usr/lib/chromium"
+        for path in ('/usr/lib/chromium-browser',  # ubuntu
+                     '/usr/lib/chromium'):  # debian jessie (on stretch it's /usr/bin/chromedriver)
+            if exists(join(path, 'chromedriver')):  # ubuntu
+                os.environ["PATH"] += ":" + path
+                os.environ["LD_LIBRARY_PATH"] = path
+                break
     browser = Browser('chrome', headless=True)
 
     def fin():
