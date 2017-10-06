@@ -1108,7 +1108,7 @@ class BaseOps(object):
 
     def update_from_json(
             self, json, user_id=None, context=None, jsonld=None,
-            parse_def_name='default_reverse'):
+            permissions=None, parse_def_name='default_reverse'):
         """Update (patch) an object from its JSON representation."""
         parse_def = get_view_def(parse_def_name)
         context = context or self.get_instance_context()
@@ -1117,7 +1117,8 @@ class BaseOps(object):
         discussion = context.get_instance_of_class(Discussion)
         if not discussion and isinstance(self, DiscussionBoundBase):
             discussion = Discussion.get(self.get_discussion_id())
-        permissions = context.get_permissions()
+        if permissions is None:
+            permissions = context.get_permissions()
         if not self.user_can(
                 user_id, CrudPermissions.UPDATE, permissions):
             raise HTTPUnauthorized(
