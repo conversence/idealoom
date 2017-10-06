@@ -334,6 +334,10 @@ from .announcement import (
     IdeaAnnouncement,
 )
 
+from ..lib.generic_pointer import BaseTableEnum
+
+BaseTableEnum.init_members(Base)
+
 
 def includeme(config):
     config.include('.langstrings')

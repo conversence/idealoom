@@ -448,6 +448,20 @@ class BaseOps(object):
             self.external_typename(), getattr(self, 'id', None) or -1)
 
     @classmethod
+    def base_tablename(cls):
+        tablename = None
+        for c in cls.mro():
+            tablename = getattr(c, '__tablename__', tablename)
+        return tablename
+
+    @classmethod
+    def base_concrete_class(cls):
+        for c in cls.mro():
+            if getattr(c, '__dict__', {}).get('__tablename__', None):
+                cls = c
+        return cls
+
+    @classmethod
     def base_polymorphic_class(cls):
         """Returns the base class of this class above Base."""
         mapper_args = getattr(cls, '__mapper_args__', {})
