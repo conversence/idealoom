@@ -62,7 +62,7 @@ class BaseContext(object):
             yield i
 
     def get_user_id(self):
-        return self.get_request().authenticated_userid
+        return self.__parent__.get_user_id()
 
     def context_chain(self):
         yield self
@@ -126,8 +126,10 @@ def collection_creation_side_effects(inst_ctx, ctx):
 
 class AppRoot(DictContext):
     """The root context. Anything not defined by a root comes here."""
-    def __init__(self, request=None):
+    def __init__(self, request=None, user_id=None):
         self.request = request
+        self.user_id = user_id
+        self._permissions = None
         super(AppRoot, self).__init__('', ACL_READABLE, [
             Api2Context(self, ACL_RESTRICTIVE),
             DictContext('admin', ACL_RESTRICTIVE, [
@@ -164,17 +166,22 @@ class AppRoot(DictContext):
     def get_discussion_id(self):
         return None
 
+    def get_user_id(self):
+        if self.user_id:
+            return self.user_id
+        request = self.get_request()
+        if request:
+            return request.authenticated_userid
+
     def get_instance_ctx_of_class(self, cls):
         return None # I'm the holder of the user, but not the user's context
 
     def get_instance_of_class(self, cls):
         from assembl.models import AgentProfile
         if issubclass(cls, AgentProfile):
-            request = self.get_request()
-            if request:
-                user_id = request.authenticated_userid
-                if user_id and user_id != Everyone:
-                    return AgentProfile.get(user_id)
+            user_id = self.get_user_id()
+            if user_id and user_id != Everyone:
+                return AgentProfile.get(user_id)
 
     def get_all_instances(self):
         from assembl.models import User
@@ -183,7 +190,16 @@ class AppRoot(DictContext):
             yield user
 
     def get_permissions(self):
-        return self.request.permissions
+        if self.user_id:
+            if self._permissions is None:
+                from assembl.auth.util import get_permissions
+                self._permissions = get_permissions(
+                    self.user_id, self.get_discussion_id())
+            return self._permissions
+        elif self.request:
+            # only use request if it knows the user
+            return self.request.permissions
+        return []
 
 
 class DiscussionsContext(BaseContext):
@@ -1189,7 +1205,7 @@ class DiscussionPreferenceCollection(AbstractCollectionDefinition):
         return c[key]
 
 
-def root_factory(request):
+def root_factory(request, user_id=None):
     """The factory function for the root context"""
     # OK, this is the old code... I need to do better, but fix first.
     from ..models import Discussion
@@ -1206,7 +1222,7 @@ def root_factory(request):
         if not discussion:
             raise HTTPNotFound("No discussion named %s" % (discussion_slug,))
         return discussion
-    return AppRoot(request)
+    return AppRoot(request, user_id)
 
 
 def includeme(config):

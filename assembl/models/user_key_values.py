@@ -516,9 +516,9 @@ class DiscussionPerUserNamespacedKeyValue(
     def container_url(self):
         return "/data/Discussion/%d/user_ns_kv" % (self.discussion_id,)
 
-    def get_default_parent_context(self, request=None):
+    def get_default_parent_context(self, request=None, user_id=None):
         return self.discussion.get_collection_context(
-            'user_ns_kv', request=request)
+            'user_ns_kv', request=request, user_id=user_id)
 
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):
@@ -555,9 +555,9 @@ class IdeaNamespacedKeyValue(
         return "/data/Discussion/%d/ideas/%d/ns_kv" % (
             self.get_discussion_id(), self.idea_id)
 
-    def get_default_parent_context(self, request=None):
+    def get_default_parent_context(self, request=None, user_id=None):
         return self.idea.get_collection_context(
-            'ns_kv', request=request)
+            'ns_kv', request=request, user_id=user_id)
 
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):

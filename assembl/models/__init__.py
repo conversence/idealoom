@@ -83,14 +83,14 @@ class DiscussionBoundBase(AbstractBase):
     def tombstone(self):
         return DiscussionBoundTombstone(self)
 
-    def get_default_parent_context(self, request=None):
+    def get_default_parent_context(self, request=None, user_id=None):
         for r in self.__class__.__mapper__.relationships:
             if r.mapper.class_ == Discussion and r.back_populates:
                 discussion = getattr(self, r.key)
                 return discussion.get_collection_context(
-                    r.back_populates, request=request)
+                    r.back_populates, request=request, user_id=user_id)
         return super(DiscussionBoundBase, self
-                     ).get_default_parent_context(request)
+                     ).get_default_parent_context(request, user_id)
 
     def container_url(self):
         for r in self.__class__.__mapper__.relationships:

@@ -1882,33 +1882,34 @@ class BaseOps(object):
         return cls._collections_cache
 
     @staticmethod
-    def get_api_context(request=None):
+    def get_api_context(request=None, user_id=None):
         from assembl.views.traversal import root_factory
         from pyramid.threadlocal import get_current_request
         request = request or get_current_request()
-        root = root_factory(request)
+        root = root_factory(request, user_id)
         return root['data']
 
     @classmethod
-    def get_class_context(cls, request=None):
-        api_context = cls.get_api_context(request)
+    def get_class_context(cls, request=None, user_id=None):
+        api_context = cls.get_api_context(request, user_id)
         return api_context[cls.external_typename()]
 
-    def get_default_parent_context(self, request=None):
-        return self.get_class_context(request)
+    def get_default_parent_context(self, request=None, user_id=None):
+        return self.get_class_context(request, user_id)
 
-    def get_instance_context(self, parent_context=None, request=None):
+    def get_instance_context(self, parent_context=None, request=None, user_id=None):
         from assembl.views.traversal import InstanceContext
         return InstanceContext(
-            parent_context or self.get_default_parent_context(request), self)
+            parent_context or self.get_default_parent_context(
+                request, user_id), self)
 
     def get_collection_context(
-            self, relation_name, parent_context=None, request=None):
+            self, relation_name, parent_context=None, request=None, user_id=None):
         from assembl.views.traversal import CollectionContext
         collection = self.get_collections().get(relation_name, None)
         if collection:
             parent_context = parent_context or self.get_instance_context(
-                request=request)
+                request=request, user_id=user_id)
             return CollectionContext(parent_context, collection, self)
 
     def is_owner(self, user_id):

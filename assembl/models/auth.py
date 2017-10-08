@@ -417,9 +417,9 @@ class AbstractAgentAccount(Base):
 
     full_name = Column(CoerceUnicode(512))
 
-    def get_default_parent_context(self, request=None):
+    def get_default_parent_context(self, request=None, user_id=None):
         return self.profile.get_collection_context(
-            'accounts', request=request)
+            'accounts', request=request, user_id=user_id)
 
     def container_url(self):
         return "/data/AgentProfile/%d/accounts" % (self.profile_id)
@@ -675,7 +675,7 @@ class User(NamedClassMixin, OriginMixin, AgentProfile):
 
         super(User, self).__init__(**kwargs)
 
-    def get_default_parent_context(self, request=None):
+    def get_default_parent_context(self, request=None, user_id=None):
         from pyramid.threadlocal import get_current_request
         from ..auth.util import discussion_from_request
         if not request:
@@ -683,8 +683,10 @@ class User(NamedClassMixin, OriginMixin, AgentProfile):
         if request:
             d = discussion_from_request(request)
             if d:
-                return d.get_collection_context('all_users', request=request)
-        return super(User, self).get_default_parent_context(request)
+                return d.get_collection_context(
+                    'all_users', request=request, user_id=user_id)
+        return super(User, self).get_default_parent_context(
+            request, user_id=user_id)
 
     @property
     def real_name_p(self):
@@ -1199,9 +1201,9 @@ class UserRole(Base, PrivateObjectMixin):
     def container_url(self):
         return "/data/User/%d/roles" % (self.user_id)
 
-    def get_default_parent_context(self, request=None):
+    def get_default_parent_context(self, request=None, user_id=None):
         return self.user.get_collection_context(
-            'roles', self.user.get_class_context(), request)
+            'roles', self.user.get_class_context(), request, user_id)
 
     @classmethod
     def special_quad_patterns(cls, alias_maker, discussion_id):
@@ -1271,8 +1273,8 @@ class LocalUserRole(DiscussionBoundBase, PrivateObjectMixin):
         return "/data/Discussion/%d/all_users/%d/local_roles" % (
             self.discussion_id, self.user_id)
 
-    def get_default_parent_context(self, request=None):
-        return self.user.get_collection_context('roles', request=request)
+    def get_default_parent_context(self, request=None, user_id=None):
+        return self.user.get_collection_context('roles', request=request, user_id=user_id)
 
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):

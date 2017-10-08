@@ -714,9 +714,9 @@ class WidgetPost(AssemblPost):
         # and creativity uses
         # /data/Discussion/%d/widgets/%d/base_idea/-/children/%d/widgetposts
 
-    def get_default_parent_context(self, request=None):
+    def get_default_parent_context(self, request=None, user_id=None):
         return self.widget.get_collection_context(
-            'posts', request=request)
+            'posts', request=request, user_id=user_id)
 
     def populate_from_context(self, context):
         if not(self.widget or self.widget_id):
@@ -826,9 +826,9 @@ class ImportedPost(Post):
         return "/data/Discussion/%d/sources/%d/contents" % (
             self.discussion_id, self.source_id)
 
-    def get_default_parent_context(self, request=None):
+    def get_default_parent_context(self, request=None, user_id=None):
         return self.source.get_collection_context(
-            'contents', request=request)
+            'contents', request=request, user_id=user_id)
 
     def get_body_mime_type(self):
         return self.body_mime_type

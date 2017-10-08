@@ -88,9 +88,9 @@ class AbstractVoteSpecification(DiscussionBoundBase):
                 Discussion, viewonly=True, uselist=False,
                 secondary=Widget.__table__, backref="vote_specifications")
 
-    def get_default_parent_context(self, request=None):
+    def get_default_parent_context(self, request=None, user_id=None):
         return self.widget.get_collection_context(
-            'vote_specifications', request=request)
+            'vote_specifications', request=request, user_id=user_id)
 
     def container_url(self):
         return "/data/Discussion/%d/widgets/$d/vote_specifications" % (
@@ -370,9 +370,9 @@ class TokenCategorySpecification(DiscussionBoundBase):
             self.get_discussion_id(), self.token_vote_specification.widget_id,
             self.token_vote_specification_id)
 
-    def get_default_parent_context(self, request=None):
+    def get_default_parent_context(self, request=None, user_id=None):
         return self.token_vote_specification.get_collection_context(
-            'token_categories', request=request)
+            'token_categories', request=request, user_id=user_id)
 
     def is_valid_vote(self, vote):
         if vote.vote_value < 0:
@@ -812,9 +812,9 @@ class AbstractIdeaVote(HistoryMixinWithOrigin, DiscussionBoundBase):
             self.get_discussion_id(), self.widget_id,
             self.vote_spec_id, self.idea_id)
 
-    def get_default_parent_context(self, request=None):
+    def get_default_parent_context(self, request=None, user_id=None):
         return self.vote_spec_ts.get_collection_context(
-            'votes', request=request)
+            'votes', request=request, user_id=user_id)
 
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):
