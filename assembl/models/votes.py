@@ -240,8 +240,12 @@ class AbstractVoteSpecification(DiscussionBoundBase):
         self.settings = json.dumps(val)
 
     def get_discussion_id(self):
-        widget = self.widget or Widget.get(self.widget_id)
-        return widget.get_discussion_id()
+        from .widgets import Widget
+        widget = self.widget
+        if self.widget_id and not widget:
+            widget = Widget.get(self.widget_id)
+        if widget:
+            return widget.get_discussion_id()
 
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):

@@ -1327,7 +1327,7 @@ class IdeaLink(HistoryMixinWithOrigin, DiscussionBoundBase):
         return super(IdeaLink, self).copy(**kwargs)
 
     def get_discussion_id(self):
-        source = self.source_ts or Idea.get(self.source_id)
+        source = self.source_ts or self.source or Idea.get(self.source_id)
         return source.get_discussion_id()
 
     def send_to_changes(self, connection=None, operation=CrudOperation.UPDATE,

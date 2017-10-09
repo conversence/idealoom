@@ -1198,6 +1198,9 @@ class UserRole(Base, PrivateObjectMixin):
     def get_role_name(self):
         return self.role.name
 
+    def set_role_by_name(self, name):
+        self.role = Role.getRole(name)
+
     def container_url(self):
         return "/data/User/%d/roles" % (self.user_id)
 
@@ -1282,6 +1285,9 @@ class LocalUserRole(DiscussionBoundBase, PrivateObjectMixin):
 
     def get_role_name(self):
         return self.role.name
+
+    def set_role_by_name(self, name):
+        self.role = Role.getRole(name)
 
     def unique_query(self):
         query, _ = super(LocalUserRole, self).unique_query()

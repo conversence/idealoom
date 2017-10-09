@@ -998,13 +998,14 @@ class BaseOps(object):
         target_type = json.get('@type', None)
         if target_type:
             new_target_cls = get_named_class(target_type)
-            if target_cls is not None and \
-                    not issubclass(new_target_cls, target_cls):
-                raise HTTPBadRequest(
-                    "Type %s was assigned to %s.%s" % (
-                        target_type, self.__class__.__name__,
-                        accessor_name))
-            target_cls = new_target_cls
+            if new_target_cls:
+                if target_cls is not None and \
+                        not issubclass(new_target_cls, target_cls):
+                    raise HTTPBadRequest(
+                        "Type %s was assigned to %s.%s" % (
+                            target_type, self.__class__.__name__,
+                            accessor_name))
+                target_cls = new_target_cls
         if not target_cls:
             # Not an instance
             return None
@@ -1528,6 +1529,10 @@ class BaseOps(object):
                             setattr(self, key, value.lower() == "true")
                         elif issubclass(col.type.python_type, string_types):
                             setattr(self, key, value)
+                        elif issubclass(col.type.python_type, float):
+                            setattr(self, key, float(value))
+                        elif issubclass(col.type.python_type, int):
+                            setattr(self, key, int(value))
                         else:
                             assert False, "can't assign json type %s"\
                                 " to column %s of class %s" % (

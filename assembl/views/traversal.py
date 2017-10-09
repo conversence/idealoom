@@ -130,6 +130,7 @@ class AppRoot(DictContext):
         self.request = request
         self.user_id = user_id
         self._permissions = None
+        self._user_cache = None
         super(AppRoot, self).__init__('', ACL_READABLE, [
             Api2Context(self, ACL_RESTRICTIVE),
             DictContext('admin', ACL_RESTRICTIVE, [
@@ -181,7 +182,9 @@ class AppRoot(DictContext):
         if issubclass(cls, AgentProfile):
             user_id = self.get_user_id()
             if user_id and user_id != Everyone:
-                return AgentProfile.get(user_id)
+                if self._user_cache is None:
+                    self._user_cache = AgentProfile.get(user_id)
+                return self._user_cache
 
     def get_all_instances(self):
         from assembl.models import User

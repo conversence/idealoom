@@ -565,6 +565,17 @@ class LangStringEntry(TombstonableMixin, Base):
     # tombstone_date = Column(DateTime) implicit from Tombstonable mixin
     value = Column(UnicodeText)  # not searchable in virtuoso
 
+    def set_value(self, value, clone=True):
+        target = self
+        if value != self.value:
+            if value:
+                if clone:
+                    target = self.clone(self.langstring, tombstone=True)
+                target.value = value
+            else:
+                target.is_tombstone = True
+        return target
+
     def clone(self, langstring, db=None, tombstone=None):
         if tombstone is True:
             tombstone = datetime.utcnow()
