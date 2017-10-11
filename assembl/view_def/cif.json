@@ -256,7 +256,7 @@
         "name": "&get_role_name"
     },
     "AbstractVoteSpecification": {},
-    "LickertVoteSpecification": {
+    "LickertRange": {
         "@extends": "AbstractVoteSpecification",
         "@type": "'\"LickertRange\"",
         "min": "minimum",

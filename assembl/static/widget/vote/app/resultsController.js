@@ -530,13 +530,13 @@ voteApp.controller('resultsCtl',
 
       var x_vote_spec = $scope.getVoteSpecByURI(x_vote_spec_uri);
       var y_vote_spec = $scope.getVoteSpecByURI(y_vote_spec_uri);
-      var x_vote_spec_type = (x_vote_spec && "@type" in x_vote_spec) ? x_vote_spec["@type"] : "LickertVoteSpecification";
-      if ( x_vote_spec_type != "LickertVoteSpecification" ){
-        console.log("ERROR: x_vote_spec_type is not of type LickertVoteSpecification. Instead: ", x_vote_spec_type);
+      var x_vote_spec_type = (x_vote_spec && "@type" in x_vote_spec) ? x_vote_spec["@type"] : "LickertRange";
+      if ( x_vote_spec_type != "LickertRange" ){
+        console.log("ERROR: x_vote_spec_type is not of type LickertRange. Instead: ", x_vote_spec_type);
       }
-      var y_vote_spec_type = (y_vote_spec && "@type" in y_vote_spec) ? y_vote_spec["@type"] : "LickertVoteSpecification";
-      if ( y_vote_spec_type != "LickertVoteSpecification" ){
-        console.log("ERROR: y_vote_spec_type is not of type LickertVoteSpecification. Instead: ", y_vote_spec_type);
+      var y_vote_spec_type = (y_vote_spec && "@type" in y_vote_spec) ? y_vote_spec["@type"] : "LickertRange";
+      if ( y_vote_spec_type != "LickertRange" ){
+        console.log("ERROR: y_vote_spec_type is not of type LickertRange. Instead: ", y_vote_spec_type);
       }
 
       var x_vote_spec_label = $scope.getVoteSpecLabelByURI(x_vote_spec_uri) || x_vote_spec_uri;
@@ -920,7 +920,7 @@ voteApp.controller('resultsCtl',
     $scope.drawResultAsBarChartForSingleTargetOfVoteSpecification = function(destination, vote_spec_uri, vote_spec_result_data_for_target, target){
 
       var vote_spec = $scope.getVoteSpecByURI(vote_spec_uri);
-      var vote_spec_type = (vote_spec && "@type" in vote_spec) ? vote_spec["@type"] : "LickertVoteSpecification"; // can also be "MultipleChoiceVoteSpecification"
+      var vote_spec_type = (vote_spec && "@type" in vote_spec) ? vote_spec["@type"] : "LickertRange"; // can also be "MultipleChoiceVoteSpecification"
 
       var data = null;
       var result_number_of_voters = 0;
@@ -985,7 +985,7 @@ voteApp.controller('resultsCtl',
           }
         }
       
-      } else { // "LickertVoteSpecification"
+      } else { // "LickertRange"
 
         var result_average = null;
         if ( "avg" in vote_spec_result_data_for_target )

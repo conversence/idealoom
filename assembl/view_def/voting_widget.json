@@ -509,7 +509,7 @@
         "vote_class": "&get_vote_classname",
         "my_votes": "&votes_of_current_user:partial"
     },
-    "LickertVoteSpecification": {
+    "LickertRange": {
         "@extends": "AbstractVoteSpecification",
         "minimum": true,
         "maximum": true

@@ -398,7 +398,7 @@
         "settings": "settings_json",
         "vote_class": false
     },
-    "LickertVoteSpecification": {
+    "LickertRange": {
         "@extends": "AbstractVoteSpecification",
         "minimum": true,
         "maximum": true

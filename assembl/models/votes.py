@@ -412,6 +412,7 @@ LangString.setup_ownership_load_event(TokenCategorySpecification, ['name'])
 
 class LickertVoteSpecification(AbstractVoteSpecification):
     __tablename__ = "lickert_vote_specification"
+    __external_typename = "LickertRange"
     rdf_class = VOTE.LickertRange
     __mapper_args__ = {
         'polymorphic_identity': 'lickert_vote_specification'

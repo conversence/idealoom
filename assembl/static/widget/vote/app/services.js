@@ -152,7 +152,7 @@ voteServices.service('VoteWidgetService', ['$window', '$rootScope', '$log', '$ht
       "key": "vertical_gauge",
       "label": "Vertical gauge (aka lickert): needs 1 criterion (of type Lickert)",
       "number_of_criteria": 1,
-      "allowed_criteria_types": ["LickertVoteSpecification"]
+      "allowed_criteria_types": ["LickertRange"]
     },
     {
       "key": "radio",
@@ -164,7 +164,7 @@ voteServices.service('VoteWidgetService', ['$window', '$rootScope', '$log', '$ht
       "key": "2_axes",
       "label": "Two axes graph: needs 2 criteria (of type Lickert)",
       "number_of_criteria": 2,
-      "allowed_criteria_types": ["LickertVoteSpecification"]
+      "allowed_criteria_types": ["LickertRange"]
     },
     {
       "key": "token",
@@ -243,7 +243,7 @@ voteServices.service('VoteWidgetService', ['$window', '$rootScope', '$log', '$ht
 
   this.criterion_types = [
     {
-      "key": "LickertVoteSpecification",
+      "key": "LickertRange",
       // "description": "",
       "label": "Lickert"
     },
@@ -295,7 +295,7 @@ voteServices.service('VoteWidgetService', ['$window', '$rootScope', '$log', '$ht
   };
   */
   this.mandatory_typed_criterion_fields = {
-    "LickertVoteSpecification": [
+    "LickertRange": [
       {
         "key": "minimum",
         "type": "integer",
@@ -384,7 +384,7 @@ voteServices.service('VoteWidgetService', ['$window', '$rootScope', '$log', '$ht
   ];
 
   this.optional_typed_criterion_fields = {
-    "LickertVoteSpecification": [
+    "LickertRange": [
       {
         "key": "valueDefault",
         "type": "integer",
