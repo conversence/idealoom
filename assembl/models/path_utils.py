@@ -631,7 +631,7 @@ class DiscussionGlobalData(object):
             for child, parent in self.parent_dict.items():
                 children[parent].append(child)
             root = set(children.keys()) - set(self.parent_dict.keys())
-            assert len(root) == 1
+            # assert len(root) == 1
             children[None] = [root.pop()]
             self._children_dict = children
         return self._children_dict

@@ -270,8 +270,8 @@ class NotificationSubscription(DiscussionBoundBase, OriginMixin):
         return self.external_typename()
 
     def _do_update_from_json(
-                self, json, parse_def, aliases, ctx,
-                duplicate_handling=None, jsonld=None):
+                self, json, parse_def, ctx,
+                duplicate_handling=None, object_importer=None):
         from ..auth.util import user_has_permission
         user_id = ctx.get_user_id()
         target_user_id = user_id
@@ -310,8 +310,8 @@ class NotificationSubscription(DiscussionBoundBase, OriginMixin):
             new_type = polymap[new_type].class_
             new_instance = self.change_class(new_type)
             return new_instance._do_update_from_json(
-                json, parse_def, aliases, ctx,
-                DuplicateHandling.USE_ORIGINAL, jsonld)
+                json, parse_def, ctx,
+                DuplicateHandling.USE_ORIGINAL, object_importer)
         creation_origin = json.get('creation_origin', "USER_REQUESTED")
         if creation_origin is not None:
             self.creation_origin = NotificationCreationOrigin.from_string(creation_origin)
@@ -466,11 +466,11 @@ class NotificationSubscriptionOnPost(NotificationSubscriptionOnObject):
         return query.filter_by(post_id=post_id), True
 
     def _do_update_from_json(
-            self, json, parse_def, aliases, ctx,
-            duplicate_handling=None, jsonld=None):
+            self, json, parse_def, ctx,
+            duplicate_handling=None, object_importer=None):
         updated = super(
             NotificationSubscriptionOnPost, self)._do_update_from_json(
-                json, parse_def, aliases, ctx, duplicate_handling, jsonld)
+                json, parse_def, ctx, duplicate_handling, object_importer)
         if updated == self:
             self.post_id = json.get('post_id', self.post_id)
         return updated
@@ -510,11 +510,11 @@ class NotificationSubscriptionOnIdea(NotificationSubscriptionOnObject):
         return query.filter_by(idea_id=idea_id), True
 
     def _do_update_from_json(
-            self, json, parse_def, aliases, ctx,
-            duplicate_handling=True, jsonld=None):
+            self, json, parse_def, ctx,
+            duplicate_handling=True, object_importer=None):
         updated = super(
             NotificationSubscriptionOnIdea, self)._do_update_from_json(
-                json, parse_def, aliases, ctx, duplicate_handling, jsonld)
+                json, parse_def, ctx, duplicate_handling, object_importer)
         if updated == self:
             self.idea_id = json.get('idea_id', self.idea_id)
         return updated
@@ -554,11 +554,11 @@ class NotificationSubscriptionOnExtract(NotificationSubscriptionOnObject):
         return query.filter_by(extract_id=extract_id), True
 
     def _do_update_from_json(
-            self, json, parse_def, aliases, ctx,
-            duplicate_handling=True, jsonld=None):
+            self, json, parse_def, ctx,
+            duplicate_handling=True, object_importer=None):
         updated = super(
             NotificationSubscriptionOnExtract, self)._do_update_from_json(
-                json, parse_def, aliases, ctx, duplicate_handling, jsonld)
+                json, parse_def, ctx, duplicate_handling, object_importer)
         if updated == self:
             self.extract_id = json.get('extract_id', self.extract_id)
         return updated
@@ -598,11 +598,11 @@ class NotificationSubscriptionOnUserAccount(NotificationSubscriptionOnObject):
         return query.filter_by(on_user_id=on_user_id), True
 
     def _do_update_from_json(
-            self, json, parse_def, aliases, ctx,
-            duplicate_handling=True, jsonld=None):
+            self, json, parse_def, ctx,
+            duplicate_handling=True, object_importer=None):
         updated = super(
             NotificationSubscriptionOnUserAccount, self)._do_update_from_json(
-                json, parse_def, aliases, ctx, duplicate_handling, jsonld)
+                json, parse_def, ctx, duplicate_handling, object_importer)
         if updated == self:
             self.on_user_id = json.get('on_user_id', self.on_user_id)
         return updated

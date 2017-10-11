@@ -333,10 +333,14 @@ from .announcement import (
     Announcement,
     IdeaAnnouncement,
 )
+from .import_records import (
+    IdeaSource,
+    CatalystIdeaSource,
+    ImportRecord,
+)
 
-from ..lib.generic_pointer import BaseTableEnum
-
-BaseTableEnum.init_members(Base)
+from ..lib.generic_pointer import init_data
+init_data(Base)
 
 
 def includeme(config):

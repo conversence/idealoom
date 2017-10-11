@@ -1,8 +1,11 @@
 {
     "_default": {
-        "id": false,
-        "@id": "self",
-        "_default": false
+      "id": false,
+      "type": false,
+      "@id": false,
+      "@type": false,
+      "@view": false,
+      "_default": false
     },
     "Agent": {
         "in_conversation": false
@@ -14,7 +17,7 @@
     "Update": {
         "when": "creation_date",
         "who": "actor",
-        "in_conversation": "&get_discussion"
+        "in_conversation": false
     },
     "ActionOnPost": {
         "@extends": "Update",
@@ -106,7 +109,8 @@
         "date": "creation_date",
         "created": "creation_date",
         "in_conversation": "discussion",
-        "title": "&get_original_subject"
+        "title": true,
+        "body": true
     },
     "Post": {
         "@extends": "SPost",
@@ -163,20 +167,22 @@
     },
     "GenericIdeaNode": {
         "created": "creation_date",
-        "description": ":extended",
-        "title": ":extended",
+        "description": true,
+        "title": true,
         "in_conversation": "discussion",
         "has_container": "discussion",
         "alternative": "long_title",
         "ideaInMap": false,
+        "rdf_type": true,
         "includes": "children_uris"
     },
     "RootIdea": {
         "@extends": "GenericIdeaNode"
     },
     "DirectedIdeaRelation": {
-        "in_conversation": "&get_discussion",
+        "in_conversation": false,
         "link_order": "order",
+        "rdf_type": true,
         "target_idea": "source",
         "source_idea": "target"
     },
@@ -214,62 +220,63 @@
     },
     "Excerpt": {
         "@extends": "IdeaContentPositiveLink",
-        "hasBody": "&local_uri_as_graph",
-        "hasTarget": "&local_uri_as_resource",
+        "hasBody": false,
+        "hasTarget": false,
         "relevantToConversation": "discussion"
     },
     "FragmentSelector": {
-        "conformsTo": "'\"http://tools.ietf.org/rfc/rfc3023\"",
-        "value": "&as_xpointer"
+        "value": "&from_xpointer"
     },
     "AbstractIdeaVote": {
         "subject_node": "idea",
         "voter": true,
+        "widget": true,
         "voting_criterion": "criterion"
     },
     "BinaryVote": {
-        "@extends": "AbstractIdeaVote"
+        "@extends": "AbstractIdeaVote",
+        "positive": "vote_value"
     },
     "MultipleChoiceIdeaVote": {
-        "@type": "'\"Vote\"",
-        "@extends": "AbstractIdeaVote"
+        "@extends": "AbstractIdeaVote",
+        "vote_value": true
     },
     "LickertVote": {
         "@extends": "AbstractIdeaVote",
+        "lickert_value": "vote_value",
         "lickert_in_range": "vote_spec"
     },
     "TokenIdeaVote": {
         "@extends": "AbstractIdeaVote",
-        "@type": "'\"LickertVote\"",
+        "vote_value": true,
         "lickert_in_range": "token_category"
     },
     "UserRole": {
         "@type": "'\"Role\"",
         "in_conversation": false,
         "function_of": "user",
-        "name": "&get_role_name"
+        "name": "&set_role_by_name"
     },
     "LocalUserRole": {
         "@type": "'\"Role\"",
         "in_conversation": "discussion",
         "function_of": "user",
-        "name": "&get_role_name"
+        "name": "&set_role_by_name"
     },
-    "AbstractVoteSpecification": {},
+    "AbstractVoteSpecification": {
+        "widget": true
+    },
     "LickertRange": {
         "@extends": "AbstractVoteSpecification",
-        "@type": "'\"LickertRange\"",
         "min": "minimum",
         "max": "maximum"
     },
     "MultipleChoiceVoteSpecification": {
         "@extends": "AbstractVoteSpecification",
-        "@type": "'\"LickertRange\"",
         "min": "'1",
         "max": "num_choices"
     },
     "TokenCategorySpecification": {
-        "@type": "'\"LickertRange\"",
         "min": "'0",
         "max": "maximum_per_idea"
     }

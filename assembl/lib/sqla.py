@@ -219,6 +219,23 @@ class TableLockCreationThread(Thread):
             self.exception = e
 
 
+class SimpleObjectImporter(object):
+    def __init__(self):
+        self.instances_by_id = {}
+
+    def get_existing(self, identifier):
+        instance = self.instances_by_id.get(identifier, None)
+        if instance is None:
+            instance = get_named_object(identifier)
+        return instance
+
+    def get_record(self, identifier):
+        return None
+
+    def associate(self, target_id, instance, data=None):
+        self.instances_by_id[target_id] = instance
+
+
 class BaseOps(object):
     """Base class for SQLAlchemy models in Assembl.
 
@@ -1006,8 +1023,8 @@ class BaseOps(object):
         return operation.created
 
     def _create_subobject_from_json(
-            self, json, target_cls, parse_def, aliases,
-            context, accessor_name, jsonld=None):
+            self, json, target_cls, parse_def,
+            context, accessor_name, object_importer=None):
         instance = None
         target_type = json.get('@type', None)
         if target_type:
@@ -1026,34 +1043,33 @@ class BaseOps(object):
         target_id = json.get('@id', None)
         if target_id is not None:
             if isinstance(target_id, string_types):
-                instance = aliases.get(target_id, None)
-                if instance is None:
-                    instance = get_named_object(
-                        target_id, target_cls.external_typename())
-                    if instance is not None:
-                        aliases[target_id] = instance
+                instance = self._json_is_known_instance(target_id, object_importer)
+                if instance is not None and object_importer:
+                    object_importer.associate(target_id, instance)
         if instance is not None:
             # Interesting that it works here and not upstream
             sub_context = instance.get_instance_context(context)
             log.info("Chaining context from %s -> %s" % (context, sub_context))
             # NOTE: Here we could tombstone the instance if tombstonable.
             instance = instance._do_update_from_json(
-                json, parse_def, aliases, sub_context,
-                DuplicateHandling.USE_ORIGINAL, jsonld)
+                json, parse_def, sub_context,
+                DuplicateHandling.USE_ORIGINAL, object_importer)
             instance = instance.handle_duplication(
-                json, parse_def, aliases, sub_context,
-                DuplicateHandling.USE_ORIGINAL, jsonld)
+                json, parse_def, sub_context,
+                DuplicateHandling.USE_ORIGINAL, object_importer)
         else:
             instance_ctx = target_cls._do_create_from_json(
-                json, parse_def, aliases, context,
-                DuplicateHandling.USE_ORIGINAL, jsonld)
+                json, parse_def, context,
+                DuplicateHandling.USE_ORIGINAL, object_importer)
             if instance_ctx is None:
                 raise HTTPBadRequest(
                     "Could not find or create object %s" % (
                         dumps(json),))
-            context.on_new_instance(instance_ctx._instance)
-        if target_id is not None:
-            aliases[target_id] = instance_ctx._instance
+            if instance_ctx._instance:
+                context.on_new_instance(instance_ctx._instance)
+        if (target_id is not None and object_importer and
+                instance_ctx._instance is not None):
+            object_importer.associate(target_id, instance_ctx._instance)
         return instance_ctx
 
     # If a duplicate is created, do we use the original? (Error otherwise)
@@ -1061,25 +1077,24 @@ class BaseOps(object):
 
     # Cases: Create -> no duplicate. Sub-elements are created or found.
     # Update-> no duplicate. Sub-elements are created or found.
-    # do we store aliases? (not yet.)
     # We need to give the parse_def (by name or by value?)
     @classmethod
     def create_from_json(
-            cls, json, context=None, aliases=None, jsonld=None,
+            cls, json, context=None, object_importer=None,
             parse_def_name='default_reverse', duplicate_handling=None):
         """Create an object from its JSON representation."""
-        aliases = aliases or {}
+        # object_importer = object_importer or SimpleObjectImporter()
         parse_def = get_view_def(parse_def_name)
         context = context or cls.get_class_context()
         with cls.default_db.no_autoflush:
             # We need this to allow db.is_modified to work well
             return cls._do_create_from_json(
-                json, parse_def, aliases, context, duplicate_handling, jsonld)
+                json, parse_def, context, duplicate_handling, object_importer)
 
     @classmethod
     def _do_create_from_json(
-            cls, json, parse_def, aliases, context,
-            duplicate_handling=None, jsonld=None):
+            cls, json, parse_def, context,
+            duplicate_handling=None, object_importer=None):
         user_id = context.get_user_id()
         permissions = context.get_permissions()
         duplicate_handling = \
@@ -1094,13 +1109,13 @@ class BaseOps(object):
         inst = cls()
         i_context = inst.get_instance_context(context)
         result = inst._do_update_from_json(
-            json, parse_def, aliases, i_context,
-            duplicate_handling, jsonld)
+            json, parse_def, i_context,
+            duplicate_handling, object_importer)
 
         # Now look for missing relationships
         result.populate_from_context(context)
         result = result.handle_duplication(
-            json, parse_def, aliases, context, duplicate_handling, jsonld)
+            json, parse_def, context, duplicate_handling, object_importer)
 
         if result is inst and not can_create:
             raise HTTPUnauthorized(
@@ -1116,15 +1131,15 @@ class BaseOps(object):
         if result is not inst:
             i_context = result.get_instance_context(context)
             cls.default_db.add(result)
-            result_id = result.uri()
-            if '@id' in json and result_id != json['@id']:
-                aliases[json['@id']] = result
+        if '@id' in json and json['@id'] != result.uri() and object_importer:
+            object_importer.associate(json['@id'], result)
         return i_context
 
     def update_from_json(
-            self, json, user_id=None, context=None, jsonld=None,
+            self, json, user_id=None, context=None, object_importer=None,
             permissions=None, parse_def_name='default_reverse'):
         """Update (patch) an object from its JSON representation."""
+        # object_importer = object_importer or SimpleObjectImporter()
         parse_def = get_view_def(parse_def_name)
         context = context or self.get_instance_context()
         user_id = context.get_user_id()
@@ -1141,31 +1156,24 @@ class BaseOps(object):
                     user_id, self.__class__.__name__))
         with self.db.no_autoflush:
             # We need this to allow db.is_modified to work well
-            aliases = {}
             self._do_update_from_json(
-                json, parse_def, aliases, context, None, jsonld)
+                json, parse_def, context, None, object_importer)
             return self.handle_duplication(
-                json, parse_def, aliases, context, None, jsonld)
+                json, parse_def, context, None, object_importer)
 
     @staticmethod
-    def _json_is_known_instance(json, aliases=None):
-        aliases = aliases or {}
-        if isinstance(json, string_types):
-            instance = aliases.get(json, None)
-            if instance is None:
-                instance = get_named_object(json)
-            if instance:
-                return instance
-        assert isinstance(json, dict)
-        target_id = json.get('@id', None)
-        if target_id is not None:
-            if isinstance(target_id, string_types):
-                instance = aliases.get(target_id, None)
-                if instance is None:
-                    instance = get_named_object(target_id)
-                    if instance is not None:
-                        aliases[target_id] = instance
-                        return instance
+    def _json_is_known_instance(json_record, object_importer):
+        if isinstance(json_record, string_types):
+            identifier = json_record
+            json_record = None
+        elif isinstance(json_record, dict):
+            identifier = json_record.get('@id', None)
+        if identifier:
+            if object_importer is not None:
+                instance = object_importer.get_existing(identifier)
+            else:
+                instance = get_named_object(identifier)
+            return instance
 
     def _assign_subobject_list(self, instances, accessor):
         # only known case yet is Langstring.entries
@@ -1264,8 +1272,8 @@ class BaseOps(object):
             assert False, "we should not get here"
 
     def _do_update_from_json(
-            self, json, parse_def, aliases, context,
-            duplicate_handling=None, jsonld=None):
+            self, json, parse_def, context,
+            duplicate_handling=None, object_importer=None):
         is_creating = self.id is None
         # Note: maybe pass as argument, and distinguish case of recasting
         # Special case of recasts
@@ -1277,22 +1285,22 @@ class BaseOps(object):
             assert new_cls
             recast = self.change_class(new_cls, json)
             recast = recast._do_update_from_json(
-                json, parse_def, aliases, context,
-                duplicate_handling, jsonld)
+                json, parse_def, context,
+                duplicate_handling, object_importer)
             recast.populate_from_context(context)
             return recast.handle_duplication(
-                json, parse_def, aliases, context, duplicate_handling, jsonld)
+                json, parse_def, context, duplicate_handling, object_importer)
 
         # populate_locally (incl. links to existing objects)
         #  identifying future sub-objects
         subobject_changes = self._do_local_update_from_json(
-            json, parse_def, aliases, context,
-            duplicate_handling, jsonld)
+            json, parse_def, context,
+            duplicate_handling, object_importer)
         if is_creating:
             self.populate_from_context(context)
         # handle duplicates
         dup = self.handle_duplication(
-            json, parse_def, aliases, context, duplicate_handling, jsonld)
+            json, parse_def, context, duplicate_handling, object_importer)
         if dup is not self:
             return dup
         if is_creating:
@@ -1307,16 +1315,16 @@ class BaseOps(object):
                 if isinstance(value, list):
                     list_remaining = []
                     for val in value:
-                        if isinstance(val, string_types) and val in jsonld:
+                        if isinstance(val, string_types) and val in object_importer:
                             list_remaining.append((False, val))
                             continue
-                        inst = self._json_is_known_instance(val, aliases)
+                        inst = self._json_is_known_instance(val, object_importer)
                         if inst:
                             i_context = inst.get_instance_context(c_context)
                             if isinstance(val, dict):
                                 inst = inst._do_update_from_json(
-                                    val, s_parse_def, aliases, i_context,
-                                    duplicate_handling, jsonld)
+                                    val, s_parse_def, i_context,
+                                    duplicate_handling, object_importer)
                             list_remaining.append((True, inst))
                         else:
                             list_remaining.append((False, val))
@@ -1324,12 +1332,12 @@ class BaseOps(object):
                         list_remaining, accessor, target_cls, s_parse_def,
                         c_context)
                 else:
-                    inst = self._json_is_known_instance(value, aliases)
+                    inst = self._json_is_known_instance(value, object_importer)
                     if inst:
                         i_context = inst.get_instance_context(c_context)
                         inst2 = inst._do_update_from_json(
-                            value, s_parse_def, aliases, i_context,
-                            duplicate_handling, jsonld)
+                            value, s_parse_def, i_context,
+                            duplicate_handling, object_importer)
                         if inst2 is not inst:
                             self._assign_subobject(inst2, accessor)
                     else:
@@ -1352,8 +1360,8 @@ class BaseOps(object):
                                 "Multiple json values apply to side effect")
                         elif untreated_vals:
                             i2 = sub_instance._do_update_from_json(
-                                untreated_vals[0], s_parse_def, aliases,
-                                sub_i_ctx, duplicate_handling, jsonld)
+                                untreated_vals[0], s_parse_def,
+                                sub_i_ctx, duplicate_handling, object_importer)
                             if i2 is not sub_instance:
                                 self._assign_subobject(i2, accessor)
                             self.db.add(i2)
@@ -1361,8 +1369,8 @@ class BaseOps(object):
                             self.db.add(sub_instance)
                     else:
                         i2 = sub_instance._do_update_from_json(
-                            value, s_parse_def, aliases, sub_i_ctx,
-                            duplicate_handling, jsonld)
+                            value, s_parse_def, sub_i_ctx,
+                            duplicate_handling, object_importer)
                         if i2 != sub_instance:
                             self._assign_subobject(i2, accessor)
                         self.db.add(i2)
@@ -1397,41 +1405,55 @@ class BaseOps(object):
                         instances.append(subval)
                         continue
                     if isinstance(subval, string_types):
-                        if subval in jsonld:
-                            instance_ctx = self._create_subobject_from_json(
-                                jsonld[subval], target_cls, parse_def,
-                                aliases, c_context, accessor, jsonld)
-                            if instance_ctx is None:
-                                raise HTTPBadRequest(
-                                    "Could not find object %s" % (
-                                        subval,))
-                            aliases[subval] = instance_ctx._instance
-                            instances.append(instance_ctx._instance)
-                            continue
+                        if object_importer:
+                            record = object_importer.get_record(subval)
+                            if record:
+                                instance_ctx = self._create_subobject_from_json(
+                                    record, target_cls, parse_def,
+                                    c_context, accessor, object_importer)
+                                if instance_ctx is None:
+                                    raise HTTPBadRequest(
+                                        "Could not find object %s" % (
+                                            subval,))
+                                if instance_ctx._instance is not None:
+                                    object_importer.associate(subval, instance_ctx._instance)
+                                    instances.append(instance_ctx._instance)
+                                continue
                         # TODO: Keys spanning multiple columns
                     elif isinstance(subval, dict):
                         instance_ctx = self._create_subobject_from_json(
-                            subval, target_cls, parse_def, aliases,
-                            c_context, accessor_name, jsonld)
+                            subval, target_cls, parse_def,
+                            c_context, accessor_name, object_importer)
                         if instance_ctx is None:
                             raise HTTPBadRequest("Could not create " + dumps(subval))
-                        instances.append(instance_ctx._instance)
+                        if instance_ctx._instance is not None:
+                            instances.append(instance_ctx._instance)
+                            id = subval.get('@id', None)
+                            if id:
+                                object_importer.associate(id, instance_ctx._instance)
                     else:
                         raise
                 self._assign_subobject_list(instances, accessor)
             elif isinstance(value, dict):
                 instance_ctx = self._create_subobject_from_json(
-                    value, target_cls, parse_def, aliases,
-                    c_context, accessor_name, jsonld)
+                    value, target_cls, parse_def,
+                    c_context, accessor_name, object_importer)
                 if not instance_ctx:
                     raise HTTPBadRequest("Could not create " + dumps(value))
-                instance = instance_ctx._instance.handle_duplication(
-                    value, parse_def, aliases, context, duplicate_handling, jsonld)
-                self._assign_subobject(instance, accessor)
+                if instance_ctx._instance is not None:
+                    instance = instance_ctx._instance
+                    if instance is not None:
+                        instance = instance.handle_duplication(
+                            value, parse_def, context, duplicate_handling,
+                            object_importer)
+                        self._assign_subobject(instance, accessor)
+                        id = value.get('@id', None)
+                        if id:
+                            object_importer.associate(id, instance_ctx._instance)
             else:
                 raise
         return self.handle_duplication(
-            json, parse_def, aliases, context, duplicate_handling, jsonld)
+            json, parse_def, context, duplicate_handling, object_importer)
 
     def apply_side_effects_without_json(self, context=None, request=None):
         """Apply side-effects in non-json context"""
@@ -1454,11 +1476,9 @@ class BaseOps(object):
     # TODO: Add security by attribute?
     # Some attributes may be settable only on create.
     def _do_local_update_from_json(
-            self, json, parse_def, aliases, context,
-            duplicate_handling=None, jsonld=None):
-        assert isinstance(json, dict)
+            self, json, parse_def, context,
+            duplicate_handling=None, object_importer=None):
         user_id = context.get_user_id()
-        jsonld = jsonld or {}
 
         local_view = self.expand_view_def(parse_def)
         # False means it's illegal to get this.
@@ -1470,7 +1490,7 @@ class BaseOps(object):
         treated_relns = set()
         subobject_changes = {}
         # Also: Pre-visit the json to associate @ids to dicts
-        # because the object may not be ready in the aliases yet
+        # because the object may not be ready in the object_importer yet
         for key, value in json.items():
             if key in local_view:
                 parse_instruction = local_view[key]
@@ -1624,19 +1644,17 @@ class BaseOps(object):
                 target_id = value
                 if target_cls is not None and \
                         isinstance(target_id, string_types):
-                    instance = aliases.get(target_id, None)
                     # TODO: Keys spanning multiple columns
-                    if instance is None:
-                        instance = get_named_object(
-                            target_id, target_cls.external_typename())
-                        if instance is not None:
-                            aliases[target_id] = instance
-                    if instance is None and target_id in jsonld:
-                        instance_ctx = self._create_subobject_from_json(
-                            jsonld[target_id], target_cls, parse_def,
-                            aliases, c_context, accessor, jsonld)
-                        instance = instance_ctx._instance
-                        aliases[target_id] = instance
+                    instance = self._json_is_known_instance(target_id, object_importer)
+                    if instance is None and object_importer:
+                        record = object_importer.get_record(target_id)
+                        if record:
+                            instance_ctx = self._create_subobject_from_json(
+                                record, target_cls, parse_def,
+                                c_context, accessor, object_importer)
+                            instance = instance_ctx._instance
+                            if instance is not None:
+                                object_importer.associate(target_id, instance)
                     if instance is None:
                         raise HTTPBadRequest("Could not find object "+value)
                 else:
@@ -1769,8 +1787,8 @@ class BaseOps(object):
         return ()
 
     def handle_duplication(
-                self, json={}, parse_def={}, aliases={}, context=None,
-                duplicate_handling=None, jsonld=None):
+                self, json={}, parse_def={}, context=None,
+                duplicate_handling=None, object_importer=None):
         """Look for duplicates of this object.
 
         Some uniqueness is handled in the database, but it is difficult to do
@@ -1818,11 +1836,11 @@ class BaseOps(object):
                         # TODO: check the CrudPermissions on subobject,
                         # UNLESS it's they're inherited (eg Langstring)
                         other = other._do_update_from_json(
-                            json, parse_def, aliases, context,
-                            duplicate_handling, jsonld)
+                            json, parse_def, context,
+                            duplicate_handling, object_importer)
                         return other.handle_duplication(
-                            json, parse_def, aliases, context,
-                            duplicate_handling, jsonld)
+                            json, parse_def, context,
+                            duplicate_handling, object_importer)
                 else:
                     raise ValueError("Invalid value of duplicate_handling")
         return self

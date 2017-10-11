@@ -4,7 +4,7 @@ from builtins import filter
 from collections import defaultdict
 from datetime import datetime
 
-from future.utils import as_native_str
+from future.utils import as_native_str, string_types
 from sqlalchemy import (
     Column, ForeignKey, Integer, Boolean, String, SmallInteger,
     UnicodeText, UniqueConstraint, event, inspect, Sequence, events,
@@ -294,6 +294,105 @@ class LangString(Base):
         if owner_object is not None:
             return owner_object.user_can(user_id, operation, permissions)
         return super(LangString, self).user_can(user_id, operation, permissions)
+
+    @classmethod
+    def _do_create_from_json(
+            cls, json, parse_def, context,
+            duplicate_handling=None, object_importer=None):
+        # Special case for JSON-LD
+        added = False
+        ls = cls()
+        if isinstance(json, list):
+            for entry_record in json:
+                value = entry_record['@value']
+                if value:
+                    added = True
+                    lang = entry_record.get('@language', LocaleLabel.UNDEFINED)
+                    ls.add_value(value, lang)
+        elif isinstance(json, dict):
+            if '@id' in json or '@type' in json:
+                return super(LangString, cls)._do_create_from_json(
+                    json, parse_def, context,
+                    duplicate_handling, object_importer)
+            elif '@value' in json:
+                value = json['@value']
+                if value:
+                    added = True
+                    lang = json.get('@language', LocaleLabel.UNDEFINED)
+                    ls.add_value(value, lang)
+            else:
+                for lang, value in json.items():
+                    if value:
+                        added = True
+                        ls.add_value(value, lang)
+        elif isinstance(json, string_types):
+            if json:
+                from .discussion import Discussion
+                added = True
+                lang = LocaleLabel.UNDEFINED
+                discussion = context.get_instance_of_class(Discussion)
+                if discussion:
+                    tr_service = discussion.translation_service()
+                    lang, _ = tr_service.identify(json)
+                ls.add_value(entry_record, lang)
+        else:
+            raise ValueError("Not a valid langstring: " + json)
+        i_context = ls.get_instance_context(context)
+        if added:
+            cls.default_db.add(ls)
+        else:
+            i_context._instance = None
+        return i_context
+
+    def _do_update_from_json(
+            self, json, parse_def, context,
+            duplicate_handling=None, object_importer=None):
+        # Special case for JSON-LD
+        if isinstance(json, list):
+            for entry_record in json:
+                lang = entry_record.get('@language', LocaleLabel.UNDEFINED)
+                value = entry_record['@value']
+                entry = self.entries_as_dict.get(lang, None)
+                if entry:
+                    entry.set_value(value)
+                elif value:
+                    self.add_value(value, lang)
+        elif isinstance(json, dict):
+            if '@id' in json or '@type' in json:
+                return super(LangString, self)._do_update_from_json(
+                    json, parse_def, context,
+                    duplicate_handling, object_importer)
+            elif '@value' in json:
+                value = json['@value']
+                if value:
+                    lang = json.get('@language', LocaleLabel.UNDEFINED)
+                    entry = self.entries_as_dict.get(lang, None)
+                    if entry:
+                        entry.set_value(value)
+                    elif value:
+                        self.add_value(value, lang)
+            else:
+                for lang, value in json.items():
+                    entry = self.entries_as_dict.get(lang, None)
+                    if entry:
+                        entry.set_value(value)
+                    elif value:
+                        self.add_value(value, lang)
+        elif isinstance(json, string_types):
+            from .discussion import Discussion
+            lang = LocaleLabel.UNDEFINED
+            discussion = context.get_instance_of_class(Discussion)
+            if discussion:
+                tr_service = discussion.translation_service()
+                lang, _ = tr_service.identify(json)
+            entry = self.entries_as_dict.get(lang, None)
+            if entry:
+                entry.set_value(json)
+            elif json:
+                self.add_value(json, lang)
+        else:
+            raise ValueError("Not a valid langstring: " + json)
+        return self
 
     # TODO: Reinstate when the javascript can handle empty body/subject.
     # def generic_json(
