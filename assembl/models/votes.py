@@ -22,7 +22,7 @@ from ..lib.sqla import DuplicateHandling
 from ..lib.sqla_types import URLString
 from .discussion import Discussion
 from .idea import Idea, AppendingVisitor
-from .auth import User
+from .auth import AgentProfile
 from ..auth import CrudPermissions, P_VOTE, P_SYSADMIN, P_ADMIN_DISC, P_READ
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..semantic.namespaces import (VOTE, ASSEMBL, DCTERMS, QUADNAMES)
@@ -750,18 +750,18 @@ class AbstractIdeaVote(HistoryMixinWithOrigin, DiscussionBoundBase):
 
     voter_id = Column(
         Integer,
-        ForeignKey(User.id, ondelete="CASCADE", onupdate="CASCADE"),
+        ForeignKey(AgentProfile.id, ondelete="CASCADE", onupdate="CASCADE"),
         nullable=False, index=True,
         info={'rdf': QuadMapPatternS(None, VOTE.voter)}
     )
     voter_ts = relationship(
-        User, backref=backref("votes_ts", cascade="all, delete-orphan"))
+        AgentProfile, backref=backref("votes_ts", cascade="all, delete-orphan"))
     voter = relationship(
-        User,
-        primaryjoin="User.id==AbstractIdeaVote.voter_id",
+        AgentProfile,
+        primaryjoin="AgentProfile.id==AbstractIdeaVote.voter_id",
         backref=backref(
             "votes",
-            primaryjoin="and_(User.id==AbstractIdeaVote.voter_id, "
+            primaryjoin="and_(AgentProfile.id==AbstractIdeaVote.voter_id, "
                              "AbstractIdeaVote.tombstone_date == None)"))
 
     def populate_from_context(self, context):
@@ -769,7 +769,7 @@ class AbstractIdeaVote(HistoryMixinWithOrigin, DiscussionBoundBase):
             from .widgets import VotingWidget
             self.widget = context.get_instance_of_class(VotingWidget)
         if not(self.voter or self.voter_id):
-            self.voter = context.get_instance_of_class(User)
+            self.voter = context.get_instance_of_class(AgentProfile)
         if not(self.vote_spec or self.vote_spec_id):
             self.vote_spec = context.get_instance_of_class(
                 AbstractVoteSpecification)
