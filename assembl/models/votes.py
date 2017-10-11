@@ -69,7 +69,7 @@ class AbstractVoteSpecification(DiscussionBoundBase):
     criterion_idea = relationship(
         Idea, backref="criterion_for")
 
-    retypeable_as = ("LickertVoteSpecification", "BinaryVoteSpecification",
+    retypeable_as = ("LickertRange", "BinaryVoteSpecification",
                      "MultipleChoiceVoteSpecification", "TokenVoteSpecification")
 
     def populate_from_context(self, context):

@@ -580,7 +580,7 @@ def test_voting_widget(
 
     # Add a first criterion
     vote_spec_1 = {
-        '@type': 'LickertVoteSpecification',
+        '@type': 'LickertRange',
         'minimum': 0,
         'maximum': 1,
         'criterion_idea': criterion_1.uri()
@@ -678,7 +678,7 @@ def test_voting_widget(
         assert vote_results.status_code == 200
         vote_results = vote_results.json
         assert vote_results[subidea_1_1.uri()]['n'] == 1
-        if spec_rep['@type'] == "LickertVoteSpecification":
+        if spec_rep['@type'] == "LickertRange":
             assert vote_results[subidea_1_1.uri()]['avg'] == 0
     return
     # So far so good, rest to be done.
@@ -705,7 +705,7 @@ def test_voting_widget(
         assert vote_results.status_code == 200
         vote_results = vote_results.json
         assert vote_results[subidea_1_1.uri()]['n'] == 1
-        if spec_rep['@type'] == "LickertVoteSpecification":
+        if spec_rep['@type'] == "LickertRange":
             assert vote_results[subidea_1_1.uri()]['avg'] == 10
 
     # ideas_data = test_app.get('/api/v1/discussion/%d/ideas' % discussion.id)
