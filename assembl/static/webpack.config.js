@@ -95,6 +95,7 @@ module.exports = {
       bourbon$: path.resolve(__dirname, 'node_modules/bourbon/app/assets/stylesheets/_bourbon.scss'),
       'jquery.dotdotdot$': path.resolve(__dirname, 'js/bower/jquery.dotdotdot/src/js/jquery.dotdotdot.js'),
       'jquery-highlight$': path.resolve(__dirname, 'js/lib/jquery-highlight/jquery.highlight.js'),
+      'moment$': 'moment/moment',
     },
   },
   module: {
