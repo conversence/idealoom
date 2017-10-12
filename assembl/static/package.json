@@ -86,9 +86,9 @@
     "uglifyjs-webpack-plugin": "~0.4",
     "url-loader": "~0.6",
     "watchify": "~3.9.0",
-    "webpack": "~3.6",
+    "webpack": "~3.7",
     "webpack-dashboard": "^1.0.0-5",
     "webpack-dev-server": "~2.9",
-    "yarn": "1.2.0"
+    "yarn": "1.2.1"
   }
 }
