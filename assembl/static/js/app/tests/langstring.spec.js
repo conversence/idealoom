@@ -35,7 +35,11 @@ describe("Langstring Spec", function(){
   var codes = localsJson;
 
   after(function(){
-    Ctx.setApplicationUnderProduction();
+    if (Ctx) {
+      Ctx.setApplicationUnderProduction();
+    } else {
+      console.warn("Why is the scope in teardowns?");
+    }
   });
 
   describe("User Language Preference Spec", function(){

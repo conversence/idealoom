@@ -4,6 +4,7 @@
  */
 
 var _ = require('underscore'),
+    Promise = require('bluebird'),
     Agent = require('../models/agents.js'),
     chai = require('chai'),
     expect = chai.expect,
@@ -24,12 +25,12 @@ describe('Models Specs', function() {
     });
 
     // improve this test, need to be connected and disconnected
-    it('fetchFromScriptTag method should return the current user', function() {
+    // it('fetchFromScriptTag method should return the current user', function() {
       //agent.fetchFromScriptTag('current-user-json');
       //agent.fetchPermissionsFromScriptTag();
       //expect(agent).not.toBeUndefined();
-      expect(true).to.be.true;
-    });
+      // expect(true).to.be.true;
+    // });
 
     it('getAvatarUrl method should return the avatar url as string', function() {
       var avatar = agent.getAvatarUrl('32');
@@ -75,15 +76,12 @@ describe('Models Specs', function() {
    });
 
   describe("Asynchronous tests", function() {
+    this.timeout(5000);
     beforeEach(mockServer.setupMockAjax);
     afterEach(mockServer.tearDownMockAjax);
-    it('load_ideas', function(done) {
-        ideasPromise = collectionManager.getAllIdeasCollectionPromise().then(function(ideas) {
-            expect(ideas.length).to.not.equal(0);
-            done();
-        }).catch(function(err) {
-            done(err);
-        });
+    
+    it('load_ideas', function() {
+      return expect(collectionManager.getAllIdeasCollectionPromise()).to.eventually.have.lengthOf.at.least(1);
     });
   });
 

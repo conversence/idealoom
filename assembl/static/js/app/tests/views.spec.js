@@ -40,7 +40,7 @@ describe('Views Specs', function() {
     });
 
     afterEach(function() {
-      $('#test_view').html("")
+      $('#test_view').html("");
       mockServer.tearDownMockAjax();
     });
 

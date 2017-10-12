@@ -116,11 +116,7 @@ module.exports = {
         test: /sinon.*\.js$/,
         use: [
           {
-            loader: 'imports-loader',
-            options: {
-              require: false,
-              define: false,
-            },
+            loader: 'imports-loader?define=>false',
           }],
       },
       {

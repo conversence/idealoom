@@ -309,5 +309,6 @@ def json_representation_of_fixtures(
     rec_app.get("/data/Conversation/%d/widgets" % discussion.id)
     rec_app.get("/data/Conversation/%d/settings/default_table_of_ideas_collapsed_state" % discussion.id)
     rec_app.get("/data/Conversation/%d/user_ns_kv/expertInterface_group_0_table_of_ideas_collapsed_state" % discussion.id)
+    rec_app.get("/data/Conversation/%d/all_users/current/language_preference" % discussion.id)
 
     return None

@@ -72,11 +72,19 @@ function ajaxMock(url, settings) {
 }
 
 function setupMockAjax() {
-  Sinon.stub(Backbone, "ajax", ajaxMock);
+  if (Backbone.ajax.restore !== undefined) {
+    console.log('setupMockAjax called twice');
+  } else {
+    Sinon.stub(Backbone, "ajax").callsFake(ajaxMock);
+  }
 }
 
 function tearDownMockAjax() {
-  Backbone.ajax.restore();
+  if (Backbone.ajax.restore) {
+    Backbone.ajax.restore();
+  } else {
+    console.log('no restore in tearDownMockAjax');
+  }
 }
 
 module.exports = {
