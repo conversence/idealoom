@@ -1015,7 +1015,8 @@ class UserNsDictCollection(AbstractCollectionDefinition):
         from assembl.models.user_key_values import UserNsDict
         request = get_current_request()
         if request is not None:
-            user_id = request.authenticated_userid
+            user_id = request.unauthenticated_userid
+            # Check again downstream for real userid
             if user_id is None:
                 raise HTTPUnauthorized()
         else:
