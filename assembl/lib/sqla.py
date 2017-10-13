@@ -722,6 +722,23 @@ class BaseOps(object):
             view_def[my_typename] = local_view
         return local_view
 
+    _methods_by_class = {}
+    _props_by_class = {}
+    @classmethod
+    def get_single_arg_methods(cls):
+        if cls not in cls._methods_by_class:
+            cls._methods_by_class[cls] = dict(pyinspect.getmembers(
+                cls, lambda m: (
+                    pyinspect.ismethod(m) or pyinspect.isfunction(m))
+                    and m.__code__.co_argcount == 1))
+        return cls._methods_by_class[cls]
+    @classmethod
+    def get_props_of(cls):
+        if cls not in cls._props_by_class:
+            cls._props_by_class[cls] = dict(pyinspect.getmembers(
+                cls, lambda p: pyinspect.isdatadescriptor(p)))
+        return cls._props_by_class[cls]
+
     def generic_json(
             self, view_def_name='default', user_id=None,
             permissions=(P_READ, ), base_uri='local:'):
@@ -746,12 +763,8 @@ class BaseOps(object):
         }
         fkey_of_reln = {r.key: r._calculated_foreign_keys
                         for r in mapper.relationships}
-        methods = dict(pyinspect.getmembers(
-            self.__class__, lambda m: (
-                pyinspect.ismethod(m) or pyinspect.isfunction(m))
-                and m.__code__.co_argcount == 1))
-        properties = dict(pyinspect.getmembers(
-            self.__class__, lambda p: pyinspect.isdatadescriptor(p)))
+        methods = self.__class__.get_single_arg_methods()
+        properties = self.__class__.get_props_of()
         known = set()
         for name, spec in local_view.items():
             if name == "_default":

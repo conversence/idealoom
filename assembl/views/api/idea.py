@@ -150,6 +150,11 @@ def _get_ideas_real(request, view_def=None, ids=None, user_id=None):
 
     permissions = request.permissions
     Idea.prepare_counters(discussion.id, True)
+    # ideas = list(ideas)
+    # import cProfile
+    # cProfile.runctx('''retval = [idea.generic_json(None, %d, %s)
+    #           for idea in ideas]''' % (user_id, permissions),
+    #           globals(), locals(), 'json_stats')
     retval = [idea.generic_json(view_def, user_id, permissions)
               for idea in ideas]
     retval = [x for x in retval if x is not None]

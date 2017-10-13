@@ -31,29 +31,37 @@ IDs will always take the form ``local:<classname>/<object_id>``
 """
 
 import traceback
-from os.path import exists, join, dirname
+from os.path import exists, join, dirname, getmtime
 
 import simplejson
 from pyramid.settings import asbool
 
 _def_cache = {}
-_use_cache = True
+_cache_age = {}
+_check_modified = False
+
 
 def get_view_def(name):
-    global _def_cache, _use_cache
-    if _use_cache and name in _def_cache:
+    global _def_cache, _check_modified, _cache_age
+    if name in _def_cache and not _check_modified:
         return _def_cache[name]
 
     fname = join(dirname(__file__), name+".json")
-    if exists(fname):
+    if _check_modified:
+        modified = getmtime(fname)
+        previous = _cache_age.get(name, 0)
+        if modified > previous:
+            _def_cache.pop(name, None)
+        _cache_age[name] = modified
+    if name not in _def_cache:
         try:
-            json = simplejson.load(open(fname))
-            if _use_cache:
-                _def_cache[name] = json
-            return json
+            with open(fname) as f:
+                _def_cache[name] = simplejson.load(f)
         except:
             traceback.print_exc()
+    return _def_cache.get(name, None)
+
 
 def includeme(config):
-    global _use_cache
-    _use_cache = asbool(config.registry.settings.get('cache_viewdefs', True))
+    global _check_modified
+    _check_modified = not asbool(config.registry.settings.get('cache_viewdefs', True))
