@@ -27,6 +27,29 @@ voteServices.service('AssemblToolsService', ['$window', '$rootScope', '$log', fu
     }
   },
 
+  this.getLocale = function() {
+    // TODO: This is copied from translateProvider. Find a way to unify the code.
+    var nav = window.navigator;
+    return (nav.language || nav.browserLanguage || nav.systemLanguage || nav.userLanguage || '').split('-').join('_');
+  };
+
+  this.LangStringToString = function(langString){
+    if (!langString) {
+      return null;
+    }
+    var locale = this.getLocale();
+    var entry = _.findWhere(langString.entries || [], function(entry) {
+      return entry['@language'] === locale;
+    });
+    if (entry === undefined && langString.entries && langString.entries.length) {
+      entry = langString.entries[0];
+    }
+    if (entry) {
+      return entry['value'];
+    }
+    return null;
+  };
+
   /** (this function is copied from Assembl's context.js) This removes (rather than escape) all html tags
    * @param  {String} html
    * @return {String} The new string without html tags

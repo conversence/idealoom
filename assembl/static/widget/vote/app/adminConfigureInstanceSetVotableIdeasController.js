@@ -80,6 +80,10 @@ voteApp.controller('adminConfigureInstanceSetVotableIdeasCtl',
       console.log(data);
       $scope.current_substep = 2;
       $scope.ideas = data;
+      $scope.ideaShortTitles = {};
+      _.each(data, function(idea) {
+        $scope.ideaShortTitles[idea['@id']] = AssemblToolsService.LangStringToString(idea['shortTitle']);
+      });
     });
   };
 

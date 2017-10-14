@@ -1740,10 +1740,10 @@ voteApp.controller('indexCtl',
       if ( target_id in $scope.targets_promises ){
         $.when($scope.targets_promises[target_id]).done(function(data){
           if ( "shortTitle" in data ){
-            el_title.text(data.shortTitle);
-            if ( "definition" in data && data.definition.length ){
-              var ideaDescriptionHTML = data.definition;
-              var ideaDescriptionText = AssemblToolsService.stripHtml(data.definition); // idea's definition field contains HTML
+            el_title.text(AssemblToolsService.LangStringToString(data.shortTitle));
+            if ( "definition" in data ){
+              var ideaDescriptionHTML = AssemblToolsService.LangStringToString(data.definition);
+              var ideaDescriptionText = AssemblToolsService.stripHtml(ideaDescriptionHTML); // idea's definition field contains HTML
               var showVotableIdeaDescription = "showVotableIdeaDescription" in config ? config.showVotableIdeaDescription : "text";
               if ( showVotableIdeaDescription == "html" ){
                 var el = $("<div>");

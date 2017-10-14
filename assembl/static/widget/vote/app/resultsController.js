@@ -146,10 +146,10 @@ voteApp.controller('resultsCtl',
       if ( target_id in $scope.targets_promises ){
         $.when($scope.targets_promises[target_id]).done(function(data){
           if ( "shortTitle" in data ){
-            el_title.text(data.shortTitle);
-            if ( "definition" in data && data.definition.length ){
-              var ideaDescriptionHTML = data.definition;
-              var ideaDescriptionText = AssemblToolsService.stripHtml(data.definition); // idea's definition field contains HTML
+            el_title.text(AssemblToolsService.LangStringToString(data.shortTitle));
+            if ( "definition" in data ){
+              var ideaDescriptionHTML = AssemblToolsService.LangStringToString(data.definition);
+              var ideaDescriptionText = AssemblToolsService.stripHtml(ideaDescriptionHTML); // idea's definition field contains HTML
               var showVotableIdeaDescription = "showVotableIdeaDescription" in config ? config.showVotableIdeaDescription : "text";
               if ( showVotableIdeaDescription == "html" ){
                 var el = $("<div>");
@@ -844,9 +844,11 @@ voteApp.controller('resultsCtl',
       if ( target_id in $scope.targets_promises ){
         $.when($scope.targets_promises[target_id]).done(function(data){
           if ( "shortTitle" in data ){
-            target_title_holder.text(getShownText(data.shortTitle));
-            if ( "definition" in data && data.definition.length ){
-              target_title_holder.attr("title", data.definition); // TODO: but this is HTML :/
+            target_title_holder.text(getShownText(AssemblToolsService.LangStringToString(data.shortTitle)));
+            if ( "definition" in data ){
+              var ideaDescriptionHTML = AssemblToolsService.LangStringToString(data.definition);
+              var ideaDescriptionText = AssemblToolsService.stripHtml(ideaDescriptionHTML); // idea's definition field contains HTML
+              target_title_holder.attr("title", ideaDescriptionText);
               //for debug: target_title_holder.attr("title", target_id);
             }
           } else {
@@ -1148,9 +1150,11 @@ voteApp.controller('resultsCtl',
       if ( target_id in $scope.targets_promises ){
         $.when($scope.targets_promises[target_id]).done(function(data){
           if ( "shortTitle" in data ){
-            target_idea_label = data.shortTitle;
-            if ( "definition" in data && data.definition.length ){
-              target_idea_definition = data.definition; // TODO: but this is HTML :/
+            target_idea_label = AssemblToolsService.LangStringToString(data.shortTitle);
+            if ( "definition" in data){
+              var ideaDescriptionHTML = AssemblToolsService.LangStringToString(data.definition);
+              var ideaDescriptionText = AssemblToolsService.stripHtml(ideaDescriptionHTML); // idea's definition field contains HTML
+              target_idea_definition = ideaDescriptionText;
             }
             populateResultInfo();
           } else {

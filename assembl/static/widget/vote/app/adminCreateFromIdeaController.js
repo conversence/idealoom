@@ -47,6 +47,7 @@ voteApp.controller('adminCreateFromIdeaCtl',
     }).success(function(data, status, headers) {
       console.log(data);
       $scope.idea = data;
+      $scope.shortTitle = AssemblToolsService.LangStringToString(data.shortTitle);
       $scope.discussion_uri = data.discussion;
 
       $http({

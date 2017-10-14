@@ -143,7 +143,7 @@ voteApp.controller('adminConfigureInstanceSetSettingsItemCriterionCtl', ['$scope
         return criterion["@id"] == newValue;
       });
       if (criterionWithDetails && criterionWithDetails.shortTitle)
-        $scope.criterion.name = criterionWithDetails.shortTitle;
+        $scope.criterion.name = AssemblToolsService.LangStringToString(criterionWithDetails.shortTitle);
     }
   });
 }]);
