@@ -1933,10 +1933,10 @@ class BaseOps(object):
 
     @staticmethod
     def get_api_context(request=None, user_id=None):
-        from assembl.views.traversal import root_factory
+        from assembl.views.traversal import app_root_factory
         from pyramid.threadlocal import get_current_request
         request = request or get_current_request()
-        root = root_factory(request, user_id)
+        root = app_root_factory(request, user_id)
         return root['data']
 
     @classmethod

@@ -8,7 +8,6 @@ import simplejson as json
 from assembl.auth import (P_READ, P_EDIT_SYNTHESIS, CrudPermissions)
 from assembl.models import (
     Discussion, Idea, SubGraphIdeaAssociation, Synthesis)
-from assembl.auth.util import get_permissions
 from ..traversal import InstanceContext, CollectionContext
 from . import check_permissions
 
@@ -26,8 +25,7 @@ def discussion_notifications(request):
 def get_syntheses(request, default_view='default'):
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
-    permissions = get_permissions(
-        user_id, ctx.get_discussion_id())
+    permissions = ctx.get_permissions()
     check_permissions(ctx, user_id, permissions, CrudPermissions.READ)
     include_unpublished = P_EDIT_SYNTHESIS in permissions
     view = request.GET.get('view', None) or ctx.get_default_view() or default_view

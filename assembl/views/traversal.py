@@ -1209,6 +1209,10 @@ class DiscussionPreferenceCollection(AbstractCollectionDefinition):
         return c[key]
 
 
+def app_root_factory(request, user_id=None):
+    return AppRoot(request, user_id)
+
+
 def root_factory(request, user_id=None):
     """The factory function for the root context"""
     # OK, this is the old code... I need to do better, but fix first.
@@ -1226,7 +1230,7 @@ def root_factory(request, user_id=None):
         if not discussion:
             raise HTTPNotFound("No discussion named %s" % (discussion_slug,))
         return discussion
-    return AppRoot(request, user_id)
+    return app_root_factory(request, user_id)
 
 
 def includeme(config):
