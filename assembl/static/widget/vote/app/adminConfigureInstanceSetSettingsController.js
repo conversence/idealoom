@@ -14,8 +14,10 @@ voteApp.controller('adminConfigureInstanceSetSettingsCtl',
     //$scope.criteria_url = null; // "local:Discussion/1/widgets/66/criteria"
     //$scope.criteria_endpoint = null; // "/data/Conversation/1/widgets/66/criteria"
     $scope.criteria = null; // array of ideas (their full structure)
+    $scope.criteriaShortTitles = {};
     $scope.vote_specifications = null; // array of vote specs (descriptions of items)
     $scope.ideas = null; // array of ideas
+    $scope.ideaShortTitles = {};
 
     $scope.mandatory_settings_fields = VoteWidgetService.mandatory_settings_fields;
     $scope.optional_settings_fields = VoteWidgetService.optional_settings_fields;
@@ -242,6 +244,9 @@ voteApp.controller('adminConfigureInstanceSetSettingsCtl',
     //$scope.criteria_endpoint = AssemblToolsService.resourceToUrl($scope.criteria_url);
     if ("criteria" in $scope.widget) {
       $scope.criteria = $scope.widget.criteria;
+      $scope.criteriaShortTitles = _.map($scope.criteria, function(idea) {
+        return {id: idea['@id'], title: AssemblToolsService.LangStringToString(idea['shortTitle'])};
+      });
 
       //console.log("$scope.criteria:");
       //console.log($scope.criteria);
@@ -268,6 +273,9 @@ voteApp.controller('adminConfigureInstanceSetSettingsCtl',
       }).success(function(data, status, headers) {
         //console.log("ideas received: ", data);
         $scope.ideas = data;
+        $scope.ideaShortTitles = _.map(data, function(idea) {
+          return {id: idea['@id'], title: AssemblToolsService.LangStringToString(idea['shortTitle'])};
+        });
       });
     }
 

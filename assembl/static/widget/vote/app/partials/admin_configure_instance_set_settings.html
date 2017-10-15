@@ -101,7 +101,7 @@
                             <div ng-repeat="field in mandatory_criterion_fields">
                                 <div ng-switch on="field.type">
                                     <span ng-attr-class="{{ field.description && 'with-title' }}" title="{{ field.description }}">{{ field.label || field.key }} ({{ field.type }}):</span>
-                                    <select ng-switch-when="criterion" ng-model="criterion[field.key]" ng-options="c['@id'] as c.shortTitle for c in criteria"></select>
+                                    <select ng-switch-when="criterion" ng-model="criterion[field.key]" ng-options="value.title for value in criteriaShortTitles track by value.id"></select>
                                     <select ng-switch-when="select" ng-model="criterion[field.key]" ng-options="v.key as v.label for v in field.options" ng-change="field.key == '@type' && resetCriterionFromType(item_index, criterion_index)"></select>
                                     <input ng-switch-default type="text" ng-model="criterion[field.key]" />
                                 </div>
@@ -112,7 +112,7 @@
                                     <div ng-switch on="field.type">
                                         <span ng-attr-class="{{ field.description && 'with-title' }}" title="{{ field.description }}">{{ field.label || field.key }} ({{ field.type }}):</span>
                                         
-                                        <select ng-switch-when="criterion" ng-model="criterion[field.key]" ng-options="c['@id'] as c.shortTitle for c in criteria"></select>
+                                        <select ng-switch-when="criterion" ng-model="criterion[field.key]" ng-options="value.title for value in criteriaShortTitles track by value.id"></select>
                                         
                                         <select ng-switch-when="select" ng-model="criterion[field.key]" ng-options="key as value for ( key, value ) in field.options"></select>
 
@@ -127,7 +127,7 @@
                                         <input ng-switch-default type="text" ng-model="criterion[field.key]" />
                                     </div>
                                 </div>
-                            </div>                            
+                            </div>
                         <!--
                         </fieldset>
                         -->
@@ -138,7 +138,7 @@
                                 <div ng-if="criterion.hasOwnProperty(field.key)">
                                     <div ng-switch on="field.type">
                                         <span ng-attr-class="{{ field.description && 'with-title' }}" title="{{ field.description }}">{{ field.label || field.key }} ({{ field.type }}):</span>
-                                        <select ng-switch-when="idea_id" ng-model="criterion[field.key]" ng-options="c['@id'] as c.shortTitle for c in ideas"></select>
+                                        <select ng-switch-when="idea_id" ng-model="criterion[field.key]" ng-options="value.title for value in ideaShortTitles track by value.id"></select>
                                         <input ng-switch-default type="text" ng-model="criterion[field.key]" />
                                         <button ng-click="deleteCriterionField(item_index, criterion_index, field.key);">{{'adminConfigureInstanceSetAppearanceDeleteField' | translate}}</button>
                                     </div>
