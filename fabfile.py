@@ -300,8 +300,8 @@ def migrate_local_ini():
 def circus_restart():
     "Restart circusd itself."
     with hide('running', 'stdout'):
-        venvcmd("circusctl --timeout 8 stop")
-        venvcmd("circusctl --timeout 5 quit")
+        venvcmd("python -m circus.circusctl --timeout 8 stop")
+        venvcmd("python -m circus.circusctl --timeout 5 quit")
     if env.uses_global_supervisor:
         # Another supervisor, upstart, etc. may be watching it, give it a little while
         # Ideally we should wait, but I didn't have time to code it.
@@ -313,7 +313,7 @@ def circus_restart():
 
 def is_circus_running():
     with settings(warn_only=True), hide('running', 'stdout', 'stderr'):
-        circusd_cmd_result = venvcmd("circusctl --timeout 5 dstats")
+        circusd_cmd_result = venvcmd("python -m circus.circusctl --timeout 5 dstats")
         if circusd_cmd_result.failed:
             return False
         else:
@@ -325,7 +325,7 @@ def circus_process_start(process_name):
     """
     print(cyan('Asking circus to start %s' % process_name))
     with hide('running', 'stdout'):
-        circusd_cmd_result = venvcmd("circusctl --timeout 5 dstats")
+        circusd_cmd_result = venvcmd("python -m circus.circusctl --timeout 5 dstats")
     if not circusd_cmd_result.startswith("Main Process:"):
         if env.uses_global_supervisor:
             print(red('Circusd doesn\'t seem to be running, aborting'))
@@ -338,14 +338,14 @@ def circus_process_start(process_name):
                 exit()
     for try_num in range(20):
         with hide('running', 'stdout'):
-            status = venvcmd("circusctl --timeout 5 status %s" % process_name)
+            status = venvcmd("python -m circus.circusctl --timeout 5 status %s" % process_name)
 
         if status:
             if status == 'active':
                 print(green("%s is running" % process_name))
                 break
             elif status == 'stopped':
-                venvcmd("circusctl start %s" % process_name)
+                venvcmd("python -m circus.circusctl start %s" % process_name)
             elif status == 'starting':
                 print(status)
             else:
@@ -365,15 +365,15 @@ def circus_process_stop(process_name):
     circus_pid_regex = re.compile('Main Process:\n\s*(\d+)', re.MULTILINE)
     status_regex = re.compile('^%s\s*(\S*)' % process_name)
     with settings(warn_only=True), hide('running', 'stdout'):
-        circusd_cmd_result = venvcmd("circusctl --timeout 5 dstats")
+        circusd_cmd_result = venvcmd("python -m circus.circusctl --timeout 5 dstats")
     match = circus_pid_regex.match(circusd_cmd_result)
     if not match:
         print(cyan('Circusd doesn\'t seem to be running, nothing to stop'))
         return
     for try_num in range(20):
-        venvcmd("circusctl --timeout 10 stop %s" % process_name)
+        venvcmd("python -m circus.circusctl --timeout 10 stop %s" % process_name)
         with hide('running', 'stdout'):
-            status_cmd_result = venvcmd("circusctl status %s" % process_name)
+            status_cmd_result = venvcmd("python -m circus.circusctl status %s" % process_name)
 
         match = status_regex.match(status_cmd_result)
         if match:
@@ -382,7 +382,7 @@ def circus_process_stop(process_name):
                 print(green("%s is stopped" % process_name))
                 break
             elif status == 'active':
-                venvcmd("circusctl stop %s" % process_name)
+                venvcmd("python -m circus.circusctl stop %s" % process_name)
             elif status == 'stopping':
                 print(status)
             else:
@@ -426,15 +426,15 @@ def app_majorupdate():
     execute(app_db_update)
     if env.uses_global_supervisor:
         print(cyan('Asking circus to restart %(projectname)s' % env))
-        run("sudo /usr/bin/circusctl restart %(projectname)s" % env)
+        run("sudo /usr/bin/python -m circus.circusctl restart %(projectname)s" % env)
     else:
         if is_circus_running():
             # circus config file may have changed
-            venvcmd("circusctl --timeout 10 reloadconfig")
+            venvcmd("python -m circus.circusctl --timeout 10 reloadconfig")
             processes = filter_autostart_processes([
                 "celery_imap", "changes_router", "celery_notification_dispatch",
                 "celery_notify"])
-            venvcmd("circusctl --timeout 10 restart " + " ".join(processes))
+            venvcmd("python -m circus.circusctl --timeout 10 restart " + " ".join(processes))
             maintenance_mode_stop()
     execute(webservers_reload)
 
@@ -450,15 +450,15 @@ def app_reload():
         run("sudo /usr/bin/circusctl restart %(projectname)s" % env)
     else:
         if is_circus_running():
-            venvcmd("circusctl --timeout 10 stop pserve")
+            venvcmd("python -m circus.circusctl --timeout 10 stop pserve")
             # circus config file may have changed
-            venvcmd("circusctl reloadconfig")
+            venvcmd("python -m circus.circusctl reloadconfig")
             processes = filter_autostart_processes([
                 "celery_imap", "changes_router", "celery_notification_dispatch",
                 "celery_notify", "celery_notify_beat", "source_reader"])
-            venvcmd("circusctl restart " + " ".join(processes))
+            venvcmd("python -m circus.circusctl restart " + " ".join(processes))
             if env.uses_uwsgi:
-                venvcmd("circusctl restart uwsgi")
+                venvcmd("python -m circus.circusctl restart uwsgi")
     """ This will log everyone out, hopefully the code is now resilient enough
     that it isn't necessary
     if env.uses_memcache:
