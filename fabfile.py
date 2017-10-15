@@ -300,8 +300,8 @@ def migrate_local_ini():
 def circus_restart():
     "Restart circusd itself."
     with hide('running', 'stdout'):
-        venvcmd("circusctl stop")
-        venvcmd("circusctl quit")
+        venvcmd("circusctl --timeout 8 stop")
+        venvcmd("circusctl --timeout 5 quit")
     if env.uses_global_supervisor:
         # Another supervisor, upstart, etc. may be watching it, give it a little while
         # Ideally we should wait, but I didn't have time to code it.
@@ -313,7 +313,7 @@ def circus_restart():
 
 def is_circus_running():
     with settings(warn_only=True), hide('running', 'stdout', 'stderr'):
-        circusd_cmd_result = venvcmd("circusctl dstats")
+        circusd_cmd_result = venvcmd("circusctl --timeout 5 dstats")
         if circusd_cmd_result.failed:
             return False
         else:
@@ -325,7 +325,7 @@ def circus_process_start(process_name):
     """
     print(cyan('Asking circus to start %s' % process_name))
     with hide('running', 'stdout'):
-        circusd_cmd_result = venvcmd("circusctl dstats")
+        circusd_cmd_result = venvcmd("circusctl --timeout 5 dstats")
     if not circusd_cmd_result.startswith("Main Process:"):
         if env.uses_global_supervisor:
             print(red('Circusd doesn\'t seem to be running, aborting'))
@@ -338,7 +338,7 @@ def circus_process_start(process_name):
                 exit()
     for try_num in range(20):
         with hide('running', 'stdout'):
-            status = venvcmd("circusctl status %s" % process_name)
+            status = venvcmd("circusctl --timeout 5 status %s" % process_name)
 
         if status:
             if status == 'active':
@@ -365,13 +365,13 @@ def circus_process_stop(process_name):
     circus_pid_regex = re.compile('Main Process:\n\s*(\d+)', re.MULTILINE)
     status_regex = re.compile('^%s\s*(\S*)' % process_name)
     with settings(warn_only=True), hide('running', 'stdout'):
-        circusd_cmd_result = venvcmd("circusctl dstats")
+        circusd_cmd_result = venvcmd("circusctl --timeout 5 dstats")
     match = circus_pid_regex.match(circusd_cmd_result)
     if not match:
         print(cyan('Circusd doesn\'t seem to be running, nothing to stop'))
         return
     for try_num in range(20):
-        venvcmd("circusctl stop %s" % process_name)
+        venvcmd("circusctl --timeout 10 stop %s" % process_name)
         with hide('running', 'stdout'):
             status_cmd_result = venvcmd("circusctl status %s" % process_name)
 
@@ -430,11 +430,11 @@ def app_majorupdate():
     else:
         if is_circus_running():
             # circus config file may have changed
-            venvcmd("circusctl reloadconfig")
+            venvcmd("circusctl --timeout 10 reloadconfig")
             processes = filter_autostart_processes([
                 "celery_imap", "changes_router", "celery_notification_dispatch",
                 "celery_notify"])
-            venvcmd("circusctl restart " + " ".join(processes))
+            venvcmd("circusctl --timeout 10 restart " + " ".join(processes))
             maintenance_mode_stop()
     execute(webservers_reload)
 
@@ -445,11 +445,12 @@ def app_reload():
     Restart all necessary processes after an update
     """
     if env.uses_global_supervisor:
+        # TODO: Redo this. circus is not using a global supervisor/circus, but systemd
         print(cyan('Asking circus to restart %(projectname)s' % env))
         run("sudo /usr/bin/circusctl restart %(projectname)s" % env)
     else:
         if is_circus_running():
-            venvcmd("circusctl stop dev:")
+            venvcmd("circusctl --timeout 10 stop pserve")
             # circus config file may have changed
             venvcmd("circusctl reloadconfig")
             processes = filter_autostart_processes([
@@ -457,7 +458,7 @@ def app_reload():
                 "celery_notify", "celery_notify_beat", "source_reader"])
             venvcmd("circusctl restart " + " ".join(processes))
             if env.uses_uwsgi:
-                venvcmd("circusctl restart prod:uwsgi")
+                venvcmd("circusctl restart uwsgi")
     """ This will log everyone out, hopefully the code is now resilient enough
     that it isn't necessary
     if env.uses_memcache:
