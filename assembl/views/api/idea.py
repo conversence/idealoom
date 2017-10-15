@@ -42,7 +42,7 @@ def create_idea(request):
     discussion = request.context
     session = discussion.db
     user_id = authenticated_userid(request)
-    permissions = get_permissions(user_id, discussion.id)
+    permissions = request.permissions
     idea_data = json.loads(request.body)
     now = datetime.utcnow()
 
@@ -51,7 +51,7 @@ def create_idea(request):
         "creation_date": now,
     }
 
-    for key, attr_name in langstring_fields.iteritems():
+    for key, attr_name in langstring_fields.items():
         if key in idea_data:
             ls_data = idea_data[key]
             if ls_data is None:
@@ -185,7 +185,7 @@ def save_idea(request):
     ``IdeaLink`` changes and send relevant ideas on the socket."""
     discussion = request.context
     user_id = authenticated_userid(request)
-    permissions = get_permissions(user_id, discussion_id)
+    permissions = request.permissions
     idea_id = request.matchdict['id']
     idea_data = json.loads(request.body)
     # Idea.default_db.execute('set transaction isolation level read committed')
@@ -203,7 +203,7 @@ def save_idea(request):
             "Idea from discussion %s cannot be saved from different discussion (%s)." % (
                 idea.discussion_id, discussion.id))
 
-    for key, attr_name in langstring_fields.iteritems():
+    for key, attr_name in langstring_fields.items():
         if key in idea_data:
             current = getattr(idea, attr_name)
             ls_data = idea_data[key]

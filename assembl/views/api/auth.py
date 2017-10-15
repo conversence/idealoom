@@ -16,7 +16,7 @@ from assembl.models import (
 from assembl.auth import (
     P_READ, P_ADMIN_DISC, P_SYSADMIN, R_SYSADMIN, SYSTEM_ROLES)
 from assembl.auth.util import (
-    user_has_permission as a_user_has_permission, get_permissions,
+    user_has_permission as a_user_has_permission,
     users_with_permission as a_users_with_permission)
 from social.apps.pyramid_app.utils import load_backend, load_strategy
 
@@ -259,14 +259,7 @@ def put_discussion_roles_for_user(request):
 
 @permissions_for_user.get()
 def get_permissions_for_user(request):
-    discussion = request.context
-    user_id = request.matchdict['user_id']
-    if user_id not in (Authenticated, Everyone):
-        user = User.get_instance(user_id)
-        if not user:
-            raise HTTPNotFound("User id %s does not exist" % (user_id,))
-        user_id = user.id
-    return get_permissions(user_id, discussion.id)
+    return request.permissions
 
 
 @user_has_permission.get()

@@ -419,8 +419,7 @@ def assembl_register_user(request):
     session = AgentProfile.default_db
     json = request.json
     discussion = discussion_from_request(request)
-    permissions = get_permissions(
-        Everyone, discussion.id if discussion else None)
+    permissions = ctx.get_permissions()
 
     name = json.get('real_name', '').strip()
     errors = JSONError()
