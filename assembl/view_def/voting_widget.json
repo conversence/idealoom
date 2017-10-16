@@ -299,7 +299,8 @@
         "important": true,
         "annotator_schema_version": "'\"v1.0\"",
         "owner": true,
-        "quote": "body",
+        "quote": true,
+        "body": true,
         "order": true,
         "discussion": false,
         "ranges": ["text_fragment_identifiers:"],
@@ -309,6 +310,7 @@
         "end": "xpath_end_calc",
         "endOffset": "offset_end",
         "extract_id": false,
+        "body": true,
         "start": "xpath_start_calc",
         "startOffset": "offset_start"
     },

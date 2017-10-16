@@ -10,7 +10,6 @@ from pyramid.httpexceptions import (
 from sqlalchemy import Unicode
 from sqlalchemy.sql.expression import cast
 from sqlalchemy.orm import joinedload_all
-import simplejson as json
 
 from assembl.views.api import API_DISCUSSION_PREFIX
 from assembl.auth import (
@@ -106,6 +105,7 @@ def post_extract(request):
     """
     extract_data = json.loads(request.body)
     discussion = request.context
+    db = discussion.db
     user_id = authenticated_userid(request)
     if not user_id:
         # Straight from annotator
@@ -126,13 +126,11 @@ def post_extract(request):
     content = None
     uri = extract_data.get('uri')
     important = extract_data.get('important', False)
-    annotation_text = None
-    if uri:
-        # Straight from annotator
-        annotation_text = extract_data.get('text')
-    else:
-        target = extract_data.get('target')
-        if not (target or uri):
+    annotation_text = extract_data.get('text')
+    target = extract_data.get('target')
+    if not uri:
+        # Extract from an internal post
+        if not target:
             raise HTTPBadRequest("No target")
 
         target_class = sqla.get_named_class(target.get('@type'))
@@ -150,14 +148,16 @@ def post_extract(request):
         if not content:
             # TODO: maparent:  This is actually a singleton pattern, should be
             # handled by the AnnotatorSource now that it exists...
-            source = AnnotatorSource.default_db.query(AnnotatorSource).filter_by(
+            source = db.query(AnnotatorSource).filter_by(
                 discussion=discussion).filter(
                 cast(AnnotatorSource.name, Unicode) == 'Annotator').first()
             if not source:
                 source = AnnotatorSource(
                     name='Annotator', discussion=discussion)
+                db.add(source)
             content = Webpage(url=uri, discussion=discussion)
-    extract_body = extract_data.get('quote', '')
+            db.add(content)
+    extract_body = extract_data.get('quote', None)
 
     idea_id = extract_data.get('idIdea', None)
     if idea_id:
@@ -168,28 +168,28 @@ def post_extract(request):
     else:
         idea = None
 
-
     new_extract = Extract(
         creator_id=user_id,
         owner_id=user_id,
         discussion=discussion,
-        body=extract_body,
+        body=extract_data.get('text', None),
         idea=idea,
         important=important,
         annotation_text=annotation_text,
         content=content
     )
-    Extract.default_db.add(new_extract)
+    db.add(new_extract)
 
     for range_data in extract_data.get('ranges', []):
         range = TextFragmentIdentifier(
             extract=new_extract,
+            body=extract_body,
             xpath_start=range_data['start'],
             offset_start=range_data['startOffset'],
             xpath_end=range_data['end'],
             offset_end=range_data['endOffset'])
-        TextFragmentIdentifier.default_db.add(range)
-    Extract.default_db.flush()
+        db.add(range)
+    db.flush()
 
     return {'ok': True, '@id': new_extract.uri()}
 

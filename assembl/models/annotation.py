@@ -3,7 +3,7 @@ from sqlalchemy import Column, Integer, ForeignKey, DateTime
 
 from .generic import Content
 from ..lib.sqla_types import CoerceUnicode
-from .langstrings import LangString, LangStringEntry
+from .langstrings import LangString, LangStringEntry, LocaleLabel
 
 
 class Webpage(Content):
@@ -28,7 +28,7 @@ class Webpage(Content):
     }
 
     def get_body(self):
-        return LangString.EMPTY(self.db)
+        return self.body
 
     def get_title(self):
         return LangString.create(self.url, LocaleLabel.NON_LINGUISTIC)

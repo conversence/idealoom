@@ -298,6 +298,8 @@
         "@extends": "IdeaContentPositiveLink",
         "quote": "body",
         "discussion": false,
+        "quote": false,
+        "body": true,
         "ranges": ["text_fragment_identifiers"],
         "text": "annotation_text"
     },
@@ -305,6 +307,7 @@
         "end": "xpath_end",
         "endOffset": "offset_end",
         "extract_id": false,
+        "body": true,
         "start": "xpath_start",
         "startOffset": "offset_start"
     },

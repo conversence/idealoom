@@ -231,11 +231,7 @@ class Extract(IdeaContentPositiveLink):
         None,
         ('id', Integer, False))
 
-    # TODO: body was misused to contain the extract fragment content,
-    # which should belong in the TextFragmentIdentifier,
-    # whereas it was meant to be a comment on the extract
-    # if used from the Web annotator. I'll have to migrate it.
-    body = Column(UnicodeText, nullable=False)
+    body = Column(UnicodeText, nullable=True)
     # info={'rdf': QuadMapPatternS(None, OA.hasBody)})
 
     discussion_id = Column(Integer, ForeignKey(
@@ -356,10 +352,15 @@ class Extract(IdeaContentPositiveLink):
             self.content.get_title(), self.content.get_body(),
             self.get_post().id)
 
+    @property
+    def quote(self):
+        return ' '.join((tf.body for tf in self.text_fragment_identifiers if tf.body))
+
     def _infer_text_fragment_inner(self, title, body, post_id):
         # dead code? If not needs to be refactored with langstrings
+        # and moved within text_fragment, maybe?
         body = sanitize_html(body, [])
-        quote = self.body.replace("\r", "")
+        quote = self.quote.replace("\r", "")
         try:
             # for historical reasons
             quote = quopri.decodestring(quote)
@@ -470,8 +471,14 @@ class TextFragmentIdentifier(DiscussionBoundBase):
     offset_start = Column(Integer)
     xpath_end = Column(String)
     offset_end = Column(Integer)
+    body = Column(UnicodeText)
     extract = relationship(Extract, backref=backref(
-        'text_fragment_identifiers', cascade="all, delete-orphan"))
+        'text_fragment_identifiers',
+        # TODO: Better ordering based on xpath_start, offset.
+        # But xpath_start should be the same in most cases.
+        order_by="TextFragmentIdentifier.offset_start",
+        cascade="all, delete-orphan"))
+
 
     @classmethod
     def generate_post_xpath(cls, post, prefix=''):
