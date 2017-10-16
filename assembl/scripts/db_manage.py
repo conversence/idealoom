@@ -20,7 +20,7 @@ from ..lib.migration import bootstrap_db, bootstrap_db_data
 from ..lib.sqla import configure_engine, mark_changed
 from ..lib.zmqlib import configure_zmq
 from ..lib.config import set_config
-from ..lib.sqlatypes import postgres_language_configurations
+from ..lib.sqla_types import postgres_language_configurations
 from sqlalchemy.orm import sessionmaker
 
 
