@@ -102,7 +102,7 @@ def extract_post_1_to_subidea_1_1(
 
     from assembl.models import Extract
     e = Extract(
-        body=u"body",
+        annotation_text=u"body",
         creator=participant2_user,
         owner=participant2_user,
         content=reply_post_1,

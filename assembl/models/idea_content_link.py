@@ -231,7 +231,8 @@ class Extract(IdeaContentPositiveLink):
         None,
         ('id', Integer, False))
 
-    body = Column(UnicodeText, nullable=True)
+    annotation_text = Column(UnicodeText)
+
     # info={'rdf': QuadMapPatternS(None, OA.hasBody)})
 
     discussion_id = Column(Integer, ForeignKey(
@@ -304,9 +305,6 @@ class Extract(IdeaContentPositiveLink):
             #     name=QUADNAMES.assembl_idea_contributor,
             #     conditions=(cls.idea_id != None,)),
             ]
-
-
-    annotation_text = Column(UnicodeText)
 
     owner_id = Column(
         Integer,

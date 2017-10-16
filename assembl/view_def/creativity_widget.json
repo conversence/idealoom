@@ -225,7 +225,6 @@
         "annotator_schema_version": "'\"v1.0\"",
         "owner": true,
         "quote": true,
-        "body": true,
         "order": true,
         "discussion": false,
         "ranges": ["text_fragment_identifiers:"],

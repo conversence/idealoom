@@ -190,7 +190,6 @@
         "important": true,
         "owner": true,
         "quote": true,
-        "body": true,
         "order": true,
         "discussion": false,
         "ranges": ["text_fragment_identifiers:"],

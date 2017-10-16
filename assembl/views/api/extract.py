@@ -173,7 +173,6 @@ def post_extract(request):
         creator_id=user_id,
         owner_id=user_id,
         discussion=discussion,
-        body=extract_data.get('text', None),
         idea=idea,
         important=important,
         annotation_text=annotation_text,
