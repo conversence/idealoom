@@ -298,6 +298,7 @@
         "@extends": "IdeaContentPositiveLink",
         "discussion": false,
         "quote": false,
+        "attributed_to": true,
         "ranges": ["text_fragment_identifiers"],
         "text": "annotation_text"
     },

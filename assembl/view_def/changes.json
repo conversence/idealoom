@@ -219,6 +219,7 @@
         "target": true,
         "created": "creation_date",
         "idCreator": "creator",
+        "attributed_to": true,
         "important": true,
         "owner": true,
         "quote": true,
@@ -231,7 +232,6 @@
         "end": "xpath_end_calc",
         "endOffset": "offset_end",
         "extract_id": false,
-        "body": true,
         "start": "xpath_start_calc",
         "startOffset": "offset_start"
     },

@@ -237,6 +237,7 @@
         "important": true,
         "annotator_schema_version": "'\"v1.0\"",
         "owner": true,
+        "attributed_to": true,
         "quote": true,
         "order": true,
         "discussion": false,
