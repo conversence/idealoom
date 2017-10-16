@@ -30,6 +30,7 @@ from .discussion import Discussion
 from .idea import Idea
 from .generic import Content
 from .post import Post
+from .auth import AgentProfile
 from .mail import IMAPMailbox
 from ..auth import (
     CrudPermissions, P_READ, P_EDIT_IDEA,
@@ -77,7 +78,7 @@ class IdeaContentLink(DiscussionBoundBase, OriginMixin):
     )
 
     creator = relationship(
-        'AgentProfile', foreign_keys=[creator_id], backref=backref(
+        AgentProfile, foreign_keys=[creator_id], backref=backref(
             'extracts_created', cascade="all")) # do not delete orphan
 
     __mapper_args__ = {
@@ -245,6 +246,10 @@ class Extract(IdeaContentPositiveLink):
 
     important = Column('important', Boolean, server_default='0')
 
+    attributed_to_id = Column(
+        Integer, ForeignKey(AgentProfile.id,
+                            ondelete='SET NULL', onupdate='CASCADE'))
+
     def local_uri_as_graph(self):
         return 'local:ExcerptGraph/%d' % (self.id,)
 
@@ -313,7 +318,11 @@ class Extract(IdeaContentPositiveLink):
     )
 
     owner = relationship(
-        'AgentProfile', foreign_keys=[owner_id], backref='extracts_owned')
+        AgentProfile, foreign_keys=[owner_id], backref='extracts_owned')
+
+    attributed_to = relationship(
+        AgentProfile, foreign_keys=[attributed_to_id],
+        backref='extracts_attributed')
 
     extract_source = relationship(Content, backref="extracts")
     extract_ideas = relationship(Idea, backref="extracts")
