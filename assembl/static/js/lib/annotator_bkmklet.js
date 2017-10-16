@@ -182,7 +182,7 @@
 
       jQuery.ajaxSetup({timeout: this.config('timeout', 30000)});
       jQuery.getScript(annotatorSource, callback)
-            .error(function () {
+            .fail(function () {
               notification.error('Sorry, we\'re unable to load Annotator at the moment...');
             });
     },
@@ -194,8 +194,7 @@
     },
 
     storeOptions: function () {
-      // var uri = location.href.split(/#|\?/).shift();
-      var uri = location.href;
+      var uri = location.href.split(/#|\?/).shift();
       return {
         prefix: this.config('store.prefix', 'http://annotateit.org/api'),
         annotationData: { 'uri': uri },
@@ -276,9 +275,9 @@
       var root = options['root'];
       var option_defaults = {
         externals: {
-          "jQuery":  root + "/static/js/bower/dist/jquery/jquery.min.js",
+          "jQuery":  root + "/static/js/bower/jquery/dist/jquery.min.js",
           "source":  root + "/static/js/lib/annotator/annotator-bookmarklet.min.js",
-          "styles":  root + "/static/css/lib/annotator.min.css"
+          "styles":  root + "/static/js/build/annotator_ext.css"
         },
         store: {
           prefix: root+"/api/v1/discussion/"+options["discussion"]+"/"

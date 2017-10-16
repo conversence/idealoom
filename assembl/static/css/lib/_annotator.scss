@@ -550,9 +550,11 @@
  * Added by us
  */
 
-.annotator-resize,
-.annotator-adder {
+.annotator-resize {
     display: none !important;
+}
+.annotator-adder {
+    display: none;
 }
 
 

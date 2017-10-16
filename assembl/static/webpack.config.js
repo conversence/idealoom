@@ -75,6 +75,7 @@ module.exports = {
       'sinon',
       './js/app/tests.js',
     ],
+    annotator_ext: './css/lib/annotator_ext.scss',
   }),
   output: {
     path: path.join(__dirname, 'js/build'),

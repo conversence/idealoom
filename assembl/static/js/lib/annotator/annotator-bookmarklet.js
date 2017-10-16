@@ -1,13 +1,13 @@
 
 /*
-** Annotator v1.2.10-dev-08f7377
+** Annotator v1.2.10-dev-0b487e0
 ** https://github.com/okfn/annotator/
 **
-** Copyright 2015, the Annotator project contributors.
+** Copyright 2017, the Annotator project contributors.
 ** Dual licensed under the MIT and GPLv3 licenses.
 ** https://github.com/okfn/annotator/blob/master/LICENSE
 **
-** Built at: 2015-05-06 14:58:43Z
+** Built at: 2017-10-15 22:26:32Z
  */
 
 
@@ -1357,15 +1357,15 @@
   g = Util.getGlobal();
 
   if (((_ref1 = g.document) != null ? _ref1.evaluate : void 0) == null) {
-    $.getScript('http://assets.annotateit.org/vendor/xpath.min.js');
+    $.getScript('/static/js/lib/annotator/vendor/xpath.min.js');
   }
 
   if (g.getSelection == null) {
-    $.getScript('http://assets.annotateit.org/vendor/ierange.min.js');
+    $.getScript('/static/js/lib/annotator/vendor/ierange.min.js');
   }
 
   if (g.JSON == null) {
-    $.getScript('http://assets.annotateit.org/vendor/json2.min.js');
+    $.getScript('/static/js/lib/annotator/vendor/json2.min.js');
   }
 
   if (g.Node == null) {
