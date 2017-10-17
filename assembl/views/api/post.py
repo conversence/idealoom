@@ -240,7 +240,7 @@ def get_posts(request):
         posts = posts.filter(parent_alias.creator_id == post_replies_to)
 
     if keywords:
-        keywords_j = ' '.join(keywords)
+        keywords_j = ' & '.join(keywords)
         lse = aliased(LangStringEntry)
         posts = posts.join(lse, lse.langstring_id == PostClass.body_id)
         locales = request.GET.getall('locale')
