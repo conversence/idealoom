@@ -59,11 +59,11 @@ def update_indices(db):
     return bool(commands)
 
 
-def add_text_search(query, join_columns, keywords, locales, include_rank=True):
+def add_text_search(query, join_columns, keywords, locales, include_rank=True, lse=None):
     from assembl.models.langstrings import LangStringEntry
     rank = None
     keywords_j = ' & '.join(keywords)
-    lse = aliased(LangStringEntry)
+    lse = lse or aliased(LangStringEntry)
     join_conds = [lse.langstring_id == join_column for join_column in join_columns]
     if len(join_conds) > 1:
         join_cond = or_(*join_conds)
