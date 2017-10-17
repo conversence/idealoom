@@ -59,12 +59,17 @@ def update_indices(db):
     return bool(commands)
 
 
-def add_text_search(query, join_column, keywords, locales, include_rank=True):
+def add_text_search(query, join_columns, keywords, locales, include_rank=True):
     from assembl.models.langstrings import LangStringEntry
     rank = None
     keywords_j = ' & '.join(keywords)
     lse = aliased(LangStringEntry)
-    query = query.join(lse, lse.langstring_id == join_column)
+    join_conds = [lse.langstring_id == join_column for join_column in join_columns]
+    if len(join_conds) > 1:
+        join_cond = or_(*join_conds)
+    else:
+        join_cond = join_conds[0]
+    query = query.join(lse, join_cond)
     if locales:
         active_text_indices = get('active_text_indices', 'en')
         locales_by_config = defaultdict(list)

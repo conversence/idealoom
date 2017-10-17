@@ -243,7 +243,7 @@ def get_posts(request):
     if keywords:
         locales = request.GET.getall('locale')
         posts, rank = add_text_search(
-            posts, PostClass.body_id, keywords, locales, order == 'score')
+            posts, (PostClass.body_id,), keywords, locales, order == 'score')
 
     # Post read/unread management
     is_unread = request.GET.get('is_unread')
