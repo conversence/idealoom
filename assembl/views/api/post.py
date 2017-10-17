@@ -27,7 +27,8 @@ import transaction
 from assembl.lib.parsedatetime import parse_datetime
 from assembl.lib.clean_input import sanitize_html, sanitize_text
 from assembl.lib.config import get
-from assembl.lib.sqla_types import postgres_language_configurations
+from assembl.lib.text_search import (
+    add_text_search, postgres_language_configurations)
 from assembl.views.api import API_DISCUSSION_PREFIX
 from assembl.auth import P_READ, P_ADD_POST
 from assembl.tasks.translate import (
@@ -240,58 +241,9 @@ def get_posts(request):
         posts = posts.filter(parent_alias.creator_id == post_replies_to)
 
     if keywords:
-        keywords_j = ' & '.join(keywords)
-        lse = aliased(LangStringEntry)
-        posts = posts.join(lse, lse.langstring_id == PostClass.body_id)
         locales = request.GET.getall('locale')
-        if locales:
-            active_text_indices = get('active_text_indices', 'en')
-            locales_by_config = defaultdict(list)
-            any_locale = 'any' in locales
-            for locale in locales:
-                fts_config = postgres_language_configurations.get(locale, 'simple')
-                if fts_config not in active_text_indices:
-                    fts_config = 'simple'
-                locales_by_config[fts_config].append(locale)
-            conds = {}
-            # TODO: to_tsquery vs plainto_tsquery vs phraseto_tsquery
-            for fts_config, locales in locales_by_config.items():
-                conds[fts_config] = (
-                    or_(*[((lse.locale == locale) | lse.locale.like(locale+"_%"))
-                        for locale in locales]) if 'any' not in locales else None,
-                    func.to_tsvector(fts_config, lse.value))
-            filter = [cond & v.match(keywords_j, postgresql_regconfig=conf)
-                      for (conf, (cond, v)) in conds.items()
-                      if cond is not None]
-            if any_locale:
-                (_, v) = conds['simple']
-                filter.append(v.match(keywords_j, postgresql_regconfig='simple'))
-            posts = posts.filter(or_(*filter))
-            if order == 'score':
-                if len(conds) > 1:
-                    if any_locale:
-                        (_, v) = conds['simple']
-                        else_case = func.ts_rank(v, func.to_tsquery('simple', keywords_j))
-                    else:
-                        else_case = 0
-                    rank = case([
-                        (cond, func.ts_rank(v, func.to_tsquery(conf, keywords_j)))
-                        for (conf, (cond, v)) in conds.items()
-                        if cond is not None], else_ = else_case).label('score')
-                else:
-                    (conf, (cond, v)) = next(iter(conds.items()))
-                    rank = func.ts_rank(v, func.to_tsquery(conf, keywords_j)).label('score')
-                posts = posts.add_column(rank)
-        else:
-            fts_config = 'simple'
-            posts = posts.filter(
-                func.to_tsvector(fts_config, lse.value
-                    ).match(keywords_j, postgresql_regconfig=fts_config))
-            if order == 'score':
-                rank = func.ts_rank(
-                    func.to_tsvector(fts_config, lse.value),
-                    func.to_tsquery(fts_config, keywords_j)).label('score')
-                posts = posts.add_column(rank)
+        posts, rank = add_text_search(
+            posts, PostClass.body_id, keywords, locales, order == 'score')
 
     # Post read/unread management
     is_unread = request.GET.get('is_unread')

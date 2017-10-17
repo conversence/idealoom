@@ -9,6 +9,7 @@ from alembic.script import ScriptDirectory
 
 from ..lib.sqla import (
     get_metadata, get_session_maker, mark_changed)
+from ..lib.text_search import update_indices
 
 
 def bootstrap_db(config_uri=None, with_migration=True):
@@ -60,6 +61,7 @@ def bootstrap_db_data(db, mark=True):
     for cls in (Permission, Role, IdentityProvider, LocaleLabel, URIRefDb):
         cls.populate_db(session)
     ensure_functions(session)
+    mark |= update_indices(session)
     if mark:
         mark_changed(session)
 

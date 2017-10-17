@@ -169,23 +169,3 @@ class UUID(TypeDecorator):
 
     def copy(self, **kw):
         return UUID()
-
-
-postgres_language_configurations = {
-    'da': 'danish',
-    'nl': 'dutch',
-    'en': 'english',
-    'fi': 'finnish',
-    'fr': 'french',
-    'de': 'german',
-    'hu': 'hungarian',
-    'it': 'italian',
-    'no': 'norwegian',
-    'pt': 'portuguese',
-    'ro': 'romanian',
-    'ru': 'russian',
-    'es': 'spanish',
-    'sv': 'swedish',
-    'tr': 'turkish',
-    'simple': 'simple',
-}
