@@ -729,6 +729,8 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
                 extract.discussion_id == self.id),
             db.query(extract.owner_id.label('user_id')).filter(
                 extract.discussion_id == self.id),
+            db.query(extract.attributed_to_id.label('user_id')).filter(
+                extract.discussion_id == self.id),
             db.query(Announcement.creator_id.label('user_id')).filter(
                 Announcement.discussion_id == self.id),
             db.query(attachment.creator_id.label('user_id')).filter(

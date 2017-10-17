@@ -18,6 +18,7 @@ from pyisemail import is_email
 import assembl.lib.config as settings
 from assembl.lib.web_token import decode_token, TokenInvalid
 from assembl.lib.sqla_types import EmailString
+from assembl.lib.text_search import add_simple_text_search
 from assembl.auth import (
     P_ADMIN_DISC, P_SELF_REGISTER, P_SELF_REGISTER_REQUEST,
     R_PARTICIPANT, P_READ, CrudPermissions)
@@ -681,3 +682,28 @@ def modify_user_language_preference(request):
         raise HTTPNotImplemented()
     except ObjectNotUniqueError as e:
         raise JSONError(str(e), code=409)
+
+
+@view_config(context=ClassContext, renderer='json',
+             ctx_class=AgentProfile, name='autocomplete', permission=P_ADMIN_DISC)
+@view_config(context=CollectionContext, renderer='json',
+             ctx_collection_class=AgentProfile, name='autocomplete', permission=P_READ)
+def autocomplete(request):
+    keywords = request.GET.get('q')
+    if not keywords:
+        raise HTTPBadRequest("please specify search terms (q)")
+    discussion = request.context.get_instance_of_class(Discussion)
+    query = Discussion.default_db.query(AgentProfile.id, AgentProfile.name)
+    if discussion:
+        query = query.filter(AgentProfile.id.in_(
+            discussion.get_participants_query(
+                True, True, request.authenticated_userid
+            ).subquery()))
+    limit = int(request.GET.get('limit') or 20)
+    query, rank = add_simple_text_search(
+        query, [AgentProfile.name], keywords.split())
+    query = query.order_by(rank.desc()).limit(limit).all()
+    print(query)
+    return {'results': [{
+        'id': AgentProfile.uri_generic(id),
+        'text': name} for (id, name, rank) in query]}

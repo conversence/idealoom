@@ -89,6 +89,11 @@ class AgentProfile(Base):
     """
     __tablename__ = "agent_profile"
     __external_typename = "Agent"
+    __table_args__ = (
+        Index("agent_profile_name_vidx",
+              func.to_tsvector('simple', 'agent_profile.name'),
+              postgresql_using='gin'),
+    )
 
     rdf_class = FOAF.Agent
     rdf_sections = (USER_SECTION,)
@@ -704,7 +709,6 @@ class User(NamedClassMixin, OriginMixin, AgentProfile):
             if not user_id:
                 return None
             return User.get_instance(user_id)
-        return super(User, self).getByName(cls, name, session, query)
 
     @real_name_p.setter
     def real_name_p(self, name):

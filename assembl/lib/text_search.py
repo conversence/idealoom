@@ -1,4 +1,5 @@
 from collections import defaultdict
+from functools import reduce
 
 from sqlalchemy.sql import func, case
 from sqlalchemy.sql.expression import or_
@@ -118,4 +119,25 @@ def add_text_search(query, join_columns, keywords, locales, include_rank=True, l
                 func.to_tsvector(fts_config, lse.value),
                 func.to_tsquery(fts_config, keywords_j)).label('score')
             query = query.add_column(rank)
+    return query, rank
+
+
+def add_simple_text_search(query, text_columns, keywords, include_rank=True):
+    rank = None
+    keywords_j = ' & '.join(keywords)
+    fts_config = 'simple'
+    filters = [func.to_tsvector(fts_config, column).match(keywords_j)
+               for column in text_columns]
+    if len(filters) > 1:
+        filter = or_(*filters)
+    else:
+        filter = filters[0]
+    query = query.filter(filter)
+    if include_rank:
+        ranks = [func.ts_rank(
+            func.to_tsvector(fts_config, column),
+            func.to_tsquery(fts_config, keywords_j))
+            for column in text_columns]
+        rank = reduce(lambda a, b: a + b, ranks)
+        query = query.add_column(rank.label('score'))
     return query, rank
