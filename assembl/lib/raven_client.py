@@ -4,6 +4,7 @@ standard_library.install_aliases()
 import logging
 from traceback import print_exc
 import configparser
+from raven.transport.threaded_requests import ThreadedRequestsHTTPTransport
 
 
 _raven_client = None
@@ -43,6 +44,7 @@ def setup_raven(settings):
         if 'raven' in pipeline:
             raven_dsn = settings.get('filter:raven', 'dsn')
             from raven import Client
-            _raven_client = Client(raven_dsn)
+            _raven_client = Client(
+                raven_dsn, transport=ThreadedRequestsHTTPTransport)
     except configparser.Error:
         pass
