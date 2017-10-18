@@ -7,13 +7,18 @@ import configparser
 from raven.transport.threaded_requests import ThreadedRequestsHTTPTransport
 
 
-_raven_client = None
 log = logging.getLogger(__name__)
 
 
 def get_raven_client():
     from raven.base import Raven
-    return Raven or _raven_client
+    if Raven:
+        dsns = list(Raven._transport_cache.keys())
+        if any((Raven._transport_cache[dsn]._transport_cls != ThreadedRequestsHTTPTransport for dsn in dsns)):
+            Raven._transport_cache.clear()
+            for dsn in dsns:
+                Raven.set_dsn(dsn, ThreadedRequestsHTTPTransport)
+        return Raven
 
 
 def capture_message(*args, **kwargs):
@@ -35,8 +40,8 @@ def setup_raven(settings):
 
     Raven is automatically setup in assembl,
     this is useful for other processes."""
-    global _raven_client
-    if _raven_client is not None:
+    from raven.base import Raven
+    if Raven is not None:
         log.error("Calling setup_raven when raven is already set up.")
         return
     try:
@@ -44,7 +49,6 @@ def setup_raven(settings):
         if 'raven' in pipeline:
             raven_dsn = settings.get('filter:raven', 'dsn')
             from raven import Client
-            _raven_client = Client(
-                raven_dsn, transport=ThreadedRequestsHTTPTransport)
+            Client(raven_dsn, transport=ThreadedRequestsHTTPTransport)
     except configparser.Error:
         pass
