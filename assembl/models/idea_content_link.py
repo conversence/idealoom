@@ -344,7 +344,7 @@ class Extract(IdeaContentPositiveLink):
     @as_native_str()
     def __repr__(self):
         r = super(Extract, self).__repr__()
-        body = self.body or ""
+        body = self.quote or ""
         return r[:-1] + body[:20] + ">"
 
     def get_target(self):
