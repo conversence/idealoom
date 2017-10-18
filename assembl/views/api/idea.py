@@ -58,7 +58,7 @@ def create_idea(request):
                 continue
             assert isinstance(ls_data, dict)
             current = LangString.create_from_json(
-                ls_data, user_id, permissions=permissions)
+                ls_data, user_id)
             kwargs[attr_name] = current
 
     new_idea = Idea(**kwargs)
@@ -217,7 +217,7 @@ def save_idea(request):
                     current.delete()
             elif ls_data:
                 current = LangString.create_from_json(
-                    ls_data, user_id, permissions=permissions)
+                    ls_data, user_id)
                 setattr(idea, attr_name, current)
 
     if 'parentId' in idea_data and idea_data['parentId'] is not None:
