@@ -51,19 +51,21 @@ def create_idea(request):
         "creation_date": now,
     }
 
+    new_idea = Idea(**kwargs)
+
+    session.add(new_idea)
+
+    context = new_idea.get_instance_context(request=request)
     for key, attr_name in langstring_fields.items():
         if key in idea_data:
             ls_data = idea_data[key]
             if ls_data is None:
                 continue
             assert isinstance(ls_data, dict)
+            subcontext = new_idea.get_collection_context(key, context)
             current = LangString.create_from_json(
-                ls_data, user_id)
-            kwargs[attr_name] = current
-
-    new_idea = Idea(**kwargs)
-
-    session.add(new_idea)
+                ls_data, context=subcontext)
+            setattr(new_idea, attr_name, current._instance)
 
     if idea_data['parentId']:
         parent = Idea.get_instance(idea_data['parentId'])
@@ -203,22 +205,23 @@ def save_idea(request):
             "Idea from discussion %s cannot be saved from different discussion (%s)." % (
                 idea.discussion_id, discussion.id))
 
+    context = idea.get_instance_context(request=request)
     for key, attr_name in langstring_fields.items():
         if key in idea_data:
             current = getattr(idea, attr_name)
             ls_data = idea_data[key]
             # TODO: handle legacy string instance?
             assert isinstance(ls_data, (dict, type(None)))
+            subcontext = idea.get_collection_context(key, context)
             if current:
                 if ls_data:
                     current.update_from_json(
-                        ls_data, user_id, permissions=permissions)
+                        ls_data, context=subcontext, permissions=permissions)
                 else:
                     current.delete()
             elif ls_data:
-                current = LangString.create_from_json(
-                    ls_data, user_id)
-                setattr(idea, attr_name, current)
+                current = LangString.create_from_json(ls_data, context=subcontext)
+                setattr(idea, attr_name, current._instance)
 
     if 'parentId' in idea_data and idea_data['parentId'] is not None:
         # TODO: Make sure this is sent as a list!
