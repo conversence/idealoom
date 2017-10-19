@@ -44,7 +44,7 @@ var EditableField = Marionette.View.extend({
     this.model.save(this.modelProp, text, {
       success: function(model, resp) {},
       error: function(model, resp) {
-        console.error('ERROR: saveEdition', resp.toJSON());
+        console.error('ERROR: saveEdition', resp.responseJSON);
       }
     });
   },
