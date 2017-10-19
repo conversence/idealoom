@@ -187,7 +187,7 @@ var messageSendView = LoaderView.extend({
       msg_in_progress_body: this.options.msg_in_progress_body,
       msg_in_progress_title: this.options.msg_in_progress_title,
       reply_idea: reply_idea,
-      reply_idea_title: reply_idea.getShortTitleDisplayText(this.translationData),
+      reply_idea_title: reply_idea ? reply_idea.getShortTitleDisplayText(this.translationData) : '',
       show_cancel_button: show_cancel_button,
       reply_message_id: reply_message_id,
       show_target_context_with_choice: show_target_context_with_choice,
