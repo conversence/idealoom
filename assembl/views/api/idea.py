@@ -61,7 +61,6 @@ def create_idea(request):
             ls_data = idea_data[key]
             if ls_data is None:
                 continue
-            assert isinstance(ls_data, dict)
             subcontext = new_idea.get_collection_context(key, context)
             current = LangString.create_from_json(
                 ls_data, context=subcontext)
@@ -211,7 +210,6 @@ def save_idea(request):
             current = getattr(idea, attr_name)
             ls_data = idea_data[key]
             # TODO: handle legacy string instance?
-            assert isinstance(ls_data, (dict, type(None)))
             subcontext = idea.get_collection_context(key, context)
             if current:
                 if ls_data:

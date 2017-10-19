@@ -302,12 +302,20 @@ class LangString(Base):
         # Special case for JSON-LD
         added = False
         ls = cls()
+        def guess_lang(value):
+            from .discussion import Discussion
+            discussion = context.get_instance_of_class(Discussion)
+            if discussion:
+                tr_service = discussion.translation_service()
+                lang, _ = tr_service.identify(value)
+            return LocaleLabel.UNDEFINED
+
         if isinstance(json, list):
             for entry_record in json:
                 value = entry_record['@value']
                 if value:
                     added = True
-                    lang = entry_record.get('@language', LocaleLabel.UNDEFINED)
+                    lang = entry_record.get('@language', None) or guess_lang(value)
                     ls.add_value(value, lang)
         elif isinstance(json, dict):
             if '@id' in json or '@type' in json:
@@ -318,7 +326,7 @@ class LangString(Base):
                 value = json['@value']
                 if value:
                     added = True
-                    lang = json.get('@language', LocaleLabel.UNDEFINED)
+                    lang = json.get('@language', None) or guess_lang(value)
                     ls.add_value(value, lang)
             else:
                 for lang, value in json.items():
@@ -327,14 +335,9 @@ class LangString(Base):
                         ls.add_value(value, lang)
         elif isinstance(json, string_types):
             if json:
-                from .discussion import Discussion
                 added = True
-                lang = LocaleLabel.UNDEFINED
-                discussion = context.get_instance_of_class(Discussion)
-                if discussion:
-                    tr_service = discussion.translation_service()
-                    lang, _ = tr_service.identify(json)
-                ls.add_value(entry_record, lang)
+                lang = guess_lang(json)
+                ls.add_value(json, lang)
         else:
             raise ValueError("Not a valid langstring: " + json)
         i_context = ls.get_instance_context(context)
