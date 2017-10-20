@@ -121,6 +121,16 @@ module.exports = {
           }],
       },
       {
+        test: /\/js\/app\/.*\.js$/,
+        use: [{
+            loader: 'babel-loader',
+            options: {
+                presets: ['es2015-webpack2'],
+                cacheDirectory: false,
+            },
+        }],
+      },
+      {
         test: /\.scss$/,
         use: ExtractTextPlugin.extract({
           fallback: 'style-loader',
