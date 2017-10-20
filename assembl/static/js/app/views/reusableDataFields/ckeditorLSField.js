@@ -10,7 +10,6 @@ var Marionette = require('backbone.marionette'),
     Assembl = require('../../app.js'),
     Permissions = require('../../utils/permissions.js'),
     LangString = require('../../models/langstring.js'),
-    CK = require('ckeditor'),
     CKEditorField = require('./ckeditorField.js'),
     Ctx = require('../../common/context.js');
 

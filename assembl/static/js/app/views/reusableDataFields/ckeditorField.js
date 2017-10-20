@@ -12,7 +12,7 @@ var Marionette = require('backbone.marionette'),
     Backbone = require('backbone'),
     BackboneModal = require('backbone.modal'),
     Permissions = require('../../utils/permissions.js'),
-    CK = require('ckeditor'),
+    CK = require('./ckeditor.js'),
     Ctx = require('../../common/context.js');
 
 
@@ -28,18 +28,6 @@ var cKEditorField = Marionette.View.extend({
    * http://docs.ckeditor.com/#!/api/CKEDITOR.config
    * @type {object}
    */
-  CKEDITOR_CONFIG: {
-    toolbar: [
-        ['Bold', 'Italic', 'Outdent', 'Indent', 'NumberedList', 'BulletedList'],
-        ['Link', 'Unlink', 'Anchor']
-    ],
-    extraPlugins: 'sharedspace',
-    removePlugins: 'floatingspace,resize',
-    sharedSpaces: { top: 'ckeditor-toptoolbar', bottom: 'ckeditor-bottomtoolbar' },
-    disableNativeSpellChecker: false,
-    language: Ctx.getLocale(),
-    title: false //Removes the annoying tooltip in the middle of the main textarea
-  },
 
   ckInstance: null,
 
@@ -227,12 +215,13 @@ var cKEditorField = Marionette.View.extend({
     var editingArea = this.$('#' + this.fieldId).get(0),
         that = this;
 
-    var config = _.extend({}, this.CKEDITOR_CONFIG, {
+    var config = _.extend({}, CK.CKEDITOR_CONFIG, {
+      language: Ctx.getLocale(),
       sharedSpaces: { top: this.topId, bottom: this.bottomId }
     });
 
     //CKEDITOR.basePath = static_url + '/node_modules/ckeditor/';
-    this.ckInstance = CKEDITOR.inline(editingArea, config);
+    this.ckInstance = CK.CKEDITOR.inline(editingArea, config);
 
     setTimeout(function() {
       if (Ctx.debugRender) {
@@ -295,8 +284,8 @@ var cKEditorField = Marionette.View.extend({
       }
     }
 
-    this.editing = false;
-    this.render();
+    // this.editing = false;
+    // this.render();
   },
 
   cancelEdition: function(ev) {

@@ -121,6 +121,35 @@ var SegmentView = Marionette.View.extend({
     var cid = ev.currentTarget.getAttribute('data-segmentid'),
         segment = this.model.collection.get(cid);
 
+    if (ev.data === undefined) {
+      ev.data = ev.originalEvent;
+    }
+    CKEDITOR.plugins.clipboard.initDragDataTransfer( ev );
+    var dataTransfer = ev.data.dataTransfer;
+    var post, url, creatorName = '',
+        idPost = this.model.get('idPost');
+
+    if (idPost) {
+      post = this.allMessagesCollection.get(idPost);
+      if (post) {
+        var id = post.get('idCreator') || post.get('idAttributedTo');
+        if (id) {
+          var creator = this.allUsersCollection.get(id);
+          if (creator) {
+            creatorName = creator.get('name');
+          }
+        }
+        url = post.get('url');
+      }
+    }
+    dataTransfer.setData( 'segment', JSON.stringify({
+      id: segment.id,
+      quote: segment.get('quote'),
+      url: url,
+      postId: idPost,
+      creatorName: creatorName,
+    }));
+
     Ctx.showDragbox(ev, segment.getQuote());
     Ctx.setDraggedSegment(segment);
   },

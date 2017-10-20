@@ -8,6 +8,7 @@ VALID_TAGS = ['a',
               'code',
               'del',
               'dd',
+              'div',
               'dl',
               'dt',
               'em',
@@ -22,6 +23,7 @@ VALID_TAGS = ['a',
               'p',
               'pre',
               's',
+              'span',
               'sup',
               'sub',
               'strike',
@@ -38,6 +40,7 @@ VALID_TAGS = ['a',
 VALID_ATTRIBUTES = ['href',  # For hyperlinks
                     'alt',  # For accessiblity
                     'colspan', 'headers', 'abbr',
+                    'class', 'id',  # for ckeditor widgets
                     'scope', 'sorted'  # For tables
                     ]
 
