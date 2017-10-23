@@ -6,7 +6,7 @@ from pyramid.httpexceptions import HTTPUnauthorized, HTTPBadRequest
 from pyramid.security import authenticated_userid, Everyone
 
 from assembl.auth import P_READ, P_MODERATE, P_DELETE_POST, P_DELETE_MY_POST
-from assembl.models import Content, Post, SynthesisPost, User, Extract
+from assembl.models import Content, Post, SynthesisPost, User, Extract, Discussion
 from assembl.models.post import PublicationStates
 from ..traversal import InstanceContext, CollectionContext
 from . import (
@@ -30,6 +30,31 @@ def show_similar_posts(request):
         return similar
     post_ids = [x[0] for x in similar]
     posts = post.db.query(Content).filter(Content.id.in_(post_ids))
+    posts = {post.id: post for post in posts}
+    results = [posts[post_id].generic_json(view)
+               for (post_id, score) in similar]
+    for n, (post_id, score) in enumerate(similar):
+        results[n]['score'] = float(score)
+    return results
+
+
+@view_config(context=CollectionContext, request_method='POST',
+             ctx_collection_class=Content, permission=P_READ,
+             accept="application/json", name="similar",
+             renderer='json')
+def show_posts_similar_to_text(request):
+    ctx = request.context
+    discussion = ctx.get_instance_of_class(Discussion)
+    text = request.body.decode('utf-8')
+    from assembl.nlp.clusters import SemanticAnalysisData
+    analysis = SemanticAnalysisData(discussion)
+    similar = analysis.get_similar_posts(text=text)
+    view = (request.matchdict or {}).get('view', None)\
+        or ctx.get_default_view() or 'default'
+    if view == 'id_only':
+        return similar
+    post_ids = [x[0] for x in similar]
+    posts = discussion.db.query(Content).filter(Content.id.in_(post_ids))
     posts = {post.id: post for post in posts}
     results = [posts[post_id].generic_json(view)
                for (post_id, score) in similar]
