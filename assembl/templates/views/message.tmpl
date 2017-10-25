@@ -26,7 +26,7 @@
 {%- endmacro %}
 
 {% macro showLikeButton() -%}
-<a href="<%= direct_link_relative_url %>" data-href="<%= share_link_url %>" class="js_likeButton"><% if (message.get('liked')) { %>{{ gettext("Unlike") }}<% } else { %>{{ gettext("Like") }}<% } %></a>
+<a href="#" class="js_likeButton"><% if (message.get('liked')) { %>{{ gettext("Unlike") }}<% } else { %>{{ gettext("Like") }}<% } %></a>
 {%- endmacro %}
 
 {% macro menuAction() -%}
