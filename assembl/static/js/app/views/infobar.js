@@ -101,7 +101,8 @@ var WidgetInfobarItemView = LoaderView.extend({
       evt.preventDefault();
     }
     var context = Widget.Model.prototype.INFO_BAR;
-    var openTargetInModalOnButtonClick = (this.model.getCssClasses(context).indexOf("js_openTargetInModal") != -1);
+    var model = this.model.get('widget');
+    var openTargetInModalOnButtonClick = (model.getCssClasses(context).indexOf("js_openTargetInModal") != -1);
     if ( openTargetInModalOnButtonClick !== false ) {
       var options = {
         footer: false
@@ -114,7 +115,7 @@ var WidgetInfobarItemView = LoaderView.extend({
     return false;
   },
   serializeModel: function() {
-    var model = this.model;
+    var model = this.model.get('widget');
     return {
       model: model,
       message: model.getDescriptionText(Widget.Model.prototype.INFO_BAR, undefined, this.translationData),
@@ -138,9 +139,10 @@ var InfobarsView = Marionette.CollectionView.extend({
     Marionette.CollectionView.apply(this, arguments);
   },
   childView:function(item){
-    if(item.get('@type')){
+    var submodel = item.get('widget');
+    if(submodel && submodel instanceof Widget.Model){
       return WidgetInfobarItemView;
-    }else{
+    } else {
       return CookieInfobarItemView;
     }
   },

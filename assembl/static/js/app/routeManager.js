@@ -455,8 +455,8 @@ var routeManager = Marionette.Object.extend({
             infobarsCollection.add(new InfobarsModels.CookieInfobarModel());
           }
           widgetCollection.each(function(widgetModel){
-            var model = new InfobarsModels.WidgetInfobarModel(widgetModel.attributes);
-            infobarsCollection.add(widgetModel);
+            var model = new InfobarsModels.WidgetInfobarModel({widget: widgetModel});
+            infobarsCollection.add(model);
           });
           Assembl.rootView.showChildView('infobarRegion', new InfobarsViews.InfobarsView({collection: infobarsCollection}));
         });
