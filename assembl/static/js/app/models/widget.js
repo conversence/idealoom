@@ -1192,7 +1192,7 @@ var InspirationWidgetModel = WidgetModel.extend({
     }
     switch (context) {
       case this.MESSAGE_LIST_INSPIREME_CTX:
-        return (activityState === "active");
+        return (activityState === 'active') && this.get('configured');
       case this.DISCUSSION_MENU_CONFIGURE_CTX:
       case this.IDEA_PANEL_CONFIGURE_CTX:
         // assume root idea
