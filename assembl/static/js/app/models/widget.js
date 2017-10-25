@@ -114,6 +114,12 @@ var WidgetModel = Base.Model.extend({
   },
   */
 
+  /**
+   * @function app.model.widgets.Widget.getObjectShareUrl
+   * Get the URL of the sharing Widget, which has no backend
+   * representation. TODO: move to Ctx?
+   * @param  {dict} params parameters for the URL GET
+   */
   getObjectShareUrl: function(params) {
     return Ctx.appendExtraURLParams(widget_url + "/share/index.html", params);
   },
@@ -126,6 +132,13 @@ var WidgetModel = Base.Model.extend({
     console.error("Widget.getConfigurationUrl: unknown type");
   },
 
+  /**
+   * @function app.model.widgets.Widget.getUrlForUser
+   * get the URL that will launch the widget in a modal window.
+   * @param  {string} targetIdeaId Id of an idea on which the widget was launched
+   * @param  {[type]} page         ?
+   * @return {string}              URL
+   */
   getUrlForUser: function(targetIdeaId, page) {
     // Is it the same as widget.get("ui_endpoint")?
     console.error("Widget.getUrlForUser: wrong type");
@@ -172,7 +185,7 @@ var WidgetModel = Base.Model.extend({
   },
 
   /**
-   * [Describes whether the widget model is internal to Assembl 
+   * Describes whether the widget model is internal to Assembl
    * (using Marionette)(=false) or Independent (using Angular)(=true);
    * Override in child classes]
    * @returns {boolean}
