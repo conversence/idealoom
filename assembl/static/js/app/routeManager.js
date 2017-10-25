@@ -360,14 +360,6 @@ var routeManager = Marionette.Object.extend({
     Assembl.rootView.showChildView('slider', new View({model: widget}));
   },
 
-  openAngularWidget: function(widget){
-    var options = {
-      "target_url": widget.getUrlForUser(),
-      "modal_title": widget.getLinkText(Widget.Model.prototype.INFO_BAR)
-    };
-    Ctx.openTargetInModal(null, null, options);
-  },
-
   // example: http://localhost:6543/jacklayton/widget/local%3AWidget%2F64/result
   widgetInModal: function(id, arg) {
     var that = this;
@@ -389,9 +381,8 @@ var routeManager = Marionette.Object.extend({
           args are passed, pass the parameter accordingly. 
          */
         if (widget.isIndependentModalType()){
-          that.openAngularWidget(widget);
-        }
-        else{
+          that.openExternalWidget(widget);
+        } else{
           that.openLocalWidget(widget, arg);
         }
       });
