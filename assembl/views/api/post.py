@@ -35,7 +35,7 @@ from assembl.tasks.translate import (
     translate_content,
     PrefCollectionTranslationTable)
 from assembl.models import (
-    get_database_id, Post, AssemblPost, SynthesisPost,
+    Post, AssemblPost, SynthesisPost,
     Synthesis, Discussion, Content, Idea, ViewPost, User,
     IdeaRelatedPostLink, AgentProfile, LikedPost, LangString,
     LanguagePreferenceCollection, LangStringEntry)
@@ -113,18 +113,18 @@ def get_posts(request):
 
     root_post_id = request.GET.getall('root_post_id')
     if root_post_id:
-        root_post_id = get_database_id("Post", root_post_id[0])
+        root_post_id = Post.get_database_id(root_post_id[0])
     family_post_id = request.GET.getall('family_post_id')
     if family_post_id:
-        family_post_id = get_database_id("Post", family_post_id[0])
+        family_post_id = Post.get_database_id(family_post_id[0])
 
     root_idea_id = request.GET.getall('root_idea_id')
     if root_idea_id:
-        root_idea_id = get_database_id("Idea", root_idea_id[0])
+        root_idea_id = Idea.get_database_id(root_idea_id[0])
 
     ids = request.GET.getall('ids[]')
     if ids:
-        ids = [get_database_id("Post", id) for id in ids]
+        ids = [Post.get_database_id(id) for id in ids]
 
     view_def = request.GET.get('view') or 'default'
 
@@ -132,12 +132,12 @@ def get_posts(request):
 
     post_author_id = request.GET.get('post_author')
     if post_author_id:
-        post_author_id = get_database_id("AgentProfile", post_author_id)
+        post_author_id = AgentProfile.get_database_id(post_author_id)
         assert AgentProfile.get(post_author_id), "Unable to find agent profile with id " + post_author_id
 
     post_replies_to = request.GET.get('post_replies_to')
     if post_replies_to:
-        post_replies_to = get_database_id("AgentProfile", post_replies_to)
+        post_replies_to = AgentProfile.get_database_id(post_replies_to)
         assert AgentProfile.get(post_replies_to), "Unable to find agent profile with id " + post_replies_to
 
     posted_after_date = request.GET.get('posted_after_date')

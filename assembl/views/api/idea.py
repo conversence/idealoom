@@ -11,7 +11,7 @@ from sqlalchemy.orm import (joinedload, subqueryload, undefer)
 
 from assembl.views.api import API_DISCUSSION_PREFIX
 from assembl.models import (
-    get_database_id, Idea, RootIdea, IdeaLink, Discussion,
+    Idea, RootIdea, IdeaLink, Discussion,
     Extract, SubGraphIdeaAssociation, LangString)
 from assembl.auth import (P_READ, P_ADD_IDEA, P_EDIT_IDEA)
 
@@ -136,7 +136,7 @@ def _get_ideas_real(request, view_def=None, ids=None, user_id=None):
     ideas = ideas.order_by(IdeaLink.order, Idea.creation_date)
 
     if ids:
-        ids = [get_database_id("Idea", id) for id in ids]
+        ids = [Idea.get_database_id(id) for id in ids]
         ideas = ideas.filter(Idea.id.in_(ids))
     # remove tombstones
     ideas = ideas.filter(and_(*Idea.base_conditions()))

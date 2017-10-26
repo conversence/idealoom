@@ -1,8 +1,6 @@
 """Cornice API for extracts"""
-import json
 
 from cornice import Service
-
 from pyramid.security import authenticated_userid, Everyone
 from pyramid.httpexceptions import (
     HTTPNotFound, HTTPBadRequest, HTTPForbidden, HTTPServerError,
@@ -16,7 +14,7 @@ from assembl.views.api import API_DISCUSSION_PREFIX
 from assembl.auth import (
     P_READ, P_ADD_EXTRACT, P_EDIT_EXTRACT, P_EDIT_MY_EXTRACT)
 from assembl.models import (
-    get_database_id, Extract, TextFragmentIdentifier,
+    AgentProfile, Extract, TextFragmentIdentifier,
     AnnotatorSource, Post, Webpage, Idea)
 from assembl.auth.util import user_has_permission
 from assembl.lib.web_token import decode_token
@@ -76,7 +74,7 @@ def _get_extracts_real(request, view_def='default', ids=None, user_id=None):
         Extract.discussion_id == discussion.id
     )
     if ids:
-        ids = [get_database_id("Extract", id) for id in ids]
+        ids = [Extract.get_database_id(id) for id in ids]
         all_extracts = all_extracts.filter(Extract.id.in_(ids))
 
     all_extracts = all_extracts.options(joinedload_all(
@@ -223,7 +221,7 @@ def put_extract(request):
             and user_id == extract.owner_id)):
         raise HTTPForbidden()
 
-    extract.owner_id = user_id or get_database_id("User", extract.owner_id)
+    extract.owner_id = user_id or AgentProfile.get_database_id(extract.owner_id)
     extract.order = updated_extract_data.get('order', extract.order)
     extract.important = updated_extract_data.get('important', extract.important)
     idea_id = updated_extract_data.get('idIdea', None)
