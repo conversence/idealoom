@@ -14,8 +14,9 @@ import Ctx from '../common/context.js';
  *
  * @param {string} url
  */
-var Socket = function(connectCallback) {
+var Socket = function(connectCallback, collManager) {
   this.connectCallback = connectCallback;
+  this.collectionManager = collManager;
   if (start_application) {
     this.init();
   }
@@ -132,9 +133,7 @@ Socket.prototype.onClose = function(ev) {
  * @param  {Object} item
  */
 Socket.prototype.processData = function(item) {
-  var CollectionManager = require('../common/collectionManager.js').default;
-  var collectionManager = new CollectionManager();
-  var collPromise = collectionManager.getCollectionPromiseByType(item);
+  var collPromise = this.collectionManager.getCollectionPromiseByType(item);
 
   if (Ctx.debugSocket) {
     console.log("On socket:", item['@type'], item['@id'], item);

@@ -1089,12 +1089,13 @@ var CollectionManager = Marionette.Object.extend({
       return this._connectedSocketPromise;
     }
 
+    var that = this;
     var socket = null;
 
     // Note: This does not solve the fact that the socket may disconnect.
     return this._connectedSocketPromise = new Promise(
       function(resolve) {
-        socket = new Socket(resolve);
+        socket = new Socket(resolve, that);
       });
   },
   /**

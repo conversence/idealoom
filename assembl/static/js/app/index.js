@@ -7,7 +7,6 @@ import App from './app.js';
 
 import Router from './router.js';
 import Ctx from './common/context.js';
-import Socket from './utils/socket.js';
 import CollectionManager from './common/collectionManager.js';
 import Raven from 'raven-js';
 
