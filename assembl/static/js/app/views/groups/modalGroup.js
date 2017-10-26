@@ -3,10 +3,7 @@
  * @module app.views.groups.modalGroup
  */
 
-import Marionette from 'backbone.marionette';
-
 import Backbone from 'backbone';
-import BackboneModal from 'backbone.modal';
 import _ from 'underscore';
 import $ from 'jquery';
 import Assembl from '../../app.js';
@@ -17,6 +14,9 @@ import i18n from '../../utils/i18n.js';
 //import viewsFactory from '../../objects/viewsFactory';
 import groupSpec from '../../models/groupSpec';
 import GroupContainer from '../groups/groupContainer';
+import panelSpec from '../../models/panelSpec.js';
+import PanelSpecTypes from '../../utils/panelSpecTypes.js';
+import viewsFactory from '../../objects/viewsFactory';
 
 /**
  * @class app.views.groups.modalGroup.ModalGroupView
@@ -103,10 +103,6 @@ var ModalGroupView = Backbone.Modal.extend({
  *  modal is a fully configured instance of ModalGroup.
  */
 var filteredMessagePanelFactory = function(modal_title, filters) {
-  var panelSpec = require('../../models/panelSpec.js').default;
-  var PanelSpecTypes = require('../../utils/panelSpecTypes.js').default;
-  var viewsFactory = require('../../objects/viewsFactory').default;
-
   var defaults = {
       panels: new panelSpec.Collection([
                                         {type: PanelSpecTypes.MESSAGE_LIST.id, minimized: false}
