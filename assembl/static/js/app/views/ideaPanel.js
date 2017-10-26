@@ -348,7 +348,7 @@ var IdeaPanel = AssemblPanel.extend({
       share_link_url = Widget.Model.prototype.getObjectShareUrl(
         [
           {'u': Ctx.getAbsoluteURLFromRelativeURL(direct_link_relative_url) },
-          {'t': this.model.getShortTitlSafe(this.translationData)},
+          {'t': this.model.getShortTitleSafe(this.translationData)},
           {'s': Ctx.getPreferences().social_sharing }
         ]
       );
