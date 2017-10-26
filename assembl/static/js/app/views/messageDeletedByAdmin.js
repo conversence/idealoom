@@ -1,11 +1,11 @@
-'use strict';
 /**
  * 
  * @module app.views.message
  */
 
-var i18n = require('../utils/i18n.js'),
-    MessageDeletedByUserView = require('./messageDeletedByUser.js');
+var i18n = require('../utils/i18n.js');
+
+var MessageDeletedByUserView = require('./messageDeletedByUser.js');
 
 
 

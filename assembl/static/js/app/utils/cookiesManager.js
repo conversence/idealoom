@@ -1,9 +1,7 @@
-'use strict';
-
 /**
  * @module app.utils.cookiesManager
  */
- 
+
 var Ctx = require('../common/context.js');
 
 var getUserCookiesAuthorization = function() {

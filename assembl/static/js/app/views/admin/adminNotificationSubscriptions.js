@@ -1,17 +1,17 @@
-'use strict';
 /**
  * 
  * @module app.views.admin.adminNotificationSubscriptions
  */
 
-var Marionette = require('backbone.marionette'),
-    CollectionManager = require('../../common/collectionManager.js'),
-    Permissions = require('../../utils/permissions.js'),
-    Ctx = require('../../common/context.js'),
-    i18n = require('../../utils/i18n.js'),
-    $ = require('jquery'),
-    Promise = require('bluebird'),
-    AdminNavigationMenu = require('./adminNavigationMenu.js');
+var Marionette = require('backbone.marionette');
+
+var CollectionManager = require('../../common/collectionManager.js');
+var Permissions = require('../../utils/permissions.js');
+var Ctx = require('../../common/context.js');
+var i18n = require('../../utils/i18n.js');
+var $ = require('jquery');
+var Promise = require('bluebird');
+var AdminNavigationMenu = require('./adminNavigationMenu.js');
 
 var NotificationView = Marionette.View.extend({
   constructor: function NotificationView() {
@@ -33,8 +33,8 @@ var NotificationView = Marionette.View.extend({
     }
   },
   discussionNotification: function(e) {
-    var elm = $(e.target),
-        status = elm.is(':checked') ? 'ACTIVE' : 'UNSUBSCRIBED';
+    var elm = $(e.target);
+    var status = elm.is(':checked') ? 'ACTIVE' : 'UNSUBSCRIBED';
 
     this.model.set("status", status);
     this.model.save(null, {
@@ -130,8 +130,8 @@ var adminNotificationSubscriptions = Marionette.View.extend({
   },
 
   onRender: function() {
-    var that = this,
-        collectionManager = new CollectionManager();
+    var that = this;
+    var collectionManager = new CollectionManager();
 
     Promise.join(collectionManager.getDiscussionModelPromise(),
         collectionManager.getNotificationsDiscussionCollectionPromise(),

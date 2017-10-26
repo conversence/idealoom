@@ -1,13 +1,13 @@
-'use strict';
 /**
  * 
  * @module app.views.navigation.about
  */
 
-var Assembl = require('../../app.js'),
-    AssemblPanel = require('../assemblPanel.js'),
-    PanelSpecTypes = require('../../utils/panelSpecTypes.js'),
-    Analytics = require('../../internal_modules/analytics/dispatcher.js');
+var Assembl = require('../../app.js');
+
+var AssemblPanel = require('../assemblPanel.js');
+var PanelSpecTypes = require('../../utils/panelSpecTypes.js');
+var Analytics = require('../../internal_modules/analytics/dispatcher.js');
 
 var AboutNavPanel = AssemblPanel.extend({
   constructor: function AboutNavPanel() {

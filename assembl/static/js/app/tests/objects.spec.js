@@ -3,8 +3,9 @@
  * @module app.tests.objects.spec
  */
 
-var panelViewByPanelSpec = require('../objects/viewsFactory.js'),
-    expect = require('chai').expect;
+var panelViewByPanelSpec = require('../objects/viewsFactory.js');
+
+var expect = require('chai').expect;
 
 describe('Objects Specs', function() {
 

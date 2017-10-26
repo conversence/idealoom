@@ -1,13 +1,13 @@
-'use strict';
 /**
  * The collection of idea snapshots in a synthesis
  * @module app.models.synthesis
  */
 
-var Base = require('./base.js'),
-    Ctx = require('../common/context.js'),
-    Idea = require("./idea.js"),
-    i18n = require('../utils/i18n.js');
+var Base = require('./base.js');
+
+var Ctx = require('../common/context.js');
+var Idea = require("./idea.js");
+var i18n = require('../utils/i18n.js');
 
 
 /**
@@ -15,15 +15,15 @@ var Base = require('./base.js'),
  * @class app.models.synthesis.SynthesisIdeaCollection
  * @extends app.models.idea.IdeaCollection
  */
- 
+
 var SynthesisIdeaCollection = Idea.Collection.extend({
   constructor: function SynthesisIdeaCollection() {
     Idea.Collection.apply(this, arguments);
   },
 
   initialize: function(models, options) {
-    var synthesis = options.synthesis,
-        id = synthesis.getNumericId();
+    var synthesis = options.synthesis;
+    var id = synthesis.getNumericId();
     this.url = Ctx.getApiV2DiscussionUrl("/syntheses/" + id + "/ideas");
   },
   // Here I actually need double inheritance; cheating with function references.
@@ -37,7 +37,7 @@ var SynthesisIdeaCollection = Idea.Collection.extend({
  * @class app.models.synthesis.SynthesisModel
  * @extends app.models.base.BaseModel
  */
- 
+
 var SynthesisModel = Base.Model.extend({
   constructor: function SynthesisModel() {
     Base.Model.apply(this, arguments);
@@ -98,7 +98,7 @@ var SynthesisModel = Base.Model.extend({
  * @class app.models.synthesis.SynthesisCollection
  * @extends app.models.base.BaseCollection
  */
- 
+
 var SynthesisCollection = Base.Collection.extend({
   constructor: function SynthesisCollection() {
     Base.Collection.apply(this, arguments);
@@ -124,17 +124,17 @@ var SynthesisCollection = Base.Collection.extend({
    * @returns Message.Model or null
    */
   getLastPublisedSynthesis: function() {
-      var publishedSyntheses = this.getPublishedSyntheses(),
-          lastSynthesis = null;
-      if (publishedSyntheses.length > 0) {
-        _.sortBy(publishedSyntheses, function(model) {
-          return model.get('creation_date');
-        });
-        lastSynthesis = _.last(publishedSyntheses);
-      }
-
-      return lastSynthesis;
+    var publishedSyntheses = this.getPublishedSyntheses();
+    var lastSynthesis = null;
+    if (publishedSyntheses.length > 0) {
+      _.sortBy(publishedSyntheses, function(model) {
+        return model.get('creation_date');
+      });
+      lastSynthesis = _.last(publishedSyntheses);
     }
+
+    return lastSynthesis;
+  }
 });
 
 module.exports = {

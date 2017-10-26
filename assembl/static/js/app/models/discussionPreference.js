@@ -1,11 +1,11 @@
-"use strict";
 /**
  * Discussion preferences
  * @module app.models.discussionPreference
  */
-var Backbone = require("backbone"),
-    Types = require("../utils/types.js"),
-    Ctx = require("../common/context.js");
+var Backbone = require("backbone");
+
+var Types = require("../utils/types.js");
+var Ctx = require("../common/context.js");
 
 
 /**
@@ -44,7 +44,9 @@ var DiscussionIndividualPreferenceModel = Backbone.Model.extend({
   valueAsCollection: function(preferenceData, as_list) {
     // MISSING: Better handling of default_item_X and default_Key...
     if (this._subcollectionCache === undefined) {
-      var collection, that = this, value = this.get('value');
+      var collection;
+      var that = this;
+      var value = this.get('value');
       if (as_list) {
         if (!Array.isArray(value)) {
           // Error in value type
@@ -114,14 +116,14 @@ var DiscussionPreferenceDictionaryModel = Backbone.Model.extend({
     if (this._subcollectionCache !== undefined) {
       return this._subcollectionCache;
     }
-    var value = this.get('value'),
-        that = this,
-        collection,
-        items = [];
-        _.mapObject(value, function(v, k) {
-          items.push({ key: k, value: v });
-        });
-        collection = new DiscussionPreferenceSubCollection(items, {parse: true});
+    var value = this.get('value');
+    var that = this;
+    var collection;
+    var items = [];
+    _.mapObject(value, function(v, k) {
+      items.push({ key: k, value: v });
+    });
+    collection = new DiscussionPreferenceSubCollection(items, {parse: true});
     this.listenTo(collection, "reset change add remove", function(model) {
         var val = {};
         model.collection.map(

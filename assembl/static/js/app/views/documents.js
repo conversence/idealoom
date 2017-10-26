@@ -1,18 +1,18 @@
-'use strict';
 /**
  * 
  * @module app.views.documents
  */
 
-var Marionette = require('backbone.marionette'),
-    _ = require('underscore'),
-    $ = require('jquery'),
-    oembed = require('jquery-oembed-all/jquery.oembed'),
-    Assembl = require('../app.js'),
-    Promise = require('bluebird'),
-    Ctx = require('../common/context.js'),
-    i18n = require('../utils/i18n.js'),
-    Raven = require('raven-js');
+var Marionette = require('backbone.marionette');
+
+var _ = require('underscore');
+var $ = require('jquery');
+var oembed = require('jquery-oembed-all/jquery.oembed');
+var Assembl = require('../app.js');
+var Promise = require('bluebird');
+var Ctx = require('../common/context.js');
+var i18n = require('../utils/i18n.js');
+var Raven = require('raven-js');
 
 
 var AbstractDocumentView = Marionette.View.extend({

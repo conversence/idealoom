@@ -1,24 +1,24 @@
-'use strict';
 /**
  * 
  * @module app.views.announcements
  */
 
-var Marionette = require('backbone.marionette'),
-    _ = require('underscore'),
-    $ = require('jquery'),
-    Promise = require('bluebird'),
-    i18n = require('../utils/i18n.js'),
-    Assembl = require('../app.js'),
-    Ctx = require('../common/context.js'),
-    CollectionManager = require('../common/collectionManager.js'),
-    Types = require('../utils/types.js'),
-    Announcement = require('../models/announcement.js'),
-    AgentViews = require('./agent.js'),
-    LoaderView = require('./loaderView.js'),
-    EditableLSField = require('./reusableDataFields/editableLSField.js'),
-    CKEditorLSField = require('./reusableDataFields/ckeditorLSField.js'),
-    TrueFalseField = require('./reusableDataFields/trueFalseField.js');
+var Marionette = require('backbone.marionette');
+
+var _ = require('underscore');
+var $ = require('jquery');
+var Promise = require('bluebird');
+var i18n = require('../utils/i18n.js');
+var Assembl = require('../app.js');
+var Ctx = require('../common/context.js');
+var CollectionManager = require('../common/collectionManager.js');
+var Types = require('../utils/types.js');
+var Announcement = require('../models/announcement.js');
+var AgentViews = require('./agent.js');
+var LoaderView = require('./loaderView.js');
+var EditableLSField = require('./reusableDataFields/editableLSField.js');
+var CKEditorLSField = require('./reusableDataFields/ckeditorLSField.js');
+var TrueFalseField = require('./reusableDataFields/trueFalseField.js');
 
 /** 
  */
@@ -101,8 +101,8 @@ var AnnouncementMessageView = AbstractAnnouncementView.extend({
   },
 
   initialize: function(options) {
-    var that = this,
-        collectionManager = new CollectionManager();
+    var that = this;
+    var collectionManager = new CollectionManager();
     this.setLoading(true);
     this.hideCreator = options.hide_creator;
     this.creator = undefined;
@@ -153,8 +153,8 @@ var AnnouncementEditableView = AbstractAnnouncementView.extend({
   }),
 
   initialize: function(options) {
-    var that = this,
-        collectionManager = new CollectionManager();
+    var that = this;
+    var collectionManager = new CollectionManager();
     this.setLoading(true);
     collectionManager.getUserLanguagePreferencesPromise(Ctx).then(function(ulp) {
         if(!that.isDestroyed()) {

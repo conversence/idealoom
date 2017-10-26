@@ -1,12 +1,12 @@
-'use strict';
 /**
  * Represents an independent group of panels in the interface. When added, the matching views (groupContainerView) will be instanciated
  * @module app.models.groupSpec
  */
-var Base = require('./base.js'),
-    panelSpec = require('./panelSpec.js'),
-    PanelSpecTypes = require('../utils/panelSpecTypes.js'),
-    groupState = require('./groupState.js');
+var Base = require('./base.js');
+
+var panelSpec = require('./panelSpec.js');
+var PanelSpecTypes = require('../utils/panelSpecTypes.js');
+var groupState = require('./groupState.js');
 /**
  * Group specifications model
  * @class app.models.groupSpec.GroupSpecModel
@@ -74,9 +74,9 @@ var GroupSpecModel = Base.Model.extend({
    * @function app.models.groupSpec.GroupSpecModel.findNavigationPanelSpec
    */
   findNavigationPanelSpec: function() {
-    var navigationTypes = PanelSpecTypes.getNavigationPanelTypes(),
-        panelAtFirstPositionTypeId = this.get('panels').at(0).get('type');
-        
+    var navigationTypes = PanelSpecTypes.getNavigationPanelTypes();
+    var panelAtFirstPositionTypeId = this.get('panels').at(0).get('type');
+
     var panelSpecType = _.find(navigationTypes, function(navigationType) { return navigationType.id === panelAtFirstPositionTypeId; });
 
     return panelSpecType;

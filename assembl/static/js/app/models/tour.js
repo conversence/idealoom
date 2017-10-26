@@ -1,19 +1,19 @@
-'use strict';
 /**
  * A tour manager to help user
  * @module app.models.tour
  */
 
-var Base = require('./base.js'),
-    $ = require('jquery'),
-    Ctx = require('../common/context.js');
+var Base = require('./base.js');
+
+var $ = require('jquery');
+var Ctx = require('../common/context.js');
 
 /**
  * Tour model
  * @class app.models.tour.tourModel
  * @extends app.models.base.BaseModel
  */
- 
+
 var tourModel = Base.Model.extend({
   constructor: function tourModel() {
     Base.Model.apply(this, arguments);

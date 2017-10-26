@@ -1,11 +1,11 @@
-'use strict';
 /**
  * Represents a discussion's messages from an external source.
  * @module app.models.discussionSource
  */
-var Base = require('./base.js'),
-    Ctx = require('../common/context.js'),
-    $ = require('jquery');
+var Base = require('./base.js');
+
+var Ctx = require('../common/context.js');
+var $ = require('jquery');
 /**
  * Source model
  * Frontend model for :py:class:`assembl.models.generic.ContentSource`

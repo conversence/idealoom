@@ -1,18 +1,18 @@
-'use strict';
 /**
  * Represents a panel in the interface. When added to the collection, the matching view (panelWrapper) will be instanciated
  * @module app.models.panelSpec
  */
 
-var Base = require('./base.js'),
-    PanelSpecTypes = require('../utils/panelSpecTypes.js');
+var Base = require('./base.js');
+
+var PanelSpecTypes = require('../utils/panelSpecTypes.js');
 
 /**
  * Panel specification model
  * @class app.models.panelSpec.PanelSpecModel
  * @extends app.models.base.BaseModel
  */
- 
+
 var PanelSpecModel = Base.Model.extend({
   constructor: function PanelSpecModel() {
     Base.Model.apply(this, arguments);
@@ -63,7 +63,7 @@ var PanelSpecModel = Base.Model.extend({
  * @class app.models.panelSpec.PanelSpecs
  * @extends app.models.base.BaseCollection
  */
- 
+
 var PanelSpecs = Base.Collection.extend({
   constructor: function PanelSpecs() {
     Base.Collection.apply(this, arguments);

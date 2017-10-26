@@ -1,15 +1,15 @@
-"use strict";
 /**
  * 
  * @module app.views.admin.adminDiscussionSettings
  */
 
-var Marionette = require('backbone.marionette'),
-    i18n = require('../../utils/i18n.js'),
-    CollectionManager = require('../../common/collectionManager.js'),
-    Sources = require('../../models/sources.js'),
-    SourceView = require('./generalSource.js'),
-    AdminNavigationMenu = require('./adminNavigationMenu.js');
+var Marionette = require('backbone.marionette');
+
+var i18n = require('../../utils/i18n.js');
+var CollectionManager = require('../../common/collectionManager.js');
+var Sources = require('../../models/sources.js');
+var SourceView = require('./generalSource.js');
+var AdminNavigationMenu = require('./adminNavigationMenu.js');
 
 var AdminDiscussionSettings = Marionette.View.extend({
   constructor: function AdminDiscussionSettings() {
@@ -30,8 +30,8 @@ var AdminDiscussionSettings = Marionette.View.extend({
     navigationMenuHolder: '.navigation-menu-holder'
   },
   onRender: function() {
-    var that = this,
-        collectionManager = new CollectionManager();
+    var that = this;
+    var collectionManager = new CollectionManager();
 
     collectionManager.getDiscussionSourceCollectionPromise2()
       .then(function(discussionSource) {
@@ -41,7 +41,7 @@ var AdminDiscussionSettings = Marionette.View.extend({
         });
         that.showChildView('sources', discussionSourceList);
       });
-    
+
     this.showChildView('createSource', new SourceView.CreateSource());
 
     var menu = new AdminNavigationMenu.discussionAdminNavigationMenu(

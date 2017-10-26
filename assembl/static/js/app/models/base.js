@@ -1,15 +1,15 @@
-'use strict';
 /**
  * 
  * @module app.models.base
  */
 
 
-var Backbone = require('backbone'),
-    Promise = require('bluebird'),
-    Ctx = require('../common/context.js'),
-    _ = require('underscore'),
-    Types = require('../utils/types.js');
+var Backbone = require('backbone');
+
+var Promise = require('bluebird');
+var Ctx = require('../common/context.js');
+var _ = require('underscore');
+var Types = require('../utils/types.js');
 
 /**
   * BaseModel which should be used by ALL models
@@ -184,26 +184,26 @@ var BaseModel = Backbone.Model.extend({
    * @returns {String|null} The fully composed URL of the post/idea
   */
   getRouterUrl: function(options){
-      if (!this.id || this.routerBaseUrl === null) {
-        return null;
-      }
-      var encodedId = encodeURIComponent(this.id),
-          relPath = this.routerBaseUrl + encodedId,
-          params = _.has(options, 'parameters') ? options.parameters : {};
+    if (!this.id || this.routerBaseUrl === null) {
+      return null;
+    }
+    var encodedId = encodeURIComponent(this.id);
+    var relPath = this.routerBaseUrl + encodedId;
+    var params = _.has(options, 'parameters') ? options.parameters : {};
 
-      if (options){
-        if (_.has(options, 'relative') && options.relative === true){
-          return Ctx.appendExtraURLParams(
-            Ctx.getRelativeURLFromDiscussionRelativeURL(relPath),
-            params
-          );
-        }
+    if (options){
+      if (_.has(options, 'relative') && options.relative === true){
+        return Ctx.appendExtraURLParams(
+          Ctx.getRelativeURLFromDiscussionRelativeURL(relPath),
+          params
+        );
       }
+    }
 
-      return Ctx.appendExtraURLParams(
-        Ctx.getAbsoluteURLFromDiscussionRelativeURL(relPath),
-        params
-      );
+    return Ctx.appendExtraURLParams(
+      Ctx.getAbsoluteURLFromDiscussionRelativeURL(relPath),
+      params
+    );
   }
 
 });
@@ -230,8 +230,8 @@ var BaseCollection = Backbone.Collection.extend({
       var that = this;
 
       return Promise.delay(1).then(function() {
-        var script = document.getElementById(id),
-        json;
+        var script = document.getElementById(id);
+        var json;
         if (!script) {
           throw new Error(Ctx.format("Script tag #{0} doesn't exist", id));
         }
@@ -269,9 +269,9 @@ var BaseCollection = Backbone.Collection.extend({
    * @returns {BaseModel}
    */
   getByNumericId: function(id) {
-    var re = new RegExp(id + '$'),
-        i = 0,
-        model = this.models[i];
+    var re = new RegExp(id + '$');
+    var i = 0;
+    var model = this.models[i];
 
     while (model) {
       if (re.test(model.getId())) {
@@ -358,8 +358,9 @@ var RelationsCollection = BaseCollection.extend({
     models = Backbone.Collection.prototype.add.apply(this, arguments);
     // use previousModels to detect whether called from reset
     if (options === undefined || options.previousModels === undefined) {
-      var that = this, singular = !_.isArray(models),
-          modelsArray = singular ? [models] : models;
+      var that = this;
+      var singular = !_.isArray(models);
+      var modelsArray = singular ? [models] : models;
       _.forEach(modelsArray, function(model) {
         Backbone.sync("create", model, {url: that.url});
       });
@@ -373,8 +374,9 @@ var RelationsCollection = BaseCollection.extend({
     //console.log(models);
     // use previousModels to detect whether called from reset
     if (models !== undefined && (options === undefined || options.previousModels === undefined)) {
-      var that = this, singular = !_.isArray(models),
-          modelsArray = singular ? [models] : models;
+      var that = this;
+      var singular = !_.isArray(models);
+      var modelsArray = singular ? [models] : models;
       _.forEach(modelsArray, function(model) {
         var id = model.getNumericId();
         Backbone.sync("delete", models, {url: that.url + "/" + id});

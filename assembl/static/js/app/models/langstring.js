@@ -1,13 +1,13 @@
-'use strict';
 /**
  * Manage string translation
  * @module app.models.langstring
  */
-var _ = require('underscore'),
-    Base = require('./base.js'),
-    Ctx = require('../common/context.js'),
-    i18n = require('../utils/i18n.js'),
-    Types = require('../utils/types.js');
+var _ = require('underscore');
+
+var Base = require('./base.js');
+var Ctx = require('../common/context.js');
+var i18n = require('../utils/i18n.js');
+var Types = require('../utils/types.js');
 /**
  * @class app.models.langstring.LocaleUtils
  */
@@ -17,29 +17,29 @@ var LocaleUtils = {
    * @function app.models.langstring.LocaleUtils.localeCompatibility
    */
   localeCompatibility: function(locale1, locale2) {
-      // Are the two locales similar enough to be substituted
-      // one for the other. Mostly same language/script, disregard country.
-      // shortcut
-      if (locale1.substr(0, 2) != locale2.substr(0, 2)) {
+    // Are the two locales similar enough to be substituted
+    // one for the other. Mostly same language/script, disregard country.
+    // shortcut
+    if (locale1.substr(0, 2) != locale2.substr(0, 2)) {
+      return false;
+    }
+    // Google special case
+    if (locale1 == "zh")
+        locale1 = "zh_Hans";
+    if (locale2 == "zh")
+        locale2 = "zh_Hans";
+    var l1 = locale1.split("-x-mtfrom-")[0].split("_");
+    var l2 = locale2.split("-x-mtfrom-")[0].split("_");
+    var max = Math.min(l1.length, l2.length);
+    for (var i = 0; i < max; i++) {
+      if (l1[i] != l2[i]) {
+        if (i > 0 && l1[i].length == 2) {
+            return i;
+        }
         return false;
       }
-      // Google special case
-      if (locale1 == "zh")
-          locale1 = "zh_Hans";
-      if (locale2 == "zh")
-          locale2 = "zh_Hans";
-      var l1 = locale1.split("-x-mtfrom-")[0].split("_"),
-          l2 = locale2.split("-x-mtfrom-")[0].split("_"),
-          max = Math.min(l1.length, l2.length);
-      for (var i = 0; i < max; i++) {
-        if (l1[i] != l2[i]) {
-          if (i > 0 && l1[i].length == 2) {
-              return i;
-          }
-          return false;
-        }
-      }
-      return i + 1;
+    }
+    return i + 1;
   },
 
   undefined: "und",
@@ -331,15 +331,18 @@ var LangString = Base.Model.extend({
    * @returns {LangStringEntry}
    */
   bestOf: function(available, langPrefs, filter_errors, for_interface) {
-    var i, entry, commonLenF, that = this;
+    var i;
+    var entry;
+    var commonLenF;
+    var that = this;
     if (available.length == 1) {
         return available[0];
     }
     if (langPrefs !== undefined) {
       for (var useTranslationsC = 0; useTranslationsC < 2; useTranslationsC++) {
-        var useTranslations = (useTranslationsC==1),
-            prefCandidates = [],
-            entryByPrefLocale = {};
+        var useTranslations = (useTranslationsC==1);
+        var prefCandidates = [];
+        var entryByPrefLocale = {};
         for (var i = 0; i < available.length; i++) {
           entry = available[i];
           var entry_locale = entry.get("@language");
@@ -360,8 +363,8 @@ var LangString = Base.Model.extend({
           prefCandidates = _.sortBy(prefCandidates,
             (for_interface)?langPrefs.interface_comparator:langPrefs.comparator);
           for (i = 0; i < prefCandidates.length; i++) {
-            var pref = prefCandidates[i],
-                translate_to = pref.get("translate_to_name");
+            var pref = prefCandidates[i];
+            var translate_to = pref.get("translate_to_name");
             if (!translate_to) {
               return entryByPrefLocale[pref.get("locale_code")];
             } else {
@@ -451,8 +454,8 @@ var LangString = Base.Model.extend({
         error: null
       };
     }
-    var entry = this.bestOf(this.get("entries").models, langPrefs, filter_errors),
-        error_code = entry.get("error_code");
+    var entry = this.bestOf(this.get("entries").models, langPrefs, filter_errors);
+    var error_code = entry.get("error_code");
     if (error_code && entry !== undefined) {
       entry = entry.original();
     }

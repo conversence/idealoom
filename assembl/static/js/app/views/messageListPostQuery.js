@@ -1,17 +1,17 @@
-'use strict';
 /**
  * 
  * @module app.views.messageListPostQuery
  */
 
-var $ = require('jquery'),
-    Ctx = require('../common/context.js'),
-    i18n = require('../utils/i18n.js'),
-    CollectionManager = require('../common/collectionManager.js'),
-    Promise = require('bluebird'),
-    Message = require('../models/message.js'),
-    Raven = require('raven-js'),
-    _ = require('underscore');
+var $ = require('jquery');
+
+var Ctx = require('../common/context.js');
+var i18n = require('../utils/i18n.js');
+var CollectionManager = require('../common/collectionManager.js');
+var Promise = require('bluebird');
+var Message = require('../models/message.js');
+var Raven = require('raven-js');
+var _ = require('underscore');
 
 /**
 * @class app.views.messageListPostQuery.PostQuery
@@ -137,12 +137,13 @@ var PostQuery = function() {
      */
     this.addFilter = function(filterDef, value) {
       //console.log("addFilter called with: ", filterDef.name, value);
-      var that = this,
-          retval = true,
-          valueWasReplaced = false,
-          filter = null,
-          candidate_filter = new filterDef(),
-          filterId = candidate_filter.getId();
+      var that = this;
+
+      var retval = true;
+      var valueWasReplaced = false;
+      var filter = null;
+      var candidate_filter = new filterDef();
+      var filterId = candidate_filter.getId();
 
       if (this.isQueryValid() === false) {
         this.initialize();
@@ -179,7 +180,7 @@ var PostQuery = function() {
         filter = candidate_filter;
         this._query[filterId] = filter;
       }
-      
+
       if (filter) {
         retval = filter.addValue(value);
         if (retval) {
@@ -254,19 +255,19 @@ var PostQuery = function() {
      * @returns true if filter(s) were cleared
      */
     this.clearFilter = function(filterDef, valueIndex) {
-      var retval = false,
-      i = 0,
-      len,
-      filterObject = new filterDef(),
-      filterId = filterObject.getId();
+      var retval = false;
+      var i = 0;
+      var len;
+      var filterObject = new filterDef();
+      var filterId = filterObject.getId();
 
       // console.log("clearFilter called with ",filterId, valueIndex)
       if (this.isQueryValid() === false) {
         this.initialize();
       }
       else if (filterId in this._query) {
-        var filter = this._query[filterId],
-            filterValues = filter.getValues();
+        var filter = this._query[filterId];
+        var filterValues = filter.getValues();
 
         if (filter.deleteValueAtIndex(valueIndex)) {
           retval = true;
@@ -334,11 +335,12 @@ var PostQuery = function() {
      */
     this._execute = function() {
       //console.log("messageListPostQuery:execute() called");
-      var that = this,
-      url = Ctx.getApiUrl('posts'),
-      params = {},
-      id = null,
-      value = null;
+      var that = this;
+
+      var url = Ctx.getApiUrl('posts');
+      var params = {};
+      var id = null;
+      var value = null;
 
       if (this._query === undefined) {
         throw new Error("Query isn't initialized");
@@ -381,7 +383,6 @@ var PostQuery = function() {
           return that._resultIds;
         });
       }
-
     };
 
     /**
@@ -476,9 +477,9 @@ var PostQuery = function() {
      * Return a promise to a HTML description of a single active query filter
      */
     this._getHtmlFilterDescriptionPromise = function(filter) {
-      var that = this,
-      descriptionPromise,
-      individualValuesButtonsPromises = [];
+      var that = this;
+      var descriptionPromise;
+      var individualValuesButtonsPromises = [];
       _.each(filter.getValues(), function(value) {
         individualValuesButtonsPromises.push(filter.getFilterIndividualValueDescriptionStringPromise(value)
             .then(function(individualValueString) {
@@ -500,14 +501,14 @@ var PostQuery = function() {
      * Return a promise to a HTML description of the active query filters
      */
     this._getHtmlFiltersDescriptionPromise = function() {
-      var that = this,
-      nActiveFilters = 0,
-      filterDescriptionPromises = [];
+      var that = this;
+      var nActiveFilters = 0;
+      var filterDescriptionPromises = [];
 
       _.each(this._query, function(filter) {
         filterDescriptionPromises.push(that._getHtmlFilterDescriptionPromise(filter));
       });
-      
+
       return Promise.all(filterDescriptionPromises).then(function(filterDescriptions) {
         var retval = '';
         retval += '<ul class="post-query-filter-info pan">';
@@ -520,7 +521,6 @@ var PostQuery = function() {
 
         return retval;
       });
-
     };
 
     /**
@@ -529,9 +529,9 @@ var PostQuery = function() {
     this.getHtmlDescriptionPromise = function() {
       var that = this;
       return Promise.join(this._getHtmlFiltersDescriptionPromise(), this.getTotalNumMessages(), function(filtersDescription, totalMsgCount) {
-        var retval = '',
-        individualValuesButtons = [],
-        numActiveFilters = _.keys(that._query).length;
+        var retval = '';
+        var individualValuesButtons = [];
+        var numActiveFilters = _.keys(that._query).length;
 
         if (that._queryResultInfo == null) {
           retval += '<span class="post-query-results-info">';

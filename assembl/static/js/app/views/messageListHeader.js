@@ -1,31 +1,32 @@
-'use strict';
 /**
  * 
  * @module app.views.messageListHeader
  */
 
-var Backbone = require('backbone'),
-    Raven = require('raven-js'),
-    _ = require('underscore'),
-    $ = require('jquery'),
-    dropdown = require('bootstrap-dropdown'),
-    Assembl = require('../app.js'),
-    Ctx = require('../common/context.js'),
-    FlipSwitchButtonModel = require('../models/flipSwitchButton.js'),
-    FlipSwitchButtonView = require('./flipSwitchButton.js'),
-    i18n = require('../utils/i18n.js'),
-    Permissions = require('../utils/permissions.js'),
-    PanelSpecTypes = require('../utils/panelSpecTypes.js'),
-    AssemblPanel = require('./assemblPanel.js'),
-    Marionette = require('backbone.marionette'),
-    CollectionManager = require('../common/collectionManager.js'),
-    Promise = require('bluebird');
+var Backbone = require('backbone');
+
+var Raven = require('raven-js');
+var _ = require('underscore');
+var $ = require('jquery');
+var dropdown = require('bootstrap-dropdown');
+var Assembl = require('../app.js');
+var Ctx = require('../common/context.js');
+var FlipSwitchButtonModel = require('../models/flipSwitchButton.js');
+var FlipSwitchButtonView = require('./flipSwitchButton.js');
+var i18n = require('../utils/i18n.js');
+var Permissions = require('../utils/permissions.js');
+var PanelSpecTypes = require('../utils/panelSpecTypes.js');
+var AssemblPanel = require('./assemblPanel.js');
+var Marionette = require('backbone.marionette');
+var CollectionManager = require('../common/collectionManager.js');
+var Promise = require('bluebird');
 
 /**
  * Constants
  */
-var DEFAULT_MESSAGE_VIEW_LI_ID_PREFIX = "js_defaultMessageView-",
-    MESSAGE_LIST_VIEW_STYLES_CLASS_PREFIX = "js_messageList-view-";
+var DEFAULT_MESSAGE_VIEW_LI_ID_PREFIX = "js_defaultMessageView-";
+
+var MESSAGE_LIST_VIEW_STYLES_CLASS_PREFIX = "js_messageList-view-";
 
 var MessageListHeader = Marionette.View.extend({
   constructor: function MessageListHeader() {
@@ -148,8 +149,8 @@ var MessageListHeader = Marionette.View.extend({
    * Renders the messagelist view style dropdown button
    */
   renderMessageListViewStyleDropdown: function() {
-    var that = this,
-        html = "";
+    var that = this;
+    var html = "";
 
     html += '<a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">';
     html += this.currentViewStyle.label;
@@ -166,27 +167,26 @@ var MessageListHeader = Marionette.View.extend({
    * Renders the messagelist view style dropdown button
    */
   renderMessageListFiltersDropdown: function() {
-    var that = this,
-        filtersPromises = [];
+    var that = this;
+    var filtersPromises = [];
 
     _.each(this.messageList.currentQuery.availableFilters, function(availableFilterDef) {
-          var candidateFilter = new availableFilterDef(),
-
-          implicitValuePromise = undefined;
-          if (_.isFunction(candidateFilter.getImplicitValuePromise)) {
-            implicitValuePromise = candidateFilter.getImplicitValuePromise();
-            if (implicitValuePromise !== undefined) {
-              filtersPromises.push(Promise.join(candidateFilter.getLabelPromise(), implicitValuePromise, function(label, value) {
-                if (value !== undefined) {
-                  return '<li><a class="' + candidateFilter.getAddButtonCssClass() + '" data-filterid="' + candidateFilter.getId() + '" data-toggle="tooltip" title="" data-placement="left" data-original-title="' + candidateFilter.getHelpText() + '">' + label + '</a></li>';
-                }
-                else {
-                  return '';
-                }
-              }));
+      var candidateFilter = new availableFilterDef();
+      var implicitValuePromise = undefined;
+      if (_.isFunction(candidateFilter.getImplicitValuePromise)) {
+        implicitValuePromise = candidateFilter.getImplicitValuePromise();
+        if (implicitValuePromise !== undefined) {
+          filtersPromises.push(Promise.join(candidateFilter.getLabelPromise(), implicitValuePromise, function(label, value) {
+            if (value !== undefined) {
+              return '<li><a class="' + candidateFilter.getAddButtonCssClass() + '" data-filterid="' + candidateFilter.getId() + '" data-toggle="tooltip" title="" data-placement="left" data-original-title="' + candidateFilter.getHelpText() + '">' + label + '</a></li>';
             }
-          }
-        });
+            else {
+              return '';
+            }
+          }));
+        }
+      }
+    });
     Promise.all(filtersPromises).then(function(filterButtons) {
           var html = "";
           html += '<a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">';
@@ -198,7 +198,6 @@ var MessageListHeader = Marionette.View.extend({
           that.ui.filtersDropdown.html(html);
           Ctx.initTooltips(that.$el);
         })
-
   },
 
   /**
@@ -238,9 +237,10 @@ var MessageListHeader = Marionette.View.extend({
    */
   onSelectMessageListViewStyle: function(e) {
     //console.log("messageListHeader::onSelectMessageListViewStyle()");
-    var messageListViewStyleClass,
-        messageListViewStyleSelected,
-        classes = $(e.currentTarget).attr('class').split(" ");
+    var messageListViewStyleClass;
+
+    var messageListViewStyleSelected;
+    var classes = $(e.currentTarget).attr('class').split(" ");
     messageListViewStyleClass = _.find(classes, function(cls) {
       return cls.indexOf(MESSAGE_LIST_VIEW_STYLES_CLASS_PREFIX) === 0;
     });
@@ -254,8 +254,8 @@ var MessageListHeader = Marionette.View.extend({
    * @event
    */
   onSelectDefaultMessageViewStyle: function(e) {
-    var classes = $(e.currentTarget).attr('class').split(" "),
-        defaultMessageListViewStyleClass;
+    var classes = $(e.currentTarget).attr('class').split(" ");
+    var defaultMessageListViewStyleClass;
     defaultMessageListViewStyleClass = _.find(classes, function(cls) {
       return cls.indexOf(DEFAULT_MESSAGE_VIEW_LI_ID_PREFIX) === 0;
     });
@@ -274,11 +274,11 @@ var MessageListHeader = Marionette.View.extend({
    * @event
    */
   onAddFilter: function(ev) {
-    var that = this,
-    filterId = ev.currentTarget.getAttribute('data-filterid'),
-    filterDef = this.messageList.currentQuery.getFilterDefById(filterId),
-    filter = new filterDef(),
-    queryChanged = false;
+    var that = this;
+    var filterId = ev.currentTarget.getAttribute('data-filterid');
+    var filterDef = this.messageList.currentQuery.getFilterDefById(filterId);
+    var filter = new filterDef();
+    var queryChanged = false;
 
     var execute = function(value){
       queryChanged = that.messageList.currentQuery.addFilter(filterDef, value);
@@ -302,7 +302,6 @@ var MessageListHeader = Marionette.View.extend({
         execute(implicitValue);
       });
     }
-
   },
 
 
@@ -322,8 +321,8 @@ var MessageListHeader = Marionette.View.extend({
    * Renders the default message view style dropdown button
    */
   renderDefaultMessageViewDropdown: function() {
-    var that = this,
-        html = "";
+    var that = this;
+    var html = "";
 
     html += '<a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">';
     html += this.defaultMessageStyle.label;
@@ -340,9 +339,9 @@ var MessageListHeader = Marionette.View.extend({
    * Renders the search result information
    */
   renderUserViewButtons: function() {
-    var that = this,
-        resultNumTotal,
-        resultNumUnread;
+    var that = this;
+    var resultNumTotal;
+    var resultNumUnread;
 
     _.each(this.ViewStyles, function(viewStyle) {
       if (that.currentViewStyle === viewStyle) {

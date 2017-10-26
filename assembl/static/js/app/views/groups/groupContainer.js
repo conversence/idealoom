@@ -1,16 +1,16 @@
-'use strict';
 /**
  * 
  * @module app.views.groups.groupContainer
  */
 
-var $ = require('jquery'),
-    Marionette = require('backbone.marionette'),
-    ctx = require('../../common/context.js'),
-    Assembl = require('../../app.js'),
-    GroupContent = require('./groupContent.js'),
-    AssemblPanel = require('../assemblPanel.js'),
-    PanelSpecTypes = require('../../utils/panelSpecTypes.js');
+var $ = require('jquery');
+
+var Marionette = require('backbone.marionette');
+var ctx = require('../../common/context.js');
+var Assembl = require('../../app.js');
+var GroupContent = require('./groupContent.js');
+var AssemblPanel = require('../assemblPanel.js');
+var PanelSpecTypes = require('../../utils/panelSpecTypes.js');
 /**
  * Manages all the groups in the interface, essentially the GroupSpec.Collection
  * Normally referenced with Assembl.groupContainer

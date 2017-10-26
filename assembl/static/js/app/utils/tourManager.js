@@ -1,18 +1,18 @@
-"use strict";
 /**
  * 
  * @module app.utils.tourManager
  */
 
-var Marionette = require('backbone.marionette'),
-    i18n =  require('./i18n.js'),
-    TourModel = require('../models/tour.js'),
-    Ctx = require('../common/context.js'),
-    _ = require('underscore'),
-    $ = require('jquery'),
-    AssemblTours = require('./tours/assemblTours.js'),
-    hopscotch = require('hopscotch'),
-    Raven = require('raven-js');
+var Marionette = require('backbone.marionette');
+
+var i18n =  require('./i18n.js');
+var TourModel = require('../models/tour.js');
+var Ctx = require('../common/context.js');
+var _ = require('underscore');
+var $ = require('jquery');
+var AssemblTours = require('./tours/assemblTours.js');
+var hopscotch = require('hopscotch');
+var Raven = require('raven-js');
 
 
 var TourManager = Marionette.Object.extend({
@@ -37,8 +37,8 @@ var TourManager = Marionette.Object.extend({
     if (Ctx.isAdminApp()) {
       return;
     }
-    var that = this,
-        currentUser = Ctx.getCurrentUser();
+    var that = this;
+    var currentUser = Ctx.getCurrentUser();
     this.user = currentUser;
     hopscotch.configure({
       onShow: function() {
@@ -66,7 +66,8 @@ var TourManager = Marionette.Object.extend({
     }
   },
   initialize2: function() {
-    var that = this, toursById = {};
+    var that = this;
+    var toursById = {};
     for (var i in AssemblTours) {
         var tour = AssemblTours[i];
         tour.position = i;
@@ -184,22 +185,22 @@ var TourManager = Marionette.Object.extend({
       this.currentTour = this.toursById[hopscotch.getCurrTour().name];
     }
     this.checkForLastStep();
-    var stepNum = hopscotch.getCurrStepNum(),
-        step = this.currentTour.tour.steps[stepNum];
+    var stepNum = hopscotch.getCurrStepNum();
+    var step = this.currentTour.tour.steps[stepNum];
     //console.log("onShow", this.currentTour.name, stepNum);
     this.currentTour.wasSeen = true;
     if (step.stepOnShow !== undefined) {
       step.stepOnShow();
     }
-      //that.$(".panel-body").scroll(that, that.scrollLogger);
+    //that.$(".panel-body").scroll(that, that.scrollLogger);
   },
 
   checkForLastStep: function() {
-    var stepNum = hopscotch.getCurrStepNum(),
-        step = this.currentTour.tour.steps[stepNum];
+    var stepNum = hopscotch.getCurrStepNum();
+    var step = this.currentTour.tour.steps[stepNum];
     if (stepNum + 1 == this.currentTour.tour.steps.length) {
-      var nextTour = this.getNextTour(false),
-          nextButton = $(".hopscotch-next");
+      var nextTour = this.getNextTour(false);
+      var nextButton = $(".hopscotch-next");
       if (nextTour !== undefined) {
         nextButton.text(i18n.gettext("Next"));
       }
@@ -226,7 +227,8 @@ var TourManager = Marionette.Object.extend({
   },
 
   startCurrentTour: function() {
-    var that = this, tour = this.currentTour;
+    var that = this;
+    var tour = this.currentTour;
     // We may be within the end signal, so make it asynchronous.
     setTimeout(function() {
       hopscotch.startTour(tour.tour);

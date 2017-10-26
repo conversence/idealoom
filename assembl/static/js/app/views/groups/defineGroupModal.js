@@ -1,26 +1,26 @@
-'use strict';
 /**
  * 
  * @module app.views.groups.defineGroupModal
  */
 
-var Marionette = require('backbone.marionette'),
-    $ = require('jquery'),
-    _ = require('underscore'),
-    Backbone = require('backbone'),
-    BackboneModal = require('backbone.modal'),
-    Assembl = require('../../app.js'),
-    Ctx = require('../../common/context.js'),
-    GroupSpec = require('../../models/groupSpec.js'),
-    CollectionManager = require('../../common/collectionManager.js'),
-    PanelSpecTypes = require('../../utils/panelSpecTypes.js'),
-    viewsFactory = require('../../objects/viewsFactory.js'),
-    RolesModel = require('../../models/roles.js'),
-    Permissions = require('../../utils/permissions.js'),
-    i18n = require('../../utils/i18n.js'),
-    Roles = require('../../utils/roles.js'),
-    Widget = require('../../models/widget.js'),
-    WidgetLinks = require('../widgetLinks.js');
+var Marionette = require('backbone.marionette');
+
+var $ = require('jquery');
+var _ = require('underscore');
+var Backbone = require('backbone');
+var BackboneModal = require('backbone.modal');
+var Assembl = require('../../app.js');
+var Ctx = require('../../common/context.js');
+var GroupSpec = require('../../models/groupSpec.js');
+var CollectionManager = require('../../common/collectionManager.js');
+var PanelSpecTypes = require('../../utils/panelSpecTypes.js');
+var viewsFactory = require('../../objects/viewsFactory.js');
+var RolesModel = require('../../models/roles.js');
+var Permissions = require('../../utils/permissions.js');
+var i18n = require('../../utils/i18n.js');
+var Roles = require('../../utils/roles.js');
+var Widget = require('../../models/widget.js');
+var WidgetLinks = require('../widgetLinks.js');
 
 /**
  * 
@@ -35,8 +35,8 @@ var DefineGroupModal = Backbone.Modal.extend({
     className: 'generic-modal popin-wrapper',
     cancelEl: '.close, .btn-cancel',
     serializeData: function() {
-      var displayCIDashboard = Ctx.getPreferences().show_ci_dashboard,
-          numLowerPanels = displayCIDashboard ? 4 : 3;
+      var displayCIDashboard = Ctx.getPreferences().show_ci_dashboard;
+      var numLowerPanels = displayCIDashboard ? 4 : 3;
       return {
         PanelSpecTypes: PanelSpecTypes,
         displayCIDashboard: displayCIDashboard,
@@ -53,8 +53,8 @@ var DefineGroupModal = Backbone.Modal.extend({
       'click .js_createGroup': 'createGroup'
     },
     selectItem: function(e) {
-      var elm = $(e.currentTarget),
-          item = elm.parent().attr('data-view');
+      var elm = $(e.currentTarget);
+      var item = elm.parent().attr('data-view');
 
       elm.parent().toggleClass('is-selected');
 
@@ -88,7 +88,6 @@ var DefineGroupModal = Backbone.Modal.extend({
             break;
         }
       }
-
     },
 
     disableView: function(items) {
@@ -107,9 +106,9 @@ var DefineGroupModal = Backbone.Modal.extend({
     },
 
     createGroup: function() {
-      var items = [],
-          that = this,
-          hasNavSide = false;
+      var items = [];
+      var that = this;
+      var hasNavSide = false;
 
       if ($('.itemGroup').hasClass('is-selected')) {
 
@@ -138,7 +137,6 @@ var DefineGroupModal = Backbone.Modal.extend({
           that.$el.remove();
         }, 100);
       }
-
     },
     scrollToRight: function() {
       var right = $('.groupsContainer').width();

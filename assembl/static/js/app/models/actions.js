@@ -1,10 +1,10 @@
-'use strict';
 /**
  * An action done by a user.
  * @module app.models.actions
  */
-var Base = require('./base.js'),
-    Ctx = require('../common/context.js');
+var Base = require('./base.js');
+
+var Ctx = require('../common/context.js');
 /**
  * Action model
  * Frontend model for :py:class:`assembl.models.action.Action`

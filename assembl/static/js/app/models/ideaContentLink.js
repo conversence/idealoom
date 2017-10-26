@@ -1,23 +1,23 @@
-'use strict';
 /**
  * The link between an idea and a message.
  * @module app.models.ideaContentLink
  */
-var Marionette = require('backbone.marionette'),
-    Backbone = require('backbone'),
-    _ = require('underscore'),
-    $ = require('jquery'),
-    Promise = require('bluebird'),
-    Moment = require('moment'),
-    Types = require('../utils/types.js'),
-    Base = require('./base.js'),
-    Ctx = require('../common/context.js');
+var Marionette = require('backbone.marionette');
+
+var Backbone = require('backbone');
+var _ = require('underscore');
+var $ = require('jquery');
+var Promise = require('bluebird');
+var Moment = require('moment');
+var Types = require('../utils/types.js');
+var Base = require('./base.js');
+var Ctx = require('../common/context.js');
 /**
  * @function app.models.ideaContentLink.IdeaContentLinkTypeRank
  */
 var IdeaContentLinkTypeRank = function() {
-    var IDEA_RELATED_POST_LINK = Types.IDEA_RELATED_POST_LINK,
-        EXTRACT = Types.EXTRACT;
+    var IDEA_RELATED_POST_LINK = Types.IDEA_RELATED_POST_LINK;
+    var EXTRACT = Types.EXTRACT;
     this._ranks = {};
     this._ranks[IDEA_RELATED_POST_LINK] = 0;
     this._ranks[EXTRACT] = 1;
@@ -66,8 +66,8 @@ var IdeaContentLinkModel = Base.Model.extend({
    * @function app.models.ideaContentLink.IdeaContentLinkModel.getPostCreatorModelPromise
    */
     getPostCreatorModelPromise: function(){
-        var that = this,
-            messageId = this.get('idPost');
+        var that = this;
+        var messageId = this.get('idPost');
         return this.collection.collectionManager.getMessageFullModelPromise(messageId)
             .then(function(messageModel){
                 var postCreatorId = messageModel.get('idCreator');
@@ -199,28 +199,28 @@ var Collection = Base.Collection.extend({
      */
     comparator: function(one, two){
         function sortByDate(one, two){
-            var d1 = Moment(one.getCreationDate()),
-                d2 = Moment(one.getCreationDate());
+            var d1 = Moment(one.getCreationDate());
+            var d2 = Moment(one.getCreationDate());
 
             if (d1.isBefore(d2)) {return -1;}
             if (d2.isBefore(d1)) {return 1;}
-            else {return 0;}                
-        };
+            else {return 0;}
+        }
         function sortByType(one, two){
-            var t1 = one.get('@type'),
-                t2 = two.get('@type'),
-                ranker = new IdeaContentLinkTypeRank(),
-                rank1 = ranker.getRank(t1),
-                rank2 = ranker.getRank(t2);
+            var t1 = one.get('@type');
+            var t2 = two.get('@type');
+            var ranker = new IdeaContentLinkTypeRank();
+            var rank1 = ranker.getRank(t1);
+            var rank2 = ranker.getRank(t2);
 
             if (rank1 < rank2) { return -1; }
             if (rank2 < rank1) { return 1; }
             else {
                 return sortByDate(one, two);
             }
-        };
-        var isDirect1 = one.isDirect(),
-            isDirect2 = two.isDirect();
+        }
+        var isDirect1 = one.isDirect();
+        var isDirect2 = two.isDirect();
         if (isDirect1 && !isDirect2) { return -1;}
         if (!isDirect1 && isDirect2) { return 1; }
         else {

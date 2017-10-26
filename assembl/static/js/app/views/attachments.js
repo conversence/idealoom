@@ -1,22 +1,22 @@
-'use strict';
 /**
  * 
  * @module app.views.attachments
  */
 
-var Marionette = require('backbone.marionette'),
-    _ = require('underscore'),
-    $ = require('jquery'),
-    dropdown = require('bootstrap-dropdown'),
-    i18n = require('../utils/i18n.js'),
-    Assembl = require('../app.js'),
-    Ctx = require('../common/context.js'),
-    Types = require('../utils/types.js'),
-    Attachments = require('../models/attachments.js'),
-    Documents = require('../models/documents.js'),
-    Backbone=require('backbone'),
-    BackboneModal = require('backbone.modal'),
-    DocumentViews = require('./documents.js');
+var Marionette = require('backbone.marionette');
+
+var _ = require('underscore');
+var $ = require('jquery');
+var dropdown = require('bootstrap-dropdown');
+var i18n = require('../utils/i18n.js');
+var Assembl = require('../app.js');
+var Ctx = require('../common/context.js');
+var Types = require('../utils/types.js');
+var Attachments = require('../models/attachments.js');
+var Documents = require('../models/documents.js');
+var Backbone=require('backbone');
+var BackboneModal = require('backbone.modal');
+var DocumentViews = require('./documents.js');
 
 
 var TARGET = {
@@ -63,11 +63,13 @@ var AbstractAttachmentView = Marionette.View.extend({
   },
 
   renderDocument: function(){
-    var documentModel = this.model.getDocument(),
-        hash = {
-          model: documentModel
-        },
-        documentView;
+    var documentModel = this.model.getDocument();
+
+    var hash = {
+      model: documentModel
+    };
+
+    var documentView;
 
     if (documentModel.isFileType()) {
       documentView = new DocumentViews.FileView(hash);
@@ -139,9 +141,9 @@ var AttachmentEditableView = AbstractAttachmentView.extend({
   },
   
   renderDocument: function(){
-    var documentModel = this.model.getDocument(),
-        documentView;
-    
+    var documentModel = this.model.getDocument();
+    var documentView;
+
     if (documentModel.isFileType()) {
       documentView = new DocumentViews.FileEditView({
         model: documentModel,
@@ -186,8 +188,8 @@ var AttachmentEditableView = AbstractAttachmentView.extend({
   },
 
   _renderAttachmentPurpose: function(){
-    var purposesHtml = [],
-        that = this;
+    var purposesHtml = [];
+    var that = this;
     if(this.model.get('@type') !== 'IdeaAttachment'){
       _.each(Attachments.attachmentPurposeTypes, function(attachmentPurposeDef) {
         purposesHtml.push('<li><a class="js_attachmentPurposeDropdownListItem" data-id="' + attachmentPurposeDef.id + '" data-toggle="tooltip" title="" data-placement="left" data-original-title="' + attachmentPurposeDef.id + '">' + attachmentPurposeDef.label + '</a></li>');
@@ -207,8 +209,8 @@ var AttachmentEditableView = AbstractAttachmentView.extend({
    * Renders the messagelist view style dropdown button
    */
   renderAttachmentPurposeDropdown: function(purposesList) {
-    var that = this,
-        html = "";
+    var that = this;
+    var html = "";
 
     html += '<a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false">';
     html += '<span class="dropdown-label">';
@@ -219,7 +221,6 @@ var AttachmentEditableView = AbstractAttachmentView.extend({
     html += purposesList ? purposesList.join(''): "";
     html += '</ul>';
     this.ui.attachmentPurposeDropdown.html(html);
-
   },
   
   purposeDropdownListClick: function(ev) {
@@ -336,7 +337,7 @@ var AttachmentEditableErrorView = AttachmentView.extend({
     );
     this.$el.html("<div class='error-message'>"+ text +"</div>");
   }
-}); 
+});
 
 
 /*
@@ -551,8 +552,8 @@ var AttachmentUploadButtonView = Marionette.View.extend({
   },
 
   onFileUpload: function(e){
-    var fs = e.target.files,
-        that = this;
+    var fs = e.target.files;
+    var that = this;
 
     fs = _.map(fs, function(f){
       //There will be file duplication because the file is already on the DOM if previously added
@@ -571,7 +572,7 @@ var AttachmentUploadButtonView = Marionette.View.extend({
 
       return attachment;
     });
-    
+
     this.collection.add(fs);
     //Set to the idea model
   }

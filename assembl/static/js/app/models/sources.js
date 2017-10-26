@@ -1,14 +1,14 @@
-'use strict';
 /**
  * An external source of imported messages
  * @module app.models.sources
  */
 
-var Base = require('./base.js'),
-    i18n = require('../utils/i18n.js'),
-    Ctx = require('../common/context.js'),
-    Types = require('../utils/types.js'),
-    $ = require('jquery');
+var Base = require('./base.js');
+
+var i18n = require('../utils/i18n.js');
+var Ctx = require('../common/context.js');
+var Types = require('../utils/types.js');
+var $ = require('jquery');
 
 /**
  * Source model
@@ -16,7 +16,7 @@ var Base = require('./base.js'),
  * @class app.models.sources.Source
  * @extends app.models.base.BaseModel
  */
- 
+
 var Source = Base.Model.extend({
    constructor: function Source() {
     Base.Model.apply(this, arguments);

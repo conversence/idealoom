@@ -1,11 +1,11 @@
-'use strict';
 /**
  * Custom key-value storage bound to a user and a namespace
  * @module app.models.userCustomData
  */
 
-var Backbone = require('backbone'),
-    Ctx = require('../common/context.js');
+var Backbone = require('backbone');
+
+var Ctx = require('../common/context.js');
 
 // We do not use Base.Model.extend(), because we want to keep Backbone's default behaviour with model urls
 /**

@@ -1,25 +1,25 @@
-'use strict';
 /**
  * 
  * @module app.views.messageList
  */
 
-var Backbone = require('backbone'),
-    MessageListHeaderView = require('./messageListHeader.js'),
-    _ = require('underscore'),
-    $ = require('jquery'),
-    highlight = require('jquery-highlight'),
-    Assembl = require('../app.js'),
-    Ctx = require('../common/context.js'),
-    i18n = require('../utils/i18n.js'),
-    Announcements = require('./announcements.js'),
-    MessageSendView = require('./messageSend.js'),
-    PanelSpecTypes = require('../utils/panelSpecTypes.js'),
-    AssemblPanel = require('./assemblPanel.js'),
-    BaseMessageListMixin = require('./baseMessageList.js'),
-    CollectionManager = require('../common/collectionManager.js'),
-    Widget = require('../models/widget.js'),
-    Promise = require('bluebird');
+var Backbone = require('backbone');
+
+var MessageListHeaderView = require('./messageListHeader.js');
+var _ = require('underscore');
+var $ = require('jquery');
+var highlight = require('jquery-highlight');
+var Assembl = require('../app.js');
+var Ctx = require('../common/context.js');
+var i18n = require('../utils/i18n.js');
+var Announcements = require('./announcements.js');
+var MessageSendView = require('./messageSend.js');
+var PanelSpecTypes = require('../utils/panelSpecTypes.js');
+var AssemblPanel = require('./assemblPanel.js');
+var BaseMessageListMixin = require('./baseMessageList.js');
+var CollectionManager = require('../common/collectionManager.js');
+var Widget = require('../models/widget.js');
+var Promise = require('bluebird');
 
 /**
  * @class app.views.messageList.BaseMessageList
@@ -200,69 +200,69 @@ var MessageList = BaseMessageList.extend({
    * Synchronizes the panel with the currently selected idea (possibly none)
    */
   syncWithCurrentIdea: function() {
-      var currentIdea = this.getGroupState().get('currentIdea'),
-      filterValue,
-      snapshot = this.currentQuery.getFilterConfigSnapshot();
+    var currentIdea = this.getGroupState().get('currentIdea');
+    var filterValue;
+    var snapshot = this.currentQuery.getFilterConfigSnapshot();
 
-      //console.log("messageList:syncWithCurrentIdea(): New idea is now: ",currentIdea, this.currentQuery.isFilterInQuery(this.currentQuery.availableFilters.POST_IS_IN_CONTEXT_OF_IDEA, filterValue));
-      //TODO benoitg - this logic should really be in postQuery, not here - 2014-07-29
-      if (currentIdea && this.currentQuery.isFilterInQuery(this.currentQuery.availableFilters.POST_IS_IN_CONTEXT_OF_IDEA, currentIdea.getId())) {
-        //Filter is already in sync
-        return;
-      }
-      else if (!currentIdea && (this.currentQuery.isFilterInQuery(this.currentQuery.availableFilters.POST_IS_IN_CONTEXT_OF_IDEA, null) === false)) {
-        //Filter is already in sync
-        //TODO:  Detect the case where there is no idea selected, and we already have no filter on ideas
-        return;
-      }
-      else {
-        this.currentQuery.clearFilter(this.currentQuery.availableFilters.POST_IS_IN_CONTEXT_OF_IDEA, null);
-        this.currentQuery.clearFilter(this.currentQuery.availableFilters.POST_IS_DESCENDENT_OF_POST, null);
-        this.currentQuery.clearFilter(this.currentQuery.availableFilters.POST_IS_SYNTHESIS, null);
+    //console.log("messageList:syncWithCurrentIdea(): New idea is now: ",currentIdea, this.currentQuery.isFilterInQuery(this.currentQuery.availableFilters.POST_IS_IN_CONTEXT_OF_IDEA, filterValue));
+    //TODO benoitg - this logic should really be in postQuery, not here - 2014-07-29
+    if (currentIdea && this.currentQuery.isFilterInQuery(this.currentQuery.availableFilters.POST_IS_IN_CONTEXT_OF_IDEA, currentIdea.getId())) {
+      //Filter is already in sync
+      return;
+    }
+    else if (!currentIdea && (this.currentQuery.isFilterInQuery(this.currentQuery.availableFilters.POST_IS_IN_CONTEXT_OF_IDEA, null) === false)) {
+      //Filter is already in sync
+      //TODO:  Detect the case where there is no idea selected, and we already have no filter on ideas
+      return;
+    }
+    else {
+      this.currentQuery.clearFilter(this.currentQuery.availableFilters.POST_IS_IN_CONTEXT_OF_IDEA, null);
+      this.currentQuery.clearFilter(this.currentQuery.availableFilters.POST_IS_DESCENDENT_OF_POST, null);
+      this.currentQuery.clearFilter(this.currentQuery.availableFilters.POST_IS_SYNTHESIS, null);
 
-        if (currentIdea) {
-          this.currentQuery.clearFilter(this.currentQuery.availableFilters.POST_IS_ORPHAN, null);
-          this.currentQuery.addFilter(this.currentQuery.availableFilters.POST_IS_IN_CONTEXT_OF_IDEA, currentIdea.getId());
+      if (currentIdea) {
+        this.currentQuery.clearFilter(this.currentQuery.availableFilters.POST_IS_ORPHAN, null);
+        this.currentQuery.addFilter(this.currentQuery.availableFilters.POST_IS_IN_CONTEXT_OF_IDEA, currentIdea.getId());
+      }
+
+      if (this.currentQuery.isFilterConfigSameAsSnapshot(snapshot) === false) {
+        if (Ctx.debugRender) {
+          console.log("messageList:syncWithCurrentIdea(): triggering render because the filter was modified");
+          console.log("messageList:syncWithCurrentIdea(): Query is now: ", this.currentQuery._query);
         }
 
-        if (this.currentQuery.isFilterConfigSameAsSnapshot(snapshot) === false) {
-          if (Ctx.debugRender) {
-            console.log("messageList:syncWithCurrentIdea(): triggering render because the filter was modified");
-            console.log("messageList:syncWithCurrentIdea(): Query is now: ", this.currentQuery._query);
-          }
-
-          this.render();
-        }
+        this.render();
       }
-    },
+    }
+  },
 
   showInspireMeIfAvailable: function() {
-      var currentIdea = this.getGroupState().get("currentIdea");
+    var currentIdea = this.getGroupState().get("currentIdea");
 
-      if (!currentIdea) {
-        return;
-      }
-      var that = this,
-          collectionManager = new CollectionManager();
-      collectionManager.getAllWidgetsPromise().then(function(widgets) {
-        var relevantWidgets = widgets.relevantWidgetsFor(
-          currentIdea, Widget.Model.prototype.MESSAGE_LIST_INSPIREME_CTX);
+    if (!currentIdea) {
+      return;
+    }
+    var that = this;
+    var collectionManager = new CollectionManager();
+    collectionManager.getAllWidgetsPromise().then(function(widgets) {
+      var relevantWidgets = widgets.relevantWidgetsFor(
+        currentIdea, Widget.Model.prototype.MESSAGE_LIST_INSPIREME_CTX);
 
-        if (relevantWidgets.length > 0) {
-          var widget = relevantWidgets[0];
-          // TODO : Handle multiple widgets.
-          that.inspireMeLink = widget.getUrlForUser(currentIdea.getId());
-          that.ui.inspireMeAnchor.attr("href", that.inspireMeLink);
-          that.ui.inspireMe.removeClass("hidden");
-        } else {
-          that.inspireMeLink = null;
-          that.ui.inspireMe.addClass("hidden");
-        }
-      }).error(function() {
+      if (relevantWidgets.length > 0) {
+        var widget = relevantWidgets[0];
+        // TODO : Handle multiple widgets.
+        that.inspireMeLink = widget.getUrlForUser(currentIdea.getId());
+        that.ui.inspireMeAnchor.attr("href", that.inspireMeLink);
+        that.ui.inspireMe.removeClass("hidden");
+      } else {
         that.inspireMeLink = null;
         that.ui.inspireMe.addClass("hidden");
-      });
-    },
+      }
+    }).error(function() {
+      that.inspireMeLink = null;
+      that.ui.inspireMe.addClass("hidden");
+    });
+  },
 
   /**
    * This is used by groupContent.js
@@ -359,9 +359,9 @@ var MessageList = BaseMessageList.extend({
 
   onRender: function() {
     BaseMessageList.prototype.onRender.apply(this, arguments);
-    var that = this,
-        collectionManager = new CollectionManager(),
-        renderId = _.clone(this._renderId);
+    var that = this;
+    var collectionManager = new CollectionManager();
+    var renderId = _.clone(this._renderId);
 
     if (this.currentQuery.isQueryValid()) {
       this.blockPanel();
@@ -390,10 +390,9 @@ var MessageList = BaseMessageList.extend({
                   that.showInspireMeIfAvailable();
                   that.renderMessageListHeader();
                   that.ui.panelBody.scroll(function() {
-
-                    var msgBox = that.$('.messagelist-replybox').height(),
-                    scrollH = $(this)[0].scrollHeight - (msgBox + 25),
-                    panelScrollTop = $(this).scrollTop() + $(this).innerHeight();
+                    var msgBox = that.$('.messagelist-replybox').height();
+                    var scrollH = $(this)[0].scrollHeight - (msgBox + 25);
+                    var panelScrollTop = $(this).scrollTop() + $(this).innerHeight();
 
                     if (panelScrollTop >= scrollH) {
                       that.ui.stickyBar.fadeOut();
@@ -406,7 +405,6 @@ var MessageList = BaseMessageList.extend({
                     //This event cannot be bound in ui, because backbone binds to
                     //the top element and scroll does not propagate
                     that.$(".panel-body").scroll(that, that.scrollLogger);
-
                   });
                 }
               });

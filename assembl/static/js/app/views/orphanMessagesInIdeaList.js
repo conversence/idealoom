@@ -1,14 +1,14 @@
-'use strict';
 /**
  * 
  * @module app.views.orphanMessagesInIdeaList
  */
 
-var $ = require('jquery'),
-    Assembl = require('../app.js'),
-    Ctx = require('../common/context.js'),
-    PanelSpecTypes = require('../utils/panelSpecTypes.js'),
-    ideaInIdeaList = require('./ideaInIdeaList.js');
+var $ = require('jquery');
+
+var Assembl = require('../app.js');
+var Ctx = require('../common/context.js');
+var PanelSpecTypes = require('../utils/panelSpecTypes.js');
+var ideaInIdeaList = require('./ideaInIdeaList.js');
 
 var OrphanMessagesInIdeaListView = ideaInIdeaList.IdeaView.extend({
   constructor: function OrphanMessagesInIdeaListView() {

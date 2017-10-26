@@ -3,15 +3,16 @@
  * @module app.tests.models.spec
  */
 
-var _ = require('underscore'),
-    Promise = require('bluebird'),
-    Agent = require('../models/agents.js'),
-    chai = require('chai'),
-    expect = chai.expect,
-    chaiAsPromised = require("chai-as-promised"),
-    CollectionManager = require('../common/collectionManager.js'),
-    collectionManager = new CollectionManager(),
-    mockServer = require('./mock_server.js');
+var _ = require('underscore');
+
+var Promise = require('bluebird');
+var Agent = require('../models/agents.js');
+var chai = require('chai');
+var expect = chai.expect;
+var chaiAsPromised = require("chai-as-promised");
+var CollectionManager = require('../common/collectionManager.js');
+var collectionManager = new CollectionManager();
+var mockServer = require('./mock_server.js');
 
 chai.use(chaiAsPromised);
 

@@ -1,19 +1,19 @@
-'use strict';
 /**
  * 
  * @module app.views.reusableDataFields.ckeditorField
  */
 
-var Marionette = require('backbone.marionette'),
-    _ = require('underscore'),
-    $ = require('jquery'),
-    dotdotdot = require('jquery.dotdotdot'),
-    Assembl = require('../../app.js'),
-    Backbone = require('backbone'),
-    BackboneModal = require('backbone.modal'),
-    Permissions = require('../../utils/permissions.js'),
-    CK = require('ckeditor'),
-    Ctx = require('../../common/context.js');
+var Marionette = require('backbone.marionette');
+
+var _ = require('underscore');
+var $ = require('jquery');
+var dotdotdot = require('jquery.dotdotdot');
+var Assembl = require('../../app.js');
+var Backbone = require('backbone');
+var BackboneModal = require('backbone.modal');
+var Permissions = require('../../utils/permissions.js');
+var CK = require('ckeditor');
+var Ctx = require('../../common/context.js');
 
 
 var cKEditorField = Marionette.View.extend({
@@ -112,8 +112,8 @@ var cKEditorField = Marionette.View.extend({
   },
 
   serializeData: function() {
-    var text = this.getTextValue(),
-        textToShow = (this.showPlaceholderOnEditIfEmpty && !text) ? this.placeholder : text;
+    var text = this.getTextValue();
+    var textToShow = (this.showPlaceholderOnEditIfEmpty && !text) ? this.placeholder : text;
 
     return {
       topId: this.topId,
@@ -223,9 +223,8 @@ var cKEditorField = Marionette.View.extend({
    * set the templace in editing mode
    */
   startEditing: function() {
-
-    var editingArea = this.$('#' + this.fieldId).get(0),
-        that = this;
+    var editingArea = this.$('#' + this.fieldId).get(0);
+    var that = this;
 
     var config = _.extend({}, this.CKEDITOR_CONFIG, {
       sharedSpaces: { top: this.topId, bottom: this.bottomId }

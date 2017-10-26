@@ -1,15 +1,15 @@
-'use strict';
 /**
  * User profile and permissions (user or email author)
  * @module app.models.agents
  */
-var $ = require('jquery'),
-    Base = require('./base.js'),
-    Ctx = require('../common/context.js'),
-    i18n = require('../utils/i18n.js'),
-    Promise = require('bluebird'),
-    Permissions = require("../utils/permissions.js"),
-    Roles = require('../utils/roles.js');
+var $ = require('jquery');
+
+var Base = require('./base.js');
+var Ctx = require('../common/context.js');
+var i18n = require('../utils/i18n.js');
+var Promise = require('bluebird');
+var Permissions = require("../utils/permissions.js");
+var Roles = require('../utils/roles.js');
 var AVATAR_PLACEHOLDER = '//placehold.it/{0}';
 var UNKNOWN_USER_ID = Roles.EVERYONE;
 /**

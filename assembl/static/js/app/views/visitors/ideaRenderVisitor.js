@@ -1,4 +1,3 @@
-'use strict';
 /**
  * 
  * @module app.views.visitors.ideaRenderVisitor
@@ -35,15 +34,17 @@ var IdeaRenderVisitor = function(data_by_object, order_lookup_table, roots, filt
 IdeaRenderVisitor.prototype = new Visitor();
 
 IdeaRenderVisitor.prototype.visit = function(object, ancestry) {
-  var data_by_object = this.data_by_object,
-      order_lookup_table = this.order_lookup_table,
-      filter_result = this.filter_function(object);
+  var data_by_object = this.data_by_object;
+  var order_lookup_table = this.order_lookup_table;
+  var filter_result = this.filter_function(object);
   if (filter_result) {
     var object_id = object.getId();
     var level = 0;
     var in_ancestry = true;
-    var ancestor_id, last_ancestor_id = null;
-    var link, last_link = null;
+    var ancestor_id;
+    var last_ancestor_id = null;
+    var link;
+    var last_link = null;
     var true_sibling = true;
 
     for (var i in ancestry) {

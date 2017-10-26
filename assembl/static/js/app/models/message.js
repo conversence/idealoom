@@ -1,19 +1,19 @@
-'use strict';
 /**
  * A message (whether generated on assembl or imported from a ContentSource)
  * @module app.models.message
  */
 
-var _ = require('underscore'),
-    $ = require('jquery'),
-    Promise = require('bluebird'),
-    Assembl = require('../app.js'),
-    Ctx = require('../common/context.js'),
-    Base = require('./base.js'),
-    LangString = require('./langstring.js'),
-    Types = require('../utils/types.js'),
-    Permissions = require('../utils/permissions.js'),
-    Attachment = require('./attachments.js');
+var _ = require('underscore');
+
+var $ = require('jquery');
+var Promise = require('bluebird');
+var Assembl = require('../app.js');
+var Ctx = require('../common/context.js');
+var Base = require('./base.js');
+var LangString = require('./langstring.js');
+var Types = require('../utils/types.js');
+var Permissions = require('../utils/permissions.js');
+var Attachment = require('./attachments.js');
 
 
 var PublicationStates = {
@@ -111,15 +111,15 @@ var MessageModel = Base.Model.extend({
    * @returns {string} the subject, with any re: stripped
    */
   getSubjectNoRe: function() {
-      var subject = this.get('subject'),
-          subjectText = subject ? subject.originalValue() : '';
-      if (subjectText) {
-        return subjectText.replace(/( *)?(RE) *(:|$) */igm, "");
-      }
-      else {
-        return subjectText;
-      }
-    },
+    var subject = this.get('subject');
+    var subjectText = subject ? subject.originalValue() : '';
+    if (subjectText) {
+      return subjectText.replace(/( *)?(RE) *(:|$) */igm, "");
+    }
+    else {
+      return subjectText;
+    }
+  },
 
   /**
    * @returns Array  Json objects representing idea_content_links
@@ -142,8 +142,8 @@ var MessageModel = Base.Model.extend({
    * @returns {number} the quantity of all descendants
    */
   getDescendantsCount: function() {
-    var children = this.getChildren(),
-        count = children.length;
+    var children = this.getChildren();
+    var count = children.length;
 
     _.each(children, function(child) {
       count += child.getDescendantsCount();
@@ -285,8 +285,8 @@ var MessageModel = Base.Model.extend({
       target.removeClass('readUnreadIndicator').addClass('is-loading');
     }
 
-    var user = Ctx.getCurrentUser(),
-        that = this;
+    var user = Ctx.getCurrentUser();
+    var that = this;
 
     if (user.isUnknownUser()) {
       // Unknown User can't mark as read
@@ -312,7 +312,6 @@ var MessageModel = Base.Model.extend({
       },
       error: function(model, resp) {}
     });
-
   },
 
   validate: function(attrs, options) {
@@ -339,8 +338,8 @@ var MessageModel = Base.Model.extend({
       //These models are never saved to the backend, and should never be deleted either
       errorCollection.destroyAll(options);
     }
-    var attachments = this.get('attachments'),
-        that = this;
+    var attachments = this.get('attachments');
+    var that = this;
     return Promise.resolve(attachments.destroyAll(options))
       .then(function(){
         return Base.Model.prototype.destroy.call(that, options);
@@ -366,7 +365,7 @@ var MessageModel = Base.Model.extend({
  * @class app.models.message.MessageCollection
  * @extends app.models.base.BaseCollection
  */
- 
+
 var MessageCollection = Base.Collection.extend({
   constructor: function MessageCollection() {
     Base.Collection.apply(this, arguments);
@@ -399,17 +398,17 @@ var MessageCollection = Base.Collection.extend({
    * @returns Message.Model or null
    */
   getLastSynthesisPost: function() {
-      var lastSynthesisPost = null,
-          synthesisMessages = this.where({'@type': Types.SYNTHESIS_POST});
-      if (synthesisMessages.length > 0) {
-        _.sortBy(synthesisMessages, function(message) {
-          return message.get('date');
-        });
-        lastSynthesisPost = _.last(synthesisMessages);
-      }
+    var lastSynthesisPost = null;
+    var synthesisMessages = this.where({'@type': Types.SYNTHESIS_POST});
+    if (synthesisMessages.length > 0) {
+      _.sortBy(synthesisMessages, function(message) {
+        return message.get('date');
+      });
+      lastSynthesisPost = _.last(synthesisMessages);
+    }
 
-      return lastSynthesisPost;
-    },
+    return lastSynthesisPost;
+  },
 
   /**
    * Traversal function.

@@ -1,27 +1,27 @@
-'use strict';
 /**
  * 
  * @module app.views.ideaInSynthesis
  */
 
-var Marionette = require('backbone.marionette'),
-    _ = require('underscore'),
-    Assembl = require('../app.js'),
-    Ctx = require('../common/context.js'),
-    i18n = require('../utils/i18n.js'),
-    Permissions = require('../utils/permissions.js'),
-    CKEditorLSField = require('./reusableDataFields/ckeditorLSField.js'),
-    MessageSendView = require('./messageSend.js'),
-    MessagesInProgress = require('../objects/messagesInProgress.js'),
-    CollectionManager = require('../common/collectionManager.js'),
-    panelSpec = require('../models/panelSpec'),
-    PanelSpecTypes = require('../utils/panelSpecTypes'),
-    viewsFactory = require('../objects/viewsFactory'),
-    groupSpec = require('../models/groupSpec'),
-    Promise = require('bluebird'),
-    LoaderView = require('./loaderView.js'),
-    Analytics = require('../internal_modules/analytics/dispatcher.js'),
-    openIdeaInModal = require('./modals/ideaInModal.js');
+var Marionette = require('backbone.marionette');
+
+var _ = require('underscore');
+var Assembl = require('../app.js');
+var Ctx = require('../common/context.js');
+var i18n = require('../utils/i18n.js');
+var Permissions = require('../utils/permissions.js');
+var CKEditorLSField = require('./reusableDataFields/ckeditorLSField.js');
+var MessageSendView = require('./messageSend.js');
+var MessagesInProgress = require('../objects/messagesInProgress.js');
+var CollectionManager = require('../common/collectionManager.js');
+var panelSpec = require('../models/panelSpec');
+var PanelSpecTypes = require('../utils/panelSpecTypes');
+var viewsFactory = require('../objects/viewsFactory');
+var groupSpec = require('../models/groupSpec');
+var Promise = require('bluebird');
+var LoaderView = require('./loaderView.js');
+var Analytics = require('../internal_modules/analytics/dispatcher.js');
+var openIdeaInModal = require('./modals/ideaInModal.js');
 
 var IdeaInSynthesisView = LoaderView.extend({
   constructor: function IdeaInSynthesisView() {
@@ -60,116 +60,117 @@ var IdeaInSynthesisView = LoaderView.extend({
    * @init
    */
   initialize: function(options) {
-      this.synthesis = options.synthesis || null;
-      this.messageListView = options.messageListView;
-      this.editing = false;
-      this.authors = [];
-      this.original_idea = undefined;
-      this.setLoading(true);
+    this.synthesis = options.synthesis || null;
+    this.messageListView = options.messageListView;
+    this.editing = false;
+    this.authors = [];
+    this.original_idea = undefined;
+    this.setLoading(true);
 
-      this.parentPanel = options.parentPanel;
-      if (this.parentPanel === undefined) {
-        throw new Error("parentPanel is mandatory");
-      }
+    this.parentPanel = options.parentPanel;
+    if (this.parentPanel === undefined) {
+      throw new Error("parentPanel is mandatory");
+    }
 
-      var that = this,
-      collectionManager = new CollectionManager();
-      // Calculate the contributors of the idea: authors of important segments (nuggets)
-      // Should match Idea.get_synthesis_contributors in the backend
-      function render_with_info(allMessageStructureCollection, allUsersCollection, ideaExtracts) {
-        if (!that.isDestroyed()) {
-          ideaExtracts.filter(function(segment){
-            return segment.get("important");
-          }).forEach(function(segment) {
-            var post = allMessageStructureCollection.get(segment.get('idPost'));
-            if (post) {
-              var creator = allUsersCollection.get(post.get('idCreator'));
-              if (creator) {
-                that.authors.push(creator);
-              }
+    var that = this;
+    var collectionManager = new CollectionManager();
+    // Calculate the contributors of the idea: authors of important segments (nuggets)
+    // Should match Idea.get_synthesis_contributors in the backend
+    function render_with_info(allMessageStructureCollection, allUsersCollection, ideaExtracts) {
+      if (!that.isDestroyed()) {
+        ideaExtracts.filter(function(segment){
+          return segment.get("important");
+        }).forEach(function(segment) {
+          var post = allMessageStructureCollection.get(segment.get('idPost'));
+          if (post) {
+            var creator = allUsersCollection.get(post.get('idCreator'));
+            if (creator) {
+              that.authors.push(creator);
             }
-          });
+          }
+        });
 
-          that.setLoading(false);
-          that.render();
-        }
+        that.setLoading(false);
+        that.render();
       }
-      // idea is either a tombstone or from a different collection; get the original
-      Promise.join(
-          collectionManager.getAllIdeasCollectionPromise(),
-          collectionManager.getUserLanguagePreferencesPromise(Ctx),
-          function(allIdeasCollection, translationData) {
-        if (!that.isDestroyed()) {
-          var idea = that.model,
-          original_idea = undefined;
-          that.translationData = translationData;
-          if (that.synthesis.get('is_next_synthesis')) {
-            original_idea = allIdeasCollection.get(that.model.id);
-          }
-          else {
-            original_idea = allIdeasCollection.get(that.model.get('original_uri'));
-          }
-          if (original_idea) {
-            // original may be null if idea deleted.
-            that.original_idea = original_idea;
-            idea = original_idea;
-          }
-          Promise.join(collectionManager.getAllMessageStructureCollectionPromise(),
-              collectionManager.getAllUsersCollectionPromise(),
-              idea.getExtractsPromise(),
-              render_with_info);
-
-          //console.log("About to connect idea change event to idea:", idea, "for synthesis: ", that.synthesis);
-          that.listenTo(idea, "change:shortTitle change:longTitle change:segments", function() {
-            /*if (Ctx.debugRender) {
-            console.log("idesInSynthesis:change event on original_idea, firing render");
-          }*/
-            //
-            console.log("Re-assigning model:", that.model);
-            //This is evil and a stop-gap measure. - benoitg
-            that.model = idea;
-            that.render();
-          });
+    }
+    // idea is either a tombstone or from a different collection; get the original
+    Promise.join(
+        collectionManager.getAllIdeasCollectionPromise(),
+        collectionManager.getUserLanguagePreferencesPromise(Ctx),
+        function(allIdeasCollection, translationData) {
+      if (!that.isDestroyed()) {
+        var idea = that.model;
+        var original_idea = undefined;
+        that.translationData = translationData;
+        if (that.synthesis.get('is_next_synthesis')) {
+          original_idea = allIdeasCollection.get(that.model.id);
         }
-      });
+        else {
+          original_idea = allIdeasCollection.get(that.model.get('original_uri'));
+        }
+        if (original_idea) {
+          // original may be null if idea deleted.
+          that.original_idea = original_idea;
+          idea = original_idea;
+        }
+        Promise.join(collectionManager.getAllMessageStructureCollectionPromise(),
+            collectionManager.getAllUsersCollectionPromise(),
+            idea.getExtractsPromise(),
+            render_with_info);
 
-      this.listenTo(this.parentPanel.getGroupState(), "change:currentIdea", function(state, currentIdea) {
-        that.onIsSelectedChange(currentIdea);
-      });
-    },
+        //console.log("About to connect idea change event to idea:", idea, "for synthesis: ", that.synthesis);
+        that.listenTo(idea, "change:shortTitle change:longTitle change:segments", function() {
+          /*if (Ctx.debugRender) {
+          console.log("idesInSynthesis:change event on original_idea, firing render");
+        }*/
+          //
+          console.log("Re-assigning model:", that.model);
+          //This is evil and a stop-gap measure. - benoitg
+          that.model = idea;
+          that.render();
+        });
+      }
+    });
+
+    this.listenTo(this.parentPanel.getGroupState(), "change:currentIdea", function(state, currentIdea) {
+      that.onIsSelectedChange(currentIdea);
+    });
+  },
 
   canEdit: function() {
       return Ctx.getCurrentUser().can(Permissions.EDIT_IDEA) && this.synthesis.get("published_in_post") === null;
     },
 
   serializeData: function() {
-      //As all ideas in a previously posted synthesis are tombstoned, the original idea is 
-      //gathered from the original_uri attribute and view is re-rendered. Therefore, the 
-      //original idea is expected to be the one that contants the num_posts field.
-      var numMessages,
-          longTitle = this.model.get('longTitle');
-      if(this.original_idea) {
-        numMessages = this.original_idea.get('num_posts');
-      }
-      if (!numMessages) {
-        numMessages = 0;
-      }
+    //As all ideas in a previously posted synthesis are tombstoned, the original idea is 
+    //gathered from the original_uri attribute and view is re-rendered. Therefore, the 
+    //original idea is expected to be the one that contants the num_posts field.
+    var numMessages;
 
-      return {
-        id: this.model.getId(),
-        editing: this.editing,
-        longTitle: this.model.getLongTitleDisplayText(this.translationData),
-        authors: _.uniq(this.authors),
-        subject: longTitle ? longTitle.bestValue(this.translationData) : '',
-        canEdit: this.canEdit(),
-        isPrimaryNavigationPanel: this.getPanel().isPrimaryNavigationPanel(),
-        ctxNumMessages: i18n.sprintf(i18n.ngettext(
-          "%d message is available under this idea",
-          "%d messages are available under this idea",
-          numMessages), numMessages),
-        numMessages: numMessages
-      }
-    },
+    var longTitle = this.model.get('longTitle');
+    if(this.original_idea) {
+      numMessages = this.original_idea.get('num_posts');
+    }
+    if (!numMessages) {
+      numMessages = 0;
+    }
+
+    return {
+      id: this.model.getId(),
+      editing: this.editing,
+      longTitle: this.model.getLongTitleDisplayText(this.translationData),
+      authors: _.uniq(this.authors),
+      subject: longTitle ? longTitle.bestValue(this.translationData) : '',
+      canEdit: this.canEdit(),
+      isPrimaryNavigationPanel: this.getPanel().isPrimaryNavigationPanel(),
+      ctxNumMessages: i18n.sprintf(i18n.ngettext(
+        "%d message is available under this idea",
+        "%d messages are available under this idea",
+        numMessages), numMessages),
+      numMessages: numMessages
+    }
+  },
 
   /**
    * The render
@@ -221,35 +222,36 @@ var IdeaInSynthesisView = LoaderView.extend({
    * renders the reply interface
    */
   renderReplyView: function() {
-      var that = this,
-      partialCtx = "synthesis-idea-" + this.model.getId(),
-      partialMessage = MessagesInProgress.getMessage(partialCtx),
-      send_callback = function() {
-        Assembl.message_vent.trigger('messageList:currentQuery');
-        // If we're in synthesis view, do not reset view to idea view
-        that.getPanel().getContainingGroup().setCurrentIdea(that.original_idea, true);
-      };
+    var that = this;
+    var partialCtx = "synthesis-idea-" + this.model.getId();
+    var partialMessage = MessagesInProgress.getMessage(partialCtx);
 
-      var replyView = new MessageSendView({
-        'allow_setting_subject': false,
-        'reply_message_id': this.synthesis.get('published_in_post'),
-        'reply_idea': this.original_idea,
-        'body_help_message': i18n.gettext('Type your response here...'),
-        'cancel_button_label': null,
-        'send_button_label': i18n.gettext('Send your reply'),
-        'subject_label': null,
-        'default_subject': 'Re: ' + Ctx.stripHtml(
-          this.original_idea.getLongTitleDisplayText(this.translationData)).substring(0, 50),
-        'mandatory_body_missing_msg': i18n.gettext('You did not type a response yet...'),
-        'mandatory_subject_missing_msg': null,
-        'msg_in_progress_body': partialMessage['body'],
-        'msg_in_progress_ctx': partialCtx,
-        'send_callback': send_callback,
-        'messageList': this.messageListView
-      });
+    var send_callback = function() {
+      Assembl.message_vent.trigger('messageList:currentQuery');
+      // If we're in synthesis view, do not reset view to idea view
+      that.getPanel().getContainingGroup().setCurrentIdea(that.original_idea, true);
+    };
 
-      this.$('.synthesisIdea-replybox').html(replyView.render().el);
-    },
+    var replyView = new MessageSendView({
+      'allow_setting_subject': false,
+      'reply_message_id': this.synthesis.get('published_in_post'),
+      'reply_idea': this.original_idea,
+      'body_help_message': i18n.gettext('Type your response here...'),
+      'cancel_button_label': null,
+      'send_button_label': i18n.gettext('Send your reply'),
+      'subject_label': null,
+      'default_subject': 'Re: ' + Ctx.stripHtml(
+        this.original_idea.getLongTitleDisplayText(this.translationData)).substring(0, 50),
+      'mandatory_body_missing_msg': i18n.gettext('You did not type a response yet...'),
+      'mandatory_subject_missing_msg': null,
+      'msg_in_progress_body': partialMessage['body'],
+      'msg_in_progress_ctx': partialCtx,
+      'send_callback': send_callback,
+      'messageList': this.messageListView
+    });
+
+    this.$('.synthesisIdea-replybox').html(replyView.render().el);
+  },
 
   /**
    *  Focus on the reply box, and open it if closed
@@ -312,11 +314,11 @@ var IdeaInSynthesisView = LoaderView.extend({
     },
     
   navigateToIdea: function(ev, forcePopup) {
-      var panel = this.getPanel(),
-          analytics = Analytics.getInstance();
+    var panel = this.getPanel();
+    var analytics = Analytics.getInstance();
 
-      analytics.trackEvent(analytics.events.NAVIGATE_TO_IDEA_IN_SYNTHESIS);
-      openIdeaInModal(panel, this.original_idea, forcePopup);
+    analytics.trackEvent(analytics.events.NAVIGATE_TO_IDEA_IN_SYNTHESIS);
+    openIdeaInModal(panel, this.original_idea, forcePopup);
   },
 
   makeEditable: function() {

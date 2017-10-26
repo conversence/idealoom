@@ -1,25 +1,25 @@
-'use strict';
 /**
  *
  * @module app.views.admin.adminTimelineEvents
  */
 
-var Assembl = require('../../app.js'),
-    Ctx = require('../../common/context.js'),
-    i18n = require('../../utils/i18n.js'),
-    EditableField = require('../reusableDataFields/editableField.js'),
-    TimelineEvent = require('../../models/timeline.js'),
-    LangString = require('../../models/langstring.js'),
-    CollectionManager = require('../../common/collectionManager.js'),
-    Marionette = require('backbone.marionette'),
-    Growl = require('../../utils/growl.js'),
-    SimpleLangStringEditPanel = require('../simpleLangStringEdit.js'),
-    Moment = require('moment'),
-    AdminNavigationMenu = require('./adminNavigationMenu.js'),
-    $ = require('jquery'),
-    _ = require('underscore'),
-    LoaderView = require('../loaderView.js'),
-    Promise = require('bluebird');
+var Assembl = require('../../app.js');
+
+var Ctx = require('../../common/context.js');
+var i18n = require('../../utils/i18n.js');
+var EditableField = require('../reusableDataFields/editableField.js');
+var TimelineEvent = require('../../models/timeline.js');
+var LangString = require('../../models/langstring.js');
+var CollectionManager = require('../../common/collectionManager.js');
+var Marionette = require('backbone.marionette');
+var Growl = require('../../utils/growl.js');
+var SimpleLangStringEditPanel = require('../simpleLangStringEdit.js');
+var Moment = require('moment');
+var AdminNavigationMenu = require('./adminNavigationMenu.js');
+var $ = require('jquery');
+var _ = require('underscore');
+var LoaderView = require('../loaderView.js');
+var Promise = require('bluebird');
 
 
 /**
@@ -48,8 +48,8 @@ var AdminTimelineEventPanel = LoaderView.extend({
   },
 
   initialize: function(options) {
-    var that = this,
-        collectionManager = new CollectionManager();
+    var that = this;
+    var collectionManager = new CollectionManager();
     this.timelineEventCollection = null;
     this.setLoading(true);
     if(this.isDestroyed()) {
@@ -63,14 +63,14 @@ var AdminTimelineEventPanel = LoaderView.extend({
   },
 
   addTimelineEvent: function(ev) {
-    var eventCollection = this.timelineEventCollection,
-        lastEventId,
-        event,
-        title = new LangString.Model(),
-        titles = {},
-        description = new LangString.Model(),
-        descriptions = {},
-        preferences = Ctx.getPreferences();
+    var eventCollection = this.timelineEventCollection;
+    var lastEventId;
+    var event;
+    var title = new LangString.Model();
+    var titles = {};
+    var description = new LangString.Model();
+    var descriptions = {};
+    var preferences = Ctx.getPreferences();
     if (eventCollection.length > 0) {
       lastEventId = eventCollection.models[eventCollection.length-1].id;
     }
@@ -176,8 +176,8 @@ var TimelineEventView = Marionette.View.extend({
       }));
   },
   reorderColumnDown: function(ev) {
-    var index = this.getIndex(),
-        nextModel = this.model.collection.at(index + 1);
+    var index = this.getIndex();
+    var nextModel = this.model.collection.at(index + 1);
     Promise.resolve($.ajax(nextModel.url() + "/reorder_up", {
         method: "POST"})).then(function(data) {
         nextModel.collection.fetch({
@@ -201,9 +201,9 @@ var TimelineEventView = Marionette.View.extend({
     ev.preventDefault();
   },
   deleteColumn: function(ev) {
-    var nextModel = null,
-        prevColumn = this.model.get('previous_event'),
-        index = this.getIndex();
+    var nextModel = null;
+    var prevColumn = this.model.get('previous_event');
+    var index = this.getIndex();
     if (index + 1 < this.model.collection.length) {
       nextModel = this.model.collection.at(index+1);
     }

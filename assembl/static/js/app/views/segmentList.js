@@ -1,27 +1,27 @@
-'use strict';
 /**
  * 
  * @module app.views.segmentList
  */
 
-var Marionette = require('backbone.marionette'),
-    Backbone = require('backbone'),
-    BackboneModal = require('backbone.modal'),
-    _ = require('underscore'),
-    $ = require('jquery'),
-    highlight = require('jquery-highlight'),
-    Assembl = require('../app.js'),
-    Ctx = require('../common/context.js'),
-    Segment = require('../models/segment.js'),
-    Types = require('../utils/types.js'),
-    i18n = require('../utils/i18n.js'),
-    Permissions = require('../utils/permissions.js'),
-    CollectionManager = require('../common/collectionManager.js'),
-    PanelSpecTypes = require('../utils/panelSpecTypes.js'),
-    AssemblPanel = require('./assemblPanel.js'),
-    AgentViews = require('./agent.js'),
-    BackboneSubset = require("Backbone.Subset"),
-    Promise = require('bluebird');
+var Marionette = require('backbone.marionette');
+
+var Backbone = require('backbone');
+var BackboneModal = require('backbone.modal');
+var _ = require('underscore');
+var $ = require('jquery');
+var highlight = require('jquery-highlight');
+var Assembl = require('../app.js');
+var Ctx = require('../common/context.js');
+var Segment = require('../models/segment.js');
+var Types = require('../utils/types.js');
+var i18n = require('../utils/i18n.js');
+var Permissions = require('../utils/permissions.js');
+var CollectionManager = require('../common/collectionManager.js');
+var PanelSpecTypes = require('../utils/panelSpecTypes.js');
+var AssemblPanel = require('./assemblPanel.js');
+var AgentViews = require('./agent.js');
+var BackboneSubset = require("Backbone.Subset");
+var Promise = require('bluebird');
 
 var SegmentView = Marionette.View.extend({
   constructor: function SegmentView() {
@@ -58,10 +58,10 @@ var SegmentView = Marionette.View.extend({
   },
 
   serializeData: function() {
-    var post,
-        idPost = this.model.get('idPost'),
-        currentUser = Ctx.getCurrentUser(),
-        harvester = this.model.getCreatorFromUsersCollection(this.allUsersCollection);
+    var post;
+    var idPost = this.model.get('idPost');
+    var currentUser = Ctx.getCurrentUser();
+    var harvester = this.model.getCreatorFromUsersCollection(this.allUsersCollection);
 
     if (!harvester) {
       throw new Error("No harvester found in segment");
@@ -99,8 +99,8 @@ var SegmentView = Marionette.View.extend({
   },
 
   renderAuthor: function() {
-    var agentAvatarView,
-        agentNameView;
+    var agentAvatarView;
+    var agentNameView;
 
     if (this.postCreator) {
       agentAvatarView = new AgentViews.AgentAvatarView({
@@ -118,8 +118,8 @@ var SegmentView = Marionette.View.extend({
   onDragStart: function(ev) {
     ev.currentTarget.style.opacity = 0.4;
 
-    var cid = ev.currentTarget.getAttribute('data-segmentid'),
-        segment = this.model.collection.get(cid);
+    var cid = ev.currentTarget.getAttribute('data-segmentid');
+    var segment = this.model.collection.get(cid);
 
     Ctx.showDragbox(ev, segment.getQuote());
     Ctx.setDraggedSegment(segment);
@@ -132,8 +132,8 @@ var SegmentView = Marionette.View.extend({
   },
 
   onSegmentLinkClick: function(ev) {
-    var cid = ev.currentTarget.getAttribute('data-segmentid'),
-        collectionManager = new CollectionManager();
+    var cid = ev.currentTarget.getAttribute('data-segmentid');
+    var collectionManager = new CollectionManager();
 
     collectionManager.getAllExtractsCollectionPromise()
             .then(function(allExtractsCollection) {
@@ -224,9 +224,9 @@ var Clipboard = Backbone.Subset.extend({
     return extract.get('idIdea') == null;
   },
   comparator: function(e1, e2) {
-    var currentUserId = this.currentUserId,
-        myE1 = e1.get('idCreator') == currentUserId,
-        myE2 = e2.get('idCreator') == currentUserId;
+    var currentUserId = this.currentUserId;
+    var myE1 = e1.get('idCreator') == currentUserId;
+    var myE2 = e2.get('idCreator') == currentUserId;
     if (myE1 != myE2) {
       return myE1 ? -1 : 1;
     }
@@ -277,8 +277,8 @@ var SegmentListPanel = AssemblPanel.extend({
 
   initialize: function(options) {
     AssemblPanel.prototype.initialize.apply(this, arguments);
-    var that = this,
-        collectionManager = new CollectionManager();
+    var that = this;
+    var collectionManager = new CollectionManager();
 
     collectionManager.getAllExtractsCollectionPromise()
             .then(function(allExtractsCollection) {
@@ -334,8 +334,8 @@ var SegmentListPanel = AssemblPanel.extend({
   },
 
   onRender: function() {
-    var that = this,
-        collectionManager = new CollectionManager();
+    var that = this;
+    var collectionManager = new CollectionManager();
     if (Ctx.debugRender) {
       console.log("segmentListPanel:onRender() is firing");
     }
@@ -438,8 +438,8 @@ var SegmentListPanel = AssemblPanel.extend({
    * @param {Segment} segment
    */
   highlightSegment: function(segment) {
-    var selector = Ctx.format('.box[data-segmentid={0}]', segment.cid),
-        box = this.$(selector);
+    var selector = Ctx.format('.box[data-segmentid={0}]', segment.cid);
+    var box = this.$(selector);
 
     if (box.length) {
       var panelBody = this.$('.panel-body');
@@ -554,10 +554,10 @@ var SegmentListPanel = AssemblPanel.extend({
   },
 
   onClearButtonClick: function(ev) {
-    var that = this,
-        collectionManager = new CollectionManager(),
-        ok = confirm(i18n.gettext('Are you sure you want to empty your entire clipboard?')),
-        user_id = Ctx.getCurrentUser().id;
+    var that = this;
+    var collectionManager = new CollectionManager();
+    var ok = confirm(i18n.gettext('Are you sure you want to empty your entire clipboard?'));
+    var user_id = Ctx.getCurrentUser().id;
 
     if (ok) {
       collectionManager.getAllExtractsCollectionPromise()

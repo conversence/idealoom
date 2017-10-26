@@ -1,48 +1,47 @@
-'use strict';
 /**
  * 
  * @module app.views.message
  */
 
-var Marionette = require('backbone.marionette'),
-    Raven = require('raven-js'),
-    Backbone = require('backbone'),
-    BackboneModal = require('backbone.modal'),
-    _ = require('underscore'),
-    Assembl = require('../app.js'),
-    Ctx = require('../common/context.js'),
-    i18n = require('../utils/i18n.js'),
-    Permissions = require('../utils/permissions.js'),
-    scrollUtils = require('../utils/scrollUtils.js'),
-    MessageSendView = require('./messageSend.js'),
-    MessagesInProgress = require('../objects/messagesInProgress.js'),
-    CollectionManager = require('../common/collectionManager.js'),
-    PanelSpecTypes = require('../utils/panelSpecTypes.js'),
-    $ = require('jquery'),
-    highlight = require('jquery-highlight'),
-    dropdown = require('bootstrap-dropdown'),
-    Promise = require('bluebird'),
-    dotdotdot = require('jquery.dotdotdot'),
-    messageExport = require('./messageExportModal.js'),
-    AgentViews = require('./agent.js'),
-    Types = require('../utils/types.js'),
-    AttachmentViews = require('./attachments.js'),
-    MessageModerationOptionsView = require('./messageModerationOptions.js'),
-    MessageTranslationView = require('./messageTranslationQuestion.js'),
-    Analytics = require('../internal_modules/analytics/dispatcher.js'),
-    Genie = require('../utils/genieEffect.js'),
-    IdeaClassificationOnMessageView = require('./ideaClassificationOnMessage.js'),
-    LangString = require('../models/langstring.js'),
-    IdeaContentLink = require('../models/ideaContentLink.js'),
-    ConfirmModal = require('./confirmModal.js'),
-    Growl = require('../utils/growl.js'),
-    Widget = require('../models/widget.js'),
-    LoaderView = require('./loaderView.js'),
-    MessageModel = require('../models/message.js');
+var Marionette = require('backbone.marionette');
 
-var MIN_TEXT_TO_TOOLTIP = 5,
-    TOOLTIP_TEXT_LENGTH = 10,
-    IDEA_CLASSIFICATION_LENGTH = 3;
+var Raven = require('raven-js');
+var Backbone = require('backbone');
+var BackboneModal = require('backbone.modal');
+var _ = require('underscore');
+var Assembl = require('../app.js');
+var Ctx = require('../common/context.js');
+var i18n = require('../utils/i18n.js');
+var Permissions = require('../utils/permissions.js');
+var scrollUtils = require('../utils/scrollUtils.js');
+var MessageSendView = require('./messageSend.js');
+var MessagesInProgress = require('../objects/messagesInProgress.js');
+var CollectionManager = require('../common/collectionManager.js');
+var PanelSpecTypes = require('../utils/panelSpecTypes.js');
+var $ = require('jquery');
+var highlight = require('jquery-highlight');
+var dropdown = require('bootstrap-dropdown');
+var Promise = require('bluebird');
+var dotdotdot = require('jquery.dotdotdot');
+var messageExport = require('./messageExportModal.js');
+var AgentViews = require('./agent.js');
+var Types = require('../utils/types.js');
+var AttachmentViews = require('./attachments.js');
+var MessageModerationOptionsView = require('./messageModerationOptions.js');
+var MessageTranslationView = require('./messageTranslationQuestion.js');
+var Analytics = require('../internal_modules/analytics/dispatcher.js');
+var Genie = require('../utils/genieEffect.js');
+var IdeaClassificationOnMessageView = require('./ideaClassificationOnMessage.js');
+var LangString = require('../models/langstring.js');
+var IdeaContentLink = require('../models/ideaContentLink.js');
+var ConfirmModal = require('./confirmModal.js');
+var Growl = require('../utils/growl.js');
+var Widget = require('../models/widget.js');
+var LoaderView = require('./loaderView.js');
+var MessageModel = require('../models/message.js');
+var MIN_TEXT_TO_TOOLTIP = 5;
+var TOOLTIP_TEXT_LENGTH = 10;
+var IDEA_CLASSIFICATION_LENGTH = 3;
 
 
 /**
@@ -67,9 +66,9 @@ var IdeaClassificationNameListView = LoaderView.extend({
 
   initialize: function(options){
     this.setLoading(true);
-    var cm = new CollectionManager(),
-        that = this,
-        ideaContentLinks = cm.getIdeaContentLinkCollectionOnMessage(this.model);
+    var cm = new CollectionManager();
+    var that = this;
+    var ideaContentLinks = cm.getIdeaContentLinkCollectionOnMessage(this.model);
 
     this.messageView = options.messageView;
     this.ideaContentLinks = ideaContentLinks;
@@ -150,7 +149,6 @@ var IdeaClassificationNameListView = LoaderView.extend({
           console.error(e.statusText);
         });
     }
-
   },
 
   serializeData: function(){
@@ -158,9 +156,9 @@ var IdeaClassificationNameListView = LoaderView.extend({
       return {};
     }
 
-    var count = this.ideaNames? this.ideaNames.length: 0,
-        first = null,
-        rest = null;
+    var count = this.ideaNames? this.ideaNames.length: 0;
+    var first = null;
+    var rest = null;
 
     if (count <= IDEA_CLASSIFICATION_LENGTH ){
       first = this.ideaNames;
@@ -191,8 +189,8 @@ var IdeaClassificationNameListView = LoaderView.extend({
   },
 
   onIdeaClick: function(e){
-    var that = this,
-        analytics = Analytics.getInstance();
+    var that = this;
+    var analytics = Analytics.getInstance();
 
     analytics.trackEvent(analytics.events.NAVIGATE_TO_CLASSIFICATION_ON_MESSAGE);
 
@@ -537,8 +535,8 @@ var MessageView = LoaderView.extend({
    * @returns string
    */
   generateSafeOriginalBody: function() {
-    var body = this.model.get('body') || LangString.Model.empty,
-        bodyText = body.originalValue();
+    var body = this.model.get('body') || LangString.Model.empty;
+    var bodyText = body.originalValue();
     if(this.model.get('bodyMimeType') !== "text/html") {
         bodyText = Ctx.stripHtml(bodyText);
     }
@@ -546,14 +544,14 @@ var MessageView = LoaderView.extend({
   },
 
   processContent: function() {
-    var body = this.model.get('body') || LangString.Model.empty,
-        subject = this.model.get('subject') || LangString.Model.empty;
+    var body = this.model.get('body') || LangString.Model.empty;
+    var subject = this.model.get('subject') || LangString.Model.empty;
 
     if (this.hasTranslatorService) {
 
       if (!this.useOriginalContent) {
-        var processedBody = body.bestWithErrors(this.translationData, false),
-            processedSubject = subject.bestWithErrors(this.translationData, true);
+        var processedBody = body.bestWithErrors(this.translationData, false);
+        var processedSubject = subject.bestWithErrors(this.translationData, true);
 
         //bestWithError will make this the original value if error
 
@@ -594,14 +592,17 @@ var MessageView = LoaderView.extend({
         return {};
     }
     this.processContent();
-    var bodyFormatClass,
-        that = this,
-        moderatedBody = null,
-        metadata_json = this.model.get('metadata_json'), // this property needs to exist to display the inspiration source of a message (creativity widget)
-        bodyFormat = this.model.get('bodyMimeType'),
-        isModerated = false,
-        moderationType,
-        moderationLangString;
+    var bodyFormatClass;
+    var that = this;
+    var moderatedBody = null;
+
+    var // this property needs to exist to display the inspiration source of a message (creativity widget)
+    metadata_json = this.model.get('metadata_json');
+
+    var bodyFormat = this.model.get('bodyMimeType');
+    var isModerated = false;
+    var moderationType;
+    var moderationLangString;
 
     if (this.viewStyle === this.availableMessageViewStyles.PREVIEW || this.viewStyle === this.availableMessageViewStyles.TITLE_ONLY) {
       if (bodyFormat === "text/html") {
@@ -645,14 +646,15 @@ var MessageView = LoaderView.extend({
         'source': 'share'
       },
       relative: true
-    }),
-        share_link_url = Widget.Model.prototype.getObjectShareUrl(
-          [
-            {'u': Ctx.getAbsoluteURLFromRelativeURL(direct_link_relative_url)},
-            {'t': this._subject.value()},
-            {'s': Ctx.getPreferences().social_sharing }
-          ]
-        );
+    });
+
+    var share_link_url = Widget.Model.prototype.getObjectShareUrl(
+      [
+        {'u': Ctx.getAbsoluteURLFromRelativeURL(direct_link_relative_url)},
+        {'t': this._subject.value()},
+        {'s': Ctx.getPreferences().social_sharing }
+      ]
+    );
 
     var html_export_url = null;
     if (this.model.getBEType() == Types.SYNTHESIS_POST) {
@@ -717,27 +719,28 @@ var MessageView = LoaderView.extend({
     },
 
   changeIsPartialRender: function() {
-      var likeFound = false, changedAttributes = this.model.changedAttributes();
-      for (var propName in changedAttributes) {
-        if (propName === "like_count") {
-          likeFound = true;
-          continue;
-        }
-
-        if (!changedAttributes.hasOwnProperty(propName)) {
-          continue;
-        }
-
-        // is __prototype__ in there? Not on chrome.
-        if (Ctx.debugRender) {
-          console.log("changeIsPartialRender found change in", propName);
-        }
-
-        return false;
+    var likeFound = false;
+    var changedAttributes = this.model.changedAttributes();
+    for (var propName in changedAttributes) {
+      if (propName === "like_count") {
+        likeFound = true;
+        continue;
       }
 
-      return likeFound;
-    },
+      if (!changedAttributes.hasOwnProperty(propName)) {
+        continue;
+      }
+
+      // is __prototype__ in there? Not on chrome.
+      if (Ctx.debugRender) {
+        console.log("changeIsPartialRender found change in", propName);
+      }
+
+      return false;
+    }
+
+    return likeFound;
+  },
 
   onBeforeRender: function(){
     this.isCompleteDataLoaded();
@@ -766,10 +769,9 @@ var MessageView = LoaderView.extend({
       return;
     }
     else {
-      
-      var that = this,
-          modelId = this.model.id,
-          partialMessage = MessagesInProgress.getMessage(modelId);
+      var that = this;
+      var modelId = this.model.id;
+      var partialMessage = MessagesInProgress.getMessage(modelId);
 
       //Important flag to display/remove annotations is this.showAnnotations
       this.showAnnotations = this.canShowAnnotations();
@@ -1043,9 +1045,9 @@ var MessageView = LoaderView.extend({
   },
 
   onClickLike: function(e) {
-    var that = this,
-    liked_uri = this.model.get('liked'),
-    analytics = Analytics.getInstance();
+    var that = this;
+    var liked_uri = this.model.get('liked');
+    var analytics = Analytics.getInstance();
 
     if (liked_uri) {
       analytics.trackEvent(analytics.events.MESSAGE_UNLIKED);
@@ -1091,10 +1093,13 @@ var MessageView = LoaderView.extend({
    * Get the list of annotations to render in the message body
    */
   getAnnotationsToLoadPromise: function() {
-    var that = this,
-        annotationsPromise = this.model.getAnnotationsPromise(), //TODO:  This is fairly CPU intensive, and may be worth caching.
-        annotationsToLoad = [],
-        filter;
+    var that = this;
+
+    var //TODO:  This is fairly CPU intensive, and may be worth caching.
+    annotationsPromise = this.model.getAnnotationsPromise();
+
+    var annotationsToLoad = [];
+    var filter;
 
     return annotationsPromise.then(function(annotations) {
       if (that.annotationsToLoad === undefined) {
@@ -1187,9 +1192,9 @@ var MessageView = LoaderView.extend({
    * @param  {annotation} annotation
    */
   showSegmentByAnnotation: function(annotation) {
-    var that = this,
-        currentIdea = this.messageListView.getGroupState().get('currentIdea'),
-        collectionManager = new CollectionManager();
+    var that = this;
+    var currentIdea = this.messageListView.getGroupState().get('currentIdea');
+    var collectionManager = new CollectionManager();
     if (annotation.idIdea == null || (
         currentIdea != null && currentIdea.id == annotation.idIdea))
       return;
@@ -1251,7 +1256,6 @@ var MessageView = LoaderView.extend({
     var modal = new Modal();
 
     $('#slider').html(modal.render().el);
-
   },
 
   /**
@@ -1262,8 +1266,8 @@ var MessageView = LoaderView.extend({
 
     if(!this.isDestroyed()) {
       _.each(annotations, function(annotation) {
-        var highlights = annotation.highlights,
-        func = that.showSegmentByAnnotation.bind(that, annotation);
+        var highlights = annotation.highlights;
+        var func = that.showSegmentByAnnotation.bind(that, annotation);
 
         _.each(highlights, function(highlight) {
           highlight.setAttribute('data-annotation-id', annotation['@id']);
@@ -1342,8 +1346,8 @@ var MessageView = LoaderView.extend({
    * @param  {string} text
    */
   showAnnotatorSelectionTooltip: function(x, y, text) {
-    var marginLeft = Ctx.annotatorSelectionTooltip.width() / -2,
-        segment = text;
+    var marginLeft = Ctx.annotatorSelectionTooltip.width() / -2;
+    var segment = text;
 
     text = text.substr(0, TOOLTIP_TEXT_LENGTH) + '...' + text.substr(-TOOLTIP_TEXT_LENGTH);
 
@@ -1782,37 +1786,39 @@ var MessageView = LoaderView.extend({
    * Does the selection
    */
   updateAnnotatorTextSelection: function(ev) {
-      if (Ctx.debugAnnotator) {
-        console.log("updateAnnotatorTextSelection called");
-      }
+    if (Ctx.debugAnnotator) {
+      console.log("updateAnnotatorTextSelection called");
+    }
 
-      if (this.messageListView.isInPrintableView()) {
-        return;
-      }
+    if (this.messageListView.isInPrintableView()) {
+      return;
+    }
 
-      if (!this.isSelecting) {
-        return;
-      }
+    if (!this.isSelecting) {
+      return;
+    }
 
-      if ($(ev.target).closest('.is-selecting').length === 0) {
-        // If it isn't inside the one which started, don't show it
-        return;
-      }
+    if ($(ev.target).closest('.is-selecting').length === 0) {
+      // If it isn't inside the one which started, don't show it
+      return;
+    }
 
-      var selectedText = this.getSelectedText(), text = selectedText.focusNode ? selectedText
-          .getRangeAt(0).cloneContents()
-          : '';
+    var selectedText = this.getSelectedText();
 
-      text = text.textContent || '';
+    var text = selectedText.focusNode ? selectedText
+        .getRangeAt(0).cloneContents()
+        : '';
 
-      if (text.length > MIN_TEXT_TO_TOOLTIP) {
-        this
-            .showAnnotatorSelectionTooltip(ev.clientX, ev.clientY, text);
-      }
-      else {
-        this.hideAnnotatorSelectionTooltip();
-      }
-    },
+    text = text.textContent || '';
+
+    if (text.length > MIN_TEXT_TO_TOOLTIP) {
+      this
+          .showAnnotatorSelectionTooltip(ev.clientX, ev.clientY, text);
+    }
+    else {
+      this.hideAnnotatorSelectionTooltip();
+    }
+  },
 
   /**
    * @event
@@ -1872,33 +1878,33 @@ var MessageView = LoaderView.extend({
    * @event
    */
   finishAnnotatorTextSelection: function(ev) {
-      var isInsideAMessage = false,
-          selectedText = this.getSelectedText(),
-          user = Ctx.getCurrentUser(),
-          text = selectedText.focusNode ? selectedText.getRangeAt(0).cloneContents() : '';
+    var isInsideAMessage = false;
+    var selectedText = this.getSelectedText();
+    var user = Ctx.getCurrentUser();
+    var text = selectedText.focusNode ? selectedText.getRangeAt(0).cloneContents() : '';
 
-      if (Ctx.debugAnnotator) {
-        console.log("finishAnnotatorTextSelection called");
+    if (Ctx.debugAnnotator) {
+      console.log("finishAnnotatorTextSelection called");
+    }
+
+    text = text.textContent || '';
+
+    if (ev) {
+      isInsideAMessage = $(ev.target).closest('.is-selecting').length > 0;
+    }
+
+    if (this.isSelecting && text.length > MIN_TEXT_TO_TOOLTIP && isInsideAMessage) {
+      if (user.can(Permissions.ADD_EXTRACT)) {
+        this.showAnnotatorSelectionSaveOptions(ev.clientX - 50, ev.clientY);
       }
-
-      text = text.textContent || '';
-
-      if (ev) {
-        isInsideAMessage = $(ev.target).closest('.is-selecting').length > 0;
+      else {
+        console.warn('finishAnnotatorTextSelection() called but current user does not have Permissions.ADD_EXTRACT');
       }
+    }
 
-      if (this.isSelecting && text.length > MIN_TEXT_TO_TOOLTIP && isInsideAMessage) {
-        if (user.can(Permissions.ADD_EXTRACT)) {
-          this.showAnnotatorSelectionSaveOptions(ev.clientX - 50, ev.clientY);
-        }
-        else {
-          console.warn('finishAnnotatorTextSelection() called but current user does not have Permissions.ADD_EXTRACT');
-        }
-      }
-
-      this.isSelecting = false;
-      this.$el.removeClass('is-selecting');
-    },
+    this.isSelecting = false;
+    this.$el.removeClass('is-selecting');
+  },
 
   /**
    * @event
@@ -1915,8 +1921,8 @@ var MessageView = LoaderView.extend({
    * Mark the current message as unread
    */
   markAsUnread: function(ev) {
-    var target = this.$('.readUnreadIndicator'),
-        analytics = Analytics.getInstance();
+    var target = this.$('.readUnreadIndicator');
+    var analytics = Analytics.getInstance();
 
     analytics.trackEvent(analytics.events.MESSAGE_MANUALLY_MARKED_UNREAD);
     ev.stopPropagation();
@@ -1928,8 +1934,8 @@ var MessageView = LoaderView.extend({
    * Mark the current message as read
    */
   markAsRead: function(ev) {
-    var target = this.$('.readUnreadIndicator'),
-        analytics = Analytics.getInstance();
+    var target = this.$('.readUnreadIndicator');
+    var analytics = Analytics.getInstance();
 
     analytics.trackEvent(analytics.events.MESSAGE_MANUALLY_MARKED_READ);
     ev.stopPropagation();
@@ -1983,9 +1989,9 @@ var MessageView = LoaderView.extend({
    * @param  {Function}  cb:  A parameterless callback 
    */
   closeTranslationView: function(cb){
-    var $source = this.$(this.ui.translation),
-        $target = this.$(this.ui.showMoreDropDown),
-        that = this;
+    var $source = this.$(this.ui.translation);
+    var $target = this.$(this.ui.showMoreDropDown);
+    var that = this;
 
     this.hideTranslationQuestion = true;
 

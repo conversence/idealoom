@@ -2,11 +2,12 @@
  * 
  * @module app.views.admin.sourceEditViews
  */
-var Marionette = require('backbone.marionette'),
-    i18n = require('../../utils/i18n.js'),
-    CollectionManager = require('../../common/collectionManager.js'),
-    Promise = require('bluebird'),
-    SourceViewBase = require('../sourceEditView.js');
+var Marionette = require('backbone.marionette');
+
+var i18n = require('../../utils/i18n.js');
+var CollectionManager = require('../../common/collectionManager.js');
+var Promise = require('bluebird');
+var SourceViewBase = require('../sourceEditView.js');
 
 //This needs to become the emailSourceEditView
 

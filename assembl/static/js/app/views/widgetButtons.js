@@ -1,17 +1,17 @@
-"use strict";
 /**
  * 
  * @module app.views.widgetButtons
  */
 
-var Backbone = require("backbone"),
-    Marionette = require('backbone.marionette'),
-    _ = require("underscore"),
-    i18n = require('../utils/i18n.js'),
-    Moment = require('moment'),
-    Widget = require("../models/widget.js"),
-    Ctx = require('../common/context.js'),
-    Permissions = require('../utils/permissions.js');
+var Backbone = require("backbone");
+
+var Marionette = require('backbone.marionette');
+var _ = require("underscore");
+var i18n = require('../utils/i18n.js');
+var Moment = require('moment');
+var Widget = require("../models/widget.js");
+var Ctx = require('../common/context.js');
+var Permissions = require('../utils/permissions.js');
 
 
 var WidgetButtonView = Marionette.View.extend({

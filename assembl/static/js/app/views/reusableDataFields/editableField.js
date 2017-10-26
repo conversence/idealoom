@@ -1,14 +1,14 @@
-'use strict';
 /**
  * 
  * @module app.views.reusableDataFields.editableField
  */
 
-var $ = require('jquery'),
-    Marionette = require('backbone.marionette'),
-    _ = require('underscore'),
-    Assembl = require('../../app.js'),
-    Ctx = require('../../common/context.js');
+var $ = require('jquery');
+
+var Marionette = require('backbone.marionette');
+var _ = require('underscore');
+var Assembl = require('../../app.js');
+var Ctx = require('../../common/context.js');
 
 var EditableField = Marionette.View.extend({
   constructor: function EditableField() {

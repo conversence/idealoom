@@ -1,18 +1,18 @@
-'use strict';
 /**
  * 
  * @module app.views.user.account
  */
 
-var Marionette = require('backbone.marionette'),
-    $ = require('jquery'),
-    _ = require('underscore'),
-    Accounts = require('../../models/accounts.js'),
-    Ctx = require('../../common/context.js'),
-    Agents = require('../../models/agents.js'),
-    UserNavigationMenu = require('./userNavigationMenu.js'),
-    i18n = require('../../utils/i18n.js'),
-    Growl = require('../../utils/growl.js');
+var Marionette = require('backbone.marionette');
+
+var $ = require('jquery');
+var _ = require('underscore');
+var Accounts = require('../../models/accounts.js');
+var Ctx = require('../../common/context.js');
+var Agents = require('../../models/agents.js');
+var UserNavigationMenu = require('./userNavigationMenu.js');
+var i18n = require('../../utils/i18n.js');
+var Growl = require('../../utils/growl.js');
 
 var email = Marionette.View.extend({
   constructor: function email() {
@@ -110,11 +110,11 @@ var userAccount =  Marionette.View.extend({
   saveAccount: function(e) {
     e.preventDefault();
 
-    var pass1 = this.$('input[name="new_password"]'),
-        pass2 = this.$('input[name="confirm_password"]'),
-        user = this.$('input[name="username"]'),
-        p_pass1 = pass1.parent().parent(),
-        p_pass2 = pass2.parent().parent();
+    var pass1 = this.$('input[name="new_password"]');
+    var pass2 = this.$('input[name="confirm_password"]');
+    var user = this.$('input[name="username"]');
+    var p_pass1 = pass1.parent().parent();
+    var p_pass2 = pass2.parent().parent();
 
     if (pass1.val() || pass2.val()) {
       if (pass1.val() !== pass2.val()) {
@@ -199,9 +199,9 @@ var account = Marionette.View.extend({
   addEmail: function(e) {
     e.preventDefault();
 
-    var that = this,
-        email = this.$('input[name="new_email"]').val().trim(),
-        emailRegex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    var that = this;
+    var email = this.$('input[name="new_email"]').val().trim();
+    var emailRegex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
     if (!email) {
       Growl.showBottomGrowl(Growl.GrowlReason.ERROR, i18n.gettext("Empty email"));
@@ -232,7 +232,6 @@ var account = Marionette.View.extend({
         Growl.showBottomGrowl(Growl.GrowlReason.ERROR, message);
       }
     })
-
   }
 
 });

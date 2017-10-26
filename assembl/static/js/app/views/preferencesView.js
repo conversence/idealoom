@@ -1,22 +1,22 @@
-"use strict";
 /**
  * @module app.views.preferencesView
  */
 
-var Marionette = require('backbone.marionette'),
-    Backbone = require("backbone"),
-    _ = require("underscore"),
-    BackboneSubset = require("Backbone.Subset"),
-    i18n = require("../utils/i18n.js"),
-    Types = require("../utils/types.js"),
-    Ctx = require("../common/context.js"),
-    Permissions = require("../utils/permissions.js"),
-    DiscussionPreference = require("../models/discussionPreference.js"),
-    CollectionManager = require("../common/collectionManager.js"),
-    AdminNavigationMenu = require('./admin/adminNavigationMenu.js'),
-    UserNavigationMenu = require('./user/userNavigationMenu.js'),
-    LoaderView = require('./loaderView.js'),
-    Growl = require('../utils/growl.js');
+var Marionette = require('backbone.marionette');
+
+var Backbone = require("backbone");
+var _ = require("underscore");
+var BackboneSubset = require("Backbone.Subset");
+var i18n = require("../utils/i18n.js");
+var Types = require("../utils/types.js");
+var Ctx = require("../common/context.js");
+var Permissions = require("../utils/permissions.js");
+var DiscussionPreference = require("../models/discussionPreference.js");
+var CollectionManager = require("../common/collectionManager.js");
+var AdminNavigationMenu = require('./admin/adminNavigationMenu.js');
+var UserNavigationMenu = require('./user/userNavigationMenu.js');
+var LoaderView = require('./loaderView.js');
+var Growl = require('../utils/growl.js');
 
 
 /**
@@ -28,8 +28,8 @@ function getModelElementaryType(modelType, subViewKey, useKey) {
     subViewKey = String(subViewKey).split('_');
   }
   while (true) {
-    var isList = modelType.substring(0, 8) == "list_of_",
-        isDict = modelType.substring(0, 8) == "dict_of_";
+    var isList = modelType.substring(0, 8) == "list_of_";
+    var isDict = modelType.substring(0, 8) == "dict_of_";
     if (isList) {
       if (subViewKey !== undefined && subViewKey.length > 0) {
         modelType = modelType.substring(8);
@@ -141,7 +141,8 @@ var PreferencesItemView = Marionette.View.extend({
   template: "#tmpl-preferenceItemView",
   isKeyView: false,
   resetPreference: function() {
-    var that = this, model = this.model;
+    var that = this;
+    var model = this.model;
     model.sync("delete", this.model, {
       success: function(model1, resp) {
         model.sync("read", model, {
@@ -188,8 +189,8 @@ var PreferencesItemView = Marionette.View.extend({
   serializeData: function() {
     var model = this.model;
     if (this.listKey !== undefined) {
-      var listKey = String(this.listKey).split("_"),
-          lastKey = parseInt(listKey[listKey.length - 1]);
+      var listKey = String(this.listKey).split("_");
+      var lastKey = parseInt(listKey[listKey.length - 1]);
       model = this.listCollectionView.listView.submodels.models[lastKey];
     }
     return {
@@ -398,9 +399,9 @@ var DictPreferencesItemView = PreferencesItemView.extend({
   },
   keySubview: StringPreferenceView,
   onRender: function() {
-    var key_subview = getPreferenceEditView(this.preferenceData, this.listKey, true),
-        val_subview = getPreferenceEditView(this.preferenceData, this.listKey),
-        key_options = _.clone(this.childViewOptions);
+    var key_subview = getPreferenceEditView(this.preferenceData, this.listKey, true);
+    var val_subview = getPreferenceEditView(this.preferenceData, this.listKey);
+    var key_options = _.clone(this.childViewOptions);
     _.extend(key_options, { isKeyView: true });
     this.showChildView('key_subview', new key_subview(key_options));
     if (val_subview) {
@@ -591,8 +592,9 @@ var ListSubviewCollectionView = Marionette.CollectionView.extend({
   childViewOptions: function(model) {
     // This is bizarrely called before initialize;
     // then we have the options in the object
-    var options = this.options,
-        index = this.collection.indexOf(model);
+    var options = this.options;
+
+    var index = this.collection.indexOf(model);
     if (options === undefined) {
       options = this;
     }
@@ -634,8 +636,9 @@ var DictSubviewCollectionView = Marionette.CollectionView.extend({
   childViewOptions: function(model) {
     // This is bizarrely called before initialize;
     // then we have the options in the object
-    var options = this.options,
-        index = this.collection.indexOf(model);
+    var options = this.options;
+
+    var index = this.collection.indexOf(model);
     if (options === undefined) {
       options = this;
     }
@@ -748,7 +751,8 @@ var DictPreferenceView = ListPreferenceView.extend({
   },
   subviewClass: DictSubviewCollectionView,
   asModel: function(value) {
-    var key, val;
+    var key;
+    var val;
     // only use one
     _.each(value, function(v, k) {
       key = k;
@@ -787,9 +791,9 @@ var PreferenceCollectionSubset = Backbone.Subset.extend({
     Backbone.Subset.apply(this, arguments);
   },
   beforeInitialize: function(models, options) {
-    var preferenceData = options.parent.get("preference_data"),
-        modifiable = _.filter(preferenceData.get("value"), this.prefDataSieve),
-        keys = {};
+    var preferenceData = options.parent.get("preference_data");
+    var modifiable = _.filter(preferenceData.get("value"), this.prefDataSieve);
+    var keys = {};
     _.map(modifiable, function(pd) {
       keys[pd.id] = true;
     });
@@ -882,8 +886,8 @@ var PreferencesView = LoaderView.extend({
     this.showChildView("navigationMenuHolder", this.getNavigationMenu());
   },
   storePreferences: function(prefs) {
-    var prefDataArray = prefs.get("preference_data").get("value"),
-        prefData = {};
+    var prefDataArray = prefs.get("preference_data").get("value");
+    var prefData = {};
     _.map(prefDataArray, function(pref) {
         prefData[pref.id] = pref;
     });
@@ -893,10 +897,14 @@ var PreferencesView = LoaderView.extend({
     this.render();
   },
   save: function() {
-    var that = this, errors = [], complete = 0,
-        toSave = this.allPreferences.filter(function(model) {
-          return model.hasChanged();
-        });
+    var that = this;
+    var errors = [];
+    var complete = 0;
+
+    var toSave = this.allPreferences.filter(function(model) {
+      return model.hasChanged();
+    });
+
     function do_complete() {
       complete += 1;
       if (complete == toSave.length) {
@@ -945,8 +953,8 @@ var DiscussionPreferencesView = PreferencesView.extend({
   },
   initialize: function() {
     this.setLoading(true);
-    var that = this,
-        collectionManager = new CollectionManager();
+    var that = this;
+    var collectionManager = new CollectionManager();
     collectionManager.getDiscussionPreferencePromise().then(function(prefs) {
         that.preferences = new DiscussionPreferenceCollectionSubset([], {parent: prefs});
         that.storePreferences(prefs);
@@ -974,8 +982,8 @@ var GlobalPreferencesView = PreferencesView.extend({
     PreferencesView.apply(this, arguments);
   },
   initialize: function() {
-    var that = this,
-        collectionManager = new CollectionManager();
+    var that = this;
+    var collectionManager = new CollectionManager();
     collectionManager.getGlobalPreferencePromise().then(function(prefs) {
         that.preferences = new GlobalPreferenceCollectionSubset([], {parent: prefs});
         that.storePreferences(prefs);
@@ -1002,8 +1010,8 @@ var UserPreferencesView = PreferencesView.extend({
   },
   initialize: function() {
     this.setLoading(true);
-    var that = this,
-        collectionManager = new CollectionManager();
+    var that = this;
+    var collectionManager = new CollectionManager();
     collectionManager.getUserPreferencePromise().then(function(prefs) {
         that.preferences = new UserPreferenceCollectionSubset([], {parent: prefs});
         that.storePreferences(prefs);

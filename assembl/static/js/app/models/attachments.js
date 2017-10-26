@@ -1,19 +1,19 @@
-'use strict';
 /**
  * Represents the link between an object (ex: Message, Idea) and a remote (url) or eventually local document attached to it.
  * @module app.models.attachments
  */
-var $ = require('jquery'),
-    _ = require('underscore'),
-    Moment = require("moment"),
-    Base = require('./base.js'),
-    i18n = require('../utils/i18n.js'),
-    Ctx = require('../common/context.js'),
-    Promise = require('bluebird'),
-    Types = require('../utils/types.js'),
-    Document = require('../models/documents.js'),
-    Growl = require('../utils/growl.js');
-    
+var $ = require('jquery');
+
+var _ = require('underscore');
+var Moment = require("moment");
+var Base = require('./base.js');
+var i18n = require('../utils/i18n.js');
+var Ctx = require('../common/context.js');
+var Promise = require('bluebird');
+var Types = require('../utils/types.js');
+var Document = require('../models/documents.js');
+var Growl = require('../utils/growl.js');
+
 var attachmentPurposeTypes = {
   /** 
    * Ensure that the front_end and back_end share the same values!
@@ -40,8 +40,7 @@ var attachmentPurposeTypes = {
 //For IE support...sigh
 if (!String.prototype.includes) {
     String.prototype.includes = function() {
-        'use strict';
-        return String.prototype.indexOf.apply(this, arguments) !== -1;
+      return String.prototype.indexOf.apply(this, arguments) !== -1;
     };
 }
 
@@ -224,8 +223,8 @@ var AttachmentModel = Base.Model.extend({
    * @function app.models.attachments.AttachmentModel.destroy
    */
   destroy: function(options){
-    var d = this.getDocument(),
-        that = this;
+    var d = this.getDocument();
+    var that = this;
     return d.destroy({
       success: function(model, response){
         return Base.Model.prototype.destroy.call(that);
@@ -325,8 +324,8 @@ var AttachmentCollection = Base.Collection.extend({
    * @function app.models.attachments.AttachmentCollection.comparator
    */
   comparator: function(one, two){
-    var d1 = one.getDocument(),
-        d2 = two.getDocument();
+    var d1 = one.getDocument();
+    var d2 = two.getDocument();
     var cmp = function (a, b){
       if ( a.getCreationDate().isBefore(b.getCreationDate()) ){
         return -1;
@@ -428,8 +427,8 @@ var ValidationAttachmentCollection = AttachmentCollection.extend({
       return [];
     }
 
-    var correctedNumberModelsCollection = models,
-        that = this;
+    var correctedNumberModelsCollection = models;
+    var that = this;
 
     if (!this.isCountLimitCorrect(models)){
       correctedNumberModelsCollection= this.getCorrectCountedCollection(models);
@@ -457,7 +456,7 @@ var ValidationAttachmentCollection = AttachmentCollection.extend({
         );
       }
     });
-    
+
     //Remove the naughty models from the collection
     models = _.filter(correctedNumberModelsCollection, function(model){
       return model.typeLimitReached !== true;

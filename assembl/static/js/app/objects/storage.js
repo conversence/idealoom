@@ -1,20 +1,20 @@
-'use strict';
 /**
  * 
  * @module app.objects.storage
  */
 
-var Marionette = require('backbone.marionette'),
-    groupSpec = require('../models/groupSpec.js'),
-    Ctx = require('../common/context.js');
+var Marionette = require('backbone.marionette');
+
+var groupSpec = require('../models/groupSpec.js');
+var Ctx = require('../common/context.js');
 
 var storage = Marionette.Object.extend({
 
   _store: window.localStorage,
 
   getStoragePrefix: function() {
-    var interfaceType = Ctx.getCurrentInterfaceType(),
-        storagePrefix;
+    var interfaceType = Ctx.getCurrentInterfaceType();
+    var storagePrefix;
     if (interfaceType === Ctx.InterfaceTypes.SIMPLE) {
       storagePrefix = "simpleInterface";
     }

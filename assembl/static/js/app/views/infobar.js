@@ -1,19 +1,19 @@
-'use strict';
 /**
  * 
  * @module app.views.infobar
  */
 
-var Backbone=require('backbone'),
-    BackboneModal = require('backbone.modal'),
-    Marionette = require('backbone.marionette'),
-    Assembl = require('../app.js'),
-    CookiesManager = require("../utils/cookiesManager.js"),
-    Widget = require('../models/widget.js'),
-    Ctx = require('../common/context.js'),
-    LoaderView = require('./loaderView.js'),
-    CollectionManager = require('../common/collectionManager.js'),
-    $ = require('jquery');
+var Backbone=require('backbone');
+
+var BackboneModal = require('backbone.modal');
+var Marionette = require('backbone.marionette');
+var Assembl = require('../app.js');
+var CookiesManager = require("../utils/cookiesManager.js");
+var Widget = require('../models/widget.js');
+var Ctx = require('../common/context.js');
+var LoaderView = require('./loaderView.js');
+var CollectionManager = require('../common/collectionManager.js');
+var $ = require('jquery');
 
 var CookieInfobarItemView = Marionette.View.extend({
   constructor: function CookiebarItem() {
@@ -87,8 +87,8 @@ var WidgetInfobarItemView = LoaderView.extend({
     'click .js_openTargetInModal': 'openTargetInModal'
   },
   initialize: function() {
-    var that = this,
-        collectionManager = new CollectionManager();
+    var that = this;
+    var collectionManager = new CollectionManager();
     this.setLoading(true);
     collectionManager.getUserLanguagePreferencesPromise(Ctx).then(function (ulp) {
       that.translationData = ulp;

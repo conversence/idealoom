@@ -1,12 +1,12 @@
-'use strict';
 /**
  * 
  * @module app.internal_modules.analytics.dispatcher
  */
 
 // UMD style module defintion. Simplified details below. Read comments to understand dependencies
-var moduleName = 'Analytics_Dispatcher',
-    dependencies = ['underscore', 'abstract', 'piwik'];
+var moduleName = 'Analytics_Dispatcher';
+
+var dependencies = ['underscore', 'abstract', 'piwik'];
 
 (function(root, factory){
   if (typeof module === 'object' && module.exports) {
@@ -55,9 +55,9 @@ var moduleName = 'Analytics_Dispatcher',
     },
 
     notify: function(methodName, args, check_cb){
-      var that = this,
-          check_cb = check_cb, 
-          args = args;
+      var that = this;
+      var check_cb = check_cb;
+      var args = args;
 
       if(this.debug) {
         console.log("dispatching " + methodName + " on " + this._observers.length + " observer(s) with argument(s):", args);

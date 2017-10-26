@@ -1,12 +1,12 @@
-'use strict';
 /**
  * 
  * @module app.utils.scrollUtils
  */
 
-var jQuery = require('jquery'),
-    $ = jQuery,
-    Raven = require('raven-js');
+var jQuery = require('jquery');
+
+var $ = jQuery;
+var Raven = require('raven-js');
 
 var debugScrollUtils = false;
 
@@ -26,10 +26,11 @@ var maxWatchProcessDuration = 15000;
  * https://github.com/slindberg/jquery-scrollparent/blob/master/jquery.scrollparent.js
  */
 jQuery.fn.scrollParent = function() {
-  var overflowRegex = /(auto|scroll)/,
-  position = this.css( "position" ),
-  excludeStaticParent = position === "absolute",
-  scrollParent = this.parents().filter( function() {
+  var overflowRegex = /(auto|scroll)/;
+  var position = this.css( "position" );
+  var excludeStaticParent = position === "absolute";
+
+  var scrollParent = this.parents().filter( function() {
     var parent = $( this );
     if ( excludeStaticParent && parent.css( "position" ) === "static" ) {
       return false;
@@ -45,9 +46,9 @@ jQuery.fn.scrollParent = function() {
  * is.
  */
 var getElementViewportOffset = function(el, scrollableViewport) {
-  var scrollableViewportWindowOffset = scrollableViewport.offset().top,
-  elWindowOffset = el.offset().top,
-  elViewPortOffset = elWindowOffset - scrollableViewportWindowOffset;
+  var scrollableViewportWindowOffset = scrollableViewport.offset().top;
+  var elWindowOffset = el.offset().top;
+  var elViewPortOffset = elWindowOffset - scrollableViewportWindowOffset;
 
   if(debugScrollUtils) {
     console.log("scrollUtils::getElementViewportOffset(): scrollableViewportWindowOffset: ",scrollableViewportWindowOffset, "elWindowOffset: ", elWindowOffset, el.offset(), el, "elViewPortOffset: ", elViewPortOffset);
@@ -63,19 +64,19 @@ var getElementViewportOffset = function(el, scrollableViewport) {
  * desiredViewportOffset pixels from the top of the viewport.
  */
 var computeScrollTarget = function(el, scrollableViewport, desiredViewportOffset) {
-  var scrollableViewportScrollTop = scrollableViewport.scrollTop(),
-  elViewPortOffset = getElementViewportOffset(el, scrollableViewport),
-  scrollTarget = elViewPortOffset + scrollableViewportScrollTop - desiredViewportOffset;
+  var scrollableViewportScrollTop = scrollableViewport.scrollTop();
+  var elViewPortOffset = getElementViewportOffset(el, scrollableViewport);
+  var scrollTarget = elViewPortOffset + scrollableViewportScrollTop - desiredViewportOffset;
   if(debugScrollUtils) {
     console.log("scrollUtils::computeScrollTarget(): scrollableViewport info:", " scrollHeight: ", scrollableViewport[0].scrollHeight, ", height: ", scrollableViewport.height()," scrollableViewportScrollTop: ", scrollableViewportScrollTop," el info: ", "elViewPortOffset: ", elViewPortOffset, "computed scrollTarget:",scrollTarget);
   }
   return scrollTarget;
 };
- var scrollToNextPanel = function(elm,delay,xValue){
-  var selector = elm;
-  setTimeout(function(){
-    $(selector).animate({scrollLeft:xValue}, 500);
-  },delay);//Delay because sometimes there is an action before.
+var scrollToNextPanel = function(elm,delay,xValue){
+ var selector = elm;
+ setTimeout(function(){
+   $(selector).animate({scrollLeft:xValue}, 500);
+ },delay);//Delay because sometimes there is an action before.
 };
 /**
  * scrolls to any dom element in the messageList. Unlike scrollToMessage, the
@@ -108,7 +109,7 @@ var scrollToElement = function(el, callback, margin, animate, watch) {
   if(!_.isFunction(scrollableElement.offset)) {
     console.warn("scrollUtils::scrollToElement(): Warning: scrollableElement has no offset, aborting");
     return;
-  } 
+  }
   if(scrollableElement.offset() === undefined) {
     console.warn("scrollUtils::scrollToElement(): Warning: scrollableElement has no offset (hidden?), aborting");
     if(debugScrollUtils) {
@@ -116,9 +117,9 @@ var scrollToElement = function(el, callback, margin, animate, watch) {
     }
     return;
   }
-  
-  var scrollTarget,
-  desiredViewportOffset = margin || 30;
+
+  var scrollTarget;
+  var desiredViewportOffset = margin || 30;
 
   if (animate === undefined) {
     animate = true;
@@ -132,8 +133,8 @@ var scrollToElement = function(el, callback, margin, animate, watch) {
   var elReference = el;
   var processCallback = function() {
     try {
-      var finalViewportOffset = getElementViewportOffset(elReference, scrollableElement),
-      differenceToTargetOffset = finalViewportOffset - desiredViewportOffset;
+      var finalViewportOffset = getElementViewportOffset(elReference, scrollableElement);
+      var differenceToTargetOffset = finalViewportOffset - desiredViewportOffset;
       if(debugScrollUtils) {
         console.log("scrollUtils::scrollToElement(): Final viewPort offset: ", finalViewportOffset, ", difference of: ", differenceToTargetOffset, " with desiredViewportOffset of ", desiredViewportOffset);
       }
@@ -182,10 +183,10 @@ var scrollToElement = function(el, callback, margin, animate, watch) {
 //TODO:  Handle cleanly the element disapearing from DOM
 
 var _watchOffset = function(el, scrollableViewport, initialWatchProcessTimestampParam) {
-  var initialScrollableViewportHeight = scrollableViewport[0].scrollHeight,
-  initialElViewPortOffset = getElementViewportOffset(el, scrollableViewport),
-  initialWatchProcessTimestamp = initialWatchProcessTimestampParam;
-  
+  var initialScrollableViewportHeight = scrollableViewport[0].scrollHeight;
+  var initialElViewPortOffset = getElementViewportOffset(el, scrollableViewport);
+  var initialWatchProcessTimestamp = initialWatchProcessTimestampParam;
+
   if (initialWatchProcessTimestamp === undefined) {
     //console.log("Setting initialWatchProcessTimestamp");
     initialWatchProcessTimestamp = Date.now(); // unix timestamp in milliseconds;
@@ -228,10 +229,10 @@ var _watchOffset = function(el, scrollableViewport, initialWatchProcessTimestamp
   scrollableViewport.on("scroll", _throttledWatchScrollHandler );
 
   var _watchProcess = function() {
-    var currentScrollableViewportHeight = scrollableViewport[0].scrollHeight,
-    currentElViewPortOffset = getElementViewportOffset(el, scrollableViewport),
-    scrollableViewportHeightChange = currentScrollableViewportHeight - initialScrollableViewportHeight,
-    elViewPortOffsetChange = currentElViewPortOffset - initialElViewPortOffset;
+    var currentScrollableViewportHeight = scrollableViewport[0].scrollHeight;
+    var currentElViewPortOffset = getElementViewportOffset(el, scrollableViewport);
+    var scrollableViewportHeightChange = currentScrollableViewportHeight - initialScrollableViewportHeight;
+    var elViewPortOffsetChange = currentElViewPortOffset - initialElViewPortOffset;
     //  TODO:  Check if the actual element changed height (could be a signal that it just finished loading)
 
     scrollableViewport.off("scroll", _throttledWatchScrollHandler );

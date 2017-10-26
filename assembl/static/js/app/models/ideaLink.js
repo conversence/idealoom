@@ -1,11 +1,11 @@
-'use strict';
 /**
  * The link between two ideas
  * @module app.models.ideaLink
  */
-var _ = require('underscore'),
-    Base = require('./base.js'),
-    Ctx = require('../common/context.js');
+var _ = require('underscore');
+
+var Base = require('./base.js');
+var Ctx = require('../common/context.js');
 /**
  * Idea link model
  * Frontend model for :py:class:`assembl.models.idea.IdeaLink`

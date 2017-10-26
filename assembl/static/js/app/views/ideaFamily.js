@@ -1,12 +1,12 @@
-'use strict';
 /**
  * 
  * @module app.views.ideaFamily
  */
 
-var Backbone = require('backbone'),
-    _ = require('underscore'),
-    Ctx = require('../common/context.js');
+var Backbone = require('backbone');
+
+var _ = require('underscore');
+var Ctx = require('../common/context.js');
 
 var IdeaFamilyView = Backbone.View.extend({
   constructor: function IdeaFamilyView() {
@@ -50,13 +50,12 @@ var IdeaFamilyView = Backbone.View.extend({
    * @returns {IdeaInSynthesisView}
    */
   render: function() {
-    var
-        that = this,
-        data = this.model.toJSON(),
-        authors = [],
-        view_data = this.view_data,
-        render_data = view_data[this.model.getId()],
-        ideaView = new this.innerViewClass(_.extend({model: this.model}, this.innerViewClassInitializeParams));
+    var that = this;
+    var data = this.model.toJSON();
+    var authors = [];
+    var view_data = this.view_data;
+    var render_data = view_data[this.model.getId()];
+    var ideaView = new this.innerViewClass(_.extend({model: this.model}, this.innerViewClassInitializeParams));
     _.extend(data, render_data);
     Ctx.removeCurrentlyDisplayedTooltips(this.$el);
 

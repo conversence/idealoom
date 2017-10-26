@@ -1,14 +1,14 @@
-"use strict";
 /**
  * 
  * @module app.views.widgetLinks
  */
 
-var Backbone = require("backbone"),
-    Marionette = require('backbone.marionette'),
-    _ = require("underscore"),
-    $ = require("jquery"),
-    Widget = require("../models/widget.js");
+var Backbone = require("backbone");
+
+var Marionette = require('backbone.marionette');
+var _ = require("underscore");
+var $ = require("jquery");
+var Widget = require("../models/widget.js");
 
 
 var WidgetLinkView = Marionette.View.extend({

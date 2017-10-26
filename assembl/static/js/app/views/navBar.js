@@ -1,32 +1,32 @@
-'use strict';
 /**
  * 
  * @module app.views.navBar
  */
 
-var Marionette = require('backbone.marionette'),
-    Backbone=require('backbone'),
-    BackboneModal = require('backbone.modal'),
-    Promise = require('bluebird'),
-    $ = require('jquery'),
-    _ = require('underscore'),
-    Assembl = require('../app.js'),
-    Ctx = require('../common/context.js'),
-    GroupSpec = require('../models/groupSpec.js'),
-    CollectionManager = require('../common/collectionManager.js'),
-    PanelSpecTypes = require('../utils/panelSpecTypes.js'),
-    viewsFactory = require('../objects/viewsFactory.js'),
-    RolesModel = require('../models/roles.js'),
-    Permissions = require('../utils/permissions.js'),
-    i18n = require('../utils/i18n.js'),
-    Roles = require('../utils/roles.js'),
-    Widget = require('../models/widget.js'),
-    DefineGroupModal = require('./groups/defineGroupModal.js'),
-    WidgetLinks = require('./widgetLinks.js'),
-    Analytics = require('../internal_modules/analytics/dispatcher.js'),
-    StatisticsModal = require('./modals/discussionStatisticsModal.js'),
-    LoaderView = require('./loaderView.js'),
-    AgentViews = require('./agent.js');
+var Marionette = require('backbone.marionette');
+
+var Backbone=require('backbone');
+var BackboneModal = require('backbone.modal');
+var Promise = require('bluebird');
+var $ = require('jquery');
+var _ = require('underscore');
+var Assembl = require('../app.js');
+var Ctx = require('../common/context.js');
+var GroupSpec = require('../models/groupSpec.js');
+var CollectionManager = require('../common/collectionManager.js');
+var PanelSpecTypes = require('../utils/panelSpecTypes.js');
+var viewsFactory = require('../objects/viewsFactory.js');
+var RolesModel = require('../models/roles.js');
+var Permissions = require('../utils/permissions.js');
+var i18n = require('../utils/i18n.js');
+var Roles = require('../utils/roles.js');
+var Widget = require('../models/widget.js');
+var DefineGroupModal = require('./groups/defineGroupModal.js');
+var WidgetLinks = require('./widgetLinks.js');
+var Analytics = require('../internal_modules/analytics/dispatcher.js');
+var StatisticsModal = require('./modals/discussionStatisticsModal.js');
+var LoaderView = require('./loaderView.js');
+var AgentViews = require('./agent.js');
 
 var navBarLeft = Marionette.View.extend({
   constructor: function navBarLeft() {
@@ -116,8 +116,8 @@ var navBarRight = LoaderView.extend({
   template: '#tmpl-navBarRight',
   className: 'navbar-right',
   initialize: function(options) {
-    var that = this,
-        collectionManager = new CollectionManager();
+    var that = this;
+    var collectionManager = new CollectionManager();
 
     if (Ctx.getDiscussionId() && Ctx.getCurrentUserId()) {
       this.setLoading(true);
@@ -141,7 +141,6 @@ var navBarRight = LoaderView.extend({
     else {
       this.isUserSubscribedToDiscussion = false;
     }
-
   },
   ui: {
     currentLocal: '.js_setLocale',
@@ -262,8 +261,8 @@ var navBar = Marionette.View.extend({
   },
 
   addGroup: function() {
-    var collectionManager = new CollectionManager(),
-        groupSpecsP = collectionManager.getGroupSpecsCollectionPromise(viewsFactory);
+    var collectionManager = new CollectionManager();
+    var groupSpecsP = collectionManager.getGroupSpecsCollectionPromise(viewsFactory);
 
     Assembl.rootView.showChildView('slider', new DefineGroupModal({groupSpecsP: groupSpecsP}));
   },
@@ -272,8 +271,8 @@ var navBar = Marionette.View.extend({
     * @param {string|null} popinType: null, 'first_post', 'first_login_after_auto_subscribe_to_notifications'
     */
   joinDiscussion: function(evt, popinType) {
-    var self = this,
-        collectionManager = new CollectionManager();
+    var self = this;
+    var collectionManager = new CollectionManager();
 
     var model = new Backbone.Model({
       notificationsToShow: null
@@ -319,8 +318,8 @@ var navBar = Marionette.View.extend({
                 initialize: function() {
                   var that = this;
                   this.$('.bbm-modal').addClass('popin');
-                  var analytics = Analytics.getInstance(),
-                      previousPage = analytics.getCurrentPage();
+                  var analytics = Analytics.getInstance();
+                  var previousPage = analytics.getCurrentPage();
 
                   this.returningPage = previousPage;
                   analytics.changeCurrentPage(analytics.pages.NOTIFICATION);
@@ -378,7 +377,6 @@ var navBar = Marionette.View.extend({
             }
 
         );
-
   },
 
   showPopInOnFirstPost: function() {

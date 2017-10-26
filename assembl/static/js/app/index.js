@@ -1,15 +1,15 @@
-'use strict';
 /**
  * App instanciation.
  * @module app.index
  */
 
-var App = require('./app.js'),
-    Router = require('./router.js'),
-    Ctx = require('./common/context.js'),
-    Socket = require('./utils/socket.js'),
-    CollectionManager = require('./common/collectionManager.js'),
-    Raven = require('raven-js');
+var App = require('./app.js');
+
+var Router = require('./router.js');
+var Ctx = require('./common/context.js');
+var Socket = require('./utils/socket.js');
+var CollectionManager = require('./common/collectionManager.js');
+var Raven = require('raven-js');
 
 /**
  * Init current language

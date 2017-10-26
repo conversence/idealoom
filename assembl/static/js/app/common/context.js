@@ -1,34 +1,39 @@
-'use strict';
 /**
  * Useful global variables and methods.
  * @module app.common.context
  */
 
-var $ = require('jquery'),
-    _ = require('underscore'),
-    Moment = require('moment'),
-    Promise = require('bluebird'),
-    Assembl =  require('../app.js'),
-    Permissions =  require('../utils/permissions.js'),
-    Types = require('../utils/types.js'),
-    Roles =  require('../utils/roles.js'),
-    i18n =  require('../utils/i18n.js'),
-    Raven = require('raven-js'),
-    Backbone=require('backbone'),
-    BackboneModal = require('backbone.modal'),
-    upload = require('backbone-model-file-upload'), // why here?
-    Analytics = require('../internal_modules/analytics/dispatcher.js');
+var $ = require('jquery');
+
+var _ = require('underscore');
+var Moment = require('moment');
+var Promise = require('bluebird');
+var Assembl =  require('../app.js');
+var Permissions =  require('../utils/permissions.js');
+var Types = require('../utils/types.js');
+var Roles =  require('../utils/roles.js');
+var i18n =  require('../utils/i18n.js');
+var Raven = require('raven-js');
+var Backbone=require('backbone');
+var BackboneModal = require('backbone.modal');
+
+var // why here?
+upload = require('backbone-model-file-upload');
+
+var Analytics = require('../internal_modules/analytics/dispatcher.js');
 require('linkifyjs');
 require('linkifyjs/jquery')($);
 
 window.jQuery = $;
 window._ = _;
+
 // the following require window.jQuery
-var tooltip = require('bootstrap-tooltip'),
-    dropdown = require('bootstrap-dropdown'),
-    oembed = require('jquery-oembed-all/jquery.oembed'),
-    highlight = require('jquery-highlight');
-    // require('ckeditor-sharedcontainer/plugin'); // where is this anyway?
+var tooltip = require('bootstrap-tooltip');
+// require('ckeditor-sharedcontainer/plugin'); // where is this anyway?
+
+var dropdown = require('bootstrap-dropdown');
+var oembed = require('jquery-oembed-all/jquery.oembed');
+var highlight = require('jquery-highlight');
 
 
 /**
@@ -278,9 +283,9 @@ Context.prototype = {
    * @function app.common.context.Context.setCurrentUser
   **/
   setCurrentUser: function(user) {
-    var analytics = Analytics.getInstance(),
-        days_since_first_visit,
-        last_login_buffer = 30; //seconds
+    var analytics = Analytics.getInstance(); //seconds
+    var days_since_first_visit;
+    var last_login_buffer = 30;
 
     this._currentUser = user;
     if(!this._currentUser.isUnknownUser()) {
@@ -289,10 +294,10 @@ Context.prototype = {
       //Hackish way to know if the USER_LOGIN event should be triggered
       var last_login = user.get('last_login');
       if (last_login) {
-        var timezonedLogin = this.addUTCTimezoneToISO8601(last_login),
-            now = new Moment().utc(),
-            loginMoment = new Moment(timezonedLogin).utc(),
-            acceptableTime = loginMoment.add(last_login_buffer, 'seconds');
+        var timezonedLogin = this.addUTCTimezoneToISO8601(last_login);
+        var now = new Moment().utc();
+        var loginMoment = new Moment(timezonedLogin).utc();
+        var acceptableTime = loginMoment.add(last_login_buffer, 'seconds');
 
         // Moment #isBefore has consequences http://momentjs.com/docs/#/query/is-before/
         if ( now.isBefore(acceptableTime) ) {
@@ -321,8 +326,8 @@ Context.prototype = {
         }
       }
 
-      var CollectionManager = require('./collectionManager.js'),
-          collectionManager = new CollectionManager();
+      var CollectionManager = require('./collectionManager.js');
+      var collectionManager = new CollectionManager();
 
       collectionManager.getLocalRoleCollectionPromise().then(function(localRoles) {
         var logUserSubscriptionStatus = function(localRoles) {
@@ -333,7 +338,6 @@ Context.prototype = {
       });
 
       this.manageLastCurrentUser();
-
     }
   },
   /**
@@ -786,9 +790,9 @@ Context.prototype = {
   getCurrentSynthesisDraftPromise: function() {
     // Preliminary code, may not be final architecture.
     if (this.currentSynthesisDraftPromise === null) {
-      var that = this,
-          CollectionManager = require('./collectionManager.js'),
-          collectionManager = new CollectionManager();
+      var that = this;
+      var CollectionManager = require('./collectionManager.js');
+      var collectionManager = new CollectionManager();
 
       this.currentSynthesisDraftPromise = collectionManager.getAllSynthesisCollectionPromise().then(
         function(syntheses) {
@@ -841,8 +845,8 @@ Context.prototype = {
    * @function app.common.context.Context.getPostIdFromAnnotation
    */
   getPostIdFromAnnotation: function(annotation) {
-    var span = $(annotation.highlights[0]),
-        messageId = span.closest('[id^="' + this.ANNOTATOR_MESSAGE_BODY_ID_PREFIX + '"]').attr('id');
+    var span = $(annotation.highlights[0]);
+    var messageId = span.closest('[id^="' + this.ANNOTATOR_MESSAGE_BODY_ID_PREFIX + '"]').attr('id');
 
     return messageId.substr(this.ANNOTATOR_MESSAGE_BODY_ID_PREFIX.length);
   },
@@ -877,8 +881,8 @@ Context.prototype = {
    * @function app.common.context.Context.showDragbox
    */
   showDragbox: function(ev, text, newExtract) {
-    var dragbox_max_length = 25,
-        that = this;
+    var dragbox_max_length = 25;
+    var that = this;
 
     if (ev && "originalEvent" in ev) {
       ev = ev.originalEvent;
@@ -1196,9 +1200,9 @@ Context.prototype = {
   onDropdownClick: function(e) {
     if (!e || !(e.target))
         return;
-    var targetElement = $(e.target),
-        toggle = undefined,
-        parent = undefined;
+    var targetElement = $(e.target);
+    var toggle = undefined;
+    var parent = undefined;
 
     if (targetElement.hasClass("dropdown-toggle")) {
       toggle = targetElement;
@@ -1376,8 +1380,8 @@ Context.prototype = {
    * @function app.common.context.Context.makeLinksShowOembedOnHover
   **/
   makeLinksShowOembedOnHover: function(el) {
-    var that = this,
-        popover = $("#popover-oembed");
+    var that = this;
+    var popover = $("#popover-oembed");
 
     var timeoutIdHidePopover = null;
 
@@ -1391,9 +1395,9 @@ Context.prototype = {
     };
 
     var triggerHover = function(evt) {
-      var LoaderView = require('../views/loader.js'),
-      loader = new LoaderView(),
-      loaderHtml = loader.render().el;
+      var LoaderView = require('../views/loader.js');
+      var loader = new LoaderView();
+      var loaderHtml = loader.render().el;
 
       popover.html(loaderHtml);
       popover.css('position', 'fixed');
@@ -1458,7 +1462,6 @@ Context.prototype = {
       });
       $(this).mouseleave(hidePopoverGenerator(500));
     });
-
   },
   /**
    * @function app.common.context.Context.getTooltipsContainerSelector
@@ -1540,8 +1543,8 @@ Context.prototype = {
       params = [params];
     }
 
-    var urlHasParams = false,
-        paramExists = false;
+    var urlHasParams = false;
+    var paramExists = false;
 
     if (url.indexOf('?') >= 0) {
       urlHasParams = true;
@@ -1552,8 +1555,8 @@ Context.prototype = {
       }
     }
 
-    var qs = [],
-        finalUrl = url.substring(0);
+    var qs = [];
+    var finalUrl = url.substring(0);
 
     _.each(params, function(p){
       qs.push($.param(p));
@@ -1577,8 +1580,8 @@ Context.prototype = {
    * @function app.common.context.Context.manageLastCurrentUser
   **/
   manageLastCurrentUser: function() {
-    var lastCurrentUserId = null,
-        connectedUserId = null;
+    var lastCurrentUserId = null;
+    var connectedUserId = null;
 
     if (window.localStorage.getItem('lastCurrentUser')) {
       lastCurrentUserId = window.localStorage.getItem('lastCurrentUser').split('/')[1];
@@ -1714,8 +1717,8 @@ Context.prototype = {
    * @function app.common.context.Context.getJsonFromScriptTag
   **/
   getJsonFromScriptTag: function(id) {
-    var script = document.getElementById(id),
-        json;
+    var script = document.getElementById(id);
+    var json;
 
     if (!script) {
       console.error(this.format("Script tag #{0} doesn't exist", id));
@@ -1803,19 +1806,19 @@ Context.prototype = {
    * @function app.common.context.Context.deanonymizationCifInUrl
   **/
   deanonymizationCifInUrl: function(url, callback) {
-    var urlTemplate = _.template(url),
-        serverUrl = document.URL,
-        serverUrlComp1 = serverUrl.split('://', 2),
-        serverUrlComp2 = serverUrlComp1[1].split('/', 1),
-        cif_perms = [Permissions.READ_PUBLIC_CIF],
-        user_perms = [Permissions.READ, Permissions.READ_PUBLIC_CIF],
-        url_base = serverUrlComp1[0] + '://' + serverUrlComp2[0] + '/data/'+Types.DISCUSSION+'/' + Ctx.getDiscussionId();
+    var urlTemplate = _.template(url);
+    var serverUrl = document.URL;
+    var serverUrlComp1 = serverUrl.split('://', 2);
+    var serverUrlComp2 = serverUrlComp1[1].split('/', 1);
+    var cif_perms = [Permissions.READ_PUBLIC_CIF];
+    var user_perms = [Permissions.READ, Permissions.READ_PUBLIC_CIF];
+    var url_base = serverUrlComp1[0] + '://' + serverUrlComp2[0] + '/data/'+Types.DISCUSSION+'/' + Ctx.getDiscussionId();
     Promise.join(
         this.getPermissionTokenPromise([cif_perms, user_perms],
               ["local:"+Types.AGENT_PROFILE+"/" + this.getCurrentUserId()]),
             function(token_data) {
-              var cif_token = token_data[cif_perms.join(",")],
-                  user_token = token_data[user_perms.join(",")];
+              var cif_token = token_data[cif_perms.join(",")];
+              var user_token = token_data[user_perms.join(",")];
               callback(urlTemplate({
                 "url": encodeURIComponent(url_base + '/jsonld?token=' + cif_token),
                 "user_url": encodeURIComponent(url_base + '/private_jsonld?token=' + user_token),
@@ -1907,10 +1910,12 @@ Context.prototype = {
   _hiddenTargetLocales: ['und', 'mul', 'zxx'],
   localesAsSortedList: function() {
     if (this._localesAsSortedList === undefined) {
-      var hiddenTargetLocales = this._hiddenTargetLocales,
-          localeList = _.mapObject(this.getLocaleToLanguageNameCache(), function(name, loc) {
-          return [loc, name];
-      });
+      var hiddenTargetLocales = this._hiddenTargetLocales;
+
+      var localeList = _.mapObject(this.getLocaleToLanguageNameCache(), function(name, loc) {
+      return [loc, name];
+  });
+
       localeList = _.filter(localeList, function(x) {
         return hiddenTargetLocales.indexOf(x[0]) < 0;
       });

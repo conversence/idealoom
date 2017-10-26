@@ -1,5 +1,3 @@
-'use strict';
-
 var Marionette = require('backbone.marionette');
 /** LoaderView: a Marionette View that starts as a loader.
  */
@@ -11,7 +9,8 @@ var LoaderView = Marionette.View.extend({
     return this.template === '#tmpl-loader';
   },
   setLoading: function(newVal, specialTemplate) {
-    var specialTemplate, current = this.isLoading();
+    var specialTemplate;
+    var current = this.isLoading();
     if (newVal) {
         if (!current) {
             this._template = this.template;

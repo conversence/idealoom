@@ -1,13 +1,13 @@
-'use strict';
 /**
  * Represents a file or document (a remote url or a blob)
  * @module app.models.documents
  */
-var $ = require('jquery'),
-    Base = require('./base.js'),
-    i18n = require('../utils/i18n.js'),
-    Ctx = require('../common/context.js'),
-    Types = require('../utils/types.js');
+var $ = require('jquery');
+
+var Base = require('./base.js');
+var i18n = require('../utils/i18n.js');
+var Ctx = require('../common/context.js');
+var Types = require('../utils/types.js');
 /**
  * Document model
  * Frontend model for :py:class:`assembl.models.attachment.Document`

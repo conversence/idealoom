@@ -1,9 +1,10 @@
 /** @module app.tests.mock_server */
 
-var Sinon = require('sinon'),
-    Backbone = require('backbone'),
-    $ = require('jquery'),
-    _ = require('underscore');
+var Sinon = require('sinon');
+
+var Backbone = require('backbone');
+var $ = require('jquery');
+var _ = require('underscore');
 
 /**
  * transform an ajax call into the equivalent recorded API call fixture from
@@ -18,12 +19,12 @@ function ajaxMock(url, settings) {
     settings = url;
     url = settings.url;
   }
-  var pos = url.lastIndexOf('/') + 1,
-      dirname = url.substring(0, pos),
-      fname = url.substring(pos),
-      pos_args = fname.indexOf('?'),
-      method = settings.method || "GET",
-      data = settings.data;
+  var pos = url.lastIndexOf('/') + 1;
+  var dirname = url.substring(0, pos);
+  var fname = url.substring(pos);
+  var pos_args = fname.indexOf('?');
+  var method = settings.method || "GET";
+  var data = settings.data;
 
   if (method !== 'GET') {
     fname = method + '_' + fname;

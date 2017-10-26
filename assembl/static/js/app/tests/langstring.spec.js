@@ -9,14 +9,14 @@
 var Ctx = require('../common/context.js');
 Ctx.setApplicationUnderTest();
 
-var _ = require('underscore'),
-    LangString = require("../models/langstring.js"),
-    UserLanguagePreference = require('../models/languagePreference.js'),
-    userLanguagePreferencesJson = require('./fixtures/languagePreferences.json'),
-    langstringEntriesJson = require('./fixtures/langstringEntry.json'),
-    localsJson = require('./fixtures/languageLocales.json'),
-    langstringJson = require('./fixtures/langstring.json'),
-    assert = require('chai').assert;
+var _ = require('underscore');
+var LangString = require("../models/langstring.js");
+var UserLanguagePreference = require('../models/languagePreference.js');
+var userLanguagePreferencesJson = require('./fixtures/languagePreferences.json');
+var langstringEntriesJson = require('./fixtures/langstringEntry.json');
+var localsJson = require('./fixtures/languageLocales.json');
+var langstringJson = require('./fixtures/langstring.json');
+var assert = require('chai').assert;
 
 /**
  * These tests depends on the server to supply several peices of logic to the
@@ -43,18 +43,16 @@ describe("Langstring Spec", function(){
   });
 
   describe("User Language Preference Spec", function(){
-
-    var ls_en,
-        ls_fr,
-        ls_en_fr_x,
-        ls_fr_en_x;
-
-    var ulp_en_cookie,
-        ulp_fr_cookie,
-        ulp_en,
-        ulp_fr,
-        ulp_en_from_fr,
-        ulp_fr_from_en;
+    var ls_en;
+    var ls_fr;
+    var ls_en_fr_x;
+    var ls_fr_en_x;
+    var ulp_en_cookie;
+    var ulp_fr_cookie;
+    var ulp_en;
+    var ulp_fr;
+    var ulp_en_from_fr;
+    var ulp_fr_from_en;
 
 
     beforeEach(function(){

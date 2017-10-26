@@ -1,15 +1,15 @@
-'use strict';
 /**
  * An access token for facebook
  * @module app.models.social
  */
 
-var $ = require('jquery'),
-    Base = require('./base.js'),
-    Ctx = require('../common/context.js'),
-    i18n = require('../utils/i18n.js'),
-    Agents = require('./agents.js'),
-    Moment = require('moment');
+var $ = require('jquery');
+
+var Base = require('./base.js');
+var Ctx = require('../common/context.js');
+var i18n = require('../utils/i18n.js');
+var Agents = require('./agents.js');
+var Moment = require('moment');
 
 var tokenTimeManager = function() {
   this.minTime = new Moment('0001-01-01T00:00:00Z').utc() //datetime.min in python
@@ -53,7 +53,7 @@ tokenTimeManager.prototype = {
  * @class app.models.social.FacebookAccessToken
  * @extends app.models.base.BaseModel
  */
- 
+
 var FacebookAccessToken = Base.Model.extend({
    constructor: function FacebookAccessToken() {
     Base.Model.apply(this, arguments);

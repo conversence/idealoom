@@ -1,4 +1,3 @@
-'use strict';
 /**
  * Infobars for cookie and widget settings
  * @module app.models.infobar

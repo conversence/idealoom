@@ -1,23 +1,23 @@
-'use strict';
 /**
  * 
  * @module app.views.navigation.synthesisInNavigation
  */
 
-var Marionette = require('backbone.marionette'),
-    _ = require('underscore'),
-    $ = require('jquery'),
-    Promise = require('bluebird'),
-    AssemblPanel = require('../assemblPanel.js'),
-    CollectionManager = require('../../common/collectionManager.js'),
-    Types = require('../../utils/types.js'),
-    Assembl = require('../../app.js'),
-    Ctx = require('../../common/context.js'),
-    i18n = require('../../utils/i18n.js'),
-    PanelSpecTypes = require('../../utils/panelSpecTypes.js'),
-    scrollUtils = require('../../utils/scrollUtils.js'),
-    LoaderView = require('../loaderView.js'),
-    Analytics = require('../../internal_modules/analytics/dispatcher.js');
+var Marionette = require('backbone.marionette');
+
+var _ = require('underscore');
+var $ = require('jquery');
+var Promise = require('bluebird');
+var AssemblPanel = require('../assemblPanel.js');
+var CollectionManager = require('../../common/collectionManager.js');
+var Types = require('../../utils/types.js');
+var Assembl = require('../../app.js');
+var Ctx = require('../../common/context.js');
+var i18n = require('../../utils/i18n.js');
+var PanelSpecTypes = require('../../utils/panelSpecTypes.js');
+var scrollUtils = require('../../utils/scrollUtils.js');
+var LoaderView = require('../loaderView.js');
+var Analytics = require('../../internal_modules/analytics/dispatcher.js');
 
 var SynthesisItem = LoaderView.extend({
   constructor: function SynthesisItem() {
@@ -102,8 +102,8 @@ var SynthesisInNavigationPanel = AssemblPanel.extend({
 
   initialize: function(options) {
     AssemblPanel.prototype.initialize.apply(this, arguments);
-    var that = this,
-        collectionManager = new CollectionManager();
+    var that = this;
+    var collectionManager = new CollectionManager();
     this.setLoading(true);
 
     Promise.join(collectionManager.getAllMessageStructureCollectionPromise(),
@@ -164,8 +164,8 @@ var SynthesisInNavigationPanel = AssemblPanel.extend({
     },
 
   onRender: function() {
-    var that = this,
-    collectionManager = new CollectionManager();
+    var that = this;
+    var collectionManager = new CollectionManager();
 
     if (!this.isLoading() && !this.isDestroyed()) {
         this.displaySynthesisList(this.allMessageStructureCollection, this.allSynthesisCollection);

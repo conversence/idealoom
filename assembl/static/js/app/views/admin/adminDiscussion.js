@@ -1,20 +1,20 @@
-'use strict';
 /**
  * 
  * @module app.views.admin.adminDiscussion
  */
 
-var Marionette = require('backbone.marionette'),
-    $ = require('jquery'),
-    _ = require('underscore'),
-    autosize = require('jquery-autosize'),
-    CollectionManager = require('../../common/collectionManager.js'),
-    Ctx = require('../../common/context.js'),
-    Growl = require('../../utils/growl.js'),
-    Discussion = require('../../models/discussion.js'),
-    DiscussionSource = require('../../models/discussionSource.js'),
-    i18n = require('../../utils/i18n.js'),
-    AdminNavigationMenu = require('./adminNavigationMenu.js');
+var Marionette = require('backbone.marionette');
+
+var $ = require('jquery');
+var _ = require('underscore');
+var autosize = require('jquery-autosize');
+var CollectionManager = require('../../common/collectionManager.js');
+var Ctx = require('../../common/context.js');
+var Growl = require('../../utils/growl.js');
+var Discussion = require('../../models/discussion.js');
+var DiscussionSource = require('../../models/discussionSource.js');
+var i18n = require('../../utils/i18n.js');
+var AdminNavigationMenu = require('./adminNavigationMenu.js');
 
 var adminDiscussion = Marionette.View.extend({
   constructor: function adminDiscussion() {
@@ -36,8 +36,8 @@ var adminDiscussion = Marionette.View.extend({
     'blur @ui.logo': 'renderLogoThumbnail'
   },
   initialize: function() {
-    var that = this,
-        collectionManager = new CollectionManager();
+    var that = this;
+    var collectionManager = new CollectionManager();
 
     this.model = undefined;
 
@@ -46,7 +46,6 @@ var adminDiscussion = Marionette.View.extend({
               that.model =  Discussion;
               that.render();
             });
-
   },
 
   onRender: function() {
@@ -69,15 +68,15 @@ var adminDiscussion = Marionette.View.extend({
   saveDiscussion: function(e) {
     e.preventDefault();
 
-    var introduction = this.$('textarea[name=introduction]').val(),
-        topic = this.$('input[name=topic]').val(),
-        slug = this.$('input[name=slug]').val(),
-        objectives = this.$('textarea[name=objectives]').val(),
-        web_analytics_piwik_id_site = parseInt(this.$('#web_analytics_piwik_id_site').val()),
-        help_url = this.$('#help_url').val(),
-        homepage_url = this.$("#homepage_url").val(),
-        logo_url = this.ui.logo.val(),
-        show_help_in_debate_section = this.$('#show_help_in_debate_section:checked').length == 1;
+    var introduction = this.$('textarea[name=introduction]').val();
+    var topic = this.$('input[name=topic]').val();
+    var slug = this.$('input[name=slug]').val();
+    var objectives = this.$('textarea[name=objectives]').val();
+    var web_analytics_piwik_id_site = parseInt(this.$('#web_analytics_piwik_id_site').val());
+    var help_url = this.$('#help_url').val();
+    var homepage_url = this.$("#homepage_url").val();
+    var logo_url = this.ui.logo.val();
+    var show_help_in_debate_section = this.$('#show_help_in_debate_section:checked').length == 1;
 
     this.model.set({
       introduction:introduction,

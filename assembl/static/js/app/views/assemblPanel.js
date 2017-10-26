@@ -1,11 +1,11 @@
-'use strict';
 /**
  * 
  * @module app.views.assemblPanel
  */
 
-var LoaderView = require('./loaderView.js'),
-    _ = require('underscore');
+var LoaderView = require('./loaderView.js');
+
+var _ = require('underscore');
 
 /**
  * An abstract class every panel should eventually extend

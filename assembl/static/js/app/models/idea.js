@@ -1,17 +1,17 @@
-'use strict';
 /**
  * Represent an idea
  * @module app.models.idea
  */
-var _ = require('underscore'),
-    Promise = require('bluebird'),
-    Base = require('./base.js'),
-    Ctx = require('../common/context.js'),
-    i18n = require('../utils/i18n.js'),
-    Types = require('../utils/types.js'),
-    LangString = require('./langstring.js'),
-    Attachment = require('./attachments.js'),
-    Permissions = require('../utils/permissions.js');
+var _ = require('underscore');
+
+var Promise = require('bluebird');
+var Base = require('./base.js');
+var Ctx = require('../common/context.js');
+var i18n = require('../utils/i18n.js');
+var Types = require('../utils/types.js');
+var LangString = require('./langstring.js');
+var Attachment = require('./attachments.js');
+var Permissions = require('../utils/permissions.js');
 /**
  * Idea model
  * Frontend model for :py:class:`assembl.models.idea.Idea`
@@ -119,7 +119,8 @@ var IdeaModel = Base.Model.extend({
     if (this.get('root') === true) {
       return i18n.gettext('The root idea will not be in the synthesis');
     }
-    var valText, val = this.get('definition');
+    var valText;
+    var val = this.get('definition');
     if (val) {
       valText = val.bestValue(langPrefs);
       if (valText && Ctx.stripHtml(valText)) {
@@ -147,7 +148,8 @@ var IdeaModel = Base.Model.extend({
     if (this.get('root') === true) {
       return i18n.gettext('The root idea will never be in the synthesis');
     }
-    var valText, val = this.get('longTitle');
+    var valText;
+    var val = this.get('longTitle');
     if (val) {
       valText = val.bestValue(langPrefs);
       if (valText && Ctx.stripHtml(valText)) {
@@ -180,7 +182,8 @@ var IdeaModel = Base.Model.extend({
     if (this.isRootIdea()) {
       return i18n.gettext('All posts');
     }
-    var valText, val = this.get('shortTitle');
+    var valText;
+    var val = this.get('shortTitle');
     if (val) {
       valText = val.bestValue(langPrefs);
       if (valText && Ctx.stripHtml(valText)) {
@@ -243,10 +246,10 @@ var IdeaModel = Base.Model.extend({
    * @function app.models.idea.IdeaModel.addSiblingAbove
    */
   addSiblingAbove: function(idea) {
-    var parent = this.getParent(),
-        parentId = parent ? parent.getId() : null,
-        index = this.collection.indexOf(this),
-        order = this.get('order') - 0.1;
+    var parent = this.getParent();
+    var parentId = parent ? parent.getId() : null;
+    var index = this.collection.indexOf(this);
+    var order = this.get('order') - 0.1;
     this.collection.add(idea, { at: index });
     idea.attributes.parentId = parentId;
     idea.attributes.order = order;
@@ -263,10 +266,10 @@ var IdeaModel = Base.Model.extend({
    * @function app.models.idea.IdeaModel.addSiblingBelow
    */
   addSiblingBelow: function(idea) {
-    var parent = this.getParent(),
-        parentId = parent ? parent.getId() : null,
-        index = this.collection.indexOf(this) + 1,
-        order = this.get('order') + 0.1;
+    var parent = this.getParent();
+    var parentId = parent ? parent.getId() : null;
+    var index = this.collection.indexOf(this) + 1;
+    var order = this.get('order') + 0.1;
     this.collection.add(idea, { at: index });
     idea.attributes.parentId = parentId;
     idea.attributes.order = order;
@@ -335,10 +338,10 @@ var IdeaModel = Base.Model.extend({
     if (parentLink.get('target') != this.id) {
       console.error("this is not my link");
     } else if (preferences && preferences.idea_typology.ideas) {
-      var preferences = Ctx.getPreferences(),
-          parent =  this.collection.findWhere({ '@id': parentLink.get('source') }),
-          parentSubtype = parent.get('subtype'),
-          typologyParentInfo = preferences.idea_typology.ideas[parentSubtype];
+      var preferences = Ctx.getPreferences();
+      var parent =  this.collection.findWhere({ '@id': parentLink.get('source') });
+      var parentSubtype = parent.get('subtype');
+      var typologyParentInfo = preferences.idea_typology.ideas[parentSubtype];
       if (typologyParentInfo && typologyParentInfo.rules) {
         var result = [];
         _.mapObject(typologyParentInfo.rules, function(objectTypes, linkType) {
@@ -357,10 +360,11 @@ var IdeaModel = Base.Model.extend({
   },
 
   combinedTypeNamesOf: function(combined, lang) {
-    var preferences = Ctx.getPreferences(),
-        LNTypes = combined.split(/;/, 2),
-        linkName = LNTypes[0], nodeName = LNTypes[1],
-        info = preferences.idea_typology;
+    var preferences = Ctx.getPreferences();
+    var LNTypes = combined.split(/;/, 2);
+    var linkName = LNTypes[0];
+    var nodeName = LNTypes[1];
+    var info = preferences.idea_typology;
     if (!info) {
       console.error('No typology!');
       if (linkName == 'InclusionRelation') {
@@ -417,29 +421,29 @@ var IdeaModel = Base.Model.extend({
     var that = this;
     return this.collection.collectionManager.getAllAnnouncementCollectionPromise()
             .then(function(allAnnouncementCollection) {
-              var announcement = undefined,
-                  counter = 0,
-                  parent = that,
-                  condition;
-              do {
-                if( counter === 0 ) {
-                  announcement = allAnnouncementCollection.findWhere(
-                      {idObjectAttachedTo: parent.id}
-                      );
-                }
-                else {
-                  announcement = allAnnouncementCollection.findWhere(
-                      {idObjectAttachedTo: parent.id,
-                       should_propagate_down: true}
-                      );
-                }
-                if (announcement)
-                  break;
-                parent = parent.get('parentId') !== null ? parent.getParent() : null;
-                counter += 1;
-              } while (parent);
-              return Promise.resolve(announcement);
-            }
+      var announcement = undefined;
+      var counter = 0;
+      var parent = that;
+      var condition;
+      do {
+        if( counter === 0 ) {
+          announcement = allAnnouncementCollection.findWhere(
+              {idObjectAttachedTo: parent.id}
+              );
+        }
+        else {
+          announcement = allAnnouncementCollection.findWhere(
+              {idObjectAttachedTo: parent.id,
+               should_propagate_down: true}
+              );
+        }
+        if (announcement)
+          break;
+        parent = parent.get('parentId') !== null ? parent.getParent() : null;
+        counter += 1;
+      } while (parent);
+      return Promise.resolve(announcement);
+    }
         );
   },
   /**
@@ -482,8 +486,9 @@ var IdeaModel = Base.Model.extend({
   updateChildrenOrder: function() {
     var children = _.sortBy(this.getChildren(), function(child) {
       return child.get('order');
-    }),
-    currentOrder = 1;
+    });
+
+    var currentOrder = 1;
     _.each(children, function(child) {
       child.save('order', currentOrder, {
         success: function(model, resp) {
@@ -586,8 +591,8 @@ var IdeaCollection = Base.Collection.extend({
    * @function app.models.idea.IdeaCollection.updateRootIdeasOrder
    */
   updateRootIdeasOrder: function() {
-    var children = this.where({ parentId: null }),
-        currentOrder = 1;
+    var children = this.where({ parentId: null });
+    var currentOrder = 1;
     _.each(children, function(child) {
       child.save('order', currentOrder, {
         success: function(model, resp) {
@@ -610,7 +615,9 @@ var IdeaCollection = Base.Collection.extend({
     if (ancestry === undefined) {
       ancestry = [];
     }
-    var that = this, idea, origin_id;
+    var that = this;
+    var idea;
+    var origin_id;
     if (origin_link == undefined) {
       idea = this.getRootIdea();
       origin_id = idea.id;
@@ -657,9 +664,10 @@ var IdeaCollection = Base.Collection.extend({
    * @function app.models.idea.IdeaCollection.visitBreadthFirst
    */
   visitBreadthFirst: function(idea_links, visitor, origin_link, include_ts, ancestry, includeHidden) {
-    var that = this,
-        continue_visit = true,
-        origin_id, idea;
+    var that = this;
+    var continue_visit = true;
+    var origin_id;
+    var idea;
     if (origin_link == undefined) {
       idea = this.getRootIdea();
       origin_id = idea.id;
@@ -697,9 +705,9 @@ var IdeaCollection = Base.Collection.extend({
       });
       var childlinks_to_visit = [];
       for (var i in child_links) {
-        var link = child_links[i],
-            target_id = link.get('target'),
-            target = this.get(target_id);
+        var link = child_links[i];
+        var target_id = link.get('target');
+        var target = this.get(target_id);
         if (target.get('is_tombstone') && include_ts !== true)
             continue;
         if (visitor.visit(target, ancestry)) {

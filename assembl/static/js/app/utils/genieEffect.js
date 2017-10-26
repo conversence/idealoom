@@ -2,8 +2,9 @@
  * 
  * @module app.utils.genieEffect
  */
-var $ = require('jquery'),
-    Promise = require('bluebird');
+var $ = require('jquery');
+
+var Promise = require('bluebird');
 
 /**
  * Creates a genie effect using CSS3 properties
@@ -43,17 +44,16 @@ var effect = function($source, $target, duration, delayTime){
         "transition": "all " + t + "s", //0.25s
     }
 
-    var targetHeight = $target.height(),
-        targetWidth = $target.width(),
-        sourceHeight = $source.height(),
-        sourceWidth = $source.width(),
-        targetOffset = $target.offset(),
-        sourceOffset = $source.offset(),
-        diffX,
-        diffY;
- 
-    var scaleY = targetHeight / sourceHeight,
-        scaleX = targetWidth / sourceWidth;
+    var targetHeight = $target.height();
+    var targetWidth = $target.width();
+    var sourceHeight = $source.height();
+    var sourceWidth = $source.width();
+    var targetOffset = $target.offset();
+    var sourceOffset = $source.offset();
+    var diffX;
+    var diffY;
+    var scaleY = targetHeight / sourceHeight;
+    var scaleX = targetWidth / sourceWidth;
 
     // var genieAnimation = {
     //     "-ms-transform": "scale(" + scaleX + ", " + scaleY + ") perspective(370px) rotateX(45deg)",
@@ -63,9 +63,10 @@ var effect = function($source, $target, duration, delayTime){
     //     "transform": "scale(" + scaleX + ", " + scaleY + ") perspective(370px) rotateX(45deg)"
     // };
 
-    var percent = 30,
-        num = percent/100,
-        factor = num + 1;
+    var percent = 30;
+
+    var num = percent/100;
+    var factor = num + 1;
 
     var genieAnimation = {
         "-ms-transform": "perspective(370px) scale(0) rotateX(45deg)",
@@ -73,7 +74,7 @@ var effect = function($source, $target, duration, delayTime){
         "-moz-transform": "perspective(370px) scale(0)  rotateX(45deg)",
         "-o-transform": "perspective(370px) scale(0)  rotateX(45deg)",
         "transform": "perspective(370px) scale(0) rotateX(45deg)"
-    };    
+    };
     //Check who is on top
     if ((targetOffset.top - sourceOffset.top) < 0) {
         //Target is above
@@ -105,7 +106,7 @@ var effect = function($source, $target, duration, delayTime){
     }
 
     var origin = diffX + 'px ' + diffY + 'px'; //That space is very important in 'px '
-        
+
     // console.log("[Genie Effect] origin is: ", origin);
 
     $source.css(genieEffect);
@@ -118,14 +119,14 @@ var effect = function($source, $target, duration, delayTime){
 };
 
 var effect2 = function($source, $target, duration, delayTime){
-    var targetHeight = $target.height(),
-        targetWidth = $target.width(),
-        targetOffset = $target.offset(),
-        sourceOffset = $source.offset(),
-        diffX = sourceOffset.left - targetOffset.left - targetWidth*0.5,
-        diffY = sourceOffset.top - targetOffset.top - targetHeight*0.5,
-        origin = -diffX + 'px' + -diffY + 'px';
-    
+    var targetHeight = $target.height();
+    var targetWidth = $target.width();
+    var targetOffset = $target.offset();
+    var sourceOffset = $source.offset();
+    var diffX = sourceOffset.left - targetOffset.left - targetWidth*0.5;
+    var diffY = sourceOffset.top - targetOffset.top - targetHeight*0.5;
+    var origin = -diffX + 'px' + -diffY + 'px';
+
     console.log("[Genie Effect] origin is: ", origin);
 
     $source.addClass("genie-effect");

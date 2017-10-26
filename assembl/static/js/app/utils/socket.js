@@ -1,13 +1,13 @@
-'use strict';
 /**
  * 
  * @module app.utils.socket
  */
 
-var _ = require('underscore'),
-    SockJS = require('sockjs-client'),
-    App = require('../app.js'),
-    Ctx = require('../common/context.js');
+var _ = require('underscore');
+
+var SockJS = require('sockjs-client');
+var App = require('../app.js');
+var Ctx = require('../common/context.js');
 
 /**
  * @class app.utils.socket.Socket
@@ -93,9 +93,9 @@ Socket.prototype.onMessage = function(ev) {
     this.state = Socket.STATE_OPEN;
   }
 
-  var data = JSON.parse(ev.data),
-      i = 0,
-      len = data.length;
+  var data = JSON.parse(ev.data);
+  var i = 0;
+  var len = data.length;
 
   for (; i < len; i += 1) {
     this.processData(data[i]);
@@ -132,9 +132,9 @@ Socket.prototype.onClose = function(ev) {
  * @param  {Object} item
  */
 Socket.prototype.processData = function(item) {
-  var CollectionManager = require('../common/collectionManager.js'),
-      collectionManager = new CollectionManager(),
-      collPromise = collectionManager.getCollectionPromiseByType(item);
+  var CollectionManager = require('../common/collectionManager.js');
+  var collectionManager = new CollectionManager();
+  var collPromise = collectionManager.getCollectionPromiseByType(item);
 
   if (Ctx.debugSocket) {
     console.log("On socket:", item['@type'], item['@id'], item);

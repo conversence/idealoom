@@ -1,20 +1,20 @@
-'use strict';
 /**
  * A simple editor for langstring models, mostly for back-office use
  * @module app.views.admin.simpleLangStringEdit
  */
 
-var Assembl = require('../app.js'),
-    Ctx = require('../common/context.js'),
-    i18n = require('../utils/i18n.js'),
-    EditableField = require('./reusableDataFields/editableField.js'),
-    LangString = require('../models/langstring.js'),
-    CollectionManager = require('../common/collectionManager.js'),
-    Marionette = require('backbone.marionette'),
-    Growl = require('../utils/growl.js'),
-    $ = require('jquery'),
-    _ = require('underscore'),
-    Promise = require('bluebird');
+var Assembl = require('../app.js');
+
+var Ctx = require('../common/context.js');
+var i18n = require('../utils/i18n.js');
+var EditableField = require('./reusableDataFields/editableField.js');
+var LangString = require('../models/langstring.js');
+var CollectionManager = require('../common/collectionManager.js');
+var Marionette = require('backbone.marionette');
+var Growl = require('../utils/growl.js');
+var $ = require('jquery');
+var _ = require('underscore');
+var Promise = require('bluebird');
 
 
 /**
@@ -49,9 +49,9 @@ var SimpleLangStringEditPanel = Marionette.View.extend({
   },
 
   addEntry: function(ev) {
-    var langstring = this.model,
-        entries = langstring.get('entries'),
-        entry = new LangString.EntryModel();
+    var langstring = this.model;
+    var entries = langstring.get('entries');
+    var entry = new LangString.EntryModel();
     entries.add(entry);
     // saving will happen after entry has changed value
     ev.preventDefault();

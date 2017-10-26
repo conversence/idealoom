@@ -1,23 +1,24 @@
-'use strict';
 /**
  * 
  * @module app.views.groups.modalGroup
  */
 
-var Marionette = require('backbone.marionette'),
-    Backbone = require('backbone'),
-    BackboneModal = require('backbone.modal'),
-    _ = require('underscore'),
-    $ = require('jquery'),
-    Assembl = require('../../app.js'),
-    Ctx = require('../../common/context.js'),
-    i18n = require('../../utils/i18n.js'),
+var Marionette = require('backbone.marionette');
 
-    //panelSpec = require('../../models/panelSpec'),
-    //PanelSpecTypes = require('../../utils/panelSpecTypes'),
-    //viewsFactory = require('../../objects/viewsFactory'),
-    groupSpec = require('../../models/groupSpec'),
-    GroupContainer = require('../groups/groupContainer');
+var Backbone = require('backbone');
+var BackboneModal = require('backbone.modal');
+var _ = require('underscore');
+var $ = require('jquery');
+var Assembl = require('../../app.js');
+var Ctx = require('../../common/context.js');
+var i18n = require('../../utils/i18n.js');
+
+var //panelSpec = require('../../models/panelSpec'),
+//PanelSpecTypes = require('../../utils/panelSpecTypes'),
+//viewsFactory = require('../../objects/viewsFactory'),
+groupSpec = require('../../models/groupSpec');
+
+var GroupContainer = require('../groups/groupContainer');
 
 /**
  * @class app.views.groups.modalGroup.ModalGroupView

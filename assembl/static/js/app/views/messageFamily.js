@@ -1,23 +1,23 @@
-'use strict';
 /**
  * 
  * @module app.views.messageFamily
  */
 
-var Marionette = require('backbone.marionette'),
-    _ = require('underscore'),
-    i18n = require('../utils/i18n.js'),
-    Assembl = require('../app.js'),
-    Ctx = require('../common/context.js'),
-    Types = require('../utils/types.js'),
-    MessageView = require('./message.js'),
-    MessageModel = require('../models/message.js'),
-    SynthesisMessageView = require('./synthesisMessage.js'),
-    MessageDeletedByUserView = require('./messageDeletedByUser.js'),
-    MessageDeletedByAdminView = require('./messageDeletedByAdmin.js'),
-    Analytics = require('../internal_modules/analytics/dispatcher.js'),
-    LoaderView = require('./loaderView.js'),
-    availableFilters = require('./postFilters.js');
+var Marionette = require('backbone.marionette');
+
+var _ = require('underscore');
+var i18n = require('../utils/i18n.js');
+var Assembl = require('../app.js');
+var Ctx = require('../common/context.js');
+var Types = require('../utils/types.js');
+var MessageView = require('./message.js');
+var MessageModel = require('../models/message.js');
+var SynthesisMessageView = require('./synthesisMessage.js');
+var MessageDeletedByUserView = require('./messageDeletedByUser.js');
+var MessageDeletedByAdminView = require('./messageDeletedByAdmin.js');
+var Analytics = require('../internal_modules/analytics/dispatcher.js');
+var LoaderView = require('./loaderView.js');
+var availableFilters = require('./postFilters.js');
 
 /**
  * @class app.views.messageFamily.MessageFamilyView
@@ -81,53 +81,53 @@ var MessageFamilyView = LoaderView.extend({
   },
 
   serializeData: function() {
-      var hasParentsOrChildrenOutOfScope = false,
-          firstMessage = this.model,
-          numAncestors = undefined,
-          numDescendants = undefined,
-          visitorViewData = this.visitorData.visitorViewData[this.model.id],
-          numAncestorsOutOfContext = 0,
-          numDescendantsOutOfContext = 0,
-          numAuthorsOutOfContext = 0;
+    var hasParentsOrChildrenOutOfScope = false;
+    var firstMessage = this.model;
+    var numAncestors = undefined;
+    var numDescendants = undefined;
+    var visitorViewData = this.visitorData.visitorViewData[this.model.id];
+    var numAncestorsOutOfContext = 0;
+    var numDescendantsOutOfContext = 0;
+    var numAuthorsOutOfContext = 0;
 
-      //console.log(this.model.id, visitorViewData);
-      if (this.messageListView.isCurrentViewStyleThreadedType()) {
-        if ((visitorViewData.filtered_descendant_count !== visitorViewData.real_descendant_count) || visitorViewData.real_ancestor_count !== visitorViewData.level && firstMessage.get("parentId") && this.level === 1) {
-          hasParentsOrChildrenOutOfScope = true;
-          numAncestorsOutOfContext = visitorViewData.real_ancestor_count - visitorViewData.level;
-          numDescendantsOutOfContext = visitorViewData.real_descendant_count - visitorViewData.filtered_descendant_count;
-          numAuthorsOutOfContext = visitorViewData.real_descendant_authors_list.length - visitorViewData.filtered_descendant_authors_list.length + visitorViewData.real_ancestor_authors_list.length - visitorViewData.filtered_ancestor_authors_list.length;
-        }
+    //console.log(this.model.id, visitorViewData);
+    if (this.messageListView.isCurrentViewStyleThreadedType()) {
+      if ((visitorViewData.filtered_descendant_count !== visitorViewData.real_descendant_count) || visitorViewData.real_ancestor_count !== visitorViewData.level && firstMessage.get("parentId") && this.level === 1) {
+        hasParentsOrChildrenOutOfScope = true;
+        numAncestorsOutOfContext = visitorViewData.real_ancestor_count - visitorViewData.level;
+        numDescendantsOutOfContext = visitorViewData.real_descendant_count - visitorViewData.filtered_descendant_count;
+        numAuthorsOutOfContext = visitorViewData.real_descendant_authors_list.length - visitorViewData.filtered_descendant_authors_list.length + visitorViewData.real_ancestor_authors_list.length - visitorViewData.filtered_ancestor_authors_list.length;
       }
-      else {
-        if (visitorViewData.real_descendant_count > 0 || visitorViewData.real_ancestor_count > 0) {
-          hasParentsOrChildrenOutOfScope = true;
-          numAncestorsOutOfContext = visitorViewData.real_ancestor_count;
-          numDescendantsOutOfContext = visitorViewData.real_descendant_count;
-          numAuthorsOutOfContext = _.union(visitorViewData.real_descendant_authors_list, visitorViewData.real_ancestor_authors_list, [this.model.get('idCreator')]).length - 1;
-        }
+    }
+    else {
+      if (visitorViewData.real_descendant_count > 0 || visitorViewData.real_ancestor_count > 0) {
+        hasParentsOrChildrenOutOfScope = true;
+        numAncestorsOutOfContext = visitorViewData.real_ancestor_count;
+        numDescendantsOutOfContext = visitorViewData.real_descendant_count;
+        numAuthorsOutOfContext = _.union(visitorViewData.real_descendant_authors_list, visitorViewData.real_ancestor_authors_list, [this.model.get('idCreator')]).length - 1;
       }
+    }
 
-      return {
-        id: this.model.get('@id'),
-        level: this.level,
-        last_sibling_chain: this.last_sibling_chain,
-        hasChildren: this.hasChildren,
-        hasParentsOrChildrenOutOfScope: hasParentsOrChildrenOutOfScope,
-        numAncestorsOutOfContext: numAncestorsOutOfContext,
-        numDescendantsOutOfContext: numDescendantsOutOfContext,
-        numAuthorsOutOfContext: numAuthorsOutOfContext,
-        ctxMessageCountTooltip: i18n.sprintf(i18n.ngettext(
-          "%d more message is available in this message's full context.",
-          "%d more messages are available in this message's full context.",
-          (numAncestorsOutOfContext + numDescendantsOutOfContext)),
-          (numAncestorsOutOfContext + numDescendantsOutOfContext)),
-        ctxAuthorCountTooltip: i18n.sprintf(i18n.ngettext(
-          "Messages available in this message's full context are from %d more author.",
-          "Messages available in this message's full context are from %d more authors.",
-          numAuthorsOutOfContext), numAuthorsOutOfContext)
-      };
-    },
+    return {
+      id: this.model.get('@id'),
+      level: this.level,
+      last_sibling_chain: this.last_sibling_chain,
+      hasChildren: this.hasChildren,
+      hasParentsOrChildrenOutOfScope: hasParentsOrChildrenOutOfScope,
+      numAncestorsOutOfContext: numAncestorsOutOfContext,
+      numDescendantsOutOfContext: numDescendantsOutOfContext,
+      numAuthorsOutOfContext: numAuthorsOutOfContext,
+      ctxMessageCountTooltip: i18n.sprintf(i18n.ngettext(
+        "%d more message is available in this message's full context.",
+        "%d more messages are available in this message's full context.",
+        (numAncestorsOutOfContext + numDescendantsOutOfContext)),
+        (numAncestorsOutOfContext + numDescendantsOutOfContext)),
+      ctxAuthorCountTooltip: i18n.sprintf(i18n.ngettext(
+        "Messages available in this message's full context are from %d more author.",
+        "Messages available in this message's full context are from %d more authors.",
+        numAuthorsOutOfContext), numAuthorsOutOfContext)
+    };
+  },
 
   onDestroy: function() {
     //Marionette view not used in a region
@@ -241,17 +241,19 @@ var MessageFamilyView = LoaderView.extend({
     ev.preventDefault();
     analytics.trackEvent(analytics.events.THREAD_VIEW_COMPLETE_CONVERSATION);
 
-    var filters =  [{filterDef: availableFilters.POST_IS_DESCENDENT_OR_ANCESTOR_OF_POST, value: this.model.id}],
-        ModalGroup = require('./groups/modalGroup.js'),
-        subject = this.model.get('subject'),
-        modal_title = i18n.sprintf(i18n.gettext("Zooming on the conversation around \"%s\""),
-                                   subject ? subject.bestValue(this.translationData) : ''),
-        modalFactory = ModalGroup.filteredMessagePanelFactory(modal_title, filters),
-        modal = modalFactory.modal,
-        messageList = modalFactory.messageList;
+    var filters =  [{filterDef: availableFilters.POST_IS_DESCENDENT_OR_ANCESTOR_OF_POST, value: this.model.id}];
+    var ModalGroup = require('./groups/modalGroup.js');
+    var subject = this.model.get('subject');
+
+    var modal_title = i18n.sprintf(i18n.gettext("Zooming on the conversation around \"%s\""),
+                               subject ? subject.bestValue(this.translationData) : '');
+
+    var modalFactory = ModalGroup.filteredMessagePanelFactory(modal_title, filters);
+    var modal = modalFactory.modal;
+    var messageList = modalFactory.messageList;
 
     Assembl.rootView.showChildView('slider', modal);
-    messageList.showMessageById(this.model.id, undefined, true, true); 
+    messageList.showMessageById(this.model.id, undefined, true, true);
   },
 
   /**
@@ -261,9 +263,9 @@ var MessageFamilyView = LoaderView.extend({
     if (this.isLoading()) {
         return;
     }
-    var collapsed = this.collapsed,
-        target = this.$el,
-        children = target.find(">.messagelist-children").last();
+    var collapsed = this.collapsed;
+    var target = this.$el;
+    var children = target.find(">.messagelist-children").last();
     if (collapsed) {
       this.$el.removeClass('message--expanded');
       children.hide();

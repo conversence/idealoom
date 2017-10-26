@@ -1,4 +1,3 @@
-'use strict';
 /**
  * 
  * @module app.views.visitors.ideaSiblingChainVisitor
@@ -21,12 +20,14 @@ var IdeaSiblingChainVisitor = function(data_by_idea) {
 IdeaSiblingChainVisitor.prototype = new Visitor();
 
 IdeaSiblingChainVisitor.prototype.visit = function(idea, ancestry) {
-  var idea_id = idea.getId(),
-      data_by_idea = this.data_by_idea;
+  var idea_id = idea.getId();
+  var data_by_idea = this.data_by_idea;
   if (data_by_idea.hasOwnProperty(idea_id)) {
     var level = 0;
     var in_ancestry = true;
-    var link, ancestor_id, last_ancestor_id = null;
+    var link;
+    var ancestor_id;
+    var last_ancestor_id = null;
     var last_sibling_chain = [];
     for (var i in ancestry) {
       link = ancestry[i];

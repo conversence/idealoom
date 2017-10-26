@@ -1,14 +1,14 @@
-'use strict';
 /**
  * 
  * @module app.views.externalVisualization
  */
 
-var Marionette = require('backbone.marionette'),
-    i18n = require('../utils/i18n.js'),
-    Ctx = require('../common/context.js'),
-    PanelSpecTypes = require('../utils/panelSpecTypes.js'),
-    AssemblPanel = require('./assemblPanel.js');
+var Marionette = require('backbone.marionette');
+
+var i18n = require('../utils/i18n.js');
+var Ctx = require('../common/context.js');
+var PanelSpecTypes = require('../utils/panelSpecTypes.js');
+var AssemblPanel = require('./assemblPanel.js');
 
 var externalVisualizationPanel = Marionette.View.extend({
   constructor: function externalVisualizationPanel() {

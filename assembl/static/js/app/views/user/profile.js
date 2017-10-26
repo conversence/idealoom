@@ -1,16 +1,16 @@
-'use strict';
 /**
  * 
  * @module app.views.user.profile
  */
 
-var Marionette = require('backbone.marionette'),
-    $ = require('jquery'),
-    Agents = require('../../models/agents.js'),
-    i18n = require('../../utils/i18n.js'),
-    UserNavigationMenu = require('./userNavigationMenu.js'),
-    Ctx = require('../../common/context.js'),
-    Growl = require('../../utils/growl.js');
+var Marionette = require('backbone.marionette');
+
+var $ = require('jquery');
+var Agents = require('../../models/agents.js');
+var i18n = require('../../utils/i18n.js');
+var UserNavigationMenu = require('./userNavigationMenu.js');
+var Ctx = require('../../common/context.js');
+var Growl = require('../../utils/growl.js');
 
 var profile = Marionette.View.extend({
   constructor: function profile() {

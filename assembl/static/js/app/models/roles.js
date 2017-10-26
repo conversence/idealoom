@@ -1,14 +1,14 @@
-'use strict';
 /**
  * A role that the user is granted in this discussion
  * @module app.models.roles
  */
 
-var Base = require('./base.js'),
-    Ctx = require('../common/context.js'),
-    Roles = require('../utils/roles.js'),
-    Types = require('../utils/types.js'),
-    Analytics = require('../internal_modules/analytics/dispatcher.js');
+var Base = require('./base.js');
+
+var Ctx = require('../common/context.js');
+var Roles = require('../utils/roles.js');
+var Types = require('../utils/types.js');
+var Analytics = require('../internal_modules/analytics/dispatcher.js');
 
 /**
  * Role model
@@ -16,7 +16,7 @@ var Base = require('./base.js'),
  * @class app.models.roles.roleModel
  * @extends app.models.base.BaseModel
  */
- 
+
 var roleModel = Base.Model.extend({
   constructor: function roleModel() {
     Base.Model.apply(this, arguments);
@@ -47,7 +47,7 @@ var roleModel = Base.Model.extend({
  * @class app.models.roles.roleCollection
  * @extends app.models.base.BaseCollection
  */
- 
+
 var roleCollection = Base.Collection.extend({
   constructor: function roleCollection() {
     Base.Collection.apply(this, arguments);
@@ -83,20 +83,21 @@ var roleCollection = Base.Collection.extend({
   },
 
   UnsubscribeUserFromDiscussion: function() {
-  var that = this,
-      role =  this.find(function(local_role) {
-        return local_role.get('role') === Roles.PARTICIPANT;
-      });
+    var that = this;
 
-  role.destroy({
-    success: function(model, resp) {
-      that.remove(model);
-      var analytics = Analytics.getInstance();
-      analytics.trackEvent(analytics.events.LEAVE_DISCUSSION);
-    },
-    error: function(model, resp) {
-      console.error('ERROR: unSubscription failed', resp);
-    }});
+    var role =  this.find(function(local_role) {
+      return local_role.get('role') === Roles.PARTICIPANT;
+    });
+
+    role.destroy({
+      success: function(model, resp) {
+        that.remove(model);
+        var analytics = Analytics.getInstance();
+        analytics.trackEvent(analytics.events.LEAVE_DISCUSSION);
+      },
+      error: function(model, resp) {
+        console.error('ERROR: unSubscription failed', resp);
+      }});
   }
 });
 

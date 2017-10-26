@@ -1,35 +1,35 @@
-'use strict';
 /**
  * 
  * @module app.views.ideaPanel
  */
 
-var Assembl = require('../app.js'),
-    Ctx = require('../common/context.js'),
-    i18n = require('../utils/i18n.js'),
-    EditableLSField = require('./reusableDataFields/editableLSField.js'),
-    CKEditorLSField = require('./reusableDataFields/ckeditorLSField.js'),
-    Permissions = require('../utils/permissions.js'),
-    PanelSpecTypes = require('../utils/panelSpecTypes.js'),
-    MessagesInProgress = require('../objects/messagesInProgress.js'),
-    SegmentList = require('./segmentList.js'),
-    Announcements = require('./announcements.js'),
-    Widget = require('../models/widget.js'),
-    AgentViews = require('./agent.js'),
-    WidgetLinks = require('./widgetLinks.js'),
-    WidgetButtons = require('./widgetButtons.js'),
-    CollectionManager = require('../common/collectionManager.js'),
-    AssemblPanel = require('./assemblPanel.js'),
-    Marionette = require('backbone.marionette'),
-    AttachmentViews = require('./attachments.js'),
-    ConfirmModal = require('./confirmModal.js'),
-    AttachmentModels = require('../models/attachments.js'),
-    Loader = require('./loader.js'),
-    $ = require('jquery'),
-    _ = require('underscore'),
-    highlight = require('jquery-highlight'),
-    BackboneSubset = require("Backbone.Subset"),
-    Promise = require('bluebird');
+var Assembl = require('../app.js');
+
+var Ctx = require('../common/context.js');
+var i18n = require('../utils/i18n.js');
+var EditableLSField = require('./reusableDataFields/editableLSField.js');
+var CKEditorLSField = require('./reusableDataFields/ckeditorLSField.js');
+var Permissions = require('../utils/permissions.js');
+var PanelSpecTypes = require('../utils/panelSpecTypes.js');
+var MessagesInProgress = require('../objects/messagesInProgress.js');
+var SegmentList = require('./segmentList.js');
+var Announcements = require('./announcements.js');
+var Widget = require('../models/widget.js');
+var AgentViews = require('./agent.js');
+var WidgetLinks = require('./widgetLinks.js');
+var WidgetButtons = require('./widgetButtons.js');
+var CollectionManager = require('../common/collectionManager.js');
+var AssemblPanel = require('./assemblPanel.js');
+var Marionette = require('backbone.marionette');
+var AttachmentViews = require('./attachments.js');
+var ConfirmModal = require('./confirmModal.js');
+var AttachmentModels = require('../models/attachments.js');
+var Loader = require('./loader.js');
+var $ = require('jquery');
+var _ = require('underscore');
+var highlight = require('jquery-highlight');
+var BackboneSubset = require("Backbone.Subset");
+var Promise = require('bluebird');
 
 var IdeaPanel = AssemblPanel.extend({
   constructor: function IdeaPanel() {
@@ -48,7 +48,8 @@ var IdeaPanel = AssemblPanel.extend({
   initialize: function(options) {
     AssemblPanel.prototype.initialize.apply(this, arguments);
     this.setLoading(true);
-    var that = this, collectionManager = new CollectionManager();
+    var that = this;
+    var collectionManager = new CollectionManager();
     this.panelWrapper = options.panelWrapper;
     this.lastRenderHadModel = false;
 
@@ -99,8 +100,9 @@ var IdeaPanel = AssemblPanel.extend({
       this.listenTo(this.panelWrapper.model, 'change:minimized', function(model, value, options){
         //Must use a setTimeout as the panel animation is not Promisified
         //The animation duration is available as a view variable
-        var that = this,
-            timeToVisibleImage = this.panelWrapper.animationDuration / 2;
+        var that = this;
+
+        var timeToVisibleImage = this.panelWrapper.animationDuration / 2;
 
         setTimeout(function(){ that.checkContentHeight(); }, timeToVisibleImage);
       });
@@ -181,8 +183,8 @@ var IdeaPanel = AssemblPanel.extend({
     attachment or not.
    */
   checkContentHeight: function(){
-    var domObject = this.$(".content-ideapanel"),
-        that = this;
+    var domObject = this.$(".content-ideapanel");
+    var that = this;
     if (this.model !== null && this.model.get('attachments') && (this.model.get('attachments').length > 0)){
       if (this.attachmentLoaded){
         var imageDomObject = this.$el.find(".embedded-image-preview");
@@ -310,19 +312,19 @@ var IdeaPanel = AssemblPanel.extend({
       console.log("ideaPanel::serializeData()");
     }
 
-    var subIdeas = {},
-        that = this,
-        currentUser = Ctx.getCurrentUser(),
-        canEdit = currentUser.can(Permissions.EDIT_IDEA) || false,
-        canEditNextSynthesis = currentUser.can(Permissions.EDIT_SYNTHESIS),
-        direct_link_relative_url = null,
-        share_link_url = null,
-        currentTypes = null,
-        currentTypeDescriptions = ['', ''],
-        possibleTypes = [],
-        possibleTypeDescriptions = {},
-        locale = Ctx.getLocale(),
-        contributors = undefined;
+    var subIdeas = {};
+    var that = this;
+    var currentUser = Ctx.getCurrentUser();
+    var canEdit = currentUser.can(Permissions.EDIT_IDEA) || false;
+    var canEditNextSynthesis = currentUser.can(Permissions.EDIT_SYNTHESIS);
+    var direct_link_relative_url = null;
+    var share_link_url = null;
+    var currentTypes = null;
+    var currentTypeDescriptions = ['', ''];
+    var possibleTypes = [];
+    var possibleTypeDescriptions = {};
+    var locale = Ctx.getLocale();
+    var contributors = undefined;
 
     if (this.model) {
       subIdeas = this.model.getChildren();
@@ -374,12 +376,12 @@ var IdeaPanel = AssemblPanel.extend({
       nodeTypeDescription: currentTypeDescriptions[1],
       share_link_url: share_link_url
     };
-
   },
 
   onRender: function() {
-    var that = this, collectionManager = new CollectionManager(),
-        currentUser = Ctx.getCurrentUser();
+    var that = this;
+    var collectionManager = new CollectionManager();
+    var currentUser = Ctx.getCurrentUser();
 
     if (Ctx.debugRender) {
       console.log("ideaPanel::onRender()");
@@ -452,7 +454,6 @@ var IdeaPanel = AssemblPanel.extend({
     } else {
       this.lastRenderHadModel = false;
     }
-
   },
 
   onAttach: function() {
@@ -464,8 +465,8 @@ var IdeaPanel = AssemblPanel.extend({
   },
 
   getExtractslist: function() {
-    var that = this,
-        collectionManager = new CollectionManager();
+    var that = this;
+    var collectionManager = new CollectionManager();
 
     if (this.extractListSubset) {
       Promise.join(collectionManager.getAllExtractsCollectionPromise(),
@@ -488,13 +489,13 @@ var IdeaPanel = AssemblPanel.extend({
   },
 
   renderContributors: function() {
-    var that = this,
-    collectionManager = new CollectionManager();
+    var that = this;
+    var collectionManager = new CollectionManager();
 
     collectionManager.getAllUsersCollectionPromise().then(function(allAgents) {
-      var contributorsRaw = that.model.get('contributors'),
-      contributorsId = [],
-      allAgents = allAgents;
+      var contributorsRaw = that.model.get('contributors');
+      var contributorsId = [];
+      var allAgents = allAgents;
       _.each(contributorsRaw, function(contributorId) {
         contributorsId.push(contributorId);
       });
@@ -536,15 +537,13 @@ var IdeaPanel = AssemblPanel.extend({
         that.ui.contributorsSection.removeClass('hidden');
       }
     });
-
   },
 
   renderShortTitle: function() {
-
-    var currentUser = Ctx.getCurrentUser(),
-        canEdit = currentUser.can(Permissions.EDIT_IDEA) || false,
-        modelId = this.model.id,
-        partialMessage = MessagesInProgress.getMessage(modelId);
+    var currentUser = Ctx.getCurrentUser();
+    var canEdit = currentUser.can(Permissions.EDIT_IDEA) || false;
+    var modelId = this.model.id;
+    var partialMessage = MessagesInProgress.getMessage(modelId);
 
     var shortTitleField = new EditableLSField({
       'model': this.model,
@@ -557,7 +556,6 @@ var IdeaPanel = AssemblPanel.extend({
       'focus': this.focusShortTitle
     });
     shortTitleField.renderTo(this.$('.ideaPanel-shorttitle'));
-
   },
 
   /**
@@ -567,8 +565,8 @@ var IdeaPanel = AssemblPanel.extend({
   addSegment: function(segment) {
     delete segment.attributes.highlights;
 
-    var id = this.model.getId(),
-        that = this;
+    var id = this.model.getId();
+    var that = this;
     segment.save('idIdea', id, {
       success: function(model, resp) {
         //console.log('SUCCESS: addSegment', resp);
@@ -585,11 +583,11 @@ var IdeaPanel = AssemblPanel.extend({
    * @param {Segment} segment
    */
   showSegment: function(segment) {
-    var that = this,
-        selector = Ctx.format('.box[data-segmentid={0}]', segment.cid),
-        idIdea = segment.get('idIdea'),
-        box,
-        collectionManager = new CollectionManager();
+    var that = this;
+    var selector = Ctx.format('.box[data-segmentid={0}]', segment.cid);
+    var idIdea = segment.get('idIdea');
+    var box;
+    var collectionManager = new CollectionManager();
 
     collectionManager.getAllIdeasCollectionPromise()
             .then(function(allIdeasCollection) {
@@ -710,30 +708,30 @@ var IdeaPanel = AssemblPanel.extend({
     },
 
   fetchModelAndRender: function() {
-      var that = this,
-      collectionManager = new CollectionManager(),
-      fetchPromise = this.model.fetch({ data: $.param({ view: 'contributors'}) });
-      Promise.join(collectionManager.getAllExtractsCollectionPromise(),
-                   collectionManager.getAllIdeaLinksCollectionPromise(), fetchPromise,
-          function(allExtractsCollection, allLinksCollection, fetchedJQHR) {
-            //View could be gone, or model may have changed in the meantime
-            if (that.isRenderedAndNotYetDestroyed() && that.model) {
-              that.extractListSubset = new SegmentList.IdeaSegmentListSubset([], {
-                parent: allExtractsCollection,
-                ideaId: that.model.id
-              });
-              that.listenTo(that.extractListSubset, "add remove reset change", that.renderTemplateGetExtractsLabel);
+    var that = this;
+    var collectionManager = new CollectionManager();
+    var fetchPromise = this.model.fetch({ data: $.param({ view: 'contributors'}) });
+    Promise.join(collectionManager.getAllExtractsCollectionPromise(),
+                 collectionManager.getAllIdeaLinksCollectionPromise(), fetchPromise,
+        function(allExtractsCollection, allLinksCollection, fetchedJQHR) {
+          //View could be gone, or model may have changed in the meantime
+          if (that.isRenderedAndNotYetDestroyed() && that.model) {
+            that.extractListSubset = new SegmentList.IdeaSegmentListSubset([], {
+              parent: allExtractsCollection,
+              ideaId: that.model.id
+            });
+            that.listenTo(that.extractListSubset, "add remove reset change", that.renderTemplateGetExtractsLabel);
 
-              // temporary code: single parent link for now.
-              that.parentLink = allLinksCollection.findWhere({ 'target': that.model.id });
-              //console.log("The region:", that.segmentList);
-              that.setLoading(false);
-              that.render();
-            }
+            // temporary code: single parent link for now.
+            that.parentLink = allLinksCollection.findWhere({ 'target': that.model.id });
+            //console.log("The region:", that.segmentList);
+            that.setLoading(false);
+            that.render();
           }
+        }
 
-      );
-    },
+    );
+  },
 
   onTypeSelectionChange: function(ev) {
     var vals = ev.target.selectedOptions[0].value.split(/;/, 2);
@@ -746,8 +744,9 @@ var IdeaPanel = AssemblPanel.extend({
 
   deleteCurrentIdea: function() {
     // to be deleted, an idea cannot have any children nor segments
-    var that = this,
-        children = this.model.getChildren();
+    var that = this;
+
+    var children = this.model.getChildren();
 
     this.blockPanel();
     this.model.getExtractsPromise()
@@ -812,25 +811,25 @@ var IdeaPanel = AssemblPanel.extend({
   onDragStart: function(ev) {
     //console.log("ideaPanel::onDragStart() ev: ", ev);
 
-    var that = this,
-        collectionManager = new CollectionManager();
+    var that = this;
+
+    var collectionManager = new CollectionManager();
 
     //TODO: Deal with editing own extract (EDIT_MY_EXTRACT)
     if (Ctx.getCurrentUser().can(Permissions.EDIT_EXTRACT)) {
       collectionManager.getAllExtractsCollectionPromise()
             .then(function(allExtractsCollection) {
-              ev.currentTarget.style.opacity = 0.4;
+        ev.currentTarget.style.opacity = 0.4;
 
-              ev.originalEvent.dataTransfer.effectAllowed = 'all';
-              ev.originalEvent.dataTransfer.dropEffect = 'move';
+        ev.originalEvent.dataTransfer.effectAllowed = 'all';
+        ev.originalEvent.dataTransfer.dropEffect = 'move';
 
-              var cid = ev.currentTarget.getAttribute('data-segmentid'),
-                  segment = allExtractsCollection.getByCid(cid);
+        var cid = ev.currentTarget.getAttribute('data-segmentid');
+        var segment = allExtractsCollection.getByCid(cid);
 
-              Ctx.showDragbox(ev, segment.getQuote());
-              Ctx.setDraggedSegment(segment);
-
-            })
+        Ctx.showDragbox(ev, segment.getQuote());
+        Ctx.setDraggedSegment(segment);
+      })
             .catch(function(error){
               console.log("promise error: ", error);
             });
@@ -961,8 +960,8 @@ var IdeaPanel = AssemblPanel.extend({
   },
 
   onSegmentCloseButtonClick: function(ev) {
-    var cid = ev.currentTarget.getAttribute('data-segmentid'),
-        collectionManager = new CollectionManager();
+    var cid = ev.currentTarget.getAttribute('data-segmentid');
+    var collectionManager = new CollectionManager();
     collectionManager.getAllExtractsCollectionPromise().done(
             function(allExtractsCollection) {
               var segment = allExtractsCollection.get(cid);
@@ -992,8 +991,8 @@ var IdeaPanel = AssemblPanel.extend({
   },
 
   renderAnnouncement:  function() {
-    var that = this,
-    collectionManager = new CollectionManager();
+    var that = this;
+    var collectionManager = new CollectionManager();
 
     if (Ctx.getCurrentUser().can(Permissions.EDIT_IDEA)) {
       this.ui.announcement.removeClass('hidden');

@@ -1,19 +1,19 @@
-'use strict';
 /**
  * 
  * @module app.views.admin.adminPartners
  */
 
-var Marionette = require('backbone.marionette'),
-    Backbone = require('backbone'),
-    BackboneModal = require('backbone.modal'),
-    Assembl = require('../../app.js'),
-    $ = require('jquery'),
-    CollectionManager = require('../../common/collectionManager.js'),
-    Ctx = require('../../common/context.js'),
-    i18n = require('../../utils/i18n.js'),
-    partnerModel = require('../../models/partners.js'),
-    AdminNavigationMenu = require('./adminNavigationMenu.js');
+var Marionette = require('backbone.marionette');
+
+var Backbone = require('backbone');
+var BackboneModal = require('backbone.modal');
+var Assembl = require('../../app.js');
+var $ = require('jquery');
+var CollectionManager = require('../../common/collectionManager.js');
+var Ctx = require('../../common/context.js');
+var i18n = require('../../utils/i18n.js');
+var partnerModel = require('../../models/partners.js');
+var AdminNavigationMenu = require('./adminNavigationMenu.js');
 
 var Partners = Marionette.View.extend({
   constructor: function Partners() {
@@ -142,8 +142,8 @@ var adminPartners = Marionette.View.extend({
   },
 
   onRender: function() {
-    var that = this,
-        collectionManager = new CollectionManager();
+    var that = this;
+    var collectionManager = new CollectionManager();
 
     Ctx.initTooltips(this.$el);
 
@@ -189,9 +189,8 @@ var adminPartners = Marionette.View.extend({
       validatePartner: function(e) {
 
         if (e.target.checkValidity()) {
-
-          var inputs = document.querySelectorAll('#partner-form *[required]'),
-          that = this;
+          var inputs = document.querySelectorAll('#partner-form *[required]');
+          var that = this;
 
           var partner = new partnerModel.Model({
             description: this.$('.partner-description').val(),
@@ -211,7 +210,6 @@ var adminPartners = Marionette.View.extend({
               console.log(resp)
             }
           })
-
         }
 
         return false;

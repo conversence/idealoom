@@ -2,11 +2,12 @@
  * 
  * @module app.views.sourceEditView
  */
-var Marionette = require('backbone.marionette'),
-    $ = require('jquery'),
-    i18n = require('../utils/i18n.js'),
-    Promise = require('bluebird'),
-    Growl = require('../utils/growl.js');
+var Marionette = require('backbone.marionette');
+
+var $ = require('jquery');
+var i18n = require('../utils/i18n.js');
+var Promise = require('bluebird');
+var Growl = require('../utils/growl.js');
 
 
 /**

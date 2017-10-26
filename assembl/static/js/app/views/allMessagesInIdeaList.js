@@ -1,13 +1,13 @@
-'use strict';
 /**
  * 
  * @module app.views.allMessagesInIdeaList
  */
 
-var $ = require('jquery'),
-    ideaInIdeaList = require('./ideaInIdeaList.js'),
-    Ctx = require('../common/context.js'),
-    PanelSpecTypes = require('../utils/panelSpecTypes.js');
+var $ = require('jquery');
+
+var ideaInIdeaList = require('./ideaInIdeaList.js');
+var Ctx = require('../common/context.js');
+var PanelSpecTypes = require('../utils/panelSpecTypes.js');
 
 var AllMessagesInIdeaListView = ideaInIdeaList.IdeaView.extend({
   constructor: function AllMessagesInIdeaListView() {

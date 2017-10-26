@@ -1,4 +1,3 @@
-'use strict';
 /**
  * 
  * @module app.views.visitors.messageRenderVisitor
@@ -35,14 +34,15 @@ var MessageRenderVisitor = function(data_by_object, order_lookup_table, roots, f
 MessageRenderVisitor.prototype = new Visitor();
 
 MessageRenderVisitor.prototype.visit = function(object, ancestry) {
-  var data_by_object = this.data_by_object,
-      order_lookup_table = this.order_lookup_table,
-      filter_result = this.filter_function(object);
+  var data_by_object = this.data_by_object;
+  var order_lookup_table = this.order_lookup_table;
+  var filter_result = this.filter_function(object);
   if (filter_result) {
     var object_id = object.getId();
     var level = 0;
     var in_ancestry = true;
-    var ancestor_id, last_ancestor_id = null;
+    var ancestor_id;
+    var last_ancestor_id = null;
     var true_sibling = true;
     var real_ancestor_authors_list = [];
     var filtered_ancestor_authors_list = [];
@@ -107,14 +107,15 @@ MessageRenderVisitor.prototype.visit = function(object, ancestry) {
 
 MessageRenderVisitor.prototype.post_visit = function(object, children_data) {
   //console.log(object, children_data);
-  var filtered_descendant_count = 0,
-      real_descendant_count = 0,
-      filtered_descendant_authors_list = [],
-      real_descendant_authors_list = [],
-      newest_descendant_date = undefined,
-      filter_result = false,
-      authors = [],
-      retval = {};
+  var filtered_descendant_count = 0;
+
+  var real_descendant_count = 0;
+  var filtered_descendant_authors_list = [];
+  var real_descendant_authors_list = [];
+  var newest_descendant_date = undefined;
+  var filter_result = false;
+  var authors = [];
+  var retval = {};
   _.each(children_data, function(child_data) {
     if (child_data !== undefined) {
       filtered_descendant_count += child_data.filtered_descendant_count;
@@ -149,7 +150,7 @@ MessageRenderVisitor.prototype.post_visit = function(object, children_data) {
       authors = [object.get('idCreator')];
     }
   }
-  
+
   if (filter_result) {
     retval.filtered_descendant_count = filtered_descendant_count + 1;
     retval.filtered_descendant_authors_list = _.union(filtered_descendant_authors_list, authors);

@@ -1,40 +1,40 @@
-'use strict';
 /**
  * A singleton to manage data backend access with Ajax requests and Bluebird promises. Responsible for the data synchronization listening to a websocket and updating collections.
  * @module app.common.collectionManager
  */
 
-var Marionette = require('backbone.marionette'),
-    Promise = require('bluebird'),
-    Raven = require('raven-js'),
-    $ = require('jquery'),
-    Assembl = require('../app.js'),
-    Ctx = require('./context.js'),
-    Message = require('../models/message.js'),
-    groupSpec = require('../models/groupSpec.js'),
-    Idea = require('../models/idea.js'),
-    IdeaLink = require('../models/ideaLink.js'),
-    Segment = require('../models/segment.js'),
-    Synthesis = require('../models/synthesis.js'),
-    Partners = require('../models/partners.js'),
-    TimelineEvent = require('../models/timeline.js'),
-    Announcement = require('../models/announcement.js'),
-    Agents = require('../models/agents.js'),
-    NotificationSubscription = require('../models/notificationSubscription.js'),
-    Storage = require('../objects/storage.js'),
-    Types = require('../utils/types.js'),
-    i18n = require('../utils/i18n.js'),
-    LocalRole = require('../models/roles.js'),
-    Discussion = require('../models/discussion.js'),
-    DiscussionSource = require('../models/discussionSource.js'),
-    Widget = require('../models/widget.js'),
-    Social = require('../models/social.js'),
-    Account = require('../models/accounts.js'),
-    Socket = require('../utils/socket.js'),
-    DiscussionSources = require('../models/sources.js'),
-    DiscussionPreference = require('../models/discussionPreference.js'),
-    LanguagePreference = require('../models/languagePreference.js'),
-    IdeaContentLink = require('../models/ideaContentLink.js');
+var Marionette = require('backbone.marionette');
+
+var Promise = require('bluebird');
+var Raven = require('raven-js');
+var $ = require('jquery');
+var Assembl = require('../app.js');
+var Ctx = require('./context.js');
+var Message = require('../models/message.js');
+var groupSpec = require('../models/groupSpec.js');
+var Idea = require('../models/idea.js');
+var IdeaLink = require('../models/ideaLink.js');
+var Segment = require('../models/segment.js');
+var Synthesis = require('../models/synthesis.js');
+var Partners = require('../models/partners.js');
+var TimelineEvent = require('../models/timeline.js');
+var Announcement = require('../models/announcement.js');
+var Agents = require('../models/agents.js');
+var NotificationSubscription = require('../models/notificationSubscription.js');
+var Storage = require('../objects/storage.js');
+var Types = require('../utils/types.js');
+var i18n = require('../utils/i18n.js');
+var LocalRole = require('../models/roles.js');
+var Discussion = require('../models/discussion.js');
+var DiscussionSource = require('../models/discussionSource.js');
+var Widget = require('../models/widget.js');
+var Social = require('../models/social.js');
+var Account = require('../models/accounts.js');
+var Socket = require('../utils/socket.js');
+var DiscussionSources = require('../models/sources.js');
+var DiscussionPreference = require('../models/discussionPreference.js');
+var LanguagePreference = require('../models/languagePreference.js');
+var IdeaContentLink = require('../models/ideaContentLink.js');
 
 /**
  * A singleton to manage lazy loading of server collections
@@ -389,7 +389,8 @@ var CollectionManager = Marionette.Object.extend({
          * need it
          */
         function Defer() {
-          var resolve, reject;
+          var resolve;
+          var reject;
           var promise = new Promise(function() {
             resolve = arguments[0];
             reject = arguments[1];
@@ -445,9 +446,8 @@ var CollectionManager = Marionette.Object.extend({
       },
 
       this.executeRequest = function() {
-
-        var that = this,
-            ids = [];
+        var that = this;
+        var ids = [];
         if ( typeof messagesStructureCollectionPromise === "undefined" ){
           messagesStructureCollectionPromise = this.collectionManager.getAllMessageStructureCollectionPromise();
         }
@@ -465,9 +465,9 @@ var CollectionManager = Marionette.Object.extend({
           }
         });
         messagesStructureCollectionPromise.then(function(allMessageStructureCollection) {
-          var PostQuery = require('../views/messageListPostQuery'),
-              postQuery = new PostQuery(),
-              viewDef = 'default';
+          var PostQuery = require('../views/messageListPostQuery');
+          var postQuery = new PostQuery();
+          var viewDef = 'default';
 
           if (_.size(ids) > 0) {
             postQuery.addFilter(postQuery.availableFilters.POST_HAS_ID_IN, ids);
@@ -478,9 +478,9 @@ var CollectionManager = Marionette.Object.extend({
 
             postQuery.getResultRawDataPromise().then(function(results) {
               _.each(results, function(jsonData) {
-                var id = jsonData['@id'],
-                    structureModel = allMessageStructureCollection.get(id),
-                    deferredList = that.requests[id];
+                var id = jsonData['@id'];
+                var structureModel = allMessageStructureCollection.get(id);
+                var deferredList = that.requests[id];
 
                 if (CollectionManager.prototype.DEBUG_LAZY_LOADING) {
                   console.log("executeRequest resolving for id", id, deferredList['count'], " requests queued for that id");
@@ -504,7 +504,6 @@ var CollectionManager = Marionette.Object.extend({
             }
           }
         });
-
       }
 
       //Constructor
@@ -580,8 +579,8 @@ var CollectionManager = Marionette.Object.extend({
    * @function app.common.collectionManager.CollectionManager.getMessageFullModelsPromise
    */
   getMessageFullModelsPromise: function(ids) {
-    var that = this,
-    returnedModelsPromises = [];
+    var that = this;
+    var returnedModelsPromises = [];
 
     _.each(ids, function(id) {
       var promise = that.getMessageFullModelPromise(id);
@@ -816,61 +815,62 @@ var CollectionManager = Marionette.Object.extend({
 
       return Promise.join(allIdeasCollectionPromise, url_structure_promise,
         function(allIdeasCollection, url_structure) {
-        var collection, data;
-        if (url_structure !== undefined) {
-          collection = url_structure;
-        } else if (skip_group_state === false) {
-          data = Storage.getStorageGroupItem();
+          var collection;
+          var data;
+          if (url_structure !== undefined) {
+            collection = url_structure;
+          } else if (skip_group_state === false) {
+            data = Storage.getStorageGroupItem();
+            if (data !== undefined) {
+              data = that._parseGroupStates(data, allIdeasCollection);
+            }
+          }
+
           if (data !== undefined) {
-            data = that._parseGroupStates(data, allIdeasCollection);
+            collection = new groupSpec.Collection(data, {parse: true});
+            if (!collection.validate()) {
+              console.error("getGroupSpecsCollectionPromise(): Collection in local storage is invalid, will return a new one");
+              collection = undefined;
+            }
           }
-        }
 
-        if (data !== undefined) {
-          collection = new groupSpec.Collection(data, {parse: true});
-          if (!collection.validate()) {
-            console.error("getGroupSpecsCollectionPromise(): Collection in local storage is invalid, will return a new one");
-            collection = undefined;
-          }
-        }
+          if (collection === undefined) {
+            collection = new groupSpec.Collection();
+            var panelSpec = require('../models/panelSpec.js');
+            var PanelSpecTypes = require('../utils/panelSpecTypes.js');
+            var groupState = require('../models/groupState.js');
+            var preferences = Ctx.getPreferences();
+            //console.log(preferences);
+            var defaultPanels;
+            // defined here and in groupContent.SimpleUIResetMessageAndIdeaPanelState
+            if(preferences.simple_view_panel_order === "NIM") {
+              defaultPanels = [{type: PanelSpecTypes.NAV_SIDEBAR.id },
+              {type: PanelSpecTypes.IDEA_PANEL.id, minimized: true},
+              {type: PanelSpecTypes.MESSAGE_LIST.id}];
+            }
+            else if (preferences.simple_view_panel_order === "NMI"){
+              defaultPanels = [{type: PanelSpecTypes.NAV_SIDEBAR.id },
+               {type: PanelSpecTypes.MESSAGE_LIST.id},
+               {type: PanelSpecTypes.IDEA_PANEL.id, minimized: true}];
+            }
+            else {
+              throw new Error("Invalid simple_view_panel_order preference: ", preferences.simple_view_panel_order);
+            }
+            var defaults = {
+              panels: new panelSpec.Collection(defaultPanels,
+                                                {'viewsFactory': viewsFactory }),
+              navigationState: 'debate',
+              states: new groupState.Collection([new groupState.Model()])
+            };
+            collection.add(new groupSpec.Model(defaults));
 
-        if (collection === undefined) {
-          collection = new groupSpec.Collection();
-          var panelSpec = require('../models/panelSpec.js');
-          var PanelSpecTypes = require('../utils/panelSpecTypes.js');
-          var groupState = require('../models/groupState.js');
-          var preferences = Ctx.getPreferences();
-          //console.log(preferences);
-          var defaultPanels;
-          // defined here and in groupContent.SimpleUIResetMessageAndIdeaPanelState
-          if(preferences.simple_view_panel_order === "NIM") {
-            defaultPanels = [{type: PanelSpecTypes.NAV_SIDEBAR.id },
-            {type: PanelSpecTypes.IDEA_PANEL.id, minimized: true},
-            {type: PanelSpecTypes.MESSAGE_LIST.id}];
           }
-          else if (preferences.simple_view_panel_order === "NMI"){
-            defaultPanels = [{type: PanelSpecTypes.NAV_SIDEBAR.id },
-             {type: PanelSpecTypes.MESSAGE_LIST.id},
-             {type: PanelSpecTypes.IDEA_PANEL.id, minimized: true}];
-          }
-          else {
-            throw new Error("Invalid simple_view_panel_order preference: ", preferences.simple_view_panel_order);
-          }
-          var defaults = {
-            panels: new panelSpec.Collection(defaultPanels,
-                                              {'viewsFactory': viewsFactory }),
-            navigationState: 'debate',
-            states: new groupState.Collection([new groupState.Model()])
-          };
-          collection.add(new groupSpec.Model(defaults));
 
-        }
-
-        collection.collectionManager = that;
-        Storage.bindGroupSpecs(collection);
-        that._allGroupSpecsCollectionPromise = Promise.resolve(collection);
-        return that._allGroupSpecsCollectionPromise;
-      });
+          collection.collectionManager = that;
+          Storage.bindGroupSpecs(collection);
+          that._allGroupSpecsCollectionPromise = Promise.resolve(collection);
+          return that._allGroupSpecsCollectionPromise;
+        });
     }
     else {
       return this._allGroupSpecsCollectionPromise;
@@ -1028,8 +1028,9 @@ var CollectionManager = Marionette.Object.extend({
     /*
       @TODO: Add efficient Collection management and caching
      */
-    var id = messageModel.id,
-        ideaContentLinks = messageModel.getIdeaContentLinks();
+    var id = messageModel.id;
+
+    var ideaContentLinks = messageModel.getIdeaContentLinks();
 
     var validIcls = _.filter(ideaContentLinks, function(icl){
       return ( (icl) && (_.has(icl, 'idIdea')) && (icl['idIdea'] !== null) );

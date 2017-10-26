@@ -1,14 +1,14 @@
-'use strict';
 /**
  * 
  * @module app.views.synthesisInIdeaList
  */
 
-var $ = require('jquery'),
-    Ctx = require('../common/context.js'),
-    Assembl = require('../app.js'),
-    PanelSpecTypes = require('../utils/panelSpecTypes.js'),
-    ideaInIdeaList = require('./ideaInIdeaList.js');
+var $ = require('jquery');
+
+var Ctx = require('../common/context.js');
+var Assembl = require('../app.js');
+var PanelSpecTypes = require('../utils/panelSpecTypes.js');
+var ideaInIdeaList = require('./ideaInIdeaList.js');
 
 var SynthesisIdeaView = ideaInIdeaList.IdeaView.extend({
   constructor: function SynthesisIdeaView() {

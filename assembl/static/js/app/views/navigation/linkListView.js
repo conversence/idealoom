@@ -1,15 +1,15 @@
-'use strict';
 /**
  * 
  * @module app.views.navigation.linkListView
  */
 
-var _ = require('underscore'),
-    $ = require('jquery'),
-    Promise = require('bluebird'),
-    Marionette = require('backbone.marionette'),
-    Ctx = require('../../common/context.js'),
-    Permissions = require('../../utils/permissions.js');
+var _ = require('underscore');
+
+var $ = require('jquery');
+var Promise = require('bluebird');
+var Marionette = require('backbone.marionette');
+var Ctx = require('../../common/context.js');
+var Permissions = require('../../utils/permissions.js');
 
 var SimpleLinkView = Marionette.View.extend({
   constructor: function SimpleLinkView() {
@@ -32,8 +32,9 @@ var SimpleLinkView = Marionette.View.extend({
         content.NavigationResetVisualizationState(url);
     });
   }
-}),
-LinkListView = Marionette.CollectionView.extend({
+});
+
+var LinkListView = Marionette.CollectionView.extend({
   constructor: function LinkListView() {
     Marionette.CollectionView.apply(this, arguments);
   },

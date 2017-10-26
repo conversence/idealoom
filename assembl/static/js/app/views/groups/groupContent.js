@@ -1,19 +1,19 @@
-'use strict';
 /**
  * 
  * @module app.views.groups.groupContent
  */
 
-var Marionette = require('backbone.marionette'),
-    Ctx = require('../../common/context.js'),
-    i18n = require('../../utils/i18n.js'),
-    panelSpec = require('../../models/panelSpec.js'),
-    AssemblPanel = require('../assemblPanel.js'),
-    PanelWrapper = require('./panelWrapper.js'),
-    PanelSpecTypes = require('../../utils/panelSpecTypes.js'),
-    Analytics = require('../../internal_modules/analytics/dispatcher.js'),
-    Storage = require('../../objects/storage.js'),
-    UserCustomData = require('../../models/userCustomData.js');
+var Marionette = require('backbone.marionette');
+
+var Ctx = require('../../common/context.js');
+var i18n = require('../../utils/i18n.js');
+var panelSpec = require('../../models/panelSpec.js');
+var AssemblPanel = require('../assemblPanel.js');
+var PanelWrapper = require('./panelWrapper.js');
+var PanelSpecTypes = require('../../utils/panelSpecTypes.js');
+var Analytics = require('../../internal_modules/analytics/dispatcher.js');
+var Storage = require('../../objects/storage.js');
+var UserCustomData = require('../../models/userCustomData.js');
 
 
 /** Represents the entire content of a single panel group
@@ -230,35 +230,35 @@ var groupContent = Marionette.View.extend({
     return undefined;
   },
   findViewByType: function(panelSpecType) {
-      var retval = undefined,
-          wrapper = this.findPanelWrapperByType(panelSpecType);
+    var retval = undefined;
+    var wrapper = this.findPanelWrapperByType(panelSpecType);
 
-      if (wrapper != null) {
-        if (wrapper.getRegion('contents') === undefined) {
-          throw new Error("PanelWrapper doesn't have any content");
-        }
-
-        retval = wrapper.getRegion('contents').currentView;
+    if (wrapper != null) {
+      if (wrapper.getRegion('contents') === undefined) {
+        throw new Error("PanelWrapper doesn't have any content");
       }
-      return retval;
-    },
+
+      retval = wrapper.getRegion('contents').currentView;
+    }
+    return retval;
+  },
   getNavigationPanel: function(panelSpecType) {
-      var retval = undefined,
-          navigationPanelSpec = this.model.findNavigationPanelSpec();
-      if (navigationPanelSpec) {
-        retval = this.findViewByType(navigationPanelSpec);
-      }
-      return retval;
-    },
+    var retval = undefined;
+    var navigationPanelSpec = this.model.findNavigationPanelSpec();
+    if (navigationPanelSpec) {
+      retval = this.findViewByType(navigationPanelSpec);
+    }
+    return retval;
+  },
   /** 
    * ensure only the listed panels, are visible
    * However, all panels are created if necessary
    * @params list of panel names
    */
   ensureOnlyPanelsVisible: function() {
-    var that = this,
-        args = Array.prototype.slice.call(arguments),
-        panels = this.model.get('panels');
+    var that = this;
+    var args = Array.prototype.slice.call(arguments);
+    var panels = this.model.get('panels');
     // add missing panels
     this.model.ensurePanelsAt(args, 1);
     // show and hide panels

@@ -1,30 +1,31 @@
-'use strict';
 /**
  * 
  * @module app.objects.viewsFactory
  */
 
-var _ = require('underscore'),
-    Types = require('../utils/types.js'),
-    AssemblPanel = require('../views/assemblPanel.js'),
-    AboutNavPanel = require('../views/navigation/about.js'),
-    ContextPanel = require('../views/contextPage.js'),
-    IdeaList = require('../views/ideaList.js'),
-    IdeaPanel = require('../views/ideaPanel.js'),
-    MessageList = require('../views/messageList.js'),
-    NavigationView = require('../views/navigation/navigation.js'),
-    SegmentList = require('../views/segmentList.js'),
-    SynthesisNavPanel = require('../views/navigation/synthesisInNavigation.js'),
-    SynthesisPanel = require('../views/synthesisPanel.js'),
-    CollectionManager = require('../common/collectionManager.js'),
-    ExternalVisualizationPanels = require('../views/externalVisualization.js');
+var _ = require('underscore');
+
+var Types = require('../utils/types.js');
+var AssemblPanel = require('../views/assemblPanel.js');
+var AboutNavPanel = require('../views/navigation/about.js');
+var ContextPanel = require('../views/contextPage.js');
+var IdeaList = require('../views/ideaList.js');
+var IdeaPanel = require('../views/ideaPanel.js');
+var MessageList = require('../views/messageList.js');
+var NavigationView = require('../views/navigation/navigation.js');
+var SegmentList = require('../views/segmentList.js');
+var SynthesisNavPanel = require('../views/navigation/synthesisInNavigation.js');
+var SynthesisPanel = require('../views/synthesisPanel.js');
+var CollectionManager = require('../common/collectionManager.js');
+var ExternalVisualizationPanels = require('../views/externalVisualization.js');
 
 /*
  * A registry of AssemblView subclasses implementing a panelSpec,
  * indexed by PanelSpec.id
  */
-var panelTypeRegistry = {},
-    typeByCode = {};
+var panelTypeRegistry = {};
+
+var typeByCode = {};
 _.each([
     AboutNavPanel, ContextPanel, IdeaList, IdeaPanel, MessageList, NavigationView, SegmentList.SegmentListPanel, SynthesisNavPanel, SynthesisPanel, ExternalVisualizationPanels.externalVisualizationPanel, ExternalVisualizationPanels.dashboardVisualizationPanel
 ], function(panelClass) {
@@ -45,8 +46,8 @@ _.each([
  * @returns <AssemblPanel> AssemblPanel view
  */
 function panelViewByPanelSpec(panelSpecModel) {
-  var panelClass,
-      id;
+  var panelClass;
+  var id;
 
   //console.log("panelViewByPanelSpec() called with ",panelSpecModel);
   try {

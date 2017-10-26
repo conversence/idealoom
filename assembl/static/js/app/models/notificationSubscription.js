@@ -1,11 +1,11 @@
-'use strict';
 /**
  * A user's subscription to being notified of certain situations
  * @module app.models.notificationSubscription
  */
 
-var Base = require('./base.js'),
-    Ctx = require('../common/context.js');
+var Base = require('./base.js');
+
+var Ctx = require('../common/context.js');
 
 /**
  * Notification subscription model
@@ -13,7 +13,7 @@ var Base = require('./base.js'),
  * @class app.models.notificationSubscription.notificationsSubscriptionModel
  * @extends app.models.base.BaseModel
  */
- 
+
 var notificationsSubscriptionModel = Base.Model.extend({
   constructor: function notificationsSubscriptionModel() {
     Base.Model.apply(this, arguments);
@@ -46,7 +46,7 @@ var notificationsSubscriptionModel = Base.Model.extend({
  * @class app.models.notificationSubscription.notificationsSubscriptionCollection
  * @extends app.models.base.BaseCollection
  */
- 
+
 var notificationsSubscriptionCollection = Base.Collection.extend({
   constructor: function notificationsSubscriptionCollection() {
     Base.Collection.apply(this, arguments);

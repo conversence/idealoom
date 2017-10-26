@@ -1,18 +1,18 @@
-'use strict';
 /**
  *
  * @module app.views.reusableDataFields.EditableLSField
  */
 
-var Marionette = require('backbone.marionette'),
-    _ = require('underscore'),
-    $ = require('jquery'),
-    Assembl = require('../../app.js'),
-    Permissions = require('../../utils/permissions.js'),
-    LangString = require('../../models/langstring.js'),
-    CK = require('ckeditor'),
-    EditableField = require('./editableField.js'),
-    Ctx = require('../../common/context.js');
+var Marionette = require('backbone.marionette');
+
+var _ = require('underscore');
+var $ = require('jquery');
+var Assembl = require('../../app.js');
+var Permissions = require('../../utils/permissions.js');
+var LangString = require('../../models/langstring.js');
+var CK = require('ckeditor');
+var EditableField = require('./editableField.js');
+var Ctx = require('../../common/context.js');
 
 
 
@@ -51,7 +51,9 @@ var EditableLSField = EditableField.extend({
   },
 
   setTextValue: function(text) {
-    var lse, attrs = {}, ls = this.model.get(this.modelProp);
+    var lse;
+    var attrs = {};
+    var ls = this.model.get(this.modelProp);
     if (!ls) {
       ls = new LangString.Model();
       ls.initFromDict({});

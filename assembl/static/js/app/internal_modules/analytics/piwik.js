@@ -1,12 +1,12 @@
-'use strict';
 /**
  * 
  * @module app.internal_modules.analytics.piwik
  */
 
 // UMD style module defintion. Simplified details below. Read comments to understand dependencies
-var moduleName = 'Analytics_Piwik',
-    dependencies = ['underscore', 'abstract'];
+var moduleName = 'Analytics_Piwik';
+
+var dependencies = ['underscore', 'abstract'];
 
 (function(root, factory){
   if (typeof module === 'object' && module.exports) {

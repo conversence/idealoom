@@ -1,13 +1,13 @@
-'use strict';
 /**
  * A partner organization, to be displayed in front page
  * @module app.models.partners
  */
 
-var $ = require('jquery'),
-    Base = require('./base.js'),
-    i18n = require('../utils/i18n.js'),
-    Ctx = require('../common/context.js');
+var $ = require('jquery');
+
+var Base = require('./base.js');
+var i18n = require('../utils/i18n.js');
+var Ctx = require('../common/context.js');
 
 
 /**

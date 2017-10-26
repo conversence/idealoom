@@ -1,17 +1,17 @@
-'use strict';
 /**
  * 
  * @module app.views.user.userNavigationMenu
  */
 
-var Marionette = require('backbone.marionette'),
-    $ = require('jquery'),
-    i18n = require('../../utils/i18n.js'),
-    Ctx = require('../../common/context.js'),
-    CollectionManager = require('../../common/collectionManager.js'),
-    Roles = require('../../utils/roles.js'),
-    LoaderView = require('../loaderView.js'),
-    Permissions = require('../../utils/permissions.js');
+var Marionette = require('backbone.marionette');
+
+var $ = require('jquery');
+var i18n = require('../../utils/i18n.js');
+var Ctx = require('../../common/context.js');
+var CollectionManager = require('../../common/collectionManager.js');
+var Roles = require('../../utils/roles.js');
+var LoaderView = require('../loaderView.js');
+var Permissions = require('../../utils/permissions.js');
 
 var userNavigationMenu = LoaderView.extend({
   constructor: function userNavigationMenu() {
@@ -24,8 +24,8 @@ var userNavigationMenu = LoaderView.extend({
   selectedSection: undefined,
 
   initialize: function(options) {
-    var that = this,
-        collectionManager = new CollectionManager();
+    var that = this;
+    var collectionManager = new CollectionManager();
     this.setLoading(true);
 
     if ( "selectedSection" in options ){

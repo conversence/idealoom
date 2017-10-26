@@ -1,18 +1,18 @@
-'use strict';
 /**
  * A segment of text extracted from a message. Can be associated to an idea, otherwise in clipboard.
  * @module app.models.segment
  */
 
-var _ = require('underscore'),
-    Base = require('./base.js'),
-    Promise = require('bluebird'),
-    Ctx = require('../common/context.js'),
-    Agents = require('./agents.js'),
-    Annotator = require('annotator/annotator-full.js').Annotator,
-    Message = require('./message.js'),
-    Types = require('../utils/types.js'),
-    i18n = require('../utils/i18n.js');
+var _ = require('underscore');
+
+var Base = require('./base.js');
+var Promise = require('bluebird');
+var Ctx = require('../common/context.js');
+var Agents = require('./agents.js');
+var Annotator = require('annotator/annotator-full.js').Annotator;
+var Message = require('./message.js');
+var Types = require('../utils/types.js');
+var i18n = require('../utils/i18n.js');
 
 /**
  * Segment model
@@ -20,7 +20,7 @@ var _ = require('underscore'),
  * @class app.models.segment.SegmentModel
  * @extends app.models.base.BaseModel
  */
- 
+
 var SegmentModel = Base.Model.extend({
   constructor: function SegmentModel() {
     Base.Model.apply(this, arguments);
@@ -38,9 +38,9 @@ var SegmentModel = Base.Model.extend({
       this.set('creationDate', Ctx.getCurrentTime());
     }
 
-    var ranges = this.attributes.ranges,
-        _serializedRange = [],
-        _ranges = [];
+    var ranges = this.attributes.ranges;
+    var _serializedRange = [];
+    var _ranges = [];
 
     _.each(ranges, function(range, index) {
 
@@ -60,24 +60,24 @@ var SegmentModel = Base.Model.extend({
     this.listenTo(this, "change:idIdea", function() {
       that.collection.collectionManager.getAllIdeasCollectionPromise()
                 .done(function(allIdeasCollection) {
-                  var previousIdea,
-                      idea;
+        var previousIdea;
+        var idea;
 
-                  if (that.previous("idIdea") !== null) {
-                    previousIdea = allIdeasCollection.get(that.previous("idIdea"));
+        if (that.previous("idIdea") !== null) {
+          previousIdea = allIdeasCollection.get(that.previous("idIdea"));
 
-                    //console.log("Segment:initialize:triggering idea change (previous idea)");
-                    previousIdea.trigger('change');
-                  }
+          //console.log("Segment:initialize:triggering idea change (previous idea)");
+          previousIdea.trigger('change');
+        }
 
-                  if (that.get('idIdea') !== null) {
+        if (that.get('idIdea') !== null) {
 
-                    idea = allIdeasCollection.get(that.get('idIdea'));
+          idea = allIdeasCollection.get(that.get('idIdea'));
 
-                    //console.log("Segment:initialize:triggering idea change (new idea)");
-                    idea.trigger('change');
-                  }
-                });
+          //console.log("Segment:initialize:triggering idea change (new idea)");
+          idea.trigger('change');
+        }
+      });
     })
 
     // cleaning
@@ -108,8 +108,8 @@ var SegmentModel = Base.Model.extend({
    * Validation
    */
   validate: function(attrs, options) {
-    var currentUser = Ctx.getCurrentUser(),
-        id = currentUser.getId();
+    var currentUser = Ctx.getCurrentUser();
+    var id = currentUser.getId();
 
     if (!id) {
       return i18n.gettext('You must be logged in to create segments');
@@ -139,25 +139,23 @@ var SegmentModel = Base.Model.extend({
     if (attrs.idCreator === null || typeof attrs.idCreator !== 'string') {
       return i18n.gettext('invalid idCreator: ') + attrs.idCreator;
     }
-
   },
 
   /** Return a promise for the Post the segments is associated to, if any
    * @returns {$.Defered.Promise}
    */
   getAssociatedIdeaPromise: function() {
-      var that = this,
-          idIdea = this.get('idIdea');
-      if (idIdea) {
-        return this.collection.collectionManager.getAllIdeasCollectionPromise().then(function(allIdeasCollection) {
-          return allIdeasCollection.get(idIdea);
-        });
-      }
-      else {
-        return Promise.resolve(null);
-      }
-
-    },
+    var that = this;
+    var idIdea = this.get('idIdea');
+    if (idIdea) {
+      return this.collection.collectionManager.getAllIdeasCollectionPromise().then(function(allIdeasCollection) {
+        return allIdeasCollection.get(idIdea);
+      });
+    }
+    else {
+      return Promise.resolve(null);
+    }
+  },
 
   /** Return a promise for the Post the segments is associated to, if any
    * @returns {$.Defered.Promise}
@@ -171,9 +169,9 @@ var SegmentModel = Base.Model.extend({
    * @returns {string}
    */
   getTypeIcon: function() {
-    var cls = 'icon-',
-        target = this.get('target'),
-        idPost = this.idPost;
+    var cls = 'icon-';
+    var target = this.get('target');
+    var idPost = this.idPost;
 
     // todo(Marc-Antonie): review this `type` because `idPost`
     // is a string and doesn't have `@type` attribute
@@ -205,8 +203,8 @@ var SegmentModel = Base.Model.extend({
    * @returns {User}
    */
   getCreatorFromUsersCollection: function(usersCollection) {
-    var creatorId = this.get('idCreator'),
-        creator = usersCollection.getById(creatorId);
+    var creatorId = this.get('idCreator');
+    var creator = usersCollection.getById(creatorId);
     if (!creatorId) {
       throw new Error("A segment cannot have an empty creator");
     }
@@ -236,7 +234,7 @@ var SegmentModel = Base.Model.extend({
  * @class app.models.segment.SegmentCollection
  * @extends app.models.base.BaseCollection
  */
- 
+
 var SegmentCollection = Base.Collection.extend({
   constructor: function SegmentCollection() {
     Base.Collection.apply(this, arguments);
@@ -276,8 +274,8 @@ var SegmentCollection = Base.Collection.extend({
    * @returns {Segment}
    */
   addAnnotationAsExtract: function(annotation, idIdea) {
-    var that = this,
-        idPost = Ctx.getPostIdFromAnnotation(annotation);
+    var that = this;
+    var idPost = Ctx.getPostIdFromAnnotation(annotation);
 
     //console.log("addAnnotationAsExtract called");
 

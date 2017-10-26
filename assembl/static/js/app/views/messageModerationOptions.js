@@ -1,17 +1,17 @@
-'use strict';
 /**
  * 
  * @module app.views.messageModerationOptions
  */
 
-var Backbone = require('backbone'),
-    Marionette = require('backbone.marionette'),
-    Assembl = require('../app.js'),
-    _ = require('underscore'),
-    $ = require('jquery'),
-    Ctx = require('../common/context.js'),
-    AgentViews = require('./agent.js'),
-    i18n = require('../utils/i18n.js');
+var Backbone = require('backbone');
+
+var Marionette = require('backbone.marionette');
+var Assembl = require('../app.js');
+var _ = require('underscore');
+var $ = require('jquery');
+var Ctx = require('../common/context.js');
+var AgentViews = require('./agent.js');
+var i18n = require('../utils/i18n.js');
 
 
 var messageModerationOptions = Marionette.View.extend({

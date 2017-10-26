@@ -1,41 +1,43 @@
-'use strict';
 /**
  * 
  * @module app.views.baseMessageList
  */
 
-var Backbone = require('backbone'),
-    Raven = require('raven-js'),
-    MessageRenderVisitor = require('./visitors/messageRenderVisitor.js'),
-    MessageRenderVisitorReSort = require('./visitors/messageRenderVisitorReSort.js'),
-    MessageFamilyView = require('./messageFamily.js'),
-    _ = require('underscore'),
-    $ = require('jquery'),
-    Assembl = require('../app.js'),
-    Ctx = require('../common/context.js'),
-    Message = require('../models/message.js'),
-    i18n = require('../utils/i18n.js'),
-    PostQuery = require('./messageListPostQuery.js'),
-    Permissions = require('../utils/permissions.js'),
-    MessagesInProgress = require('../objects/messagesInProgress.js'),
-    scrollUtils = require('../utils/scrollUtils.js'),
-    CollectionManager = require('../common/collectionManager.js'),
-    Promise = require('bluebird');
+var Backbone = require('backbone');
 
+var Raven = require('raven-js');
+var MessageRenderVisitor = require('./visitors/messageRenderVisitor.js');
+var MessageRenderVisitorReSort = require('./visitors/messageRenderVisitorReSort.js');
+var MessageFamilyView = require('./messageFamily.js');
+var _ = require('underscore');
+var $ = require('jquery');
+var Assembl = require('../app.js');
+var Ctx = require('../common/context.js');
+var Message = require('../models/message.js');
+var i18n = require('../utils/i18n.js');
+var PostQuery = require('./messageListPostQuery.js');
+var Permissions = require('../utils/permissions.js');
+var MessagesInProgress = require('../objects/messagesInProgress.js');
+var scrollUtils = require('../utils/scrollUtils.js');
+var CollectionManager = require('../common/collectionManager.js');
+var Promise = require('bluebird');
 
 /**
  * Constants
  */
-var MESSAGE_LIST_VIEW_STYLES_CLASS_PREFIX = "js_messageList-view-",
-/* The maximum number of messages that can be loaded at the same time
+var MESSAGE_LIST_VIEW_STYLES_CLASS_PREFIX = "js_messageList-view-";
+
+var /* The maximum number of messages that can be loaded at the same time
  * before being removed from memory
  */
-    MAX_MESSAGES_IN_DISPLAY = 50,
-/* The number of messages to load each time the user scrolls to
+MAX_MESSAGES_IN_DISPLAY = 50;
+
+var /* The number of messages to load each time the user scrolls to
  * the end or beginning of the list.
  */
-    MORE_PAGES_NUMBER = 20,
-    SLOW_WORKER_DELAY_VALUE = 20;
+MORE_PAGES_NUMBER = 20;
+
+var SLOW_WORKER_DELAY_VALUE = 20;
 
 /**
  * A mixin for message list behaviour. Logic here, UI in subclasses.
@@ -69,9 +71,9 @@ return cls.extend({
   initialize: function(options) {
     //console.log("messageList::initialize()");
     cls.prototype.initialize.apply(this, arguments);
-    var that = this,
-    collectionManager = new CollectionManager(),
-    d = new Date();
+    var that = this;
+    var collectionManager = new CollectionManager();
+    var d = new Date();
     this.renderIsComplete = false;
     this.showMessageByIdInProgress = false;
     this.scrollLoggerPreviousScrolltop = 0;
@@ -328,12 +330,12 @@ return cls.extend({
    * for this function to work.
    */
   getPreviousScrollTarget: function() {
-    var panelOffset = null,
-        panelScrollTop = 0,
-        messageViewScrolledInto = null,
-        messageViewScrolledIntoOffset = -Number.MAX_VALUE,
-        retval = null,
-        debug = false;
+    var panelOffset = null;
+    var panelScrollTop = 0;
+    var messageViewScrolledInto = null;
+    var messageViewScrolledIntoOffset = -Number.MAX_VALUE;
+    var retval = null;
+    var debug = false;
 
     //We may have been called on the first render, so we have to check
     if (_.isFunction(this.ui.panelBody.size) && (this.ui.panelBody.offset() !== undefined)) {
@@ -395,124 +397,124 @@ return cls.extend({
   },
 
   scrollToPreviousScrollTarget: function(retrying) {
-      var previousScrollTarget = this._previousScrollTarget,
-        debug = false,
-        that = this;
+    var previousScrollTarget = this._previousScrollTarget;
+    var debug = false;
+    var that = this;
 
-      if (previousScrollTarget && !this.isDestroyed()) {
-        if (debug) {
-          console.log("scrollToPreviousScrollTarget(): Trying to scroll to:", previousScrollTarget); // example: "message-local:Content/5232"
-        }
-
-        //We may have been called on the first render, so we have to check
-        if (this.ui.panelBody.offset() !== undefined) {
-          // console.log("previousScrollTarget.messageHtmlId: ~" + previousScrollTarget.messageHtmlId + "~" );
-          // We have to escape some characters for the JQuery CSS selector to work. Function taken from http://learn.jquery.com/using-jquery-core/faq/how-do-i-select-an-element-by-an-id-that-has-characters-used-in-css-notation/
-          var buildIdSelector = function ( myid ) {
-            return myid.replace( /(:|\.|\[|\]|,)/g, "\\$1" );
-          };
-          var selector = Ctx.format('[id="{0}"]', buildIdSelector(previousScrollTarget.messageHtmlId)); // we could use '#{0}' or document.getElementById() but there could be problems if there are several messageLists. TODO: refactor by using a dedicated class for example
-          var message = this.$el.find(selector);
-          if (!_.size(message)) {
-            console.log("scrollToPreviousScrollTarget() can't find element with id:",previousScrollTarget.messageHtmlId);
-            if ( !retrying ){
-              retrying = 0;
-            }
-            if ( retrying < 2){
-              ++retrying;
-              setTimeout(function(){
-                console.log("retrying x ", retrying);
-                that.scrollToPreviousScrollTarget(retrying);
-              });
-            }
-            return;
-          }
-
-          // Scrolling to the element
-          //console.log("Scrolling to previous scroll target");
-          scrollUtils.scrollToElementAndWatch(message, undefined, previousScrollTarget.innerOffset, false);
-        }
+    if (previousScrollTarget && !this.isDestroyed()) {
+      if (debug) {
+        console.log("scrollToPreviousScrollTarget(): Trying to scroll to:", previousScrollTarget); // example: "message-local:Content/5232"
       }
-    },
+
+      //We may have been called on the first render, so we have to check
+      if (this.ui.panelBody.offset() !== undefined) {
+        // console.log("previousScrollTarget.messageHtmlId: ~" + previousScrollTarget.messageHtmlId + "~" );
+        // We have to escape some characters for the JQuery CSS selector to work. Function taken from http://learn.jquery.com/using-jquery-core/faq/how-do-i-select-an-element-by-an-id-that-has-characters-used-in-css-notation/
+        var buildIdSelector = function ( myid ) {
+          return myid.replace( /(:|\.|\[|\]|,)/g, "\\$1" );
+        };
+        var selector = Ctx.format('[id="{0}"]', buildIdSelector(previousScrollTarget.messageHtmlId)); // we could use '#{0}' or document.getElementById() but there could be problems if there are several messageLists. TODO: refactor by using a dedicated class for example
+        var message = this.$el.find(selector);
+        if (!_.size(message)) {
+          console.log("scrollToPreviousScrollTarget() can't find element with id:",previousScrollTarget.messageHtmlId);
+          if ( !retrying ){
+            retrying = 0;
+          }
+          if ( retrying < 2){
+            ++retrying;
+            setTimeout(function(){
+              console.log("retrying x ", retrying);
+              that.scrollToPreviousScrollTarget(retrying);
+            });
+          }
+          return;
+        }
+
+        // Scrolling to the element
+        //console.log("Scrolling to previous scroll target");
+        scrollUtils.scrollToElementAndWatch(message, undefined, previousScrollTarget.innerOffset, false);
+      }
+    }
+  },
 
   /**
    * Calculate the offsets of messages actually displayed from a request
    * @returns The actual offset array
    */
   calculateMessagesOffsets: function(visitorData, requestedOffsets) {
-      var returnedDataOffsets = {},
-          len = _.size(visitorData.visitorOrderLookupTable);
+    var returnedDataOffsets = {};
+    var len = _.size(visitorData.visitorOrderLookupTable);
 
-      if (this.isCurrentViewStyleThreadedType()) {
-        returnedDataOffsets = this._calculateThreadedMessagesOffsets(visitorData, requestedOffsets);
-      } else {
-        returnedDataOffsets.offsetStart = _.isUndefined(requestedOffsets.offsetStart) ? 0 : requestedOffsets.offsetStart;
-        returnedDataOffsets.offsetEnd = _.isUndefined(requestedOffsets.offsetEnd) ? MORE_PAGES_NUMBER : requestedOffsets.offsetEnd;
-        if (returnedDataOffsets.offsetEnd < len) {
-          // if offsetEnd is bigger or equal than len, do not use it
-          len = returnedDataOffsets.offsetEnd + 1;
-        }
-        else {
-          returnedDataOffsets.offsetEnd = len - 1;
-        }
+    if (this.isCurrentViewStyleThreadedType()) {
+      returnedDataOffsets = this._calculateThreadedMessagesOffsets(visitorData, requestedOffsets);
+    } else {
+      returnedDataOffsets.offsetStart = _.isUndefined(requestedOffsets.offsetStart) ? 0 : requestedOffsets.offsetStart;
+      returnedDataOffsets.offsetEnd = _.isUndefined(requestedOffsets.offsetEnd) ? MORE_PAGES_NUMBER : requestedOffsets.offsetEnd;
+      if (returnedDataOffsets.offsetEnd < len) {
+        // if offsetEnd is bigger or equal than len, do not use it
+        len = returnedDataOffsets.offsetEnd + 1;
       }
-
-      if (this.debugPaging) {
-        console.log("calculateMessagesOffsets() called with requestedOffsets:", requestedOffsets, " returning ", returnedDataOffsets);
+      else {
+        returnedDataOffsets.offsetEnd = len - 1;
       }
+    }
 
-      return returnedDataOffsets;
-    },
+    if (this.debugPaging) {
+      console.log("calculateMessagesOffsets() called with requestedOffsets:", requestedOffsets, " returning ", returnedDataOffsets);
+    }
+
+    return returnedDataOffsets;
+  },
 
   _calculateThreadedMessagesOffsets: function(visitorData, requestedOffsets) {
-      var returnedDataOffsets = {},
-          numMessages = visitorData.visitorOrderLookupTable.length;
+    var returnedDataOffsets = {};
+    var numMessages = visitorData.visitorOrderLookupTable.length;
 
-      if (numMessages > 0) {
-        //Find preceding root message, and include it
-        //It is not possible that we do not find one if there is
-        //at least one message
-        //Gaby: Never declare an incremental variable "i" out of loop, it's a memory leak
-        for (var i = requestedOffsets.offsetStart; i >= 0; i--) {
+    if (numMessages > 0) {
+      //Find preceding root message, and include it
+      //It is not possible that we do not find one if there is
+      //at least one message
+      //Gaby: Never declare an incremental variable "i" out of loop, it's a memory leak
+      for (var i = requestedOffsets.offsetStart; i >= 0; i--) {
+        if (visitorData.visitorViewData[visitorData.visitorOrderLookupTable[i]]['last_ancestor_id'] === null) {
+          returnedDataOffsets.offsetStart = i;
+          break;
+        }
+      }
+    }
+    else {
+      returnedDataOffsets.offsetStart = 0;
+      returnedDataOffsets.offsetEnd = 0;
+      return returnedDataOffsets;
+    }
+
+    if (requestedOffsets.offsetEnd > (numMessages - 1)) {
+      returnedDataOffsets.offsetEnd = (numMessages - 1);
+    }
+    else {
+      if (visitorData.visitorViewData[visitorData.visitorOrderLookupTable[requestedOffsets.offsetEnd]]['last_ancestor_id'] === null) {
+        returnedDataOffsets.offsetEnd = requestedOffsets.offsetEnd;
+      }
+      else {
+        //If the requested offsetEnd isn't a root, find next root message, and stop just
+        //before it
+
+        for (var i = requestedOffsets.offsetEnd; i < numMessages; i++) {
           if (visitorData.visitorViewData[visitorData.visitorOrderLookupTable[i]]['last_ancestor_id'] === null) {
-            returnedDataOffsets.offsetStart = i;
+            returnedDataOffsets.offsetEnd = i;
             break;
           }
         }
-      }
-      else {
-        returnedDataOffsets.offsetStart = 0;
-        returnedDataOffsets.offsetEnd = 0;
-        return returnedDataOffsets;
-      }
 
-      if (requestedOffsets.offsetEnd > (numMessages - 1)) {
-        returnedDataOffsets.offsetEnd = (numMessages - 1);
-      }
-      else {
-        if (visitorData.visitorViewData[visitorData.visitorOrderLookupTable[requestedOffsets.offsetEnd]]['last_ancestor_id'] === null) {
-          returnedDataOffsets.offsetEnd = requestedOffsets.offsetEnd;
-        }
-        else {
-          //If the requested offsetEnd isn't a root, find next root message, and stop just
-          //before it
-
-          for (var i = requestedOffsets.offsetEnd; i < numMessages; i++) {
-            if (visitorData.visitorViewData[visitorData.visitorOrderLookupTable[i]]['last_ancestor_id'] === null) {
-              returnedDataOffsets.offsetEnd = i;
-              break;
-            }
-          }
-
-          if (returnedDataOffsets.offsetEnd === undefined) {
-            //It's possible we didn't find a root, if we are at the very end of the list
-            returnedDataOffsets.offsetEnd = numMessages;
-          }
+        if (returnedDataOffsets.offsetEnd === undefined) {
+          //It's possible we didn't find a root, if we are at the very end of the list
+          returnedDataOffsets.offsetEnd = numMessages;
         }
       }
+    }
 
-      return returnedDataOffsets;
-    },
+    return returnedDataOffsets;
+  },
 
   /**
    * @param messageId of the message that we want onscreen
@@ -527,8 +529,8 @@ return cls.extend({
    * @returns {} requetedOffset structure
    */
   calculateRequestedOffsetToShowOffset: function(messageOffset) {
-    var requestedOffsets = {},
-        requestedOffsets;
+    var requestedOffsets = {};
+    var requestedOffsets;
 
     requestedOffsets.offsetStart = null;
     requestedOffsets.offsetEnd = null;
@@ -578,25 +580,25 @@ return cls.extend({
    * @returns list of message ids, in the order they are shown onscreen
    * */
   getMessageIdsToShow: function(resultMessageIdCollection, visitorData, requestedOffsets) {
-      var messageIdsToShow = [],
-          returnedOffsets = this.calculateMessagesOffsets(visitorData, requestedOffsets);
+    var messageIdsToShow = [];
+    var returnedOffsets = this.calculateMessagesOffsets(visitorData, requestedOffsets);
 
-      if (this.isCurrentViewStyleThreadedType()) {
-        messageIdsToShow = visitorData.visitorOrderLookupTable.slice(returnedOffsets.offsetStart, returnedOffsets.offsetEnd + 1);
-      } else {
-        if (this.debugPaging) {
-          console.log("getMessageIdsToShow() about to slice collection", resultMessageIdCollection);
-        }
-
-        messageIdsToShow = resultMessageIdCollection.slice(returnedOffsets.offsetStart, returnedOffsets.offsetEnd + 1);
-      }
-
+    if (this.isCurrentViewStyleThreadedType()) {
+      messageIdsToShow = visitorData.visitorOrderLookupTable.slice(returnedOffsets.offsetStart, returnedOffsets.offsetEnd + 1);
+    } else {
       if (this.debugPaging) {
-        console.log("getMessageIdsToShow() called with requestedOffsets:", requestedOffsets, " returning ", _.size(messageIdsToShow), "/", _.size(resultMessageIdCollection), " message ids: ", messageIdsToShow);
+        console.log("getMessageIdsToShow() about to slice collection", resultMessageIdCollection);
       }
 
-      return messageIdsToShow;
-    },
+      messageIdsToShow = resultMessageIdCollection.slice(returnedOffsets.offsetStart, returnedOffsets.offsetEnd + 1);
+    }
+
+    if (this.debugPaging) {
+      console.log("getMessageIdsToShow() called with requestedOffsets:", requestedOffsets, " returning ", _.size(messageIdsToShow), "/", _.size(resultMessageIdCollection), " message ids: ", messageIdsToShow);
+    }
+
+    return messageIdsToShow;
+  },
 
   /**
    * Load the new batch of messages according to the requested `offsetStart`
@@ -607,14 +609,14 @@ return cls.extend({
    * @returns a Promise to true, resolved when done
    */
   showMessages: function(requestedOffsets) {
-    var that = this,
-        views_promise,
-        offsets,
-        numMessages,
-        messageIdsToShow,
-        returnedOffsets = {},
-        messageFullModelsToShowPromise,
-        previousScrollTarget;
+    var that = this;
+    var views_promise;
+    var offsets;
+    var numMessages;
+    var messageIdsToShow;
+    var returnedOffsets = {};
+    var messageFullModelsToShowPromise;
+    var previousScrollTarget;
 
     //Because of a hack to call showMessageById from render_real
     //Note that this can also be set to false in onRender()
@@ -662,74 +664,74 @@ return cls.extend({
     this.suspendAnnotatorRefresh();
     return Promise.join(this.currentQuery.getResultMessageIdCollectionPromise(), this.getVisitorDataPromise(),
         function(resultMessageIdCollection, visitorData) {
-      returnedOffsets = that.calculateMessagesOffsets(visitorData, requestedOffsets);
-      messageIdsToShow = that.getMessageIdsToShow(resultMessageIdCollection, visitorData, requestedOffsets);
-      numMessages = _.size(resultMessageIdCollection);
-      if (that.isCurrentViewStyleThreadedType()) {
-        views_promise = that.getRenderedMessagesThreadedPromise(_.clone(visitorData.visitorRootMessagesToDisplay), 1, visitorData, messageIdsToShow);
-      } else {
-        views_promise = that.getRenderedMessagesFlatPromise(messageIdsToShow);
-      }
-
-      that._offsetStart = returnedOffsets.offsetStart;
-      that._offsetEnd = returnedOffsets.offsetEnd;
-
-      var currentIdea = that.getGroupState().get('currentIdea'),
-      announcementPromise = null,
-      announcementMessageView;
-      if (currentIdea && that.currentQuery.isFilterInQuery(that.currentQuery.availableFilters.POST_IS_IN_CONTEXT_OF_IDEA, currentIdea.getId())) {
-        announcementPromise = currentIdea.getApplicableAnnouncementPromise();
-      }
-
-      return Promise.join(views_promise, announcementPromise, function(views, announcement) {
-        if (that.debugPaging) {
-          console.log("showMessages() showing requestedOffsets:", requestedOffsets, "returnedOffsets:", returnedOffsets, "messageIdsToShow", messageIdsToShow, "out of numMessages", numMessages, "root views", views);
-        }
-
-        if (views.length === 0) {  
-          //TODO:  This is probably where https://app.asana.com/0/15264711598672/20633284646643 occurs
-          that.ui.messageFamilyList.append(Ctx.format("<div class='margin'>{0}</div>", i18n.gettext('No messages')));
-        } 
-
-        if (announcement && that._offsetStart <= 0) { //Only display the announcement on the first page
-          that.showAnnouncement(announcement);
-        }
-
-        if (views.length > 0) {
-          if (that.getContainingGroup().model.get('navigationState') !== "synthesis") {
-            // dynamically add id to the first view of message to enable take tour
-            views[0].$el.attr('id', 'tour_step_message');
-            Assembl.tour_vent.trigger("requestTour", "first_message");
+          returnedOffsets = that.calculateMessagesOffsets(visitorData, requestedOffsets);
+          messageIdsToShow = that.getMessageIdsToShow(resultMessageIdCollection, visitorData, requestedOffsets);
+          numMessages = _.size(resultMessageIdCollection);
+          if (that.isCurrentViewStyleThreadedType()) {
+            views_promise = that.getRenderedMessagesThreadedPromise(_.clone(visitorData.visitorRootMessagesToDisplay), 1, visitorData, messageIdsToShow);
+          } else {
+            views_promise = that.getRenderedMessagesFlatPromise(messageIdsToShow);
           }
 
-          _.each(views, function(view) {
-            that.ui.messageFamilyList.append(view.el);
-          })
+          that._offsetStart = returnedOffsets.offsetStart;
+          that._offsetEnd = returnedOffsets.offsetEnd;
 
-        }
+          var currentIdea = that.getGroupState().get('currentIdea');
+          var announcementPromise = null;
+          var announcementMessageView;
+          if (currentIdea && that.currentQuery.isFilterInQuery(that.currentQuery.availableFilters.POST_IS_IN_CONTEXT_OF_IDEA, currentIdea.getId())) {
+            announcementPromise = currentIdea.getApplicableAnnouncementPromise();
+          }
 
-        that.scrollToPreviousScrollTarget();
-        that.$el.find('.js_messageList-loadprevloader').addClass('hidden');
-        if (that._offsetStart <= 0) {
-          that.ui.topArea.addClass('hidden');
-        } else {
-          that.ui.topArea.removeClass('hidden');
-        }
+          return Promise.join(views_promise, announcementPromise, function(views, announcement) {
+            if (that.debugPaging) {
+              console.log("showMessages() showing requestedOffsets:", requestedOffsets, "returnedOffsets:", returnedOffsets, "messageIdsToShow", messageIdsToShow, "out of numMessages", numMessages, "root views", views);
+            }
 
-        that.$el.find('.js_messageList-loadmoreloader').addClass('hidden');
-        if (that._offsetEnd >= (numMessages - 1)) {
-          that.ui.bottomArea.addClass('hidden');
-        } else {
-          that.ui.bottomArea.removeClass('hidden');
-        }
+            if (views.length === 0) {  
+              //TODO:  This is probably where https://app.asana.com/0/15264711598672/20633284646643 occurs
+              that.ui.messageFamilyList.append(Ctx.format("<div class='margin'>{0}</div>", i18n.gettext('No messages')));
+            } 
 
-        that.resumeAnnotatorRefresh();
-        that.unblockPanel();
-        that.renderIsComplete = true;
-        that.trigger("messageList:render_complete", "Render complete");
-        return true;
-      });
-    }).catch(function(e) {
+            if (announcement && that._offsetStart <= 0) { //Only display the announcement on the first page
+              that.showAnnouncement(announcement);
+            }
+
+            if (views.length > 0) {
+              if (that.getContainingGroup().model.get('navigationState') !== "synthesis") {
+                // dynamically add id to the first view of message to enable take tour
+                views[0].$el.attr('id', 'tour_step_message');
+                Assembl.tour_vent.trigger("requestTour", "first_message");
+              }
+
+              _.each(views, function(view) {
+                that.ui.messageFamilyList.append(view.el);
+              })
+
+            }
+
+            that.scrollToPreviousScrollTarget();
+            that.$el.find('.js_messageList-loadprevloader').addClass('hidden');
+            if (that._offsetStart <= 0) {
+              that.ui.topArea.addClass('hidden');
+            } else {
+              that.ui.topArea.removeClass('hidden');
+            }
+
+            that.$el.find('.js_messageList-loadmoreloader').addClass('hidden');
+            if (that._offsetEnd >= (numMessages - 1)) {
+              that.ui.bottomArea.addClass('hidden');
+            } else {
+              that.ui.bottomArea.removeClass('hidden');
+            }
+
+            that.resumeAnnotatorRefresh();
+            that.unblockPanel();
+            that.renderIsComplete = true;
+            that.trigger("messageList:render_complete", "Render complete");
+            return true;
+          });
+        }).catch(function(e) {
       if (raven_url) {
         Raven.captureException(e);
       }
@@ -740,7 +742,6 @@ return cls.extend({
       }
 
     });
-
   },
 
   /**
@@ -936,8 +937,8 @@ return cls.extend({
    * @private
    */
   getPreviousMessagesRequestedOffsets: function() {
-    var messagesInDisplay,
-        retval = {};
+    var messagesInDisplay;
+    var retval = {};
 
     retval.offsetStart = this._offsetStart - MORE_PAGES_NUMBER;
     if (retval.offsetStart < 0) {
@@ -1020,102 +1021,103 @@ return cls.extend({
    * @returns {views.Message}
    */
   render_real: function() {
-      var that = this,
-          views = [],
-          renderId = _.clone(this._renderId),
+    var that = this;
+    var views = [];
+    var renderId = _.clone(this._renderId);
 
-      // We could distinguish on current idea, but I think that would be confusing.
-          partialMessageContext = "new-topic-" + Ctx.getDiscussionId(),
-          partialMessage = MessagesInProgress.getMessage(partialMessageContext);
+    var // We could distinguish on current idea, but I think that would be confusing.
+    partialMessageContext = "new-topic-" + Ctx.getDiscussionId();
 
-      if (Ctx.debugRender) {
-        console.log("messageList:render_real() is firing for render id:", renderId, "the current view style is:", this.currentViewStyle);
-      }
+    var partialMessage = MessagesInProgress.getMessage(partialMessageContext);
 
-      if (!(Ctx.getCurrentUser().can(Permissions.ADD_EXTRACT))) {
-        $("body").addClass("js_annotatorUserCannotAddExtract");
-      }
+    if (Ctx.debugRender) {
+      console.log("messageList:render_real() is firing for render id:", renderId, "the current view style is:", this.currentViewStyle);
+    }
 
-      // Ctx.initTooltips(this.$el); // this takes way too much time when the DOM of the messagelist is big, so instead we init tooltips on selected subparts of the template. But here each subpart takes care of their own tooltips init so we don't need to call it.
+    if (!(Ctx.getCurrentUser().can(Permissions.ADD_EXTRACT))) {
+      $("body").addClass("js_annotatorUserCannotAddExtract");
+    }
 
-      //this.renderCollapseButton(); // FIXME: this seems to be not used anymore, so I (Quentin) commented it out
+    // Ctx.initTooltips(this.$el); // this takes way too much time when the DOM of the messagelist is big, so instead we init tooltips on selected subparts of the template. But here each subpart takes care of their own tooltips init so we don't need to call it.
 
-      var options = {
-        'allow_setting_subject': true,
-        'send_button_label': i18n.gettext('Send'),
-        'subject_label': i18n.gettext('Subject'),
-        'body_help_message': i18n.gettext('Add a subject above and start a new topic here'),
-        'mandatory_body_missing_msg': i18n.gettext('You need to type a comment first...'),
-        'mandatory_subject_missing_msg': i18n.gettext('You need to set a subject to add a new topic...'),
-        'msg_in_progress_ctx': partialMessageContext,
-        'msg_in_progress_title': partialMessage['title'],
-        'msg_in_progress_body': partialMessage['body'],
-        'messageList': that,
-        'show_target_context_with_choice': true
-      };
+    //this.renderCollapseButton(); // FIXME: this seems to be not used anymore, so I (Quentin) commented it out
 
-      var currentIdea = this.getGroupState().get('currentIdea');
+    var options = {
+      'allow_setting_subject': true,
+      'send_button_label': i18n.gettext('Send'),
+      'subject_label': i18n.gettext('Subject'),
+      'body_help_message': i18n.gettext('Add a subject above and start a new topic here'),
+      'mandatory_body_missing_msg': i18n.gettext('You need to type a comment first...'),
+      'mandatory_subject_missing_msg': i18n.gettext('You need to set a subject to add a new topic...'),
+      'msg_in_progress_ctx': partialMessageContext,
+      'msg_in_progress_title': partialMessage['title'],
+      'msg_in_progress_body': partialMessage['body'],
+      'messageList': that,
+      'show_target_context_with_choice': true
+    };
 
-      if (currentIdea && this.currentQuery.isFilterInQuery(this.currentQuery.availableFilters.POST_IS_IN_CONTEXT_OF_IDEA, currentIdea.getId())) {
-        options.reply_idea = currentIdea;
-      }
+    var currentIdea = this.getGroupState().get('currentIdea');
 
-      if(Ctx.getCurrentUser().can(Permissions.ADD_POST) && !this.isLoading()) {
-        this.showTopPostBox(options);
-      }
+    if (currentIdea && this.currentQuery.isFilterInQuery(this.currentQuery.availableFilters.POST_IS_IN_CONTEXT_OF_IDEA, currentIdea.getId())) {
+      options.reply_idea = currentIdea;
+    }
 
-      var collectionManager = new CollectionManager();
-      Promise.join(this.currentQuery.getResultMessageStructureCollectionPromise(),
-                   this.currentQuery.getResultMessageIdCollectionPromise(),
-                   this.getVisitorDataPromise(),
-          function(allMessageStructureCollection, resultMessageIdCollection, visitorData) {
+    if(Ctx.getCurrentUser().can(Permissions.ADD_POST) && !this.isLoading()) {
+      this.showTopPostBox(options);
+    }
 
-            if (Ctx.debugRender) {
-              console.log("messageList:render_real() collection ready, processing for render id:", renderId);
+    var collectionManager = new CollectionManager();
+    Promise.join(this.currentQuery.getResultMessageStructureCollectionPromise(),
+                 this.currentQuery.getResultMessageIdCollectionPromise(),
+                 this.getVisitorDataPromise(),
+        function(allMessageStructureCollection, resultMessageIdCollection, visitorData) {
+
+          if (Ctx.debugRender) {
+            console.log("messageList:render_real() collection ready, processing for render id:", renderId);
+          }
+
+          if (renderId != that._renderId) {
+            console.log("messageList:render_real() collections arrived too late, this is render %d, and render %d is already in progress.  Aborting.", renderId, that._renderId);
+            return;
+          }
+
+          var first_unread_id = that.findFirstUnreadMessageId(visitorData, allMessageStructureCollection, resultMessageIdCollection);
+
+          //console.log("that.showMessageByIdInProgress", that.showMessageByIdInProgress);
+          if (that.showMessageByIdInProgress === false
+              && that.currentViewStyle === that.ViewStyles.NEW_MESSAGES
+              && first_unread_id
+              && !that._previousScrollTarget) {
+            that.renderIsComplete = true;//showMessageById will call showMessages and actually finish the render
+            //We do not trigger the render_complete event here, the line above is just to un-inhibit showMessageById
+            if (that.debugPaging) {
+              console.log("render_real: calling showMessageById to display the first unread message");
             }
 
-            if (renderId != that._renderId) {
-              console.log("messageList:render_real() collections arrived too late, this is render %d, and render %d is already in progress.  Aborting.", renderId, that._renderId);
-              return;
+            that.showMessageById(first_unread_id, undefined, undefined, false);
+          }
+          else if (that.showMessageByIdInProgress === false && (that._offsetStart === undefined || that._offsetEnd === undefined)) {
+            //If there is nothing currently onscreen
+            //Would avoid rendering twice, and would allow showMessageById to just request showing messages systematically
+            if (that.debugPaging) {
+              console.log("render_real: calling showMessages");
             }
 
-            var first_unread_id = that.findFirstUnreadMessageId(visitorData, allMessageStructureCollection, resultMessageIdCollection);
-
-            //console.log("that.showMessageByIdInProgress", that.showMessageByIdInProgress);
-            if (that.showMessageByIdInProgress === false
-                && that.currentViewStyle === that.ViewStyles.NEW_MESSAGES
-                && first_unread_id
-                && !that._previousScrollTarget) {
-              that.renderIsComplete = true;//showMessageById will call showMessages and actually finish the render
-              //We do not trigger the render_complete event here, the line above is just to un-inhibit showMessageById
-              if (that.debugPaging) {
-                console.log("render_real: calling showMessageById to display the first unread message");
-              }
-
-              that.showMessageById(first_unread_id, undefined, undefined, false);
-            }
-            else if (that.showMessageByIdInProgress === false && (that._offsetStart === undefined || that._offsetEnd === undefined)) {
-              //If there is nothing currently onscreen
-              //Would avoid rendering twice, and would allow showMessageById to just request showing messages systematically
-              if (that.debugPaging) {
-                console.log("render_real: calling showMessages");
-              }
-
-              that.showMessages();
-            }
-            else {
-              if (that.debugPaging) {
-                console.log("render_real: Already running showMessageById will finish the job");
-              }
-
-              that.renderIsComplete = true;
-              that.trigger("messageList:render_complete", "Render complete");
+            that.showMessages();
+          }
+          else {
+            if (that.debugPaging) {
+              console.log("render_real: Already running showMessageById will finish the job");
             }
 
-            that._startPostRenderSlowCallbackProcessing();
-          })
-      return this;
-    },
+            that.renderIsComplete = true;
+            that.trigger("messageList:render_complete", "Render complete");
+          }
+
+          that._startPostRenderSlowCallbackProcessing();
+        })
+    return this;
+  },
 
   onBeforeDestroy: function() {
     this.saveMessagesInProgress();
@@ -1145,17 +1147,17 @@ return cls.extend({
      * when visiting the message tree
      * @type {object}
      */
-    var visitorViewData = {},
+    var visitorViewData = {};
 
-    /**
+    var /**
      * An index for the visitorViewData mapping traversal order with
      * object id.  Generated by MessageRenderVisitor's order_lookup_table
      * when visiting the message tree
      * @type {Array}
      */
-    visitorOrderLookupTable = [],
+    visitorOrderLookupTable = [];
 
-    /**
+    var /**
      * A list of "root" messages that have no parent or ancestors in the set
      * of messages to display.  GGenerated by MessageRenderVisitor's roots
      * when visiting the message tree
@@ -1163,9 +1165,9 @@ return cls.extend({
      */
     visitorRootMessagesToDisplay = [];
 
-    var resultMessageIdCollectionReference = resultMessageIdCollection,
-        tempVisitorOrderLookupTable = [],
-        tempVisitorRootMessagesToDisplay = [];
+    var resultMessageIdCollectionReference = resultMessageIdCollection;
+    var tempVisitorOrderLookupTable = [];
+    var tempVisitorRootMessagesToDisplay = [];
 
     var inFilter = function(message) {
       return resultMessageIdCollectionReference.indexOf(message.getId()) >= 0;
@@ -1221,8 +1223,8 @@ return cls.extend({
   },
 
   getVisitorDataPromise: function() {
-    var that = this,
-        collectionManager = new CollectionManager();
+    var that = this;
+    var collectionManager = new CollectionManager();
 
     return Promise.join(this.currentQuery.getResultMessageStructureCollectionPromise(),
         this.currentQuery.getResultMessageIdCollectionPromise(),
@@ -1282,9 +1284,9 @@ return cls.extend({
    * @returns {HTMLDivElement[]}
    */
   getRenderedMessagesFlatPromise: function(requestedIds) {
-    var that = this,
-        view,
-        collectionManager = new CollectionManager();
+    var that = this;
+    var view;
+    var collectionManager = new CollectionManager();
 
     return Promise.join(this.currentQuery.getResultMessageStructureCollectionPromise(),
         this.getVisitorDataPromise(),
@@ -1331,18 +1333,18 @@ return cls.extend({
    * @returns {jquery.promise}
    */
   getRenderedMessagesThreadedPromise: function(sibblings, level, visitorData, messageIdsToShow) {
-    var that = this,
-        list = [],
-        i = 0,
-        view,
-        messageStructureModel,
-        children,
-        prop,
-        isValid,
-        last_sibling_chain,
-        current_message_info,
-        collectionManager = new CollectionManager(),
-        debug = false;
+    var that = this;
+    var list = [];
+    var i = 0;
+    var view;
+    var messageStructureModel;
+    var children;
+    var prop;
+    var isValid;
+    var last_sibling_chain;
+    var current_message_info;
+    var collectionManager = new CollectionManager();
+    var debug = false;
     if (debug) {
       console.log("getRenderedMessagesThreadedPromise() num sibblings:", _.size(sibblings), "level:", level, "messageIdsToShow", messageIdsToShow);
     }
@@ -1352,10 +1354,10 @@ return cls.extend({
      * @returns {boolean[]} which of the view's ancestors are the last child of their respective parents.
      */
     function buildLastSibblingChain(message, data_by_object) {
-      var last_sibling_chain = [],
-          current_message_id = message.getId(),
-          next_parent,
-          current_message_info;
+      var last_sibling_chain = [];
+      var current_message_id = message.getId();
+      var next_parent;
+      var current_message_info;
       while (current_message_id) {
         current_message_info = data_by_object[current_message_id]
 
@@ -1380,8 +1382,8 @@ return cls.extend({
     //This actually replaces the for loop for sibblings -benoitg - I wrote it, but can't remember why...
     /* This recursively pops untill a valid model is found, and returns false if not */
     var popFirstValidFromSibblings = function(sibblings) {
-      var model = sibblings.shift(),
-          current_message_info;
+      var model = sibblings.shift();
+      var current_message_info;
       if (model) {
         current_message_info = visitorData.visitorViewData[model.getId()];
       }
@@ -1549,11 +1551,11 @@ return cls.extend({
       save.text(i18n.gettext('Send to clipboard'));
       var cancel = $(annotatorEditor.element).find(".annotator-cancel");
       cancel.text(i18n.gettext('Cancel'));
-      var textarea = annotatorEditor.fields[0].element.firstChild,
-          div = $('<div/>'),
-          div_draggable = $('<div/>', { 'draggable': true, 'class': 'annotator-textarea' }),
-          div_annotator_help = i18n.sprintf("<div class='annotator-draganddrop-help'>%s</div>", i18n.gettext('You can drag the segment below directly to the table of ideas')),
-          div_copy_paste = i18n.sprintf("<div class='annotator-draganddrop-help'>%s</div><div class='annotator-copy-paste-zone'>%s</div>", i18n.gettext('You can also copy-paste from the text in the zone below'), annotation.quote);
+      var textarea = annotatorEditor.fields[0].element.firstChild;
+      var div = $('<div/>');
+      var div_draggable = $('<div/>', { 'draggable': true, 'class': 'annotator-textarea' });
+      var div_annotator_help = i18n.sprintf("<div class='annotator-draganddrop-help'>%s</div>", i18n.gettext('You can drag the segment below directly to the table of ideas'));
+      var div_copy_paste = i18n.sprintf("<div class='annotator-draganddrop-help'>%s</div><div class='annotator-copy-paste-zone'>%s</div>", i18n.gettext('You can also copy-paste from the text in the zone below'), annotation.quote);
 
       div_draggable.html(annotation.quote);
 
@@ -1567,7 +1569,7 @@ return cls.extend({
       });
       div.append(div_annotator_help);
       div.append(div_draggable);
-      div.append(div_copy_paste); 
+      div.append(div_copy_paste);
 
       $(textarea).replaceWith(div);
 
@@ -1664,8 +1666,8 @@ return cls.extend({
   },
 
   getTargetMessageViewStyleFromMessageListConfig: function(messageView) {
-    var defaultMessageStyle,
-        targetMessageViewStyle;
+    var defaultMessageStyle;
+    var targetMessageViewStyle;
 
     if (Ctx.getCurrentInterfaceType() === Ctx.InterfaceTypes.SIMPLE) {
       defaultMessageStyle = Ctx.AVAILABLE_MESSAGE_VIEW_STYLES.FULL_BODY;
@@ -1772,8 +1774,8 @@ return cls.extend({
   /** Returns a list of message id in order of traversal.
    * Return -1 if message not found */
   getResultThreadedTraversalOrder: function(messageId, visitorOrderLookupTable, resultMessageIdCollection) {
-    var that = this,
-        retval = -1;
+    var that = this;
+    var retval = -1;
     _.every(visitorOrderLookupTable, function(visitorMessageId) {
       if (that.isMessageIdInResults(visitorMessageId, resultMessageIdCollection)) {
         retval++;
@@ -1860,26 +1862,28 @@ return cls.extend({
    * @return:  A list of jquery selectors
    */
   getOnScreenMessagesSelectors: function(resultMessageIdCollection, visitorData) {
-      if (this._offsetStart === undefined || this._offsetEnd === undefined) {
-        throw new Error("The messagelist hasn't displayed any messages yet");
-      }
+    if (this._offsetStart === undefined || this._offsetEnd === undefined) {
+      throw new Error("The messagelist hasn't displayed any messages yet");
+    }
 
-      var that = this,
-      messagesOnScreenIds = this.getMessageIdsToShow(
-          resultMessageIdCollection,
-          visitorData,
-          {
-            'offsetStart': this._offsetStart,
-            'offsetEnd': this._offsetEnd
-          }),
-          messagesOnScreenJquerySelectors = [];
+    var that = this;
 
-      _.each(messagesOnScreenIds, function(messageId) {
-        var selector = that.getMessageSelector(messageId);
-        messagesOnScreenJquerySelectors.push(selector);
-      });
-      return messagesOnScreenJquerySelectors;
-    },
+    var messagesOnScreenIds = this.getMessageIdsToShow(
+        resultMessageIdCollection,
+        visitorData,
+        {
+          'offsetStart': this._offsetStart,
+          'offsetEnd': this._offsetEnd
+        });
+
+    var messagesOnScreenJquerySelectors = [];
+
+    _.each(messagesOnScreenIds, function(messageId) {
+      var selector = that.getMessageSelector(messageId);
+      messagesOnScreenJquerySelectors.push(selector);
+    });
+    return messagesOnScreenJquerySelectors;
+  },
 
 
   /**
@@ -1894,142 +1898,144 @@ return cls.extend({
    * are complete
    */
   scrollToMessage: function(messageModel, shouldHighlightMessageSelected, shouldOpenMessageSelected, callback, failedCallback, recursionDepth, originalRenderId) {
-      var that = this,
-      MAX_RETRIES = 50, //Stop after ~30 seconds
-      debug = false;
+    var that = this;
 
-      if (debug) {
-        console.log("scrollToMessage called with args:", messageModel.id, shouldHighlightMessageSelected, shouldOpenMessageSelected, callback, failedCallback, recursionDepth, originalRenderId);
+    var //Stop after ~30 seconds
+    MAX_RETRIES = 50;
+
+    var debug = false;
+
+    if (debug) {
+      console.log("scrollToMessage called with args:", messageModel.id, shouldHighlightMessageSelected, shouldOpenMessageSelected, callback, failedCallback, recursionDepth, originalRenderId);
+    }
+
+    recursionDepth = recursionDepth || 0;
+    originalRenderId = originalRenderId || _.clone(this._renderId);
+    var RETRY_INTERVAL = Math.floor(200 * Math.log(2 + recursionDepth));  // increasing interval
+
+    shouldHighlightMessageSelected = (typeof shouldHighlightMessageSelected === "undefined") ? true : shouldHighlightMessageSelected;
+    shouldOpenMessageSelected = (typeof shouldOpenMessageSelected === "undefined") ? true : shouldOpenMessageSelected;
+
+    if (!messageModel) {
+      throw new Error("scrollToMessage(): ERROR:  messageModel wasn't provided");
+    }
+
+    if (recursionDepth === 0 && this._scrollToMessageInProgressId) {
+      Raven.captureMessage("scrollToMessage():  a scrollToMessage was already in progress, aborting", {message_id: messageModel.id})
+      if (_.isFunction(failedCallback)) {
+        failedCallback();
       }
 
-      recursionDepth = recursionDepth || 0;
-      originalRenderId = originalRenderId || _.clone(this._renderId);
-      var RETRY_INTERVAL = Math.floor(200 * Math.log(2 + recursionDepth));  // increasing interval
-
-      shouldHighlightMessageSelected = (typeof shouldHighlightMessageSelected === "undefined") ? true : shouldHighlightMessageSelected;
-      shouldOpenMessageSelected = (typeof shouldOpenMessageSelected === "undefined") ? true : shouldOpenMessageSelected;
-
-      if (!messageModel) {
-        throw new Error("scrollToMessage(): ERROR:  messageModel wasn't provided");
-      }
-
-      if (recursionDepth === 0 && this._scrollToMessageInProgressId) {
-        Raven.captureMessage("scrollToMessage():  a scrollToMessage was already in progress, aborting", {message_id: messageModel.id})
-        if (_.isFunction(failedCallback)) {
-          failedCallback();
-        }
-
-        return;
-      }
-      else if (originalRenderId !== this._renderId) {
-        //This is a normal condition now
-        //console.log("scrollToMessage():  obsolete render, aborting for ", messageModel.id);
-        //Raven.captureMessage("scrollToMessage():  obsolete render, aborting", {message_id: messageModel.id})
-        if (this._scrollToMessageInProgressId === originalRenderId) {
-          this._scrollToMessageInProgressId = false;
-        }
-
-        if (_.isFunction(failedCallback)) {
-          failedCallback();
-        }
-
-        return;
-      }
-      else {
-        this._scrollToMessageInProgressId = originalRenderId;
-      }
-
-      var animate_message = function(message) {
-        var el = that.getMessageSelector(message.id);
-
-        //console.log("el0: ", el);
-        if (el.length && el[0]) {
-          if (shouldOpenMessageSelected) {
-            // console.log("showMessageById(): sending openWithFullBodyView
-            // to message", message.id);
-            message.trigger('openWithFullBodyView');
-            /*setTimeout(function () {
-              if(debug) {
-                console.log("scrollToMessage(): INFO:  shouldOpenMessageSelected is true, calling recursively after a delay with same recursion depth");
-              }
-              that.scrollToMessage(messageModel, shouldHighlightMessageSelected, false, callback, failedCallback, recursionDepth, originalRenderId);
-            }, 1000); //Add a delay if we had to open the message*/
-          }
-
-          var real_callback = function() {
-            if (shouldHighlightMessageSelected) {
-              //console.log(that.currentViewStyle);
-              //console.log("el1: ", el);
-              try {
-                el.highlight();
-              } catch (e) {
-                console.log("Error: could not highlight message. Details of the error are given below.");
-                console.log(e);
-              }
-            }
-
-            if (_.isFunction(callback)) {
-              callback();
-            }
-          }
-          //console.log("scrollToMessage(): Scrolling to message", messageModel.id);
-          scrollUtils.scrollToElementAndWatch(el, real_callback);
-        }
-        else {
-          // Trigerring openWithFullBodyView above requires the message to
-          // re-render. We may have to give it time
-          if (recursionDepth <= MAX_RETRIES) {
-            if (debug || recursionDepth >= 2) {
-              Raven.captureMessage(
-                  "scrollToMessage():  Message still not found in the DOM, calling recursively",
-                  { message_id: message.id,
-                    selector: el,
-                    next_call_recursion_depth: recursionDepth + 1
-                  }
-              );
-              console.log("scrollToMessage():  Message " + message.id + " not found in the DOM with selector: ", el, ", calling recursively with ", recursionDepth + 1);
-            }
-
-            setTimeout(function() {
-              that.scrollToMessage(messageModel, shouldHighlightMessageSelected, shouldOpenMessageSelected, callback, failedCallback, recursionDepth + 1, originalRenderId);
-            }, RETRY_INTERVAL);
-          }
-          else {
-            that._scrollToMessageInProgressId = false;
-            Raven.captureMessage(
-                "scrollToMessage():  scrollToMessage(): MAX_RETRIES has been reached",
-                { message_id: messageModel.id,
-                  recursionDepth: recursionDepth}
-            );
-            if (_.isFunction(failedCallback)) {
-              failedCallback();
-            }
-            return;
-          }
-        }
-
-      };
-
-      if (this.renderIsComplete) {
-        animate_message(messageModel);
+      return;
+    }
+    else if (originalRenderId !== this._renderId) {
+      //This is a normal condition now
+      //console.log("scrollToMessage():  obsolete render, aborting for ", messageModel.id);
+      //Raven.captureMessage("scrollToMessage():  obsolete render, aborting", {message_id: messageModel.id})
+      if (this._scrollToMessageInProgressId === originalRenderId) {
         this._scrollToMessageInProgressId = false;
       }
-      else {
-        if (debug) {
-          console.log("scrollToMessage(): waiting for render to complete");
-        }
 
-        this.listenToOnce(this, "messageList:render_complete", function() {
-          if (debug) {
-            console.log("scrollToMessage(): render has completed, animating");
-          }
-
-          animate_message(messageModel);
-          this._scrollToMessageInProgressId = false;
-        });
+      if (_.isFunction(failedCallback)) {
+        failedCallback();
       }
 
-    },
+      return;
+    }
+    else {
+      this._scrollToMessageInProgressId = originalRenderId;
+    }
+
+    var animate_message = function(message) {
+      var el = that.getMessageSelector(message.id);
+
+      //console.log("el0: ", el);
+      if (el.length && el[0]) {
+        if (shouldOpenMessageSelected) {
+          // console.log("showMessageById(): sending openWithFullBodyView
+          // to message", message.id);
+          message.trigger('openWithFullBodyView');
+          /*setTimeout(function () {
+            if(debug) {
+              console.log("scrollToMessage(): INFO:  shouldOpenMessageSelected is true, calling recursively after a delay with same recursion depth");
+            }
+            that.scrollToMessage(messageModel, shouldHighlightMessageSelected, false, callback, failedCallback, recursionDepth, originalRenderId);
+          }, 1000); //Add a delay if we had to open the message*/
+        }
+
+        var real_callback = function() {
+          if (shouldHighlightMessageSelected) {
+            //console.log(that.currentViewStyle);
+            //console.log("el1: ", el);
+            try {
+              el.highlight();
+            } catch (e) {
+              console.log("Error: could not highlight message. Details of the error are given below.");
+              console.log(e);
+            }
+          }
+
+          if (_.isFunction(callback)) {
+            callback();
+          }
+        }
+        //console.log("scrollToMessage(): Scrolling to message", messageModel.id);
+        scrollUtils.scrollToElementAndWatch(el, real_callback);
+      }
+      else {
+        // Trigerring openWithFullBodyView above requires the message to
+        // re-render. We may have to give it time
+        if (recursionDepth <= MAX_RETRIES) {
+          if (debug || recursionDepth >= 2) {
+            Raven.captureMessage(
+                "scrollToMessage():  Message still not found in the DOM, calling recursively",
+                { message_id: message.id,
+                  selector: el,
+                  next_call_recursion_depth: recursionDepth + 1
+                }
+            );
+            console.log("scrollToMessage():  Message " + message.id + " not found in the DOM with selector: ", el, ", calling recursively with ", recursionDepth + 1);
+          }
+
+          setTimeout(function() {
+            that.scrollToMessage(messageModel, shouldHighlightMessageSelected, shouldOpenMessageSelected, callback, failedCallback, recursionDepth + 1, originalRenderId);
+          }, RETRY_INTERVAL);
+        }
+        else {
+          that._scrollToMessageInProgressId = false;
+          Raven.captureMessage(
+              "scrollToMessage():  scrollToMessage(): MAX_RETRIES has been reached",
+              { message_id: messageModel.id,
+                recursionDepth: recursionDepth}
+          );
+          if (_.isFunction(failedCallback)) {
+            failedCallback();
+          }
+          return;
+        }
+      }
+
+    };
+
+    if (this.renderIsComplete) {
+      animate_message(messageModel);
+      this._scrollToMessageInProgressId = false;
+    }
+    else {
+      if (debug) {
+        console.log("scrollToMessage(): waiting for render to complete");
+      }
+
+      this.listenToOnce(this, "messageList:render_complete", function() {
+        if (debug) {
+          console.log("scrollToMessage(): render has completed, animating");
+        }
+
+        animate_message(messageModel);
+        this._scrollToMessageInProgressId = false;
+      });
+    }
+  },
 
   /**
    * Highlights the message by the given id
@@ -2038,150 +2044,149 @@ return cls.extend({
    * @param {boolean} shouldHighlightMessageSelected: defaults to true
    */
   showMessageById: function(id, callback, shouldHighlightMessageSelected, shouldOpenMessageSelected, shouldRecurseMaxMoreTimes, originalRenderId) {
-      var that = this,
-          collectionManager = new CollectionManager(),
-          shouldRecurse,
-          debug = false;
+    var that = this;
+    var collectionManager = new CollectionManager();
+    var shouldRecurse;
+    var debug = false;
 
-      originalRenderId = originalRenderId || _.clone(this._renderId);
+    originalRenderId = originalRenderId || _.clone(this._renderId);
 
+    if (debug) {
+      console.log("showMessageById called with args:", id, callback, shouldHighlightMessageSelected, shouldOpenMessageSelected, shouldRecurseMaxMoreTimes, originalRenderId, "currently on render id: ", this._renderId);
+      console.log("this.showMessageByIdInProgress:", this.showMessageByIdInProgress);
+    }
+
+    if (!id) {
+      throw new Error("showMessageById called with an empty id");
+    }
+
+    if (this.showMessageByIdInProgress === true && shouldRecurseMaxMoreTimes === undefined) {
+      this.showMessageByIdInProgress = false;
+      Raven.context(function() {
+        throw new Error("showMessageById():   a showMessageById was already in progress, aborting")
+      },
+      {requested_message_id: id});
+    }
+
+    if (shouldRecurseMaxMoreTimes === undefined) {
+      this.showMessageByIdInProgress = true;
+    }
+
+    shouldRecurseMaxMoreTimes = (typeof shouldRecurseMaxMoreTimes === "undefined") ? 3 : shouldRecurseMaxMoreTimes;
+    shouldRecurse = shouldRecurseMaxMoreTimes > 0;
+
+    if (!this.currentQuery.isQueryValid()) {
+      //It may be that we had no query before
+      this.currentQuery.initialize();
       if (debug) {
-        console.log("showMessageById called with args:", id, callback, shouldHighlightMessageSelected, shouldOpenMessageSelected, shouldRecurseMaxMoreTimes, originalRenderId, "currently on render id: ", this._renderId);
-        console.log("this.showMessageByIdInProgress:", this.showMessageByIdInProgress);
+        console.log("Calling render manually after initializing query");
       }
 
-      if (!id) {
-        throw new Error("showMessageById called with an empty id");
+      this.render();
+    }
+
+    if (!this.renderIsComplete) {
+      // If there is already a render in progress, really weird things
+      // can happen.  Wait untill things calm down.
+      if (debug) {
+        console.log("showMessageById(): Render is in progress, setting up listener");
       }
 
-      if (this.showMessageByIdInProgress === true && shouldRecurseMaxMoreTimes === undefined) {
-        this.showMessageByIdInProgress = false;
-        Raven.context(function() {
-          throw new Error("showMessageById():   a showMessageById was already in progress, aborting")
-        },
-        {requested_message_id: id});
-      }
-
-      if (shouldRecurseMaxMoreTimes === undefined) {
-        this.showMessageByIdInProgress = true;
-      }
-
-      shouldRecurseMaxMoreTimes = (typeof shouldRecurseMaxMoreTimes === "undefined") ? 3 : shouldRecurseMaxMoreTimes;
-      shouldRecurse = shouldRecurseMaxMoreTimes > 0;
-
-      if (!this.currentQuery.isQueryValid()) {
-        //It may be that we had no query before
-        this.currentQuery.initialize();
+      this.listenToOnce(that, "messageList:render_complete", function() {
         if (debug) {
-          console.log("Calling render manually after initializing query");
+          console.log("showMessageById(): calling recursively after waiting for render to complete");
         }
 
-        this.render();
-      }
+        that.showMessageById(id, callback, shouldHighlightMessageSelected, shouldOpenMessageSelected, shouldRecurseMaxMoreTimes - 1, originalRenderId);
+      });
+      return;
+    }
 
-      if (!this.renderIsComplete) {
-        // If there is already a render in progress, really weird things
-        // can happen.  Wait untill things calm down.
-        if (debug) {
-          console.log("showMessageById(): Render is in progress, setting up listener");
-        }
+    Promise.join(this.currentQuery.getResultMessageStructureCollectionPromise(),
+        this.getVisitorDataPromise(),
+        this.currentQuery.getResultMessageIdCollectionPromise(),
+        function(allMessageStructureCollection, visitorData, resultMessageIdCollection) {
+          var message = allMessageStructureCollection.get(id);
+          var messageIsInFilter = that.isMessageIdInResults(id, resultMessageIdCollection);
+          var requestedOffsets;
 
-        this.listenToOnce(that, "messageList:render_complete", function() {
-          if (debug) {
-            console.log("showMessageById(): calling recursively after waiting for render to complete");
+          if (originalRenderId !== that._renderId) {
+            Raven.captureMessage("showMessageById():  Unable to complete because a new render is in progress, restarting from scratch", {requested_message_id: id})
+            that.showMessageByIdInProgress = false;
+            that.showMessageById(id, callback, shouldHighlightMessageSelected, shouldOpenMessageSelected, undefined, undefined);
+            return;
           }
 
-          that.showMessageById(id, callback, shouldHighlightMessageSelected, shouldOpenMessageSelected, shouldRecurseMaxMoreTimes - 1, originalRenderId);
-        });
-        return;
-      }
+          if (messageIsInFilter && !that.isMessageOnscreen(resultMessageIdCollection, visitorData, id)) {
+            if (shouldRecurse) {
+              var success = function() {
+                      if (debug) {
+                        console.log("showMessageById(): INFO: message " + id + " was in query results but not onscreen, we requested a page change and now call showMessageById() recursively after waiting for render to complete");
+                      }
 
-      Promise.join(this.currentQuery.getResultMessageStructureCollectionPromise(),
-          this.getVisitorDataPromise(),
-          this.currentQuery.getResultMessageIdCollectionPromise(),
-          function(allMessageStructureCollection, visitorData, resultMessageIdCollection) {
-            var message = allMessageStructureCollection.get(id),
-                messageIsInFilter = that.isMessageIdInResults(id, resultMessageIdCollection),
-                requestedOffsets;
+                      that.showMessageById(id, callback, shouldHighlightMessageSelected, shouldOpenMessageSelected, 0, originalRenderId);
+                    };
+              requestedOffsets = that.calculateRequestedOffsetToShowMessage(id, visitorData, resultMessageIdCollection);
+              that.requestMessages(requestedOffsets); //It may be that a render in progress that will actually use it
+              if (debug) {
+                console.log("showMessageById() requesting page change with requestedOffset:", requestedOffsets);
+              }
 
-            if (originalRenderId !== that._renderId) {
-              Raven.captureMessage("showMessageById():  Unable to complete because a new render is in progress, restarting from scratch", {requested_message_id: id})
+              that.listenToOnce(that, "messageList:render_complete", success);
+              that.showMessages(requestedOffsets);
+            }
+            else {
               that.showMessageByIdInProgress = false;
-              that.showMessageById(id, callback, shouldHighlightMessageSelected, shouldOpenMessageSelected, undefined, undefined);
-              return;
+              Raven.context(function() {
+                throw new Error("showMessageById():  Message is in query results but not in current page, and we are not allowed to recurse");
+              },
+              {requested_message_id: id}
+            );
             }
 
-            if (messageIsInFilter && !that.isMessageOnscreen(resultMessageIdCollection, visitorData, id)) {
-              if (shouldRecurse) {
-                var success = function() {
-                        if (debug) {
-                          console.log("showMessageById(): INFO: message " + id + " was in query results but not onscreen, we requested a page change and now call showMessageById() recursively after waiting for render to complete");
-                        }
+            return true;
+          }
 
-                        that.showMessageById(id, callback, shouldHighlightMessageSelected, shouldOpenMessageSelected, 0, originalRenderId);
-                      };
-                requestedOffsets = that.calculateRequestedOffsetToShowMessage(id, visitorData, resultMessageIdCollection);
-                that.requestMessages(requestedOffsets); //It may be that a render in progress that will actually use it
-                if (debug) {
-                  console.log("showMessageById() requesting page change with requestedOffset:", requestedOffsets);
-                }
-
-                that.listenToOnce(that, "messageList:render_complete", success);
-                that.showMessages(requestedOffsets);
-              }
-              else {
-                that.showMessageByIdInProgress = false;
-                Raven.context(function() {
-                  throw new Error("showMessageById():  Message is in query results but not in current page, and we are not allowed to recurse");
-                },
-                {requested_message_id: id}
-              );
-              }
-
-              return true;
+          if (!messageIsInFilter) {
+            //The current filters might not include the message
+            if (shouldRecurse) {
+              that.showAllMessages();
+              var success = function() {
+                console.log("showMessageById(): WARNING: message " + id + " not in query results, calling showMessageById() recursively after clearing filters");
+                that.showMessageById(id, callback, shouldHighlightMessageSelected, shouldOpenMessageSelected, shouldRecurseMaxMoreTimes - 1, originalRenderId);
+              };
+              that.listenToOnce(that, "messageList:render_complete", success);
+            }
+            else {
+              console.log("Message not in colllection:  id collection was: ", resultMessageIdCollection);
+              that.showMessageByIdInProgress = false;
+              Raven.context(function() {
+                throw new Error("showMessageById:  Message is not in query results, and we are not allowed to recurse");
+              },
+              {requested_message_id: id}
+            );
             }
 
-            if (!messageIsInFilter) {
-              //The current filters might not include the message
-              if (shouldRecurse) {
-                that.showAllMessages();
-                var success = function() {
-                  console.log("showMessageById(): WARNING: message " + id + " not in query results, calling showMessageById() recursively after clearing filters");
-                  that.showMessageById(id, callback, shouldHighlightMessageSelected, shouldOpenMessageSelected, shouldRecurseMaxMoreTimes - 1, originalRenderId);
-                };
-                that.listenToOnce(that, "messageList:render_complete", success);
-              }
-              else {
-                console.log("Message not in colllection:  id collection was: ", resultMessageIdCollection);
-                that.showMessageByIdInProgress = false;
-                Raven.context(function() {
-                  throw new Error("showMessageById:  Message is not in query results, and we are not allowed to recurse");
-                },
-                {requested_message_id: id}
-              );
-              }
+            return true;
+          }
 
-              return true;
+          var real_callback = function() {
+            if (_.isFunction(callback)) {
+              callback();
             }
+          };
 
-            var real_callback = function() {
-              if (_.isFunction(callback)) {
-                callback();
-              }
-            };
-
-            if (debug) {
-              console.log("showMessageById: Handing off to scrollToMessage");
-            }
-            that.scrollToMessage(message, shouldHighlightMessageSelected, shouldOpenMessageSelected, real_callback);
-            that.showMessageByIdInProgress = false;
-          }).error(function() {
-            // give up. This was actually seen.
-            console.error("showMessageById: promises failed.");
-            that.showMessageByIdInProgress = false;
-          });
-
-    },
+          if (debug) {
+            console.log("showMessageById: Handing off to scrollToMessage");
+          }
+          that.scrollToMessage(message, shouldHighlightMessageSelected, shouldOpenMessageSelected, real_callback);
+          that.showMessageByIdInProgress = false;
+        }).error(function() {
+          // give up. This was actually seen.
+          console.error("showMessageById: promises failed.");
+          that.showMessageByIdInProgress = false;
+        });
+  },
 
   scrollToTopPostBox: function() {
     //console.log(scrollToTopPostBox());
@@ -2201,48 +2206,51 @@ return cls.extend({
   },
 
   checkMessagesOnscreen: function(resultMessageIdCollection, visitorData) {
-      var that = this,
-          messageDoms = this.getOnScreenMessagesSelectors(resultMessageIdCollection, visitorData),
-          currentScrolltop = this.ui.panelBody.scrollTop(),
-          currentViewPortTop = this.getCurrentViewPortTop(),
-          currentViewPortBottom = this.getCurrentViewPortBottom();
-      if (this.debugScrollLogging) {
-        //console.log(messageDoms);
-        //console.log("checkMessagesOnscreen(): currentScrolltop", currentScrolltop, "currentViewPortTop", currentViewPortTop, "currentViewPortBottom", currentViewPortBottom);
+    var that = this;
+    var messageDoms = this.getOnScreenMessagesSelectors(resultMessageIdCollection, visitorData);
+    var currentScrolltop = this.ui.panelBody.scrollTop();
+    var currentViewPortTop = this.getCurrentViewPortTop();
+    var currentViewPortBottom = this.getCurrentViewPortBottom();
+    if (this.debugScrollLogging) {
+      //console.log(messageDoms);
+      //console.log("checkMessagesOnscreen(): currentScrolltop", currentScrolltop, "currentViewPortTop", currentViewPortTop, "currentViewPortBottom", currentViewPortBottom);
+    }
+
+    _.each(messageDoms, function(messageSelector) {
+      if (!messageSelector || messageSelector.length == 0)
+        return;
+      var messageTop = messageSelector.offset().top;
+      var messageBottom = messageTop + messageSelector.height();
+      var messageHeight = messageBottom - messageTop;
+      var heightAboveViewPort = currentViewPortTop - messageTop;
+      var heightBelowViewPort = messageBottom - currentViewPortBottom;
+
+      var //15px message padding bottom
+      messageWhiteSpaceRatio = (messageSelector.find(".js_messageHeader").height() + messageSelector.find(".js_messageBottomMenu").height() - 15) / messageHeight;
+
+      var ratioOnscreen;
+      if (heightAboveViewPort < 0) {
+        heightAboveViewPort = 0;
+      }
+      else if (heightAboveViewPort > messageHeight) {
+        heightAboveViewPort = messageHeight;
       }
 
-      _.each(messageDoms, function(messageSelector) {
-        if (!messageSelector || messageSelector.length == 0)
-          return;
-        var messageTop = messageSelector.offset().top,
-            messageBottom = messageTop + messageSelector.height(),
-            messageHeight = messageBottom - messageTop,
-            heightAboveViewPort = currentViewPortTop - messageTop,
-            heightBelowViewPort = messageBottom - currentViewPortBottom,
-            messageWhiteSpaceRatio = (messageSelector.find(".js_messageHeader").height() + messageSelector.find(".js_messageBottomMenu").height() - 15) / messageHeight, //15px message padding bottom
-            ratioOnscreen;
-        if (heightAboveViewPort < 0) {
-          heightAboveViewPort = 0;
-        }
-        else if (heightAboveViewPort > messageHeight) {
-          heightAboveViewPort = messageHeight;
-        }
+      if (heightBelowViewPort < 0) {
+        heightBelowViewPort = 0;
+      }
+      else if (heightBelowViewPort > messageHeight) {
+        heightBelowViewPort = messageHeight;
+      }
 
-        if (heightBelowViewPort < 0) {
-          heightBelowViewPort = 0;
-        }
-        else if (heightBelowViewPort > messageHeight) {
-          heightBelowViewPort = messageHeight;
-        }
+      ratioOnscreen = (messageHeight - heightAboveViewPort - heightBelowViewPort) / messageHeight;
 
-        ratioOnscreen = (messageHeight - heightAboveViewPort - heightBelowViewPort) / messageHeight;
-
-        //console.log("message heightAboveViewPort ", heightAboveViewPort, "heightBelowViewPort",heightBelowViewPort );
-        if (that.debugScrollLogging) {
-          console.log("message % on screen: ", ratioOnscreen * 100, "messageWhiteSpaceRatio", messageWhiteSpaceRatio);
-        }
-      });
-    },
+      //console.log("message heightAboveViewPort ", heightAboveViewPort, "heightBelowViewPort",heightBelowViewPort );
+      if (that.debugScrollLogging) {
+        console.log("message % on screen: ", ratioOnscreen * 100, "messageWhiteSpaceRatio", messageWhiteSpaceRatio);
+      }
+    });
+  },
 
   /**
    * Shows the number of pending messages added through the socket
@@ -2282,14 +2290,14 @@ return cls.extend({
    * @returns A promise
    */
   loadPendingMessages: function() {
-      var that = this,
-          collectionManager = new CollectionManager();
-      return collectionManager.getAllMessageStructureCollectionPromise()
-        .then(function(allMessageStructureCollection) {
-          that.resetPendingMessages(allMessageStructureCollection);
-          that.invalidateQuery();
-          that.render();
-        });
+    var that = this;
+    var collectionManager = new CollectionManager();
+    return collectionManager.getAllMessageStructureCollectionPromise()
+      .then(function(allMessageStructureCollection) {
+        that.resetPendingMessages(allMessageStructureCollection);
+        that.invalidateQuery();
+        that.render();
+      });
   },
 
   invalidateQuery: function() {
@@ -2307,32 +2315,34 @@ return cls.extend({
       //this isn't our own scroll handler
       return;
     }
-    var that = ev.data,
-    //alert("scroll");
-    CURRENT_FONT_SIZE_PX = 13,
+    var that = ev.data;
 
-    //Approximate using messagelist width - 2 * (messageList padding + messageFamily padding, messageFamily margin, message margin.
+    var //alert("scroll");
+    CURRENT_FONT_SIZE_PX = 13;
+
+    var //Approximate using messagelist width - 2 * (messageList padding + messageFamily padding, messageFamily margin, message margin.
     //This is only a good estimation for flat viewss
-    averageMessageWidth = that.ui.messageList.width() - 2 * (20 + 6 + 6 + 10),
+    averageMessageWidth = that.ui.messageList.width() - 2 * (20 + 6 + 6 + 10);
 
-    //Character per line:  normally between 45 to 75, 66 is considered ideal.
+    var //Character per line:  normally between 45 to 75, 66 is considered ideal.
     //Average character per line = div width / font size in px*0.4
-    CURRENT_CHARACTERS_PER_LINE = averageMessageWidth / (CURRENT_FONT_SIZE_PX * 0.4),
+    CURRENT_CHARACTERS_PER_LINE = averageMessageWidth / (CURRENT_FONT_SIZE_PX * 0.4);
 
-    //(gotcha:  ideally substract non-character size of message, but still count header)
-    ESTIMATED_LINE_HEIGHT = 1.5 * CURRENT_FONT_SIZE_PX,
+    var //(gotcha:  ideally substract non-character size of message, but still count header)
+    ESTIMATED_LINE_HEIGHT = 1.5 * CURRENT_FONT_SIZE_PX;
 
-    //Character per word: 5.1 average for english language + 1 space => multipy WPM*5 to get CPM
-    LINE_CARACTERS_PER_WORD = 5.1 + 1,
-    WORDS_PER_LINE = CURRENT_CHARACTERS_PER_LINE / LINE_CARACTERS_PER_WORD,
-    currentScrolltop = that.ui.panelBody.scrollTop(),
-    d = new Date(),
-    currentTimeStamp = d.getTime(),
-    distance = currentScrolltop - that.scrollLoggerPreviousScrolltop,
-    elapsedMilliseconds = currentTimeStamp - that.scrollLoggerPreviousTimestamp,
-    scrollLines = distance / ESTIMATED_LINE_HEIGHT,
-    scrollLinesPerMinute = scrollLines / elapsedMilliseconds * 1000 * 60,
-    scrollWordsPerMinute = scrollLinesPerMinute * WORDS_PER_LINE;
+    var //Character per word: 5.1 average for english language + 1 space => multipy WPM*5 to get CPM
+    LINE_CARACTERS_PER_WORD = 5.1 + 1;
+
+    var WORDS_PER_LINE = CURRENT_CHARACTERS_PER_LINE / LINE_CARACTERS_PER_WORD;
+    var currentScrolltop = that.ui.panelBody.scrollTop();
+    var d = new Date();
+    var currentTimeStamp = d.getTime();
+    var distance = currentScrolltop - that.scrollLoggerPreviousScrolltop;
+    var elapsedMilliseconds = currentTimeStamp - that.scrollLoggerPreviousTimestamp;
+    var scrollLines = distance / ESTIMATED_LINE_HEIGHT;
+    var scrollLinesPerMinute = scrollLines / elapsedMilliseconds * 1000 * 60;
+    var scrollWordsPerMinute = scrollLinesPerMinute * WORDS_PER_LINE;
 
     if (that.debugScrollLogging) {
       /*console.log("CURRENT_FONT_SIZE_PX", CURRENT_FONT_SIZE_PX);

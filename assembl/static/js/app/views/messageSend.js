@@ -1,31 +1,31 @@
-'use strict';
 /**
  * 
  * @module app.views.messageSend
  */
 
-var Backbone = require('backbone'),
-    Marionette = require('backbone.marionette'),
-    Assembl = require('../app.js'),
-    _ = require('underscore'),
-    $ = require('jquery'),
-    Ctx = require('../common/context.js'),
-    CollectionManager = require('../common/collectionManager.js'),
-    Permissions = require('../utils/permissions.js'),
-    MessagesInProgress = require('../objects/messagesInProgress.js'),
-    i18n = require('../utils/i18n.js'),
-    PanelSpecTypes = require('../utils/panelSpecTypes.js'),
-    autosize = require('jquery-autosize'),
-    LangString = require('../models/langstring.js'),
-    Messages = require('../models/message.js'),
-    Agents = require('../models/agents.js'),
-    Documents = require('../models/documents.js'),
-    Attachments = require('../models/attachments.js'),
-    AttachmentViews = require('./attachments.js'),
-    Promise = require('bluebird'),
-    LoaderView = require('./loaderView.js'),
-    Analytics = require('../internal_modules/analytics/dispatcher.js'),
-    linkify = require('linkifyjs');
+var Backbone = require('backbone');
+
+var Marionette = require('backbone.marionette');
+var Assembl = require('../app.js');
+var _ = require('underscore');
+var $ = require('jquery');
+var Ctx = require('../common/context.js');
+var CollectionManager = require('../common/collectionManager.js');
+var Permissions = require('../utils/permissions.js');
+var MessagesInProgress = require('../objects/messagesInProgress.js');
+var i18n = require('../utils/i18n.js');
+var PanelSpecTypes = require('../utils/panelSpecTypes.js');
+var autosize = require('jquery-autosize');
+var LangString = require('../models/langstring.js');
+var Messages = require('../models/message.js');
+var Agents = require('../models/agents.js');
+var Documents = require('../models/documents.js');
+var Attachments = require('../models/attachments.js');
+var AttachmentViews = require('./attachments.js');
+var Promise = require('bluebird');
+var LoaderView = require('./loaderView.js');
+var Analytics = require('../internal_modules/analytics/dispatcher.js');
+var linkify = require('linkifyjs');
 
 /**
  * @init
@@ -81,7 +81,8 @@ var messageSendView = LoaderView.extend({
   initialize: function(options) {
     //console.log("options given to the constructor of messageSend: ", options);
     this.options = options;
-    var that = this, collectionManager = new CollectionManager();
+    var that = this;
+    var collectionManager = new CollectionManager();
     this.setLoading(true);
     collectionManager.getUserLanguagePreferencesPromise(Ctx).then(function (ulp) {
       that.translationData = ulp;
@@ -202,7 +203,8 @@ var messageSendView = LoaderView.extend({
     Ctx.removeCurrentlyDisplayedTooltips(this.$el);
     Ctx.initTooltips(this.$el);
     if (!Ctx.getCurrentUser().can(Permissions.ADD_POST)) {
-      var that = this, collectionManager = new CollectionManager();
+      var that = this;
+      var collectionManager = new CollectionManager();
       collectionManager.getDiscussionModelPromise().then(function(discussion) {
         if (that.isDestroyed()) {
           return;
@@ -211,9 +213,9 @@ var messageSendView = LoaderView.extend({
         if (that.reply_message_model) {
           routeUrl = that.reply_message_model.getRouterUrl({relative: true});
         }
-        var rolesMissingMessageForPermission = Ctx.getCurrentUser().getRolesMissingMessageForPermission(Permissions.ADD_POST, discussion, routeUrl),
-        messageString,
-        warningMessage;
+        var rolesMissingMessageForPermission = Ctx.getCurrentUser().getRolesMissingMessageForPermission(Permissions.ADD_POST, discussion, routeUrl);
+        var messageString;
+        var warningMessage;
         if ('reply_message_id' in that.options) {
           messageString = i18n.gettext("Before you can reply to this message %s")
         }
@@ -262,19 +264,19 @@ var messageSendView = LoaderView.extend({
   },
 
   onSendMessageButtonClick: function(ev) {
-    var btn = $(ev.currentTarget),
-        that = this,
-        btn_original_text = btn.text(),
-        message_body = this.ui.messageBody.val(),
-        message_subject_field = this.ui.topicSubject,
-        message_subject = message_subject_field.val() || this.options.default_subject,
-        reply_idea_id = null,
-        reply_message_id = null,
-        success_callback = null,
-        chosenTargetIdeaField = this.$el.find('.messageSend-target input:checked');
+    var btn = $(ev.currentTarget);
+    var that = this;
+    var btn_original_text = btn.text();
+    var message_body = this.ui.messageBody.val();
+    var message_subject_field = this.ui.topicSubject;
+    var message_subject = message_subject_field.val() || this.options.default_subject;
+    var reply_idea_id = null;
+    var reply_message_id = null;
+    var success_callback = null;
+    var chosenTargetIdeaField = this.$el.find('.messageSend-target input:checked');
     /*console.log("chosenTargetIdea:", chosenTargetIdeaField);
     console.log("chosenTargetIdea val:", chosenTargetIdeaField.val());*/
-    
+
     if (this.sendInProgress !== false) {
       return;
     }
@@ -327,18 +329,20 @@ var messageSendView = LoaderView.extend({
 
     // This is not too good, but it allows the next render to come.
     message_subject_field.value = "";
+
     var subject_ls = message_subject ? (new LangString.Model({
         entries: new LangString.EntryCollection([
             new LangString.EntryModel({
                 value: message_subject
                 // @language: make educated guess from discussion and user languages
-            })])})) : null,
-        body_ls = message_body ? (new LangString.Model({
-        entries: new LangString.EntryCollection([
-            new LangString.EntryModel({
-                value: message_body
-                // @language: make educated guess from discussion and user languages
             })])})) : null;
+
+    var body_ls = message_body ? (new LangString.Model({
+    entries: new LangString.EntryCollection([
+        new LangString.EntryModel({
+            value: message_body
+            // @language: make educated guess from discussion and user languages
+        })])})) : null;
 
     this.model.set({
       subject: subject_ls,
@@ -456,7 +460,6 @@ var messageSendView = LoaderView.extend({
               console.error('ERROR: onSendMessageButtonClick', model, resp);
             }
     })
-
   },
 
   onCancelMessageButtonClick: function() {
@@ -465,8 +468,8 @@ var messageSendView = LoaderView.extend({
   },
 
   onBlurMessage: function(ev) {
-    var analytics = Analytics.getInstance(),
-        messageWasSaved = this.savePartialMessage();
+    var analytics = Analytics.getInstance();
+    var messageWasSaved = this.savePartialMessage();
 
     //console.log("onBlurMessage()", ev);
 
@@ -483,13 +486,12 @@ var messageSendView = LoaderView.extend({
     else {
       analytics.trackEvent(analytics.events['LEAVE_EMPTY_MESSAGE_WRITING_AREA_ON_'+this.analytics_context]);
     }
-
   },
 
   onFocusMessage: function() {
-    var analytics = Analytics.getInstance(),
-        message_body = this.ui.messageBody,
-        message_title = this.ui.messageSubject;
+    var analytics = Analytics.getInstance();
+    var message_body = this.ui.messageBody;
+    var message_title = this.ui.messageSubject;
 
     //console.log("onFocusMessage()");
     //TODO: use a better mecanism than panel locking to address the problem of reloading UI when the user is writing a message (for example when other new messages arrive at the same time)
@@ -505,7 +507,6 @@ var messageSendView = LoaderView.extend({
     } else {
       analytics.trackEvent(analytics.events['ENTER_EMPTY_MESSAGE_WRITING_AREA_ON_'+this.analytics_context]);
     }
-
   },
 
   /**
@@ -513,8 +514,8 @@ var messageSendView = LoaderView.extend({
    */
   savePartialMessage: function() {
     if(this.isRenderedAndNotYetDestroyed()) {
-      var message_body = this.ui.messageBody,
-      message_title = this.ui.messageSubject;
+      var message_body = this.ui.messageBody;
+      var message_title = this.ui.messageSubject;
 
       if ((message_body.length > 0 && message_body.val().length > 0) || (message_title.length > 0 && message_title.val().length > 0)) {
         MessagesInProgress.saveMessage(this.msg_in_progress_ctx, message_body.val(), message_title.val());
@@ -549,11 +550,11 @@ var messageSendView = LoaderView.extend({
   },
 
   _processHyperlinks: _.throttle(function() {
-    var that = this,
-        messageText = this.ui.messageBody.val()||'',
-        links = linkify.find(messageText),
-        missingLinks = [],
-        goneModels = [];
+    var that = this;
+    var messageText = this.ui.messageBody.val()||'';
+    var links = linkify.find(messageText);
+    var missingLinks = [];
+    var goneModels = [];
     //console.log("_processHyperlinks called");
     //console.log(links);
     //console.log(this.attachmentsCollection);
@@ -580,7 +581,7 @@ var messageSendView = LoaderView.extend({
       return found === undefined;
     });
     //console.log("goneModels: ", goneModels);
-    
+
     that.attachmentsCollection.destroy(goneModels);
 
     missingLinks = _.filter(links, function(link) {
@@ -601,13 +602,16 @@ var messageSendView = LoaderView.extend({
         console.warn("unknown link type: ", link.type);
         return;
       }
+
       var document = new Documents.DocumentModel({
-                                  uri: link.href}),
-          attachment = new Attachments.Model({
-            document: document,
-            objectAttachedToModel: that.model,
-            idCreator: Ctx.getCurrentUser().id
-          })
+                                  uri: link.href});
+
+      var attachment = new Attachments.Model({
+        document: document,
+        objectAttachedToModel: that.model,
+        idCreator: Ctx.getCurrentUser().id
+      });
+
       //console.log("Adding missing url", document);
       that.attachmentsCollection.add(attachment);
     });

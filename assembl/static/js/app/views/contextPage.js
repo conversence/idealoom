@@ -1,25 +1,25 @@
-'use strict';
 /**
  * 
  * @module app.views.contextPage
  */
 
-var Marionette = require('backbone.marionette'),
-    Assembl = require('../app.js'),
-    Ctx = require('../common/context.js'),
-    CollectionManager = require('../common/collectionManager.js'),
-    $ = require('jquery'),
-    _ = require('underscore'),
-    i18n = require('../utils/i18n.js'),
-    Moment = require('moment'),
-    BackboneSubset = require("Backbone.Subset"),
-    Permissions = require('../utils/permissions.js'),
-    PanelSpecTypes = require('../utils/panelSpecTypes.js'),
-    AssemblPanel = require('./assemblPanel.js'),
-    CKEditorField = require('./reusableDataFields/ckeditorField.js'),
-    Statistics = require('./statistics.js'),
-    Types = require('../utils/types.js'),
-    Promise = require('bluebird');
+var Marionette = require('backbone.marionette');
+
+var Assembl = require('../app.js');
+var Ctx = require('../common/context.js');
+var CollectionManager = require('../common/collectionManager.js');
+var $ = require('jquery');
+var _ = require('underscore');
+var i18n = require('../utils/i18n.js');
+var Moment = require('moment');
+var BackboneSubset = require("Backbone.Subset");
+var Permissions = require('../utils/permissions.js');
+var PanelSpecTypes = require('../utils/panelSpecTypes.js');
+var AssemblPanel = require('./assemblPanel.js');
+var CKEditorField = require('./reusableDataFields/ckeditorField.js');
+var Statistics = require('./statistics.js');
+var Types = require('../utils/types.js');
+var Promise = require('bluebird');
 
 var Partner = Marionette.View.extend({
   constructor: function Partner() {
@@ -241,8 +241,8 @@ var Introduction = Marionette.View.extend({
   },
 
   renderCKEditorIntroduction: function() {
-    var that = this,
-        area = this.$('.context-introduction-editor');
+    var that = this;
+    var area = this.$('.context-introduction-editor');
 
     var introduction = new CKEditorField({
       'model': this.model,
@@ -255,8 +255,8 @@ var Introduction = Marionette.View.extend({
   },
 
   renderCKEditorObjective: function() {
-    var that = this,
-        area = this.$('.context-objective-editor');
+    var that = this;
+    var area = this.$('.context-objective-editor');
 
     var objective = new CKEditorField({
       'model': this.model,
@@ -293,8 +293,8 @@ var ContextPage = Marionette.View.extend({
   },
 
   onRender: function() {
-    var that = this,
-        collectionManager = new CollectionManager();
+    var that = this;
+    var collectionManager = new CollectionManager();
 
     Promise.join(collectionManager.getDiscussionModelPromise(),
         collectionManager.getAllPartnerOrganizationCollectionPromise(),

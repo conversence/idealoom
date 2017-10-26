@@ -1,22 +1,22 @@
-'use strict';
 /**
  * 
  * @module app.views.facebookViews
  */
 
-var Marionette = require('backbone.marionette'),
-    Backbone = require('backbone'),
-    _ = require('underscore'),
-    Ctx = require('../common/context.js'),
-    i18n = require('../utils/i18n.js'),
-    $ = require('jquery'),
-    Types = require('../utils/types.js'),
-    Promise = require('bluebird'),
-    Moment = require('moment'),
-    CollectionManager = require('../common/collectionManager.js'),
-    Social = require('../models/social.js'),
-    LoaderView = require('./loaderView.js'),
-    Source = require('../models/sources.js');
+var Marionette = require('backbone.marionette');
+
+var Backbone = require('backbone');
+var _ = require('underscore');
+var Ctx = require('../common/context.js');
+var i18n = require('../utils/i18n.js');
+var $ = require('jquery');
+var Types = require('../utils/types.js');
+var Promise = require('bluebird');
+var Moment = require('moment');
+var CollectionManager = require('../common/collectionManager.js');
+var Social = require('../models/social.js');
+var LoaderView = require('./loaderView.js');
+var Source = require('../models/sources.js');
 
 var _allFacebookPermissions = undefined;
 var getAllFacebookPermissions = function() {
@@ -51,7 +51,7 @@ var messageDefaults = {
     });  
     return i18n.gettext("Please be aware that comments below will be imported into a discussion found at ") + link;
   }
-}; 
+};
 
 var _composeMessageBody = function(model, creator, header, extra) {
   var header_default = messageDefaults.header(creator);
@@ -287,9 +287,9 @@ var checkState_shim_2 = function(renderer) {
 // ***************************************************************************************************************
 
 var fbApi = function(options, success, error) {
-  var source = options.endpoint,
-      httpType = options.http || 'get',
-      qs = options.fields;
+  var source = options.endpoint;
+  var httpType = options.http || 'get';
+  var qs = options.fields;
 
   window.FB.api(source, httpType, qs, function(resp) {
     if (_.has(resp, 'error')) {
@@ -353,7 +353,7 @@ var uniqify = function(data) {
 //         permissionDict = _.extend({}, _.values(permissionList)); //This might not work, check.
 
 //     _.each(permissions, function(p,i,arr){
-      
+
 //     });
 //   });
 // }
@@ -489,9 +489,9 @@ var checkState = function(renderView) {
         if (tokens !== false) {
           //Cache all current tokens, then update userToken accordingly.
           tokens.each(function(token, i, arr) {
-            var fb_id = token.get('object_fb_id'),
-                t = token.get('token'),
-                e = token.get('expiration');
+            var fb_id = token.get('object_fb_id');
+            var t = token.get('token');
+            var e = token.get('expiration');
 
             if (token.isPageToken()) {
               window.FB_TOKEN.setPageToken(fb_id, t, e);
@@ -861,8 +861,8 @@ var exportPostForm = Marionette.View.extend({
 
   },
   saveModel: function(success, error) {
-    var that = this,
-        errorMsg = i18n.gettext("Facebook was unable to create the post. Close the box and try again.");
+    var that = this;
+    var errorMsg = i18n.gettext("Facebook was unable to create the post. Close the box and try again.");
     var getLink = function() {
       var tmp = $('.js_fb-attachment-link').val();
       if (!tmp){
@@ -957,9 +957,9 @@ var exportPostForm = Marionette.View.extend({
             error(errorMsg);
           } 
           else {
-            var fbPostId = resp.id,
-                sender = null,
-                cm = new CollectionManager();
+            var fbPostId = resp.id;
+            var sender = null;
+            var cm = new CollectionManager();
 
             // 1) Create the source
             // 2) Create the ContentsourceId
@@ -1057,7 +1057,8 @@ var FacebookSourceForm = Marionette.View.extend({
     return result;
   },
   saveModel: function(success, error) {
-    var that = this, cm = new CollectionManager();
+    var that = this;
+    var cm = new CollectionManager();
     cm.getAllUserAccountsPromise().then(function(accounts) {
       var fbAccount = accounts.getFacebookAccount();
       if (!fbAccount) {
@@ -1120,9 +1121,9 @@ var privateGroupSourceForm = FacebookSourceForm.extend({
   },
   getModelData: function(sender) {
     if (this.bundle.endpoint) {
-      var endpoint = this.bundle.endpoint,
-          groupId = endpoint.substr(0, endpoint.length - 5),
-          modelData = FacebookSourceForm.prototype.getModelData.apply(this, arguments);
+      var endpoint = this.bundle.endpoint;
+      var groupId = endpoint.substr(0, endpoint.length - 5);
+      var modelData = FacebookSourceForm.prototype.getModelData.apply(this, arguments);
       modelData.fb_source_id = groupId;
       return modelData;
     }
@@ -1144,9 +1145,9 @@ var pageSourceForm = FacebookSourceForm.extend({
   },
   getModelData: function(sender) {
     if (this.bundle.endpoint) {
-      var endpoint = this.bundle.endpoint,
-          pageId = endpoint.substr(0, endpoint.length - 5),
-          modelData = FacebookSourceForm.prototype.getModelData.apply(this, arguments);
+      var endpoint = this.bundle.endpoint;
+      var pageId = endpoint.substr(0, endpoint.length - 5);
+      var modelData = FacebookSourceForm.prototype.getModelData.apply(this, arguments);
       modelData.fb_source_id = pageId;
       return modelData;
     }

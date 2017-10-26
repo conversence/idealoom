@@ -1,43 +1,43 @@
-'use strict';
 /**
  * Manage views instanciation.
  * @module app.routeManager
  */
 
-var Marionette = require('backbone.marionette'),
-    Assembl = require('./app.js'),
-    Promise = require('bluebird'),
-    Ctx = require('./common/context.js'),
-    Agents = require('./models/agents.js'),
-    Storage = require('./objects/storage.js'),
-    Loader = require('./views/loader.js'),
-    NavBar = require('./views/navBar.js'),
-    InfobarsViews = require('./views/infobar.js'),
-    InfobarsModels = require('./models/infobar.js'),
-    UrlParser = require('./url/url.pegjs'),
-    GroupContainer = require('./views/groups/groupContainer.js'),
-    PanelSpecTypes = require('./utils/panelSpecTypes.js'),
-    CookiesManager = require("./utils/cookiesManager.js"),
-    CollectionManager = require('./common/collectionManager.js'),
-    ViewsFactory = require('./objects/viewsFactory.js'),
-    AdminDiscussion = require('./views/admin/adminDiscussion.js'),
-    AdminNotificationSubscriptions = require('./views/admin/adminNotificationSubscriptions.js'),
-    AdminPartners = require('./views/admin/adminPartners.js'),
-    UserNotificationSubscriptions = require('./views/user/userNotificationSubscriptions.js'),
-    Profile = require('./views/user/profile.js'),
-    AgentViews = require('./views/agent.js'),
-    Authorization = require('./views/authorization.js'),
-    Permissions = require('./utils/permissions.js'),
-    Account = require('./views/user/account.js'),
-    Widget = require('./models/widget.js'),
-    AdminDiscussionSettings = require('./views/admin/adminDiscussionSettings.js'),
-    AdminTimeline = require('./views/admin/adminTimelineEvents.js'),
-    PreferencesView = require('./views/preferencesView.js'),
-    FirstIdeaToShowVisitor = require('./views/visitors/firstIdeaToShowVisitor.js'),
-    i18n = require('./utils/i18n.js'),
-    Analytics = require('./internal_modules/analytics/dispatcher.js'),
-    Marionette = require('backbone.marionette'),
-    $ = require('jquery');
+var Marionette = require('backbone.marionette');
+
+var Assembl = require('./app.js');
+var Promise = require('bluebird');
+var Ctx = require('./common/context.js');
+var Agents = require('./models/agents.js');
+var Storage = require('./objects/storage.js');
+var Loader = require('./views/loader.js');
+var NavBar = require('./views/navBar.js');
+var InfobarsViews = require('./views/infobar.js');
+var InfobarsModels = require('./models/infobar.js');
+var UrlParser = require('./url/url.pegjs');
+var GroupContainer = require('./views/groups/groupContainer.js');
+var PanelSpecTypes = require('./utils/panelSpecTypes.js');
+var CookiesManager = require("./utils/cookiesManager.js");
+var CollectionManager = require('./common/collectionManager.js');
+var ViewsFactory = require('./objects/viewsFactory.js');
+var AdminDiscussion = require('./views/admin/adminDiscussion.js');
+var AdminNotificationSubscriptions = require('./views/admin/adminNotificationSubscriptions.js');
+var AdminPartners = require('./views/admin/adminPartners.js');
+var UserNotificationSubscriptions = require('./views/user/userNotificationSubscriptions.js');
+var Profile = require('./views/user/profile.js');
+var AgentViews = require('./views/agent.js');
+var Authorization = require('./views/authorization.js');
+var Permissions = require('./utils/permissions.js');
+var Account = require('./views/user/account.js');
+var Widget = require('./models/widget.js');
+var AdminDiscussionSettings = require('./views/admin/adminDiscussionSettings.js');
+var AdminTimeline = require('./views/admin/adminTimelineEvents.js');
+var PreferencesView = require('./views/preferencesView.js');
+var FirstIdeaToShowVisitor = require('./views/visitors/firstIdeaToShowVisitor.js');
+var i18n = require('./utils/i18n.js');
+var Analytics = require('./internal_modules/analytics/dispatcher.js');
+var Marionette = require('backbone.marionette');
+var $ = require('jquery');
 
 var QUERY_STRINGS = {
   'source': ['notification', 'share']
@@ -47,7 +47,7 @@ var QUERY_STRINGS = {
  * 
  * @class app.routeManager.TrackAnalyticsWithQueryString
  */
- 
+
 var trackAnalyticsWithQueryString = function(qs, context){
   
   //console.log('tracking with query string ' + qs + ' using context ' + context);
@@ -63,9 +63,9 @@ var trackAnalyticsWithQueryString = function(qs, context){
   };
 
   function doCheck(param, success){
-    var tmp = param.split('='),
-        k = tmp[0],
-        v = tmp[1];
+    var tmp = param.split('=');
+    var k = tmp[0];
+    var v = tmp[1];
 
     if ( _.has(QUERY_STRINGS, k) ){
       if ( arrayHas(QUERY_STRINGS[k], v) ){
@@ -138,7 +138,7 @@ var trackAnalyticsWithQueryString = function(qs, context){
  * 
  * @class app.routeManager.RouteManager
  */
- 
+
 var routeManager = Marionette.Object.extend({
 
   initialize: function() {
@@ -472,8 +472,8 @@ var routeManager = Marionette.Object.extend({
         collection: groupSpecs
       });
 
-      var lastSave = Storage.getDateOfLastViewSave(),
-          currentUser = Ctx.getCurrentUser();
+      var lastSave = Storage.getDateOfLastViewSave();
+      var currentUser = Ctx.getCurrentUser();
       if (lastSave && !lastSave.getDate()) {
         // case of Invalid Date
         lastSave = null;
@@ -530,8 +530,9 @@ var routeManager = Marionette.Object.extend({
      * TODO: backend api know private discussion and can redirect to login
      * add this method to home page route
      * */
-    var route = Backbone.history.fragment,
-        access = false;
+    var route = Backbone.history.fragment;
+
+    var access = false;
 
     if (!Ctx.getCurrentUserId()) {
       var authorization = new Authorization({

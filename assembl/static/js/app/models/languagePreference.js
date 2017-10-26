@@ -1,14 +1,14 @@
-'use strict';
 /**
  * A user's preference language
  * @module app.models.languagePreference
  */
-var _ = require('underscore'),
-    Base = require('./base.js'),
-    Ctx = require('../common/context.js'),
-    i18n = require('../utils/i18n.js'),
-    LangString = require("./langstring.js"),
-    Types = require('../utils/types.js');
+var _ = require('underscore');
+
+var Base = require('./base.js');
+var Ctx = require('../common/context.js');
+var i18n = require('../utils/i18n.js');
+var LangString = require("./langstring.js");
+var Types = require('../utils/types.js');
 
 var clean = function(input){
     if (!input){
@@ -50,16 +50,16 @@ var LanguagePreferenceModel = Base.Model.extend({
    * @function app.models.languagePreference.LanguagePreferenceModel.isLocale
    */
     isLocale: function(locale){
-        var cl = clean(locale),
-            clln = clean(this.get('locale_code'));
+        var cl = clean(locale);
+        var clln = clean(this.get('locale_code'));
         return clln === cl;
     },
   /**
    * @function app.models.languagePreference.LanguagePreferenceModel.isTranslateTo
    */
     isTranslateTo: function(locale){
-        var cl = clean(locale),
-            clln = clean(this.get('translate_to_name'));
+        var cl = clean(locale);
+        var clln = clean(this.get('translate_to_name'));
         return clln === cl;
     }
 });
@@ -162,49 +162,50 @@ var LanguagePreferenceCollection = Base.Collection.extend({
       // this is when we precalculate the cache
       // We might make the cache into another object someday.
       if (this.cachePrefByLocale === undefined) {
-        var that = this,
-            prefByLocale = {};
-        // assume this.models is sorted, just reverse
-        _.map(this.models.reverse(), function(pref) {
-          prefByLocale[pref.get("locale_code")] = pref;
-        });
-        // then add the superlocales
-        this.map(function(pref) {
-          var locale = pref.get("locale_code");
-          locale = LangString.LocaleUtils.superLocale(locale);
-          while (locale !== undefined && prefByLocale[locale] == undefined) {
-            prefByLocale[locale] = pref;
+          var that = this;
+          var prefByLocale = {};
+          // assume this.models is sorted, just reverse
+          _.map(this.models.reverse(), function(pref) {
+            prefByLocale[pref.get("locale_code")] = pref;
+          });
+          // then add the superlocales
+          this.map(function(pref) {
+            var locale = pref.get("locale_code");
             locale = LangString.LocaleUtils.superLocale(locale);
-          }
-        });
-        // check if the translation targets are there
-        this.map(function(pref) {
-          var locale = pref.get("translate_to_name");
-          while (locale != undefined) {
-            if (prefByLocale[locale] === undefined) {
-                prefByLocale[locale] = new LanguagePreferenceModel({
-                    locale_code: locale,
-                    source_of_evidence: 3, // LanguagePreferenceOrder.DeducedFromTranslation
-                    preferred_order: pref.get("preferred_order")});
+            while (locale !== undefined && prefByLocale[locale] == undefined) {
+              prefByLocale[locale] = pref;
+              locale = LangString.LocaleUtils.superLocale(locale);
             }
-            locale = LangString.LocaleUtils.superLocale(locale);
+          });
+          // check if the translation targets are there
+          this.map(function(pref) {
+            var locale = pref.get("translate_to_name");
+            while (locale != undefined) {
+              if (prefByLocale[locale] === undefined) {
+                  prefByLocale[locale] = new LanguagePreferenceModel({
+                      locale_code: locale,
+                      source_of_evidence: 3, // LanguagePreferenceOrder.DeducedFromTranslation
+                      preferred_order: pref.get("preferred_order")});
+              }
+              locale = LangString.LocaleUtils.superLocale(locale);
+            }
+          });
+          this.cachePrefByLocale = prefByLocale;
+          var pref;
+          var i;
+          for (i = 0; i < this.models.length; i++) {
+            pref = this.models[i];
+            if (pref.get("translate_to_name") !== null) {
+              this.cacheDefaultTargetLocale = pref.get("translate_to_name");
+              return this;
+            }
           }
-        });
-        this.cachePrefByLocale = prefByLocale;
-        var pref, i;
-        for (i = 0; i < this.models.length; i++) {
-          pref = this.models[i];
-          if (pref.get("translate_to_name") !== null) {
-            this.cacheDefaultTargetLocale = pref.get("translate_to_name");
-            return this;
+          pref = this.first();
+          if (pref === undefined) {
+            this.cacheDefaultTargetLocale = Ctx.getLocale();
+          } else {
+            this.cacheDefaultTargetLocale = pref.get("locale_code")
           }
-        }
-        pref = this.first();
-        if (pref === undefined) {
-          this.cacheDefaultTargetLocale = Ctx.getLocale();
-        } else {
-          this.cacheDefaultTargetLocale = pref.get("locale_code")
-        }
       }
       return this;
     },
@@ -222,30 +223,33 @@ var LanguagePreferenceCollection = Base.Collection.extend({
             // invalidate the cache
             this.cacheDefaultTargetLocale = undefined;
             this.cachePrefByLocale = undefined;
-            var user_id = currentUser.id,
-                that = this,
-                saveOptions = saveOptions || {},
-                existingModel = this.find(function(model){
-                //Uniqueness constraint from the back-end ensures only 1 model with such parameters
-                return (
-                    (model.get('user') === user_id) && 
-                    (model.get('locale_code') === locale) &&
-                    (model.get('source_of_evidence') === 0))
-                }),
-                ops = {
-                    success: function(model, resp, options){
-                        that.add(model);
-                        if (_.has(saveOptions, "success")){
-                            saveOptions.success(model, resp, options);
-                        }
-                    },
-                    error: function(model, resp, options){
-                        console.error("Failed to save user language preference of " + model + " to the database", resp);
-                        if (_.has(saveOptions, "error")){
-                            saveOptions.error(model, resp, options);
-                        }
+            var user_id = currentUser.id;
+            var that = this;
+            var saveOptions = saveOptions || {};
+
+            var existingModel = this.find(function(model){
+            //Uniqueness constraint from the back-end ensures only 1 model with such parameters
+            return (
+                (model.get('user') === user_id) && 
+                (model.get('locale_code') === locale) &&
+                (model.get('source_of_evidence') === 0))
+            });
+
+            var ops = {
+                success: function(model, resp, options){
+                    that.add(model);
+                    if (_.has(saveOptions, "success")){
+                        saveOptions.success(model, resp, options);
                     }
-                };
+                },
+                error: function(model, resp, options){
+                    console.error("Failed to save user language preference of " + model + " to the database", resp);
+                    if (_.has(saveOptions, "error")){
+                        saveOptions.error(model, resp, options);
+                    }
+                }
+            };
+
             if (existingModel) {
                 var model = existingModel;
                 ops.wait = true;

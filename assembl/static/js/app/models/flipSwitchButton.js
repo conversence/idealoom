@@ -1,4 +1,3 @@
-'use strict';
 /**
  * Button to switch to less/more filter options
  * @module app.models.flipSwitchButton

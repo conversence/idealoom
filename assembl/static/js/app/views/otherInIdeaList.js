@@ -1,13 +1,13 @@
-'use strict';
 /**
  * 
  * @module app.views.otherInIdeaList
  */
 
-var Ctx = require('../common/context.js'),
-    ideaInIdeaList = require('./ideaInIdeaList.js'),
-    IdeaView = require('./ideaInIdeaList.js'),
-    _ = require('underscore');
+var Ctx = require('../common/context.js');
+
+var ideaInIdeaList = require('./ideaInIdeaList.js');
+var IdeaView = require('./ideaInIdeaList.js');
+var _ = require('underscore');
 
 var otherInIdeaList = ideaInIdeaList.IdeaView.extend({
   constructor: function otherInIdeaList() {
@@ -18,8 +18,8 @@ var otherInIdeaList = ideaInIdeaList.IdeaView.extend({
   onRender: function() {
     Ctx.removeCurrentlyDisplayedTooltips(this.$el);
 
-    var hasOrphanPosts = this.model.get('num_orphan_posts'),
-        hasSynthesisPosts = this.model.get('num_synthesis_posts');
+    var hasOrphanPosts = this.model.get('num_orphan_posts');
+    var hasSynthesisPosts = this.model.get('num_synthesis_posts');
 
     var subMenu = _.find([hasOrphanPosts, hasSynthesisPosts], function(num) {
       return num !== 0;

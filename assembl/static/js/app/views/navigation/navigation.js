@@ -1,25 +1,25 @@
-'use strict';
 /**
  * 
  * @module app.views.navigation.navigation
  */
 
-var Marionette = require('backbone.marionette'),
-    Jed = require('jed'),
-    $ = require('jquery'),
-    _ = require('underscore'),
-    Assembl = require('../../app.js'),
-    IdeaList = require('../ideaList.js'),
-    Base = require('../../models/base.js'),
-    AboutNavPanel = require('../navigation/about.js'),
-    SynthesisInNavigationPanel = require('../navigation/synthesisInNavigation.js'),
-    LinkListView = require('../navigation/linkListView.js'),
-    AssemblPanel = require('../assemblPanel.js'),
-    Ctx = require('../../common/context.js'),
-    Permissions = require('../../utils/permissions.js'),
-    PanelSpecTypes = require('../../utils/panelSpecTypes.js'),
-    CollectionManager = require('../../common/collectionManager.js'),
-    Analytics = require('../../internal_modules/analytics/dispatcher.js');
+var Marionette = require('backbone.marionette');
+
+var Jed = require('jed');
+var $ = require('jquery');
+var _ = require('underscore');
+var Assembl = require('../../app.js');
+var IdeaList = require('../ideaList.js');
+var Base = require('../../models/base.js');
+var AboutNavPanel = require('../navigation/about.js');
+var SynthesisInNavigationPanel = require('../navigation/synthesisInNavigation.js');
+var LinkListView = require('../navigation/linkListView.js');
+var AssemblPanel = require('../assemblPanel.js');
+var Ctx = require('../../common/context.js');
+var Permissions = require('../../utils/permissions.js');
+var PanelSpecTypes = require('../../utils/panelSpecTypes.js');
+var CollectionManager = require('../../common/collectionManager.js');
+var Analytics = require('../../internal_modules/analytics/dispatcher.js');
 
 var NavigationView = AssemblPanel.extend({
   constructor: function NavigationView() {
@@ -71,8 +71,8 @@ var NavigationView = AssemblPanel.extend({
     this.listenTo(Assembl.other_vent, 'infobar:closeItem', this.setSideBarHeight);
   },
   onAttach:function() {
-    var that = this,
-    collectionManager = new CollectionManager();
+    var that = this;
+    var collectionManager = new CollectionManager();
 
     var boundSetSideBarHeight = function(){ return that.setSideBarHeight(); };
     boundSetSideBarHeight = _.bind(boundSetSideBarHeight, this);
@@ -154,8 +154,11 @@ var NavigationView = AssemblPanel.extend({
   _toggleMenuByEvent: function(evt) {
     if ($(evt.target).hasClass("js_minimizePanel"))
         return;
-    var elm = $(evt.currentTarget), // use currentTarget instead of target, so that we are sure that it is a .nav element
-        view = elm.attr('data-view');
+
+    var // use currentTarget instead of target, so that we are sure that it is a .nav element
+    elm = $(evt.currentTarget);
+
+    var view = elm.attr('data-view');
     Assembl.other_vent.trigger("DEPRECATEDnavigation:selected", view, 'NAVIGATION');
   },
 
@@ -269,12 +272,12 @@ var NavigationView = AssemblPanel.extend({
       this.li_height = 40;
       marginHeightLi = 2;
     }
-    var _header = $('#header').height() + $('#infobar').height(),
-        _window = $(window).height(),
-        _li = this.li_height * this.num_items,
-        _headerGroup = ($(".groupHeader").first().hasClass('editable')) ? this.group_editable_header_height : this.group_header_height,
-        _sideBarHeight = (_window - _header) - _headerGroup,
-        that = this;
+    var _header = $('#header').height() + $('#infobar').height();
+    var _window = $(window).height();
+    var _li = this.li_height * this.num_items;
+    var _headerGroup = ($(".groupHeader").first().hasClass('editable')) ? this.group_editable_header_height : this.group_header_height;
+    var _sideBarHeight = (_window - _header) - _headerGroup;
+    var that = this;
 
     if (this.$el && this.$el.parent() && this.$el.parent().height()) {
       this._accordionContentHeight = _sideBarHeight - _li - marginHeightLi;
@@ -288,7 +291,6 @@ var NavigationView = AssemblPanel.extend({
         }, 100);
       }
     }
-
   },
 
   serializeData: function() {

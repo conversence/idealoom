@@ -1,14 +1,14 @@
-'use strict';
 /**
  * Represents a discussion
  * @module app.models.discussion
  */
-var Base = require('./base.js'),
-    Jed = require('jed'),
-    Ctx = require('../common/context.js'),
-    Permissions = require('../utils/permissions.js'),
-    i18n = require('../utils/i18n.js'),
-    Roles = require('../utils/roles.js');
+var Base = require('./base.js');
+
+var Jed = require('jed');
+var Ctx = require('../common/context.js');
+var Permissions = require('../utils/permissions.js');
+var i18n = require('../utils/i18n.js');
+var Roles = require('../utils/roles.js');
 /**
  * Discussion model
  * Frontend model for :py:class:`assembl.models.discussion.Discussion`
@@ -93,11 +93,12 @@ var discussionModel = Base.Model.extend({
    * @function app.models.discussion.discussionModel.getVisualizations
    */
   getVisualizations: function() {
-    var jed, settings = Ctx.getPreferences(),
-        visualizations = settings.visualizations,
-        navigation_sections = settings.navigation_sections || {},
-        user = Ctx.getCurrentUser(),
-        navigation_item_collections = [];
+    var jed;
+    var settings = Ctx.getPreferences();
+    var visualizations = settings.visualizations;
+    var navigation_sections = settings.navigation_sections || {};
+    var user = Ctx.getCurrentUser();
+    var navigation_item_collections = [];
     try {
       jed = new Jed(translations[Ctx.getLocale()]);
     } catch (e) {
@@ -106,8 +107,8 @@ var discussionModel = Base.Model.extend({
     }
 
     for (var i in navigation_sections) {
-      var navigation_section = navigation_sections[i],
-      permission = navigation_section.requires_permission || Permissions.READ;
+      var navigation_section = navigation_sections[i];
+      var permission = navigation_section.requires_permission || Permissions.READ;
       if (user.can(permission)) {
         var visualization_items = navigation_section.navigation_content.items;
         visualization_items = _.filter(visualization_items, function(item) {

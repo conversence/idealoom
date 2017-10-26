@@ -1,13 +1,13 @@
-'use strict';
 /**
  * Description of the columns of classified messages under an idea
  * @module app.models.timeline
  */
-var _ = require('underscore'),
-    Base = require('./base.js'),
-    LangString = require('./langstring.js'),
-    Moment = require('moment'),
-    Ctx = require('../common/context.js');
+var _ = require('underscore');
+
+var Base = require('./base.js');
+var LangString = require('./langstring.js');
+var Moment = require('moment');
+var Ctx = require('../common/context.js');
 
 /**
  * A category of classified messages under an idea
@@ -93,8 +93,9 @@ var TimelineEventCollection = Base.Collection.extend({
     // in theory, this can fail if links of the chain are missing.
     // in practice, the collections are tiny, and this should not be an issue.
     // To be sure, re-sort once the collection is complete.
-    var e1p = e1.get("previous_event"),
-        e2p = e2.get("previous_event");
+    var e1p = e1.get("previous_event");
+
+    var e2p = e2.get("previous_event");
     if (e1.id == e2p) {
       return -1;
     } else if (e2.id == e1p) {

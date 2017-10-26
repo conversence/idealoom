@@ -2,19 +2,20 @@
  * 
  * @module app.views.admin.generalSource
  */
-var Marionette = require('backbone.marionette'),
-    $ = require('jquery'),
-    _ = require('underscore'),
-    i18n = require('../../utils/i18n.js'),
-    Types = require('../../utils/types.js'),
-    Ctx = require('../../common/context.js'),
-    Permissions = require('../../utils/permissions.js'),
-    Growl = require('../../utils/growl.js'),
-    Source = require('../../models/sources.js'),
-    CollectionManager = require('../../common/collectionManager.js'),
-    SourceViews = require("./sourceEditViews.js"),
-    Moment = require('moment'),
-    FacebookSourceEditView = require("../facebookViews.js");
+var Marionette = require('backbone.marionette');
+
+var $ = require('jquery');
+var _ = require('underscore');
+var i18n = require('../../utils/i18n.js');
+var Types = require('../../utils/types.js');
+var Ctx = require('../../common/context.js');
+var Permissions = require('../../utils/permissions.js');
+var Growl = require('../../utils/growl.js');
+var Source = require('../../models/sources.js');
+var CollectionManager = require('../../common/collectionManager.js');
+var SourceViews = require("./sourceEditViews.js");
+var Moment = require('moment');
+var FacebookSourceEditView = require("../facebookViews.js");
 
 function getSourceEditView(model_type) {
   var form;
@@ -34,7 +35,7 @@ function getSourceEditView(model_type) {
       console.error("Not edit view for source of type "+model_type);
       return;
   }
-};
+}
 
 
 
@@ -138,7 +139,7 @@ var ReadSource = Marionette.View.extend({
 function getSourceDisplayView(model) {
   // TODO
   return ReadSource;
-};
+}
 
 
 var SourceView = Marionette.View.extend({
@@ -195,11 +196,12 @@ var CreateSource = Marionette.View.extend({
         Types.FACEBOOK_PAGE_POSTS_SOURCE,
         Types.FACEBOOK_PAGE_FEED_SOURCE,
         Types.FACEBOOK_SINGLE_POST_SOURCE
-      ],
-      type_name_assoc = {};
-      for (var i in types) {
-        type_name_assoc[types[i]] = Source.getSourceClassByType(types[i]).prototype.localizedName;
-      }
+      ];
+
+    var type_name_assoc = {};
+    for (var i in types) {
+      type_name_assoc[types[i]] = Source.getSourceClassByType(types[i]).prototype.localizedName;
+    }
     return {
       types: types,
       type_names: type_name_assoc

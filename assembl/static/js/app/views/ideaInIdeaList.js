@@ -1,22 +1,22 @@
-'use strict';
 /**
  * 
  * @module app.views.ideaInIdeaList
  */
 
-var Backbone = require('backbone'),
-    _ = require('underscore'),
-    $ = require('jquery'),
-    Types = require('../utils/types.js'),
-    classlist = require('classlist-polyfill'),
-    Assembl = require('../app.js'),
-    Ctx = require('../common/context.js'),
-    Permissions = require('../utils/permissions.js'),
-    UserCustomData = require('../models/userCustomData.js'),
-    PanelSpecTypes = require('../utils/panelSpecTypes.js'),
-    scrollUtils = require('../utils/scrollUtils.js'),
-    Marionette = require('backbone.marionette'),
-    Analytics = require('../internal_modules/analytics/dispatcher.js');
+var Backbone = require('backbone');
+
+var _ = require('underscore');
+var $ = require('jquery');
+var Types = require('../utils/types.js');
+var classlist = require('classlist-polyfill');
+var Assembl = require('../app.js');
+var Ctx = require('../common/context.js');
+var Permissions = require('../utils/permissions.js');
+var UserCustomData = require('../models/userCustomData.js');
+var PanelSpecTypes = require('../utils/panelSpecTypes.js');
+var scrollUtils = require('../utils/scrollUtils.js');
+var Marionette = require('backbone.marionette');
+var Analytics = require('../internal_modules/analytics/dispatcher.js');
 
 var IdeaInIdeaListView = Marionette.View.extend({
   constructor: function IdeaInIdeaListView() {
@@ -135,8 +135,8 @@ var IdeaInIdeaListView = Marionette.View.extend({
   },
 
   serializeData: function() {
-    var data = this.model.toJSON(),
-        model_type = this.model.get('@type');
+    var data = this.model.toJSON();
+    var model_type = this.model.get('@type');
     _.extend(data, render_data);
 
     data.shortTitle = this.model.getShortTitleDisplayText(this.translationData);
@@ -147,8 +147,8 @@ var IdeaInIdeaListView = Marionette.View.extend({
     data.Ctx = Ctx;
     data.idea_css_class = this.model.getCssClassFromId();
     if (Types.isInstance(model_type, Types.IDEA) && model_type != Types.ROOT_IDEA) {
-      var visitorData = this.visitorData,
-      render_data = visitorData[this.model.getId()];
+      var visitorData = this.visitorData;
+      var render_data = visitorData[this.model.getId()];
       if (this.synthesis != undefined) {
         data.inNextSynthesis = this.synthesis.getIdeasCollection().get(this.model.id) !== undefined;
       } else {
@@ -167,9 +167,9 @@ var IdeaInIdeaListView = Marionette.View.extend({
    */
   onRender: function() {
     var that = this;
-    var visitorData = this.visitorData,
-    idea_render_data = visitorData[this.model.getId()];
-    
+    var visitorData = this.visitorData;
+    var idea_render_data = visitorData[this.model.getId()];
+
     this.$el.addClass('idealist-item');
     Ctx.removeCurrentlyDisplayedTooltips(this.$el);
 
@@ -261,8 +261,8 @@ var IdeaInIdeaListView = Marionette.View.extend({
    * @event
    */
   onCheckboxChange: function(ev) {
-    var that = this,
-    checked = ev.currentTarget.checked;
+    var that = this;
+    var checked = ev.currentTarget.checked;
 
     ev.stopPropagation();
     Ctx.getCurrentSynthesisDraftPromise().then(function(synthesis) {
@@ -476,8 +476,8 @@ var IdeaInIdeaListView = Marionette.View.extend({
       ev.preventDefault();
     }
 
-    var isDraggedBelow = this.$el.hasClass('is-dragover-below'),
-        isDraggedAbove = this.$el.hasClass('is-dragover-above');
+    var isDraggedBelow = this.$el.hasClass('is-dragover-below');
+    var isDraggedAbove = this.$el.hasClass('is-dragover-above');
 
     this.$('.idealist-body').trigger('dragleave');
 

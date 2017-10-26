@@ -1,18 +1,18 @@
-'use strict';
 /**
  * 
  * @module app.views.groups.panelWrapper
  */
 
-var $ = require('jquery'),
-    Marionette = require('backbone.marionette'),
-    panelViewByPanelSpec = require('../../objects/viewsFactory.js'),
-    Ctx = require('../../common/context.js'),
-    AssemblPanel = require('../assemblPanel.js'),
-    i18n = require('../../utils/i18n.js'),
-    panelSpec = require('../../models/panelSpec.js'),
-    tooltip = require('bootstrap-tooltip'),
-    PanelSpecTypes = require('../../utils/panelSpecTypes.js');
+var $ = require('jquery');
+
+var Marionette = require('backbone.marionette');
+var panelViewByPanelSpec = require('../../objects/viewsFactory.js');
+var Ctx = require('../../common/context.js');
+var AssemblPanel = require('../assemblPanel.js');
+var i18n = require('../../utils/i18n.js');
+var panelSpec = require('../../models/panelSpec.js');
+var tooltip = require('bootstrap-tooltip');
+var PanelSpecTypes = require('../../utils/panelSpecTypes.js');
 
 /**
  * @class app.views.groups.panelWrapper.PanelWrapper
@@ -378,8 +378,8 @@ var PanelWrapper = Marionette.View.extend({
     }
   },
   getIcon: function() {
-    var type = this.contentsView.panelType,
-        icon = '';
+    var type = this.contentsView.panelType;
+    var icon = '';
     switch (type.id) {
       case PanelSpecTypes.IDEA_PANEL.id:
         icon = 'icon-idea';

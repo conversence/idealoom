@@ -1,15 +1,15 @@
-'use strict';
 /**
  * The application router.
  * @module app.router
  */
 
-var Marionette = require('backbone.marionette'),
-    routeManager = require('./routeManager.js'),
-    Ctx = require('./common/context.js'),
-    message = require('./models/message.js'),
-    idea = require('./models/idea.js'),
-    agent = require('./models/agents.js');
+var Marionette = require('backbone.marionette');
+
+var routeManager = require('./routeManager.js');
+var Ctx = require('./common/context.js');
+var message = require('./models/message.js');
+var idea = require('./models/idea.js');
+var agent = require('./models/agents.js');
 
 /**
  * The Router will forward existing URLs to various handlers according to those routes

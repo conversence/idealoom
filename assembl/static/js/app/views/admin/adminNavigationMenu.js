@@ -1,14 +1,14 @@
-'use strict';
 /**
  * 
  * @module app.views.admin.adminNavigationMenu
  */
 
-var Marionette = require('backbone.marionette'),
-    $ = require('jquery'),
-    i18n = require('../../utils/i18n.js'),
-    Permissions = require('../../utils/permissions.js'),
-    Ctx = require('../../common/context.js');
+var Marionette = require('backbone.marionette');
+
+var $ = require('jquery');
+var i18n = require('../../utils/i18n.js');
+var Permissions = require('../../utils/permissions.js');
+var Ctx = require('../../common/context.js');
 
 var adminNavigationMenu = Marionette.View.extend({
   constructor: function adminNavigationMenu() {

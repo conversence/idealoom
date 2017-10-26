@@ -1,10 +1,10 @@
-'use strict';
 /**
  * Represents the state of a panel group (current idea, selected navigation, minimised states, etc.)
  * @module app.models.groupState
  */
-var Base = require('./base.js'),
-    Idea = require('./idea.js');
+var Base = require('./base.js');
+
+var Idea = require('./idea.js');
 /**
  * Group state model
  * @class app.models.groupState.GroupStateModel

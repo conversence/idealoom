@@ -1,16 +1,16 @@
-'use strict';
 /**
  * App initialization.
  * @module app.app
  */
 
-var Marionette = require('backbone.marionette'),
-    $ = require('jquery'),
-    classlist = require('classlist-polyfill'),
-    Raven = require('raven-js'),
-    Radio = require('backbone.radio'),
-    Types = require('./utils/types.js'),
-    _ = require('underscore');
+var Marionette = require('backbone.marionette');
+
+var $ = require('jquery');
+var classlist = require('classlist-polyfill');
+var Raven = require('raven-js');
+var Radio = require('backbone.radio');
+var Types = require('./utils/types.js');
+var _ = require('underscore');
 
 
 var RootView = Marionette.View.extend({
@@ -61,8 +61,8 @@ var AppClass = Marionette.Application.extend({
     // Temporary code for Catalyst demo
     function messageListener(event) {
       try {
-        var data = event.data,
-            dlen = data.length;
+        var data = event.data;
+        var dlen = data.length;
         if (dlen > 2 && data[dlen-2] == ",") {
           // bad json
           data = data.substring(0, dlen-2) + data[dlen-1];

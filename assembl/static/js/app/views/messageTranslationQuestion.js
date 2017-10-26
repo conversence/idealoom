@@ -2,18 +2,19 @@
  * 
  * @module app.views.messageTranslationQuestion
  */
-var Marionette = require('backbone.marionette'),
-    Backbone = require('backbone'),
-    Ctx = require('../common/context.js'),
-    CollectionManager = require('../common/collectionManager.js'),
-    i18n = require('../utils/i18n.js'),
-    _ = require('underscore'),
-    $ = require('jquery'),
-    Types = require('../utils/types.js'),
-    Growl = require('../utils/growl.js'),
-    LangString = require('../models/langstring.js'),
-    LoaderView = require('./loaderView.js'),
-    LanguagePreference = require('../models/languagePreference.js');
+var Marionette = require('backbone.marionette');
+
+var Backbone = require('backbone');
+var Ctx = require('../common/context.js');
+var CollectionManager = require('../common/collectionManager.js');
+var i18n = require('../utils/i18n.js');
+var _ = require('underscore');
+var $ = require('jquery');
+var Types = require('../utils/types.js');
+var Growl = require('../utils/growl.js');
+var LangString = require('../models/langstring.js');
+var LoaderView = require('./loaderView.js');
+var LanguagePreference = require('../models/languagePreference.js');
 
 /**
  * Date: Jan 14, 2016
@@ -91,9 +92,9 @@ var LanguageSelectionView = Marionette.View.extend({
     },
 
     onConfirmClick: function(e){
-        var that = this,
-            user = Ctx.getCurrentUser(),
-            preferredLanguageTo = $(this.ui.selectedLanguage).val(); //Will return Array
+        var that = this; //Will return Array
+        var user = Ctx.getCurrentUser();
+        var preferredLanguageTo = $(this.ui.selectedLanguage).val();
 
         if (!preferredLanguageTo) {
             Growl.showBottomGrowl(
@@ -169,22 +170,22 @@ var TranslationView = LoaderView.extend({
         //Toggle flag for more languages view (nice to have)
         this.moreLanguagesViewShown = false;
 
-        var cm = new CollectionManager(),
-            that = this;
+        var cm = new CollectionManager();
+        var that = this;
 
         cm.getUserLanguagePreferencesPromise(Ctx)
             .then(function(preferences){
                 if (!that.isDestroyed()){
                     var translationData = that.messageView.translationData || preferences.getTranslationData();
                     that.langCache = that.messageView.langCache; //For reference
-                    var body = that.message.get('body') || LangString.Model.empty,
-                        bestSuggestedTranslation = body.best(translationData),
-                        original = body.original(),
-                        originalLocale = original.getLocaleValue(),
-                        translatedFromLocale = bestSuggestedTranslation.getTranslatedFromLocale(),
-                        translatedTo = bestSuggestedTranslation.getBaseLocale(),
-                        prefsForLocale = translationData.getPreferenceForLocale(originalLocale),
-                        preferredTarget = prefsForLocale ? prefsForLocale.get("translate_to_name") : Ctx.getLocale();
+                    var body = that.message.get('body') || LangString.Model.empty;
+                    var bestSuggestedTranslation = body.best(translationData);
+                    var original = body.original();
+                    var originalLocale = original.getLocaleValue();
+                    var translatedFromLocale = bestSuggestedTranslation.getTranslatedFromLocale();
+                    var translatedTo = bestSuggestedTranslation.getBaseLocale();
+                    var prefsForLocale = translationData.getPreferenceForLocale(originalLocale);
+                    var preferredTarget = prefsForLocale ? prefsForLocale.get("translate_to_name") : Ctx.getLocale();
                     if ( !(translatedFromLocale) ){
                         translatedFromLocale = translatedTo;
                     }
@@ -209,8 +210,8 @@ var TranslationView = LoaderView.extend({
     },
 
     updateLanguagePreference: function(state){
-        var user = Ctx.getCurrentUser(),
-            that = this;
+        var user = Ctx.getCurrentUser();
+        var that = this;
         if (state === userTranslationStates.CONFIRM) {
             this.languagePreferences.setPreference(
                 user,
@@ -282,7 +283,10 @@ var TranslationView = LoaderView.extend({
 
     serializeData: function(){
         if (this.isLoading()) {
-            var translationQuestion, noAnswer, yesAnswer, toAnother;
+            var translationQuestion;
+            var noAnswer;
+            var yesAnswer;
+            var toAnother;
             if (this.preferredTarget) {
                 translationQuestion = i18n.sprintf(
                     i18n.gettext("Translate all messages from %s to %s?"),

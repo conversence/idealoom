@@ -1,13 +1,13 @@
-'use strict';
 /**
  * 
  * @module app.views.loader
  */
 
-var Marionette = require('backbone.marionette'),
-    _ = require('underscore'),
-    Assembl = require('../app.js'),
-    Ctx = require('../common/context.js');
+var Marionette = require('backbone.marionette');
+
+var _ = require('underscore');
+var Assembl = require('../app.js');
+var Ctx = require('../common/context.js');
 
 var LoaderView = Marionette.View.extend({
   constructor: function LoaderView() {

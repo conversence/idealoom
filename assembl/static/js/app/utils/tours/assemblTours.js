@@ -2,9 +2,10 @@
  * 
  * @module app.utils.tours.assemblTours
  */
-var i18n =  require('../i18n.js'),
-    Ctx = require("../../common/context.js"),
-    $ = require('jquery');
+var i18n =  require('../i18n.js');
+
+var Ctx = require("../../common/context.js");
+var $ = require('jquery');
 
 var AssemblTours = [
   {

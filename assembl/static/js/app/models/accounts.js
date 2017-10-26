@@ -1,9 +1,9 @@
-'use strict';
 /**
  * @module app.models.accounts
  */
-var Base = require('./base.js'),
-    Ctx = require('../common/context.js');
+var Base = require('./base.js');
+
+var Ctx = require('../common/context.js');
 /**
  * A user's (email or social) account.
  * Frontend model for :py:class:`assembl.models.auth.AbstractAgentAccount`

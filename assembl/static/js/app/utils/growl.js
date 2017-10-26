@@ -2,9 +2,10 @@
  * 
  * @module app.utils.growl
  */
-var $ = require('jquery'),
-    _ = require('underscore'),
-    growl = require('bootstrap-notify');
+var $ = require('jquery');
+
+var _ = require('underscore');
+var growl = require('bootstrap-notify');
 
 
 /*

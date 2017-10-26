@@ -1,24 +1,24 @@
-'use strict';
 /**
  * 
  * @module app.views.ideaClassificationOnMessage
  */
 
-var Marionette = require('backbone.marionette'),
-  $ = require('jquery'),
-  _ = require('underscore'),
-  Assembl = require('../app.js'),
-  Ctx = require('../common/context.js'),
-  CollectionManager = require('../common/collectionManager.js'),
-  Types = require('../utils/types.js'),
-  BreadCrumbView = require('./breadcrumb.js'),
-  IdeaModel = require('../models/idea.js'),
-  i18n = require('../utils/i18n.js'),
-  openIdeaInModal = require('./modals/ideaInModal.js'),
-  Backbone=require('backbone'),
-  BackboneModal = require('backbone.modal'),
-  LoaderView = require('./loaderView.js'),
-  Analytics = require('../internal_modules/analytics/dispatcher.js');
+var Marionette = require('backbone.marionette');
+
+var $ = require('jquery');
+var _ = require('underscore');
+var Assembl = require('../app.js');
+var Ctx = require('../common/context.js');
+var CollectionManager = require('../common/collectionManager.js');
+var Types = require('../utils/types.js');
+var BreadCrumbView = require('./breadcrumb.js');
+var IdeaModel = require('../models/idea.js');
+var i18n = require('../utils/i18n.js');
+var openIdeaInModal = require('./modals/ideaInModal.js');
+var Backbone=require('backbone');
+var BackboneModal = require('backbone.modal');
+var LoaderView = require('./loaderView.js');
+var Analytics = require('../internal_modules/analytics/dispatcher.js');
 
 // // root class
 // var IdeaShowingMessageModel = Backbone.Model.extend({

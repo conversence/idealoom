@@ -1,15 +1,15 @@
-'use strict';
 /**
  * Represents an announcement, a mutable message-like object, with an author and a date
  * @module app.models.announcement
  */
-var $ = require('jquery'),
-    Promise = require('bluebird'),
-    Base = require('./base.js'),
-    i18n = require('../utils/i18n.js'),
-    Ctx = require('../common/context.js'),
-    LangString = require('./langstring.js'),
-    Types = require('../utils/types.js');
+var $ = require('jquery');
+
+var Promise = require('bluebird');
+var Base = require('./base.js');
+var i18n = require('../utils/i18n.js');
+var Ctx = require('../common/context.js');
+var LangString = require('./langstring.js');
+var Types = require('../utils/types.js');
 /**
  * Annoucement model
  * Frontend model for :py:class:`assembl.models.announcement.Announcement`

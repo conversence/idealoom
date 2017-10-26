@@ -1,19 +1,19 @@
-'use strict';
 /**
  * 
  * @module app.views.statistics
  */
 
-var Marionette = require('backbone.marionette'),
-    Assembl = require('../app.js'),
-    Ctx = require('../common/context.js'),
-    CollectionManager = require('../common/collectionManager.js'),
-    $ = require('jquery'),
-    _ = require('underscore'),
-    d3 = require('d3'),
-    i18n = require('../utils/i18n.js'),
-    Moment = require('moment'),
-    Promise = require('bluebird');
+var Marionette = require('backbone.marionette');
+
+var Assembl = require('../app.js');
+var Ctx = require('../common/context.js');
+var CollectionManager = require('../common/collectionManager.js');
+var $ = require('jquery');
+var _ = require('underscore');
+var d3 = require('d3');
+var i18n = require('../utils/i18n.js');
+var Moment = require('moment');
+var Promise = require('bluebird');
 
 var Statistics = Marionette.View.extend({
   constructor: function Statistics() {
@@ -22,8 +22,8 @@ var Statistics = Marionette.View.extend({
 
   template: '#tmpl-statistics',
   initialize: function() {
-    var that = this,
-        collectionManager = new CollectionManager();
+    var that = this;
+    var collectionManager = new CollectionManager();
     Promise.join(collectionManager.getAllUsersCollectionPromise(),
                  collectionManager.getAllMessageStructureCollectionPromise(),
       function(allUsersCollection, allMessagesCollection) {
@@ -31,7 +31,6 @@ var Statistics = Marionette.View.extend({
         that.allMessagesCollection = allMessagesCollection;
         that.render();
       });
-
   },
   ui: {
     statistics: '.statistics',
@@ -92,19 +91,17 @@ var Statistics = Marionette.View.extend({
   },
 
   drawLineGraph: function(data) {
-    var w = 450,
-        h = 250,
-        that = this;
-
-    var maxDataPointsForDots = 100,
-        transitionDuration = 1000;
-
-    var svg = null,
-        svg_orig = null,
-        yAxisGroup = null,
-        xAxisGroup = null,
-        dataCirclesGroup = null,
-        dataLinesGroup = null;
+    var w = 450;
+    var h = 250;
+    var that = this;
+    var maxDataPointsForDots = 100;
+    var transitionDuration = 1000;
+    var svg = null;
+    var svg_orig = null;
+    var yAxisGroup = null;
+    var xAxisGroup = null;
+    var dataCirclesGroup = null;
+    var dataLinesGroup = null;
 
     function draw() {
       //var data = generateData();
@@ -390,8 +387,8 @@ var Statistics = Marionette.View.extend({
         var mouse_position = d3.mouse(this);
         var x_position = mouse_position[0];
         var xInDomain = x.invert(x_position);
-        var i = Math.min(data_length - 1, bisectDate(data, xInDomain, 1)),
-            d = data[i];
+        var i = Math.min(data_length - 1, bisectDate(data, xInDomain, 1));
+        var d = data[i];
         if (i > 0 && i < data.length) {
           var d0 = data[i - 1];
           if (xInDomain - d0.date < d.date - xInDomain)
@@ -431,7 +428,6 @@ var Statistics = Marionette.View.extend({
     }
 
     draw();
-
   },
 
   drawPieChart: function(pie_chart_data, default_legend_data, legend_squares_data) {
@@ -708,8 +704,8 @@ var Statistics = Marionette.View.extend({
 
         animating = true;
         var revert = false;
-        var new_ref,
-            last_ref;
+        var new_ref;
+        var last_ref;
         if (d == ref && last_refs.length > 0) {
           revert = true;
           last_ref = last_refs.pop();
@@ -783,8 +779,8 @@ var Statistics = Marionette.View.extend({
   },
 
   computeStatistics: function() {
-    var allUsersCollection = this.allUsersCollection,
-        allMessagesCollection = this.allMessagesCollection;
+    var allUsersCollection = this.allUsersCollection;
+    var allMessagesCollection = this.allMessagesCollection;
     if (allUsersCollection !== undefined && allMessagesCollection !== undefined) {
               // console.log("collections allUsersCollection, allMessagesCollection are loaded");
               // console.log(allMessagesCollection);

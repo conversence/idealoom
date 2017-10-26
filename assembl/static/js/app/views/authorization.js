@@ -1,11 +1,11 @@
-'use strict';
 /**
  * 
  * @module app.views.authorization
  */
 
-var Marionette = require('backbone.marionette'),
-    Ctx = require('../common/context.js');
+var Marionette = require('backbone.marionette');
+
+var Ctx = require('../common/context.js');
 
 var authorization = Marionette.View.extend({
   constructor: function authorization() {

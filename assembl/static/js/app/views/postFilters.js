@@ -1,16 +1,16 @@
-'use strict';
 /**
  * 
  * @module app.views.postFilters
  */
 
-var Ctx = require('../common/context.js'),
-    i18n = require('../utils/i18n.js'),
-    CollectionManager = require('../common/collectionManager.js'),
-    Promise = require('bluebird');
+var Ctx = require('../common/context.js');
+
+var i18n = require('../utils/i18n.js');
+var CollectionManager = require('../common/collectionManager.js');
+var Promise = require('bluebird');
 
 var collectionManager = new CollectionManager();
-  
+
 /** Base interface of all filters */
 function AbstractFilter() {
     this._values = [];
@@ -138,7 +138,7 @@ AbstractFilter.prototype = {
 function AbstractFilterSingleValue() {
     AbstractFilter.call(this);
   }
-  
+
 AbstractFilterSingleValue.prototype = Object.create(AbstractFilter.prototype)
 _.extend(AbstractFilterSingleValue.prototype, {
     /** For filters who can only have a single, implicit value
@@ -158,12 +158,12 @@ _.extend(AbstractFilterSingleValue.prototype, {
     }
     
   });
-  
+
 /** For filters who can only have a single, true or false */
 function AbstractFilterBooleanValue() {
     AbstractFilterSingleValue.call(this);
   }
-  
+
 AbstractFilterBooleanValue.prototype = Object.create(AbstractFilterSingleValue.prototype);
 _.extend(AbstractFilterBooleanValue.prototype, {
     addValue: function(value) {
@@ -186,7 +186,7 @@ _.extend(AbstractFilterBooleanValue.prototype, {
 
     }
   });
-  
+
 function FilterPostHasIdIn() {
     AbstractFilter.call(this);
   }
@@ -246,7 +246,7 @@ _.extend(FilterPostIsInContextOfIdea.prototype, {
       });
     }
   });
-  
+
 function FilterPostIsDescendentOfPost() {
     AbstractFilterSingleValue.call(this);
   }
@@ -270,19 +270,19 @@ _.extend(FilterPostIsDescendentOfPost.prototype, {
             collectionManager.getMessageFullModelPromise(individualFilterValue),
             collectionManager.getUserLanguagePreferencesPromise(Ctx),
             function(post, ulp) {
-        if (!post) {
-          throw new Error('Post ' + individualFilterValue + ' not found');
-        }
-        var subject = post.get('subject'),
-            subjectText = subject ? subject.bestValue(ulp.getTranslationData()) : '';
+              if (!post) {
+                throw new Error('Post ' + individualFilterValue + ' not found');
+              }
+              var subject = post.get('subject');
+              var subjectText = subject ? subject.bestValue(ulp.getTranslationData()) : '';
 
-        if (post.get('@type') === "SynthesisPost") {
-          return i18n.sprintf(i18n.gettext('synthesis "%s"'), subjectText);
-        }
-        else {
-          return i18n.sprintf(i18n.gettext('message "%s"'), subjectText);
-        }
-      });
+              if (post.get('@type') === "SynthesisPost") {
+                return i18n.sprintf(i18n.gettext('synthesis "%s"'), subjectText);
+              }
+              else {
+                return i18n.sprintf(i18n.gettext('message "%s"'), subjectText);
+              }
+            });
     },
     getFilterDescriptionStringPromise: function(individualValuesButtonsPromises) {
       return Promise.all(individualValuesButtonsPromises).then(function(individualValuesButtons) {
@@ -314,19 +314,19 @@ _.extend(FilterPostIsDescendentOrAncestorOfPost.prototype, {
             collectionManager.getMessageFullModelPromise(individualFilterValue),
             collectionManager.getUserLanguagePreferencesPromise(Ctx),
             function(post, ulp) {
-        if (!post) {
-          throw new Error('Post ' + individualFilterValue + ' not found');
-        }
-        var subject = post.get('subject'),
-            subjectText = subject ? subject.bestValue(ulp.getTranslationData()) : '';
+              if (!post) {
+                throw new Error('Post ' + individualFilterValue + ' not found');
+              }
+              var subject = post.get('subject');
+              var subjectText = subject ? subject.bestValue(ulp.getTranslationData()) : '';
 
-        if (post.get('@type') === "SynthesisPost") {
-          return i18n.sprintf(i18n.gettext('synthesis "%s"'), subjectText);
-        }
-        else {
-          return i18n.sprintf(i18n.gettext('message "%s"'), subjectText);
-        }
-      });
+              if (post.get('@type') === "SynthesisPost") {
+                return i18n.sprintf(i18n.gettext('synthesis "%s"'), subjectText);
+              }
+              else {
+                return i18n.sprintf(i18n.gettext('message "%s"'), subjectText);
+              }
+            });
     },
     getFilterDescriptionStringPromise: function(individualValuesButtonsPromises) {
       return Promise.all(individualValuesButtonsPromises).then(function(individualValuesButtons) {
@@ -424,7 +424,7 @@ _.extend(FilterPostReplyToUser.prototype, {
       });
     }
   });
-  
+
 function FilterPostReplyToMe() {
     FilterPostReplyToUser.call(this);
   }
@@ -467,7 +467,7 @@ _.extend(FilterPostIsOrphan.prototype, {
       return i18n.gettext('Only include messages that are not found in any idea.');
     }
   });
-  
+
 function FilterPostIsSynthesis() {
     AbstractFilterBooleanValue.call(this);
   }
@@ -495,7 +495,7 @@ _.extend(FilterPostIsSynthesis.prototype, {
       });
     }
   });
-  
+
 function FilterPostHasUnread() {
     AbstractFilterBooleanValue.call(this);
   }
@@ -531,7 +531,7 @@ _.extend(FilterPostHasUnread.prototype, {
       });
     }
   });
-  
+
 function FilterPostIsUnread() {
     FilterPostHasUnread.call(this);
   }
@@ -694,12 +694,12 @@ _.extend(FilterPostIsPostedSinceLastSynthesis.prototype, {
       return 'is_posted_since_last_synthesis';
     },
     getImplicitValuePromise: function() {
-      var that = this,
-      collectionManager = new CollectionManager();
-      
+      var that = this;
+      var collectionManager = new CollectionManager();
+
       return collectionManager.getAllMessageStructureCollectionPromise().then(function(allMessageStructureCollection) {
-        var date = null,
-        lastSynthesisPost = allMessageStructureCollection.getLastSynthesisPost();
+        var date = null;
+        var lastSynthesisPost = allMessageStructureCollection.getLastSynthesisPost();
         if (lastSynthesisPost) {
           return lastSynthesisPost.get('date');
         }
@@ -802,7 +802,7 @@ _.extend(FilterPostIsDeletedOrNot.prototype, {
 });
 
 
-  
+
 var availableFilters = {
     POST_HAS_ID_IN: FilterPostHasIdIn,
     POST_IS_IN_CONTEXT_OF_IDEA: FilterPostIsInContextOfIdea,

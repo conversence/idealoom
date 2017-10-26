@@ -1,16 +1,16 @@
-'use strict';
 /**
  * 
  * @module app.views.message
  */
 
-var Marionette = require('backbone.marionette'),
-    Ctx = require('../common/context.js'),
-    i18n = require('../utils/i18n.js'),
-    Permissions = require('../utils/permissions.js'),
-    $ = require('jquery'),
-    LoaderView = require('./loaderView.js'),
-    AgentViews = require('./agent.js');
+var Marionette = require('backbone.marionette');
+
+var Ctx = require('../common/context.js');
+var i18n = require('../utils/i18n.js');
+var Permissions = require('../utils/permissions.js');
+var $ = require('jquery');
+var LoaderView = require('./loaderView.js');
+var AgentViews = require('./agent.js');
 
 
 // TODO: show ideas associated to the deleted message, using IdeaClassificationNameListView (e.g. which idea the message was top posted in, or to the conversation associated to which ideas does it reply to)

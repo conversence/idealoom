@@ -1,4 +1,3 @@
-'use strict';
 /**
  * 
  * A generic modal view for alerts. Cases/reasons when we need to use this view instead of a browser confirm:
@@ -9,10 +8,11 @@
  * @module app.views.confirmModal
  */
 
-var _ = require('underscore'),
-  Backbone=require('backbone'),
-  BackboneModal = require('backbone.modal'),
-  i18n = require('../utils/i18n.js');
+var _ = require('underscore');
+
+var Backbone=require('backbone');
+var BackboneModal = require('backbone.modal');
+var i18n = require('../utils/i18n.js');
 
 
 

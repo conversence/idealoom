@@ -2,13 +2,14 @@
  *
  * @module app.views.discussionStatisticsModal
  */
-var Backbone = require('backbone'),
-    Marionette = require('backbone.marionette'),
-    i18n = require('../../utils/i18n.js'),
-    $ = require('jquery'),
-    _ = require('underscore'),
-    Permissions = require('../../utils/permissions.js'),
-    Ctx = require('../../common/context.js');
+var Backbone = require('backbone');
+
+var Marionette = require('backbone.marionette');
+var i18n = require('../../utils/i18n.js');
+var $ = require('jquery');
+var _ = require('underscore');
+var Permissions = require('../../utils/permissions.js');
+var Ctx = require('../../common/context.js');
 
 var StatsModal = Backbone.Modal.extend({
   constructor: function StatsModal() {
@@ -34,8 +35,9 @@ var StatsModal = Backbone.Modal.extend({
   doDownload: function(url, filename) {
     // TODO: This will probably fail in IE, see
     // http://stackoverflow.com/questions/13405129/javascript-create-and-save-file
-    var el = this.$el,
-        a = document.createElement("a");
+    var el = this.$el;
+
+    var a = document.createElement("a");
     a.href = url;
     a.download = filename;
     a.class = 'hidden';
@@ -47,9 +49,9 @@ var StatsModal = Backbone.Modal.extend({
     }, 0);
   },
   addCommonStats: function(url) {
-    var separator = "?",
-        fields = this.$el.find('fieldset'),
-        val = fields.children('#start_date').val();
+    var separator = "?";
+    var fields = this.$el.find('fieldset');
+    var val = fields.children('#start_date').val();
     if (val) {
       url += separator + "start=" + val;
       separator = "&";
@@ -72,9 +74,9 @@ var StatsModal = Backbone.Modal.extend({
     return url;
   },
   checkDates: function() {
-    var fields = this.$el.find('fieldset'),
-        startDate = fields.children('#start_date').val(),
-        endDate = fields.children('#end_date').val();
+    var fields = this.$el.find('fieldset');
+    var startDate = fields.children('#start_date').val();
+    var endDate = fields.children('#end_date').val();
     if (endDate <= startDate) {
       alert(_("The end date should be later than the start date"));
     }
@@ -103,9 +105,10 @@ var StatsModal = Backbone.Modal.extend({
       ev.preventDefault();
       return;
     }
-    var val, separator = "?",
-        fields = this.$el.find('fieldset'),
-        url = '/participant_time_series_analytics';
+    var val;
+    var separator = "?";
+    var fields = this.$el.find('fieldset');
+    var url = '/participant_time_series_analytics';
     try {
       url = this.addCommonStats(url);
       if (url.indexOf(separator) > 0) {

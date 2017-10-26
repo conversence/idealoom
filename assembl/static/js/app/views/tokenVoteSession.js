@@ -1,27 +1,27 @@
-'use strict';
 /**
  * 
  * @module app.views.tokenVoteSession
  */
 
-var Marionette = require('backbone.marionette'),
-  $ = require('jquery'),
-  _ = require('underscore'),
-  BackboneSubset = require("Backbone.Subset"),
-  BackboneModal = require('backbone.modal'),
-  Promise = require('bluebird'),
-  Assembl = require('../app.js'),
-  classlist = require('classlist-polyfill'),
-  Ctx = require('../common/context.js'),
-  CollectionManager = require('../common/collectionManager.js'),
-  Types = require('../utils/types.js'),
-  BreadCrumbView = require('./breadcrumb.js'),
-  CKEditorLSField = require('./reusableDataFields/ckeditorLSField.js'),
-  IdeaModel = require('../models/idea.js'),
-  i18n = require('../utils/i18n.js'),
-  Ctx = require('../common/context.js'),
-  Moment = require('moment'),
-  d3 = require('d3');
+var Marionette = require('backbone.marionette');
+
+var $ = require('jquery');
+var _ = require('underscore');
+var BackboneSubset = require("Backbone.Subset");
+var BackboneModal = require('backbone.modal');
+var Promise = require('bluebird');
+var Assembl = require('../app.js');
+var classlist = require('classlist-polyfill');
+var Ctx = require('../common/context.js');
+var CollectionManager = require('../common/collectionManager.js');
+var Types = require('../utils/types.js');
+var BreadCrumbView = require('./breadcrumb.js');
+var CKEditorLSField = require('./reusableDataFields/ckeditorLSField.js');
+var IdeaModel = require('../models/idea.js');
+var i18n = require('../utils/i18n.js');
+var Ctx = require('../common/context.js');
+var Moment = require('moment');
+var d3 = require('d3');
 
 
 // from http://stackoverflow.com/questions/3959211/fast-factorial-function-in-javascript
@@ -36,7 +36,9 @@ function sFact(num)
 
 // from http://stackoverflow.com/a/24257996/2136130
 function nthPermutation(atoms, index, size) {
-  var src = atoms.slice(), dest = [], item;
+  var src = atoms.slice();
+  var dest = [];
+  var item;
   for (var i = 0; i < size; i++) {
     item = index % src.length;
     index = Math.floor(index / src.length);
@@ -769,17 +771,20 @@ var TokenCategoryExclusivePairCollectionView = Marionette.View.extend({
   onRender: function() {
     // placeholder for better code. TODO: We need to choose positive/negative
     // according to typename.
-    var negativeTokens = this.collection.at(0),
-        positiveTokens = this.collection.at(1),
-        childViewOptions = {
-      idea: this.idea,
-      myVotesCollection: this.myVotesCollection,
-      voteSpecification: this.voteSpecification,
-      collectionView: this,
-      voteItemView: this.parent,
-      model: negativeTokens,
-      tokenSize: this.tokenSize
-    };
+    var negativeTokens = this.collection.at(0);
+
+    var positiveTokens = this.collection.at(1);
+
+    var childViewOptions = {
+  idea: this.idea,
+  myVotesCollection: this.myVotesCollection,
+  voteSpecification: this.voteSpecification,
+  collectionView: this,
+  voteItemView: this.parent,
+  model: negativeTokens,
+  tokenSize: this.tokenSize
+};
+
     childViewOptions.preventDefaultTokenClickBehaviour = true;
     var animation_duration = 800;
 
@@ -997,7 +1002,6 @@ var TokenVoteResultView = Marionette.View.extend({
   },
 
   _calculateColor: function(categoryName){
-
     //http://jsfiddle.net/WK_of_Angmar/xgA5C/
     function validTextColour(stringToTest) {
       //Alter the following conditions according to your need.
@@ -1012,12 +1016,13 @@ var TokenVoteResultView = Marionette.View.extend({
       image.style.color = "rgb(255, 255, 255)";
       image.style.color = stringToTest;
       return image.style.color !== "rgb(255, 255, 255)";
-    };
+    }
+    var categories = this.voteSpecification.get('token_categories');
 
-    var categories = this.voteSpecification.get('token_categories'),
-        cat = categories.find(function(category){
-          return category.get('typename') === categoryName;
-        });
+    var cat = categories.find(function(category){
+      return category.get('typename') === categoryName;
+    });
+
     var color = cat.get('color') || null;
     if (color){
       color.trim(); //Get rid of whitespace around text
@@ -1136,8 +1141,8 @@ var TokenVoteResultView = Marionette.View.extend({
 
     else {
       this.shownDescription = true;
-      var descriptionButtonText = i18n.gettext("Hide Description"),
-          defn = this.model.get('objectConnectedTo').get('definition');
+      var descriptionButtonText = i18n.gettext("Hide Description");
+      var defn = this.model.get('objectConnectedTo').get('definition');
       icon.removeClass('icon-arrowdown');
       icon.addClass('icon-arrowup');
       this.ui.descriptionButton.text(descriptionButtonText);
@@ -1256,8 +1261,8 @@ var TokenVoteResultCollectionView = Marionette.View.extend({
 
   onRender: function() {
     if (this.firstRender) {
-      var el = $(this.ui.categoryName[0]),
-          arrowEl = el.find("i");
+      var el = $(this.ui.categoryName[0]);
+      var arrowEl = el.find("i");
       arrowEl.addClass("icon-down");
       this._colorMeBaby(el);
       this.firstRender = false;
@@ -1273,9 +1278,9 @@ var TokenVoteResultCollectionView = Marionette.View.extend({
   },
 
   serializeData: function(){
-    var that = this,
-        categories = _.values(this.categoryIndex),
-        categoryList = this.voteSpecification.get('token_categories');
+    var that = this;
+    var categories = _.values(this.categoryIndex);
+    var categoryList = this.voteSpecification.get('token_categories');
     categories = _.map(categories, function(cat){
       var importantCategory = categoryList.find(function(categoryModel){
         //Has to exist, as the original category list was created from the models
@@ -1323,10 +1328,10 @@ var TokenResultView = Marionette.View.extend({
     //{index: category}
     this.categoryIndex = [];
 
-    var CollectionManager = require('../common/collectionManager.js'),
-        cm = new CollectionManager(),
-        Widget = require('../models/widget.js'),
-        that = this;
+    var CollectionManager = require('../common/collectionManager.js');
+    var cm = new CollectionManager();
+    var Widget = require('../models/widget.js');
+    var that = this;
 
 
     cm.getAllIdeasCollectionPromise()
@@ -1377,15 +1382,15 @@ var TokenResultView = Marionette.View.extend({
   },
 
   serializeData: function(){
-    var settings = this.model.get("settings") || {},
-        items = "items" in settings ? settings.items : [],
-        questionItem = items.length ? items[0] : null,
-        questionTitle = "question_title" in questionItem ? questionItem.question_title : "",
-        questionDescription = "question_description" in questionItem ? questionItem.question_description : "",
-        startDate = Ctx.getNiceDate(this.model.get('start_date'), true, true, false),
-        endDate = Ctx.getNiceDate(this.model.get('end_date'), true, true, false),
-        statement = "",
-        that = this;
+    var settings = this.model.get("settings") || {};
+    var items = "items" in settings ? settings.items : [];
+    var questionItem = items.length ? items[0] : null;
+    var questionTitle = "question_title" in questionItem ? questionItem.question_title : "";
+    var questionDescription = "question_description" in questionItem ? questionItem.question_description : "";
+    var startDate = Ctx.getNiceDate(this.model.get('start_date'), true, true, false);
+    var endDate = Ctx.getNiceDate(this.model.get('end_date'), true, true, false);
+    var statement = "";
+    var that = this;
 
     if (!this.isReady) { 
       return {
@@ -1396,10 +1401,10 @@ var TokenResultView = Marionette.View.extend({
     }
 
     else {
-      var theEndDate = new Moment(this.model.get('end_date')).utc(),
-          _now = new Moment().utc(),
-          voteOngoing = _now.isAfter(theEndDate) ? 100: 1; //Plurarlism for past/present tense of copy
-      
+      var theEndDate = new Moment(this.model.get('end_date')).utc(); //Plurarlism for past/present tense of copy
+      var _now = new Moment().utc();
+      var voteOngoing = _now.isAfter(theEndDate) ? 100: 1;
+
       //Need a list of token names and their available number
       var data = this.tokenSpecs.get('token_categories').map(function(category){
         return {

@@ -1,21 +1,21 @@
-'use strict';
 /**
  * 
  * @module app.models.widget
  */
 
-var _ = require('underscore'),
-    Backbone = require("backbone"),
-    BackboneSubset = require("Backbone.Subset"),
-    Base = require("./base.js"),
-    i18n = require('../utils/i18n.js'),
-    Moment = require('moment'),
-    Permissions = require('../utils/permissions.js'),
-    Ctx = require("../common/context.js"),
-    Assembl = require('../app.js'),
-    Types = require('../utils/types.js'),
-    LangString = require('../models/langstring.js'),
-    TokenVoteSessionView = require('../views/tokenVoteSession.js');
+var _ = require('underscore');
+
+var Backbone = require("backbone");
+var BackboneSubset = require("Backbone.Subset");
+var Base = require("./base.js");
+var i18n = require('../utils/i18n.js');
+var Moment = require('moment');
+var Permissions = require('../utils/permissions.js');
+var Ctx = require("../common/context.js");
+var Assembl = require('../app.js');
+var Types = require('../utils/types.js');
+var LangString = require('../models/langstring.js');
+var TokenVoteSessionView = require('../views/tokenVoteSession.js');
 
 /**
  * This represents a widget, a set of bundled functionality.
@@ -70,8 +70,8 @@ var WidgetModel = Base.Model.extend({
   },
 
   findLink: function(idea) {
-    var id = this.getId(),
-        links = idea.get("widget_links");
+    var id = this.getId();
+    var links = idea.get("widget_links");
     links = _.filter(links, function(link) {
       return link.widget == id;
     });
@@ -84,9 +84,10 @@ var WidgetModel = Base.Model.extend({
     if (idea === null) {
       return this.isRelevantForLink(null, context, null);
     }
-    var that = this, id=this.getId(),
-        widgetLinks = idea.get("active_widget_links") || [],
-        postEndpoints = idea.get("widget_add_post_endpoint") || {};
+    var that = this;
+    var id=this.getId();
+    var widgetLinks = idea.get("active_widget_links") || [];
+    var postEndpoints = idea.get("widget_add_post_endpoint") || {};
     if (postEndpoints[id] !== undefined) {
         return true;
     }
@@ -223,7 +224,9 @@ var VotingWidgetModel = WidgetModel.extend({
   },
 
   getConfigurationUrl: function(targetIdeaId) {
-    var base = this.baseUri, uri = this.getId(), locale = Ctx.getLocale();
+    var base = this.baseUri;
+    var uri = this.getId();
+    var locale = Ctx.getLocale();
     base = base + "?admin=1&locale=" + locale + "#/admin/configure_instance?widget_uri=" + uri;
     if (targetIdeaId) {
       base += "&target=" + encodeURIComponent(targetIdeaId);
@@ -232,11 +235,14 @@ var VotingWidgetModel = WidgetModel.extend({
   },
 
   getUrlForUser: function(targetIdeaId, page) {
-    var uri = this.getId(), locale = Ctx.getLocale(),
-      currentUser = Ctx.getCurrentUser(),
-      activityState = this.get("activity_state"),
-      base = this.baseUri + "?config=" + encodeURIComponent(uri)
-        + "&locale=" + locale;
+    var uri = this.getId();
+    var locale = Ctx.getLocale();
+    var currentUser = Ctx.getCurrentUser();
+    var activityState = this.get("activity_state");
+
+    var base = this.baseUri + "?config=" + encodeURIComponent(uri)
+      + "&locale=" + locale;
+
     if ( currentUser.isUnknownUser() ){
       return Ctx.getLoginURL() + "?"; // "?" is added in order to handle the hacky adding of "&locale=..." in infobar.tmpl
     }
@@ -267,9 +273,9 @@ var VotingWidgetModel = WidgetModel.extend({
   },
 
   getLinkText: function(context, idea) {
-    var locale = Ctx.getLocale(),
-        activityState = this.get("activity_state"),
-        endDate = this.get("end_date");
+    var locale = Ctx.getLocale();
+    var activityState = this.get("activity_state");
+    var endDate = this.get("end_date");
     switch (context) {
       case this.IDEA_PANEL_CREATE_CTX:
         return i18n.gettext("Create a voting session on this idea");
@@ -335,10 +341,10 @@ var VotingWidgetModel = WidgetModel.extend({
   },
 
   getDescriptionText: function(context, idea, translationData) {
-    var locale = Ctx.getLocale(),
-        currentUser = Ctx.getCurrentUser(),
-        activityState = this.get("activity_state"),
-        endDate = this.get("end_date");
+    var locale = Ctx.getLocale();
+    var currentUser = Ctx.getCurrentUser();
+    var activityState = this.get("activity_state");
+    var endDate = this.get("end_date");
     if (!this.get("configured")) {
       if (context == this.UNTIL_TEXT) {
         return "";
@@ -392,8 +398,9 @@ var VotingWidgetModel = WidgetModel.extend({
 
   isRelevantForLink: function(linkType, context, idea) {
     // TODO: This should depend on widget configuration.
-    var activityState = this.get("activity_state"),
-        currentUser = Ctx.getCurrentUser();
+    var activityState = this.get("activity_state");
+
+    var currentUser = Ctx.getCurrentUser();
     if (!this.get("configured") &&
         !currentUser.can(Permissions.ADMIN_DISCUSSION)) {
       return false;
@@ -901,16 +908,20 @@ var VoteResultCollection = Base.Collection.extend({
 
     var sums = _.map(categories, function(categName) {
           return this.map(function(result) {
-              return result.get('sums')[categName] || 0; });}, this),
-        maxTokens = _.map(sums, function (s) {
-          return Math.max.apply(null, s);}),
-        sumTokens = _.map(sums, function (s) {
-          return _.reduce(s, function(a,b) {return a+b;});}),
-        percents = _.map(_.zip(maxTokens, sumTokens), function (x) {
-          return x[1]?(x[0] / x[1]):0;}),
-        maxPercent = Math.max.apply(null, percents),
-        catSummary = _.object(_.zip(categories, sumTokens)),
-        numVoters = this.getNumberOfVoters();
+              return result.get('sums')[categName] || 0; });}, this);
+
+    var maxTokens = _.map(sums, function (s) {
+      return Math.max.apply(null, s);});
+
+    var sumTokens = _.map(sums, function (s) {
+      return _.reduce(s, function(a,b) {return a+b;});});
+
+    var percents = _.map(_.zip(maxTokens, sumTokens), function (x) {
+      return x[1]?(x[0] / x[1]):0;});
+
+    var maxPercent = Math.max.apply(null, percents);
+    var catSummary = _.object(_.zip(categories, sumTokens));
+    var numVoters = this.getNumberOfVoters();
 
     return {
       sums: sums,
@@ -1010,12 +1021,16 @@ var CreativitySessionWidgetModel = WidgetModel.extend({
   },
 
   getConfigurationUrl: function(targetIdeaId) {
-    var base = this.baseUri, uri = this.getId(), locale = Ctx.getLocale();
+    var base = this.baseUri;
+    var uri = this.getId();
+    var locale = Ctx.getLocale();
     return base + "?locale=" + locale + "#/home?admin=1&config=" + uri;
   },
 
   getUrlForUser: function(targetIdeaId, page) {
-    var base = this.baseUri, uri = this.getId(), locale = Ctx.getLocale();
+    var base = this.baseUri;
+    var uri = this.getId();
+    var locale = Ctx.getLocale();
     if (!targetIdeaId) {
       if (this.get('base_idea')){
         targetIdeaId = this.get('base_idea')['@id'];
@@ -1030,8 +1045,8 @@ var CreativitySessionWidgetModel = WidgetModel.extend({
   },
 
   getLinkText: function(context, idea) {
-    var locale = Ctx.getLocale(),
-        activityState = this.get("activity_state");
+    var locale = Ctx.getLocale();
+    var activityState = this.get("activity_state");
     switch (context) {
       case this.IDEA_PANEL_CREATE_CTX:
         return i18n.gettext('Create a creativity session on this idea');
@@ -1075,9 +1090,9 @@ var CreativitySessionWidgetModel = WidgetModel.extend({
   },
 
   getDescriptionText: function(context, idea, translationData) {
-    var locale = Ctx.getLocale(),
-        activityState = this.get("activity_state"),
-        endDate = this.get("end_date");
+    var locale = Ctx.getLocale();
+    var activityState = this.get("activity_state");
+    var endDate = this.get("end_date");
     if (!this.get("configured")) {
       if (context == this.UNTIL_TEXT) {
         return "";
@@ -1108,8 +1123,9 @@ var CreativitySessionWidgetModel = WidgetModel.extend({
 
   isRelevantForLink: function(linkType, context, idea) {
     // TODO: This should depend on widget configuration.
-    var activityState = this.get("activity_state"),
-        currentUser = Ctx.getCurrentUser();
+    var activityState = this.get("activity_state");
+
+    var currentUser = Ctx.getCurrentUser();
     if (!this.get("configured") &&
         !currentUser.can(Permissions.ADMIN_DISCUSSION)) {
       return false;
@@ -1153,7 +1169,9 @@ var InspirationWidgetModel = WidgetModel.extend({
   },
 
   getConfigurationUrl: function(targetIdeaId) {
-    var base = this.baseUri, uri = this.getId(), locale = Ctx.getLocale();
+    var base = this.baseUri;
+    var uri = this.getId();
+    var locale = Ctx.getLocale();
     base = base + "?admin=1&locale=" + locale
         + "#/admin/configure_instance?widget_uri=" + Ctx.getUrlFromUri(uri);
     if (targetIdeaId) {
@@ -1163,8 +1181,9 @@ var InspirationWidgetModel = WidgetModel.extend({
   },
 
   getUrlForUser: function(targetIdeaId, page) {
-    var id = this.getId(), locale = Ctx.getLocale(),
-        url = this.baseUri + "?config=" + encodeURIComponent(Ctx.getUrlFromUri(id)) + "&locale=" + locale;
+    var id = this.getId();
+    var locale = Ctx.getLocale();
+    var url = this.baseUri + "?config=" + encodeURIComponent(Ctx.getUrlFromUri(id)) + "&locale=" + locale;
     if (targetIdeaId !== undefined) {
       url += "&target=" + encodeURIComponent(targetIdeaId);
     }
@@ -1172,8 +1191,8 @@ var InspirationWidgetModel = WidgetModel.extend({
   },
 
   getLinkText: function(context, idea) {
-    var locale = Ctx.getLocale(),
-        activityState = this.get("activity_state");
+    var locale = Ctx.getLocale();
+    var activityState = this.get("activity_state");
     switch (context) {
       case this.IDEA_PANEL_CREATE_CTX:
         return i18n.gettext("Create an inspiration module on this idea");
@@ -1196,8 +1215,9 @@ var InspirationWidgetModel = WidgetModel.extend({
   isRelevantForLink: function(linkType, context, idea) {
     // TODO: This should depend on widget configuration.
     // Put in subclasses?
-    var activityState = this.get("activity_state"),
-        currentUser = Ctx.getCurrentUser();
+    var activityState = this.get("activity_state");
+
+    var currentUser = Ctx.getCurrentUser();
     if (!this.get("configured") &&
         !currentUser.can(Permissions.ADMIN_DISCUSSION)) {
       return false;
@@ -1294,8 +1314,9 @@ var WidgetCollection = Base.Collection.extend({
   relevantUrlsFor: function(idea, context) {
     // Also give strings...
     // Careful about permissions!
-    var widgets = this.relevantWidgetsFor(idea, context),
-        ideaId = idea.getId();
+    var widgets = this.relevantWidgetsFor(idea, context);
+
+    var ideaId = idea.getId();
     return _.map(widgets, function(w) {
       return w.getUrl(context, ideaId); });
   }

@@ -3,14 +3,15 @@
  * @module app.tests.views.spec
  */
 
-var expect = require('chai').expect,
-    ViewsFactory = require('../objects/viewsFactory.js'),
-    CollectionManager = require('../common/collectionManager.js'),
-    GroupState = require('../models/groupState.js'),
-    messageList = require('../views/messageList.js'),
-    groupContainer = require('../views/groups/groupContainer.js'),
-    $ = require('jquery'),
-    mockServer = require('./mock_server.js');
+var expect = require('chai').expect;
+
+var ViewsFactory = require('../objects/viewsFactory.js');
+var CollectionManager = require('../common/collectionManager.js');
+var GroupState = require('../models/groupState.js');
+var messageList = require('../views/messageList.js');
+var groupContainer = require('../views/groups/groupContainer.js');
+var $ = require('jquery');
+var mockServer = require('./mock_server.js');
 
 var currentView;
 var collectionManager = new CollectionManager();

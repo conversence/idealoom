@@ -1,12 +1,12 @@
-'use strict';
 /**
  * 
  * @module app.internal_modules.analytics.abstract
  */
 
 // UMD style module defintion. Simplified details below. Read comments to understand dependencies
-var moduleName = 'Analytics_Abstract',
-    dependencies = [];
+var moduleName = 'Analytics_Abstract';
+
+var dependencies = [];
 
 (function(root, factory){
   if (typeof module === 'object' && module.exports) {

@@ -1,24 +1,24 @@
-'use strict';
 /**
  * 
  * @module app.views.user.userNotificationSubscriptions
  */
 
-var Marionette = require('backbone.marionette'),
-    Assembl = require('../../app.js'),
-    $ = require('jquery'),
-    _ = require('underscore'),
-    Promise = require('bluebird'),
-    CollectionManager = require('../../common/collectionManager.js'),
-    Ctx = require('../../common/context.js'),
-    NotificationSubscription = require('../../models/notificationSubscription.js'),
-    RolesModel = require('../../models/roles.js'),
-    i18n = require('../../utils/i18n.js'),
-    Roles = require('../../utils/roles.js'),
-    Accounts = require('../../models/accounts.js'),
-    UserNavigationMenu = require('./userNavigationMenu.js'),
-    LoaderView = require('../loaderView.js'),
-    Analytics = require('../../internal_modules/analytics/dispatcher.js');
+var Marionette = require('backbone.marionette');
+
+var Assembl = require('../../app.js');
+var $ = require('jquery');
+var _ = require('underscore');
+var Promise = require('bluebird');
+var CollectionManager = require('../../common/collectionManager.js');
+var Ctx = require('../../common/context.js');
+var NotificationSubscription = require('../../models/notificationSubscription.js');
+var RolesModel = require('../../models/roles.js');
+var i18n = require('../../utils/i18n.js');
+var Roles = require('../../utils/roles.js');
+var Accounts = require('../../models/accounts.js');
+var UserNavigationMenu = require('./userNavigationMenu.js');
+var LoaderView = require('../loaderView.js');
+var Analytics = require('../../internal_modules/analytics/dispatcher.js');
 
 /**
  * User notification
@@ -138,9 +138,9 @@ var TemplateSubscription = Marionette.View.extend({
       }
     },
   userNewSubscription: function(e) {
-    var elm = $(e.target),
-        that = this,
-        status = elm.is(':checked') ? 'ACTIVE' : 'UNSUBSCRIBED';
+    var elm = $(e.target);
+    var that = this;
+    var status = elm.is(':checked') ? 'ACTIVE' : 'UNSUBSCRIBED';
 
     // var notificationSubscriptionTemplateModel = this.notificationTemplates.get(elm.attr('id'));
     var notificationSubscriptionTemplateModel = this.notificationTemplates.find(function(notif){
@@ -376,8 +376,8 @@ var userNotificationSubscriptions = Marionette.View.extend({
     var menu = new UserNavigationMenu({selectedSection: "notifications"});
     this.showChildView('navigationMenuHolder', menu);
 
-    var that = this,
-        collectionManager = new CollectionManager();
+    var that = this;
+    var collectionManager = new CollectionManager();
 
     Promise.join(collectionManager.getNotificationsUserCollectionPromise(),
            collectionManager.getNotificationsDiscussionCollectionPromise(),
@@ -419,9 +419,9 @@ var userNotificationSubscriptions = Marionette.View.extend({
   },
 
   updateRole: function(role) {
-    var that = this,
-        allRoles = this.userNotification.childViewOptions.roles,
-        notificationTemplates = this.templateSubscriptions.notificationTemplates;
+    var that = this;
+    var allRoles = this.userNotification.childViewOptions.roles;
+    var notificationTemplates = this.templateSubscriptions.notificationTemplates;
     this.userNotification.updateRole(role);
     this.templateSubscriptions.updateRole(role);
     if (this.role == null && role != null) {
