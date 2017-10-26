@@ -45,6 +45,7 @@
     "jquery": "3.2.1",
     "jquery-autosize": "~1.18.18",
     "jquery-highlight": "3.4.0",
+    "lebab": "^2.7.7",
     "linkifyjs": "~2.1",
     "moment": "~2.19",
     "raven-js": "~3.19",
