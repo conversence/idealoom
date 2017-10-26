@@ -20,6 +20,7 @@ import CKEditorLSField from './reusableDataFields/ckeditorLSField.js';
 import IdeaModel from '../models/idea.js';
 import i18n from '../utils/i18n.js';
 import Moment from 'moment';
+import Widget from '../models/widget.js';
 import { scaleLinear, format, select } from 'd3';
 
 
@@ -1327,9 +1328,7 @@ var TokenResultView = Marionette.View.extend({
     //{index: category}
     this.categoryIndex = [];
 
-    var CollectionManager = require('../common/collectionManager.js').default;
     var cm = new CollectionManager();
-    var Widget = require('../models/widget.js').default;
     var that = this;
 
 
@@ -1502,8 +1501,6 @@ var TokenVoteSessionModal = Backbone.Modal.extend({
     this.widgetModel = this.model;
     console.log("that.widgetModel: ", that.widgetModel);
 
-    var Widget = require('../models/widget.js').default; // FIXME: why does it work here but not at the top of the file?
-    var CollectionManager = require('../common/collectionManager.js').default; // FIXME: Why does it not work when we write it only at the top of the file?
     var collectionManager = new CollectionManager();
 
     var voteSpecifications = that.widgetModel.get("vote_specifications");
