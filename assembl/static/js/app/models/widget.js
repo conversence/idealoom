@@ -136,7 +136,6 @@ var WidgetModel = Base.Model.extend({
    * @function app.model.widgets.Widget.getUrlForUser
    * get the URL that will launch the widget in a modal window.
    * @param  {string} targetIdeaId Id of an idea on which the widget was launched
-   * @param  {[type]} page         ?
    * @return {string}              URL
    */
   getUrlForUser: function(targetIdeaId, page) {
