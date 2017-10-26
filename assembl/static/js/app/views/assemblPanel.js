@@ -3,9 +3,9 @@
  * @module app.views.assemblPanel
  */
 
-var LoaderView = require('./loaderView.js');
+import LoaderView from './loaderView.js';
 
-var _ = require('underscore');
+import _ from 'underscore';
 
 /**
  * An abstract class every panel should eventually extend
@@ -104,4 +104,4 @@ var AssemblPanel = LoaderView.extend({
 
 });
 
-module.exports = AssemblPanel;
+export default AssemblPanel;

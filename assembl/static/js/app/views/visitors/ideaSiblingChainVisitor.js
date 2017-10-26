@@ -3,7 +3,7 @@
  * @module app.views.visitors.ideaSiblingChainVisitor
  */
 
-var Visitor = require("./visitor.js");
+import Visitor from './visitor.js';
 
 /** Generates the last_sibbling_chains for ideas, in the following structure:
  * data_by_idea[visited_idea_id]['last_sibling_chain'][for_each_level_is_the_parent_a_last_sibbling]
@@ -43,4 +43,4 @@ IdeaSiblingChainVisitor.prototype.visit = function(idea, ancestry) {
   return true;
 };
 
-module.exports = IdeaSiblingChainVisitor;
+export default IdeaSiblingChainVisitor;

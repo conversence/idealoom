@@ -3,20 +3,20 @@
  * @module app.views.attachments
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var _ = require('underscore');
-var $ = require('jquery');
-var dropdown = require('bootstrap-dropdown');
-var i18n = require('../utils/i18n.js');
-var Assembl = require('../app.js');
-var Ctx = require('../common/context.js');
-var Types = require('../utils/types.js');
-var Attachments = require('../models/attachments.js');
-var Documents = require('../models/documents.js');
-var Backbone=require('backbone');
-var BackboneModal = require('backbone.modal');
-var DocumentViews = require('./documents.js');
+import _ from 'underscore';
+import $ from 'jquery';
+import Ctx from '../common/context.js';
+import dropdown from 'bootstrap-dropdown';
+import i18n from '../utils/i18n.js';
+import Assembl from '../app.js';
+import Types from '../utils/types.js';
+import Attachments from '../models/attachments.js';
+import Documents from '../models/documents.js';
+import Backbone from 'backbone';
+import BackboneModal from 'backbone.modal';
+import DocumentViews from './documents.js';
 
 
 var TARGET = {
@@ -606,7 +606,7 @@ var AttachmentCollectionView = Marionette.CollectionView.extend({
 });
 
 
-module.exports = module.exports = {
+export default {
     AttachmentEditableView: AttachmentEditableView,
     AttachmentView: AttachmentView,
     AttachmentEditableCollectionView: AttachmentEditableCollectionView,

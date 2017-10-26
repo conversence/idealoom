@@ -2,13 +2,13 @@
  * A user's preference language
  * @module app.models.languagePreference
  */
-var _ = require('underscore');
+import _ from 'underscore';
 
-var Base = require('./base.js');
-var Ctx = require('../common/context.js');
-var i18n = require('../utils/i18n.js');
-var LangString = require("./langstring.js");
-var Types = require('../utils/types.js');
+import Base from './base.js';
+import Ctx from '../common/context.js';
+import i18n from '../utils/i18n.js';
+import LangString from './langstring.js';
+import Types from '../utils/types.js';
 
 var clean = function(input){
     if (!input){
@@ -308,7 +308,7 @@ var DisconnectedUserLanguagePreferenceCollection = LanguagePreferenceCollection.
 
 
 
-module.exports = {
+export default {
     Model: LanguagePreferenceModel,
     Collection: LanguagePreferenceCollection,
     DisconnectedUserCollection: DisconnectedUserLanguagePreferenceCollection

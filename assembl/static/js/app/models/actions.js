@@ -2,9 +2,9 @@
  * An action done by a user.
  * @module app.models.actions
  */
-var Base = require('./base.js');
+import Base from './base.js';
 
-var Ctx = require('../common/context.js');
+import Ctx from '../common/context.js';
 /**
  * Action model
  * Frontend model for :py:class:`assembl.models.action.Action`
@@ -67,7 +67,7 @@ var actionCollection = Base.Collection.extend({
   },
 });
 
-module.exports = {
+export default {
   Model: actionModel,
   Collection: actionCollection
 };

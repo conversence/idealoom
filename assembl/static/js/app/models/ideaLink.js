@@ -2,10 +2,10 @@
  * The link between two ideas
  * @module app.models.ideaLink
  */
-var _ = require('underscore');
+import _ from 'underscore';
 
-var Base = require('./base.js');
-var Ctx = require('../common/context.js');
+import Base from './base.js';
+import Ctx from '../common/context.js';
 /**
  * Idea link model
  * Frontend model for :py:class:`assembl.models.idea.IdeaLink`
@@ -59,7 +59,7 @@ var IdeaLinkCollection = Base.Collection.extend({
   url: Ctx.getApiV2DiscussionUrl("idea_links"),
 });
 
-module.exports = {
+export default {
   Model: IdeaLinkModel,
   Collection: IdeaLinkCollection
 };

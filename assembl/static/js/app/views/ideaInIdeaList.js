@@ -3,20 +3,20 @@
  * @module app.views.ideaInIdeaList
  */
 
-var Backbone = require('backbone');
+import Backbone from 'backbone';
 
-var _ = require('underscore');
-var $ = require('jquery');
-var Types = require('../utils/types.js');
-var classlist = require('classlist-polyfill');
-var Assembl = require('../app.js');
-var Ctx = require('../common/context.js');
-var Permissions = require('../utils/permissions.js');
-var UserCustomData = require('../models/userCustomData.js');
-var PanelSpecTypes = require('../utils/panelSpecTypes.js');
-var scrollUtils = require('../utils/scrollUtils.js');
-var Marionette = require('backbone.marionette');
-var Analytics = require('../internal_modules/analytics/dispatcher.js');
+import _ from 'underscore';
+import $ from 'jquery';
+import Types from '../utils/types.js';
+import classlist from 'classlist-polyfill';
+import Assembl from '../app.js';
+import Ctx from '../common/context.js';
+import Permissions from '../utils/permissions.js';
+import UserCustomData from '../models/userCustomData.js';
+import PanelSpecTypes from '../utils/panelSpecTypes.js';
+import scrollUtils from '../utils/scrollUtils.js';
+import Marionette from 'backbone.marionette';
+import Analytics from '../internal_modules/analytics/dispatcher.js';
 
 var IdeaInIdeaListView = Marionette.View.extend({
   constructor: function IdeaInIdeaListView() {
@@ -616,7 +616,7 @@ var ideaListIdeaFamilyCollectionView = Marionette.CollectionView.extend({
   }*/
 });
 
-module.exports = {
+export default {
     IdeaFamilyCollectionView: ideaListIdeaFamilyCollectionView,
     IdeaView: IdeaInIdeaListView
     };

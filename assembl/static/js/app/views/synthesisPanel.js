@@ -3,28 +3,28 @@
  * @module app.views.synthesisPanel
  */
 
-var IdeaRenderVisitor = require('./visitors/ideaRenderVisitor.js');
+import IdeaRenderVisitor from './visitors/ideaRenderVisitor.js';
 
-var Raven = require('raven-js');
-var _ = require('underscore');
-var $ = require('jquery');
-var Marionette = require('backbone.marionette');
-var Assembl = require('../app.js');
-var Ctx = require('../common/context.js');
-var MessageModel = require('../models/message.js');
-var ideaLink = require('../models/ideaLink.js');
-var Synthesis = require('../models/synthesis.js');
-var Idea = require('../models/idea.js');
-var Permissions = require('../utils/permissions.js');
-var IdeaFamilyView = require('./ideaFamily.js');
-var IdeaInSynthesisView = require('./ideaInSynthesis.js');
-var PanelSpecTypes = require('../utils/panelSpecTypes.js');
-var AssemblPanel = require('./assemblPanel.js');
-var i18n = require('../utils/i18n.js');
-var EditableField = require('./reusableDataFields/editableField.js');
-var CKEditorField = require('./reusableDataFields/ckeditorField.js');
-var CollectionManager = require('../common/collectionManager.js');
-var Promise = require('bluebird');
+import Raven from 'raven-js';
+import _ from 'underscore';
+import $ from 'jquery';
+import Marionette from 'backbone.marionette';
+import Assembl from '../app.js';
+import Ctx from '../common/context.js';
+import MessageModel from '../models/message.js';
+import ideaLink from '../models/ideaLink.js';
+import Synthesis from '../models/synthesis.js';
+import Idea from '../models/idea.js';
+import Permissions from '../utils/permissions.js';
+import IdeaFamilyView from './ideaFamily.js';
+import IdeaInSynthesisView from './ideaInSynthesis.js';
+import PanelSpecTypes from '../utils/panelSpecTypes.js';
+import AssemblPanel from './assemblPanel.js';
+import i18n from '../utils/i18n.js';
+import EditableField from './reusableDataFields/editableField.js';
+import CKEditorField from './reusableDataFields/ckeditorField.js';
+import CollectionManager from '../common/collectionManager.js';
+import Promise from 'bluebird';
 
 var SynthesisPanel = AssemblPanel.extend({
   constructor: function SynthesisPanel() {
@@ -347,5 +347,5 @@ var SynthesisPanel = AssemblPanel.extend({
 
 });
 
-module.exports = SynthesisPanel;
+export default SynthesisPanel;
 

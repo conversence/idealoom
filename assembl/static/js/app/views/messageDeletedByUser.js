@@ -3,14 +3,14 @@
  * @module app.views.message
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var Ctx = require('../common/context.js');
-var i18n = require('../utils/i18n.js');
-var Permissions = require('../utils/permissions.js');
-var $ = require('jquery');
-var LoaderView = require('./loaderView.js');
-var AgentViews = require('./agent.js');
+import Ctx from '../common/context.js';
+import i18n from '../utils/i18n.js';
+import Permissions from '../utils/permissions.js';
+import $ from 'jquery';
+import LoaderView from './loaderView.js';
+import AgentViews from './agent.js';
 
 
 // TODO: show ideas associated to the deleted message, using IdeaClassificationNameListView (e.g. which idea the message was top posted in, or to the conversation associated to which ideas does it reply to)
@@ -116,5 +116,5 @@ var MessageDeletedByUserView = LoaderView.extend({
   },
 });
 
-module.exports = MessageDeletedByUserView;
+export default MessageDeletedByUserView;
 

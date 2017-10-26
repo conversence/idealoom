@@ -2,16 +2,16 @@
  * Represent an idea
  * @module app.models.idea
  */
-var _ = require('underscore');
+import _ from 'underscore';
 
-var Promise = require('bluebird');
-var Base = require('./base.js');
-var Ctx = require('../common/context.js');
-var i18n = require('../utils/i18n.js');
-var Types = require('../utils/types.js');
-var LangString = require('./langstring.js');
-var Attachment = require('./attachments.js');
-var Permissions = require('../utils/permissions.js');
+import Promise from 'bluebird';
+import Base from './base.js';
+import Ctx from '../common/context.js';
+import i18n from '../utils/i18n.js';
+import Types from '../utils/types.js';
+import LangString from './langstring.js';
+import Attachment from './attachments.js';
+import Permissions from '../utils/permissions.js';
 /**
  * Idea model
  * Frontend model for :py:class:`assembl.models.idea.Idea`
@@ -722,7 +722,7 @@ var IdeaCollection = Base.Collection.extend({
   },
 });
 
-module.exports = {
+export default {
   Model: IdeaModel,
   Collection: IdeaCollection
 };

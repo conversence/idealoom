@@ -3,17 +3,17 @@
  * @module app.views.admin.adminPartners
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var Backbone = require('backbone');
-var BackboneModal = require('backbone.modal');
-var Assembl = require('../../app.js');
-var $ = require('jquery');
-var CollectionManager = require('../../common/collectionManager.js');
-var Ctx = require('../../common/context.js');
-var i18n = require('../../utils/i18n.js');
-var partnerModel = require('../../models/partners.js');
-var AdminNavigationMenu = require('./adminNavigationMenu.js');
+import Backbone from 'backbone';
+import BackboneModal from 'backbone.modal';
+import Assembl from '../../app.js';
+import $ from 'jquery';
+import CollectionManager from '../../common/collectionManager.js';
+import Ctx from '../../common/context.js';
+import i18n from '../../utils/i18n.js';
+import partnerModel from '../../models/partners.js';
+import AdminNavigationMenu from './adminNavigationMenu.js';
 
 var Partners = Marionette.View.extend({
   constructor: function Partners() {
@@ -224,4 +224,4 @@ var adminPartners = Marionette.View.extend({
 
 });
 
-module.exports = adminPartners;
+export default adminPartners;

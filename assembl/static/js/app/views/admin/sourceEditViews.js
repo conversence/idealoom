@@ -2,12 +2,12 @@
  * 
  * @module app.views.admin.sourceEditViews
  */
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var i18n = require('../../utils/i18n.js');
-var CollectionManager = require('../../common/collectionManager.js');
-var Promise = require('bluebird');
-var SourceViewBase = require('../sourceEditView.js');
+import i18n from '../../utils/i18n.js';
+import CollectionManager from '../../common/collectionManager.js';
+import Promise from 'bluebird';
+import SourceViewBase from '../sourceEditView.js';
 
 //This needs to become the emailSourceEditView
 
@@ -34,6 +34,6 @@ var EmailSourceEditView = SourceViewBase.extend({
 
 });
 
-module.exports = {
+export default {
   EmailSource: EmailSourceEditView
 };

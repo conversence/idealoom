@@ -3,12 +3,12 @@
  * @module app.views.widgetLinks
  */
 
-var Backbone = require("backbone");
+import Backbone from 'backbone';
 
-var Marionette = require('backbone.marionette');
-var _ = require("underscore");
-var $ = require("jquery");
-var Widget = require("../models/widget.js");
+import Marionette from 'backbone.marionette';
+import _ from 'underscore';
+import $ from 'jquery';
+import Widget from '../models/widget.js';
 
 
 var WidgetLinkView = Marionette.View.extend({
@@ -75,7 +75,7 @@ var WidgetLinkListView = Marionette.CollectionView.extend({
 });
 
 
-module.exports = {
+export default {
   WidgetLinkView: WidgetLinkView,
   WidgetLinkListView: WidgetLinkListView
 };

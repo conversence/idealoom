@@ -3,16 +3,16 @@
  * @module app.views.reusableDataFields.ckeditorLSField
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var _ = require('underscore');
-var $ = require('jquery');
-var Assembl = require('../../app.js');
-var Permissions = require('../../utils/permissions.js');
-var LangString = require('../../models/langstring.js');
-var CK = require('ckeditor');
-var CKEditorField = require('./ckeditorField.js');
-var Ctx = require('../../common/context.js');
+import _ from 'underscore';
+import $ from 'jquery';
+import Assembl from '../../app.js';
+import Permissions from '../../utils/permissions.js';
+import LangString from '../../models/langstring.js';
+import CK from 'ckeditor';
+import CKEditorField from './ckeditorField.js';
+import Ctx from '../../common/context.js';
 
 
 
@@ -114,4 +114,4 @@ var CkeditorLSFieldInModal = CKEditorField.modalClass.extend({
 });
 
 
-module.exports = cKEditorLSField;
+export default cKEditorLSField;

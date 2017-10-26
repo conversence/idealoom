@@ -2,19 +2,19 @@
  * 
  * @module app.views.messageTranslationQuestion
  */
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var Backbone = require('backbone');
-var Ctx = require('../common/context.js');
-var CollectionManager = require('../common/collectionManager.js');
-var i18n = require('../utils/i18n.js');
-var _ = require('underscore');
-var $ = require('jquery');
-var Types = require('../utils/types.js');
-var Growl = require('../utils/growl.js');
-var LangString = require('../models/langstring.js');
-var LoaderView = require('./loaderView.js');
-var LanguagePreference = require('../models/languagePreference.js');
+import Backbone from 'backbone';
+import Ctx from '../common/context.js';
+import CollectionManager from '../common/collectionManager.js';
+import i18n from '../utils/i18n.js';
+import _ from 'underscore';
+import $ from 'jquery';
+import Types from '../utils/types.js';
+import Growl from '../utils/growl.js';
+import LangString from '../models/langstring.js';
+import LoaderView from './loaderView.js';
+import LanguagePreference from '../models/languagePreference.js';
 
 /**
  * Date: Jan 14, 2016
@@ -324,4 +324,4 @@ var TranslationView = LoaderView.extend({
     }
 });
 
-module.exports = TranslationView;
+export default TranslationView;

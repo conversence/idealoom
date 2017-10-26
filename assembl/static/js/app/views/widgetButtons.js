@@ -3,15 +3,15 @@
  * @module app.views.widgetButtons
  */
 
-var Backbone = require("backbone");
+import Backbone from 'backbone';
 
-var Marionette = require('backbone.marionette');
-var _ = require("underscore");
-var i18n = require('../utils/i18n.js');
-var Moment = require('moment');
-var Widget = require("../models/widget.js");
-var Ctx = require('../common/context.js');
-var Permissions = require('../utils/permissions.js');
+import Marionette from 'backbone.marionette';
+import _ from 'underscore';
+import i18n from '../utils/i18n.js';
+import Moment from 'moment';
+import Widget from '../models/widget.js';
+import Ctx from '../common/context.js';
+import Permissions from '../utils/permissions.js';
 
 
 var WidgetButtonView = Marionette.View.extend({
@@ -88,7 +88,7 @@ var WidgetButtonListView = Marionette.CollectionView.extend({
 });
 
 
-module.exports = {
+export default {
   WidgetButtonView: WidgetButtonView,
   WidgetButtonListView: WidgetButtonListView
 };

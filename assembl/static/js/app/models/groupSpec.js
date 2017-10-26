@@ -2,11 +2,11 @@
  * Represents an independent group of panels in the interface. When added, the matching views (groupContainerView) will be instanciated
  * @module app.models.groupSpec
  */
-var Base = require('./base.js');
+import Base from './base.js';
 
-var panelSpec = require('./panelSpec.js');
-var PanelSpecTypes = require('../utils/panelSpecTypes.js');
-var groupState = require('./groupState.js');
+import panelSpec from './panelSpec.js';
+import PanelSpecTypes from '../utils/panelSpecTypes.js';
+import groupState from './groupState.js';
 /**
  * Group specifications model
  * @class app.models.groupSpec.GroupSpecModel
@@ -199,7 +199,7 @@ var GroupSpecs = Base.Collection.extend({
   }
 });
 
-module.exports = {
+export default {
   Model: GroupSpecModel,
   Collection: GroupSpecs
 };

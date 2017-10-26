@@ -3,22 +3,20 @@
  * @module app.views.groups.modalGroup
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var Backbone = require('backbone');
-var BackboneModal = require('backbone.modal');
-var _ = require('underscore');
-var $ = require('jquery');
-var Assembl = require('../../app.js');
-var Ctx = require('../../common/context.js');
-var i18n = require('../../utils/i18n.js');
-
-var //panelSpec = require('../../models/panelSpec'),
-//PanelSpecTypes = require('../../utils/panelSpecTypes'),
-//viewsFactory = require('../../objects/viewsFactory'),
-groupSpec = require('../../models/groupSpec');
-
-var GroupContainer = require('../groups/groupContainer');
+import Backbone from 'backbone';
+import BackboneModal from 'backbone.modal';
+import _ from 'underscore';
+import $ from 'jquery';
+import Assembl from '../../app.js';
+import Ctx from '../../common/context.js';
+import i18n from '../../utils/i18n.js';
+//import panelSpec from '../../models/panelSpec';
+//import PanelSpecTypes from '../../utils/panelSpecTypes';
+//import viewsFactory from '../../objects/viewsFactory';
+import groupSpec from '../../models/groupSpec';
+import GroupContainer from '../groups/groupContainer';
 
 /**
  * @class app.views.groups.modalGroup.ModalGroupView
@@ -105,9 +103,9 @@ var ModalGroupView = Backbone.Modal.extend({
  *  modal is a fully configured instance of ModalGroup.
  */
 var filteredMessagePanelFactory = function(modal_title, filters) {
-  var panelSpec = require('../../models/panelSpec.js');
-  var PanelSpecTypes = require('../../utils/panelSpecTypes.js');
-  var viewsFactory = require('../../objects/viewsFactory');
+  var panelSpec = require('../../models/panelSpec.js').default;
+  var PanelSpecTypes = require('../../utils/panelSpecTypes.js').default;
+  var viewsFactory = require('../../objects/viewsFactory').default;
 
   var defaults = {
       panels: new panelSpec.Collection([
@@ -132,7 +130,7 @@ var filteredMessagePanelFactory = function(modal_title, filters) {
   messagePanel.render();
   return {modal: modal, messageList: messagePanel};
 }
-module.exports = { 
+export default { 
     View: ModalGroupView,
     filteredMessagePanelFactory: filteredMessagePanelFactory
   }

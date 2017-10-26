@@ -3,14 +3,13 @@
  * @module app.views.groups.groupContainer
  */
 
-var $ = require('jquery');
-
-var Marionette = require('backbone.marionette');
-var ctx = require('../../common/context.js');
-var Assembl = require('../../app.js');
-var GroupContent = require('./groupContent.js');
-var AssemblPanel = require('../assemblPanel.js');
-var PanelSpecTypes = require('../../utils/panelSpecTypes.js');
+import $ from 'jquery';
+import Marionette from 'backbone.marionette';
+import ctx from '../../common/context.js';
+import Assembl from '../../app.js';
+import GroupContent from './groupContent.js';
+import AssemblPanel from '../assemblPanel.js';
+import PanelSpecTypes from '../../utils/panelSpecTypes.js';
 /**
  * Manages all the groups in the interface, essentially the GroupSpec.Collection
  * Normally referenced with Assembl.groupContainer
@@ -174,4 +173,4 @@ var groupContainer = Marionette.CollectionView.extend({
   },
 });
 
-module.exports = groupContainer;
+export default groupContainer;

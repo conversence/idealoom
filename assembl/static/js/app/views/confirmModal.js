@@ -8,11 +8,11 @@
  * @module app.views.confirmModal
  */
 
-var _ = require('underscore');
+import _ from 'underscore';
 
-var Backbone=require('backbone');
-var BackboneModal = require('backbone.modal');
-var i18n = require('../utils/i18n.js');
+import Backbone from 'backbone';
+import BackboneModal from 'backbone.modal';
+import i18n from '../utils/i18n.js';
 
 
 
@@ -52,4 +52,4 @@ var ConfirmModal = Backbone.Modal.extend({
   }
 });
 
-module.exports = ConfirmModal;
+export default ConfirmModal;

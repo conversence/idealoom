@@ -3,16 +3,16 @@
  * @module app.tests.models.spec
  */
 
-var _ = require('underscore');
+import _ from 'underscore';
 
-var Promise = require('bluebird');
-var Agent = require('../models/agents.js');
-var chai = require('chai');
+import Promise from 'bluebird';
+import Agent from '../models/agents.js';
+import chai from 'chai';
 var expect = chai.expect;
-var chaiAsPromised = require("chai-as-promised");
-var CollectionManager = require('../common/collectionManager.js');
+import chaiAsPromised from 'chai-as-promised';
+import CollectionManager from '../common/collectionManager.js';
 var collectionManager = new CollectionManager();
-var mockServer = require('./mock_server.js');
+import mockServer from './mock_server.js';
 
 chai.use(chaiAsPromised);
 

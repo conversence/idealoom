@@ -2,11 +2,10 @@
  * Represents a discussion's messages from an external source.
  * @module app.models.discussionSource
  */
-var Base = require('./base.js');
+import Base from './base.js';
 
-var Ctx = require('../common/context.js');
-var $ = require('jquery');
-/**
+import Ctx from '../common/context.js';
+import $ from 'jquery';/**
  * Source model
  * Frontend model for :py:class:`assembl.models.generic.ContentSource`
  * @class app.models.discussionSource.sourceModel
@@ -88,7 +87,7 @@ var sourceCollection = Base.Collection.extend({
   model: sourceModel
 });
 
-module.exports = {
+export default {
   Model: sourceModel,
   Collection: sourceCollection
 };

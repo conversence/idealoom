@@ -3,23 +3,23 @@
  * @module app.views.messageListHeader
  */
 
-var Backbone = require('backbone');
+import Backbone from 'backbone';
 
-var Raven = require('raven-js');
-var _ = require('underscore');
-var $ = require('jquery');
-var dropdown = require('bootstrap-dropdown');
-var Assembl = require('../app.js');
-var Ctx = require('../common/context.js');
-var FlipSwitchButtonModel = require('../models/flipSwitchButton.js');
-var FlipSwitchButtonView = require('./flipSwitchButton.js');
-var i18n = require('../utils/i18n.js');
-var Permissions = require('../utils/permissions.js');
-var PanelSpecTypes = require('../utils/panelSpecTypes.js');
-var AssemblPanel = require('./assemblPanel.js');
-var Marionette = require('backbone.marionette');
-var CollectionManager = require('../common/collectionManager.js');
-var Promise = require('bluebird');
+import Raven from 'raven-js';
+import _ from 'underscore';
+import $ from 'jquery';
+import Ctx from '../common/context.js';
+import dropdown from 'bootstrap-dropdown';
+import Assembl from '../app.js';
+import FlipSwitchButtonModel from '../models/flipSwitchButton.js';
+import FlipSwitchButtonView from './flipSwitchButton.js';
+import i18n from '../utils/i18n.js';
+import Permissions from '../utils/permissions.js';
+import PanelSpecTypes from '../utils/panelSpecTypes.js';
+import AssemblPanel from './assemblPanel.js';
+import Marionette from 'backbone.marionette';
+import CollectionManager from '../common/collectionManager.js';
+import Promise from 'bluebird';
 
 /**
  * Constants
@@ -375,4 +375,4 @@ var MessageListHeader = Marionette.View.extend({
     }
 });
 
-module.exports = MessageListHeader;
+export default MessageListHeader;

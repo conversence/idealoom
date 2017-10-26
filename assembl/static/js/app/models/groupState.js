@@ -2,9 +2,9 @@
  * Represents the state of a panel group (current idea, selected navigation, minimised states, etc.)
  * @module app.models.groupState
  */
-var Base = require('./base.js');
+import Base from './base.js';
 
-var Idea = require('./idea.js');
+import Idea from './idea.js';
 /**
  * Group state model
  * @class app.models.groupState.GroupStateModel
@@ -88,7 +88,7 @@ var GroupStates = Base.Collection.extend({
   }
 });
 
-module.exports = {
+export default {
   Model: GroupStateModel,
   Collection: GroupStates
 };

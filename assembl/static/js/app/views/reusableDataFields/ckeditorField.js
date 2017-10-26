@@ -3,17 +3,17 @@
  * @module app.views.reusableDataFields.ckeditorField
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var _ = require('underscore');
-var $ = require('jquery');
-var dotdotdot = require('jquery.dotdotdot');
-var Assembl = require('../../app.js');
-var Backbone = require('backbone');
-var BackboneModal = require('backbone.modal');
-var Permissions = require('../../utils/permissions.js');
-var CK = require('ckeditor');
-var Ctx = require('../../common/context.js');
+import _ from 'underscore';
+import $ from 'jquery';
+import dotdotdot from 'jquery.dotdotdot';
+import Assembl from '../../app.js';
+import Backbone from 'backbone';
+import BackboneModal from 'backbone.modal';
+import Permissions from '../../utils/permissions.js';
+import CK from 'ckeditor';
+import Ctx from '../../common/context.js';
 
 
 var cKEditorField = Marionette.View.extend({
@@ -356,4 +356,4 @@ var CkeditorFieldInModal = Backbone.Modal.extend({
 
 cKEditorField.modalClass = CkeditorFieldInModal;
 
-module.exports = cKEditorField;
+export default cKEditorField;

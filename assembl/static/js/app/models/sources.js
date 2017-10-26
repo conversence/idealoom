@@ -3,13 +3,12 @@
  * @module app.models.sources
  */
 
-var Base = require('./base.js');
+import Base from './base.js';
 
-var i18n = require('../utils/i18n.js');
-var Ctx = require('../common/context.js');
-var Types = require('../utils/types.js');
-var $ = require('jquery');
-
+import i18n from '../utils/i18n.js';
+import Ctx from '../common/context.js';
+import Types from '../utils/types.js';
+import $ from 'jquery';
 /**
  * Source model
  * Frontend model for :py:class:`assembl.models.generic.ContentSource` and :py:class:`assembl.models.post.PostSource`
@@ -225,7 +224,7 @@ var sourceCollection = Base.Collection.extend({
   }
 });
 
-module.exports = {
+export default {
   Model: {
     Source: Source,
     IMAPMailboxSource: IMAPMailboxSource,

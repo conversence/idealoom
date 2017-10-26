@@ -3,9 +3,9 @@
  * @module app.models.panelSpec
  */
 
-var Base = require('./base.js');
+import Base from './base.js';
 
-var PanelSpecTypes = require('../utils/panelSpecTypes.js');
+import PanelSpecTypes from '../utils/panelSpecTypes.js';
 
 /**
  * Panel specification model
@@ -27,7 +27,7 @@ var PanelSpecModel = Base.Model.extend({
   
   /** This returns undefined if the model is valid */
   validate: function(attributes, options) {
-    var viewsFactory = require('../objects/viewsFactory.js');
+    var viewsFactory = require('../objects/viewsFactory.js').default;
     if (viewsFactory === undefined) {
       throw new Error("You must define viewsFactory to run validation");
     }
@@ -86,7 +86,7 @@ var PanelSpecs = Base.Collection.extend({
   }
 });
 
-module.exports = {
+export default {
   Model: PanelSpecModel,
   Collection: PanelSpecs
 };

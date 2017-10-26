@@ -3,24 +3,22 @@
  * @module app.common.context
  */
 
-var $ = require('jquery');
+import $ from 'jquery';
+import _ from 'underscore';
+import Moment from 'moment';
+import Promise from 'bluebird';
+import Assembl from '../app.js';
+import Permissions from '../utils/permissions.js';
+import Types from '../utils/types.js';
+import Roles from '../utils/roles.js';
+import i18n from '../utils/i18n.js';
+import Raven from 'raven-js';
+import Backbone from 'backbone';
+import BackboneModal from 'backbone.modal';
 
-var _ = require('underscore');
-var Moment = require('moment');
-var Promise = require('bluebird');
-var Assembl =  require('../app.js');
-var Permissions =  require('../utils/permissions.js');
-var Types = require('../utils/types.js');
-var Roles =  require('../utils/roles.js');
-var i18n =  require('../utils/i18n.js');
-var Raven = require('raven-js');
-var Backbone=require('backbone');
-var BackboneModal = require('backbone.modal');
+import upload from 'backbone-model-file-upload';  // why here?
 
-var // why here?
-upload = require('backbone-model-file-upload');
-
-var Analytics = require('../internal_modules/analytics/dispatcher.js');
+import Analytics from '../internal_modules/analytics/dispatcher.js';
 require('linkifyjs');
 require('linkifyjs/jquery')($);
 
@@ -28,12 +26,12 @@ window.jQuery = $;
 window._ = _;
 
 // the following require window.jQuery
-var tooltip = require('bootstrap-tooltip');
+import tooltip from 'bootstrap-tooltip';
 // require('ckeditor-sharedcontainer/plugin'); // where is this anyway?
 
-var dropdown = require('bootstrap-dropdown');
-var oembed = require('jquery-oembed-all/jquery.oembed');
-var highlight = require('jquery-highlight');
+import dropdown from 'bootstrap-dropdown';
+import oembed from 'jquery-oembed-all/jquery.oembed';
+import highlight from 'jquery-highlight';
 
 
 /**
@@ -326,7 +324,7 @@ Context.prototype = {
         }
       }
 
-      var CollectionManager = require('./collectionManager.js');
+      var CollectionManager = require('./collectionManager.js').default;
       var collectionManager = new CollectionManager();
 
       collectionManager.getLocalRoleCollectionPromise().then(function(localRoles) {
@@ -791,7 +789,7 @@ Context.prototype = {
     // Preliminary code, may not be final architecture.
     if (this.currentSynthesisDraftPromise === null) {
       var that = this;
-      var CollectionManager = require('./collectionManager.js');
+      var CollectionManager = require('./collectionManager.js').default;
       var collectionManager = new CollectionManager();
 
       this.currentSynthesisDraftPromise = collectionManager.getAllSynthesisCollectionPromise().then(
@@ -1395,7 +1393,7 @@ Context.prototype = {
     };
 
     var triggerHover = function(evt) {
-      var LoaderView = require('../views/loader.js');
+      var LoaderView = require('../views/loader.js').default;
       var loader = new LoaderView();
       var loaderHtml = loader.render().el;
 
@@ -2041,4 +2039,4 @@ Context.prototype = {
 
 }
 
-module.exports = new Context();
+export default new Context();

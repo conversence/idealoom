@@ -2,14 +2,13 @@
  * Represents an announcement, a mutable message-like object, with an author and a date
  * @module app.models.announcement
  */
-var $ = require('jquery');
-
-var Promise = require('bluebird');
-var Base = require('./base.js');
-var i18n = require('../utils/i18n.js');
-var Ctx = require('../common/context.js');
-var LangString = require('./langstring.js');
-var Types = require('../utils/types.js');
+import $ from 'jquery';
+import Promise from 'bluebird';
+import Base from './base.js';
+import i18n from '../utils/i18n.js';
+import Ctx from '../common/context.js';
+import LangString from './langstring.js';
+import Types from '../utils/types.js';
 /**
  * Annoucement model
  * Frontend model for :py:class:`assembl.models.announcement.Announcement`
@@ -119,7 +118,7 @@ var AnnouncementCollection = Base.Collection.extend({
   model: AnnouncementModel
 });
 
-module.exports = {
+export default {
   Model: AnnouncementModel,
   Collection: AnnouncementCollection
 };

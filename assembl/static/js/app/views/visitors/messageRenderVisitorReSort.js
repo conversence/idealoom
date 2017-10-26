@@ -3,7 +3,7 @@
  * @module app.views.visitors.messageRenderVisitorReSort
  */
 
-var Visitor = require("./visitor.js");
+import Visitor from './visitor.js';
 
 /**
 * Traversal function to re-visit the output of an MessageRenderVisitor.
@@ -97,4 +97,4 @@ function messageRenderVisitorReSort(data_by_object, order_lookup_table, roots, s
   //console.log("messageRenderVisitorReSort: final order_lookup_table: ", order_lookup_table);
 }
 
-module.exports = messageRenderVisitorReSort;
+export default messageRenderVisitorReSort;

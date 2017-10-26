@@ -2,20 +2,20 @@
  * 
  * @module app.views.admin.generalSource
  */
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var $ = require('jquery');
-var _ = require('underscore');
-var i18n = require('../../utils/i18n.js');
-var Types = require('../../utils/types.js');
-var Ctx = require('../../common/context.js');
-var Permissions = require('../../utils/permissions.js');
-var Growl = require('../../utils/growl.js');
-var Source = require('../../models/sources.js');
-var CollectionManager = require('../../common/collectionManager.js');
-var SourceViews = require("./sourceEditViews.js");
-var Moment = require('moment');
-var FacebookSourceEditView = require("../facebookViews.js");
+import $ from 'jquery';
+import _ from 'underscore';
+import i18n from '../../utils/i18n.js';
+import Types from '../../utils/types.js';
+import Ctx from '../../common/context.js';
+import Permissions from '../../utils/permissions.js';
+import Growl from '../../utils/growl.js';
+import Source from '../../models/sources.js';
+import CollectionManager from '../../common/collectionManager.js';
+import SourceViews from './sourceEditViews.js';
+import Moment from 'moment';
+import FacebookSourceEditView from '../facebookViews.js';
 
 function getSourceEditView(model_type) {
   var form;
@@ -237,7 +237,7 @@ var DiscussionSourceList = Marionette.CollectionView.extend({
 });
 
 
-module.exports = {
+export default {
     Item: ReadSource,
     Root: SourceView,
     CreateSource: CreateSource,

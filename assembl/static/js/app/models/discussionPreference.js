@@ -2,10 +2,10 @@
  * Discussion preferences
  * @module app.models.discussionPreference
  */
-var Backbone = require("backbone");
+import Backbone from 'backbone';
 
-var Types = require("../utils/types.js");
-var Ctx = require("../common/context.js");
+import Types from '../utils/types.js';
+import Ctx from '../common/context.js';
 
 
 /**
@@ -232,7 +232,7 @@ var UserPreferenceRawCollection = PreferenceCollection.extend({
 });
 
 
-module.exports = {
+export default {
   DictModel: DiscussionPreferenceDictionaryModel,
   DiscussionPreferenceCollection: DiscussionPreferenceCollection,
   GlobalPreferenceCollection: GlobalPreferenceCollection,

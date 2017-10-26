@@ -3,7 +3,7 @@
  * @module app.views.visitors.firstIdeaToShowVisitor
  */
 
-var Visitor = require("./visitor.js");
+import Visitor from './visitor.js';
 
 /** This visitor will find the first idea with extracts, and/or the first idea altogether.
 */
@@ -30,4 +30,4 @@ FirstIdeaToShowVisitor.prototype.visit = function(object) {
   return true;
 };
 
-module.exports = FirstIdeaToShowVisitor;
+export default FirstIdeaToShowVisitor;

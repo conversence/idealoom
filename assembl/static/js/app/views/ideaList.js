@@ -3,31 +3,31 @@
  * @module app.views.ideaList
  */
 
-var AllMessagesInIdeaListView = require('./allMessagesInIdeaList.js');
+import AllMessagesInIdeaListView from './allMessagesInIdeaList.js';
 
-var OrphanMessagesInIdeaListView = require('./orphanMessagesInIdeaList.js');
-var SynthesisInIdeaListView = require('./synthesisInIdeaList.js');
-var Loader = require('./loader.js');
-var Permissions = require('../utils/permissions.js');
-var IdeaRenderVisitor = require('./visitors/ideaRenderVisitor.js');
-var IdeaSiblingChainVisitor = require('./visitors/ideaSiblingChainVisitor');
-var Backbone = require('backbone');
-var Assembl = require('../app.js');
-var Ctx = require('../common/context.js');
-var Idea = require('../models/idea.js');
-var UserCustomData = require('../models/userCustomData.js');
-var ideaInIdeaList = require('./ideaInIdeaList.js');
-var PanelSpecTypes = require('../utils/panelSpecTypes.js');
-var scrollUtils = require('../utils/scrollUtils.js');
-var AssemblPanel = require('./assemblPanel.js');
-var _ = require('underscore');
-var CollectionManager = require('../common/collectionManager.js');
-var i18n = require('../utils/i18n.js');
-var OtherInIdeaListView = require('./otherInIdeaList.js');
-var $ = require('jquery');
-var Promise = require('bluebird');
-var Analytics = require('../internal_modules/analytics/dispatcher.js');
-var DiscussionPreference = require('../models/discussionPreference.js');
+import OrphanMessagesInIdeaListView from './orphanMessagesInIdeaList.js';
+import SynthesisInIdeaListView from './synthesisInIdeaList.js';
+import Loader from './loader.js';
+import Permissions from '../utils/permissions.js';
+import IdeaRenderVisitor from './visitors/ideaRenderVisitor.js';
+import IdeaSiblingChainVisitor from './visitors/ideaSiblingChainVisitor';
+import Backbone from 'backbone';
+import Assembl from '../app.js';
+import Ctx from '../common/context.js';
+import Idea from '../models/idea.js';
+import UserCustomData from '../models/userCustomData.js';
+import ideaInIdeaList from './ideaInIdeaList.js';
+import PanelSpecTypes from '../utils/panelSpecTypes.js';
+import scrollUtils from '../utils/scrollUtils.js';
+import AssemblPanel from './assemblPanel.js';
+import _ from 'underscore';
+import CollectionManager from '../common/collectionManager.js';
+import i18n from '../utils/i18n.js';
+import OtherInIdeaListView from './otherInIdeaList.js';
+import $ from 'jquery';
+import Promise from 'bluebird';
+import Analytics from '../internal_modules/analytics/dispatcher.js';
+import DiscussionPreference from '../models/discussionPreference.js';
 var FEATURED = 'featured';
 var IN_SYNTHESIS = 'inNextSynthesis';
 
@@ -873,4 +873,4 @@ var IdeaList = AssemblPanel.extend({
 
 });
 
-module.exports = IdeaList;
+export default IdeaList;

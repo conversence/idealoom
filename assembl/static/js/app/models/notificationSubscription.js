@@ -3,9 +3,9 @@
  * @module app.models.notificationSubscription
  */
 
-var Base = require('./base.js');
+import Base from './base.js';
 
-var Ctx = require('../common/context.js');
+import Ctx from '../common/context.js';
 
 /**
  * Notification subscription model
@@ -70,7 +70,7 @@ var notificationsSubscriptionCollection = Base.Collection.extend({
   }
 });
 
-module.exports = {
+export default {
   Model: notificationsSubscriptionModel,
   Collection: notificationsSubscriptionCollection
 };

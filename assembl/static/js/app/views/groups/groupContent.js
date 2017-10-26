@@ -3,17 +3,17 @@
  * @module app.views.groups.groupContent
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var Ctx = require('../../common/context.js');
-var i18n = require('../../utils/i18n.js');
-var panelSpec = require('../../models/panelSpec.js');
-var AssemblPanel = require('../assemblPanel.js');
-var PanelWrapper = require('./panelWrapper.js');
-var PanelSpecTypes = require('../../utils/panelSpecTypes.js');
-var Analytics = require('../../internal_modules/analytics/dispatcher.js');
-var Storage = require('../../objects/storage.js');
-var UserCustomData = require('../../models/userCustomData.js');
+import Ctx from '../../common/context.js';
+import i18n from '../../utils/i18n.js';
+import panelSpec from '../../models/panelSpec.js';
+import AssemblPanel from '../assemblPanel.js';
+import PanelWrapper from './panelWrapper.js';
+import PanelSpecTypes from '../../utils/panelSpecTypes.js';
+import Analytics from '../../internal_modules/analytics/dispatcher.js';
+import Storage from '../../objects/storage.js';
+import UserCustomData from '../../models/userCustomData.js';
 
 
 /** Represents the entire content of a single panel group
@@ -368,4 +368,4 @@ var groupContent = Marionette.View.extend({
     }
   }
 });
-module.exports = groupContent;
+export default groupContent;

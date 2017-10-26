@@ -3,17 +3,17 @@
  * @module app.models.message
  */
 
-var _ = require('underscore');
+import _ from 'underscore';
 
-var $ = require('jquery');
-var Promise = require('bluebird');
-var Assembl = require('../app.js');
-var Ctx = require('../common/context.js');
-var Base = require('./base.js');
-var LangString = require('./langstring.js');
-var Types = require('../utils/types.js');
-var Permissions = require('../utils/permissions.js');
-var Attachment = require('./attachments.js');
+import $ from 'jquery';
+import Promise from 'bluebird';
+import Assembl from '../app.js';
+import Ctx from '../common/context.js';
+import Base from './base.js';
+import LangString from './langstring.js';
+import Types from '../utils/types.js';
+import Permissions from '../utils/permissions.js';
+import Attachment from './attachments.js';
 
 
 var PublicationStates = {
@@ -453,7 +453,7 @@ var MessageCollection = Base.Collection.extend({
 
 });
 
-module.exports = {
+export default {
   Model: MessageModel,
   Collection: MessageCollection,
   PublicationStates: PublicationStates,

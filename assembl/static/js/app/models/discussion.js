@@ -2,13 +2,13 @@
  * Represents a discussion
  * @module app.models.discussion
  */
-var Base = require('./base.js');
+import Base from './base.js';
 
-var Jed = require('jed');
-var Ctx = require('../common/context.js');
-var Permissions = require('../utils/permissions.js');
-var i18n = require('../utils/i18n.js');
-var Roles = require('../utils/roles.js');
+import Jed from 'jed';
+import Ctx from '../common/context.js';
+import Permissions from '../utils/permissions.js';
+import i18n from '../utils/i18n.js';
+import Roles from '../utils/roles.js';
 /**
  * Discussion model
  * Frontend model for :py:class:`assembl.models.discussion.Discussion`
@@ -154,7 +154,7 @@ var discussionCollection = Base.Collection.extend({
   }
 });
 
-module.exports = {
+export default {
   Model: discussionModel,
   Collection: discussionCollection
 };

@@ -3,12 +3,12 @@
  * @module app.views.externalVisualization
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var i18n = require('../utils/i18n.js');
-var Ctx = require('../common/context.js');
-var PanelSpecTypes = require('../utils/panelSpecTypes.js');
-var AssemblPanel = require('./assemblPanel.js');
+import i18n from '../utils/i18n.js';
+import Ctx from '../common/context.js';
+import PanelSpecTypes from '../utils/panelSpecTypes.js';
+import AssemblPanel from './assemblPanel.js';
 
 var externalVisualizationPanel = Marionette.View.extend({
   constructor: function externalVisualizationPanel() {
@@ -52,7 +52,7 @@ var dashboardVisualizationPanel = externalVisualizationPanel.extend({
   }
 });
 
-module.exports = {
+export default {
     externalVisualizationPanel: externalVisualizationPanel,
     dashboardVisualizationPanel: dashboardVisualizationPanel
 };

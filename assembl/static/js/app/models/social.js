@@ -3,13 +3,12 @@
  * @module app.models.social
  */
 
-var $ = require('jquery');
-
-var Base = require('./base.js');
-var Ctx = require('../common/context.js');
-var i18n = require('../utils/i18n.js');
-var Agents = require('./agents.js');
-var Moment = require('moment');
+import $ from 'jquery';
+import Base from './base.js';
+import Ctx from '../common/context.js';
+import i18n from '../utils/i18n.js';
+import Agents from './agents.js';
+import Moment from 'moment';
 
 var tokenTimeManager = function() {
   this.minTime = new Moment('0001-01-01T00:00:00Z').utc() //datetime.min in python
@@ -147,7 +146,7 @@ var FacebookAccessTokens = Base.Collection.extend({
   }
 });
 
-module.exports = {
+export default {
   Facebook: {
     Token: {
       Model: FacebookAccessToken,

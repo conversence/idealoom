@@ -3,10 +3,10 @@
  * @module app.objects.storage
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var groupSpec = require('../models/groupSpec.js');
-var Ctx = require('../common/context.js');
+import groupSpec from '../models/groupSpec.js';
+import Ctx from '../common/context.js';
 
 var storage = Marionette.Object.extend({
 
@@ -71,4 +71,4 @@ var storage = Marionette.Object.extend({
 
 })
 
-module.exports = new storage();
+export default new storage();

@@ -3,22 +3,22 @@
  * @module app.views.ideaClassificationOnMessage
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var $ = require('jquery');
-var _ = require('underscore');
-var Assembl = require('../app.js');
-var Ctx = require('../common/context.js');
-var CollectionManager = require('../common/collectionManager.js');
-var Types = require('../utils/types.js');
-var BreadCrumbView = require('./breadcrumb.js');
-var IdeaModel = require('../models/idea.js');
-var i18n = require('../utils/i18n.js');
-var openIdeaInModal = require('./modals/ideaInModal.js');
-var Backbone=require('backbone');
-var BackboneModal = require('backbone.modal');
-var LoaderView = require('./loaderView.js');
-var Analytics = require('../internal_modules/analytics/dispatcher.js');
+import $ from 'jquery';
+import _ from 'underscore';
+import Assembl from '../app.js';
+import Ctx from '../common/context.js';
+import CollectionManager from '../common/collectionManager.js';
+import Types from '../utils/types.js';
+import BreadCrumbView from './breadcrumb.js';
+import IdeaModel from '../models/idea.js';
+import i18n from '../utils/i18n.js';
+import openIdeaInModal from './modals/ideaInModal.js';
+import Backbone from 'backbone';
+import BackboneModal from 'backbone.modal';
+import LoaderView from './loaderView.js';
+import Analytics from '../internal_modules/analytics/dispatcher.js';
 
 // // root class
 // var IdeaShowingMessageModel = Backbone.Model.extend({
@@ -410,4 +410,4 @@ var IdeasShowingMessageModal = Backbone.Modal.extend({
   }
 });
 
-module.exports = IdeasShowingMessageModal;
+export default IdeasShowingMessageModal;

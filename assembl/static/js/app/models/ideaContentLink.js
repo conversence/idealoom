@@ -2,16 +2,16 @@
  * The link between an idea and a message.
  * @module app.models.ideaContentLink
  */
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var Backbone = require('backbone');
-var _ = require('underscore');
-var $ = require('jquery');
-var Promise = require('bluebird');
-var Moment = require('moment');
-var Types = require('../utils/types.js');
-var Base = require('./base.js');
-var Ctx = require('../common/context.js');
+import Backbone from 'backbone';
+import _ from 'underscore';
+import $ from 'jquery';
+import Promise from 'bluebird';
+import Moment from 'moment';
+import Types from '../utils/types.js';
+import Base from './base.js';
+import Ctx from '../common/context.js';
 /**
  * @function app.models.ideaContentLink.IdeaContentLinkTypeRank
  */
@@ -275,7 +275,7 @@ var Collection = Base.Collection.extend({
     },
 });
 
-module.exports = {
+export default {
     Model: IdeaContentLinkModel,
     Collection: Collection
 }    

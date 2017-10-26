@@ -3,9 +3,9 @@
  * @module app.views.authorization
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var Ctx = require('../common/context.js');
+import Ctx from '../common/context.js';
 
 var authorization = Marionette.View.extend({
   constructor: function authorization() {
@@ -33,4 +33,4 @@ var authorization = Marionette.View.extend({
   }
 });
 
-module.exports = authorization;
+export default authorization;

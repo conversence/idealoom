@@ -57,4 +57,4 @@ var PanelSpecTypes = {
     
 }
 
-module.exports = PanelSpecTypes;
+export default PanelSpecTypes;

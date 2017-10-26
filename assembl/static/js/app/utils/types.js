@@ -1,4 +1,4 @@
-var _ = require('underscore');
+import _ from 'underscore';
 
 /**
  * 
@@ -105,5 +105,5 @@ Utilities for javascript to access python inheritance relationships
 };
 Types.initInheritance();
 
-module.exports = Types;
+export default Types;
 

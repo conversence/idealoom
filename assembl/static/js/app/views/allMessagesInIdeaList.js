@@ -3,11 +3,10 @@
  * @module app.views.allMessagesInIdeaList
  */
 
-var $ = require('jquery');
-
-var ideaInIdeaList = require('./ideaInIdeaList.js');
-var Ctx = require('../common/context.js');
-var PanelSpecTypes = require('../utils/panelSpecTypes.js');
+import $ from 'jquery';
+import ideaInIdeaList from './ideaInIdeaList.js';
+import Ctx from '../common/context.js';
+import PanelSpecTypes from '../utils/panelSpecTypes.js';
 
 var AllMessagesInIdeaListView = ideaInIdeaList.IdeaView.extend({
   constructor: function AllMessagesInIdeaListView() {
@@ -70,4 +69,4 @@ var AllMessagesInIdeaListView = ideaInIdeaList.IdeaView.extend({
   }
 });
 
-module.exports = AllMessagesInIdeaListView;
+export default AllMessagesInIdeaListView;

@@ -3,12 +3,11 @@
  * @module app.views.orphanMessagesInIdeaList
  */
 
-var $ = require('jquery');
-
-var Assembl = require('../app.js');
-var Ctx = require('../common/context.js');
-var PanelSpecTypes = require('../utils/panelSpecTypes.js');
-var ideaInIdeaList = require('./ideaInIdeaList.js');
+import $ from 'jquery';
+import Assembl from '../app.js';
+import Ctx from '../common/context.js';
+import PanelSpecTypes from '../utils/panelSpecTypes.js';
+import ideaInIdeaList from './ideaInIdeaList.js';
 
 var OrphanMessagesInIdeaListView = ideaInIdeaList.IdeaView.extend({
   constructor: function OrphanMessagesInIdeaListView() {
@@ -68,4 +67,4 @@ var OrphanMessagesInIdeaListView = ideaInIdeaList.IdeaView.extend({
   }
 });
 
-module.exports = OrphanMessagesInIdeaListView;
+export default OrphanMessagesInIdeaListView;

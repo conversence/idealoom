@@ -3,25 +3,25 @@
  * @module app.views.ideaInSynthesis
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var _ = require('underscore');
-var Assembl = require('../app.js');
-var Ctx = require('../common/context.js');
-var i18n = require('../utils/i18n.js');
-var Permissions = require('../utils/permissions.js');
-var CKEditorLSField = require('./reusableDataFields/ckeditorLSField.js');
-var MessageSendView = require('./messageSend.js');
-var MessagesInProgress = require('../objects/messagesInProgress.js');
-var CollectionManager = require('../common/collectionManager.js');
-var panelSpec = require('../models/panelSpec');
-var PanelSpecTypes = require('../utils/panelSpecTypes');
-var viewsFactory = require('../objects/viewsFactory');
-var groupSpec = require('../models/groupSpec');
-var Promise = require('bluebird');
-var LoaderView = require('./loaderView.js');
-var Analytics = require('../internal_modules/analytics/dispatcher.js');
-var openIdeaInModal = require('./modals/ideaInModal.js');
+import _ from 'underscore';
+import Assembl from '../app.js';
+import Ctx from '../common/context.js';
+import i18n from '../utils/i18n.js';
+import Permissions from '../utils/permissions.js';
+import CKEditorLSField from './reusableDataFields/ckeditorLSField.js';
+import MessageSendView from './messageSend.js';
+import MessagesInProgress from '../objects/messagesInProgress.js';
+import CollectionManager from '../common/collectionManager.js';
+import panelSpec from '../models/panelSpec';
+import PanelSpecTypes from '../utils/panelSpecTypes';
+import viewsFactory from '../objects/viewsFactory';
+import groupSpec from '../models/groupSpec';
+import Promise from 'bluebird';
+import LoaderView from './loaderView.js';
+import Analytics from '../internal_modules/analytics/dispatcher.js';
+import openIdeaInModal from './modals/ideaInModal.js';
 
 var IdeaInSynthesisView = LoaderView.extend({
   constructor: function IdeaInSynthesisView() {
@@ -330,4 +330,4 @@ var IdeaInSynthesisView = LoaderView.extend({
 
 });
 
-module.exports = IdeaInSynthesisView;
+export default IdeaInSynthesisView;

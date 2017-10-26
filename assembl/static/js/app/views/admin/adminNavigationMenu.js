@@ -3,12 +3,12 @@
  * @module app.views.admin.adminNavigationMenu
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var $ = require('jquery');
-var i18n = require('../../utils/i18n.js');
-var Permissions = require('../../utils/permissions.js');
-var Ctx = require('../../common/context.js');
+import $ from 'jquery';
+import i18n from '../../utils/i18n.js';
+import Permissions from '../../utils/permissions.js';
+import Ctx from '../../common/context.js';
 
 var adminNavigationMenu = Marionette.View.extend({
   constructor: function adminNavigationMenu() {
@@ -47,7 +47,7 @@ var globalAdminNavigationMenu = adminNavigationMenu.extend({
   template:  '#tmpl-globalAdminNavigationMenu',
 });
 
-module.exports = {
+export default {
   discussionAdminNavigationMenu: discussionAdminNavigationMenu,
   globalAdminNavigationMenu: globalAdminNavigationMenu,
 };

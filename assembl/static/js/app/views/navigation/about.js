@@ -3,11 +3,11 @@
  * @module app.views.navigation.about
  */
 
-var Assembl = require('../../app.js');
+import Assembl from '../../app.js';
 
-var AssemblPanel = require('../assemblPanel.js');
-var PanelSpecTypes = require('../../utils/panelSpecTypes.js');
-var Analytics = require('../../internal_modules/analytics/dispatcher.js');
+import AssemblPanel from '../assemblPanel.js';
+import PanelSpecTypes from '../../utils/panelSpecTypes.js';
+import Analytics from '../../internal_modules/analytics/dispatcher.js';
 
 var AboutNavPanel = AssemblPanel.extend({
   constructor: function AboutNavPanel() {
@@ -45,4 +45,4 @@ var AboutNavPanel = AssemblPanel.extend({
   }
 });
 
-module.exports = AboutNavPanel;
+export default AboutNavPanel;

@@ -2,12 +2,11 @@
  * Represents a file or document (a remote url or a blob)
  * @module app.models.documents
  */
-var $ = require('jquery');
-
-var Base = require('./base.js');
-var i18n = require('../utils/i18n.js');
-var Ctx = require('../common/context.js');
-var Types = require('../utils/types.js');
+import $ from 'jquery';
+import Base from './base.js';
+import i18n from '../utils/i18n.js';
+import Ctx from '../common/context.js';
+import Types from '../utils/types.js';
 /**
  * Document model
  * Frontend model for :py:class:`assembl.models.attachment.Document`
@@ -118,7 +117,7 @@ var DocumentCollection = Base.Collection.extend({
   model: DocumentModel
 });
 
-module.exports = {
+export default {
   DocumentModel: DocumentModel,
   FileModel: FileModel,
   Collection: DocumentCollection

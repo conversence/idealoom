@@ -3,13 +3,13 @@
  * @module app.index
  */
 
-var App = require('./app.js');
+import App from './app.js';
 
-var Router = require('./router.js');
-var Ctx = require('./common/context.js');
-var Socket = require('./utils/socket.js');
-var CollectionManager = require('./common/collectionManager.js');
-var Raven = require('raven-js');
+import Router from './router.js';
+import Ctx from './common/context.js';
+import Socket from './utils/socket.js';
+import CollectionManager from './common/collectionManager.js';
+import Raven from 'raven-js';
 
 /**
  * Init current language

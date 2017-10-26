@@ -3,18 +3,17 @@
  * @module app.views.infobar
  */
 
-var Backbone=require('backbone');
+import Backbone from 'backbone';
 
-var BackboneModal = require('backbone.modal');
-var Marionette = require('backbone.marionette');
-var Assembl = require('../app.js');
-var CookiesManager = require("../utils/cookiesManager.js");
-var Widget = require('../models/widget.js');
-var Ctx = require('../common/context.js');
-var LoaderView = require('./loaderView.js');
-var CollectionManager = require('../common/collectionManager.js');
-var $ = require('jquery');
-
+import BackboneModal from 'backbone.modal';
+import Marionette from 'backbone.marionette';
+import Assembl from '../app.js';
+import CookiesManager from '../utils/cookiesManager.js';
+import Widget from '../models/widget.js';
+import Ctx from '../common/context.js';
+import LoaderView from './loaderView.js';
+import CollectionManager from '../common/collectionManager.js';
+import $ from 'jquery';
 var CookieInfobarItemView = Marionette.View.extend({
   constructor: function CookiebarItem() {
     Marionette.View.apply(this, arguments);
@@ -174,6 +173,6 @@ var InfobarsView = Marionette.CollectionView.extend({
   }
 });
 
-module.exports = {
+export default {
   InfobarsView: InfobarsView
 };

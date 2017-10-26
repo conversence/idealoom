@@ -3,10 +3,10 @@
  * @module app.models.tour
  */
 
-var Base = require('./base.js');
+import Base from './base.js';
 
-var $ = require('jquery');
-var Ctx = require('../common/context.js');
+import $ from 'jquery';
+import Ctx from '../common/context.js';
 
 /**
  * Tour model
@@ -46,6 +46,6 @@ var tourModel = Base.Model.extend({
     }
 });
 
-module.exports = {
+export default {
     Model: tourModel
 };

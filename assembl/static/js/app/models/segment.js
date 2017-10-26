@@ -3,16 +3,18 @@
  * @module app.models.segment
  */
 
-var _ = require('underscore');
+import _ from 'underscore';
 
-var Base = require('./base.js');
-var Promise = require('bluebird');
-var Ctx = require('../common/context.js');
-var Agents = require('./agents.js');
-var Annotator = require('annotator/annotator-full.js').Annotator;
-var Message = require('./message.js');
-var Types = require('../utils/types.js');
-var i18n = require('../utils/i18n.js');
+import Base from './base.js';
+import Promise from 'bluebird';
+import Ctx from '../common/context.js';
+import Agents from './agents.js';
+import AnnotatorF from 'annotator/annotator-full.js';
+import Message from './message.js';
+import Types from '../utils/types.js';
+import i18n from '../utils/i18n.js';
+
+const Annotator = AnnotatorF.Annotator;
 
 /**
  * Segment model
@@ -302,7 +304,7 @@ var SegmentCollection = Base.Collection.extend({
 
 });
 
-module.exports = {
+export default {
   Model: SegmentModel,
   Collection: SegmentCollection
 };

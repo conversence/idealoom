@@ -3,13 +3,13 @@
  * @module app.router
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var routeManager = require('./routeManager.js');
-var Ctx = require('./common/context.js');
-var message = require('./models/message.js');
-var idea = require('./models/idea.js');
-var agent = require('./models/agents.js');
+import routeManager from './routeManager.js';
+import Ctx from './common/context.js';
+import message from './models/message.js';
+import idea from './models/idea.js';
+import agent from './models/agents.js';
 
 /**
  * The Router will forward existing URLs to various handlers according to those routes
@@ -58,4 +58,4 @@ message.Model.prototype.routerBaseUrl = "posts/";
 idea.Model.prototype.routerBaseUrl = "idea/";
 agent.Model.prototype.routerBaseUrl = "profile/";
 
-module.exports = Router;
+export default Router;

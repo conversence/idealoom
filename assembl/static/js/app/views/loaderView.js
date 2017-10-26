@@ -1,4 +1,4 @@
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 /** LoaderView: a Marionette View that starts as a loader.
  */
 var LoaderView = Marionette.View.extend({
@@ -29,4 +29,4 @@ var LoaderView = Marionette.View.extend({
   },
 });
 
-module.exports = LoaderView;
+export default LoaderView;

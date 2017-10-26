@@ -3,22 +3,22 @@
  * @module app.views.announcements
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var _ = require('underscore');
-var $ = require('jquery');
-var Promise = require('bluebird');
-var i18n = require('../utils/i18n.js');
-var Assembl = require('../app.js');
-var Ctx = require('../common/context.js');
-var CollectionManager = require('../common/collectionManager.js');
-var Types = require('../utils/types.js');
-var Announcement = require('../models/announcement.js');
-var AgentViews = require('./agent.js');
-var LoaderView = require('./loaderView.js');
-var EditableLSField = require('./reusableDataFields/editableLSField.js');
-var CKEditorLSField = require('./reusableDataFields/ckeditorLSField.js');
-var TrueFalseField = require('./reusableDataFields/trueFalseField.js');
+import _ from 'underscore';
+import $ from 'jquery';
+import Promise from 'bluebird';
+import i18n from '../utils/i18n.js';
+import Assembl from '../app.js';
+import Ctx from '../common/context.js';
+import CollectionManager from '../common/collectionManager.js';
+import Types from '../utils/types.js';
+import Announcement from '../models/announcement.js';
+import AgentViews from './agent.js';
+import LoaderView from './loaderView.js';
+import EditableLSField from './reusableDataFields/editableLSField.js';
+import CKEditorLSField from './reusableDataFields/ckeditorLSField.js';
+import TrueFalseField from './reusableDataFields/trueFalseField.js';
 
 /** 
  */
@@ -249,7 +249,7 @@ var AnnouncementEditableCollectionView = Marionette.CollectionView.extend({
   }
 });
 
-module.exports = {
+export default {
     AnnouncementEditableView: AnnouncementEditableView,
     AnnouncementMessageView: AnnouncementMessageView,
     AnnouncementEditableCollectionView: AnnouncementEditableCollectionView

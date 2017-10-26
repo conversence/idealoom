@@ -3,20 +3,20 @@
  * @module app.views.facebookViews
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var Backbone = require('backbone');
-var _ = require('underscore');
-var Ctx = require('../common/context.js');
-var i18n = require('../utils/i18n.js');
-var $ = require('jquery');
-var Types = require('../utils/types.js');
-var Promise = require('bluebird');
-var Moment = require('moment');
-var CollectionManager = require('../common/collectionManager.js');
-var Social = require('../models/social.js');
-var LoaderView = require('./loaderView.js');
-var Source = require('../models/sources.js');
+import Backbone from 'backbone';
+import _ from 'underscore';
+import Ctx from '../common/context.js';
+import i18n from '../utils/i18n.js';
+import $ from 'jquery';
+import Types from '../utils/types.js';
+import Promise from 'bluebird';
+import Moment from 'moment';
+import CollectionManager from '../common/collectionManager.js';
+import Social from '../models/social.js';
+import LoaderView from './loaderView.js';
+import Source from '../models/sources.js';
 
 var _allFacebookPermissions = undefined;
 var getAllFacebookPermissions = function() {
@@ -1275,6 +1275,6 @@ var basefbView = Marionette.View.extend({
 
 });
 
-module.exports = {
+export default {
   init: basefbView
 };

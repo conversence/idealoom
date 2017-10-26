@@ -6,17 +6,17 @@
  * Load Ctx and set the env to test first. Revert back after all tests.
  */
 
-var Ctx = require('../common/context.js');
+import Ctx from '../common/context.js';
 Ctx.setApplicationUnderTest();
 
-var _ = require('underscore');
-var LangString = require("../models/langstring.js");
-var UserLanguagePreference = require('../models/languagePreference.js');
-var userLanguagePreferencesJson = require('./fixtures/languagePreferences.json');
-var langstringEntriesJson = require('./fixtures/langstringEntry.json');
-var localsJson = require('./fixtures/languageLocales.json');
-var langstringJson = require('./fixtures/langstring.json');
-var assert = require('chai').assert;
+import _ from 'underscore';
+import LangString from '../models/langstring.js';
+import UserLanguagePreference from '../models/languagePreference.js';
+import userLanguagePreferencesJson from './fixtures/languagePreferences.json';
+import langstringEntriesJson from './fixtures/langstringEntry.json';
+import localsJson from './fixtures/languageLocales.json';
+import langstringJson from './fixtures/langstring.json';
+import assert from 'chai';
 
 /**
  * These tests depends on the server to supply several peices of logic to the

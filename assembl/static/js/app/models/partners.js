@@ -3,11 +3,10 @@
  * @module app.models.partners
  */
 
-var $ = require('jquery');
-
-var Base = require('./base.js');
-var i18n = require('../utils/i18n.js');
-var Ctx = require('../common/context.js');
+import $ from 'jquery';
+import Base from './base.js';
+import i18n from '../utils/i18n.js';
+import Ctx from '../common/context.js';
 
 
 /**
@@ -69,7 +68,7 @@ var PartnerOrganizationCollection = Base.Collection.extend({
   model: PartnerOrganizationModel
 });
 
-module.exports = {
+export default {
   Model: PartnerOrganizationModel,
   Collection: PartnerOrganizationCollection
 };

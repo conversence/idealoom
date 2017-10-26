@@ -2,18 +2,16 @@
  * 
  * @module app.views.modals.ideaInModal
  */
+import i18n from '../../utils/i18n.js';
+import panelSpec from '../../models/panelSpec.js';
+import PanelSpecTypes from '../../utils/panelSpecTypes';
+import groupSpec from '../../models/groupSpec.js';
+import ModalGroup from '../groups/modalGroup.js';
+import viewsFactory from '../../objects/viewsFactory';
+import Assembl from '../../app.js';
+import Ctx from '../../common/context.js';
 
 function navigateToIdea(panel, idea, forcePopup){
-  var i18n = require('../../utils/i18n.js');
-  var panelSpec = require('../../models/panelSpec.js');
-  var PanelSpecTypes = require('../../utils/panelSpecTypes');
-  var groupSpec = require('../../models/groupSpec.js');
-  var ModalGroup = require('../groups/modalGroup.js');
-  var viewsFactory = require('../../objects/viewsFactory');
-  var Assembl = require('../../app.js');
-  var Ctx = require('../../common/context.js');
-
-
   if (panel.isPrimaryNavigationPanel()) {
     panel.getContainingGroup().setCurrentIdea(idea);
   }
@@ -53,4 +51,4 @@ function navigateToIdea(panel, idea, forcePopup){
   }
 }
 
-module.exports = navigateToIdea;
+export default navigateToIdea;

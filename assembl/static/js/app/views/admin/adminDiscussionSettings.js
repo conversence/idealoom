@@ -3,13 +3,13 @@
  * @module app.views.admin.adminDiscussionSettings
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var i18n = require('../../utils/i18n.js');
-var CollectionManager = require('../../common/collectionManager.js');
-var Sources = require('../../models/sources.js');
-var SourceView = require('./generalSource.js');
-var AdminNavigationMenu = require('./adminNavigationMenu.js');
+import i18n from '../../utils/i18n.js';
+import CollectionManager from '../../common/collectionManager.js';
+import Sources from '../../models/sources.js';
+import SourceView from './generalSource.js';
+import AdminNavigationMenu from './adminNavigationMenu.js';
 
 var AdminDiscussionSettings = Marionette.View.extend({
   constructor: function AdminDiscussionSettings() {
@@ -61,4 +61,4 @@ var AdminDiscussionSettings = Marionette.View.extend({
   }
 });
 
-module.exports = AdminDiscussionSettings;
+export default AdminDiscussionSettings;

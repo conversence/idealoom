@@ -3,21 +3,21 @@
  * @module app.views.messageFamily
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var _ = require('underscore');
-var i18n = require('../utils/i18n.js');
-var Assembl = require('../app.js');
-var Ctx = require('../common/context.js');
-var Types = require('../utils/types.js');
-var MessageView = require('./message.js');
-var MessageModel = require('../models/message.js');
-var SynthesisMessageView = require('./synthesisMessage.js');
-var MessageDeletedByUserView = require('./messageDeletedByUser.js');
-var MessageDeletedByAdminView = require('./messageDeletedByAdmin.js');
-var Analytics = require('../internal_modules/analytics/dispatcher.js');
-var LoaderView = require('./loaderView.js');
-var availableFilters = require('./postFilters.js');
+import _ from 'underscore';
+import i18n from '../utils/i18n.js';
+import Assembl from '../app.js';
+import Ctx from '../common/context.js';
+import Types from '../utils/types.js';
+import MessageView from './message.js';
+import MessageModel from '../models/message.js';
+import SynthesisMessageView from './synthesisMessage.js';
+import MessageDeletedByUserView from './messageDeletedByUser.js';
+import MessageDeletedByAdminView from './messageDeletedByAdmin.js';
+import Analytics from '../internal_modules/analytics/dispatcher.js';
+import LoaderView from './loaderView.js';
+import availableFilters from './postFilters.js';
 
 /**
  * @class app.views.messageFamily.MessageFamilyView
@@ -242,7 +242,7 @@ var MessageFamilyView = LoaderView.extend({
     analytics.trackEvent(analytics.events.THREAD_VIEW_COMPLETE_CONVERSATION);
 
     var filters =  [{filterDef: availableFilters.POST_IS_DESCENDENT_OR_ANCESTOR_OF_POST, value: this.model.id}];
-    var ModalGroup = require('./groups/modalGroup.js');
+    var ModalGroup = require('./groups/modalGroup.js').default;
     var subject = this.model.get('subject');
 
     var modal_title = i18n.sprintf(i18n.gettext("Zooming on the conversation around \"%s\""),
@@ -276,4 +276,4 @@ var MessageFamilyView = LoaderView.extend({
   }
 });
 
-module.exports = MessageFamilyView;
+export default MessageFamilyView;

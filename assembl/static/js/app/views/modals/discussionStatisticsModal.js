@@ -2,14 +2,14 @@
  *
  * @module app.views.discussionStatisticsModal
  */
-var Backbone = require('backbone');
+import Backbone from 'backbone';
 
-var Marionette = require('backbone.marionette');
-var i18n = require('../../utils/i18n.js');
-var $ = require('jquery');
-var _ = require('underscore');
-var Permissions = require('../../utils/permissions.js');
-var Ctx = require('../../common/context.js');
+import Marionette from 'backbone.marionette';
+import i18n from '../../utils/i18n.js';
+import $ from 'jquery';
+import _ from 'underscore';
+import Permissions from '../../utils/permissions.js';
+import Ctx from '../../common/context.js';
 
 var StatsModal = Backbone.Modal.extend({
   constructor: function StatsModal() {
@@ -141,4 +141,4 @@ var StatsModal = Backbone.Modal.extend({
   },
 });
 
-module.exports = StatsModal;
+export default StatsModal;

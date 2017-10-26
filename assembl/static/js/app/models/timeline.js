@@ -2,12 +2,12 @@
  * Description of the columns of classified messages under an idea
  * @module app.models.timeline
  */
-var _ = require('underscore');
+import _ from 'underscore';
 
-var Base = require('./base.js');
-var LangString = require('./langstring.js');
-var Moment = require('moment');
-var Ctx = require('../common/context.js');
+import Base from './base.js';
+import LangString from './langstring.js';
+import Moment from 'moment';
+import Ctx from '../common/context.js';
 
 /**
  * A category of classified messages under an idea
@@ -119,7 +119,7 @@ var TimelineEventCollection = Base.Collection.extend({
 
 });
 
-module.exports = {
+export default {
   Model: TimelineEventModel,
   Collection: TimelineEventCollection,
 };

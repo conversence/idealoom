@@ -26,7 +26,7 @@ var Permissions = {
   EXPORT_EXTERNAL_SOURCE: "export_post"
 };
 
-module.exports = Permissions;
+export default Permissions;
 /*
  * Comment distinguer le cas où on n'a pas la permission:
  * ex: app.currentUser.can(Permissions.ADD_POST)

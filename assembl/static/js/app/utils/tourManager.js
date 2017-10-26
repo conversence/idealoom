@@ -3,16 +3,16 @@
  * @module app.utils.tourManager
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var i18n =  require('./i18n.js');
-var TourModel = require('../models/tour.js');
-var Ctx = require('../common/context.js');
-var _ = require('underscore');
-var $ = require('jquery');
-var AssemblTours = require('./tours/assemblTours.js');
-var hopscotch = require('hopscotch');
-var Raven = require('raven-js');
+import i18n from './i18n.js';
+import TourModel from '../models/tour.js';
+import Ctx from '../common/context.js';
+import _ from 'underscore';
+import $ from 'jquery';
+import AssemblTours from './tours/assemblTours.js';
+import hopscotch from 'hopscotch';
+import Raven from 'raven-js';
 
 
 var TourManager = Marionette.Object.extend({
@@ -253,4 +253,4 @@ var TourManager = Marionette.Object.extend({
   }
 });
 
-module.exports = TourManager;
+export default TourManager;

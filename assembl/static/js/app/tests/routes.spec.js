@@ -3,9 +3,8 @@
  * @module app.tests.routes.spec
  */
 
-var Router = require('../router.js');
-
-var expect = require('chai').expect;
+import Router from '../router.js';
+import expect from 'chai';
 
 describe('Routes Specs', function() {
 

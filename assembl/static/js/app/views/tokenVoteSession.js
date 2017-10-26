@@ -3,25 +3,24 @@
  * @module app.views.tokenVoteSession
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var $ = require('jquery');
-var _ = require('underscore');
-var BackboneSubset = require("Backbone.Subset");
-var BackboneModal = require('backbone.modal');
-var Promise = require('bluebird');
-var Assembl = require('../app.js');
-var classlist = require('classlist-polyfill');
-var Ctx = require('../common/context.js');
-var CollectionManager = require('../common/collectionManager.js');
-var Types = require('../utils/types.js');
-var BreadCrumbView = require('./breadcrumb.js');
-var CKEditorLSField = require('./reusableDataFields/ckeditorLSField.js');
-var IdeaModel = require('../models/idea.js');
-var i18n = require('../utils/i18n.js');
-var Ctx = require('../common/context.js');
-var Moment = require('moment');
-var d3 = require('d3');
+import $ from 'jquery';
+import _ from 'underscore';
+import BackboneSubset from 'Backbone.Subset';
+import BackboneModal from 'backbone.modal';
+import Promise from 'bluebird';
+import Assembl from '../app.js';
+import classlist from 'classlist-polyfill';
+import Ctx from '../common/context.js';
+import CollectionManager from '../common/collectionManager.js';
+import Types from '../utils/types.js';
+import BreadCrumbView from './breadcrumb.js';
+import CKEditorLSField from './reusableDataFields/ckeditorLSField.js';
+import IdeaModel from '../models/idea.js';
+import i18n from '../utils/i18n.js';
+import Moment from 'moment';
+import { scaleLinear, format, select } from 'd3';
 
 
 // from http://stackoverflow.com/questions/3959211/fast-factorial-function-in-javascript
@@ -1090,12 +1089,12 @@ var TokenVoteResultView = Marionette.View.extend({
         num, category, total, category);
     };
 
-    var scale = d3.scaleLinear()
+    var scale = scaleLinear()
                         .domain([0, this.maxPercent])
                         .range([0, this.maxPixels]);
 
-    var percent = d3.format('.0%');
-    var results = d3.select(this.el)
+    var percent = format('.0%');
+    var results = select(this.el)
        .selectAll("div.token-vote-result-category-column")
         .data(this.results);
     results.append('div')
@@ -1328,9 +1327,9 @@ var TokenResultView = Marionette.View.extend({
     //{index: category}
     this.categoryIndex = [];
 
-    var CollectionManager = require('../common/collectionManager.js');
+    var CollectionManager = require('../common/collectionManager.js').default;
     var cm = new CollectionManager();
-    var Widget = require('../models/widget.js');
+    var Widget = require('../models/widget.js').default;
     var that = this;
 
 
@@ -1503,8 +1502,8 @@ var TokenVoteSessionModal = Backbone.Modal.extend({
     this.widgetModel = this.model;
     console.log("that.widgetModel: ", that.widgetModel);
 
-    var Widget = require('../models/widget.js'); // FIXME: why does it work here but not at the top of the file?
-    var CollectionManager = require('../common/collectionManager.js'); // FIXME: Why does it not work when we write it only at the top of the file?
+    var Widget = require('../models/widget.js').default; // FIXME: why does it work here but not at the top of the file?
+    var CollectionManager = require('../common/collectionManager.js').default; // FIXME: Why does it not work when we write it only at the top of the file?
     var collectionManager = new CollectionManager();
 
     var voteSpecifications = that.widgetModel.get("vote_specifications");
@@ -1779,7 +1778,7 @@ var TokenVoteSessionSubmittedModal = Backbone.Modal.extend({
 
 });
 
-module.exports = {
+export default {
   TokenVoteSessionModal: TokenVoteSessionModal,
   TokenVoteSessionResultModal: TokenVoteSessionResultModal
 };

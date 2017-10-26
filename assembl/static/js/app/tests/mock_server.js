@@ -1,10 +1,10 @@
 /** @module app.tests.mock_server */
 
-var Sinon = require('sinon');
+import Sinon from 'sinon';
 
-var Backbone = require('backbone');
-var $ = require('jquery');
-var _ = require('underscore');
+import Backbone from 'backbone';
+import $ from 'jquery';
+import _ from 'underscore';
 
 /**
  * transform an ajax call into the equivalent recorded API call fixture from
@@ -88,7 +88,7 @@ function tearDownMockAjax() {
   }
 }
 
-module.exports = {
+export default {
   setupMockAjax: setupMockAjax,
   tearDownMockAjax: tearDownMockAjax,
 };

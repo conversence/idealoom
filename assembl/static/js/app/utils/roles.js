@@ -15,5 +15,5 @@ var Roles = {
   SYSADMIN: 'r:sysadmin'*/
 };
 
-module.exports = Roles;
+export default Roles;
 

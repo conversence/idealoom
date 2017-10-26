@@ -3,14 +3,14 @@
  * @module app.views.user.profile
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var $ = require('jquery');
-var Agents = require('../../models/agents.js');
-var i18n = require('../../utils/i18n.js');
-var UserNavigationMenu = require('./userNavigationMenu.js');
-var Ctx = require('../../common/context.js');
-var Growl = require('../../utils/growl.js');
+import $ from 'jquery';
+import Agents from '../../models/agents.js';
+import i18n from '../../utils/i18n.js';
+import UserNavigationMenu from './userNavigationMenu.js';
+import Ctx from '../../common/context.js';
+import Growl from '../../utils/growl.js';
 
 var profile = Marionette.View.extend({
   constructor: function profile() {
@@ -72,4 +72,4 @@ var profile = Marionette.View.extend({
   },
 });
 
-module.exports = profile;
+export default profile;

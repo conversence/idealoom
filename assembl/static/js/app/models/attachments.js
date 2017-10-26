@@ -2,17 +2,16 @@
  * Represents the link between an object (ex: Message, Idea) and a remote (url) or eventually local document attached to it.
  * @module app.models.attachments
  */
-var $ = require('jquery');
-
-var _ = require('underscore');
-var Moment = require("moment");
-var Base = require('./base.js');
-var i18n = require('../utils/i18n.js');
-var Ctx = require('../common/context.js');
-var Promise = require('bluebird');
-var Types = require('../utils/types.js');
-var Document = require('../models/documents.js');
-var Growl = require('../utils/growl.js');
+import $ from 'jquery';
+import _ from 'underscore';
+import Moment from 'moment';
+import Base from './base.js';
+import i18n from '../utils/i18n.js';
+import Ctx from '../common/context.js';
+import Promise from 'bluebird';
+import Types from '../utils/types.js';
+import Document from '../models/documents.js';
+import Growl from '../utils/growl.js';
 
 var attachmentPurposeTypes = {
   /** 
@@ -548,7 +547,7 @@ var ValidationAttachmentCollection = AttachmentCollection.extend({
 
 });
 
-module.exports = {
+export default {
   attachmentPurposeTypes: attachmentPurposeTypes,
   Model: AttachmentModel,
   Collection: AttachmentCollection,

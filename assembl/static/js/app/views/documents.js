@@ -3,16 +3,16 @@
  * @module app.views.documents
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var _ = require('underscore');
-var $ = require('jquery');
-var oembed = require('jquery-oembed-all/jquery.oembed');
-var Assembl = require('../app.js');
-var Promise = require('bluebird');
-var Ctx = require('../common/context.js');
-var i18n = require('../utils/i18n.js');
-var Raven = require('raven-js');
+import _ from 'underscore';
+import $ from 'jquery';
+import oembed from 'jquery-oembed-all/jquery.oembed';
+import Assembl from '../app.js';
+import Promise from 'bluebird';
+import Ctx from '../common/context.js';
+import i18n from '../utils/i18n.js';
+import Raven from 'raven-js';
 
 
 var AbstractDocumentView = Marionette.View.extend({
@@ -385,7 +385,7 @@ var FileEditView = AbstractEditView.extend({
 });
 
 
-module.exports = {
+export default {
   DocumentView: DocumentView,
   DocumentEditView: DocumentEditView,
   FileView: FileView,

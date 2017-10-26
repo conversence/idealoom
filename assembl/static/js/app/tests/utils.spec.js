@@ -3,10 +3,9 @@
  * @module app.tests.utils.spec
  */
 
-var $ = require('jquery');
-
-var PanelSpecTypes = require('../utils/panelSpecTypes.js');
-var expect = require('chai').expect;
+import $ from 'jquery';
+import PanelSpecTypes from '../utils/panelSpecTypes.js';
+import expect from 'chai';
 
 describe('Utils module', function() {
 

@@ -2,12 +2,12 @@
  * 
  * @module app.views.sourceEditView
  */
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var $ = require('jquery');
-var i18n = require('../utils/i18n.js');
-var Promise = require('bluebird');
-var Growl = require('../utils/growl.js');
+import $ from 'jquery';
+import i18n from '../utils/i18n.js';
+import Promise from 'bluebird';
+import Growl from '../utils/growl.js';
 
 
 /**
@@ -15,7 +15,7 @@ var Growl = require('../utils/growl.js');
  * to use for the editing of each source in a source list
  * view.
  */
-module.exports = Marionette.View.extend({
+export default Marionette.View.extend({
   constructor: function exports() {
     Marionette.View.apply(this, arguments);
   },

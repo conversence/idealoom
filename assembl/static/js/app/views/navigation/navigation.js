@@ -3,23 +3,23 @@
  * @module app.views.navigation.navigation
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var Jed = require('jed');
-var $ = require('jquery');
-var _ = require('underscore');
-var Assembl = require('../../app.js');
-var IdeaList = require('../ideaList.js');
-var Base = require('../../models/base.js');
-var AboutNavPanel = require('../navigation/about.js');
-var SynthesisInNavigationPanel = require('../navigation/synthesisInNavigation.js');
-var LinkListView = require('../navigation/linkListView.js');
-var AssemblPanel = require('../assemblPanel.js');
-var Ctx = require('../../common/context.js');
-var Permissions = require('../../utils/permissions.js');
-var PanelSpecTypes = require('../../utils/panelSpecTypes.js');
-var CollectionManager = require('../../common/collectionManager.js');
-var Analytics = require('../../internal_modules/analytics/dispatcher.js');
+import Jed from 'jed';
+import $ from 'jquery';
+import _ from 'underscore';
+import Assembl from '../../app.js';
+import IdeaList from '../ideaList.js';
+import Base from '../../models/base.js';
+import AboutNavPanel from '../navigation/about.js';
+import SynthesisInNavigationPanel from '../navigation/synthesisInNavigation.js';
+import LinkListView from '../navigation/linkListView.js';
+import AssemblPanel from '../assemblPanel.js';
+import Ctx from '../../common/context.js';
+import Permissions from '../../utils/permissions.js';
+import PanelSpecTypes from '../../utils/panelSpecTypes.js';
+import CollectionManager from '../../common/collectionManager.js';
+import Analytics from '../../internal_modules/analytics/dispatcher.js';
 
 var NavigationView = AssemblPanel.extend({
   constructor: function NavigationView() {
@@ -307,4 +307,4 @@ var NavigationView = AssemblPanel.extend({
 
 });
 
-module.exports = NavigationView;
+export default NavigationView;

@@ -3,12 +3,12 @@
  * @module app.models.roles
  */
 
-var Base = require('./base.js');
+import Base from './base.js';
 
-var Ctx = require('../common/context.js');
-var Roles = require('../utils/roles.js');
-var Types = require('../utils/types.js');
-var Analytics = require('../internal_modules/analytics/dispatcher.js');
+import Ctx from '../common/context.js';
+import Roles from '../utils/roles.js';
+import Types from '../utils/types.js';
+import Analytics from '../internal_modules/analytics/dispatcher.js';
 
 /**
  * Role model
@@ -101,7 +101,7 @@ var roleCollection = Base.Collection.extend({
   }
 });
 
-module.exports = {
+export default {
   Model: roleModel,
   Collection: roleCollection
 };

@@ -3,29 +3,29 @@
  * @module app.views.messageSend
  */
 
-var Backbone = require('backbone');
+import Backbone from 'backbone';
 
-var Marionette = require('backbone.marionette');
-var Assembl = require('../app.js');
-var _ = require('underscore');
-var $ = require('jquery');
-var Ctx = require('../common/context.js');
-var CollectionManager = require('../common/collectionManager.js');
-var Permissions = require('../utils/permissions.js');
-var MessagesInProgress = require('../objects/messagesInProgress.js');
-var i18n = require('../utils/i18n.js');
-var PanelSpecTypes = require('../utils/panelSpecTypes.js');
-var autosize = require('jquery-autosize');
-var LangString = require('../models/langstring.js');
-var Messages = require('../models/message.js');
-var Agents = require('../models/agents.js');
-var Documents = require('../models/documents.js');
-var Attachments = require('../models/attachments.js');
-var AttachmentViews = require('./attachments.js');
-var Promise = require('bluebird');
-var LoaderView = require('./loaderView.js');
-var Analytics = require('../internal_modules/analytics/dispatcher.js');
-var linkify = require('linkifyjs');
+import Marionette from 'backbone.marionette';
+import Assembl from '../app.js';
+import _ from 'underscore';
+import $ from 'jquery';
+import Ctx from '../common/context.js';
+import CollectionManager from '../common/collectionManager.js';
+import Permissions from '../utils/permissions.js';
+import MessagesInProgress from '../objects/messagesInProgress.js';
+import i18n from '../utils/i18n.js';
+import PanelSpecTypes from '../utils/panelSpecTypes.js';
+import autosize from 'jquery-autosize';
+import LangString from '../models/langstring.js';
+import Messages from '../models/message.js';
+import Agents from '../models/agents.js';
+import Documents from '../models/documents.js';
+import Attachments from '../models/attachments.js';
+import AttachmentViews from './attachments.js';
+import Promise from 'bluebird';
+import LoaderView from './loaderView.js';
+import Analytics from '../internal_modules/analytics/dispatcher.js';
+const linkify = require('linkifyjs');
 
 /**
  * @init
@@ -634,4 +634,4 @@ var messageSendView = LoaderView.extend({
 
 });
 
-module.exports = messageSendView;
+export default messageSendView;

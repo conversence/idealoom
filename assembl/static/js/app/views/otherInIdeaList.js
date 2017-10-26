@@ -3,11 +3,11 @@
  * @module app.views.otherInIdeaList
  */
 
-var Ctx = require('../common/context.js');
+import Ctx from '../common/context.js';
 
-var ideaInIdeaList = require('./ideaInIdeaList.js');
-var IdeaView = require('./ideaInIdeaList.js');
-var _ = require('underscore');
+import ideaInIdeaList from './ideaInIdeaList.js';
+import IdeaView from './ideaInIdeaList.js';
+import _ from 'underscore';
 
 var otherInIdeaList = ideaInIdeaList.IdeaView.extend({
   constructor: function otherInIdeaList() {
@@ -37,4 +37,4 @@ var otherInIdeaList = ideaInIdeaList.IdeaView.extend({
   }
 });
 
-module.exports = otherInIdeaList;
+export default otherInIdeaList;

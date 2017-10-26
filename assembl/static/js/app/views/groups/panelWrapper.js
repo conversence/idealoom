@@ -3,16 +3,16 @@
  * @module app.views.groups.panelWrapper
  */
 
-var $ = require('jquery');
-
-var Marionette = require('backbone.marionette');
-var panelViewByPanelSpec = require('../../objects/viewsFactory.js');
-var Ctx = require('../../common/context.js');
-var AssemblPanel = require('../assemblPanel.js');
-var i18n = require('../../utils/i18n.js');
-var panelSpec = require('../../models/panelSpec.js');
-var tooltip = require('bootstrap-tooltip');
-var PanelSpecTypes = require('../../utils/panelSpecTypes.js');
+import $ from 'jquery';
+import Marionette from 'backbone.marionette';
+import panelViewByPanelSpec from '../../objects/viewsFactory.js';
+import Ctx from '../../common/context.js';
+import AssemblPanel from '../assemblPanel.js';
+import i18n from '../../utils/i18n.js';
+import panelSpec from '../../models/panelSpec.js';
+window.jQuery = $;
+import tooltip from 'bootstrap-tooltip';
+import PanelSpecTypes from '../../utils/panelSpecTypes.js';
 
 /**
  * @class app.views.groups.panelWrapper.PanelWrapper
@@ -408,4 +408,4 @@ var PanelWrapper = Marionette.View.extend({
     return icon;
   }
 });
-module.exports = PanelWrapper;
+export default PanelWrapper;

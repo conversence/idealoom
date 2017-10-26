@@ -2,10 +2,10 @@
  * 
  * @module app.utils.growl
  */
-var $ = require('jquery');
-
-var _ = require('underscore');
-var growl = require('bootstrap-notify');
+import $ from 'jquery';
+import _ from 'underscore';
+window.jQuery = $;
+import growl from 'bootstrap-notify';
 
 
 /*
@@ -40,7 +40,7 @@ var showBottomGrowl = function(growl_reason, msg, settings){
   $.notify({message: msg}, mergedSettings);
 };
 
-module.exports = {
+export default {
     GrowlReason: GrowlReason,
     showBottomGrowl: showBottomGrowl
 };

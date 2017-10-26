@@ -3,10 +3,10 @@
  * @module app.views.ideaFamily
  */
 
-var Backbone = require('backbone');
+import Backbone from 'backbone';
 
-var _ = require('underscore');
-var Ctx = require('../common/context.js');
+import _ from 'underscore';
+import Ctx from '../common/context.js';
 
 var IdeaFamilyView = Backbone.View.extend({
   constructor: function IdeaFamilyView() {
@@ -108,4 +108,4 @@ var IdeaFamilyView = Backbone.View.extend({
 
 });
 
-module.exports = IdeaFamilyView;
+export default IdeaFamilyView;

@@ -2,14 +2,13 @@
  * User profile and permissions (user or email author)
  * @module app.models.agents
  */
-var $ = require('jquery');
-
-var Base = require('./base.js');
-var Ctx = require('../common/context.js');
-var i18n = require('../utils/i18n.js');
-var Promise = require('bluebird');
-var Permissions = require("../utils/permissions.js");
-var Roles = require('../utils/roles.js');
+import $ from 'jquery';
+import Base from './base.js';
+import Ctx from '../common/context.js';
+import i18n from '../utils/i18n.js';
+import Promise from 'bluebird';
+import Permissions from '../utils/permissions.js';
+import Roles from '../utils/roles.js';
 var AVATAR_PLACEHOLDER = '//placehold.it/{0}';
 var UNKNOWN_USER_ID = Roles.EVERYONE;
 /**
@@ -232,7 +231,7 @@ var UNKNOWN_USER = new AgentModel({
   name: i18n.gettext('Unknown user')
 });
 
-module.exports = {
+export default {
   Model: AgentModel,
   Collection: AgentCollection
 };

@@ -3,23 +3,23 @@
  * @module app.views.messageList
  */
 
-var Backbone = require('backbone');
+import Backbone from 'backbone';
 
-var MessageListHeaderView = require('./messageListHeader.js');
-var _ = require('underscore');
-var $ = require('jquery');
-var highlight = require('jquery-highlight');
-var Assembl = require('../app.js');
-var Ctx = require('../common/context.js');
-var i18n = require('../utils/i18n.js');
-var Announcements = require('./announcements.js');
-var MessageSendView = require('./messageSend.js');
-var PanelSpecTypes = require('../utils/panelSpecTypes.js');
-var AssemblPanel = require('./assemblPanel.js');
-var BaseMessageListMixin = require('./baseMessageList.js');
-var CollectionManager = require('../common/collectionManager.js');
-var Widget = require('../models/widget.js');
-var Promise = require('bluebird');
+import MessageListHeaderView from './messageListHeader.js';
+import _ from 'underscore';
+import $ from 'jquery';
+import highlight from 'jquery-highlight';
+import Assembl from '../app.js';
+import Ctx from '../common/context.js';
+import i18n from '../utils/i18n.js';
+import Announcements from './announcements.js';
+import MessageSendView from './messageSend.js';
+import PanelSpecTypes from '../utils/panelSpecTypes.js';
+import AssemblPanel from './assemblPanel.js';
+import BaseMessageListMixin from './baseMessageList.js';
+import CollectionManager from '../common/collectionManager.js';
+import Widget from '../models/widget.js';
+import Promise from 'bluebird';
 
 /**
  * @class app.views.messageList.BaseMessageList
@@ -573,4 +573,4 @@ var MessageList = BaseMessageList.extend({
 
 });
 
-module.exports = MessageList;
+export default MessageList;

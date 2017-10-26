@@ -2,7 +2,7 @@
  * Infobars for cookie and widget settings
  * @module app.models.infobar
  */
-var Base = require("./base.js");
+import Base from './base.js';
 /**
  * Info bar model
  * @class app.models.infobar.InfobarModel
@@ -56,7 +56,7 @@ var InfobarsCollection = Base.Collection.extend({
   }
 });
 
-module.exports = {
+export default {
     InfobarsCollection:InfobarsCollection,
     InfobarModel:InfobarModel,
     WidgetInfobarModel:WidgetInfobarModel,

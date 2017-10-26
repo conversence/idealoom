@@ -3,7 +3,7 @@
  * @module app.views.navigation.notification
  */
 
-var Marionette = require('marionette.js');
+import Marionette from 'marionette.js';
 
 var sidebarNotification = Marionette.View.extend({
   constructor: function sidebarNotification() {
@@ -13,4 +13,4 @@ var sidebarNotification = Marionette.View.extend({
   template: '#tmpl-sidebar-notification'
 });
 
-module.exports = sidebarNotification;
+export default sidebarNotification;

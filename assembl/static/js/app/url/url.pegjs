@@ -1,9 +1,9 @@
 {
-    var groupSpec = require("../models/groupSpec.js"),
-        panelSpec = require("../models/panelSpec.js"),
-        groupState = require("../models/groupState.js"),
-        Promise = require('bluebird'),
-        viewsFactory = require("../objects/viewsFactory.js");
+    var groupSpec = require("../models/groupSpec.js").default,
+        panelSpec = require("../models/panelSpec.js").default,
+        groupState = require("../models/groupState.js").default,
+        Promise = require('bluebird').default,
+        viewsFactory = require("../objects/viewsFactory.js").default;
 }
 
 

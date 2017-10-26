@@ -4,10 +4,9 @@
  */
 
 
-var $ = require('jquery');
-
-var Ctx = require('../common/context.js');
-var expect = require('chai').expect;
+import $ from 'jquery';
+import Ctx from '../common/context.js';
+import expect from 'chai';
 
 // Fixtures
 var txt = '<script id="tmpl-test" type="text/template">test something</script>';

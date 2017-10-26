@@ -1,9 +1,9 @@
 /**
  * @module app.models.accounts
  */
-var Base = require('./base.js');
+import Base from './base.js';
 
-var Ctx = require('../common/context.js');
+import Ctx from '../common/context.js';
 /**
  * A user's (email or social) account.
  * Frontend model for :py:class:`assembl.models.auth.AbstractAgentAccount`
@@ -105,7 +105,7 @@ var Accounts = Base.Collection.extend({
     }
 });
 
-module.exports = {
+export default {
   Model: Account,
   Collection: Accounts
 };

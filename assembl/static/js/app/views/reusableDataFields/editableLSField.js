@@ -3,16 +3,16 @@
  * @module app.views.reusableDataFields.EditableLSField
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var _ = require('underscore');
-var $ = require('jquery');
-var Assembl = require('../../app.js');
-var Permissions = require('../../utils/permissions.js');
-var LangString = require('../../models/langstring.js');
-var CK = require('ckeditor');
-var EditableField = require('./editableField.js');
-var Ctx = require('../../common/context.js');
+import _ from 'underscore';
+import $ from 'jquery';
+import Assembl from '../../app.js';
+import Permissions from '../../utils/permissions.js';
+import LangString from '../../models/langstring.js';
+import CK from 'ckeditor';
+import EditableField from './editableField.js';
+import Ctx from '../../common/context.js';
 
 
 
@@ -78,4 +78,4 @@ var EditableLSField = EditableField.extend({
   },
 });
 
-module.exports = EditableLSField;
+export default EditableLSField;

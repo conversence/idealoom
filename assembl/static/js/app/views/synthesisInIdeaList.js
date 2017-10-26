@@ -3,12 +3,11 @@
  * @module app.views.synthesisInIdeaList
  */
 
-var $ = require('jquery');
-
-var Ctx = require('../common/context.js');
-var Assembl = require('../app.js');
-var PanelSpecTypes = require('../utils/panelSpecTypes.js');
-var ideaInIdeaList = require('./ideaInIdeaList.js');
+import $ from 'jquery';
+import Ctx from '../common/context.js';
+import Assembl from '../app.js';
+import PanelSpecTypes from '../utils/panelSpecTypes.js';
+import ideaInIdeaList from './ideaInIdeaList.js';
 
 var SynthesisIdeaView = ideaInIdeaList.IdeaView.extend({
   constructor: function SynthesisIdeaView() {
@@ -65,4 +64,4 @@ var SynthesisIdeaView = ideaInIdeaList.IdeaView.extend({
   }
 });
 
-module.exports = SynthesisIdeaView;
+export default SynthesisIdeaView;

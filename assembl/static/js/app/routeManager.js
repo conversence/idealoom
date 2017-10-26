@@ -3,42 +3,40 @@
  * @module app.routeManager
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var Assembl = require('./app.js');
-var Promise = require('bluebird');
-var Ctx = require('./common/context.js');
-var Agents = require('./models/agents.js');
-var Storage = require('./objects/storage.js');
-var Loader = require('./views/loader.js');
-var NavBar = require('./views/navBar.js');
-var InfobarsViews = require('./views/infobar.js');
-var InfobarsModels = require('./models/infobar.js');
-var UrlParser = require('./url/url.pegjs');
-var GroupContainer = require('./views/groups/groupContainer.js');
-var PanelSpecTypes = require('./utils/panelSpecTypes.js');
-var CookiesManager = require("./utils/cookiesManager.js");
-var CollectionManager = require('./common/collectionManager.js');
-var ViewsFactory = require('./objects/viewsFactory.js');
-var AdminDiscussion = require('./views/admin/adminDiscussion.js');
-var AdminNotificationSubscriptions = require('./views/admin/adminNotificationSubscriptions.js');
-var AdminPartners = require('./views/admin/adminPartners.js');
-var UserNotificationSubscriptions = require('./views/user/userNotificationSubscriptions.js');
-var Profile = require('./views/user/profile.js');
-var AgentViews = require('./views/agent.js');
-var Authorization = require('./views/authorization.js');
-var Permissions = require('./utils/permissions.js');
-var Account = require('./views/user/account.js');
-var Widget = require('./models/widget.js');
-var AdminDiscussionSettings = require('./views/admin/adminDiscussionSettings.js');
-var AdminTimeline = require('./views/admin/adminTimelineEvents.js');
-var PreferencesView = require('./views/preferencesView.js');
-var FirstIdeaToShowVisitor = require('./views/visitors/firstIdeaToShowVisitor.js');
-var i18n = require('./utils/i18n.js');
-var Analytics = require('./internal_modules/analytics/dispatcher.js');
-var Marionette = require('backbone.marionette');
-var $ = require('jquery');
-
+import Assembl from './app.js';
+import Promise from 'bluebird';
+import Ctx from './common/context.js';
+import Agents from './models/agents.js';
+import Storage from './objects/storage.js';
+import Loader from './views/loader.js';
+import NavBar from './views/navBar.js';
+import InfobarsViews from './views/infobar.js';
+import InfobarsModels from './models/infobar.js';
+import UrlParser from './url/url.pegjs';
+import GroupContainer from './views/groups/groupContainer.js';
+import PanelSpecTypes from './utils/panelSpecTypes.js';
+import CookiesManager from './utils/cookiesManager.js';
+import CollectionManager from './common/collectionManager.js';
+import ViewsFactory from './objects/viewsFactory.js';
+import AdminDiscussion from './views/admin/adminDiscussion.js';
+import AdminNotificationSubscriptions from './views/admin/adminNotificationSubscriptions.js';
+import AdminPartners from './views/admin/adminPartners.js';
+import UserNotificationSubscriptions from './views/user/userNotificationSubscriptions.js';
+import Profile from './views/user/profile.js';
+import AgentViews from './views/agent.js';
+import Authorization from './views/authorization.js';
+import Permissions from './utils/permissions.js';
+import Account from './views/user/account.js';
+import Widget from './models/widget.js';
+import AdminDiscussionSettings from './views/admin/adminDiscussionSettings.js';
+import AdminTimeline from './views/admin/adminTimelineEvents.js';
+import PreferencesView from './views/preferencesView.js';
+import FirstIdeaToShowVisitor from './views/visitors/firstIdeaToShowVisitor.js';
+import i18n from './utils/i18n.js';
+import Analytics from './internal_modules/analytics/dispatcher.js';
+import $ from 'jquery';
 var QUERY_STRINGS = {
   'source': ['notification', 'share']
 };
@@ -347,7 +345,7 @@ var routeManager = Marionette.Object.extend({
       default:
         console.log("the widget model", widget);
         console.log('the arg', arg);
-        var Views = require('./views/tokenVoteSession.js');
+        var Views = require('./views/tokenVoteSession.js').default;
         if ((arg) && (arg === 'result')){
           View = Views.TokenVoteSessionResultModal
         }
@@ -403,7 +401,7 @@ var routeManager = Marionette.Object.extend({
     },
 
   sentryTest: function() {
-    var Raven = require('raven-js');
+    var Raven = require('raven-js').default;
     Raven.captureMessage("This is a test, an uncaught non existent function call will follow.");
     //This crashes on purpose
     crashme();
@@ -570,4 +568,4 @@ var routeManager = Marionette.Object.extend({
 
 });
 
-module.exports = new routeManager();
+export default new routeManager();

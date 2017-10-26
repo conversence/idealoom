@@ -3,38 +3,38 @@
  * @module app.common.collectionManager
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var Promise = require('bluebird');
-var Raven = require('raven-js');
-var $ = require('jquery');
-var Assembl = require('../app.js');
-var Ctx = require('./context.js');
-var Message = require('../models/message.js');
-var groupSpec = require('../models/groupSpec.js');
-var Idea = require('../models/idea.js');
-var IdeaLink = require('../models/ideaLink.js');
-var Segment = require('../models/segment.js');
-var Synthesis = require('../models/synthesis.js');
-var Partners = require('../models/partners.js');
-var TimelineEvent = require('../models/timeline.js');
-var Announcement = require('../models/announcement.js');
-var Agents = require('../models/agents.js');
-var NotificationSubscription = require('../models/notificationSubscription.js');
-var Storage = require('../objects/storage.js');
-var Types = require('../utils/types.js');
-var i18n = require('../utils/i18n.js');
-var LocalRole = require('../models/roles.js');
-var Discussion = require('../models/discussion.js');
-var DiscussionSource = require('../models/discussionSource.js');
-var Widget = require('../models/widget.js');
-var Social = require('../models/social.js');
-var Account = require('../models/accounts.js');
-var Socket = require('../utils/socket.js');
-var DiscussionSources = require('../models/sources.js');
-var DiscussionPreference = require('../models/discussionPreference.js');
-var LanguagePreference = require('../models/languagePreference.js');
-var IdeaContentLink = require('../models/ideaContentLink.js');
+import Promise from 'bluebird';
+import Raven from 'raven-js';
+import $ from 'jquery';
+import Assembl from '../app.js';
+import Ctx from './context.js';
+import Message from '../models/message.js';
+import groupSpec from '../models/groupSpec.js';
+import Idea from '../models/idea.js';
+import IdeaLink from '../models/ideaLink.js';
+import Segment from '../models/segment.js';
+import Synthesis from '../models/synthesis.js';
+import Partners from '../models/partners.js';
+import TimelineEvent from '../models/timeline.js';
+import Announcement from '../models/announcement.js';
+import Agents from '../models/agents.js';
+import NotificationSubscription from '../models/notificationSubscription.js';
+import Storage from '../objects/storage.js';
+import Types from '../utils/types.js';
+import i18n from '../utils/i18n.js';
+import LocalRole from '../models/roles.js';
+import Discussion from '../models/discussion.js';
+import DiscussionSource from '../models/discussionSource.js';
+import Widget from '../models/widget.js';
+import Social from '../models/social.js';
+import Account from '../models/accounts.js';
+import Socket from '../utils/socket.js';
+import DiscussionSources from '../models/sources.js';
+import DiscussionPreference from '../models/discussionPreference.js';
+import LanguagePreference from '../models/languagePreference.js';
+import IdeaContentLink from '../models/ideaContentLink.js';
 
 /**
  * A singleton to manage lazy loading of server collections
@@ -465,7 +465,7 @@ var CollectionManager = Marionette.Object.extend({
           }
         });
         messagesStructureCollectionPromise.then(function(allMessageStructureCollection) {
-          var PostQuery = require('../views/messageListPostQuery');
+          var PostQuery = require('../views/messageListPostQuery').default;
           var postQuery = new PostQuery();
           var viewDef = 'default';
 
@@ -836,9 +836,9 @@ var CollectionManager = Marionette.Object.extend({
 
           if (collection === undefined) {
             collection = new groupSpec.Collection();
-            var panelSpec = require('../models/panelSpec.js');
-            var PanelSpecTypes = require('../utils/panelSpecTypes.js');
-            var groupState = require('../models/groupState.js');
+            var panelSpec = require('../models/panelSpec.js').default;
+            var PanelSpecTypes = require('../utils/panelSpecTypes.js').default;
+            var groupState = require('../models/groupState.js').default;
             var preferences = Ctx.getPreferences();
             //console.log(preferences);
             var defaultPanels;
@@ -1174,7 +1174,7 @@ var CollectionManager = Marionette.Object.extend({
 
 var _instance;
 
-module.exports = function() {
+export default function() {
   if (!_instance) {
     _instance = new CollectionManager();
   }

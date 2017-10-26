@@ -3,10 +3,10 @@
  * @module app.utils.scrollUtils
  */
 
-var jQuery = require('jquery');
+import jQuery from 'jquery';
 
 var $ = jQuery;
-var Raven = require('raven-js');
+import Raven from 'raven-js';
 
 var debugScrollUtils = false;
 
@@ -293,7 +293,7 @@ var maintainScroll = function(elementJquerySelector) {
 
 }
 
-module.exports = {
+export default {
     scrollToElementAndWatch: scrollToElementAndWatch,
     maintainScroll: maintainScroll,
     scrollToElement: scrollToElement,

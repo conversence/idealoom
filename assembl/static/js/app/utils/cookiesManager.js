@@ -2,7 +2,7 @@
  * @module app.utils.cookiesManager
  */
 
-var Ctx = require('../common/context.js');
+import Ctx from '../common/context.js';
 
 var getUserCookiesAuthorization = function() {
   var cookies = document.cookie;
@@ -19,7 +19,7 @@ var setUserCookiesAuthorization = function() {
   document.cookie = 'cookiesUserAuthorization_discussion' + discussionId + '=done' + ';expires=' + date + ';';
 };
 
-module.exports = {
+export default {
     getUserCookiesAuthorization: getUserCookiesAuthorization,
     setUserCookiesAuthorization:setUserCookiesAuthorization
 };

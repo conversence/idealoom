@@ -3,16 +3,16 @@
  * @module app.views.user.account
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var $ = require('jquery');
-var _ = require('underscore');
-var Accounts = require('../../models/accounts.js');
-var Ctx = require('../../common/context.js');
-var Agents = require('../../models/agents.js');
-var UserNavigationMenu = require('./userNavigationMenu.js');
-var i18n = require('../../utils/i18n.js');
-var Growl = require('../../utils/growl.js');
+import $ from 'jquery';
+import _ from 'underscore';
+import Accounts from '../../models/accounts.js';
+import Ctx from '../../common/context.js';
+import Agents from '../../models/agents.js';
+import UserNavigationMenu from './userNavigationMenu.js';
+import i18n from '../../utils/i18n.js';
+import Growl from '../../utils/growl.js';
 
 var email = Marionette.View.extend({
   constructor: function email() {
@@ -236,4 +236,4 @@ var account = Marionette.View.extend({
 
 });
 
-module.exports = account;
+export default account;

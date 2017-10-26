@@ -3,13 +3,13 @@
  * @module app.views.navigation.linkListView
  */
 
-var _ = require('underscore');
+import _ from 'underscore';
 
-var $ = require('jquery');
-var Promise = require('bluebird');
-var Marionette = require('backbone.marionette');
-var Ctx = require('../../common/context.js');
-var Permissions = require('../../utils/permissions.js');
+import $ from 'jquery';
+import Promise from 'bluebird';
+import Marionette from 'backbone.marionette';
+import Ctx from '../../common/context.js';
+import Permissions from '../../utils/permissions.js';
 
 var SimpleLinkView = Marionette.View.extend({
   constructor: function SimpleLinkView() {
@@ -49,4 +49,4 @@ var LinkListView = Marionette.CollectionView.extend({
   }
 });
 
-module.exports = LinkListView;
+export default LinkListView;

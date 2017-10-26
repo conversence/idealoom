@@ -3,15 +3,14 @@
  * @module app.views.messageListPostQuery
  */
 
-var $ = require('jquery');
-
-var Ctx = require('../common/context.js');
-var i18n = require('../utils/i18n.js');
-var CollectionManager = require('../common/collectionManager.js');
-var Promise = require('bluebird');
-var Message = require('../models/message.js');
-var Raven = require('raven-js');
-var _ = require('underscore');
+import $ from 'jquery';
+import Ctx from '../common/context.js';
+import i18n from '../utils/i18n.js';
+import CollectionManager from '../common/collectionManager.js';
+import Promise from 'bluebird';
+import Message from '../models/message.js';
+import Raven from 'raven-js';
+import _ from 'underscore';
 
 /**
 * @class app.views.messageListPostQuery.PostQuery
@@ -24,7 +23,7 @@ var _ = require('underscore');
 var PostQuery = function() {
     var collectionManager = new CollectionManager();
 
-    this.availableFilters = require('./postFilters.js');
+    this.availableFilters = require('./postFilters.js').default;
     /**
      * Has a property with the id each active
      * filter, and the filter object as value
@@ -585,5 +584,5 @@ var PostQuery = function() {
 
   };
 
-module.exports = PostQuery;
+export default PostQuery;
 

@@ -3,11 +3,11 @@
  * @module app.views.breadcrumb
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var $ = require('jquery');
-var _ = require('underscore');
-var CollectionManager = require('../common/collectionManager.js');
+import $ from 'jquery';
+import _ from 'underscore';
+import CollectionManager from '../common/collectionManager.js';
 
 /**
  * Generic Breadcrumb ItemView.
@@ -71,7 +71,7 @@ var BreadcrumbCollectionView = Marionette.CollectionView.extend({
   }
 });
 
-module.exports = {
+export default {
   BreadcrumbItemView: BreadcrumbItemView,
   BreadcrumbCollectionView: BreadcrumbCollectionView
 };

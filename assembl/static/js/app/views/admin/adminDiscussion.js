@@ -3,18 +3,18 @@
  * @module app.views.admin.adminDiscussion
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var $ = require('jquery');
-var _ = require('underscore');
-var autosize = require('jquery-autosize');
-var CollectionManager = require('../../common/collectionManager.js');
-var Ctx = require('../../common/context.js');
-var Growl = require('../../utils/growl.js');
-var Discussion = require('../../models/discussion.js');
-var DiscussionSource = require('../../models/discussionSource.js');
-var i18n = require('../../utils/i18n.js');
-var AdminNavigationMenu = require('./adminNavigationMenu.js');
+import $ from 'jquery';
+import _ from 'underscore';
+import autosize from 'jquery-autosize';
+import CollectionManager from '../../common/collectionManager.js';
+import Ctx from '../../common/context.js';
+import Growl from '../../utils/growl.js';
+import Discussion from '../../models/discussion.js';
+import DiscussionSource from '../../models/discussionSource.js';
+import i18n from '../../utils/i18n.js';
+import AdminNavigationMenu from './adminNavigationMenu.js';
 
 var adminDiscussion = Marionette.View.extend({
   constructor: function adminDiscussion() {
@@ -124,4 +124,4 @@ var adminDiscussion = Marionette.View.extend({
 
 });
 
-module.exports = adminDiscussion;
+export default adminDiscussion;

@@ -18,4 +18,4 @@ Visitor.prototype.post_visit = function(object, children_data) {
   return undefined;
 };
 
-module.exports = Visitor;
+export default Visitor;

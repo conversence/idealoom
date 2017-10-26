@@ -3,15 +3,15 @@
  * @module app.views.user.userNavigationMenu
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var $ = require('jquery');
-var i18n = require('../../utils/i18n.js');
-var Ctx = require('../../common/context.js');
-var CollectionManager = require('../../common/collectionManager.js');
-var Roles = require('../../utils/roles.js');
-var LoaderView = require('../loaderView.js');
-var Permissions = require('../../utils/permissions.js');
+import $ from 'jquery';
+import i18n from '../../utils/i18n.js';
+import Ctx from '../../common/context.js';
+import CollectionManager from '../../common/collectionManager.js';
+import Roles from '../../utils/roles.js';
+import LoaderView from '../loaderView.js';
+import Permissions from '../../utils/permissions.js';
 
 var userNavigationMenu = LoaderView.extend({
   constructor: function userNavigationMenu() {
@@ -54,4 +54,4 @@ var userNavigationMenu = LoaderView.extend({
   },
 });
 
-module.exports = userNavigationMenu;
+export default userNavigationMenu;

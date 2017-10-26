@@ -3,12 +3,12 @@
  * @module app.views.synthesisMessage
  */
 
-var Ctx = require('../common/context.js');
+import Ctx from '../common/context.js';
 
-var MessageView = require('./message.js');
-var Synthesis = require('../models/synthesis.js');
-var SynthesisPanel = require('./synthesisPanel.js');
-var CollectionManager = require('../common/collectionManager.js');
+import MessageView from './message.js';
+import Synthesis from '../models/synthesis.js';
+import SynthesisPanel from './synthesisPanel.js';
+import CollectionManager from '../common/collectionManager.js';
 
 /**
  * @class app.views.synthesisMessage.MessageView
@@ -89,5 +89,5 @@ var SynthesisMessageView = MessageView.extend({
 
 });
 
-module.exports = SynthesisMessageView;
+export default SynthesisMessageView;
 

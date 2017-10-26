@@ -3,7 +3,7 @@
  * @module app.views.visitors.messageRenderVisitor
  */
 
-var Visitor = require("./visitor.js");
+import Visitor from './visitor.js';
 
 /** A visitor function to be passed to to a visit function such as
 * Idea.visitBreadthFirst or MessageCollection.visitDepthFirst
@@ -172,4 +172,4 @@ MessageRenderVisitor.prototype.post_visit = function(object, children_data) {
   return retval;
 };
 
-module.exports = MessageRenderVisitor;
+export default MessageRenderVisitor;

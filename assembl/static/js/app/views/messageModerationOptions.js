@@ -3,15 +3,15 @@
  * @module app.views.messageModerationOptions
  */
 
-var Backbone = require('backbone');
+import Backbone from 'backbone';
 
-var Marionette = require('backbone.marionette');
-var Assembl = require('../app.js');
-var _ = require('underscore');
-var $ = require('jquery');
-var Ctx = require('../common/context.js');
-var AgentViews = require('./agent.js');
-var i18n = require('../utils/i18n.js');
+import Marionette from 'backbone.marionette';
+import Assembl from '../app.js';
+import _ from 'underscore';
+import $ from 'jquery';
+import Ctx from '../common/context.js';
+import AgentViews from './agent.js';
+import i18n from '../utils/i18n.js';
 
 
 var messageModerationOptions = Marionette.View.extend({
@@ -134,4 +134,4 @@ var messageModerationOptions = Marionette.View.extend({
 
 });
 
-module.exports = messageModerationOptions;
+export default messageModerationOptions;

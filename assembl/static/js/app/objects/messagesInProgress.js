@@ -3,9 +3,9 @@
  * @module app.objects.messagesInProgress
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var Ctx = require('../common/context.js');
+import Ctx from '../common/context.js';
 
 var messagesInProgress = Marionette.Object.extend({
 
@@ -76,4 +76,4 @@ var messagesInProgress = Marionette.Object.extend({
 
 })
 
-module.exports = new messagesInProgress();
+export default new messagesInProgress();

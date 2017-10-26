@@ -2,9 +2,8 @@
  * 
  * @module app.utils.genieEffect
  */
-var $ = require('jquery');
-
-var Promise = require('bluebird');
+import $ from 'jquery';
+import Promise from 'bluebird';
 
 /**
  * Creates a genie effect using CSS3 properties
@@ -139,7 +138,7 @@ var effect2 = function($source, $target, duration, delayTime){
 };
 
 
-module.exports = {
+export default {
     geniefy: effect,
     geniefy2: effect2 
 }

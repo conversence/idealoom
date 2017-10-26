@@ -56,14 +56,14 @@ module.exports = {
       'sockjs-client',
 
       // Those choke because they expect jquery in namespace.
-      // 'jquery.dotdotdot',
+      'jquery.dotdotdot',
       // 'annotator/annotator-full.js',
       // 'Backbone.Subset',
-      // 'bootstrap-dropdown',
-      // 'bootstrap-tooltip',
-      // 'jquery-highlight/jquery.highlight.js',
-      // 'jquery-oembed-all/jquery.oembed',
-      // 'jquery-autosize',
+      'bootstrap-dropdown',
+      'bootstrap-tooltip',
+      'jquery-highlight/jquery.highlight.js',
+      'jquery-oembed-all/jquery.oembed',
+      'jquery-autosize',
     ],
     testInfra: [
       'mocha',
@@ -119,6 +119,14 @@ module.exports = {
           {
             loader: 'imports-loader?define=>false',
           }],
+      },
+      {
+        test: /bootstrap.*\.js|jquery[-\.]/,
+        use: [
+          {
+            loader: 'imports-loader?jQuery=jquery',
+          },
+        ],
       },
       {
         test: /\/js\/app\/.*\.js$/,

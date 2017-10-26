@@ -3,25 +3,25 @@
  * @module app.views.segmentList
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var Backbone = require('backbone');
-var BackboneModal = require('backbone.modal');
-var _ = require('underscore');
-var $ = require('jquery');
-var highlight = require('jquery-highlight');
-var Assembl = require('../app.js');
-var Ctx = require('../common/context.js');
-var Segment = require('../models/segment.js');
-var Types = require('../utils/types.js');
-var i18n = require('../utils/i18n.js');
-var Permissions = require('../utils/permissions.js');
-var CollectionManager = require('../common/collectionManager.js');
-var PanelSpecTypes = require('../utils/panelSpecTypes.js');
-var AssemblPanel = require('./assemblPanel.js');
-var AgentViews = require('./agent.js');
-var BackboneSubset = require("Backbone.Subset");
-var Promise = require('bluebird');
+import Backbone from 'backbone';
+import BackboneModal from 'backbone.modal';
+import _ from 'underscore';
+import $ from 'jquery';
+import highlight from 'jquery-highlight';
+import Assembl from '../app.js';
+import Ctx from '../common/context.js';
+import Segment from '../models/segment.js';
+import Types from '../utils/types.js';
+import i18n from '../utils/i18n.js';
+import Permissions from '../utils/permissions.js';
+import CollectionManager from '../common/collectionManager.js';
+import PanelSpecTypes from '../utils/panelSpecTypes.js';
+import AssemblPanel from './assemblPanel.js';
+import AgentViews from './agent.js';
+import BackboneSubset from 'Backbone.Subset';
+import Promise from 'bluebird';
 
 var SegmentView = Marionette.View.extend({
   constructor: function SegmentView() {
@@ -596,7 +596,7 @@ var SegmentListPanel = AssemblPanel.extend({
 
 });
 
-module.exports = {
+export default {
   Clipboard: Clipboard,
   IdeaSegmentListSubset: IdeaSegmentListSubset,
   SegmentView: SegmentView,

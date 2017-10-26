@@ -3,23 +3,23 @@
  * @module app.views.contextPage
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var Assembl = require('../app.js');
-var Ctx = require('../common/context.js');
-var CollectionManager = require('../common/collectionManager.js');
-var $ = require('jquery');
-var _ = require('underscore');
-var i18n = require('../utils/i18n.js');
-var Moment = require('moment');
-var BackboneSubset = require("Backbone.Subset");
-var Permissions = require('../utils/permissions.js');
-var PanelSpecTypes = require('../utils/panelSpecTypes.js');
-var AssemblPanel = require('./assemblPanel.js');
-var CKEditorField = require('./reusableDataFields/ckeditorField.js');
-var Statistics = require('./statistics.js');
-var Types = require('../utils/types.js');
-var Promise = require('bluebird');
+import Assembl from '../app.js';
+import Ctx from '../common/context.js';
+import CollectionManager from '../common/collectionManager.js';
+import $ from 'jquery';
+import _ from 'underscore';
+import i18n from '../utils/i18n.js';
+import Moment from 'moment';
+import BackboneSubset from 'Backbone.Subset';
+import Permissions from '../utils/permissions.js';
+import PanelSpecTypes from '../utils/panelSpecTypes.js';
+import AssemblPanel from './assemblPanel.js';
+import CKEditorField from './reusableDataFields/ckeditorField.js';
+import Statistics from './statistics.js';
+import Types from '../utils/types.js';
+import Promise from 'bluebird';
 
 var Partner = Marionette.View.extend({
   constructor: function Partner() {
@@ -378,4 +378,4 @@ var ContextPage = Marionette.View.extend({
 
 });
 
-module.exports = ContextPage;
+export default ContextPage;

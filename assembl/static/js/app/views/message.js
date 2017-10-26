@@ -3,42 +3,42 @@
  * @module app.views.message
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var Raven = require('raven-js');
-var Backbone = require('backbone');
-var BackboneModal = require('backbone.modal');
-var _ = require('underscore');
-var Assembl = require('../app.js');
-var Ctx = require('../common/context.js');
-var i18n = require('../utils/i18n.js');
-var Permissions = require('../utils/permissions.js');
-var scrollUtils = require('../utils/scrollUtils.js');
-var MessageSendView = require('./messageSend.js');
-var MessagesInProgress = require('../objects/messagesInProgress.js');
-var CollectionManager = require('../common/collectionManager.js');
-var PanelSpecTypes = require('../utils/panelSpecTypes.js');
-var $ = require('jquery');
-var highlight = require('jquery-highlight');
-var dropdown = require('bootstrap-dropdown');
-var Promise = require('bluebird');
-var dotdotdot = require('jquery.dotdotdot');
-var messageExport = require('./messageExportModal.js');
-var AgentViews = require('./agent.js');
-var Types = require('../utils/types.js');
-var AttachmentViews = require('./attachments.js');
-var MessageModerationOptionsView = require('./messageModerationOptions.js');
-var MessageTranslationView = require('./messageTranslationQuestion.js');
-var Analytics = require('../internal_modules/analytics/dispatcher.js');
-var Genie = require('../utils/genieEffect.js');
-var IdeaClassificationOnMessageView = require('./ideaClassificationOnMessage.js');
-var LangString = require('../models/langstring.js');
-var IdeaContentLink = require('../models/ideaContentLink.js');
-var ConfirmModal = require('./confirmModal.js');
-var Growl = require('../utils/growl.js');
-var Widget = require('../models/widget.js');
-var LoaderView = require('./loaderView.js');
-var MessageModel = require('../models/message.js');
+import Raven from 'raven-js';
+import Backbone from 'backbone';
+import BackboneModal from 'backbone.modal';
+import _ from 'underscore';
+import Assembl from '../app.js';
+import Ctx from '../common/context.js';
+import i18n from '../utils/i18n.js';
+import Permissions from '../utils/permissions.js';
+import scrollUtils from '../utils/scrollUtils.js';
+import MessageSendView from './messageSend.js';
+import MessagesInProgress from '../objects/messagesInProgress.js';
+import CollectionManager from '../common/collectionManager.js';
+import PanelSpecTypes from '../utils/panelSpecTypes.js';
+import $ from 'jquery';
+import highlight from 'jquery-highlight';
+import dropdown from 'bootstrap-dropdown';
+import Promise from 'bluebird';
+import dotdotdot from 'jquery.dotdotdot';
+import messageExport from './messageExportModal.js';
+import AgentViews from './agent.js';
+import Types from '../utils/types.js';
+import AttachmentViews from './attachments.js';
+import MessageModerationOptionsView from './messageModerationOptions.js';
+import MessageTranslationView from './messageTranslationQuestion.js';
+import Analytics from '../internal_modules/analytics/dispatcher.js';
+import Genie from '../utils/genieEffect.js';
+import IdeaClassificationOnMessageView from './ideaClassificationOnMessage.js';
+import LangString from '../models/langstring.js';
+import IdeaContentLink from '../models/ideaContentLink.js';
+import ConfirmModal from './confirmModal.js';
+import Growl from '../utils/growl.js';
+import Widget from '../models/widget.js';
+import LoaderView from './loaderView.js';
+import MessageModel from '../models/message.js';
 var MIN_TEXT_TO_TOOLTIP = 5;
 var TOOLTIP_TEXT_LENGTH = 10;
 var IDEA_CLASSIFICATION_LENGTH = 3;
@@ -2084,5 +2084,5 @@ var MessageView = LoaderView.extend({
 
 });
 
-module.exports = MessageView;
+export default MessageView;
 

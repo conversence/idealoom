@@ -3,24 +3,24 @@
  * @module app.views.baseMessageList
  */
 
-var Backbone = require('backbone');
+import Backbone from 'backbone';
 
-var Raven = require('raven-js');
-var MessageRenderVisitor = require('./visitors/messageRenderVisitor.js');
-var MessageRenderVisitorReSort = require('./visitors/messageRenderVisitorReSort.js');
-var MessageFamilyView = require('./messageFamily.js');
-var _ = require('underscore');
-var $ = require('jquery');
-var Assembl = require('../app.js');
-var Ctx = require('../common/context.js');
-var Message = require('../models/message.js');
-var i18n = require('../utils/i18n.js');
-var PostQuery = require('./messageListPostQuery.js');
-var Permissions = require('../utils/permissions.js');
-var MessagesInProgress = require('../objects/messagesInProgress.js');
-var scrollUtils = require('../utils/scrollUtils.js');
-var CollectionManager = require('../common/collectionManager.js');
-var Promise = require('bluebird');
+import Raven from 'raven-js';
+import MessageRenderVisitor from './visitors/messageRenderVisitor.js';
+import MessageRenderVisitorReSort from './visitors/messageRenderVisitorReSort.js';
+import MessageFamilyView from './messageFamily.js';
+import _ from 'underscore';
+import $ from 'jquery';
+import Assembl from '../app.js';
+import Ctx from '../common/context.js';
+import Message from '../models/message.js';
+import i18n from '../utils/i18n.js';
+import PostQuery from './messageListPostQuery.js';
+import Permissions from '../utils/permissions.js';
+import MessagesInProgress from '../objects/messagesInProgress.js';
+import scrollUtils from '../utils/scrollUtils.js';
+import CollectionManager from '../common/collectionManager.js';
+import Promise from 'bluebird';
 
 /**
  * Constants
@@ -2372,4 +2372,4 @@ return cls.extend({
 });
 };
 
-module.exports = BaseMessageListMixin;
+export default BaseMessageListMixin;

@@ -4,12 +4,12 @@
  */
 
 
-var Backbone = require('backbone');
+import Backbone from 'backbone';
 
-var Promise = require('bluebird');
-var Ctx = require('../common/context.js');
-var _ = require('underscore');
-var Types = require('../utils/types.js');
+import Promise from 'bluebird';
+import Ctx from '../common/context.js';
+import _ from 'underscore';
+import Types from '../utils/types.js';
 
 /**
   * BaseModel which should be used by ALL models
@@ -386,7 +386,7 @@ var RelationsCollection = BaseCollection.extend({
   }
 });
 
-module.exports = {
+export default {
   Model: BaseModel,
   Collection: BaseCollection,
   RelationsCollection: RelationsCollection

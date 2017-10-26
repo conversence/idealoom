@@ -2,11 +2,10 @@
  * 
  * @module app.utils.tours.assemblTours
  */
-var i18n =  require('../i18n.js');
+import i18n from '../i18n.js';
 
-var Ctx = require("../../common/context.js");
-var $ = require('jquery');
-
+import Ctx from '../../common/context.js';
+import $ from 'jquery';
 var AssemblTours = [
   {
     name: "on_start",
@@ -173,4 +172,4 @@ var AssemblTours = [
         }]}}
 ];
 
-module.exports = AssemblTours;
+export default AssemblTours;

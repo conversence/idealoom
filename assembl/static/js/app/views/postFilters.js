@@ -3,11 +3,11 @@
  * @module app.views.postFilters
  */
 
-var Ctx = require('../common/context.js');
+import Ctx from '../common/context.js';
 
-var i18n = require('../utils/i18n.js');
-var CollectionManager = require('../common/collectionManager.js');
-var Promise = require('bluebird');
+import i18n from '../utils/i18n.js';
+import CollectionManager from '../common/collectionManager.js';
+import Promise from 'bluebird';
 
 var collectionManager = new CollectionManager();
 
@@ -823,4 +823,4 @@ var availableFilters = {
     POST_IS_DELETED_OR_NOT: FilterPostIsDeletedOrNot
   };
 
-module.exports = availableFilters;
+export default availableFilters;

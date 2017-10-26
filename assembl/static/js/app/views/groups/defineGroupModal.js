@@ -3,24 +3,24 @@
  * @module app.views.groups.defineGroupModal
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var $ = require('jquery');
-var _ = require('underscore');
-var Backbone = require('backbone');
-var BackboneModal = require('backbone.modal');
-var Assembl = require('../../app.js');
-var Ctx = require('../../common/context.js');
-var GroupSpec = require('../../models/groupSpec.js');
-var CollectionManager = require('../../common/collectionManager.js');
-var PanelSpecTypes = require('../../utils/panelSpecTypes.js');
-var viewsFactory = require('../../objects/viewsFactory.js');
-var RolesModel = require('../../models/roles.js');
-var Permissions = require('../../utils/permissions.js');
-var i18n = require('../../utils/i18n.js');
-var Roles = require('../../utils/roles.js');
-var Widget = require('../../models/widget.js');
-var WidgetLinks = require('../widgetLinks.js');
+import $ from 'jquery';
+import _ from 'underscore';
+import Backbone from 'backbone';
+import BackboneModal from 'backbone.modal';
+import Assembl from '../../app.js';
+import Ctx from '../../common/context.js';
+import GroupSpec from '../../models/groupSpec.js';
+import CollectionManager from '../../common/collectionManager.js';
+import PanelSpecTypes from '../../utils/panelSpecTypes.js';
+import viewsFactory from '../../objects/viewsFactory.js';
+import RolesModel from '../../models/roles.js';
+import Permissions from '../../utils/permissions.js';
+import i18n from '../../utils/i18n.js';
+import Roles from '../../utils/roles.js';
+import Widget from '../../models/widget.js';
+import WidgetLinks from '../widgetLinks.js';
 
 /**
  * 
@@ -147,4 +147,4 @@ var DefineGroupModal = Backbone.Modal.extend({
 
   });
 
-module.exports = DefineGroupModal;
+export default DefineGroupModal;

@@ -3,7 +3,7 @@
  * @module app.views.flipSwitchButton
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
 var FlipSwitchButton = Marionette.View.extend({
   constructor: function FlipSwitchButton() {
@@ -49,4 +49,4 @@ var FlipSwitchButton = Marionette.View.extend({
 
 });
 
-module.exports = FlipSwitchButton;
+export default FlipSwitchButton;

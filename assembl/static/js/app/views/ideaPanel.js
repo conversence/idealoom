@@ -3,33 +3,33 @@
  * @module app.views.ideaPanel
  */
 
-var Assembl = require('../app.js');
+import Assembl from '../app.js';
 
-var Ctx = require('../common/context.js');
-var i18n = require('../utils/i18n.js');
-var EditableLSField = require('./reusableDataFields/editableLSField.js');
-var CKEditorLSField = require('./reusableDataFields/ckeditorLSField.js');
-var Permissions = require('../utils/permissions.js');
-var PanelSpecTypes = require('../utils/panelSpecTypes.js');
-var MessagesInProgress = require('../objects/messagesInProgress.js');
-var SegmentList = require('./segmentList.js');
-var Announcements = require('./announcements.js');
-var Widget = require('../models/widget.js');
-var AgentViews = require('./agent.js');
-var WidgetLinks = require('./widgetLinks.js');
-var WidgetButtons = require('./widgetButtons.js');
-var CollectionManager = require('../common/collectionManager.js');
-var AssemblPanel = require('./assemblPanel.js');
-var Marionette = require('backbone.marionette');
-var AttachmentViews = require('./attachments.js');
-var ConfirmModal = require('./confirmModal.js');
-var AttachmentModels = require('../models/attachments.js');
-var Loader = require('./loader.js');
-var $ = require('jquery');
-var _ = require('underscore');
-var highlight = require('jquery-highlight');
-var BackboneSubset = require("Backbone.Subset");
-var Promise = require('bluebird');
+import Ctx from '../common/context.js';
+import i18n from '../utils/i18n.js';
+import EditableLSField from './reusableDataFields/editableLSField.js';
+import CKEditorLSField from './reusableDataFields/ckeditorLSField.js';
+import Permissions from '../utils/permissions.js';
+import PanelSpecTypes from '../utils/panelSpecTypes.js';
+import MessagesInProgress from '../objects/messagesInProgress.js';
+import SegmentList from './segmentList.js';
+import Announcements from './announcements.js';
+import Widget from '../models/widget.js';
+import AgentViews from './agent.js';
+import WidgetLinks from './widgetLinks.js';
+import WidgetButtons from './widgetButtons.js';
+import CollectionManager from '../common/collectionManager.js';
+import AssemblPanel from './assemblPanel.js';
+import Marionette from 'backbone.marionette';
+import AttachmentViews from './attachments.js';
+import ConfirmModal from './confirmModal.js';
+import AttachmentModels from '../models/attachments.js';
+import Loader from './loader.js';
+import $ from 'jquery';
+import _ from 'underscore';
+import highlight from 'jquery-highlight';
+import BackboneSubset from 'Backbone.Subset';
+import Promise from 'bluebird';
 
 var IdeaPanel = AssemblPanel.extend({
   constructor: function IdeaPanel() {
@@ -1077,4 +1077,4 @@ var IdeaPanel = AssemblPanel.extend({
 
 });
 
-module.exports = IdeaPanel;
+export default IdeaPanel;

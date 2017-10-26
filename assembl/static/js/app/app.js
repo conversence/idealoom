@@ -3,14 +3,14 @@
  * @module app.app
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var $ = require('jquery');
-var classlist = require('classlist-polyfill');
-var Raven = require('raven-js');
-var Radio = require('backbone.radio');
-var Types = require('./utils/types.js');
-var _ = require('underscore');
+import $ from 'jquery';
+import classlist from 'classlist-polyfill';
+import Raven from 'raven-js';
+import Radio from 'backbone.radio';
+import Types from './utils/types.js';
+import _ from 'underscore';
 
 
 var RootView = Marionette.View.extend({
@@ -82,7 +82,7 @@ var AppClass = Marionette.Application.extend({
     }
 
     if (activate_tour /*&& (currentUser.isUnknownUser() || currentUser.get('is_first_visit'))*/) {
-      var TourManager = require('./utils/tourManager.js');
+      var TourManager = require('./utils/tourManager.js').default;
       this.tourManager = new TourManager();
     }
 
@@ -138,4 +138,4 @@ _.extend(Backbone.Marionette.View.prototype, {
 
 var App = new AppClass();
 
-module.exports = App;
+export default App;

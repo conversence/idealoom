@@ -3,12 +3,11 @@
  * @module app.views.reusableDataFields.editableField
  */
 
-var $ = require('jquery');
-
-var Marionette = require('backbone.marionette');
-var _ = require('underscore');
-var Assembl = require('../../app.js');
-var Ctx = require('../../common/context.js');
+import $ from 'jquery';
+import Marionette from 'backbone.marionette';
+import _ from 'underscore';
+import Assembl from '../../app.js';
+import Ctx from '../../common/context.js';
 
 var EditableField = Marionette.View.extend({
   constructor: function EditableField() {
@@ -105,4 +104,4 @@ var EditableField = Marionette.View.extend({
 
 });
 
-module.exports = EditableField;
+export default EditableField;

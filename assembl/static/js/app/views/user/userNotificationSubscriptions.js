@@ -3,22 +3,22 @@
  * @module app.views.user.userNotificationSubscriptions
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var Assembl = require('../../app.js');
-var $ = require('jquery');
-var _ = require('underscore');
-var Promise = require('bluebird');
-var CollectionManager = require('../../common/collectionManager.js');
-var Ctx = require('../../common/context.js');
-var NotificationSubscription = require('../../models/notificationSubscription.js');
-var RolesModel = require('../../models/roles.js');
-var i18n = require('../../utils/i18n.js');
-var Roles = require('../../utils/roles.js');
-var Accounts = require('../../models/accounts.js');
-var UserNavigationMenu = require('./userNavigationMenu.js');
-var LoaderView = require('../loaderView.js');
-var Analytics = require('../../internal_modules/analytics/dispatcher.js');
+import Assembl from '../../app.js';
+import $ from 'jquery';
+import _ from 'underscore';
+import Promise from 'bluebird';
+import CollectionManager from '../../common/collectionManager.js';
+import Ctx from '../../common/context.js';
+import NotificationSubscription from '../../models/notificationSubscription.js';
+import RolesModel from '../../models/roles.js';
+import i18n from '../../utils/i18n.js';
+import Roles from '../../utils/roles.js';
+import Accounts from '../../models/accounts.js';
+import UserNavigationMenu from './userNavigationMenu.js';
+import LoaderView from '../loaderView.js';
+import Analytics from '../../internal_modules/analytics/dispatcher.js';
 
 /**
  * User notification
@@ -456,4 +456,4 @@ var userNotificationSubscriptions = Marionette.View.extend({
 
 });
 
-module.exports = userNotificationSubscriptions;
+export default userNotificationSubscriptions;

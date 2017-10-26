@@ -3,23 +3,23 @@
  * @module app.views.admin.adminTimelineEvents
  */
 
-var Assembl = require('../../app.js');
+import Assembl from '../../app.js';
 
-var Ctx = require('../../common/context.js');
-var i18n = require('../../utils/i18n.js');
-var EditableField = require('../reusableDataFields/editableField.js');
-var TimelineEvent = require('../../models/timeline.js');
-var LangString = require('../../models/langstring.js');
-var CollectionManager = require('../../common/collectionManager.js');
-var Marionette = require('backbone.marionette');
-var Growl = require('../../utils/growl.js');
-var SimpleLangStringEditPanel = require('../simpleLangStringEdit.js');
-var Moment = require('moment');
-var AdminNavigationMenu = require('./adminNavigationMenu.js');
-var $ = require('jquery');
-var _ = require('underscore');
-var LoaderView = require('../loaderView.js');
-var Promise = require('bluebird');
+import Ctx from '../../common/context.js';
+import i18n from '../../utils/i18n.js';
+import EditableField from '../reusableDataFields/editableField.js';
+import TimelineEvent from '../../models/timeline.js';
+import LangString from '../../models/langstring.js';
+import CollectionManager from '../../common/collectionManager.js';
+import Marionette from 'backbone.marionette';
+import Growl from '../../utils/growl.js';
+import SimpleLangStringEditPanel from '../simpleLangStringEdit.js';
+import Moment from 'moment';
+import AdminNavigationMenu from './adminNavigationMenu.js';
+import $ from 'jquery';
+import _ from 'underscore';
+import LoaderView from '../loaderView.js';
+import Promise from 'bluebird';
 
 
 /**
@@ -273,4 +273,4 @@ var TimelineEventsList = Marionette.CollectionView.extend({
 
 
 
-module.exports = AdminTimelineEventPanel;
+export default AdminTimelineEventPanel;

@@ -2,15 +2,15 @@
  * 
  * @module app.views.messageExportModal
  */
-var Backbone = require('backbone');
+import Backbone from 'backbone';
 
-var Marionette = require('backbone.marionette');
-var BackboneModal = require('backbone.modal');
-var i18n = require('../utils/i18n.js');
-var $ = require('jquery');
-var _ = require('underscore');
-var Source = require('../models/sources.js');
-var FacebookViews = require('./facebookViews.js');
+import Marionette from 'backbone.marionette';
+import BackboneModal from 'backbone.modal';
+import i18n from '../utils/i18n.js';
+import $ from 'jquery';
+import _ from 'underscore';
+import Source from '../models/sources.js';
+import FacebookViews from './facebookViews.js';
 
 var Modal = Backbone.Modal.extend({
   constructor: function Modal() {
@@ -84,4 +84,4 @@ var Modal = Backbone.Modal.extend({
     }
 });
 
-module.exports = Modal
+export default Modal;

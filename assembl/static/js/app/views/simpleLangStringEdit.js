@@ -3,18 +3,18 @@
  * @module app.views.admin.simpleLangStringEdit
  */
 
-var Assembl = require('../app.js');
+import Assembl from '../app.js';
 
-var Ctx = require('../common/context.js');
-var i18n = require('../utils/i18n.js');
-var EditableField = require('./reusableDataFields/editableField.js');
-var LangString = require('../models/langstring.js');
-var CollectionManager = require('../common/collectionManager.js');
-var Marionette = require('backbone.marionette');
-var Growl = require('../utils/growl.js');
-var $ = require('jquery');
-var _ = require('underscore');
-var Promise = require('bluebird');
+import Ctx from '../common/context.js';
+import i18n from '../utils/i18n.js';
+import EditableField from './reusableDataFields/editableField.js';
+import LangString from '../models/langstring.js';
+import CollectionManager from '../common/collectionManager.js';
+import Marionette from 'backbone.marionette';
+import Growl from '../utils/growl.js';
+import $ from 'jquery';
+import _ from 'underscore';
+import Promise from 'bluebird';
 
 
 /**
@@ -149,4 +149,4 @@ var LangStringEntryList = Marionette.CollectionView.extend({
   childView: LangStringEntryView,
 });
 
-module.exports = SimpleLangStringEditPanel;
+export default SimpleLangStringEditPanel;

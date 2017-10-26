@@ -3,19 +3,19 @@
  * @module app.models.widget
  */
 
-var _ = require('underscore');
+import _ from 'underscore';
 
-var Backbone = require("backbone");
-var BackboneSubset = require("Backbone.Subset");
-var Base = require("./base.js");
-var i18n = require('../utils/i18n.js');
-var Moment = require('moment');
-var Permissions = require('../utils/permissions.js');
-var Ctx = require("../common/context.js");
-var Assembl = require('../app.js');
-var Types = require('../utils/types.js');
-var LangString = require('../models/langstring.js');
-var TokenVoteSessionView = require('../views/tokenVoteSession.js');
+import Backbone from 'backbone';
+import BackboneSubset from 'Backbone.Subset';
+import Base from './base.js';
+import i18n from '../utils/i18n.js';
+import Moment from 'moment';
+import Permissions from '../utils/permissions.js';
+import Ctx from '../common/context.js';
+import Assembl from '../app.js';
+import Types from '../utils/types.js';
+import LangString from '../models/langstring.js';
+import TokenVoteSessionView from '../views/tokenVoteSession.js';
 
 /**
  * This represents a widget, a set of bundled functionality.
@@ -1356,7 +1356,7 @@ var WidgetSubset = Backbone.Subset.extend({
 });
 
 
-module.exports = {
+export default {
   Model: WidgetModel,
   Collection: WidgetCollection,
   WidgetSubset: WidgetSubset,

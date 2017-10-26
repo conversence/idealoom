@@ -3,16 +3,16 @@
  * @module app.views.agent
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var Assembl = require('../app.js');
-var _ = require('underscore');
-var $ = require('jquery');
-var Ctx = require('../common/context.js');
-var CollectionManager = require('../common/collectionManager.js');
-var i18n = require('../utils/i18n.js');
-var Permissions = require('../utils/permissions.js');
-var availableFilters = require('./postFilters.js');
+import Assembl from '../app.js';
+import _ from 'underscore';
+import $ from 'jquery';
+import Ctx from '../common/context.js';
+import CollectionManager from '../common/collectionManager.js';
+import i18n from '../utils/i18n.js';
+import Permissions from '../utils/permissions.js';
+import availableFilters from './postFilters.js';
 
 var AgentView = Marionette.View.extend({
   constructor: function AgentView() {
@@ -83,7 +83,7 @@ var AgentNameView = AgentView.extend({
 
 function showUserMessages(userModel) {
   var filters =  [{filterDef: availableFilters.POST_IS_FROM, value: userModel.id}];
-  var ModalGroup = require('./groups/modalGroup.js');
+  var ModalGroup = require('./groups/modalGroup.js').default;
   var modal_title = i18n.sprintf(i18n.gettext("All messages by %s"), userModel.get('name'));
   var modalFactory = ModalGroup.filteredMessagePanelFactory(modal_title, filters);
   var modal = modalFactory.modal;
@@ -92,7 +92,7 @@ function showUserMessages(userModel) {
   Assembl.rootView.showChildView('slider', modal);
 }
 
-module.exports = {
+export default {
   AgentAvatarView: AgentAvatarView,
   AgentNameView: AgentNameView,
   showUserMessages: showUserMessages

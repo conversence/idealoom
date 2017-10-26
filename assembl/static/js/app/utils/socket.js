@@ -3,11 +3,11 @@
  * @module app.utils.socket
  */
 
-var _ = require('underscore');
+import _ from 'underscore';
 
-var SockJS = require('sockjs-client');
-var App = require('../app.js');
-var Ctx = require('../common/context.js');
+import SockJS from 'sockjs-client';
+import App from '../app.js';
+import Ctx from '../common/context.js';
 
 /**
  * @class app.utils.socket.Socket
@@ -132,7 +132,7 @@ Socket.prototype.onClose = function(ev) {
  * @param  {Object} item
  */
 Socket.prototype.processData = function(item) {
-  var CollectionManager = require('../common/collectionManager.js');
+  var CollectionManager = require('../common/collectionManager.js').default;
   var collectionManager = new CollectionManager();
   var collPromise = collectionManager.getCollectionPromiseByType(item);
 
@@ -159,4 +159,4 @@ Socket.prototype.processData = function(item) {
   });
 };
 
-module.exports = Socket;
+export default Socket;

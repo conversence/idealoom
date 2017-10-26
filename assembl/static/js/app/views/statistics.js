@@ -3,17 +3,19 @@
  * @module app.views.statistics
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var Assembl = require('../app.js');
-var Ctx = require('../common/context.js');
-var CollectionManager = require('../common/collectionManager.js');
-var $ = require('jquery');
-var _ = require('underscore');
-var d3 = require('d3');
-var i18n = require('../utils/i18n.js');
-var Moment = require('moment');
-var Promise = require('bluebird');
+import Assembl from '../app.js';
+import Ctx from '../common/context.js';
+import CollectionManager from '../common/collectionManager.js';
+import $ from 'jquery';
+import _ from 'underscore';
+import { arc as d3arc, area, axisBottom, axisLeft, bisector, curveLinear, format, interpolate,
+        line as d3line, max as d3max, mouse, scaleLinear, scaleOrdinal, scaleTime, schemeCategory10, select,
+        selectAll, timeDay, timeMonth, timeWeek } from 'd3';
+import i18n from '../utils/i18n.js';
+import Moment from 'moment';
+import Promise from 'bluebird';
 
 var Statistics = Marionette.View.extend({
   constructor: function Statistics() {
@@ -106,15 +108,15 @@ var Statistics = Marionette.View.extend({
     function draw() {
       //var data = generateData();
       var margin = 30;
-      var max = d3.max(data, function(d) {
+      var max = d3max(data, function(d) {
         return d.value
       });
       var min = 0;
       var pointRadius = 3;
-      var x = d3.scaleTime().range([0, w - margin * 2]).domain([data[0].date, data[data.length - 1].date]);
-      var y = d3.scaleLinear().range([h - margin * 2, 0]).domain([min, max]);
+      var x = scaleTime().range([0, w - margin * 2]).domain([data[0].date, data[data.length - 1].date]);
+      var y = scaleLinear().range([h - margin * 2, 0]).domain([min, max]);
 
-      var xAxis = d3.axisBottom(x).tickSize(h - margin * 2).tickPadding(10).tickFormat(function(d) {
+      var xAxis = axisBottom(x).tickSize(h - margin * 2).tickPadding(10).tickFormat(function(d) {
         return Ctx.getNiceDate(d);
       });
 
@@ -122,20 +124,20 @@ var Statistics = Marionette.View.extend({
       var time_span = data[data.length - 1].date - data[0].date; // in ms
       var time_span_in_days = time_span / (1000 * 60 * 60 * 24);
       if (time_span_in_days <= 30)
-          xAxis.ticks(d3.timeDay, 5);
+          xAxis.ticks(timeDay, 5);
       else if (time_span_in_days > 30 && time_span_in_days <= 3 * 30)
-          xAxis.ticks(d3.timeWeek, 2);
+          xAxis.ticks(timeWeek, 2);
       else if (time_span_in_days > 3 * 30 && time_span_in_days <= 6 * 30)
-          xAxis.ticks(d3.timeMonth, 1);
+          xAxis.ticks(timeMonth, 1);
       else
           xAxis.ticks(4);
 
-      var yAxis = d3.axisLeft(y).tickSize(-w + margin * 2).tickPadding(10).tickFormat(d3.format("d"));
+      var yAxis = axisLeft(y).tickSize(-w + margin * 2).tickPadding(10).tickFormat(format("d"));
       var t = null;
       var chart_div = that.$('.chart');
 
       if (chart_div.empty()) {
-        svg_orig = d3.select(chart_div[0]).append('svg:svg')
+        svg_orig = select(chart_div[0]).append('svg:svg')
             .attr('width', w)
             .attr('height', h)
             .attr('class', 'viz');
@@ -143,11 +145,11 @@ var Statistics = Marionette.View.extend({
             .attr('transform', 'translate(' + margin + ',' + margin + ')')
         ;
       } else {
-        svg_orig = d3.select(chart_div).select('svg');
+        svg_orig = select(chart_div).select('svg');
         svg = svg_orig.select('g');
       }
 
-      var bisectDate = d3.bisector(function(d) {
+      var bisectDate = bisector(function(d) {
         return d.date;
       }).left;
 
@@ -181,7 +183,7 @@ var Statistics = Marionette.View.extend({
       var dataLines = dataLinesGroup.selectAll('.data-line')
           .data([data]);
 
-      var line = d3.line()
+      var line = d3line()
 
           // assign the X function to plot our line as we wish
                 .x(function(d, i) {
@@ -196,10 +198,10 @@ var Statistics = Marionette.View.extend({
                   // return the Y coordinate where we want to plot this datapoint
                   return y(d.value);
                 })
-                .curve(d3.curveLinear);
+                .curve(curveLinear);
 
-      var garea = d3.area()
-          .curve(d3.curveLinear)
+      var garea = area()
+          .curve(curveLinear)
                 .x(function(d) {
                   // verbose logging to show what's actually being done
                   return x(d.date);
@@ -239,7 +241,7 @@ var Statistics = Marionette.View.extend({
                 .style('opacity', 1e-6)
                 .remove();
 
-      d3.selectAll(".area").transition()
+      selectAll(".area").transition()
           .duration(transitionDuration)
           .attr("d", garea(data));
 
@@ -384,7 +386,7 @@ var Statistics = Marionette.View.extend({
       var data_length = data.length;
 
       function mouse_move() {
-        var mouse_position = d3.mouse(this);
+        var mouse_position = mouse(this);
         var x_position = mouse_position[0];
         var xInDomain = x.invert(x_position);
         var i = Math.min(data_length - 1, bisectDate(data, xInDomain, 1));
@@ -459,9 +461,9 @@ var Statistics = Marionette.View.extend({
 
       // var max_level = 4;
       var max_level = 2;
-      var color = d3.scaleOrdinal(d3.schemeCategory10);
+      var color = scaleOrdinal(schemeCategory10);
 
-      var svg_orig = d3.select(plot).append("svg")
+      var svg_orig = select(plot).append("svg")
           .attr("width", width)
           .attr("height", height);
       var svg = svg_orig.append("g")
@@ -508,7 +510,7 @@ var Statistics = Marionette.View.extend({
       //var thickness = width/2.0/(max_level+2)*1.1;
       var thickness = inner_width / 2.0 / (max_level + 1) * 1.1;
 
-      var arc = d3.arc()
+      var arc = d3arc()
                 .startAngle(function(d) {
                   if (d[3] == 0) {
                     return d[0];
@@ -578,7 +580,7 @@ var Statistics = Marionette.View.extend({
       addPercentText();
 
       var legend_div = that.$('.' + element_name + '_legend')[0];
-      var legend = d3.select(legend_div);
+      var legend = select(legend_div);
 
       remove_legend(null);
 
@@ -685,10 +687,10 @@ var Statistics = Marionette.View.extend({
 
       function rebaseTween(new_ref) {
         return function(d) {
-          var level = d3.interpolate(get_level(d, ref), get_level(d, new_ref));
-          var start_deg = d3.interpolate(get_start_angle(d, ref), get_start_angle(d, new_ref));
-          var stop_deg = d3.interpolate(get_stop_angle(d, ref), get_stop_angle(d, new_ref));
-          var opacity = d3.interpolate(100, 0);
+          var level = interpolate(get_level(d, ref), get_level(d, new_ref));
+          var start_deg = interpolate(get_start_angle(d, ref), get_start_angle(d, new_ref));
+          var stop_deg = interpolate(get_stop_angle(d, ref), get_stop_angle(d, new_ref));
+          var opacity = interpolate(100, 0);
           return function(t) {
             return arc([start_deg(t), stop_deg(t), d[2], level(t)]);
           }
@@ -1191,4 +1193,4 @@ var Statistics = Marionette.View.extend({
 
 });
 
-module.exports = Statistics;
+export default Statistics;

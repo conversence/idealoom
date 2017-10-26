@@ -6,7 +6,7 @@
  * Wrapper for Jed
  *
  * */
-var Jed = require('jed');
+import Jed from 'jed';
 /* json is a global set in javascript.jinja2 */
 
-module.exports = new Jed(json);
+export default new Jed(json);

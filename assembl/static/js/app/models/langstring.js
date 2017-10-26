@@ -2,12 +2,12 @@
  * Manage string translation
  * @module app.models.langstring
  */
-var _ = require('underscore');
+import _ from 'underscore';
 
-var Base = require('./base.js');
-var Ctx = require('../common/context.js');
-var i18n = require('../utils/i18n.js');
-var Types = require('../utils/types.js');
+import Base from './base.js';
+import Ctx from '../common/context.js';
+import i18n from '../utils/i18n.js';
+import Types from '../utils/types.js';
 /**
  * @class app.models.langstring.LocaleUtils
  */
@@ -547,7 +547,7 @@ var LangStringCollection = Base.Collection.extend({
   url: Ctx.getApiV2Url("LangString"),
 });
 
-module.exports = {
+export default {
   Model: LangString,
   Collection: LangStringCollection,
   EntryModel: LangStringEntry,

@@ -3,15 +3,15 @@
  * @module app.views.admin.adminNotificationSubscriptions
  */
 
-var Marionette = require('backbone.marionette');
+import Marionette from 'backbone.marionette';
 
-var CollectionManager = require('../../common/collectionManager.js');
-var Permissions = require('../../utils/permissions.js');
-var Ctx = require('../../common/context.js');
-var i18n = require('../../utils/i18n.js');
-var $ = require('jquery');
-var Promise = require('bluebird');
-var AdminNavigationMenu = require('./adminNavigationMenu.js');
+import CollectionManager from '../../common/collectionManager.js';
+import Permissions from '../../utils/permissions.js';
+import Ctx from '../../common/context.js';
+import i18n from '../../utils/i18n.js';
+import $ from 'jquery';
+import Promise from 'bluebird';
+import AdminNavigationMenu from './adminNavigationMenu.js';
 
 var NotificationView = Marionette.View.extend({
   constructor: function NotificationView() {
@@ -160,4 +160,4 @@ var adminNotificationSubscriptions = Marionette.View.extend({
 
 });
 
-module.exports = adminNotificationSubscriptions;
+export default adminNotificationSubscriptions;

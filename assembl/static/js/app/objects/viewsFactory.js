@@ -3,21 +3,21 @@
  * @module app.objects.viewsFactory
  */
 
-var _ = require('underscore');
+import _ from 'underscore';
 
-var Types = require('../utils/types.js');
-var AssemblPanel = require('../views/assemblPanel.js');
-var AboutNavPanel = require('../views/navigation/about.js');
-var ContextPanel = require('../views/contextPage.js');
-var IdeaList = require('../views/ideaList.js');
-var IdeaPanel = require('../views/ideaPanel.js');
-var MessageList = require('../views/messageList.js');
-var NavigationView = require('../views/navigation/navigation.js');
-var SegmentList = require('../views/segmentList.js');
-var SynthesisNavPanel = require('../views/navigation/synthesisInNavigation.js');
-var SynthesisPanel = require('../views/synthesisPanel.js');
-var CollectionManager = require('../common/collectionManager.js');
-var ExternalVisualizationPanels = require('../views/externalVisualization.js');
+import Types from '../utils/types.js';
+import AssemblPanel from '../views/assemblPanel.js';
+import AboutNavPanel from '../views/navigation/about.js';
+import ContextPanel from '../views/contextPage.js';
+import IdeaList from '../views/ideaList.js';
+import IdeaPanel from '../views/ideaPanel.js';
+import MessageList from '../views/messageList.js';
+import NavigationView from '../views/navigation/navigation.js';
+import SegmentList from '../views/segmentList.js';
+import SynthesisNavPanel from '../views/navigation/synthesisInNavigation.js';
+import SynthesisPanel from '../views/synthesisPanel.js';
+import CollectionManager from '../common/collectionManager.js';
+import ExternalVisualizationPanels from '../views/externalVisualization.js';
 
 /*
  * A registry of AssemblView subclasses implementing a panelSpec,
@@ -77,4 +77,4 @@ function decodeUrlData(code, data) {
   }
 }
 
-module.exports = {byPanelSpec: panelViewByPanelSpec, typeByCode: typeByCode, decodeUrlData: decodeUrlData };
+export default {byPanelSpec: panelViewByPanelSpec, typeByCode: typeByCode, decodeUrlData: decodeUrlData };

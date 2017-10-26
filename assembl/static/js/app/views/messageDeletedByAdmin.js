@@ -3,9 +3,9 @@
  * @module app.views.message
  */
 
-var i18n = require('../utils/i18n.js');
+import i18n from '../utils/i18n.js';
 
-var MessageDeletedByUserView = require('./messageDeletedByUser.js');
+import MessageDeletedByUserView from './messageDeletedByUser.js';
 
 
 
@@ -20,5 +20,5 @@ var MessageDeletedByAdminView = MessageDeletedByUserView.extend({
   body: i18n.gettext("This message has been deleted by an administrator.")
 });
 
-module.exports = MessageDeletedByAdminView;
+export default MessageDeletedByAdminView;
 

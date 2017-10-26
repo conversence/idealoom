@@ -3,11 +3,11 @@
  * @module app.models.synthesis
  */
 
-var Base = require('./base.js');
+import Base from './base.js';
 
-var Ctx = require('../common/context.js');
-var Idea = require("./idea.js");
-var i18n = require('../utils/i18n.js');
+import Ctx from '../common/context.js';
+import Idea from './idea.js';
+import i18n from '../utils/i18n.js';
 
 
 /**
@@ -137,7 +137,7 @@ var SynthesisCollection = Base.Collection.extend({
   }
 });
 
-module.exports = {
+export default {
   Model: SynthesisModel,
   Collection: SynthesisCollection
 };
