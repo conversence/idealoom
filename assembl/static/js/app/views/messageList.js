@@ -320,15 +320,15 @@ var MessageList = BaseMessageList.extend({
       }
     },
 
-  serializeData: function() {
-    var data = BaseMessageList.prototype.serializeData.apply(this, arguments);
+  serializeData: function(...args) {
+    var data = BaseMessageList.prototype.serializeData.apply(this, args);
     data.inspireMeLink = this.inspireMeLink;
     return data;
   },
 
-  onBeforeRender: function() {
+  onBeforeRender: function(...args) {
       //Save some state from the previous render
-      BaseMessageList.prototype.onBeforeRender.apply(this, arguments);
+      BaseMessageList.prototype.onBeforeRender.apply(this, args);
 
       if (this.currentQuery.isQueryValid()) {
         this.setLoading(false);
@@ -357,8 +357,8 @@ var MessageList = BaseMessageList.extend({
       //console.log("onBeforeRender:  template is now:", this.template);
     },
 
-  onRender: function() {
-    BaseMessageList.prototype.onRender.apply(this, arguments);
+  onRender: function(...args) {
+    BaseMessageList.prototype.onRender.apply(this, args);
     var that = this;
     var collectionManager = new CollectionManager();
     var renderId = _.clone(this._renderId);

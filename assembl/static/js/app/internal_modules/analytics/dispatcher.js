@@ -16,8 +16,8 @@ var dependencies = ['underscore', 'abstract', 'piwik'];
     module.exports = factory(require('underscore'), require('./abstract.js'), require('./piwik.js'));
   } else if(typeof define === 'function' && define.amd) {
     // AMD. Register as an anonymous module.
-    define(dependencies, function() {
-      return (root[moduleName] = factory(arguments));
+    define(dependencies, function(...args) {
+      return root[moduleName] = factory(args);
     });
   } else {
     // Browser global
@@ -27,11 +27,11 @@ var dependencies = ['underscore', 'abstract', 'piwik'];
   }
 })(this, function(_, Wrapper, Piwik){ //update args to factory here
 
-  var AnalyticsDispatcher = function(){
+  var AnalyticsDispatcher = function(...args) {
     if(this.debug) {
       console.log("AnalyticsDispatcher constructor called");
     }
-    Wrapper.call(this, arguments);  
+    Wrapper.call(this, args);  
     this._observers = [];
 
     /**
@@ -75,7 +75,7 @@ var dependencies = ['underscore', 'abstract', 'piwik'];
         if(observer[methodName]===undefined) {
           throw new Error('Method ' + methodName + ' does not exist');
         }
-        observer[methodName].apply(observer, args);
+        observer[methodName](...args);
       });
     },
 

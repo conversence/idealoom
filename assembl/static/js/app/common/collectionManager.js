@@ -391,9 +391,9 @@ var CollectionManager = Marionette.Object.extend({
         function Defer() {
           var resolve;
           var reject;
-          var promise = new Promise(function() {
-            resolve = arguments[0];
-            reject = arguments[1];
+          var promise = new Promise(function(...args) {
+            resolve = args[0];
+            reject = args[1];
           });
           return {
             resolve: resolve,

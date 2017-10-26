@@ -200,8 +200,8 @@ var groupContent = Marionette.View.extend({
   /**
    * @params panelSpecTypes
    */
-  removePanels: function() {
-    this.model.removePanels.apply(this.model, arguments);
+  removePanels: function(...args) {
+    this.model.removePanels(...args);
   },
   addPanel: function(options, position) {
     this.model.addPanel(options, position);

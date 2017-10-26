@@ -111,7 +111,7 @@ _.extend(Backbone.Marionette.View.prototype, {
     return this.isRendered() && !this.isDestroyed();
   },
 
-  listenTo: function() {
+  listenTo: function(...args) {
     var that = this;
     // Often, we listen on a promise in the initalizer. The view may already be dead.
     Raven.context(function() {
@@ -120,10 +120,10 @@ _.extend(Backbone.Marionette.View.prototype, {
       }
     });
 
-    Object.getPrototypeOf(Backbone.Marionette.View.prototype).listenTo.apply(this, arguments);
+    Object.getPrototypeOf(Backbone.Marionette.View.prototype).listenTo.apply(this, args);
   },
 
-  listenToOnce: function() {
+  listenToOnce: function(...args) {
     var that = this;
     // Often, we listen on a promise in the initalizer. The view may already be dead.
     Raven.context(function() {
@@ -132,7 +132,7 @@ _.extend(Backbone.Marionette.View.prototype, {
       }
     });
 
-    Object.getPrototypeOf(Backbone.Marionette.View.prototype).listenToOnce.apply(this, arguments);
+    Object.getPrototypeOf(Backbone.Marionette.View.prototype).listenToOnce.apply(this, args);
   },
 });
 

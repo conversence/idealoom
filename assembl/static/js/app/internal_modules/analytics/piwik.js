@@ -16,8 +16,8 @@ var dependencies = ['underscore', 'abstract'];
     module.exports = factory(require('underscore'), require('./abstract.js'));
   } else if (typeof define === 'function' && define.amd){
     // AMD. Register as an anonymous module.
-    define(dependencies, function() {
-      return (root[moduleName] = factory(arguments));
+    define(dependencies, function(...args) {
+      return root[moduleName] = factory(args);
     });
   } else {
     // Browser global
@@ -27,8 +27,8 @@ var dependencies = ['underscore', 'abstract'];
   }
 })(this, function(_, Wrapper) { //update args to factory here
 
-  var Piwik = function(){
-    Wrapper.call(this, arguments);
+  var Piwik = function(...args) {
+    Wrapper.call(this, args);
   }
 
   Piwik.prototype = Object.create(Wrapper.prototype);

@@ -445,8 +445,8 @@ var ScalarPreferenceView = BasePreferenceView.extend({
     BasePreferenceView.apply(this, arguments);
   },
   template: '#tmpl-scalarPreferenceView',
-  serializeData: function() {
-    var data = BasePreferenceView.prototype.serializeData.apply(this, arguments);
+  serializeData: function(...args) {
+    var data = BasePreferenceView.prototype.serializeData.apply(this, args);
     // Note: This is unsorted. Maybe should by value?
     data.scalarOptions = data.preferenceData.scalar_values;
     return data;
@@ -463,8 +463,8 @@ var LocalePreferenceView = ScalarPreferenceView.extend({
   constructor: function LocalePreferenceView() {
     ScalarPreferenceView.apply(this, arguments);
   },
-  serializeData: function() {
-    var data = ScalarPreferenceView.prototype.serializeData.apply(this, arguments);
+  serializeData: function(...args) {
+    var data = ScalarPreferenceView.prototype.serializeData.apply(this, args);
     data.scalarOptions = Ctx.getLocaleToLanguageNameCache();
     return data;
   },
@@ -480,8 +480,8 @@ var PermissionPreferenceView = ScalarPreferenceView.extend({
   constructor: function PermissionPreferenceView() {
     ScalarPreferenceView.apply(this, arguments);
   },
-  serializeData: function() {
-    var data = ScalarPreferenceView.prototype.serializeData.apply(this, arguments);
+  serializeData: function(...args) {
+    var data = ScalarPreferenceView.prototype.serializeData.apply(this, args);
     data.scalarOptions = {};
     _.each(Permissions, function(key) {
       data.scalarOptions[key] = key;
@@ -504,8 +504,8 @@ var RolePreferenceView = ScalarPreferenceView.extend({
     ScalarPreferenceView.prototype.initialize.apply(this, arguments);
     this.roles = Ctx.getRoleNames();
   },
-  serializeData: function() {
-    var data = ScalarPreferenceView.prototype.serializeData.apply(this, arguments);
+  serializeData: function(...args) {
+    var data = ScalarPreferenceView.prototype.serializeData.apply(this, args);
     data.scalarOptions = {};
     _.each(this.roles, function(key) {
       data.scalarOptions[key] = key;

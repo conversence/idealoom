@@ -16,8 +16,8 @@ var dependencies = [];
     module.exports = factory();
   } else if (typeof define === 'function' && define.amd){
     // AMD. Register as an anonymous module.
-    define(dependencies, function() {
-      return (root[moduleName] = factory(arguments));
+    define(dependencies, function(...args) {
+      return root[moduleName] = factory(args);
     });
   } else {
     // Browser global

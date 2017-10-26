@@ -38,8 +38,8 @@ var attachmentPurposeTypes = {
 
 //For IE support...sigh
 if (!String.prototype.includes) {
-    String.prototype.includes = function() {
-      return String.prototype.indexOf.apply(this, arguments) !== -1;
+    String.prototype.includes = function(...args) {
+      return String.prototype.indexOf.apply(this, args) !== -1;
     };
 }
 
