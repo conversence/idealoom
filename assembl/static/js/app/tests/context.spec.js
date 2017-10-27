@@ -6,7 +6,7 @@
 
 import $ from 'jquery';
 import Ctx from '../common/context.js';
-import expect from 'chai';
+import { expect } from 'chai';
 
 // Fixtures
 var txt = '<script id="tmpl-test" type="text/template">test something</script>';

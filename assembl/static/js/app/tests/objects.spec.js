@@ -4,7 +4,7 @@
  */
 
 import panelViewByPanelSpec from '../objects/viewsFactory.js';
-import expect from 'chai';
+import { expect } from 'chai';
 
 describe('Objects Specs', function() {
 

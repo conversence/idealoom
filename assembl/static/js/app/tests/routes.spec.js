@@ -4,7 +4,7 @@
  */
 
 import Router from '../router.js';
-import expect from 'chai';
+import { expect } from 'chai';
 
 describe('Routes Specs', function() {
 

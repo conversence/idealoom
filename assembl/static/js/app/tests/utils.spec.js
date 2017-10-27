@@ -5,7 +5,7 @@
 
 import $ from 'jquery';
 import PanelSpecTypes from '../utils/panelSpecTypes.js';
-import expect from 'chai';
+import { expect } from 'chai';
 
 describe('Utils module', function() {
 

@@ -3,7 +3,7 @@
  * @module app.tests.views.spec
  */
 
-import expect from 'chai';
+import { expect } from 'chai';
 import ViewsFactory from '../objects/viewsFactory.js';
 import CollectionManager from '../common/collectionManager.js';
 import GroupState from '../models/groupState.js';

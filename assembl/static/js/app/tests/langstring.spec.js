@@ -16,7 +16,7 @@ import userLanguagePreferencesJson from './fixtures/languagePreferences.json';
 import langstringEntriesJson from './fixtures/langstringEntry.json';
 import localsJson from './fixtures/languageLocales.json';
 import langstringJson from './fixtures/langstring.json';
-import assert from 'chai';
+import { assert } from 'chai';
 
 /**
  * These tests depends on the server to supply several peices of logic to the

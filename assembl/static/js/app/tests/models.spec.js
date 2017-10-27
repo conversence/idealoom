@@ -7,14 +7,13 @@ import _ from 'underscore';
 
 import Promise from 'bluebird';
 import Agent from '../models/agents.js';
-import chai from 'chai';
-var expect = chai.expect;
-import chaiAsPromised from 'chai-as-promised';
 import CollectionManager from '../common/collectionManager.js';
-var collectionManager = new CollectionManager();
 import mockServer from './mock_server.js';
+import chai from 'chai';
+import chaiAsPromised from 'chai-as-promised';
 
-chai.use(chaiAsPromised);
+const expect = chai.use(chaiAsPromised).expect
+const collectionManager = new CollectionManager();
 
 describe('Models Specs', function() {
 
