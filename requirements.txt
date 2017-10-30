@@ -24,7 +24,7 @@ colander==1.4
 colour==0.1.4
 contextlib2==0.5.5
 cornice==2.4.0
--e git+https://github.com/maparent/cornice.ext.sphinx.git@cornice_sphinx_services#egg=cornice_sphinx
+cornice_sphinx==0.2
 cov-core==1.15.0
 coverage==4.4.1
 cryptography==2.1.1
