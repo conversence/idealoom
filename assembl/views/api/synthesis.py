@@ -7,7 +7,8 @@ from cornice import Service
 
 from . import API_DISCUSSION_PREFIX
 from assembl.auth import P_READ, P_EDIT_SYNTHESIS
-from assembl.models import Synthesis
+from assembl.auth.util import get_permissions
+from assembl.models import Synthesis, LangString
 
 
 syntheses = Service(name='syntheses',
@@ -60,11 +61,18 @@ def save_synthesis(request):
         raise HTTPBadRequest("Synthesis with id '%s' not found." % synthesis_id)
 
     synthesis_data = json.loads(request.body)
+    user_id = authenticated_userid(request)
+    permissions = get_permissions(user_id, discussion.id, synthesis)
 
-    # TODO this is now langstrings, adapt it like we did for idea
-    synthesis.subject = synthesis_data.get('subject')
-    synthesis.introduction = synthesis_data.get('introduction')
-    synthesis.conclusion = synthesis_data.get('conclusion')
+    for key in ('subject', 'introduction', 'conclusion'):
+        if key in synthesis_data:
+            ls_data = synthesis_data[key]
+            if ls_data is None:
+                continue
+            assert isinstance(ls_data, dict)
+            current = LangString.create_from_json(
+                ls_data, user_id, permissions=permissions)
+            setattr(synthesis, key, current)
 
     Synthesis.default_db.add(synthesis)
     Synthesis.default_db.flush()
