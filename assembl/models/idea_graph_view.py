@@ -23,6 +23,7 @@ import lxml.html as htmlt
 
 from . import DiscussionBoundBase, OriginMixin
 from .discussion import Discussion
+from .langstrings import LangString
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..auth import (
     CrudPermissions, P_ADMIN_DISC, P_EDIT_SYNTHESIS)
@@ -456,9 +457,30 @@ class Synthesis(ExplicitSubGraphView):
         onupdate='CASCADE'
     ), primary_key=True)
 
-    subject = Column(UnicodeText)
-    introduction = Column(UnicodeText)
-    conclusion = Column(UnicodeText)
+    subject_id = Column(
+        Integer(), ForeignKey(LangString.id))
+    introduction_id = Column(
+        Integer(), ForeignKey(LangString.id))
+    conclusion_id = Column(
+        Integer(), ForeignKey(LangString.id))
+    subject = relationship(
+        LangString,
+        lazy="subquery", single_parent=True,
+        primaryjoin=subject_id == LangString.id,
+        backref=backref("synthesis_from_subject", lazy="dynamic"),
+        cascade="all, delete-orphan")
+    introduction = relationship(
+        LangString,
+        lazy="subquery", single_parent=True,
+        primaryjoin=introduction_id == LangString.id,
+        backref=backref("synthesis_from_introduction", lazy="dynamic"),
+        cascade="all, delete-orphan")
+    conclusion = relationship(
+        LangString,
+        lazy="subquery", single_parent=True,
+        primaryjoin=conclusion_id == LangString.id,
+        backref=backref("synthesis_from_conclusion", lazy="dynamic"),
+        cascade="all, delete-orphan")
 
     __mapper_args__ = {
         'polymorphic_identity': 'synthesis',
@@ -466,9 +488,9 @@ class Synthesis(ExplicitSubGraphView):
 
     def copy(self):
         retval = ExplicitSubGraphView.copy(self)
-        retval.subject = self.subject
-        retval.introduction = self.introduction
-        retval.conclusion = self.conclusion
+        retval.subject = self.subject.clone()
+        retval.introduction = self.introduction.clone()
+        retval.conclusion = self.conclusion.clone()
         return retval
 
     def publish(self):
@@ -555,10 +577,13 @@ class Synthesis(ExplicitSubGraphView):
     @as_native_str()
     def __repr__(self):
         r = super(Synthesis, self).__repr__()
-        subject = self.subject or ""
+        subject = self.subject.first_original().value if self.subject else ""
         return r[:-1] + subject + ">"
 
     crud_permissions = CrudPermissions(P_EDIT_SYNTHESIS)
+
+LangString.setup_ownership_load_event(
+    Synthesis, ['subject', 'introduction', 'conclusion'])
 
 
 class SynthesisHtmlizationVisitor(IdeaVisitor):
