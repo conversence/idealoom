@@ -59,6 +59,9 @@ changes.socket = ipc:///tmp/assembl_changes/5
 # 8119: testing
 # 8111-8118: production
 circus__webapp_port = 8111
+# Name of the application for configuration files (currently statsd)
+# UNIQUE_PER_SERVER
+instance_name = idealoom
 
 mac = false
 _uses_apache = false

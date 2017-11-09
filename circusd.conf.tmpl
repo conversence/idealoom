@@ -16,8 +16,7 @@ use = circus.plugins.statsd.FullStats
 host = localhost
 port = 8125
 sample_rate = 1.0
-application_name = idealoom
-
+application_name = %(instance_name)s
 
 [watcher:celery_imap]
 working_dir = %(here)s

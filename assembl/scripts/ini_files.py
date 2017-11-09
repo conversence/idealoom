@@ -68,6 +68,7 @@ DEFAULTS = {
     'autostart_uwsgi': 'false',
     'autostart_metrics_server': 'false',
     'autostart_edgesense_server': 'false',
+    'instance_name': 'idealoom',
 }
 
 
@@ -161,6 +162,7 @@ def generate_ini_files(config, config_fname):
             SECTION, 'celery_tasks.notify.num_workers'),
         'TRANSLATE_CELERY_NUM_WORKERS': config.get(
             SECTION, 'celery_tasks.translate.num_workers'),
+        'instance_name': config.get(SECTION, 'instance_name'),
         'here': dirname(abspath('circusd.conf')),
         'CONFIG_FILE': config_fname,
         'autostart_metrics_server': (config.get(
