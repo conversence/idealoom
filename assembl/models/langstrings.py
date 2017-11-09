@@ -172,6 +172,8 @@ class LangString(Base):
 
     def remove_translations_of(self, entry):
         """Remove all translations based on this code."""
+        if entry.id is None:
+            return
         for trans in self.entries[:]:
             if trans.mt_trans_of_id == entry.id:
                 trans.delete()
