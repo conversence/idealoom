@@ -52,6 +52,13 @@ changes.websocket.port = 8090
 # /3 thru /4: reserved for automated testing
 # /5-: production
 changes.socket = ipc:///tmp/assembl_changes/5
+# Circus web port
+# UNIQUE_PER_SERVER
+# Convention:
+# 8110: development
+# 8119: testing
+# 8111-8118: production
+circus__webapp_port = 8111
 
 mac = false
 _uses_apache = false

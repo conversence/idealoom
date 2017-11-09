@@ -55,7 +55,7 @@ circus__autostart_celery_imap = false
 circus__autostart_source_reader = false
 circus__use_statsd = false
 # UNIQUE_PER_SERVER
-circus__webapp_port = 8111
+circus__webapp_port = 8110
 
 _uses_ngnix = false
 _uses_uwsgi = false
