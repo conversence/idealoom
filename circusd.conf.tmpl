@@ -252,6 +252,8 @@ stderr_stream.backup_count = 3
 [watcher:metrics]
 working_dir = %(metrics_code_dir)s
 cmd = %(metrics_cl)s -l %(metrics_code_dir)s/metrics-startup.lisp
+copy_env = true
+close_child_stdin = false
 autostart = %(autostart_metrics_server)s
 stdout_stream.class = FileStream
 stdout_stream.filename = %(here)s/var/log/metrics.log
@@ -262,9 +264,14 @@ stderr_stream.filename = %(here)s/var/log/metrics.err.log
 stderr_stream.max_bytes = 1073741824
 stderr_stream.backup_count = 3
 
+[env:metrics]
+LC_CTYPE = %(lcctype)s
+
 [watcher:metrics_py]
 working_dir = %(metrics_code_dir)s
-cmd =  %(metrics_code_dir)s/startup.py
+cmd = python %(metrics_code_dir)s/startup.py
+virtualenv = %(VIRTUAL_ENV)s
+copy_env = true
 autostart = %(autostart_metrics_server)s
 stdout_stream.class = FileStream
 stdout_stream.filename = %(here)s/var/log/metrics_py.log
@@ -275,19 +282,5 @@ stderr_stream.filename = %(here)s/var/log/metrics_py.err.log
 stderr_stream.max_bytes = 1073741824
 stderr_stream.backup_count = 3
 
-[watcher:edgesense]
-%(edgesense_venv)s
-copy_env = True
-cmd = edgesense_catalyst_server
-autostart = %(autostart_edgesense_server)s
-stdout_stream.class = FileStream
-stdout_stream.filename = %(here)s/var/log/edgesense.log
-stdout_stream.max_bytes = 1073741824
-stdout_stream.backup_count = 3
-stderr_stream.class = FileStream
-stderr_stream.filename = %(here)s/var/log/edgesense.err.log
-stderr_stream.max_bytes = 1073741824
-stderr_stream.backup_count = 3
-
-[env:edgesense]
+[env:metrics_py]
 LC_CTYPE = %(lcctype)s
