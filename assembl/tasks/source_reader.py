@@ -24,7 +24,7 @@ from sqlalchemy import event, inspect
 from sqlalchemy.exc import TimeoutError
 
 from assembl.tasks import configure
-from assembl.lib.raven_client import capture_exception
+from assembl.lib.raven_client import setup_raven, capture_exception
 from assembl.lib.config import set_config
 from assembl.lib.enum import OrderedEnum
 from assembl.lib.sqla import configure_engine
@@ -583,6 +583,7 @@ if __name__ == '__main__':
     registry = getGlobalSiteManager()
     registry.settings = settings
     set_config(settings)
+    setup_raven(settings)
     fileConfig(config_file_name)
     # set the basic session maker without zope or autoflush
     engine = configure_engine(settings, False, autoflush=False, max_overflow=20)
