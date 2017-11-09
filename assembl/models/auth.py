@@ -780,7 +780,7 @@ class User(NamedClassMixin, OriginMixin, AgentProfile):
                 role.user = self
             for role in other_user.local_roles[:]:
                 role.user = self
-            for post in other_profile.posts_moderated[:]:
+            for post in other_user.posts_moderated[:]:
                 post.moderator = self
                 post.moderator_id = self.id
             for announcement in other_user.announcements_created[:]:
