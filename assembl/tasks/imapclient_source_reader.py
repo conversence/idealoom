@@ -2,8 +2,11 @@ import logging
 from datetime import datetime, timedelta
 from imaplib import IMAP4
 
-from imapclient import IMAPClient, create_default_context
+from imapclient import IMAPClient
 from sqlalchemy.orm import undefer
+
+import ssl
+import certifi
 
 from assembl.models import ContentSource, Post, AbstractMailbox, ImportedPost
 from .source_reader import (
@@ -27,7 +30,7 @@ class IMAPReader(SourceReader):
 
     def login(self):
         try:
-            context = create_default_context()
+            context = ssl.create_default_context(cafile=certifi.where())
             # context.check_hostname = False
             # context.verify_mode = ssl.CERT_NONE
             mailbox = IMAPClient(
