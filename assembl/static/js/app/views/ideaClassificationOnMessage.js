@@ -72,20 +72,19 @@ var IdeaClassificationView = LoaderView.extend({
         that.langPrefs = langPrefs;
         var ideaAncestry = that.idea.getAncestry();
         that.ideaAncestry = that.createIdeaNameCollection(ideaAncestry);
-        return idea.collection.collectionManager.getAllExtractsCollectionPromise();
-      }).then(function(extracts){
-
-        if (_.isEmpty(extracts)) {
-          that.extract = null;
-        }
-        else {
-          //An extract IS an IdeaContentLink type
-          that.extract = extracts.get(that.model.get("@id"));
-        }
-        that.canRender = true;
-        that.onEndInitialization();
-      })
-      .error(function(e){
+        return idea.collection.collectionManager.getAllExtractsCollectionPromise(
+        ).then(function(extracts){
+          if (_.isEmpty(extracts)) {
+            that.extract = null;
+          }
+          else {
+            //An extract IS an IdeaContentLink type
+            that.extract = extracts.get(that.model.get("@id"));
+          }
+          that.canRender = true;
+          that.onEndInitialization();
+        });
+      }).error(function(e){
         console.error(e.statusText);
         //Render yourself in an ErrorView.
         //THIS IS HACKY
