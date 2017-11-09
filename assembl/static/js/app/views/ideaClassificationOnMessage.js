@@ -7,7 +7,6 @@ import Marionette from 'backbone.marionette';
 
 import $ from 'jquery';
 import _ from 'underscore';
-import Assembl from '../app.js';
 import Ctx from '../common/context.js';
 import CollectionManager from '../common/collectionManager.js';
 import Types from '../utils/types.js';
@@ -16,7 +15,7 @@ import IdeaModel from '../models/idea.js';
 import i18n from '../utils/i18n.js';
 import openIdeaInModal from './modals/ideaInModal.js';
 import Backbone from 'backbone';
-import BackboneModal from 'backbone.modal';
+import Promise from 'bluebird';
 import LoaderView from './loaderView.js';
 import Analytics from '../internal_modules/analytics/dispatcher.js';
 
@@ -58,24 +57,23 @@ var IdeaClassificationView = LoaderView.extend({
     this._groupContent = options.groupContent;
     this.messageView = options.messageView;
     this.canRender = false;
+    var collectionManager = new CollectionManager();
     var that = this;
 
-    this.model.getPostCreatorModelPromise()
-      .then(function(postCreator){
+    Promise.join(
+      this.model.getPostCreatorModelPromise(),
+      that.model.getLinkCreatorModelPromise(),
+      that.model.getIdeaModelPromise(),
+      collectionManager.getUserLanguagePreferencesPromise(Ctx),
+      function(postCreator, linkCreator, idea, langPrefs) {
         that.postCreator = postCreator;
-        return that.model.getLinkCreatorModelPromise()
-      })
-      .then(function(user){
-        that.user = user;
-        return that.model.getIdeaModelPromise();
-      })
-      .then(function(idea){
+        that.user = linkCreator;
         that.idea = idea;
+        that.langPrefs = langPrefs;
         var ideaAncestry = that.idea.getAncestry();
         that.ideaAncestry = that.createIdeaNameCollection(ideaAncestry);
         return idea.collection.collectionManager.getAllExtractsCollectionPromise();
-      })
-      .then(function(extracts){
+      }).then(function(extracts){
 
         if (_.isEmpty(extracts)) {
           that.extract = null;
@@ -111,9 +109,10 @@ var IdeaClassificationView = LoaderView.extend({
     The function used by the template to render itself, given it's model
     @returns Function  The function that will be returned with parameter for model
    */
-  serializerFunc: function(){
-    return function(model){
-      return model ? model.getShortTitleDisplayText() : "";
+  serializerFunc: function() {
+    var langPrefs = this.langPrefs;
+    return function(model) {
+      return model ? model.getShortTitleDisplayText(langPrefs) : "";
     };
   },
 
@@ -126,7 +125,7 @@ var IdeaClassificationView = LoaderView.extend({
 
       var IdeaBreadcrumbView = new BreadCrumbView.BreadcrumbCollectionView({
         collection: this.ideaAncestry,
-        serializerFunc: this.serializerFunc()
+        serializerFunc: this.serializerFunc(),
       });
 
       this.showChildView('breadcrumb', IdeaBreadcrumbView);
