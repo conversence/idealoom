@@ -318,7 +318,7 @@ var IdeaInSynthesisView = LoaderView.extend({
     var analytics = Analytics.getInstance();
 
     analytics.trackEvent(analytics.events.NAVIGATE_TO_IDEA_IN_SYNTHESIS);
-    openIdeaInModal(panel, this.original_idea, forcePopup);
+    openIdeaInModal(panel, this.original_idea, forcePopup, this.translationData);
   },
 
   makeEditable: function() {

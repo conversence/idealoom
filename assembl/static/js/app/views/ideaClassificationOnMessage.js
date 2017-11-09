@@ -162,7 +162,7 @@ var IdeaClassificationView = LoaderView.extend({
 
     var panel = this.messageView.messageListView;
     Ctx.clearModal();
-    openIdeaInModal(panel, this.idea, true);
+    openIdeaInModal(panel, this.idea, true, this.langPrefs);
   }
 
 });

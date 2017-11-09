@@ -11,7 +11,7 @@ import viewsFactory from '../../objects/viewsFactory';
 import Assembl from '../../app.js';
 import Ctx from '../../common/context.js';
 
-function navigateToIdea(panel, idea, forcePopup){
+function navigateToIdea(panel, idea, forcePopup, langPrefs){
   if (panel.isPrimaryNavigationPanel()) {
     panel.getContainingGroup().setCurrentIdea(idea);
   }
@@ -34,7 +34,7 @@ function navigateToIdea(panel, idea, forcePopup){
       throw new Error("Unable to set currentIdea on modal Group");
     }
 
-    var idea_title = Ctx.stripHtml(idea.getShortTitleDisplayText());
+    var idea_title = Ctx.stripHtml(idea.getShortTitleDisplayText(langPrefs));
 
     //console.log("idea_title: ", idea_title);
     var modal_title_template = i18n.gettext("Exploring idea \"%s\"");
