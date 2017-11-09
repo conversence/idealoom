@@ -38,6 +38,7 @@ class PseudoDiscussion(object):
     slug = "admin"
     homepage_url = None
     logo = None
+    preferences = Preferences()
     def translation_service(self):
         return None
     def get_base_url(self, *args):
