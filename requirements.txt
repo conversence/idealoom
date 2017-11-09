@@ -1,7 +1,7 @@
 pip==9.0.1
 setuptools==36.6.0
 alabaster==0.7.10
-alembic==0.9.5
+alembic==0.9.6
 amqp==2.2.2
 anyjson==0.3.3
 anykeystore==0.2
@@ -15,7 +15,7 @@ billiard==3.5.0.3
 boto==2.48.0
 bz2file==0.98
 celery==4.1.0
-certifi==2017.7.27.1
+certifi==2017.11.5
 cffi==1.11.2
 Chameleon==3.2
 chaussette==1.3.0
@@ -24,11 +24,11 @@ circus==0.14.0
 colander==1.4
 colour==0.1.4
 contextlib2==0.5.5
-cornice==2.4.0
+cornice==3.0.0
 cornice_sphinx==0.2
 cov-core==1.15.0
-coverage==4.4.1
-cryptography==2.1.1
+coverage==4.4.2
+cryptography==2.1.3
 cssselect==1.0.1
 cssutils==1.0.2
 DateTime==4.2
@@ -59,18 +59,18 @@ ipykernel==4.6.1
 ipython-genutils==0.2.0
 iowait==0.2
 iso639==0.1.4  # failure with 0.1.3
-isodate==0.5.4
+isodate==0.6.0
 -e git+https://github.com/conversence/jasmine-splinter-runner.git#egg=jasmine-splinter-runner
 jedi==0.11.0
 jdcal==1.3
-Jinja2==2.9.6
+Jinja2==2.10
 jupyter-client==5.1.0
-jupyter-core==4.3.0
+jupyter-core==4.4.0
 -e git+https://github.com/benoitg/jwzthreading.git@master#egg=jwzthreading
 kombu==4.1.0
 -e git+https://github.com/maparent/langdetect.git@no_sample#egg=langdetect
 lingua==4.13
-lxml==4.0.0
+lxml==4.1.1
 Mako==1.0.7
 MarkupSafe==1.0
 mock==2.0.0
@@ -81,20 +81,20 @@ nose==1.3.7
 numpy==1.13.3
 #oauthlib==2.0.2
 oauth2client==4.1.2
-openpyxl==2.4.8
+openpyxl==2.4.9
 paramiko==2.3.1
 PasteDeploy==1.5.2
 pathlib2==2.3.0
 pathtools==0.1.2
 PdbSublimeTextSupport==0.2
-pexpect==4.2.1
+pexpect==4.3.0
 pickleshare==0.7.4
 plaster-pastedeploy==0.4.1
 plaster==1.0
 polib==1.0.8
 premailer==3.1.1
-psutil==5.4.0
-psycopg2==2.7.3.1
+psutil==5.4.1
+psycopg2==2.7.3.2
 ptyprocess==0.5.2
 py==1.4.34
 pyasn1==0.3.7
@@ -132,10 +132,10 @@ python-dateutil==2.6.1
 python-openid==2.2.5
 python-snappy==0.5.1
 -e git+https://github.com/assembl/python-social-auth.git@assembl#egg=python_social_auth
-pytz==2017.2
+pytz==2017.3
 PyYAML==3.12
-pyzmq==16.0.2
-raven==6.2.1
+pyzmq==16.0.3
+raven==6.3.0
 rdflib-jsonld==0.4.0
 rdflib==4.2.2
 reg==0.11
@@ -145,10 +145,10 @@ repoze.sendmail==4.4.1
 requests-oauthlib==0.8.0
 requests==2.18.4
 rsa==3.4.2
-scikit-learn==0.19
-scipy==0.19.1
-selenium==3.6.0
-simplejson==3.11.1
+scikit-learn==0.19.1
+scipy==1.0.0
+selenium==3.7.0
+simplejson==3.12.0
 six==1.11.0
 smart-open==1.5.3
 snowballstemmer==1.2.1
@@ -156,9 +156,9 @@ snowballstemmer==1.2.1
 SPARQLWrapper==1.8.0
 sphinxcontrib-httpdomain==1.5.0
 sphinxcontrib-zopeext==0.2.1
-Sphinx==1.6.4
-splinter==0.7.6
-SQLAlchemy==1.1.14
+Sphinx==1.6.5
+splinter==0.7.7
+SQLAlchemy==1.1.15
 -e git+https://github.com/maparent/sqlalchemy-utils.git@abstract_generic#egg=sqlalchemy_utils
 -e git+https://github.com/conversence/sqlalchemy-rdfbridge.git#egg=sqlalchemy-rdfbridge
 sqlalchemy-schemadisplay==1.3
@@ -178,7 +178,7 @@ waitress==1.1.0
 watchdog==0.8.3
 webencodings==0.5.1
 WebOb==1.7.3
-WebTest==2.0.28
+WebTest==2.0.29
 Werkzeug==0.12.2
 wheel==0.30.0
 zope.component==4.4.1
