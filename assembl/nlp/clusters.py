@@ -60,7 +60,7 @@ class Tokenizer(object):
             if word not in self.stop_words]
 
     def tokenize_post(self, post):
-        subject = post.subject.first_original().value or ""
+        subject = (post.subject.first_original().value if post.subject else "") or ""
         if subject.lower().split() in ('re:', 'comment'):
             subject = ''
         else:
