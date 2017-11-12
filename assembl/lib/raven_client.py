@@ -48,7 +48,8 @@ def setup_raven(settings, settings_file=None):
             if not isinstance(settings, configparser.ConfigParser):
                 settings_file = settings_file or settings.get('config_uri', None)
                 assert settings_file
-                settings = configparser.SafeConfigParser(settings_file)
+                settings = configparser.SafeConfigParser()
+                settings.read(settings_file)
             raven_dsn = settings.get('filter:raven', 'dsn')
             from raven import Client
             Raven = Client(raven_dsn, transport=ThreadedRequestsHTTPTransport)
