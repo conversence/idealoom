@@ -14,7 +14,6 @@ from future import standard_library
 standard_library.install_aliases()
 standard_library.install_hooks()
 from os.path import join, dirname, realpath, exists
-import configparser
 import logging
 
 from pyramid.paster import get_appsettings
@@ -132,11 +131,9 @@ def init_from_celery(celery_app):
     if not exists(settings_file):
         settings_file = join(rootdir, 'production.ini')
     _settings = settings = get_appsettings(settings_file, 'assembl')
-    config = configparser.SafeConfigParser()
-    config.read(settings_file)
     registry = getGlobalSiteManager()
     registry.settings = settings
-    setup_raven(config)
+    setup_raven(settings)
     set_config(settings)
     configure_engine(settings, False)
     configure(registry, celery_app.main)

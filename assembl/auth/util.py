@@ -249,7 +249,7 @@ def authentication_callback(user_id, request):
     connection.info['userid'] = user_id
     discussion_id = request.discussion_id()
     # this is a good time to tell raven about the user
-    from raven.base import Raven
+    from ..lib.raven_client import Raven
     if Raven:
         if user_id:
             Raven.user_context({'user_id': user_id})
