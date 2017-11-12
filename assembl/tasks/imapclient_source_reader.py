@@ -98,11 +98,12 @@ class IMAPReader(SourceReader):
                 ReaderStatus.SHUTDOWN):
             try:
                 self.mailbox.idle_done()
-            except IMAP4.abort as e:
+            except (IMAP4.abort, IMAP.error) as e:
                 log.warning(str(e))
                 # Maybe we ended from another thread
                 pass
-        self.idling = False
+            finally:
+                self.idling = False
         super(IMAPReader, self).end_wait_for_push()
 
     def shutdown(self):
