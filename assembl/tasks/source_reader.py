@@ -583,7 +583,7 @@ if __name__ == '__main__':
     registry = getGlobalSiteManager()
     registry.settings = settings
     set_config(settings)
-    setup_raven(settings)
+    setup_raven(settings, config_file_name)
     fileConfig(config_file_name)
     # set the basic session maker without zope or autoflush
     engine = configure_engine(settings, False, autoflush=False, max_overflow=20)

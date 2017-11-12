@@ -133,7 +133,7 @@ def init_from_celery(celery_app):
     _settings = settings = get_appsettings(settings_file, 'assembl')
     registry = getGlobalSiteManager()
     registry.settings = settings
-    setup_raven(settings)
+    setup_raven(settings, settings_file)
     set_config(settings)
     configure_engine(settings, False)
     configure(registry, celery_app.main)

@@ -28,7 +28,7 @@ def capture_exception(*args, **kwargs):
         print_exc()
 
 
-def setup_raven(settings):
+def setup_raven(settings, settings_file=None):
     """Setup raven client.
 
     Raven is automatically setup in assembl,
@@ -44,6 +44,14 @@ def setup_raven(settings):
     if raven_url and len(raven_url) > 12:
         from raven.base import Raven as libRaven
         Raven = libRaven
+        if not Raven:
+            if not isinstance(settings, configparser.ConfigParser):
+                settings_file = settings_file or settings.get('config_uri', None)
+                assert settings_file
+                settings = configparser.SafeConfig(settings_file)
+            raven_dsn = settings.get('filter:raven', 'dsn')
+            from raven import Client
+            Raven = Client(raven_dsn, transport=ThreadedRequestsHTTPTransport)
     if Raven:
         dsns = list(Raven._transport_cache.keys())
         if any((Raven._transport_cache[dsn]._transport_cls != ThreadedRequestsHTTPTransport for dsn in dsns)):
