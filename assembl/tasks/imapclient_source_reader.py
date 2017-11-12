@@ -111,16 +111,28 @@ class IMAPReader(SourceReader):
             self.end_wait_for_push()
 
     def do_close(self):
-        try:
-            self.idling = False
-            if getattr(self, 'selected_folder', None):
+        exc = None
+        self.idling = False
+        if self.selected_folder:
+            try:
                 self.mailbox.close_folder()
-            if getattr(self, 'mailbox', None):
+            except IMAP4.abort as e:
+                exc = IrrecoverableError(e)
+            except IMAP4.error as e:
+                exc = ClientError(e)
+            finally:
+                self.selected_folder = False
+        if self.mailbox:
+            try:
                 self.mailbox.logout()
-        except IMAP4.abort as e:
-            raise IrrecoverableError(e)
-        except IMAP4.error as e:
-            raise ClientError(e)
+            except IMAP4.abort as e:
+                exc = IrrecoverableError(e)
+            except IMAP4.error as e:
+                exc = ClientError(e)
+            finally:
+                self.mailbox = None
+        if exc is not None:
+            raise exc
 
     def import_email(self, email_id):
         mailbox = self.mailbox
