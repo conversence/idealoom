@@ -95,6 +95,7 @@ known_transitions = {
         ReaderStatus.TRANSIENT_ERROR,
         ReaderStatus.IRRECOVERABLE_ERROR,
         ReaderStatus.WAIT_FOR_PUSH,
+        ReaderStatus.SHUTDOWN,
     },
     ReaderStatus.SHUTDOWN: {
         ReaderStatus.SHUTDOWN,
