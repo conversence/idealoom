@@ -98,7 +98,7 @@ class IMAPReader(SourceReader):
                 ReaderStatus.SHUTDOWN):
             try:
                 self.mailbox.idle_done()
-            except (IMAP4.abort, IMAP.error) as e:
+            except (IMAP4.abort, IMAP4.error) as e:
                 log.warning(str(e))
                 # Maybe we ended from another thread
                 pass
