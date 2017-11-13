@@ -366,7 +366,7 @@ class SourceReader(with_metaclass(ABCMeta, Thread)):
                 else:
                     self.event.wait(self.time_between_reads.total_seconds())
                     self.event.clear()
-        if self.status == ReaderStatus.SHUTDOWN and self.is_connected():
+        if self.status == ReaderStatus.SHUTDOWN or self.is_connected():
             self.close()
         if self.source and not inspect(self.source).detached:
             self.source.db.close()
