@@ -10,26 +10,26 @@ volumes:
 
 services:
   redis:
-    image: redis:3.0-alpine
+    image: redis:3.2-alpine
     volumes:
       - redisdata:/data
     networks:
       - my_net
 
   memcached:
-    image: memcached:1.4-alpine
+    image: memcached:1.5-alpine
     networks:
       - my_net
 
   database:
-    image: postgres:9.5.5-alpine
+    image: postgres:9.6-alpine
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
       - my_net
 
   web:
-    image: nginx:1.12-alpine
+    image: nginx:1.13-alpine
     ports:
       - "8080:80"
     volumes:
@@ -148,7 +148,7 @@ services:
       BUILDING_DOCKER: "false"
     depends_on:
       - redis
-      - elasticsearch
+      - memcached
 {%- if docker_sentry == 'docker' %}
       - sentry
 {%- endif %}
