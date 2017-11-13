@@ -708,7 +708,7 @@ def login_denied_view(request):
     localizer = request.localizer
     request.session.flash(localizer.translate(_('Login failed, try again')))
     get_route = create_get_route(request)
-    return HTTPFound(location=get_route('react_login',
+    return HTTPFound(location=get_route('login',
                      _query=request.GET or None))
 
 
