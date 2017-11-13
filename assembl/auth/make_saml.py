@@ -38,7 +38,7 @@ def make_saml_key():
         encoding=serialization.Encoding.PEM,
         format=serialization.PrivateFormat.TraditionalOpenSSL,
         encryption_algorithm=serialization.NoEncryption())
-    return (cleanup_x509_text(key_text), key)
+    return (key_text, key)
 
 
 def private_key_from_cleaned_text(key_text):
@@ -49,64 +49,86 @@ def private_key_from_cleaned_text(key_text):
         key_text, password=None, backend=default_backend())
 
 
-def make_saml_cert(key, country='', state='', locality='', org='', cn='',
-                   email='', alt_names=None, days=365):
+
+def make_saml_cert(key, country=None, state=None, locality=None, org=None,
+                   domain=None, email=None, alt_names=None, days=365,
+                   self_sign=True):
     if isinstance(key, basestring):
         key = private_key_from_cleaned_text(key)
     if alt_names and isinstance(alt_names, basestring):
         alt_names = alt_names.split()
-    subject = x509.Name([
-        # Provide various details about who we are.
-        x509.NameAttribute(NameOID.COUNTRY_NAME, country),
-        x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, state),
-        x509.NameAttribute(NameOID.LOCALITY_NAME, locality),
-        x509.NameAttribute(NameOID.ORGANIZATION_NAME, org),
-        x509.NameAttribute(NameOID.COMMON_NAME, cn),
-        x509.NameAttribute(NameOID.EMAIL_ADDRESS, email),
-    ])
+    name_components = []
+    if country:
+        name_components.append(x509.NameAttribute(
+            NameOID.COUNTRY_NAME, country))
+    if state:
+        name_components.append(x509.NameAttribute(
+            NameOID.STATE_OR_PROVINCE_NAME, state))
+    if locality:
+        name_components.append(x509.NameAttribute(
+            NameOID.LOCALITY_NAME, locality))
+    if org:
+        name_components.append(x509.NameAttribute(
+            NameOID.ORGANIZATION_NAME, org))
+    if domain:
+        name_components.append(x509.NameAttribute(
+            NameOID.COMMON_NAME, domain))
+    if email:
+        name_components.append(x509.NameAttribute(
+            NameOID.EMAIL_ADDRESS, email))
+    subject = x509.Name(name_components)
     pkey = key.public_key()
     skid = x509.SubjectKeyIdentifier.from_public_key(pkey)
-    # Create self-signed
-    serial_number = random_serial_number()
-    crt = x509.CertificateBuilder().subject_name(
+    if self_sign:
+        # Create self-signed
+        serial_number = random_serial_number()
+        builder = x509.CertificateBuilder()
+    else:
+        builder = x509.CertificateSigningRequestBuilder()
+    builder = builder.subject_name(
         subject
-    ).issuer_name(
-        subject
-    ).public_key(
-        pkey
-    ).serial_number(
-        serial_number
-    ).not_valid_before(
-        datetime.datetime.utcnow()
-    ).not_valid_after(
-        # Our certificate will be valid for 10 days
-        datetime.datetime.utcnow() + datetime.timedelta(days=days)
     ).add_extension(
-        x509.BasicConstraints(True, 0), False
-    ).add_extension(
-        skid, False
-    ).add_extension(
-        x509.AuthorityKeyIdentifier(
-            skid.digest, [x509.DirectoryName(subject)], serial_number), False
+        x509.KeyUsage(True, False, False, False, True, False, False, False, False), False
     )
     if alt_names:
         # Describe what sites we want this certificate for.
-        crt = crt.add_extension(
+        builder = builder.add_extension(
             x509.SubjectAlternativeName([
-                x509.DNSName(n) for n in altnames]),
+                x509.DNSName(n) for n in alt_names]),
             critical=False)
-    crt = crt.sign(key, hashes.SHA256(), default_backend())
-    crt_text = crt.public_bytes(serialization.Encoding.PEM)
-    return (cleanup_x509_text(crt_text), crt)
+    if self_sign:
+        builder = builder.public_key(
+            pkey
+        ).issuer_name(
+            subject
+        ).serial_number(
+            serial_number
+        ).not_valid_before(
+            datetime.datetime.utcnow()
+        ).not_valid_after(
+            datetime.datetime.utcnow() + datetime.timedelta(days=days)
+        ).add_extension(
+            skid, False
+        ).add_extension(
+            x509.AuthorityKeyIdentifier(
+                skid.digest, [x509.DirectoryName(subject)], serial_number), False
+        )
+    else:
+        builder = builder.add_extension(
+            x509.BasicConstraints(True, 0), False)
+
+    builder = builder.sign(key, hashes.SHA256(), default_backend())
+    builder_text = builder.public_bytes(serialization.Encoding.PEM)
+    return (builder_text, builder)
 
 
 if __name__ == '__main__':
-    saml_info = {"country": "FR", "state": "Hauts-de-Seine",
-                 "locality": "Levallois-Perret", "org": "Bluenove",
-                 "cn": "assembl-enterprise.bluenove.com",
-                 "email": "assembl@bluenove.com"}
+    saml_info = {"country": "CA", "state": "Québec",
+                 "locality": "Montréal", "org": "Canada",
+                 "domain": "conversence.com",
+                 "email": "maparent@conversence.com"}
     key_text, key = make_saml_key()
-    crt_text, crt = make_saml_cert(key, **saml_info)
+    crt_text, crt = make_saml_cert(key, self_sign=False, days=1000, **saml_info)
     print(key_text.decode('ascii'))
     print()
     print(crt_text.decode('ascii'))
