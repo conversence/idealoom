@@ -18,6 +18,8 @@ RUN     apt-get update && apt-get install -y \
             python3-wheel \
             python3-setuptools \
             python3-nose \
+            python3-venv \
+            python3-psycopg2 \
             git \
             openssh-server \
             sudo \
