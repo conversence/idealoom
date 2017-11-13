@@ -84,9 +84,7 @@ class IMAPReader(SourceReader):
             if found_emails:
                 self.process_email_ids(found_emails)
             self.set_status(ReaderStatus.WAIT_FOR_PUSH)
-        except IMAP4.abort as e:
-            raise IrrecoverableError(e)
-        except IMAP4.error as e:
+        except (IMAP4.abort, IMAP4.error) as e:
             raise ClientError(e)
         except AssertionError as e:
             # Case where we're closing from another thread
@@ -117,18 +115,14 @@ class IMAPReader(SourceReader):
         if self.selected_folder:
             try:
                 self.mailbox.close_folder()
-            except IMAP4.abort as e:
-                exc = IrrecoverableError(e)
-            except IMAP4.error as e:
+            except (IMAP4.abort, IMAP4.error) as e:
                 exc = ClientError(e)
             finally:
                 self.selected_folder = False
         if self.mailbox:
             try:
                 self.mailbox.logout()
-            except IMAP4.abort as e:
-                exc = IrrecoverableError(e)
-            except IMAP4.error as e:
+            except (IMAP4.abort, IMAP4.error) as e:
                 exc = ClientError(e)
             finally:
                 self.mailbox = None
@@ -158,9 +152,7 @@ class IMAPReader(SourceReader):
                 self.source.db.commit()
             finally:
                 self.source = ContentSource.get(self.source.id)
-        except IMAP4.abort as e:
-            raise IrrecoverableError(e)
-        except IMAP4.error as e:
+        except (IMAP4.abort, IMAP4.error) as e:
             raise ClientError(e)
 
     def process_email_ids(self, email_ids):
@@ -221,7 +213,5 @@ class IMAPReader(SourceReader):
                 log.debug("No IMAP messages to process")
             self.successful_read()
             self.set_status(ReaderStatus.PAUSED)
-        except IMAP4.abort as e:
-            raise IrrecoverableError(e)
-        except IMAP4.error as e:
+        except (IMAP4.abort, IMAP4.error) as e:
             raise ClientError(e)
