@@ -3,7 +3,7 @@ FROM    debian:stretch
 
 ENV     DEBIAN_FRONTEND noninteractive
 ARG	GITREPO=conversence/idealoom
-ARG	GITBRANCH=python3
+ARG	GITBRANCH=master
 ARG DOCKER_RC=configs/docker.rc
 ARG BUILDING_DOCKER=true
 
