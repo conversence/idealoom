@@ -53,25 +53,27 @@ var IdeaModel = Base.Model.extend({
    */
   parse: function(resp, options) {
     var that = this;
-    this.adjust_num_read_posts(resp);
-    if (resp.shortTitle !== undefined) {
-      resp.shortTitle = new LangString.Model(resp.shortTitle, {parse: true});
-    }
-    if (resp.longTitle !== undefined) {
-      resp.longTitle = new LangString.Model(resp.longTitle, {parse: true});
-    }
-    if (resp.definition !== undefined) {
-      resp.definition = new LangString.Model(resp.definition, {parse: true});
-    }
-    if (resp.attachments !== undefined){
-      resp.attachments = new Attachment.ValidationAttachmentCollection(resp.attachments, {
-        parse: true,
-        objectAttachedToModel: that,
-        limits: {
-          count: 1,
-          type: 'image'
-        }
-      })
+    if (resp.ok !== true) {
+      this.adjust_num_read_posts(resp);
+      if (resp.shortTitle !== undefined) {
+        resp.shortTitle = new LangString.Model(resp.shortTitle, {parse: true});
+      }
+      if (resp.longTitle !== undefined) {
+        resp.longTitle = new LangString.Model(resp.longTitle, {parse: true});
+      }
+      if (resp.definition !== undefined) {
+        resp.definition = new LangString.Model(resp.definition, {parse: true});
+      }
+      if (resp.attachments !== undefined){
+        resp.attachments = new Attachment.ValidationAttachmentCollection(resp.attachments, {
+          parse: true,
+          objectAttachedToModel: that,
+          limits: {
+            count: 1,
+            type: 'image'
+          }
+        })
+      }
     }
     return Base.Model.prototype.parse.apply(this, arguments);
   },
