@@ -124,12 +124,36 @@ def make_saml_cert(key, country=None, state=None, locality=None, org=None,
 
 
 if __name__ == '__main__':
-    saml_info = {"country": "CA", "state": "Québec",
-                 "locality": "Montréal", "org": "Canada",
-                 "domain": "conversence.com",
-                 "email": "maparent@conversence.com"}
+    import argparse
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument(
+        '-s' '--sign', dest='self_sign', action='store_true',
+        help='Do we self-sign the certificate or create a CSR')
+    parser.add_argument(
+        '-d' '--domain', dest='domain',
+        default="conversence.com",
+        help='The domain name that will be used as CN')
+    parser.add_argument(
+        '-c' '--country', dest='country', default="CA",
+        help='The country (two-letter code)')
+    parser.add_argument(
+        '-e' '--email', dest='email', default="maparent@conversence.com",
+        help='The email')
+    parser.add_argument(
+        '-l' '--locality', dest='locality', default="Montréal",
+        help='The locality')
+    parser.add_argument(
+        '--state', dest='state', default="Québec",
+        help='The state')
+    parser.add_argument(
+        '-o', '--org', dest='org', default="Conversence",
+        help='The organization')
+    parser.add_argument(
+        '-t', '--days', dest='days', default=1000, type=int,
+        help='Time to live (days)')
+    args = parser.parse_args()
     key_text, key = make_saml_key()
-    crt_text, crt = make_saml_cert(key, self_sign=False, days=1000, **saml_info)
+    crt_text, crt = make_saml_cert(key, **vars(args))
     print(key_text.decode('ascii'))
     print()
     print(crt_text.decode('ascii'))
