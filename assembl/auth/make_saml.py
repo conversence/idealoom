@@ -89,7 +89,7 @@ def make_saml_cert(key, country=None, state=None, locality=None, org=None,
     builder = builder.subject_name(
         subject
     ).add_extension(
-        x509.KeyUsage(True, False, False, False, True, False, False, False, False), False
+        x509.KeyUsage(True, False, True, True, False, False, False, False, False), False
     )
     if alt_names:
         # Describe what sites we want this certificate for.
