@@ -364,7 +364,7 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
         })
         return inherited
 
-    def copy(self, tombstone=None, **kwargs):
+    def copy(self, tombstone=None, db=None, **kwargs):
         if tombstone is True:
             tombstone = datetime.utcnow()
         kwargs.update(
@@ -376,7 +376,7 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
             synthesis_title=self.synthesis_title.clone(db=db) if self.synthesis_title else None,
             description=self.description.clone(db=db) if self.description else None)
 
-        return super(Idea, self).copy(**kwargs)
+        return super(Idea, self).copy(db=db, **kwargs)
 
     @classmethod
     def get_ancestors_query(
@@ -1314,14 +1314,14 @@ class IdeaLink(HistoryMixinWithOrigin, DiscussionBoundBase):
                 name=QUADNAMES.class_IdeaLink_class),
         ]
 
-    def copy(self, tombstone=None, **kwargs):
+    def copy(self, tombstone=None, db=None, **kwargs):
         kwargs.update(
             tombstone=tombstone,
             order=self.order,
             creation_date=self.creation_date,
             source_id=self.source_id,
             target_id=self.target_id)
-        return super(IdeaLink, self).copy(**kwargs)
+        return super(IdeaLink, self).copy(db=db, **kwargs)
 
     def get_discussion_id(self):
         source = self.source_ts or self.source or Idea.get(self.source_id)
