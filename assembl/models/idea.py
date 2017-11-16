@@ -381,7 +381,7 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
     @classmethod
     def get_ancestors_query(
             cls, target_id=bindparam('root_id', type_=Integer),
-            inclusive=True):
+            inclusive=True, tombstone_date=None):
         if cls.using_virtuoso:
             if isinstance(target_id, list):
                 raise NotImplementedError()
@@ -402,7 +402,7 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
                 ).select_from(
                     IdeaLink
                 ).where(
-                    (IdeaLink.tombstone_date == None) &
+                    (IdeaLink.tombstone_date == tombstone_date) &
                     (root_condition)
                 ).cte(recursive=True)
             target_alias = aliased(link)
@@ -411,7 +411,7 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
             parents = select(
                     [sources_alias.source_id, sources_alias.target_id]
                 ).select_from(sources_alias).where(parent_link
-                    & (sources_alias.tombstone_date == None))
+                    & (sources_alias.tombstone_date == tombstone_date))
             with_parents = link.union(parents)
             select_exp = select([with_parents.c.source_id.label('id')]
                 ).select_from(with_parents)
@@ -427,7 +427,8 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
         return select_exp.alias()
 
     def get_all_ancestors(self, id_only=False):
-        query = self.get_ancestors_query(self.id)
+        query = self.get_ancestors_query(
+            self.id, tombstone_date=self.tombstone_date)
         if id_only:
             return list((id for (id,) in self.db.query(query)))
         else:
