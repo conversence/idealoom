@@ -1,5 +1,5 @@
 pip==9.0.1
-setuptools==36.6.0
+setuptools==36.7.2
 alabaster==0.7.10
 alembic==0.9.6
 amqp==2.2.2
@@ -43,7 +43,7 @@ flaky==3.4.0
 #Because mock 2.0.0 requires it, but it isn't always detected properly
 funcsigs==1.0.2
 future==0.16.0
-gensim==2.3.0
+gensim==3.1.0
 google-api-python-client==1.6.4
 greenlet==0.4.12
 hiredis==0.2.0
@@ -81,7 +81,7 @@ numpy==1.13.3
 #oauthlib==2.0.2
 oauth2client==4.1.2
 openpyxl==2.4.9
-paramiko==2.3.1
+paramiko==2.4.0
 PasteDeploy==1.5.2
 pathlib2==2.3.0
 pathtools==0.1.2
@@ -95,7 +95,7 @@ premailer==3.1.1
 psutil==5.4.1
 psycopg2==2.7.3.2
 ptyprocess==0.5.2
-py==1.4.34
+py==1.5.2
 pyasn1==0.3.7
 pyasn1_modules==0.1.5
 pycparser==2.18
@@ -126,7 +126,7 @@ pytest-cov==2.5.1
 pytest-localserver==0.3.7
 pytest-mock==1.6.3
 pytest-splinter==1.8.5
-pytest==3.2.3
+pytest==3.2.5
 python-dateutil==2.6.1
 python-openid==2.2.5
 python-snappy==0.5.1
