@@ -35,7 +35,6 @@ DateTime==4.2
 # distribute==0.7.3 # This fails with latest pip. Installed properly as a dependency.
 docutils==0.14
 dogpile.cache==0.6.4
-dogpile.core==0.4.1
 ecdsa==0.13
 et-xmlfile==1.0.1
 facebook-sdk==1.0.0  # rq.filter: <2
