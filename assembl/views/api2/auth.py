@@ -303,9 +303,12 @@ def verify_password(request):
     ctx = request.context
     user = ctx._instance
     password = request.params.get('password', None)
-    if password is not None:
-        return user.check_password(password)
-    raise HTTPBadRequest("Please provide a password")
+    if password is None:
+        raise HTTPBadRequest("Please provide a password")
+    result = user.check_password(password)
+    if result:
+        user.successful_login()
+    return result
 
 
 @view_config(
@@ -403,7 +406,7 @@ def do_password_change(request):
                 "This link has been used. Do you want us to send another?"))
         raise JSONError(error, validity)
     user.password_p = password
-    user.last_login = datetime.utcnow()
+    user.successful_login()
     headers = remember(request, user.id)
     request.response.headerlist.extend(headers)
     return HTTPOk()
@@ -504,6 +507,7 @@ def assembl_register_user(request):
             user.verified = True
             for account in user.accounts:
                 account.verified = True
+            user.successful_login()
             if asbool(settings.get('pyramid.debug_authorization')):
                 # for debugging purposes
                 from assembl.auth.password import email_token
