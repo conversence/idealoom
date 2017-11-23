@@ -15,6 +15,7 @@ from assembl.models import Discussion, Role
 from assembl.models.post import Post
 from assembl.models.idea import Idea
 from assembl.auth import P_READ, P_ADD_EXTRACT
+from assembl.auth.util import user_has_permission, get_non_expired_user_id
 from assembl.lib.locale import (to_posix_string, strip_country)
 from assembl.lib.utils import is_url_from_same_server, path_qs
 from ...models.auth import (
@@ -95,7 +96,7 @@ def process_locale(
 @view_config(route_name='home', request_method='GET', http_cache=60)
 def home_view(request):
     """The main view on a discussion"""
-    user_id = authenticated_userid(request) or Everyone
+    user_id = get_non_expired_user_id(request) or Everyone
     context = get_default_context(request)
     discussion = context["discussion"]
     canRead = user_has_permission(discussion.id, user_id, P_READ)
