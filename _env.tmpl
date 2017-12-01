@@ -1,0 +1,13 @@
+# these are things that you may want to put in a .env file. Correct full path.
+
+source venv/bin/activate
+export CIRCUSCTL_ENDPOINT=ipc://{full path to}/idealoom/var/run/circus_endpoint
+
+# if using fish: set -gx instead of export
+
+# if using fish: this block gives autocomplete to the fab command.
+if test -e fabfile.py ;
+    complete -c fab -e
+    complete -c fab -s c -r
+    complete -c fab -x -d command -a ( fab -l | tail +3 | awk -e '{printf $1 " "}')
+end

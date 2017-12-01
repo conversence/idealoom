@@ -18,6 +18,9 @@ assembl/locale/*/LC_MESSAGES/*.jed.json
 .idea
 .log
 .cache
+.env
+.env.fish
+.venv
 
 .env
 
