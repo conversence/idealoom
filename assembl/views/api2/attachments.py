@@ -1,4 +1,5 @@
 from builtins import str
+from pyramid.compat import url_quote
 from pyramid.view import view_config
 from pyramid.response import Response
 from pyramid.httpexceptions import HTTPServerError
@@ -43,7 +44,18 @@ def get_file(request):
     ctx = request.context
     document = ctx._instance
     f = File.get(document.id)
-    return Response(body=f.data, content_type=str(f.mime_type))
+    escaped_double_quotes_filename = (f.title
+        .replace(u'"', u'\\"')
+        .encode('iso-8859-1', 'replace'))
+    url_quoted_utf8_filename = url_quote(f.title.encode('utf-8'))
+    return Response(
+        body=f.safe_data(),
+        content_type=str(f.mime_type),
+        content_disposition=
+            'attachment; filename="%s"; filename*=utf-8\'\'%s' # RFC 6266
+            % (escaped_double_quotes_filename, url_quoted_utf8_filename)
+    )
+
 
 # Maybe have a permission for uploading content??
 

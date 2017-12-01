@@ -1,5 +1,7 @@
 """Documents attached to other objects, whether hosted externally or internally"""
 import enum
+from datetime import datetime
+from mimetypes import guess_all_extensions
 
 from sqlalchemy import (
     Column,
@@ -13,10 +15,10 @@ from sqlalchemy import (
     LargeBinary,
     event,
 )
-from ..lib.sqla_types import CoerceUnicode
 from sqlalchemy.orm import relationship, backref, deferred
 
-from datetime import datetime
+from ..lib.sqla_types import CoerceUnicode
+from ..lib.antivirus import get_antivirus
 from ..lib.sqla import DuplicateHandling
 from ..lib.sqla_types import URLString
 from ..semantic.virtuoso_mapping import QuadMapPatternS
@@ -174,6 +176,29 @@ class File(Document):
     av_checked = Column(Enum(*AntiVirusStatus.__members__.keys(),
                              name="anti_virus_status"),
                         server_default='unchecked')
+
+    def guess_extension(self):
+        extensions = guess_all_extensions(self.mime_type)
+        if extensions:
+            # somewhat random
+            return extensions[0]
+
+    def check_for_viruses(self, antivirus=None):
+        "Check if the file has viruses"
+        antivirus = antivirus or get_antivirus()
+        safe = antivirus.check(self.data, self.guess_extension())
+        status = AntiVirusStatus.passed.name if safe else AntiVirusStatus.failed.name
+        self.av_checked = status
+        return status
+
+    def safe_data(self):
+        if self.av_checked == AntiVirusStatus.unchecked.name:
+            needs_check = self.discussion.preferences['requires_virus_check']
+            if needs_check:
+                self.av_checked = self.check_for_viruses()
+        if self.av_checked == AntiVirusStatus.failed.name:
+            return ''
+        return self.data
 
     @Document.external_url.getter
     def external_url(self):
