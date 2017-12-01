@@ -1,4 +1,6 @@
 """Documents attached to other objects, whether hosted externally or internally"""
+import enum
+
 from sqlalchemy import (
     Column,
     UniqueConstraint,
@@ -7,6 +9,7 @@ from sqlalchemy import (
     DateTime,
     String,
     ForeignKey,
+    Enum,
     LargeBinary,
     event,
 )
@@ -24,6 +27,21 @@ from .idea import Idea
 from .auth import (
     AgentProfile, CrudPermissions, P_READ, P_ADMIN_DISC, P_ADD_POST,
     P_EDIT_POST, P_ADD_IDEA, P_EDIT_IDEA)
+
+
+class AttachmentPurpose(enum.Enum):
+
+    DOCUMENT = 'DOCUMENT'  # used for resources center
+    EMBED_ATTACHMENT = 'EMBED_ATTACHMENT'
+    IMAGE = 'IMAGE'  # used for resources center
+    PROFILE_PICTURE = 'PROFILE_PICTURE'
+    RESOURCES_CENTER_HEADER_IMAGE = 'RESOURCES_CENTER_HEADER_IMAGE'
+
+
+class AntiVirusStatus(enum.Enum):
+    unchecked = "unchecked"
+    passed = "passed"
+    failed = "failed"
 
 
 class Document(DiscussionBoundBase, OriginMixin):
@@ -153,6 +171,9 @@ class File(Document):
 
     # Should we defer this?
     data = deferred(Column(LargeBinary, nullable=False))
+    av_checked = Column(Enum(*AntiVirusStatus.__members__.keys(),
+                             name="anti_virus_status"),
+                        server_default='unchecked')
 
     @Document.external_url.getter
     def external_url(self):
