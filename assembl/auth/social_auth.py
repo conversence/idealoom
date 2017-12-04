@@ -78,6 +78,18 @@ def associate_by_email(backend, details, provider=None, user=None, *args, **kwar
         return {'user': user, "other_users": users}
 
 
+def social_user(backend, uid, user=None, *args, **kwargs):
+    provider = backend.name
+    provider_domain = backend.get_provider_domain()
+    social = backend.strategy.storage.user.get_social_auth(
+        provider, uid, provider_domain)
+    user = social.user if social else None
+    return {'social': social,
+            'user': user,
+            'is_new': user is None,
+            'new_association': False}
+
+
 def maybe_merge(
         backend, details, user=None, other_users=None,
         *args, **kwargs):
@@ -101,8 +113,6 @@ def maybe_merge(
             user = logged_in
         else:
             forget(request)
-            user = None
-            logged_in = None
     if other_users:
         if not user:
             user = other_users.pop(0)
@@ -260,7 +270,7 @@ class AssemblStrategy(PyramidStrategy):
             'social.pipeline.social_auth.auth_allowed',
 
             # Checks if the current social-account is already associated in the site.
-            'social.pipeline.social_auth.social_user',
+            'assembl.auth.social_auth.social_user',
 
             # Make up a username for this person, appends a random string at the end if
             # there's any collision.
