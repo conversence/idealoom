@@ -4,28 +4,9 @@
  */
 
 // UMD style module defintion. Simplified details below. Read comments to understand dependencies
-var moduleName = 'Analytics_Piwik';
-
-var dependencies = ['underscore', 'abstract'];
-
-(function(root, factory){
-  if (typeof module === 'object' && module.exports) {
-    // Node-like environments. Not strict CommonJS but CommonJS-like env.
-    // Update arguments here by adding require('dependency') as paramter to factory().
-    // eg. module.exports = factory(require('jquery'));
-    module.exports = factory(require('underscore'), require('./abstract.js'));
-  } else if (typeof define === 'function' && define.amd){
-    // AMD. Register as an anonymous module.
-    define(dependencies, function(...args) {
-      return root[moduleName] = factory(args);
-    });
-  } else {
-    // Browser global
-    // Update arguments here by adding root.Dependecy as parameter to factory()
-    // eg. root[moduleName] = factory(root.jquery);
-    root[moduleName] = factory(root._, root.Analytics_Abstract);
-  }
-})(this, function(_, Wrapper) { //update args to factory here
+// var moduleName = 'Analytics_Piwik';
+import _ from 'underscore';
+import Wrapper from './abstract';
 
   var Piwik = function(...args) {
     Wrapper.call(this, args);
@@ -118,6 +99,5 @@ var dependencies = ['underscore', 'abstract'];
     }
   });
 
-  return Piwik;
+export default Piwik;
 
-});

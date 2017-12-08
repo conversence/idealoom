@@ -4,28 +4,11 @@
  */
 
 // UMD style module defintion. Simplified details below. Read comments to understand dependencies
-var moduleName = 'Analytics_Dispatcher';
+//var moduleName = 'Analytics_Dispatcher';
 
-var dependencies = ['underscore', 'abstract', 'piwik'];
-
-(function(root, factory){
-  if (typeof module === 'object' && module.exports) {
-    // Node-like environments. Not strict CommonJS but CommonJS-like env.
-    // Update arguments here by adding require('dependency') as paramter to factory().
-    // eg. module.exports = factory(require('jquery'));
-    module.exports = factory(require('underscore'), require('./abstract.js'), require('./piwik.js'));
-  } else if(typeof define === 'function' && define.amd) {
-    // AMD. Register as an anonymous module.
-    define(dependencies, function(...args) {
-      return root[moduleName] = factory(args);
-    });
-  } else {
-    // Browser global
-    // Update arguments here by adding root.Dependecy as parameter to factory()
-    // eg. root[moduleName] = factory(root.jquery);
-    root[moduleName] = factory(root._, root.Analytics_Abstract, root.Analytics_Piwik);
-  }
-})(this, function(_, Wrapper, Piwik){ //update args to factory here
+import _ from 'underscore';
+import Wrapper from './abstract';
+import Piwik from './piwik';
 
   var AnalyticsDispatcher = function(...args) {
     if(this.debug) {
@@ -192,11 +175,11 @@ var dependencies = ['underscore', 'abstract', 'piwik'];
 
   var _analytics;
 
-  return {
     /** A factory returning a completely setup singleton of a concrete analytics 
      * object.
      */
-    getInstance: function(){
+  var Analytics = {
+    getInstance: function () {
       if (!_analytics){
         _analytics = new AnalyticsDispatcher();
         globalAnalytics = globalAnalytics || {};
@@ -220,4 +203,4 @@ var dependencies = ['underscore', 'abstract', 'piwik'];
     }
   };
 
-});
+export default Analytics;

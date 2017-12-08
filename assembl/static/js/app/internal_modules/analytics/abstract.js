@@ -4,29 +4,8 @@
  */
 
 // UMD style module defintion. Simplified details below. Read comments to understand dependencies
-var moduleName = 'Analytics_Abstract';
+// var moduleName = 'Analytics_Abstract';
 
-var dependencies = [];
-
-(function(root, factory){
-  if (typeof module === 'object' && module.exports) {
-    // Node-like environments. Not strict CommonJS but CommonJS-like env.
-    // Update arguments here by adding require('dependency') as paramter to factory().
-    // eg. module.exports = factory(require('jquery'));
-    module.exports = factory();
-  } else if (typeof define === 'function' && define.amd){
-    // AMD. Register as an anonymous module.
-    define(dependencies, function(...args) {
-      return root[moduleName] = factory(args);
-    });
-  } else {
-    // Browser global
-    // Update arguments here by adding root.Dependecy as parameter to factory()
-    // eg. root[moduleName] = factory(root.jquery);
-    root[moduleName] = factory();
-  }
-})(this, function(){ //Update arguments to factory here
-  
   /*
    *
    * In order to understand the event structure, please refer to docs/events.md for a broad explanation. 
@@ -612,7 +591,4 @@ var dependencies = [];
     }
   };
 
-
-  return Wrapper;
-  
-});
+export default Wrapper;
