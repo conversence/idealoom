@@ -54,6 +54,15 @@ module.exports = {
       'moment',
       'raven-js',
       'sockjs-client',
+      'babel-polyfill',
+      're-base',
+      'history',
+      'react',
+      'react-addons-css-transition-group',
+      'react-dom',
+      'react-relay',
+      'react-router',
+      'react-router-dom',
 
       // Those choke because they expect jquery in namespace.
       'jquery.dotdotdot',
@@ -80,6 +89,7 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'js/build'),
     filename: '[name].js',
+    chunkFilename: '[name].[id].js',
     sourceMapFilename: "[name].js.map",
     publicPath: '/js/build/',
   },
@@ -129,11 +139,23 @@ module.exports = {
         ],
       },
       {
+        test: /\.bundle\.js$/,
+        use: 'bundle-loader'
+      },
+      {
         test: /\/js\/app\/.*\.js$|chai-as-promised/,
         use: [{
             loader: 'babel-loader',
             options: {
-                presets: ['es2015-webpack2'],
+                plugins: [
+                  'transform-object-rest-spread',
+                  'transform-class-properties',
+                  ['transform-runtime', { helpers: true, polyfill: false }]
+                ],
+                presets: [["env", { "modules": false, "targets": { "ie": 11 },
+                                    "debug": true, "useBuiltIns": true,
+                                    "exclude": ["web.timers", "web.immediate", "web.dom.iterable"] }],
+                          "react", "flow"],
                 cacheDirectory: false,
             },
         }],
