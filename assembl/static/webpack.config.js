@@ -129,7 +129,7 @@ module.exports = {
         ],
       },
       {
-        test: /\/js\/app\/.*\.js$/,
+        test: /\/js\/app\/.*\.js$|chai-as-promised/,
         use: [{
             loader: 'babel-loader',
             options: {
