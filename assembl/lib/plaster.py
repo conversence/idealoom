@@ -23,7 +23,7 @@ class Loader(pLoader):
 
         """
         section = self._maybe_get_default_name(section)
-        if self.pastedeploy_scheme != 'config':
+        if not self.pastedeploy_spec.startswith('config:'):
             return {}
         # defaults = self._get_defaults(defaults)
         parser = self._get_parser(defaults=defaults)

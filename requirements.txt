@@ -1,5 +1,5 @@
 pip==9.0.1
-setuptools==36.7.2
+setuptools==38.2.4
 alabaster==0.7.10
 alembic==0.9.6
 amqp==2.2.2
@@ -22,13 +22,13 @@ chaussette==1.3.0
 circus==0.14.0
 -e git+https://github.com/maparent/circus-web.git@p3#egg=circus_web
 colander==1.4
-colour==0.1.4
+colour==0.1.5
 contextlib2==0.5.5
 cornice==3.0.0
-cornice_sphinx==0.2
+cornice_sphinx==0.3
 cov-core==1.15.0
 coverage==4.4.2
-cryptography==2.1.3
+cryptography==2.1.4
 cssselect==1.0.1
 cssutils==1.0.2
 DateTime==4.2
@@ -47,14 +47,14 @@ gensim==3.1.0
 google-api-python-client==1.6.4
 greenlet==0.4.12
 hiredis==0.2.0
-html5lib==0.999999999
+html5lib==1.0.1
 httplib2==0.10.3
 hupper==1.0
 idna==2.6
 imagesize==0.7.1
 -e git+https://github.com/mjs/imapclient.git@master#egg=IMAPClient
 ipaddress==1.0.18
-ipykernel==4.6.1
+ipykernel==4.7.0
 ipython-genutils==0.2.0
 iowait==0.2
 iso639==0.1.4  # failure with 0.1.3
@@ -88,16 +88,16 @@ pathtools==0.1.2
 PdbSublimeTextSupport==0.2
 pexpect==4.3.0
 pickleshare==0.7.4
-plaster-pastedeploy==0.4.1
+plaster-pastedeploy==0.4.2
 plaster==1.0
-polib==1.0.8
+polib==1.1.0
 premailer==3.1.1
-psutil==5.4.1
+psutil==5.4.2
 psycopg2==2.7.3.2
 ptyprocess==0.5.2
 py==1.5.2
-pyasn1==0.3.7
-pyasn1_modules==0.1.5
+pyasn1==0.4.2
+pyasn1_modules==0.2.1
 pycparser==2.18
 pydot==1.2.3
 Pygments==2.2.0
@@ -106,7 +106,7 @@ pyIsEmail  # 1.3.1 was pushed to pypi as "v1.3.1", which confuses pip.
 dnspython==1.15.0   # must come after pyisemail?
 PyJWT==1.5.3
 pylibmc==1.5.2
-pyOpenSSL==17.3.0
+pyOpenSSL==17.5.0
 pyparsing==2.2.0
 # Until https://github.com/SurveyMonkey/pyramid_autodoc/pull/12 is merged
 -e git+https://github.com/matthewnorman/pyramid_autodoc@sphinx_161_no_domains_v2#egg=pyramid_autodoc
@@ -123,10 +123,10 @@ pyramid-tm==2.2
 pyramid==1.9.1
 PyStemmer==1.3.0
 pytest-cov==2.5.1
-pytest-localserver==0.3.7
+pytest-localserver==0.4.1
 pytest-mock==1.6.3
 pytest-splinter==1.8.5
-pytest==3.2.5
+pytest==3.3.1
 python-dateutil==2.6.1
 python-openid==2.2.5
 python-snappy==0.5.1
@@ -146,10 +146,10 @@ requests==2.18.4
 rsa==3.4.2
 scikit-learn==0.19.1
 scipy==1.0.0
-selenium==3.7.0
-simplejson==3.12.0
+selenium==3.8.0
+simplejson==3.13.2
 six==1.11.0
-smart-open==1.5.3
+smart-open==1.5.5
 snowballstemmer==1.2.1
 -e git+https://github.com/assembl/sockjs-tornado.git@conflicting_localhost#egg=sockjs_tornado
 SPARQLWrapper==1.8.0
@@ -176,9 +176,9 @@ venusian==1.1.0
 waitress==1.1.0
 watchdog==0.8.3
 webencodings==0.5.1
-WebOb==1.7.3
+WebOb==1.7.4
 WebTest==2.0.29
-Werkzeug==0.12.2
+Werkzeug==0.13
 wheel==0.30.0
 zope.component==4.4.1
 zope.deprecation==4.3.0
