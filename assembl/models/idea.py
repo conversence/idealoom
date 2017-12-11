@@ -771,28 +771,62 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
         from ..semantic.inference import get_inference_store
         ontology = get_inference_store()
         typology = self.discussion.preferences['idea_typology'] or {}
-        rules = typology.get('ideas', {}).get('rules', {}).get(self.rdf_type, {})
+        rules = typology.get('ideas', {}).get(self.rdf_type, {}).get('rules', {})
         for child_link in self.target_links:
             link_type = child_link.rdf_type
-            if link_type not in rules:
-                # TODO: no real guarantee of mro ordering in that function
-                for supertype in ontology.getSuperClassesCtx(link_type):
-                    if supertype in rules:
-                        break
-                else:
-                    supertype = 'InclusionRelation'
-                child_link.rdf_type = link_type = supertype
-            node_rules = rules.get(child_link, ())
             child = child_link.target
             child_type = child.rdf_type
+            if child_type != 'GenericIdeaNode':
+                child_types = (
+                    set(ontology.getSuperClassesCtx(child_type)) -
+                    set(ontology.getSuperClassesCtx('GenericIdeaNode')))
+            else:
+                child_types = set((child_type,))
+            if link_type != 'InclusionRelation':
+                link_types = (
+                    set(ontology.getSuperClassesCtx(link_type)) -
+                    set(ontology.getSuperClassesCtx('InclusionRelation')))
+            else:
+                link_types = set((link_type,))
+            if link_type not in rules:
+                # TODO: no real guarantee of mro ordering in that function
+                if link_type not in rules:
+                    for supertype in link_types:
+                        if supertype in rules:
+                            break
+                    else:
+                        supertype = 'InclusionRelation'
+                    child_link.rdf_type = link_type = supertype
+            node_rules = rules.get(link_type, ())
             if child_type not in node_rules:
-                for supertype in ontology.getSuperClassesCtx(child_type):
-                    if supertype in node_rules:
-                        break
+                # Ideally keep child type stable. In order:
+                # 0: Supertype of link and same child_type
+                # 1: Any link with same child_type
+                # 2: Original link with child supertype
+                # 3: Supertype of link with child supertype
+                # 4: Original link with generic child type
+                potential_link_types = []
+                for r_link_type, r_child_types in rules.items():
+                    r_child_types = set(r_child_types)
+                    if child_type in r_child_types:
+                        potential_link_types.append((
+                            0 if r_link_type in link_types else 1,
+                            r_link_type, child_type))
+                    else:
+                        inter = child_types.intersection(r_child_types)
+                        if inter:
+                            potential_link_types.append((
+                                2 if r_link_type == link_type else 3,
+                                r_link_type, inter.pop()))
+                if 'GenericIdeaNode' in node_rules:
+                    potential_link_types.append((4, link_type, 'GenericIdeaNode'))
                 else:
-                    supertype = 'GenericIdeaNode'
-                child.rdf_type = supertype
-                child.applyTypeRules()
+                    potential_link_types.append((5, 'InclusionRelation', 'GenericIdeaNode'))
+                potential_link_types.sort()
+                _, child_link.rdf_type, new_child_type = potential_link_types[0]
+                if new_child_type != child_type:
+                    child.rdf_type = new_child_type
+                    child.applyTypeRules()
 
     def get_discussion_id(self):
         return self.discussion_id or self.discussion.id
