@@ -45,23 +45,19 @@ _.each([
  * @param <PanelSpecs.Model> panelSpecModel
  * @returns <AssemblPanel> AssemblPanel view
  */
-function panelViewByPanelSpec(panelSpecModel) {
-  var panelClass;
-  var id;
-
-  //console.log("panelViewByPanelSpec() called with ",panelSpecModel);
+function byPanelSpec(panelSpecModel) {
+  //console.log("byPanelSpec() called with ",panelSpecModel);
   try {
-    id = panelSpecModel.getPanelSpecType().id;
-    panelClass = panelTypeRegistry[id];
+    const id = panelSpecModel.getPanelSpecType().id;
+    const panelClass = panelTypeRegistry[id];
 
     if (!panelClass instanceof AssemblPanel) {
       throw new Error("panelClass isn't an instance of AssemblPanel");
     }
 
-    //console.log("panelViewByPanelSpec() returning ",panelClass, "for",panelSpecModel)
+    //console.log("byPanelSpec() returning ",panelClass, "for",panelSpecModel)
     return panelClass;
-  }
-  catch (err) {
+  } catch (err) {
     //console.log('invalid spec:', panelSpecModel, "error was", err);
     throw new Error("invalidPanelSpecModel");
   }
@@ -77,4 +73,6 @@ function decodeUrlData(code, data) {
   }
 }
 
-export default {byPanelSpec: panelViewByPanelSpec, typeByCode: typeByCode, decodeUrlData: decodeUrlData };
+export default {
+  byPanelSpec, typeByCode, panelTypeRegistry, decodeUrlData,
+};
