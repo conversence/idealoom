@@ -535,6 +535,7 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
                     P_EDIT_SYNTHESIS,
                     P_EXPORT_EXTERNAL_SOURCE,
                     P_MODERATE,
+                    P_OVERRIDE_SOCIAL_AUTOLOGIN,
                     P_SEND_SYNTHESIS,
                     P_VOTE,
                 ],
@@ -546,6 +547,7 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
                     P_EDIT_EXTRACT,
                     P_EDIT_IDEA,
                     P_EDIT_MY_EXTRACT,
+                    P_OVERRIDE_SOCIAL_AUTOLOGIN,
                     P_VOTE,
                 ],
                 R_MODERATOR: [
@@ -562,6 +564,7 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
                     P_EDIT_SYNTHESIS,
                     P_EXPORT_EXTERNAL_SOURCE,
                     P_MODERATE,
+                    P_OVERRIDE_SOCIAL_AUTOLOGIN,
                     P_SEND_SYNTHESIS,
                     P_VOTE,
                 ],
