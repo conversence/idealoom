@@ -1,4 +1,6 @@
 from __future__ import print_function
+from datetime import datetime
+
 import pytest
 
 from assembl.auth import R_PARTICIPANT
@@ -10,7 +12,7 @@ def participant1_user(request, test_session, discussion):
 
     from assembl.models import User, UserRole, Role, EmailAccount
     u = User(name=u"A. Barking Loon", type="user", password="password",
-             verified=True)
+             verified=True, last_idealoom_login=datetime.utcnow())
     email = EmailAccount(email="abloon@gmail.com", profile=u, verified=True)
     test_session.add(u)
     r = Role.get_role(R_PARTICIPANT, test_session)
@@ -32,7 +34,8 @@ def participant2_user(request, test_session):
     """A User fixture with R_PARTICIPANT role"""
 
     from assembl.models import User, UserRole, Role
-    u = User(name=u"James T. Expert", type="user")
+    u = User(name=u"James T. Expert", type="user",
+             last_idealoom_login=datetime.utcnow())
     test_session.add(u)
     r = Role.get_role(R_PARTICIPANT, test_session)
     ur = UserRole(user=u, role=r)

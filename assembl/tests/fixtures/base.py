@@ -10,6 +10,8 @@ The core fixtures that will:
 """
 from __future__ import print_function
 
+from datetime import datetime
+
 import pytest
 import transaction
 from webtest import TestApp
@@ -160,7 +162,11 @@ def admin_user(request, test_session, db_default_data):
     """A User fixture with R_SYSADMIN role"""
 
     from assembl.models import User, UserRole, Role
-    u = User(name=u"Mr. Administrator", type="user")
+    u = User(name=u"Mr. Administrator", type="user",
+        verified=True, last_idealoom_login=datetime.utcnow())
+    from assembl.models import EmailAccount
+    account = EmailAccount(email="admin@assembl.com", profile=u, verified=True)
+
     test_session.add(u)
     r = Role.get_role(R_SYSADMIN, test_session)
     ur = UserRole(user=u, role=r)
