@@ -75,3 +75,21 @@ def discussion2(request, test_session, default_preferences,
         test_session.flush()
     request.addfinalizer(fin)
     return d
+
+
+@pytest.fixture(scope="function")
+def discussion_with_lang_prefs(request, test_session, discussion):
+    """An empty Discussion fixture with locale preferences"""
+    discussion.discussion_locales = ['en', 'fr', 'ja']
+    test_session.commit()
+
+    return discussion
+
+
+@pytest.fixture(scope="function")
+def closed_discussion(request, test_session, discussion):
+    """An empty Discussion fixture restricted-to-social login"""
+    discussion.preferences['authorization_server_backend'] = 'google-oauth2'
+    test_session.commit()
+
+    return discussion
