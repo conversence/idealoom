@@ -23,10 +23,9 @@ import reg
 from assembl.auth import P_READ, R_SYSADMIN
 from assembl.auth.util import discussion_from_request
 from assembl.lib.sqla import uses_list, get_named_class, Base
+from assembl.lib.logging import getLogger
 from assembl.lib.decl_enums import DeclEnumType
 from future.utils import with_metaclass
-
-log = logging.getLogger(__name__)
 
 
 class BaseContext(object):
@@ -835,7 +834,7 @@ class RelationCollectionDefinition(AbstractCollectionDefinition):
             try:
                 query = query.join(owner_alias)
             except InvalidRequestError:
-                log.error("Could not join %s to %s" % (owner_alias, query))
+                getLogger().error("Could not join %s to %s" % (owner_alias, query))
                 # This is very likely to fail downstream
                 return query
         found_key = False

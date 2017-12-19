@@ -6,7 +6,6 @@ import sys
 from time import sleep
 from datetime import datetime, timedelta
 from traceback import print_exc
-import logging
 
 import transaction
 from pyramid_mailer import mailer_factory_from_settings
@@ -15,9 +14,9 @@ from pyramid_mailer.message import Message
 from ..lib.sqla import mark_changed
 from ..lib.raven_client import capture_exception
 from . import (config_celery_app, CeleryWithConfig)
+from ..lib.logging import getLogger
 
 
-log = logging.getLogger(__name__)
 notify_process_mailer = None
 
 
@@ -46,7 +45,7 @@ class NotifyCeleryApp(CeleryWithConfig):
                     log.error("Not a valid value for %s: %s" % (name, val))
                     continue
                 SMTP_DOMAIN_DELAYS[name[len(SETTINGS_SMTP_DELAY):]] = val
-        log.info("SMTP_DOMAIN_DELAYS: " + repr(SMTP_DOMAIN_DELAYS))
+        getLogger().info("SMTP_DOMAIN_DELAYS", delays=SMTP_DOMAIN_DELAYS)
 
 
 notify_celery_app = NotifyCeleryApp('celery_tasks.notify')

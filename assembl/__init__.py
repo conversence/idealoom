@@ -70,6 +70,7 @@ def main(global_config, **settings):
     config.include('.auth')
     config.include('.models')
     bake_lazy_loaders()
+    config.include('.lib.logging')
     # Tasks first, because it includes ZCA registration (for now)
     config.include('.tasks')
 
