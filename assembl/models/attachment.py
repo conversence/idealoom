@@ -186,9 +186,12 @@ class File(Document):
     def check_for_viruses(self, antivirus=None):
         "Check if the file has viruses"
         antivirus = antivirus or get_antivirus()
-        safe = antivirus.check(self.data, self.guess_extension())
-        status = AntiVirusStatus.passed.name if safe else AntiVirusStatus.failed.name
-        self.av_checked = status
+        # Lock row to avoid multiple antivirus processes
+        (status,) = self.db.query(File.av_checked).filter_by(id=self.id).with_for_update().first()
+        if status == AntiVirusStatus.failed.unchecked.name:
+            safe = antivirus.check(self.data, self.guess_extension())
+            status = AntiVirusStatus.passed.name if safe else AntiVirusStatus.failed.name
+            self.av_checked = status
         return status
 
     def safe_data(self):
