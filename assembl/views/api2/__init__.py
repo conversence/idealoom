@@ -152,7 +152,7 @@ def instance_view(request):
     user_id = authenticated_userid(request) or Everyone
     permissions = ctx.get_permissions()
     instance = ctx._instance
-    request.logger.info('instance_view', instance=instance, _name='assembl.views.api2')
+    request.logger().info('instance_view', instance=instance, _name='assembl.views.api2')
     if not instance.user_can(user_id, CrudPermissions.READ, permissions):
         raise HTTPUnauthorized()
     view = ctx.get_default_view() or 'default'
