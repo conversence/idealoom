@@ -13,12 +13,12 @@ import logging
 import simplejson as json
 from pyramid.view import view_config
 from pyramid.response import Response
-from social.exceptions import AuthMissingParameter
 from pyramid.httpexceptions import (
     HTTPException, HTTPInternalServerError, HTTPMovedPermanently,
     HTTPBadRequest, HTTPFound, HTTPTemporaryRedirect as HTTPTemporaryRedirectP)
 from pyramid.i18n import TranslationStringFactory
 from pyramid.settings import asbool, aslist
+from social_core.exceptions import AuthMissingParameter
 
 from ..lib.json import json_renderer_factory
 from ..lib import config

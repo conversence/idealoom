@@ -32,8 +32,8 @@ from sqlalchemy import (
 import simplejson as json
 from sqlalchemy.orm import (
     relationship, backref, deferred)
-from social.storage.sqlalchemy_orm import (
-    SQLAlchemyMixin, SQLAlchemyUserMixin, SQLAlchemyNonceMixin, UserMixin,
+from social_sqlalchemy.storage import (
+    SQLAlchemyMixin, SQLAlchemyNonceMixin, UserMixin,
     SQLAlchemyAssociationMixin, SQLAlchemyCodeMixin, BaseSQLAlchemyStorage)
 from sqlalchemy.ext.mutable import MutableDict
 from urllib.parse import quote, unquote

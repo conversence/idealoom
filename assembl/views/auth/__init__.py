@@ -2,7 +2,7 @@
 
 import sys
 
-from social.apps.pyramid_app.views import (
+from social_pyramid.views import (
     auth as psa_auth_view, complete as psa_complete_view)
 
 
@@ -37,6 +37,6 @@ def includeme(config):
     contextual_route('finish_password_change', '/finish_password_change')
     config.add_route('contextual_social.auth', '/{discussion_slug}/login/{backend}')
     contextual_route('add_social_account', '/add_account/{backend}')
-    config.include('social.apps.pyramid_app')
+    config.include('social_pyramid')
     config.scan()
-    config.scan('social.apps.pyramid_app')
+    config.include('social_pyramid')
