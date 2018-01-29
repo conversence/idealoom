@@ -9,6 +9,7 @@ from datetime import datetime
 from calendar import timegm
 import logging
 
+from future.utils import string_types
 from sqlalchemy import (
     Column,
     ForeignKey,
@@ -18,7 +19,7 @@ from sqlalchemy import (
 from pyisemail import is_email
 import feedparser
 import requests
-from urllib.parse import urlparse
+from urllib.parse import urlparse, quote_plus
 
 from ..lib.sqla_types import URLString
 from .langstrings import LangString
@@ -110,7 +111,7 @@ class ParsedData(object):
         return self._parse_agent.parse(url)
 
     def get_feed_title(self):
-        return self.get_feed()['title'].encode('utf-8')
+        return self.get_feed()['title']
 
     def get_entries(self):
         self._fetch_source()
@@ -256,8 +257,8 @@ class FeedPostSource(PostSource):
     @classmethod
     # eg. create_from(d, "www...xml", "A valid name", PaginatedFeedParser)
     def create_from(cls, discussion, url, source_name, parse_config_class):
-        encoded_name = source_name.encode('utf-8')
-        encoded_url = url.encode('utf-8')
+        encoded_name = source_name
+        encoded_url = url
         created_date = datetime.utcnow()
         parser_name = str(parse_config_class).split("'")[1]
         return cls(name=encoded_name, creation_date=created_date,
@@ -271,11 +272,11 @@ class FeedPostSource(PostSource):
     def generate_message_id(self, source_post_id):
         # Feed post ids are supposed to be globally unique.
         # They may or may not be emails.
-        if is_email(source_post_id):
+        if isinstance(source_post_id, string_types) and is_email(source_post_id):
             return source_post_id
         # Invalid source_post_id.
         return "%s_feed@%s" % (
-            self.flatten_source_post_id(source_post_id, 5),
+            self.flatten_source_post_id(str(source_post_id), 5),
             urlparse(self.url).hostname)
 
 
@@ -406,26 +407,28 @@ class FeedSourceReader(PullSourceReader):
         self._check_parser_loaded()
         return self._parse_agent.get_feed_title()
 
-    def _get_creation_date(self,entry):
+    def _get_creation_date(self, entry):
         return datetime.fromtimestamp(timegm(entry['updated_parsed']))
 
     def _get_entry_id(self, entry):
-        return entry['id'].encode('utf-8')
+        return entry['id']
 
-    def _get_body_mime_type(self,entry):
+    def _get_body_mime_type(self, entry):
         return entry['content'][0]['type']
 
-    def _get_subject(self,entry):
-        return entry['title'].encode('utf-8')
+    def _get_subject(self, entry):
+        return entry['title']
 
-    def _get_body(self,entry):
-        return entry['content'][0]['value'].encode('utf-8')
+    def _get_body(self, entry):
+        return entry['content'][0]['value']
 
-    def _get_author(self,entry):
-        return entry['author'].encode('utf-8')
+    def _get_author(self, entry):
+        return entry['author']
 
-    def _get_author_link(self,entry):
-        return entry['author_detail']['href'].encode('utf-8')
+    def _get_author_link(self, entry):
+        if 'author_detail' in entry and 'href' in entry['author_detail']:
+            return entry['author_detail']['href']
+        return "%s#%s" % (self.source.url, self._get_author(entry))
 
     def _convert_to_post(self, entry, account):
         source_post_id = self._get_entry_id(entry)
