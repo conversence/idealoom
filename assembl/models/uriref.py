@@ -12,6 +12,8 @@ base_urirefs = [
     IDEA.GenericIdeaNode,
     IDEA.InclusionRelation,
     ASSEMBL.RootIdea,
+    OWL.Class,
+    RDF.Property,
 ]
 
 
@@ -33,7 +35,8 @@ class URIRefDb(Base):
     @property
     def as_context(self):
         ctx = jsonld_context()
-        t = ctx.find_term(str(self.val))
+        val = str(self.val)
+        t = ctx.find_term(val) or ctx.find_term(val, '@id')
         if t:
             return t.name
 
