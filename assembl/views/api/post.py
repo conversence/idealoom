@@ -525,7 +525,7 @@ def create_post(request):
 
     discussion = request.context
 
-    ctx = discussion.get_instance_context(request)
+    ctx = discussion.get_instance_context(request=request)
     if html:
         log.warning("Still using html")
         # how to guess locale in this case?
