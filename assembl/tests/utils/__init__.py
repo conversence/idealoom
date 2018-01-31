@@ -89,6 +89,10 @@ def committing_session_tween_factory(handler, registry):
     # This ensures that the app has the latest state
     def committing_session_tween(request):
         get_session_maker().commit()
+        # Discussion may have been reified too early on request
+        for item in ('discussion', 'discussion_id'):
+            if request.__dict__.get(item, item) is None:
+                del request.__dict__[item]
         resp = handler(request)
         get_session_maker().flush()
         return resp
