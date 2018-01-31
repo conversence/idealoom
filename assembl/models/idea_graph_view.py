@@ -543,8 +543,8 @@ class Synthesis(ExplicitSubGraphView):
                 new_link.target_ts = idea_copies[link.target_id]
         return frozen_synthesis
 
-    def as_html(self, jinja_env):
-        v = SynthesisHtmlizationVisitor(self, jinja_env)
+    def as_html(self, jinja_env, lang_prefs):
+        v = SynthesisHtmlizationVisitor(self, jinja_env, lang_prefs)
         self.visit_ideas_depth_first(v)
         return v.as_html()
 
@@ -587,8 +587,9 @@ LangString.setup_ownership_load_event(
 
 
 class SynthesisHtmlizationVisitor(IdeaVisitor):
-    def __init__(self, graph_view, jinja_env):
+    def __init__(self, graph_view, jinja_env, lang_prefs):
         self.jinja_env = jinja_env
+        self.lang_prefs = lang_prefs
         self.idea_template = jinja_env.get_template('idea_in_synthesis.jinja2')
         self.synthesis_template = jinja_env.get_template('synthesis.jinja2')
         self.graph_view = graph_view
@@ -610,9 +611,9 @@ class SynthesisHtmlizationVisitor(IdeaVisitor):
     def as_html(self):
         inner = getattr(self, 'result', '')
         synthesis = self.graph_view
-        subject = synthesis.subject.best_lang().value
-        introduction = synthesis.introduction.best_lang().value
-        conclusion = synthesis.conclusion.best_lang().value
+        subject = synthesis.subject.best_lang(self.lang_prefs).value
+        introduction = synthesis.introduction.best_lang(self.lang_prefs).value
+        conclusion = synthesis.conclusion.best_lang(self.lang_prefs).value
         return self.synthesis_template.render(
             synthesis=synthesis, content=inner,
             introduction=introduction,
