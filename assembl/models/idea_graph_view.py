@@ -593,6 +593,7 @@ class SynthesisHtmlizationVisitor(IdeaVisitor):
         self.idea_template = jinja_env.get_template('idea_in_synthesis.jinja2')
         self.synthesis_template = jinja_env.get_template('synthesis.jinja2')
         self.graph_view = graph_view
+        self.result = None
 
     def visit_idea(self, idea_assoc, level, prev_result, parent_link_assoc):
         return True
