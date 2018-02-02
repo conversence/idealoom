@@ -61,8 +61,9 @@ def main(global_config, **settings):
         from pyramid.paster import setup_logging
         setup_logging(global_config['__file__'])
 
-    from .views.traversal import root_factory
     config = Configurator(registry=getGlobalSiteManager())
+    config.include('.lib.logging')
+    from .views.traversal import root_factory
     config.setup_registry(settings=settings, root_factory=root_factory)
     config.add_translation_dirs('assembl:locale/')
 
@@ -79,7 +80,6 @@ def main(global_config, **settings):
     config.include('.auth')
     config.include('.models')
     bake_lazy_loaders()
-    config.include('.lib.logging')
     # Tasks first, because it includes ZCA registration (for now)
     config.include('.tasks')
 
