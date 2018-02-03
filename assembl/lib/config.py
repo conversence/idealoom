@@ -5,7 +5,7 @@ import logging
 from pyramid.threadlocal import get_current_registry
 
 _settings = None
-log = logging.getLogger(__name__)
+log = logging.getLogger()
 
 
 def set_config(settings, reconfig=False):
