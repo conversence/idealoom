@@ -585,7 +585,7 @@ def add_multiple_users_csv(
 def includeme(config):
     """Pre-parse certain settings for python_social_auth, then load it."""
     config.add_request_method(
-        'assembl.auth.util.get_user', 'user', reify=True)
+        'assembl.auth.util.get_user', 'user', property=True)
     config.add_request_method(
         'assembl.auth.util.permissions_from_request',
         'permissions', reify=True)
