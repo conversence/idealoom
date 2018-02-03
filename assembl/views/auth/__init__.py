@@ -39,4 +39,4 @@ def includeme(config):
     contextual_route('add_social_account', '/add_account/{backend}')
     config.include('social_pyramid')
     config.scan()
-    config.include('social_pyramid')
+    config.scan('social_pyramid')
