@@ -28,7 +28,7 @@ class Loader(pLoader):
         # defaults = self._get_defaults(defaults)
         parser = self._get_parser(defaults=defaults)
         try:
-            d = OrderedDict(parser._sections.get(section, None))
+            d = OrderedDict(parser._sections.get(section, {}))
             d.pop('__name__', None)
             return d
         except NoSectionError:
