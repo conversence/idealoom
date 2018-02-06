@@ -48,7 +48,7 @@ def main(global_config, **settings):
 
     # here we create the engine and bind it to the (not really a) session
     # factory
-    set_config(settings)
+    settings = set_config(settings)
     if not session_maker_is_initialized():
         configure_engine(settings)
     if settings.get('assembl_debug_signal', False):
@@ -98,10 +98,11 @@ def main(global_config, **settings):
         config.set_authorization_policy(ACLAuthorizationPolicy())
     # ensure default roles and permissions at startup
     from .models import get_session_maker
-    with transaction.manager:
-        session = get_session_maker()
-        from .lib.migration import bootstrap_db_data
-        bootstrap_db_data(session, settings['config_uri'] != "testing.ini")
+    if not settings.get('in_alembic', False):
+        with transaction.manager:
+            session = get_session_maker()
+            from .lib.migration import bootstrap_db_data
+            bootstrap_db_data(session, settings['config_uri'] != "testing.ini")
 
     config.add_static_view('static', 'static', cache_max_age=3600)
     config.add_static_view('widget', 'widget', cache_max_age=3600)

@@ -15,11 +15,10 @@ def set_config(settings, reconfig=False):
         if reconfig:
             _settings = settings
         else:
-            # Re-initializing settings fails. Patch.
-            log.warn("initialized twice: " + repr(settings))
-            log.debug("keeping: " + repr(_settings))
+            log.debug("combined settings:" + repr(_settings))
     else:
         _settings = settings
+    return _settings
 
 
 def get_config():
