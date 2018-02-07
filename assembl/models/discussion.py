@@ -823,7 +823,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
         })
         return {
             "@context": [
-                "http://purl.org/catalyst/jsonld",
+                "http://purl.org/conversence/jsonld",
                 {"local": get_global_base_url() + '/data/'}],
             "@graph": graphs
         }
@@ -839,7 +839,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
         graphs = [x for x in self.get_user_graph_cif() if x]
         return {
             "@context": [
-                "http://purl.org/catalyst/jsonld",
+                "http://purl.org/conversence/jsonld",
                 {"local": get_global_base_url() + '/data/'}],
             "@graph": graphs
         }
