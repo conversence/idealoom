@@ -421,7 +421,7 @@ class SourceReader(with_metaclass(ABCMeta, Thread)):
                 self.source = ContentSource.get(self.source_id)
             except TimeoutError:
                 # Ran out of connection pool
-                log.error("TimeoutError for " + self.source_id)
+                log.error("TimeoutError for " + str(self.source_id))
                 sleep(backoff)
                 backoff *= 2
         connection_error = (
