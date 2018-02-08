@@ -15,6 +15,7 @@ def set_config(settings, reconfig=False):
         if reconfig:
             _settings = settings
         else:
+            _settings.update(settings)
             log.debug("combined settings:" + repr(_settings))
     else:
         _settings = settings
