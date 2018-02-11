@@ -138,7 +138,7 @@ class IMAPReader(SourceReader):
             # log.debug( repr(messages))
             message_string = messages[email_id][b"RFC822"]
             assert message_string
-            message_string = message_string.decode('ascii')
+            message_string = AbstractMailbox.guess_encoding(message_string)
             try:
                 if self.source.message_ok_to_import(message_string):
                     (email_object, dummy, error) = self.source.parse_email(message_string)

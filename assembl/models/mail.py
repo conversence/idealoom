@@ -375,7 +375,7 @@ class AbstractMailbox(PostSource):
         def email_header_to_unicode(header_string, join_crlf=True):
             text = u''.join(
                 [
-                    txt.decode(enc) if enc else txt.decode('ascii') if isinstance(txt, bytes) else txt
+                    txt.decode(enc) if enc else txt.decode('iso-8859-1') if isinstance(txt, bytes) else txt
                     for (txt, enc) in decode_email_header(header_string)
                 ]
             )
@@ -479,6 +479,26 @@ FROM post WHERE post.id IN (SELECT MAX(post.id) as max_post_id FROM imported_pos
         email_object.guess_languages()
         return (email_object, parsed_email, error_description)
 
+    @staticmethod
+    def guess_encoding(blob):
+        """Blobs should be ascii, but sometimes are multiply-encoded
+        utf-8, probably a bug of the underlying library.
+        Temporary patch until it is fixed."""
+        if not isinstance(blob, native_str):
+            try:
+                # shortcut that will work in 99% of cases
+                return blob.decode('ascii')
+            except UnicodeDecodeError:
+                blob = blob.decode('iso-8859-1')
+        while True:
+            try:
+                blob2 = blob.encode('iso-8859-1').decode('utf-8')
+                if blob == blob2:
+                    return blob
+                blob = blob2
+            except (UnicodeDecodeError, UnicodeEncodeError):
+                return blob
+
     """
     emails have to be a complete set
     """
@@ -487,9 +507,7 @@ FROM post WHERE post.id IN (SELECT MAX(post.id) as max_post_id FROM imported_pos
         #log.debug('Threading...')
         emails_for_threading = []
         for mail in emails:
-            blob = mail.imported_blob
-            if not isinstance(blob, native_str):
-                blob = blob.decode('ascii')
+            blob = AbstractMailbox.guess_encoding(mail.imported_blob)
             email_for_threading = jwzthreading.make_message(email.message_from_string(blob))
             #Store our emailsubject, jwzthreading does not decode subject itself
             email_for_threading.subject = mail.subject.first_original().value
@@ -565,9 +583,7 @@ FROM post WHERE post.id IN (SELECT MAX(post.id) as max_post_id FROM imported_pos
         for email in emails:
             #session = self.db
             #session.add(email)
-            blob = email.imported_blob
-            if not isinstance(blob, native_str):
-                blob = blob.decode('ascii')
+            blob = AbstractMailbox.guess_encoding(email.imported_blob)
             (email_object, dummy, error) = self.parse_email(blob, email)
             #session.add(email_object)
             session.commit()
@@ -996,8 +1012,8 @@ class Email(ImportedPost):
     def __repr__(self):
         return "%s from %s to %s>" % (
             super(Email, self).__repr__(),
-            self.sender.encode('ascii', 'ignore'),
-            self.recipients.encode('ascii', 'ignore'))
+            self.sender.encode('iso-8859-1', 'ignore'),
+            self.recipients.encode('iso-8859-1', 'ignore'))
 
     def get_title(self):
         return self.source.mangle_mail_subject(self.subject)
