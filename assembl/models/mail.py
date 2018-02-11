@@ -24,8 +24,7 @@ from datetime import datetime
 # from imaplib2 import IMAP4_SSL, IMAP4
 import transaction
 from pyisemail import is_email
-from sqlalchemy.orm import deferred
-from sqlalchemy.orm import joinedload_all
+from sqlalchemy.orm import (deferred, undefer, joinedload_all)
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy import (
     Column,
@@ -579,7 +578,8 @@ FROM post WHERE post.id IN (SELECT MAX(post.id) as max_post_id FROM imported_pos
         session = self.db
         emails = session.query(Email).filter(
                 Email.source_id == self.id,
-                ).options(joinedload_all(Email.parent))
+                ).options(joinedload_all(Email.parent),
+                          undefer(ImportedPost.imported_blob))
         for email in emails:
             #session = self.db
             #session.add(email)
