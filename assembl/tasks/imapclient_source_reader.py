@@ -8,7 +8,7 @@ from sqlalchemy.orm import undefer
 import ssl
 import certifi
 
-from assembl.models import ContentSource, Post, AbstractMailbox, ImportedPost
+from assembl.models import ContentSource, Post, AbstractMailbox, ImportedPost, Email
 from .source_reader import (
     ReaderStatus, SourceReader, ReaderError, ClientError, IrrecoverableError)
 
@@ -166,7 +166,7 @@ class IMAPReader(SourceReader):
         # We imported mails, we need to re-thread
         self.source.db.flush()
         # Rethread emails globally (sigh)
-        emails = self.source.db.query(ImportedPost).filter_by(
+        emails = self.source.db.query(Email).filter_by(
             discussion_id=self.source.discussion_id
         ).options(undefer(ImportedPost.imported_blob)).all()
 
