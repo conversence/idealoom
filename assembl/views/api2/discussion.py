@@ -213,7 +213,7 @@ def discussion_instance_view_jsonld(request):
     if not (P_READ in permissions or P_READ_PUBLIC_CIF in permissions):
         raise HTTPUnauthorized()
     if not salt and P_ADMIN_DISC not in permissions:
-        salt = base64.urlsafe_b64encode(urandom(6))
+        salt = base64.urlsafe_b64encode(urandom(12))
 
     jdata = discussion_jsonld(discussion.id)
     if salt:
@@ -240,7 +240,7 @@ def user_private_view_jsonld(request):
     if P_READ not in permissions:
         raise HTTPUnauthorized()
     if not salt and P_ADMIN_DISC not in permissions:
-        salt = base64.urlsafe_b64encode(urandom(6))
+        salt = base64.urlsafe_b64encode(urandom(12))
 
     jdata = userprivate_jsonld(discussion_id)
     if salt:
