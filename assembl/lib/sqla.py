@@ -2129,7 +2129,7 @@ def before_commit_listener(session):
         del info['cdict']
         session.cdict2 = changes
     else:
-        log.warning("EMPTY CDICT!")
+        log.debug("EMPTY CDICT!")
 
 
 def after_commit_listener(session):
