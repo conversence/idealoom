@@ -119,7 +119,7 @@ Then, start the development server and compass with this command:
 
 .. code:: sh
 
-    circusctl start pserve webpack
+    env CIRCUSCTL_ENDPOINT=ipc://`pwd`/var/run/circus_endpoint circusctl start pserve
 
 You can now type http://localhost:6543 in your browser and log in using the credentials you created.
 
