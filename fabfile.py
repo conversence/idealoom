@@ -1438,7 +1438,8 @@ def postgres_user_detach():
                         env.db_host,
                         env.db_database))
 
-    pids = process_list.split("\r\n")[2:-1:]
+    numexp = re.compile(r'\d+')
+    pids = [pid for pid in process_list.split("\r\n") if numexp.fullmatch(pid.strip())]
     for pid in pids:
         run('psql -U %s -h %s -d %s -c "SELECT pg_terminate_backend(%s);"' % (
             env.db_user,
