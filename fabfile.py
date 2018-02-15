@@ -560,7 +560,7 @@ def update_pip_requirements(force_reinstall=False):
     update external dependencies on remote host
     """
     print(cyan('Updating requirements using PIP'))
-    venvcmd('pip install -U "pip>=6"')
+    venvcmd('pip install -U "pip>=6" setuptools wheel')
     req_file = "requirements_%d.txt" % sys.version_info.major
     force_flag = "--ignore-installed" if force_reinstall else ""
     base_cmd = "%s/bin/pip install %s -r %s" % (
