@@ -174,6 +174,7 @@ def generate_ini_files(config, config_fname):
         'circus_webapp': config.get('circus', 'use_webapp'),
         'lcctype': config.get(SECTION, 'lcctype'),
         'circus_webapp_port': int(config.get('circus', 'webapp_port')),
+        'chaussette_port': int(config.get('circus', 'chaussette_port')),
         'autostart_edgesense_server': (config.get(
             'circus', 'autostart_edgesense_server')
             if has_edgesense_server else 'false'),
