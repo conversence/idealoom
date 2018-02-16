@@ -1028,7 +1028,7 @@ def install_basetools():
         run('pip3 install virtualenv psycopg2 requests')
         run('pip3 install paramiko future nose Fabric3 jinja2')
     else:
-        sudo('apt-get install -y git python3-virtualenv python3-pip')
+        sudo('apt-get install -y git python3-venv python3-pip')
         sudo('apt-get install -y python3-psycopg2 python3-setuptools')
         sudo('apt-get install -y python3-paramiko python3-future')
         sudo('apt-get install -y python3-wheel python3-requests python3-nose')
@@ -1097,7 +1097,7 @@ def update_python_package_builddeps():
             'Installing/Updating python package native binary dependencies'))
         sudo('apt-get install -y libpq-dev libmemcached-dev libzmq3-dev '
              'libxslt1-dev libffi-dev libhiredis-dev libxml2-dev libssl-dev '
-             'libreadline-dev liblapack-dev libatlas-dev libblas-dev '
+             'libreadline-dev liblapack-dev libatlas-base-dev libblas-dev '
              'libxmlsec1-dev libgraphviz-dev libsnappy-dev')
         print ("We are still trying to get some requirements right for linux, "
                "See http://www.scipy.org/scipylib/building/linux.html "
