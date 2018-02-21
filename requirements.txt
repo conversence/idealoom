@@ -151,7 +151,7 @@ simplejson==3.13.2
 six==1.11.0
 smart-open==1.5.6
 snowballstemmer==1.2.1
-social-auth-core==1.6.0
+social-auth-core==1.7.0
 social-auth-app-pyramid==1.0.0
 social-auth-storage-sqlalchemy==1.1.0
 -e git+https://github.com/assembl/sockjs-tornado.git@conflicting_localhost#egg=sockjs_tornado
