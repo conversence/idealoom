@@ -344,8 +344,10 @@ class SocialAuthAccount(
     def real_name(self):
         if not self.full_name:
             info = self.extra_data
-            name = info.get('name', {})
-            if name.get('formatted', None):
+            name = info.get('name', None) or {}
+            if isinstance(name, str):
+                self.fullname = name
+            elif name.get('formatted', None):
                 self.full_name = name['formatted']
             elif 'givenName' in name and 'familyName' in name:
                 self.full_name = ' '.join(
