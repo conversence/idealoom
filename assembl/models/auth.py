@@ -938,11 +938,15 @@ class User(NamedClassMixin, OriginMixin, AgentProfile):
         elif operation == CrudOperation.CREATE:
             watcher.processAccountCreated(self.id)
 
-    def has_role_in(self, discussion, role):
+    def has_role_in(self, discussion_id, role):
         return self.db.query(LocalUserRole).join(Role).filter(
             LocalUserRole.user_id == self.id,
             Role.name == role,
-            LocalUserRole.discussion_id == discussion.id).first()
+            LocalUserRole.requested == False,  # noqa: E712
+            LocalUserRole.discussion_id == discussion_id).first()
+
+    def is_participant(self, discussion_id):
+        return self.has_role_in(discussion_id, R_PARTICIPANT)
 
     def create_agent_status_in_discussion(self, discussion):
         s = self.get_status_in_discussion(discussion.id)
@@ -976,7 +980,7 @@ class User(NamedClassMixin, OriginMixin, AgentProfile):
         agent_status.last_unsubscribed = _now
 
     def subscribe(self, discussion, role=R_PARTICIPANT):
-        if not self.has_role_in(discussion, role):
+        if not self.has_role_in(discussion.id, role):
             role = self.db.query(Role).filter_by(name=role).one()
             self.db.add(LocalUserRole(
                 user=self, role=role, discussion=discussion))
@@ -984,7 +988,7 @@ class User(NamedClassMixin, OriginMixin, AgentProfile):
         self.update_agent_status_subscribe(discussion)
 
     def unsubscribe(self, discussion, role=R_PARTICIPANT):
-        lur = self.has_role_in(discussion, role)
+        lur = self.has_role_in(discussion.id, role)
         if lur:
             self.db.delete(lur)
         # Set the AgentStatusInDiscussion
