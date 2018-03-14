@@ -10,6 +10,7 @@ from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.sql.expression import join, nullslast
 from sqlalchemy.orm import relationship, Query
 
+from .sqla import DuplicateHandling
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..semantic.namespaces import ASSEMBL
 from ..semantic.namespaces import DCTERMS
@@ -61,10 +62,11 @@ class TombstonableMixin(object):
         return cls.tombstone_date != None
 
     def unique_query(self):
-        # we only care about unicity of non-tombstones
         query, valid = super(TombstonableMixin, self).unique_query()
-        query = query.filter_by(
-            tombstone_date=None)
+        if self.default_duplicate_handling == DuplicateHandling.ERROR:
+            # we only care about unicity of non-tombstones
+            query = query.filter_by(
+                tombstone_date=None)
         return query, valid
 
 

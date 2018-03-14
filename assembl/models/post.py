@@ -26,7 +26,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import (
     relationship, backref, deferred, column_property, with_polymorphic)
 
-from ..lib.sqla import CrudOperation
+from ..lib.sqla import CrudOperation, DuplicateHandling
 from ..lib.decl_enums import DeclEnum
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..lib.sqla_types import CoerceUnicode
@@ -777,6 +777,8 @@ class ImportedPost(Post):
     __table_args__ = (
         UniqueConstraint('source_post_id', 'source_id'),
     )
+
+    default_duplicate_handling = DuplicateHandling.USE_ORIGINAL
 
     def __init__(self, *args, **kwargs):
         source_post_id = kwargs.pop('source_post_id', None)
