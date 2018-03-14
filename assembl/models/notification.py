@@ -14,6 +14,7 @@ import email
 from email import (charset as Charset)
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.utils import formatdate
 from functools import partial
 import threading
 
@@ -1002,7 +1003,7 @@ class Notification(Base):
         headers['Precedence'] = 'list'
 
         headers['List-ID'] = self.first_matching_subscription.discussion.uri()
-        headers['Date'] = email.Utils.formatdate()
+        headers['Date'] = formatdate()
 
         headers['Message-ID'] = "<"+self.event_source_object().message_id+">"
         if self.event_source_object().parent:
