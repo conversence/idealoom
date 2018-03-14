@@ -13,6 +13,7 @@ from os.path import join, dirname
 import email
 from email import (charset as Charset)
 from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from functools import partial
 import threading
 
@@ -997,7 +998,7 @@ class Notification(Base):
             return ''
         frontendUrls = FrontendUrls(self.first_matching_subscription.discussion)
         headers = {}
-        msg = email.mime.Multipart.MIMEMultipart('alternative')
+        msg = MIMEMultipart('alternative')
         headers['Precedence'] = 'list'
 
         headers['List-ID'] = self.first_matching_subscription.discussion.uri()
