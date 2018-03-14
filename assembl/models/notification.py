@@ -35,7 +35,6 @@ from zope import interface
 from pyramid.httpexceptions import HTTPUnauthorized, HTTPBadRequest
 from pyramid.i18n import TranslationStringFactory, make_localizer
 from pyramid_mailer.message import Message
-from celery import current_task
 from jinja2 import Environment, PackageLoader
 
 from . import Base, DiscussionBoundBase, OriginMixin
@@ -734,10 +733,6 @@ class ModelEventWatcherNotificationSubscriptionDispatcher(object):
                 if(len(applicableInstances) > 0):
                     applicableInstances.sort(key=lambda n: n.priority)
                     applicableInstances[0].process(objectInstance.get_discussion_id(), verb, objectInstance, applicableInstances[1:])
-        if bool(current_task):
-            # In a celery task, there's no one else to commit
-            objectInstance.db.commit()
-
 
     def processPostCreated(self, id):
         print("processPostCreated", id)

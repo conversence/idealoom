@@ -42,7 +42,6 @@ from .generic import PostSource
 from .post import ImportedPost
 from .auth import EmailAccount
 from ..tasks.imap import import_mails
-from ..lib.sqla import mark_changed
 from ..tasks.translate import translate_content
 
 
@@ -576,18 +575,14 @@ FROM post WHERE post.id IN (SELECT MAX(post.id) as max_post_id FROM imported_pos
             Call when a code change would change the representation in the database
             """
         session = self.db
-        emails = session.query(Email).filter(
-                Email.source_id == self.id,
-                ).options(joinedload_all(Email.parent),
-                          undefer(ImportedPost.imported_blob))
-        for email in emails:
-            #session = self.db
-            #session.add(email)
-            blob = AbstractMailbox.guess_encoding(email.imported_blob)
-            (email_object, dummy, error) = self.parse_email(blob, email)
-            #session.add(email_object)
-            session.commit()
-            #session.remove()
+        emails = session.query(Email.id).filter(
+                Email.source_id == self.id)
+        for email_id in emails:
+            with transaction.manager:
+                email_ = Email.get(email_id).options(
+                    joinedload_all(Email.parent), undefer(Email.imported_blob))
+                blob = AbstractMailbox.guess_encoding(email.imported_blob)
+                (email_object, dummy, error) = self.parse_email(blob, email)
 
         with transaction.manager:
             self.thread_mails(emails)
@@ -759,20 +754,18 @@ class IMAPMailbox(AbstractMailbox):
                 log.info("Skipped message with imap id %s (bounce or vacation message)"% (email_id))
             #log.debug("Setting mailbox_obj.last_imported_email_uid to "+email_id)
             mailbox_obj.last_imported_email_uid = email_id
-            transaction.commit()
-            mailbox_obj = AbstractMailbox.get(mailbox_obj.id)
 
         if len(email_ids):
             log.info("Processing messages from IMAP: %d "% (len(email_ids)))
-            new_emails = [import_email(mbox, email_id) for email_id in email_ids]
+            for email_id in email_ids:
+                with transaction.manager:
+                    import_email(mbox, email_id)
         else:
             log.info("No IMAP messages to process")
 
         discussion_id = mbox.discussion_id
         mailbox.close()
         mailbox.logout()
-        mark_changed()
-        transaction.commit()
 
         with transaction.manager:
             if len(email_ids):
@@ -782,7 +775,6 @@ class IMAPMailbox(AbstractMailbox):
                     ).options(joinedload_all(Email.parent))
 
                 AbstractMailbox.thread_mails(emails)
-                mark_changed()
 
     def make_reader(self):
         from assembl.tasks.imapclient_source_reader import IMAPReader
@@ -891,20 +883,19 @@ class MaildirMailbox(AbstractFilesystemMailbox):
             (email_object, dummy, error) = abstract_mbox.parse_email(message_string)
             if error:
                 raise Exception(error)
-            session.add(email_object)
-            transaction.commit()
+            with transaction.manager:
+                session.add(email_object)
             abstract_mbox = AbstractMailbox.get(abstract_mbox.id)
 
         if len(mails):
             [import_email(abstract_mbox, message_data) for message_data in mails]
 
             #We imported mails, we need to re-thread
-            emails = session.query(Email).filter(
-                    Email.discussion_id == discussion_id,
-                    ).options(joinedload_all(Email.parent))
-
-            AbstractMailbox.thread_mails(emails)
-            transaction.commit()
+            with transaction.manager:
+                emails = session.query(Email).filter(
+                        Email.discussion_id == discussion_id,
+                        ).options(joinedload_all(Email.parent))
+                AbstractMailbox.thread_mails(emails)
 
 class Email(ImportedPost):
     """
