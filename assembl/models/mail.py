@@ -399,6 +399,10 @@ class AbstractMailbox(PostSource):
 
         sender_name, sender_email = parseaddr(parsed_email.get('From'))
         sender_name = email_header_to_unicode(sender_name)
+        if sender_name:
+            sender = "%s <%s>" % (sender_name, sender_email)
+        else:
+            sender = sender_email
         sender_email_account = EmailAccount.get_or_make_profile(self.db, sender_email, sender_name)
         creation_date = datetime.utcfromtimestamp(
             mktime_tz(parsedate_tz(parsed_email['Date'])))
