@@ -29,7 +29,6 @@
     "backbone.radio": "~2.0.0",
     "bluebird": "~3.5",
     "bootstrap-notify": "~3.1",
-    "bootstrap-tooltip": "~3.1",
     "ckeditor": "~4.9",
     "classlist-polyfill": "~1.2",
     "d3": "~4.13",
