@@ -397,8 +397,8 @@ class AbstractMailbox(PostSource):
             new_in_reply_to = self.clean_angle_brackets(
                 email_header_to_unicode(new_in_reply_to))
 
-        sender = email_header_to_unicode(parsed_email.get('From'))
-        sender_name, sender_email = parseaddr(sender)
+        sender_name, sender_email = parseaddr(parsed_email.get('From'))
+        sender_name = email_header_to_unicode(sender_name)
         sender_email_account = EmailAccount.get_or_make_profile(self.db, sender_email, sender_name)
         creation_date = datetime.utcfromtimestamp(
             mktime_tz(parsedate_tz(parsed_email['Date'])))
