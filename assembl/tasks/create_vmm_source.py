@@ -21,6 +21,9 @@ class CreateVMMMailboxAtDiscussionCreation(object):
 
     def discussionCreated(self, discussion):
         from assembl.models import IMAPMailbox
+        for source in discussion.sources:
+            if isinstance(source, IMAPMailbox):
+                return
         password = b64encode(urandom(12))
         email = "@".join((discussion.slug, config.get("imap_domain")))
         mailbox = IMAPMailbox(
