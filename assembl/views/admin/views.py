@@ -178,8 +178,6 @@ def discussion_admin(request):
             errors.append("Please specify a slug")
         if not username:
             errors.append("Please specify a user name")
-        if not password:
-            errors.append("Please specify the user's password")
 
         if errors:
             context['errors'] = errors
