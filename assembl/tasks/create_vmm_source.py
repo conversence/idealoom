@@ -43,6 +43,6 @@ class CreateVMMMailboxAtDiscussionCreation(object):
             if rcode != 0:
                 stderr.seek(0)
                 error = stderr.read()
-                if " already exists" not in error:
+                if b" already exists" not in error:
                     raise RuntimeError(
                         "vmm useradd failed: %d\n%s" % (rcode, error))
