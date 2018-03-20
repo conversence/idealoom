@@ -62,3 +62,5 @@ saml_locality = Montreal
 saml_org = Conversence
 saml_email = testing@idealoom.org
 mail.tls = false
+handoff_to_nginx = false
+upload_root = var/test_uploads

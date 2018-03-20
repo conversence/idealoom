@@ -45,6 +45,7 @@ future==0.16.0
 gensim==3.4.0
 google-api-python-client==1.6.5
 greenlet==0.4.13
+-e git+https://github.com/maparent/hashfs.git@use_makedirs#egg=hashfs
 hiredis==0.2.0
 html5lib==1.0.1
 httplib2==0.10.3

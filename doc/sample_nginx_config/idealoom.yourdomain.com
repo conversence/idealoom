@@ -61,6 +61,11 @@ server {
         alias /home/idealoom_user/idealoom/assembl/static;
     }
 
+    location /private_uploads {
+      internal;
+      alias /home/idealoom_user/idealoom/var/uploads;
+    }
+
     location / {
 
         include uwsgi_params;
