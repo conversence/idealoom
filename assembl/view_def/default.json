@@ -228,11 +228,11 @@
         "attachments": [":default"],
         "extracts": [":id_only"]
     },
-    "AssemblPost": {
+    "LocalPost": {
         "@extends": "Post"
     },
     "WidgetPost": {
-        "@extends": "AssemblPost",
+        "@extends": "LocalPost",
         "metadata_json": true
     },
     "IdeaProposalPost": {
@@ -240,7 +240,7 @@
         "proposes_idea": true
     },
     "SynthesisPost": {
-        "@extends": "AssemblPost",
+        "@extends": "LocalPost",
         "publishes_synthesis": true
     },
     "ImportedPost": {

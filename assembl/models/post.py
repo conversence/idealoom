@@ -610,7 +610,7 @@ def orm_insert_listener(mapper, connection, target):
 event.listen(Post, 'after_insert', orm_insert_listener, propagate=True)
 
 
-class AssemblPost(Post):
+class LocalPost(Post):
     """
     A Post that originated directly on the platform (wasn't imported from elsewhere).
     """
@@ -640,7 +640,7 @@ class AssemblPost(Post):
         return "text/plain"
 
 
-class SynthesisPost(AssemblPost):
+class SynthesisPost(LocalPost):
     """
     A Post that publishes a synthesis.
     """
@@ -681,7 +681,7 @@ class SynthesisPost(AssemblPost):
         return self.publishes_synthesis.as_html(jinja_env)
 
 
-class WidgetPost(AssemblPost):
+class WidgetPost(LocalPost):
     """
     A Post that comes from an inspiration widget
     """
@@ -689,7 +689,7 @@ class WidgetPost(AssemblPost):
     __tablename__ = "post_with_metadata"
 
     id = Column(Integer, ForeignKey(
-        AssemblPost.id,
+        LocalPost.id,
         ondelete='CASCADE',
         onupdate='CASCADE'
     ), primary_key=True)

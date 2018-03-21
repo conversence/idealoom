@@ -186,7 +186,7 @@ var SegmentModel = Base.Model.extend({
 
         case 'Email':
         case 'Post':
-        case 'AssemblPost':
+        case 'LocalPost':
         case 'SynthesisPost':
         case 'ImportedPost':
         default:

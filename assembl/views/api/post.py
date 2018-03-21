@@ -35,7 +35,7 @@ from assembl.tasks.translate import (
     translate_content,
     PrefCollectionTranslationTable)
 from assembl.models import (
-    Post, AssemblPost, SynthesisPost,
+    Post, LocalPost, SynthesisPost,
     Synthesis, Discussion, Content, Idea, ViewPost, User,
     IdeaRelatedPostLink, AgentProfile, LikedPost, LangString,
     LanguagePreferenceCollection, LangStringEntry)
@@ -530,7 +530,7 @@ def create_post(request):
         log.warning("Still using html")
         # how to guess locale in this case?
         body = LangString.create(sanitize_html(html))
-        # TODO: AssemblPosts are pure text right now.
+        # TODO: LocalPosts are pure text right now.
         # Allowing HTML requires changes to the model.
     elif body:
         # TODO: Accept HTML body.
@@ -595,7 +595,7 @@ def create_post(request):
         new_post = SynthesisPost(**post_constructor_args)
         new_post.finalize_publish()
     else:
-        new_post = AssemblPost(**post_constructor_args)
+        new_post = LocalPost(**post_constructor_args)
     new_post.guess_languages()
 
     discussion.db.add(new_post)

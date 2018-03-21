@@ -25,17 +25,17 @@
         "idCreator": "creator",
         "publication_state": true
     },
-    "AssemblPost": {
+    "LocalPost": {
         "@extends": "Post"
     },
     "WidgetPost": {
-        "@extends": "AssemblPost"
+        "@extends": "LocalPost"
     },
     "IdeaProposalPost": {
         "@extends": "WidgetPost"
     },
     "SynthesisPost": {
-        "@extends": "AssemblPost",
+        "@extends": "LocalPost",
         "publishes_synthesis": true
     },
     "ImportedPost": {

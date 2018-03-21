@@ -58,12 +58,12 @@ def upgrade(pyramid_env):
 
         # look at assembl posts
         q3 = db.query(
-            m.User.id, m.AssemblPost.discussion_id,
-            sa.func.min(m.AssemblPost.creation_date),
-            sa.func.max(m.AssemblPost.creation_date)
-            ).join(m.AssemblPost, m.AssemblPost.creator_id == m.User.id
+            m.User.id, m.LocalPost.discussion_id,
+            sa.func.min(m.LocalPost.creation_date),
+            sa.func.max(m.LocalPost.creation_date)
+            ).join(m.LocalPost, m.LocalPost.creator_id == m.User.id
             ).filter(m.User.id.in_(q1)
-            ).group_by(m.User.id, m.AssemblPost.discussion_id)
+            ).group_by(m.User.id, m.LocalPost.discussion_id)
         merge_min_max(min_maxes, q3)
         # look at requested subscriptions
         q9 = db.query(
@@ -95,10 +95,10 @@ def upgrade(pyramid_env):
         q4 = db.query(m.User.id
             ).outerjoin(m.Action
             ).outerjoin(m.SocialAuthAccount
-            ).outerjoin(m.AssemblPost, m.AssemblPost.creator_id == m.User.id
+            ).outerjoin(m.LocalPost, m.LocalPost.creator_id == m.User.id
             ).filter(
                 m.Action.id == None, m.SocialAuthAccount.id == None,
-                m.AssemblPost.id == None,
+                m.LocalPost.id == None,
                 m.User.last_login == m.User.creation_date)
 
         q5 = q4.outerjoin(m.AgentStatusInDiscussion

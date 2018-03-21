@@ -114,18 +114,18 @@
         "id": "message_id",
         "has_creator": "creator"
     },
-    "AssemblPost": {
+    "LocalPost": {
         "@extends": "Post"
     },
     "WidgetPost": {
-        "@extends": "AssemblPost"
+        "@extends": "LocalPost"
     },
     "IdeaProposalPost": {
         "@extends": "WidgetPost",
         "proposes_idea": true
     },
     "SynthesisPost": {
-        "@extends": "AssemblPost",
+        "@extends": "LocalPost",
         "publishes_synthesis": true
     },
     "ImportedPost": {

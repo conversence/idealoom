@@ -26,7 +26,7 @@ def upgrade(pyramid_env):
     with transaction.manager:
         # sanitize body of assemblposts (not imported posts)
         for lse in db.query(m.LangStringEntry
-                ).join(m.AssemblPost,
+                ).join(m.LocalPost,
                        m.Content.body_id == m.LangStringEntry.langstring_id
                 ).filter(m.LangStringEntry.value.like('%<%')):
             lse.value = sanitize_html(lse.value)

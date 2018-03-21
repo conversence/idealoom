@@ -185,7 +185,7 @@ from .generic import (
     PostSource,
 )
 from .post import (
-    AssemblPost,
+    LocalPost,
     IdeaProposalPost,
     ImportedPost,
     Post,

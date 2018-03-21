@@ -325,7 +325,7 @@ def test_creativity_session_widget(
 
     # Create a new post attached to the sub-idea
     new_post_create = test_app.post_json(local_to_absolute(post_endpoint), {
-        "@type": "AssemblPost",
+        "@type": "LocalPost",
         "body": {"@type": "LangString", "entries": [{
             "@type": "LangStringEntry", "value": "body",
             "@language": "en"
@@ -410,7 +410,7 @@ def test_creativity_session_widget(
 
     # Create a second post.
     new_post_create = test_app.post_json(local_to_absolute(post_endpoint), {
-        "@type": "AssemblPost",
+        "@type": "LocalPost",
         "body": {"@type": "LangString", "entries": [{
             "@type": "LangStringEntry", "value": "body",
             "@language": "en"

@@ -1088,7 +1088,7 @@ Context.prototype = {
       default:
 
         // This will treat:
-        // ['Email', 'Post', 'AssemblPost', 'SynthesisPost', 'ImportedPost', 'WidgetPost', 'IdeaProposalPost']
+        // ['Email', 'Post', 'LocalPost', 'SynthesisPost', 'ImportedPost', 'WidgetPost', 'IdeaProposalPost']
 
         var selector = this.format('[data-annotation-id="{0}"]', segment.id);
 

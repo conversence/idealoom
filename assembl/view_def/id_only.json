@@ -19,7 +19,7 @@
     "AnnotatorSource": {},
     "SPost": {},
     "Post": {},
-    "AssemblPost": {},
+    "LocalPost": {},
     "WidgetPost": {},
     "IdeaProposalPost": {},
     "SynthesisPost": {},

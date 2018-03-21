@@ -179,11 +179,11 @@
         "full_message": false,
         "in_reply_to": false
     },
-    "AssemblPost": {
+    "LocalPost": {
         "@extends": "Post"
     },
     "WidgetPost": {
-        "@extends": "AssemblPost",
+        "@extends": "LocalPost",
         "metadata_json": true
     },
     "IdeaProposalPost": {

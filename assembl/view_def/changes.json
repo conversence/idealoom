@@ -106,11 +106,11 @@
         "parentId": "parent",
         "idCreator": "creator"
     },
-    "AssemblPost": {
+    "LocalPost": {
         "@extends": "Post"
     },
     "WidgetPost": {
-        "@extends": "AssemblPost",
+        "@extends": "LocalPost",
         "metadata_json": false
     },
     "IdeaProposalPost": {
@@ -118,7 +118,7 @@
         "proposes_idea": true
     },
     "SynthesisPost": {
-        "@extends": "AssemblPost",
+        "@extends": "LocalPost",
         "publishes_synthesis": true
     },
     "ImportedPost": {
