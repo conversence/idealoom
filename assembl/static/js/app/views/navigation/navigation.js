@@ -14,23 +14,23 @@ import Base from '../../models/base.js';
 import AboutNavPanel from '../navigation/about.js';
 import SynthesisInNavigationPanel from '../navigation/synthesisInNavigation.js';
 import LinkListView from '../navigation/linkListView.js';
-import AssemblPanel from '../assemblPanel.js';
+import BasePanel from '../basePanel.js';
 import Ctx from '../../common/context.js';
 import Permissions from '../../utils/permissions.js';
 import PanelSpecTypes from '../../utils/panelSpecTypes.js';
 import CollectionManager from '../../common/collectionManager.js';
 import Analytics from '../../internal_modules/analytics/dispatcher.js';
 
-var NavigationView = AssemblPanel.extend({
+var NavigationView = BasePanel.extend({
   constructor: function NavigationView() {
-    AssemblPanel.apply(this, arguments);
+    BasePanel.apply(this, arguments);
   },
 
   template: "#tmpl-navigation",
   panelType: PanelSpecTypes.NAV_SIDEBAR,
   className: "navSidebar",
   hideHeader: true,
-  gridSize: AssemblPanel.prototype.NAVIGATION_PANEL_GRID_SIZE,
+  gridSize: BasePanel.prototype.NAVIGATION_PANEL_GRID_SIZE,
   minWidth: 350,
 
   //This MUST match the variables in _variables.scss
@@ -60,7 +60,7 @@ var NavigationView = AssemblPanel.extend({
     'click @ui.ideaFromIdealist': 'addIdeaFromIdeaList',
   },
   initialize: function(options) {
-    AssemblPanel.prototype.initialize.apply(this, arguments);
+    BasePanel.prototype.initialize.apply(this, arguments);
 
     this._accordionContentHeight = null;
     this._accordionHeightTries = 0;

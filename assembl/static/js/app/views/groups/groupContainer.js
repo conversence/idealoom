@@ -8,7 +8,7 @@ import Marionette from 'backbone.marionette';
 import ctx from '../../common/context.js';
 import IdeaLoom from '../../app.js';
 import GroupContent from './groupContent.js';
-import AssemblPanel from '../assemblPanel.js';
+import BasePanel from '../basePanel.js';
 import PanelSpecTypes from '../../utils/panelSpecTypes.js';
 /**
  * Manages all the groups in the interface, essentially the GroupSpec.Collection
@@ -24,7 +24,7 @@ var groupContainer = Marionette.CollectionView.extend({
   childView: GroupContent,
   group_borders_size: 0,
   resizeSuspended: false,
-  minPanelSize:AssemblPanel.prototype.minimized_size,
+  minPanelSize:BasePanel.prototype.minimized_size,
   
   onRender:function(){
     var that = this;

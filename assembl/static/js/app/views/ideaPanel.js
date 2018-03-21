@@ -19,7 +19,7 @@ import AgentViews from './agent.js';
 import WidgetLinks from './widgetLinks.js';
 import WidgetButtons from './widgetButtons.js';
 import CollectionManager from '../common/collectionManager.js';
-import AssemblPanel from './assemblPanel.js';
+import BasePanel from './basePanel.js';
 import Marionette from 'backbone.marionette';
 import AttachmentViews from './attachments.js';
 import ConfirmModal from './confirmModal.js';
@@ -31,9 +31,9 @@ import highlight from 'jquery-highlight';
 import BackboneSubset from 'Backbone.Subset';
 import Promise from 'bluebird';
 
-var IdeaPanel = AssemblPanel.extend({
+var IdeaPanel = BasePanel.extend({
   constructor: function IdeaPanel() {
-    AssemblPanel.apply(this, arguments);
+    BasePanel.apply(this, arguments);
   },
 
   template: '#tmpl-ideaPanel',
@@ -41,12 +41,12 @@ var IdeaPanel = AssemblPanel.extend({
   className: 'ideaPanel',
   minimizeable: true,
   closeable: false,
-  gridSize: AssemblPanel.prototype.IDEA_PANEL_GRID_SIZE,
+  gridSize: BasePanel.prototype.IDEA_PANEL_GRID_SIZE,
   minWidth: 295,
   ideaPanelOpensAutomatically: true,
 
   initialize: function(options) {
-    AssemblPanel.prototype.initialize.apply(this, arguments);
+    BasePanel.prototype.initialize.apply(this, arguments);
     this.setLoading(true);
     var that = this;
     var collectionManager = new CollectionManager();

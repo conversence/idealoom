@@ -8,7 +8,7 @@ import Marionette from 'backbone.marionette';
 import _ from 'underscore';
 import $ from 'jquery';
 import Promise from 'bluebird';
-import AssemblPanel from '../assemblPanel.js';
+import BasePanel from '../basePanel.js';
 import CollectionManager from '../../common/collectionManager.js';
 import Types from '../../utils/types.js';
 import IdeaLoom from '../../app.js';
@@ -85,9 +85,9 @@ var SynthesisList = Marionette.CollectionView.extend({
 
 });
 
-var SynthesisInNavigationPanel = AssemblPanel.extend({
+var SynthesisInNavigationPanel = BasePanel.extend({
   constructor: function SynthesisInNavigationPanel() {
-    AssemblPanel.apply(this, arguments);
+    BasePanel.apply(this, arguments);
   },
 
   template: '#tmpl-synthesisInNavigationPanel',
@@ -101,7 +101,7 @@ var SynthesisInNavigationPanel = AssemblPanel.extend({
   },
 
   initialize: function(options) {
-    AssemblPanel.prototype.initialize.apply(this, arguments);
+    BasePanel.prototype.initialize.apply(this, arguments);
     var that = this;
     var collectionManager = new CollectionManager();
     this.setLoading(true);

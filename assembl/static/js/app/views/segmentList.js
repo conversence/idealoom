@@ -18,7 +18,7 @@ import i18n from '../utils/i18n.js';
 import Permissions from '../utils/permissions.js';
 import CollectionManager from '../common/collectionManager.js';
 import PanelSpecTypes from '../utils/panelSpecTypes.js';
-import AssemblPanel from './assemblPanel.js';
+import BasePanel from './basePanel.js';
 import AgentViews from './agent.js';
 import BackboneSubset from 'Backbone.Subset';
 import Promise from 'bluebird';
@@ -29,7 +29,7 @@ var SegmentView = Marionette.View.extend({
   },
 
   template: '#tmpl-segment',
-  gridSize: AssemblPanel.prototype.CLIPBOARD_GRID_SIZE,
+  gridSize: BasePanel.prototype.CLIPBOARD_GRID_SIZE,
   ui: {
     postItFooter: '.postit-footer .text-quotation',
     postIt: '.postit',
@@ -253,9 +253,9 @@ var IdeaSegmentListSubset = Backbone.Subset.extend({
   }
 });
 
-var SegmentListPanel = AssemblPanel.extend({
+var SegmentListPanel = BasePanel.extend({
   constructor: function SegmentListPanel() {
-    AssemblPanel.apply(this, arguments);
+    BasePanel.apply(this, arguments);
   },
 
   template: '#tmpl-segmentList',
@@ -276,7 +276,7 @@ var SegmentListPanel = AssemblPanel.extend({
   },
 
   initialize: function(options) {
-    AssemblPanel.prototype.initialize.apply(this, arguments);
+    BasePanel.prototype.initialize.apply(this, arguments);
     var that = this;
     var collectionManager = new CollectionManager();
 

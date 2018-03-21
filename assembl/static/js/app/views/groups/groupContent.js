@@ -8,7 +8,7 @@ import Marionette from 'backbone.marionette';
 import Ctx from '../../common/context.js';
 import i18n from '../../utils/i18n.js';
 import panelSpec from '../../models/panelSpec.js';
-import AssemblPanel from '../assemblPanel.js';
+import BasePanel from '../basePanel.js';
 import PanelWrapper from './panelWrapper.js';
 import PanelSpecTypes from '../../utils/panelSpecTypes.js';
 import Analytics from '../../internal_modules/analytics/dispatcher.js';

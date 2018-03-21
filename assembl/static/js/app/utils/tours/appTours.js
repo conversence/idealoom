@@ -1,12 +1,12 @@
 /**
  * 
- * @module app.utils.tours.assemblTours
+ * @module app.utils.tours.appTours
  */
 import i18n from '../i18n.js';
 
 import Ctx from '../../common/context.js';
 import $ from 'jquery';
-var AssemblTours = [
+var AppTours = [
   {
     name: "on_start",
     autostart: true,
@@ -172,4 +172,4 @@ var AssemblTours = [
         }]}}
 ];
 
-export default AssemblTours;
+export default AppTours;

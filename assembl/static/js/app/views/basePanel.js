@@ -1,6 +1,6 @@
 /**
  * 
- * @module app.views.assemblPanel
+ * @module app.views.basePanel
  */
 
 import LoaderView from './loaderView.js';
@@ -9,10 +9,10 @@ import _ from 'underscore';
 
 /**
  * An abstract class every panel should eventually extend
- * @class app.views.assemblPanel.AssemblPanel
+ * @class app.views.basePanel.BasePanel
  */
-var AssemblPanel = LoaderView.extend({
-  constructor: function AssemblPanel() {
+var BasePanel = LoaderView.extend({
+  constructor: function BasePanel() {
     LoaderView.apply(this, arguments);
   },
 
@@ -104,4 +104,4 @@ var AssemblPanel = LoaderView.extend({
 
 });
 
-export default AssemblPanel;
+export default BasePanel;

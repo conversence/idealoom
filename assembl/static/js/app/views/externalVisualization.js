@@ -8,7 +8,7 @@ import Marionette from 'backbone.marionette';
 import i18n from '../utils/i18n.js';
 import Ctx from '../common/context.js';
 import PanelSpecTypes from '../utils/panelSpecTypes.js';
-import AssemblPanel from './assemblPanel.js';
+import BasePanel from './basePanel.js';
 
 var externalVisualizationPanel = Marionette.View.extend({
   constructor: function externalVisualizationPanel() {
@@ -18,7 +18,7 @@ var externalVisualizationPanel = Marionette.View.extend({
   template: '#tmpl-externalViz',
   panelType: PanelSpecTypes.EXTERNAL_VISUALIZATION_CONTEXT,
   className: 'externalViz',
-  gridSize: AssemblPanel.prototype.CONTEXT_PANEL_GRID_SIZE,
+  gridSize: BasePanel.prototype.CONTEXT_PANEL_GRID_SIZE,
   minWidth: 450,
   hideHeader: true,
   getTitle: function() {

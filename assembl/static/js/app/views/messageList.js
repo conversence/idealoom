@@ -15,7 +15,7 @@ import i18n from '../utils/i18n.js';
 import Announcements from './announcements.js';
 import MessageSendView from './messageSend.js';
 import PanelSpecTypes from '../utils/panelSpecTypes.js';
-import AssemblPanel from './assemblPanel.js';
+import BasePanel from './basePanel.js';
 import BaseMessageListMixin from './baseMessageList.js';
 import CollectionManager from '../common/collectionManager.js';
 import Widget from '../models/widget.js';
@@ -23,10 +23,10 @@ import Promise from 'bluebird';
 
 /**
  * @class app.views.messageList.BaseMessageList
- * @extends app.views.assemblPanel.AssemblPanel
+ * @extends app.views.basePanel.BasePanel
  * @extends app.views.baseMessageList.BaseMessageListMixin
  */
-var BaseMessageList = BaseMessageListMixin(AssemblPanel);
+var BaseMessageList = BaseMessageListMixin(BasePanel);
 
 /**
  * @class app.views.messageList.MessageList
@@ -41,7 +41,7 @@ var MessageList = BaseMessageList.extend({
   panelType: PanelSpecTypes.MESSAGE_LIST,
   className: 'panel messageList',
   lockable: true,
-  gridSize: AssemblPanel.prototype.MESSAGE_PANEL_GRID_SIZE,
+  gridSize: BasePanel.prototype.MESSAGE_PANEL_GRID_SIZE,
   minWidth: 450, // basic, may receive idea offset.
   debugPaging: false,
   debugScrollLogging: false,

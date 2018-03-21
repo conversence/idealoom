@@ -5,13 +5,13 @@
 
 import IdeaLoom from '../../app.js';
 
-import AssemblPanel from '../assemblPanel.js';
+import BasePanel from '../basePanel.js';
 import PanelSpecTypes from '../../utils/panelSpecTypes.js';
 import Analytics from '../../internal_modules/analytics/dispatcher.js';
 
-var AboutNavPanel = AssemblPanel.extend({
+var AboutNavPanel = BasePanel.extend({
   constructor: function AboutNavPanel() {
-    AssemblPanel.apply(this, arguments);
+    BasePanel.apply(this, arguments);
   },
 
   template: '#tmpl-about',
@@ -26,7 +26,7 @@ var AboutNavPanel = AssemblPanel.extend({
     'click .js_trackInteractionExample': 'testAnalytics2'
   },
   initialize: function(options) {
-      AssemblPanel.prototype.initialize.apply(this, arguments);
+      BasePanel.prototype.initialize.apply(this, arguments);
     },
   goToDebate: function() {
     IdeaLoom.other_vent.trigger("DEPRECATEDnavigation:selected", "debate");

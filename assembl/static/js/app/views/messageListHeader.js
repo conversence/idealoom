@@ -16,7 +16,7 @@ import FlipSwitchButtonView from './flipSwitchButton.js';
 import i18n from '../utils/i18n.js';
 import Permissions from '../utils/permissions.js';
 import PanelSpecTypes from '../utils/panelSpecTypes.js';
-import AssemblPanel from './assemblPanel.js';
+import BasePanel from './basePanel.js';
 import Marionette from 'backbone.marionette';
 import CollectionManager from '../common/collectionManager.js';
 import Promise from 'bluebird';

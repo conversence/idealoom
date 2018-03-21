@@ -10,7 +10,7 @@ import TourModel from '../models/tour.js';
 import Ctx from '../common/context.js';
 import _ from 'underscore';
 import $ from 'jquery';
-import AssemblTours from './tours/assemblTours.js';
+import AppTours from './tours/appTours.js';
 import hopscotch from 'hopscotch';
 import Raven from 'raven-js';
 
@@ -68,8 +68,8 @@ var TourManager = Marionette.Object.extend({
   initialize2: function() {
     var that = this;
     var toursById = {};
-    for (var i in AssemblTours) {
-        var tour = AssemblTours[i];
+    for (var i in AppTours) {
+        var tour = AppTours[i];
         tour.position = i;
         tour.tour.id = tour.name;
         toursById[tour.name] = tour;

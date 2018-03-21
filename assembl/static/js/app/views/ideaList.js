@@ -19,7 +19,7 @@ import UserCustomData from '../models/userCustomData.js';
 import ideaInIdeaList from './ideaInIdeaList.js';
 import PanelSpecTypes from '../utils/panelSpecTypes.js';
 import scrollUtils from '../utils/scrollUtils.js';
-import AssemblPanel from './assemblPanel.js';
+import BasePanel from './basePanel.js';
 import _ from 'underscore';
 import CollectionManager from '../common/collectionManager.js';
 import i18n from '../utils/i18n.js';
@@ -31,9 +31,9 @@ import DiscussionPreference from '../models/discussionPreference.js';
 var FEATURED = 'featured';
 var IN_SYNTHESIS = 'inNextSynthesis';
 
-var IdeaList = AssemblPanel.extend({
+var IdeaList = BasePanel.extend({
   constructor: function IdeaList() {
-    AssemblPanel.apply(this, arguments);
+    BasePanel.apply(this, arguments);
   },
 
   template: '#tmpl-ideaList',
@@ -78,7 +78,7 @@ var IdeaList = AssemblPanel.extend({
    */
   show_graph: false,
   minWidth: 320,
-  gridSize: AssemblPanel.prototype.NAVIGATION_PANEL_GRID_SIZE,
+  gridSize: BasePanel.prototype.NAVIGATION_PANEL_GRID_SIZE,
 
   /**
    * Is this panel the primary navigation panel for it's group?
@@ -91,7 +91,7 @@ var IdeaList = AssemblPanel.extend({
 
   initialize: function(options) {
     this.setLoading(true);
-    AssemblPanel.prototype.initialize.apply(this, arguments);
+    BasePanel.prototype.initialize.apply(this, arguments);
     var that = this;
     var collectionManager = new CollectionManager();
 

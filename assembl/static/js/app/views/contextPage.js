@@ -15,7 +15,7 @@ import Moment from 'moment';
 import BackboneSubset from 'Backbone.Subset';
 import Permissions from '../utils/permissions.js';
 import PanelSpecTypes from '../utils/panelSpecTypes.js';
-import AssemblPanel from './assemblPanel.js';
+import BasePanel from './basePanel.js';
 import CKEditorField from './reusableDataFields/ckeditorField.js';
 import Statistics from './statistics.js';
 import Types from '../utils/types.js';
@@ -278,7 +278,7 @@ var ContextPage = Marionette.View.extend({
   template: '#tmpl-contextPage',
   panelType: PanelSpecTypes.DISCUSSION_CONTEXT,
   className: 'contextPanel',
-  gridSize: AssemblPanel.prototype.CONTEXT_PANEL_GRID_SIZE,
+  gridSize: BasePanel.prototype.CONTEXT_PANEL_GRID_SIZE,
   hideHeader: true,
   getTitle: function() {
     return i18n.gettext('Home'); // unused

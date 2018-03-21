@@ -6,7 +6,7 @@
 import _ from 'underscore';
 
 import Types from '../utils/types.js';
-import AssemblPanel from '../views/assemblPanel.js';
+import BasePanel from '../views/basePanel.js';
 import AboutNavPanel from '../views/navigation/about.js';
 import ContextPanel from '../views/contextPage.js';
 import IdeaList from '../views/ideaList.js';
@@ -20,7 +20,7 @@ import CollectionManager from '../common/collectionManager.js';
 import ExternalVisualizationPanels from '../views/externalVisualization.js';
 
 /*
- * A registry of AssemblView subclasses implementing a panelSpec,
+ * A registry of BasePanel subclasses implementing a panelSpec,
  * indexed by PanelSpec.id
  */
 var panelTypeRegistry = {};
@@ -43,7 +43,7 @@ _.each([
  * Factory to create a view instance from the panelSpec passed as parameter
  *
  * @param <PanelSpecs.Model> panelSpecModel
- * @returns <AssemblPanel> AssemblPanel view
+ * @returns <BasePanel> BasePanel view
  */
 function byPanelSpec(panelSpecModel) {
   //console.log("byPanelSpec() called with ",panelSpecModel);
@@ -51,8 +51,8 @@ function byPanelSpec(panelSpecModel) {
     const id = panelSpecModel.getPanelSpecType().id;
     const panelClass = panelTypeRegistry[id];
 
-    if (!panelClass instanceof AssemblPanel) {
-      throw new Error("panelClass isn't an instance of AssemblPanel");
+    if (!panelClass instanceof BasePanel) {
+      throw new Error("panelClass isn't an instance of BasePanel");
     }
 
     //console.log("byPanelSpec() returning ",panelClass, "for",panelSpecModel)

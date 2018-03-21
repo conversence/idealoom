@@ -7,7 +7,7 @@ import $ from 'jquery';
 import Marionette from 'backbone.marionette';
 import panelViewByPanelSpec from '../../objects/viewsFactory.js';
 import Ctx from '../../common/context.js';
-import AssemblPanel from '../assemblPanel.js';
+import BasePanel from '../basePanel.js';
 import i18n from '../../utils/i18n.js';
 import panelSpec from '../../models/panelSpec.js';
 window.jQuery = $;
@@ -47,7 +47,7 @@ var PanelWrapper = Marionette.View.extend({
   _unlockCallbackQueue: {},
   panelLockedReason: null,
   panelUnlockedReason: null,
-  minPanelSize:AssemblPanel.prototype.minimized_size,
+  minPanelSize:BasePanel.prototype.minimized_size,
   
   initialize: function(options) {
     var that = this;

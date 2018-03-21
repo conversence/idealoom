@@ -19,27 +19,27 @@ import Permissions from '../utils/permissions.js';
 import IdeaFamilyView from './ideaFamily.js';
 import IdeaInSynthesisView from './ideaInSynthesis.js';
 import PanelSpecTypes from '../utils/panelSpecTypes.js';
-import AssemblPanel from './assemblPanel.js';
+import BasePanel from './basePanel.js';
 import i18n from '../utils/i18n.js';
 import EditableField from './reusableDataFields/editableField.js';
 import CKEditorField from './reusableDataFields/ckeditorField.js';
 import CollectionManager from '../common/collectionManager.js';
 import Promise from 'bluebird';
 
-var SynthesisPanel = AssemblPanel.extend({
+var SynthesisPanel = BasePanel.extend({
   constructor: function SynthesisPanel() {
-    AssemblPanel.apply(this, arguments);
+    BasePanel.apply(this, arguments);
   },
 
   template: '#tmpl-synthesisPanel',
   panelType: PanelSpecTypes.SYNTHESIS_EDITOR,
   className: 'synthesisPanel',
-  gridSize: AssemblPanel.prototype.SYNTHESIS_PANEL_GRID_SIZE,
+  gridSize: BasePanel.prototype.SYNTHESIS_PANEL_GRID_SIZE,
   /**
    * @init
    */
   initialize: function(obj) {
-    AssemblPanel.prototype.initialize.apply(this, arguments);
+    BasePanel.prototype.initialize.apply(this, arguments);
     var that = this;
     var collectionManager = new CollectionManager();
 
