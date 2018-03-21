@@ -45,7 +45,7 @@ def get_nsm(session):
 
 
 def get_virtuoso(session, storage=None):
-    storage = storage or AssemblQuadStorageManager.discussion_storage_name()
+    storage = storage or AppQuadStorageManager.discussion_storage_name()
     v = Virtuoso(quad_storage=storage,
                  connection=session.connection())
     return v
@@ -105,7 +105,7 @@ class QuadMapPatternS(QuadMapPattern):
                             exclude_base_condition=False):
         # temporary. We should use the section objects themselves.
         if self.sections:
-            graph_name = AssemblQuadStorageManager.sections[
+            graph_name = AppQuadStorageManager.sections[
                 self.sections[0]].graph_iri
         qmp = super(QuadMapPatternS, self).clone_with_defaults(
             subject, obj, graph_name, name, conditions)
@@ -119,7 +119,7 @@ def assembl_iri_accessor(cls):
     return cls.iri_class()
 
 
-class AssemblClassPatternExtractor(ClassPatternExtractor):
+class AppClassPatternExtractor(ClassPatternExtractor):
 
     def iri_accessor(self, sqla_cls):
         return sqla_cls.iri_class()
@@ -133,7 +133,7 @@ class AssemblClassPatternExtractor(ClassPatternExtractor):
             pass
         if iri_qmp:
             return iri_qmp.apply(cls.id)
-        return super(AssemblClassPatternExtractor, self
+        return super(AppClassPatternExtractor, self
                      ).get_subject_pattern(cls, alias_maker)
 
     def class_pattern_name(self, cls, for_graph):
@@ -171,7 +171,7 @@ class AssemblClassPatternExtractor(ClassPatternExtractor):
     def add_class(self, sqla_cls, for_graph):
         if self.delayed_class(sqla_cls, for_graph):
             return
-        super(AssemblClassPatternExtractor, self).add_class(
+        super(AppClassPatternExtractor, self).add_class(
             sqla_cls, for_graph)
 
     def extract_qmps(self, sqla_cls, subject_pattern, alias_maker, for_graph):
@@ -184,7 +184,7 @@ class AssemblClassPatternExtractor(ClassPatternExtractor):
                 self.class_pattern_name(sqla_cls, for_graph),
                 self.get_base_conditions(alias_maker, sqla_cls, for_graph),
                 None, rdf_sections)
-        for qmp in super(AssemblClassPatternExtractor, self).extract_qmps(
+        for qmp in super(AppClassPatternExtractor, self).extract_qmps(
                 sqla_cls, subject_pattern, alias_maker, for_graph):
             if for_graph.section in qmp.sections:
                 yield qmp
@@ -207,7 +207,7 @@ class AssemblClassPatternExtractor(ClassPatternExtractor):
     def get_base_conditions(self, alias_maker, cls, for_graph):
         from ..models import DiscussionBoundBase
         conditions = super(
-            AssemblClassPatternExtractor, self).get_base_conditions(
+            AppClassPatternExtractor, self).get_base_conditions(
             alias_maker, cls, for_graph)
         base_conds = cls.base_conditions(alias_maker=alias_maker)
         if base_conds:
@@ -252,11 +252,11 @@ class AssemblClassPatternExtractor(ClassPatternExtractor):
         return qmp
 
 
-class AssemblGraphQuadMapPattern(GraphQuadMapPattern):
+class AppGraphQuadMapPattern(GraphQuadMapPattern):
     def __init__(
             self, graph_iri, storage, section, discussion_id,
             name=None, option=None, nsm=None):
-        super(AssemblGraphQuadMapPattern, self).__init__(
+        super(AppGraphQuadMapPattern, self).__init__(
             graph_iri, storage, name, option, nsm)
         self.discussion_id = discussion_id
         self.section = section
@@ -286,11 +286,11 @@ class AESObfuscator(object):
 
 
 
-class AssemblPatternGraphQuadMapPattern(GraphQuadMapPattern):
+class AppPatternGraphQuadMapPattern(GraphQuadMapPattern):
     def __init__(
             self, graph_iri_pattern, storage, alias_set, section,
             discussion_id, name=None, option=None, nsm=None):
-        super(AssemblPatternGraphQuadMapPattern, self).__init__(
+        super(AppPatternGraphQuadMapPattern, self).__init__(
             graph_iri_pattern, storage, alias_set, name, option, nsm)
         self.discussion_id = discussion_id
         self.section = section
@@ -316,7 +316,7 @@ class DataSection(object):
             storage.add_section(self)
 
 
-class AssemblQuadStorageManager(object):
+class AppQuadStorageManager(object):
     private_user_storage = StorageDefinition(QUADNAMES.PrivateUserStorage)
     discussion_storage = StorageDefinition(QUADNAMES.discussion_storage)
     main_storage = StorageDefinition(QUADNAMES.main_storage)
@@ -355,7 +355,7 @@ class AssemblQuadStorageManager(object):
         self.session.execute("DB.DBA.RDF_AUDIT_METADATA(1, '*')")
 
     def prepare_storage(self, quad_storage_name, imported=None):
-        cpe = AssemblClassPatternExtractor(
+        cpe = AppClassPatternExtractor(
             Base._decl_class_registry)
         qs = QuadStorage(
             quad_storage_name, cpe, imported, False, nsm=self.nsm)
@@ -363,7 +363,7 @@ class AssemblQuadStorageManager(object):
 
     def populate_section(
             self, qs, cpe, section, discussion_id=None, exclusive=True):
-        gqm = AssemblGraphQuadMapPattern(
+        gqm = AppGraphQuadMapPattern(
             section.graph_name, qs, section.name, discussion_id, section.graph_iri,
             'exclusive' if exclusive else None)
         for cls in class_registry.values():
@@ -409,7 +409,7 @@ class AssemblQuadStorageManager(object):
         if discussion_id:
             return getattr(QUADNAMES, 'discussion_%d_storage' % discussion_id)
         else:
-            return AssemblQuadStorageManager.discussion_storage.name
+            return AppQuadStorageManager.discussion_storage.name
 
     @staticmethod
     def discussion_graph_name(
@@ -473,7 +473,7 @@ class AssemblQuadStorageManager(object):
         else:
             extract_graph_iri = QUADNAMES.catalyst_ExtractGraph_iri
             extract_expressesIdea_iri = QUADNAMES.catalyst_expressesIdea_iri
-        gqm = AssemblPatternGraphQuadMapPattern(
+        gqm = AppPatternGraphQuadMapPattern(
             extract_graph_name, qs, cpe, EXTRACT_SECTION, discussion_id,
             extract_graph_iri, 'exclusive')
         qmp = QuadMapPatternS(
@@ -691,7 +691,7 @@ class AssemblQuadStorageManager(object):
 
     @staticmethod
     def get_jsonld_context(expand=False):
-        server_uri = AssemblQuadStorageManager.local_uri()
+        server_uri = AppQuadStorageManager.local_uri()
         if expand:
             with open(local_context_loc) as f:
                 context = json.load(f)
@@ -716,10 +716,10 @@ class AssemblQuadStorageManager(object):
     @staticmethod
     def quads_to_jsonld(quads):
         from pyld import jsonld
-        context = AssemblQuadStorageManager.get_jsonld_context(True)
+        context = AppQuadStorageManager.get_jsonld_context(True)
         jsonf = jsonld.from_rdf(quads)
         jsonc = jsonld.compact(jsonf, context)
-        jsonc['@context'] = AssemblQuadStorageManager.get_jsonld_context(False)
+        jsonc['@context'] = AppQuadStorageManager.get_jsonld_context(False)
         return jsonc
 
     def as_jsonld_old(self, discussion_id):

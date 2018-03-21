@@ -40,6 +40,6 @@ class UpgradableSession(with_metaclass(ABCMeta, Session)):
             self.regenerate_id()
 
 
-class AssemblUpgradableSession(UpgradableSession):
+class AppUpgradableSession(UpgradableSession):
     def get_is_elevated(self):
         return bool(self.get("auth.userid", False))

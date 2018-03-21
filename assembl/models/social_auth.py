@@ -48,14 +48,13 @@ from . import Base
 from ..semantic.namespaces import (
     SIOC, ASSEMBL, QUADNAMES, FOAF, DCTERMS, RDF)
 from ..semantic.virtuoso_mapping import (
-    QuadMapPatternS, USER_SECTION, PRIVATE_USER_SECTION,
-    AssemblQuadStorageManager)
+    QuadMapPatternS, USER_SECTION, PRIVATE_USER_SECTION)
 
 
 log = logging.getLogger(__name__)
 
 
-class AssemblSocialAuthMixin(Base, SQLAlchemyMixin):
+class AppSocialAuthMixin(Base, SQLAlchemyMixin):
     __abstract__ = True
 
     @classmethod
@@ -93,20 +92,20 @@ class AssemblSocialAuthMixin(Base, SQLAlchemyMixin):
         self.session.flush()
 
 
-class Nonce(AssemblSocialAuthMixin, SQLAlchemyNonceMixin):
+class Nonce(AppSocialAuthMixin, SQLAlchemyNonceMixin):
     pass
 
 
-class Association(AssemblSocialAuthMixin, SQLAlchemyAssociationMixin):
+class Association(AppSocialAuthMixin, SQLAlchemyAssociationMixin):
     pass
 
 
-class Code(AssemblSocialAuthMixin, SQLAlchemyCodeMixin):
+class Code(AppSocialAuthMixin, SQLAlchemyCodeMixin):
     pass
 
 
 class SocialAuthAccount(
-        AbstractAgentAccount, AssemblSocialAuthMixin, UserMixin):
+        AbstractAgentAccount, AppSocialAuthMixin, UserMixin):
     """An account with an external :py:class:`.auth.IdentityProvider`"""
     __tablename__ = "social_auth_account"
     __mapper_args__ = {
@@ -482,7 +481,7 @@ class SocialAuthAccount(
         self.interpret_profile(val)
 
 
-class AssemblStorage(BaseSQLAlchemyStorage):
+class AppStorage(BaseSQLAlchemyStorage):
     user = SocialAuthAccount
     nonce = Nonce
     association = Association

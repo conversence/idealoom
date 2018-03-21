@@ -208,7 +208,7 @@ def maybe_social_logout(request):
     # backend.disconnect(user=user)
 
 
-class AssemblStrategy(PyramidStrategy):
+class AppStrategy(PyramidStrategy):
 
     def request_is_secure(self):
         return self.request.scheme == 'https' or config.get('secure_proxy')
@@ -247,14 +247,14 @@ class AssemblStrategy(PyramidStrategy):
                     val = prefs.get("authorization_" + m.group(1).lower(), None)
                     if val is not None:
                         return val
-        return super(AssemblStrategy, self).get_setting(name)
+        return super(AppStrategy, self).get_setting(name)
 
     # def partial_from_session(self, session):
     #     from social_core.pipeline.utils import partial_from_session
     #     return partial_from_session(self, session)
 
     def build_absolute_uri(self, path=None):
-        path = super(AssemblStrategy, self).build_absolute_uri(path)
+        path = super(AppStrategy, self).build_absolute_uri(path)
         if self.request_is_secure() and path.startswith('http:'):
             path = 'https' + path[4:]
         return path

@@ -59,7 +59,7 @@ from ..semantic.namespaces import (
     SIOC, ASSEMBL, QUADNAMES, FOAF, DCTERMS, RDF)
 from ..semantic.virtuoso_mapping import (
     QuadMapPatternS, USER_SECTION, PRIVATE_USER_SECTION,
-    AssemblQuadStorageManager)
+    AppQuadStorageManager)
 
 log = logging.getLogger(__name__)
 
@@ -1300,7 +1300,7 @@ class UserRole(Base, PrivateObjectMixin):
                 name=QUADNAMES.class_UserRole_global, sections=(USER_SECTION,)),
             # Note: The IRIs need to distinguish UserRole from LocalUserRole
             QuadMapPatternS(cls.iri_class().apply(cls.id),
-                SIOC.has_scope, URIRef(AssemblQuadStorageManager.local_uri()),
+                SIOC.has_scope, URIRef(AppQuadStorageManager.local_uri()),
                 name=QUADNAMES.class_UserRole_globalscope, sections=(USER_SECTION,)),
             ]
 

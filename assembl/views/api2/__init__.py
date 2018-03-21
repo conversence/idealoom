@@ -119,7 +119,7 @@ def class_view(request):
 #              request_method='GET', permission=P_READ,
 #              accept="application/ld+json;q=0.9")
 def instance_view_jsonld(request):
-    from assembl.semantic.virtuoso_mapping import AssemblQuadStorageManager
+    from assembl.semantic.virtuoso_mapping import AppQuadStorageManager
     from rdflib import URIRef, ConjunctiveGraph
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
@@ -130,7 +130,7 @@ def instance_view_jsonld(request):
     discussion = ctx.get_instance_of_class(Discussion)
     if not discussion:
         raise HTTPNotFound()
-    aqsm = AssemblQuadStorageManager()
+    aqsm = AppQuadStorageManager()
     uri = URIRef(aqsm.local_uri() + instance.uri()[6:])
     d_storage_name = aqsm.discussion_storage_name(discussion.id)
     v = get_virtuoso(instance.db, d_storage_name)
