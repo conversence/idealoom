@@ -854,8 +854,7 @@ def as_mind_map(request):
 def get_analytics_alerts(discussion, user_id, types, all_users=False):
     settings = get_config()
     metrics_server_endpoint = settings.get(
-        'metrics_server_endpoint',
-        'https://discussions.bluenove.com/analytics/accept')
+        'metrics_server_endpoint')
     verify_metrics = False  # weird SNI bug on some platforms
     secure = asbool(settings.get(
         'accept_secure_connection', False))
