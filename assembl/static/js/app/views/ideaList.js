@@ -12,7 +12,7 @@ import Permissions from '../utils/permissions.js';
 import IdeaRenderVisitor from './visitors/ideaRenderVisitor.js';
 import IdeaSiblingChainVisitor from './visitors/ideaSiblingChainVisitor';
 import Backbone from 'backbone';
-import Assembl from '../app.js';
+import IdeaLoom from '../app.js';
 import Ctx from '../common/context.js';
 import Idea from '../models/idea.js';
 import UserCustomData from '../models/userCustomData.js';
@@ -151,22 +151,22 @@ var IdeaList = AssemblPanel.extend({
 
     if(!this.isDestroyed()) {
       //Yes, it IS possible the view is already destroyed in initialize, so we check
-      this.listenTo(Assembl.idea_vent, 'ideaList:removeIdea', function(idea) {
+      this.listenTo(IdeaLoom.idea_vent, 'ideaList:removeIdea', function(idea) {
         if(!that.isDestroyed()) {
             that.removeIdea(idea);
         }
       });
 
-      this.listenTo(Assembl.idea_vent, 'ideaList:addChildToSelected', function() {
+      this.listenTo(IdeaLoom.idea_vent, 'ideaList:addChildToSelected', function() {
         if(!that.isDestroyed()) {
             that.addChildToSelected();
         }
       });
 
-      this.listenTo(Assembl.idea_vent, 'idea:dragOver', function() {
+      this.listenTo(IdeaLoom.idea_vent, 'idea:dragOver', function() {
         that.mouseIsOutside = false;
       });
-      this.listenTo(Assembl.idea_vent, 'idea:dragStart', function() {
+      this.listenTo(IdeaLoom.idea_vent, 'idea:dragStart', function() {
         that.lastScrollTime = new Date().getTime();
         that.scrollLastSpeed = 0;
         that.scrollableElement = that.$('.panel-body');
@@ -177,12 +177,12 @@ var IdeaList = AssemblPanel.extend({
           that.scrollTowardsMouseIfNecessary();
         }, 10);
       });
-      this.listenTo(Assembl.idea_vent, 'idea:dragEnd', function() {
+      this.listenTo(IdeaLoom.idea_vent, 'idea:dragEnd', function() {
         clearInterval(that.scrollInterval);
         that.scrollInterval = null;
       });
 
-      this.listenTo(Assembl.idea_vent, 'DEPRECATEDideaList:selectIdea', function(ideaId, reason, doScroll) {
+      this.listenTo(IdeaLoom.idea_vent, 'DEPRECATEDideaList:selectIdea', function(ideaId, reason, doScroll) {
         collectionManager.getAllIdeasCollectionPromise()
         .done(function(allIdeasCollection) {
           if(that.isDestroyed()){
@@ -412,7 +412,7 @@ var IdeaList = AssemblPanel.extend({
         groupContent: that.getContainingGroup()
       });
       that.showChildView('allMessagesView', allMessagesInIdeaListView);
-      Assembl.tour_vent.trigger("requestTour", "idea_list");
+      IdeaLoom.tour_vent.trigger("requestTour", "idea_list");
     }
   },
 
@@ -824,7 +824,7 @@ var IdeaList = AssemblPanel.extend({
           // I don't know why, but Backbone considers it's an error if the server does not reply by a 200 code, even if it's a 201.
           if ( "status" in resp && resp.status == 201 ){
             console.log("this is OK");
-            resp.handled = true; // In order to avoid displaying the Assembl error pop-in
+            resp.handled = true; // In order to avoid displaying the IdeaLoom error pop-in
           }
         }
       }

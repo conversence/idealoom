@@ -5,7 +5,7 @@
 
 import $ from 'jquery';
 import Ctx from '../common/context.js';
-import Assembl from '../app.js';
+import IdeaLoom from '../app.js';
 import PanelSpecTypes from '../utils/panelSpecTypes.js';
 import ideaInIdeaList from './ideaInIdeaList.js';
 

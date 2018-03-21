@@ -9,7 +9,7 @@ import _ from 'underscore';
 import $ from 'jquery';
 import Types from '../utils/types.js';
 import classlist from 'classlist-polyfill';
-import Assembl from '../app.js';
+import IdeaLoom from '../app.js';
 import Ctx from '../common/context.js';
 import Permissions from '../utils/permissions.js';
 import UserCustomData from '../models/userCustomData.js';
@@ -355,7 +355,7 @@ var IdeaInIdeaListView = Marionette.View.extend({
     //console.log("ideaInIdeaList::onDragStart() ev: ", ev);
     if (ev) {
       ev.stopPropagation();
-      Assembl.idea_vent.trigger('idea:dragStart', this.model);
+      IdeaLoom.idea_vent.trigger('idea:dragStart', this.model);
     }
 
     if (Ctx.getCurrentUser().can(Permissions.EDIT_IDEA)) {
@@ -376,7 +376,7 @@ var IdeaInIdeaListView = Marionette.View.extend({
     if (ev) {
       ev.preventDefault();
       ev.stopPropagation();
-      Assembl.idea_vent.trigger('idea:dragEnd', this.model);
+      IdeaLoom.idea_vent.trigger('idea:dragEnd', this.model);
     }
 
     ev.currentTarget.style.opacity = '';
@@ -393,7 +393,7 @@ var IdeaInIdeaListView = Marionette.View.extend({
     if (ev) {
       ev.preventDefault();
       ev.stopPropagation();
-      Assembl.idea_vent.trigger('idea:dragOver', this.model);
+      IdeaLoom.idea_vent.trigger('idea:dragOver', this.model);
     }
 
     if (ev.originalEvent) {

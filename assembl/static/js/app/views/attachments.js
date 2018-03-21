@@ -10,7 +10,7 @@ import $ from 'jquery';
 import Ctx from '../common/context.js';
 import dropdown from 'bootstrap-dropdown';
 import i18n from '../utils/i18n.js';
-import Assembl from '../app.js';
+import IdeaLoom from '../app.js';
 import Types from '../utils/types.js';
 import Attachments from '../models/attachments.js';
 import Documents from '../models/documents.js';

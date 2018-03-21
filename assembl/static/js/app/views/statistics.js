@@ -5,7 +5,7 @@
 
 import Marionette from 'backbone.marionette';
 
-import Assembl from '../app.js';
+import IdeaLoom from '../app.js';
 import Ctx from '../common/context.js';
 import CollectionManager from '../common/collectionManager.js';
 import $ from 'jquery';

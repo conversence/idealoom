@@ -9,7 +9,7 @@ import _ from 'underscore';
 import $ from 'jquery';
 import Promise from 'bluebird';
 import i18n from '../utils/i18n.js';
-import Assembl from '../app.js';
+import IdeaLoom from '../app.js';
 import Ctx from '../common/context.js';
 import CollectionManager from '../common/collectionManager.js';
 import Types from '../utils/types.js';

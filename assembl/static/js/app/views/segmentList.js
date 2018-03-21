@@ -10,7 +10,7 @@ import BackboneModal from 'backbone.modal';
 import _ from 'underscore';
 import $ from 'jquery';
 import highlight from 'jquery-highlight';
-import Assembl from '../app.js';
+import IdeaLoom from '../app.js';
 import Ctx from '../common/context.js';
 import Segment from '../models/segment.js';
 import Types from '../utils/types.js';
@@ -94,7 +94,7 @@ var SegmentView = Marionette.View.extend({
     this.renderAuthor();
     if (!_.isUndefined(this.model.get('firstInlist'))) {
       this.$el.attr('id', 'tour_step_segment');
-      Assembl.tour_vent.trigger("requestTour", "segment");
+      IdeaLoom.tour_vent.trigger("requestTour", "segment");
     }
   },
 
@@ -302,7 +302,7 @@ var SegmentListPanel = AssemblPanel.extend({
             });
 
     // TODO: There is no trigger for this event. See if there should be one.
-    this.listenTo(Assembl.other_vent, 'segmentListPanel:showSegment', function(segment) {
+    this.listenTo(IdeaLoom.other_vent, 'segmentListPanel:showSegment', function(segment) {
       that.showSegment(segment);
     });
   },
@@ -591,7 +591,7 @@ var SegmentListPanel = AssemblPanel.extend({
       cancelEl: '.close, .btn-primary'
     });
 
-    Assembl.rootView.showChildView('slider', new Modal());
+    IdeaLoom.rootView.showChildView('slider', new Modal());
   }
 
 });

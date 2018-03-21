@@ -11,7 +11,7 @@ import Promise from 'bluebird';
 import AssemblPanel from '../assemblPanel.js';
 import CollectionManager from '../../common/collectionManager.js';
 import Types from '../../utils/types.js';
-import Assembl from '../../app.js';
+import IdeaLoom from '../../app.js';
 import Ctx from '../../common/context.js';
 import i18n from '../../utils/i18n.js';
 import PanelSpecTypes from '../../utils/panelSpecTypes.js';
@@ -174,7 +174,7 @@ var SynthesisInNavigationPanel = AssemblPanel.extend({
           that.displaySynthesisList(that.allMessageStructureCollection, that.allSynthesisCollection);
         });
         // that.getRegion('synthesisContainer').$el.find(".synthesisItem:first")[0].id = "tour_step_synthesis_item1";
-        // Assembl.tour_vent.trigger("requestTour", "synthesis_item1");
+        // IdeaLoom.tour_vent.trigger("requestTour", "synthesis_item1");
     }
   },
 

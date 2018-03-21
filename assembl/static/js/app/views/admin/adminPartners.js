@@ -7,7 +7,7 @@ import Marionette from 'backbone.marionette';
 
 import Backbone from 'backbone';
 import BackboneModal from 'backbone.modal';
-import Assembl from '../../app.js';
+import IdeaLoom from '../../app.js';
 import $ from 'jquery';
 import CollectionManager from '../../common/collectionManager.js';
 import Ctx from '../../common/context.js';
@@ -97,7 +97,7 @@ var Partners = Marionette.View.extend({
 
     var modal = new Modal();
 
-    Assembl.rootView.showChildView('slider', modal);
+    IdeaLoom.rootView.showChildView('slider', modal);
 
   }
 });
@@ -218,7 +218,7 @@ var adminPartners = Marionette.View.extend({
 
     var modal = new Modal();
 
-    Assembl.rootView.showChildView('slider', modal);
+    IdeaLoom.rootView.showChildView('slider', modal);
 
   }
 

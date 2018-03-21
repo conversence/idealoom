@@ -7,7 +7,7 @@ import Marionette from 'backbone.marionette';
 
 import _ from 'underscore';
 import i18n from '../utils/i18n.js';
-import Assembl from '../app.js';
+import IdeaLoom from '../app.js';
 import Ctx from '../common/context.js';
 import Types from '../utils/types.js';
 import MessageView from './message.js';
@@ -252,7 +252,7 @@ var MessageFamilyView = LoaderView.extend({
     var modal = modalFactory.modal;
     var messageList = modalFactory.messageList;
 
-    Assembl.rootView.showChildView('slider', modal);
+    IdeaLoom.rootView.showChildView('slider', modal);
     messageList.showMessageById(this.model.id, undefined, true, true);
   },
 

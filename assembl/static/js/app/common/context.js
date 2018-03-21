@@ -7,7 +7,7 @@ import $ from 'jquery';
 import _ from 'underscore';
 import Moment from 'moment';
 import Promise from 'bluebird';
-import Assembl from '../app.js';
+import IdeaLoom from '../app.js';
 import Permissions from '../utils/permissions.js';
 import Types from '../utils/types.js';
 import Roles from '../utils/roles.js';
@@ -718,7 +718,7 @@ Context.prototype = {
       }
     };
 
-    Assembl.rootView.showChildView('slider', window.modal_instance);
+    IdeaLoom.rootView.showChildView('slider', window.modal_instance);
 
     return false; // so that we cancel the normal behaviour of the clicked link (aka making browser go to "target" attribute of the "a" tag)
   },
@@ -772,7 +772,7 @@ Context.prototype = {
   popDraggedIdea: function() {
     if (this.ideaList && this.draggedIdea) {
 
-      Assembl.idea_vent.trigger('ideaList:removeIdea', this.draggedIdea);
+      IdeaLoom.idea_vent.trigger('ideaList:removeIdea', this.draggedIdea);
     }
 
     var idea = this.draggedIdea;
@@ -1092,7 +1092,7 @@ Context.prototype = {
 
         var selector = this.format('[data-annotation-id="{0}"]', segment.id);
 
-        Assembl.message_vent.trigger('messageList:showMessageById', segment.get('idPost'), function() {
+        IdeaLoom.message_vent.trigger('messageList:showMessageById', segment.get('idPost'), function() {
           $(selector).highlight();
         });
 

@@ -3,7 +3,7 @@
  * @module app.views.admin.adminTimelineEvents
  */
 
-import Assembl from '../../app.js';
+import IdeaLoom from '../../app.js';
 
 import Ctx from '../../common/context.js';
 import i18n from '../../utils/i18n.js';

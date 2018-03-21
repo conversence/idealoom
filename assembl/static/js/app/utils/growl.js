@@ -9,7 +9,7 @@ import growl from 'bootstrap-notify';
 
 
 /*
-    An easy to use growling function for use in Assembl
+    An easy to use growling function for use in IdeaLoom
 
     If an alternative growling method is desired, please extend this file
     and sprinkle across code-base accordingly

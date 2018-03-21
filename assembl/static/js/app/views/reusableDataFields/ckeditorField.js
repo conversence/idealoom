@@ -8,7 +8,7 @@ import Marionette from 'backbone.marionette';
 import _ from 'underscore';
 import $ from 'jquery';
 import dotdotdot from 'jquery.dotdotdot';
-import Assembl from '../../app.js';
+import IdeaLoom from '../../app.js';
 import Backbone from 'backbone';
 import BackboneModal from 'backbone.modal';
 import Permissions from '../../utils/permissions.js';
@@ -196,7 +196,7 @@ var cKEditorField = Marionette.View.extend({
     }else{
       //Open ckeditor in modal when click on seeMore button
       var modalView = this.createModal();
-      Assembl.rootView.showChildView('slider', modalView);
+      IdeaLoom.rootView.showChildView('slider', modalView);
     }
   },
 

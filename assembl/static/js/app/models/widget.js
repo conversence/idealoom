@@ -12,7 +12,7 @@ import i18n from '../utils/i18n.js';
 import Moment from 'moment';
 import Permissions from '../utils/permissions.js';
 import Ctx from '../common/context.js';
-import Assembl from '../app.js';
+import IdeaLoom from '../app.js';
 import Types from '../utils/types.js';
 import LangString from '../models/langstring.js';
 import TokenVoteSessionView from '../views/tokenVoteSession.js';
@@ -185,7 +185,7 @@ var WidgetModel = Base.Model.extend({
   },
 
   /**
-   * Describes whether the widget model is internal to Assembl
+   * Describes whether the widget model is internal to IdeaLoom
    * (using Marionette)(=false) or Independent (using Angular)(=true);
    * Override in child classes]
    * @returns {boolean}
@@ -531,7 +531,7 @@ var TokenVotingWidgetModel = VotingWidgetModel.extend({
         });
 
         Ctx.setCurrentModalView(modalView);
-        Assembl.rootView.showChildView('slider', modalView);
+        IdeaLoom.rootView.showChildView('slider', modalView);
       break;
       case "ended":
         that.onShowResult();
@@ -545,7 +545,7 @@ var TokenVotingWidgetModel = VotingWidgetModel.extend({
   onShowResult: function(evt){
     var modalView = new TokenVoteSessionView.TokenVoteSessionResultModal({model: this});
     Ctx.setCurrentModalView(modalView);
-    Assembl.rootView.showChildView('slider', modalView);
+    IdeaLoom.rootView.showChildView('slider', modalView);
   },
 
   getCssClasses: function(context, idea) {

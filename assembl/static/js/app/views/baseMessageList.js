@@ -11,7 +11,7 @@ import MessageRenderVisitorReSort from './visitors/messageRenderVisitorReSort.js
 import MessageFamilyView from './messageFamily.js';
 import _ from 'underscore';
 import $ from 'jquery';
-import Assembl from '../app.js';
+import IdeaLoom from '../app.js';
 import Ctx from '../common/context.js';
 import Message from '../models/message.js';
 import i18n from '../utils/i18n.js';
@@ -701,7 +701,7 @@ return cls.extend({
               if (that.getContainingGroup().model.get('navigationState') !== "synthesis") {
                 // dynamically add id to the first view of message to enable take tour
                 views[0].$el.attr('id', 'tour_step_message');
-                Assembl.tour_vent.trigger("requestTour", "first_message");
+                IdeaLoom.tour_vent.trigger("requestTour", "first_message");
               }
 
               _.each(views, function(view) {

@@ -8,7 +8,7 @@ import PanelSpecTypes from '../../utils/panelSpecTypes';
 import groupSpec from '../../models/groupSpec.js';
 import ModalGroup from '../groups/modalGroup.js';
 import viewsFactory from '../../objects/viewsFactory';
-import Assembl from '../../app.js';
+import IdeaLoom from '../../app.js';
 import Ctx from '../../common/context.js';
 
 function navigateToIdea(panel, idea, forcePopup, langPrefs){
@@ -47,7 +47,7 @@ function navigateToIdea(panel, idea, forcePopup, langPrefs){
     //console.log("modal_title:", modal_title);
     var modal = new ModalGroup.View({"model": groupSpecModel, "title": modal_title});
     Ctx.setCurrentModalView(modal);
-    Assembl.rootView.showChildView('slider', modal);
+    IdeaLoom.rootView.showChildView('slider', modal);
   }
 }
 

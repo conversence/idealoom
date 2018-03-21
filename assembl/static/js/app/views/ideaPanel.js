@@ -3,7 +3,7 @@
  * @module app.views.ideaPanel
  */
 
-import Assembl from '../app.js';
+import IdeaLoom from '../app.js';
 
 import Ctx from '../common/context.js';
 import i18n from '../utils/i18n.js';
@@ -83,7 +83,7 @@ var IdeaPanel = AssemblPanel.extend({
       }
       );
 
-      this.listenTo(Assembl.other_vent, 'DEPRECATEDideaPanel:showSegment', function(segment) {
+      this.listenTo(IdeaLoom.other_vent, 'DEPRECATEDideaPanel:showSegment', function(segment) {
         if (!this.isDestroyed()) {
           that.showSegment(segment);
         }
@@ -760,7 +760,7 @@ var IdeaPanel = AssemblPanel.extend({
                   submitText: i18n.gettext('OK'),
                   cancelText : null
                 });
-                Assembl.rootView.showChildView('slider', confirmModal);
+                IdeaLoom.rootView.showChildView('slider', confirmModal);
               }
 
               // Nor has any segments
@@ -771,7 +771,7 @@ var IdeaPanel = AssemblPanel.extend({
                   submitText: i18n.gettext('OK'),
                   cancelText : null
                 });
-                Assembl.rootView.showChildView('slider', confirmModal);
+                IdeaLoom.rootView.showChildView('slider', confirmModal);
               }
               else if (that.model.get('num_posts') > 0) {
                 that.unblockPanel();
@@ -780,7 +780,7 @@ var IdeaPanel = AssemblPanel.extend({
                   submitText: i18n.gettext('OK'),
                   cancelText : null
                 });
-                Assembl.rootView.showChildView('slider', confirmModal);
+                IdeaLoom.rootView.showChildView('slider', confirmModal);
               }
               else {
                 var onSubmit = function(){
@@ -801,7 +801,7 @@ var IdeaPanel = AssemblPanel.extend({
                   submitText: i18n.gettext('Yes'),
                   onSubmit: onSubmit,
                 });
-                Assembl.rootView.showChildView('slider', confirmModal);
+                IdeaLoom.rootView.showChildView('slider', confirmModal);
               }
             });
   },

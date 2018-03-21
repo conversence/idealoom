@@ -6,13 +6,13 @@
 import $ from 'jquery';
 import Marionette from 'backbone.marionette';
 import ctx from '../../common/context.js';
-import Assembl from '../../app.js';
+import IdeaLoom from '../../app.js';
 import GroupContent from './groupContent.js';
 import AssemblPanel from '../assemblPanel.js';
 import PanelSpecTypes from '../../utils/panelSpecTypes.js';
 /**
  * Manages all the groups in the interface, essentially the GroupSpec.Collection
- * Normally referenced with Assembl.groupContainer
+ * Normally referenced with IdeaLoom.groupContainer
  * 
  * @class app.views.groups.groupContainer.groupContainer
  */

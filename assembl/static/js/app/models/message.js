@@ -7,7 +7,7 @@ import _ from 'underscore';
 
 import $ from 'jquery';
 import Promise from 'bluebird';
-import Assembl from '../app.js';
+import IdeaLoom from '../app.js';
 import Ctx from '../common/context.js';
 import Base from './base.js';
 import LangString from './langstring.js';
@@ -308,7 +308,7 @@ var MessageModel = Base.Model.extend({
         }
         that.trigger('change:read', [value]);
         that.trigger('change', that);
-        Assembl.socket_vent.request('ideas:update', resp.ideas);
+        IdeaLoom.socket_vent.request('ideas:update', resp.ideas);
       },
       error: function(model, resp) {}
     });

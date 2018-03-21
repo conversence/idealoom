@@ -6,7 +6,7 @@
 import Marionette from 'backbone.marionette';
 
 import _ from 'underscore';
-import Assembl from '../app.js';
+import IdeaLoom from '../app.js';
 import Ctx from '../common/context.js';
 import i18n from '../utils/i18n.js';
 import Permissions from '../utils/permissions.js';
@@ -227,7 +227,7 @@ var IdeaInSynthesisView = LoaderView.extend({
     var partialMessage = MessagesInProgress.getMessage(partialCtx);
 
     var send_callback = function() {
-      Assembl.message_vent.trigger('messageList:currentQuery');
+      IdeaLoom.message_vent.trigger('messageList:currentQuery');
       // If we're in synthesis view, do not reset view to idea view
       that.getPanel().getContainingGroup().setCurrentIdea(that.original_idea, true);
     };

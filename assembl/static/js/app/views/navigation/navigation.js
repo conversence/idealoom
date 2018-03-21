@@ -8,7 +8,7 @@ import Marionette from 'backbone.marionette';
 import Jed from 'jed';
 import $ from 'jquery';
 import _ from 'underscore';
-import Assembl from '../../app.js';
+import IdeaLoom from '../../app.js';
 import IdeaList from '../ideaList.js';
 import Base from '../../models/base.js';
 import AboutNavPanel from '../navigation/about.js';
@@ -67,8 +67,8 @@ var NavigationView = AssemblPanel.extend({
     this.visualizationItems = new Base.Collection();
     this.num_items = 2;
 
-    this.listenTo(Assembl.other_vent, 'DEPRECATEDnavigation:selected', this.setViewByName);
-    this.listenTo(Assembl.other_vent, 'infobar:closeItem', this.setSideBarHeight);
+    this.listenTo(IdeaLoom.other_vent, 'DEPRECATEDnavigation:selected', this.setViewByName);
+    this.listenTo(IdeaLoom.other_vent, 'infobar:closeItem', this.setSideBarHeight);
   },
   onAttach:function() {
     var that = this;
@@ -102,7 +102,7 @@ var NavigationView = AssemblPanel.extend({
         that.ui.discussion_tab_minimize_icon.hide();
         if (that.getContainingGroup().model.get('navigationState') !== "synthesis") {
           that.ui.synthesis_tab[0].id = "tour_step_synthesis";
-          Assembl.tour_vent.trigger("requestTour", "synthesis");
+          IdeaLoom.tour_vent.trigger("requestTour", "synthesis");
         }
       }
 
@@ -159,7 +159,7 @@ var NavigationView = AssemblPanel.extend({
     elm = $(evt.currentTarget);
 
     var view = elm.attr('data-view');
-    Assembl.other_vent.trigger("DEPRECATEDnavigation:selected", view, 'NAVIGATION');
+    IdeaLoom.other_vent.trigger("DEPRECATEDnavigation:selected", view, 'NAVIGATION');
   },
 
   /**
@@ -302,7 +302,7 @@ var NavigationView = AssemblPanel.extend({
   },
 
   addIdeaFromIdeaList: function() {
-    Assembl.idea_vent.trigger('ideaList:addChildToSelected');
+    IdeaLoom.idea_vent.trigger('ideaList:addChildToSelected');
   }
 
 });

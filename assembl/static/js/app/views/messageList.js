@@ -9,7 +9,7 @@ import MessageListHeaderView from './messageListHeader.js';
 import _ from 'underscore';
 import $ from 'jquery';
 import highlight from 'jquery-highlight';
-import Assembl from '../app.js';
+import IdeaLoom from '../app.js';
 import Ctx from '../common/context.js';
 import i18n from '../utils/i18n.js';
 import Announcements from './announcements.js';
@@ -107,7 +107,7 @@ var MessageList = BaseMessageList.extend({
         this.ideaChanged();
       });
 
-      this.listenTo(Assembl.message_vent, 'messageList:showMessageById', function(id, callback) {
+      this.listenTo(IdeaLoom.message_vent, 'messageList:showMessageById', function(id, callback) {
         //console.log("Calling showMessageById from messageList:showMessageById with params:", id, callback);
         that.showMessageById(id, callback);
       });
@@ -140,24 +140,24 @@ var MessageList = BaseMessageList.extend({
             }, 'syncWithCurrentIdea');
       });
 
-      this.listenTo(Assembl.message_vent, 'messageList:showAllMessages', function() {
+      this.listenTo(IdeaLoom.message_vent, 'messageList:showAllMessages', function() {
         that.getPanelWrapper().filterThroughPanelLock(
             function() {
               that.showAllMessages();
             }, 'syncWithCurrentIdea');
       });
 
-      this.listenTo(Assembl.message_vent, 'messageList:currentQuery', function() {
+      this.listenTo(IdeaLoom.message_vent, 'messageList:currentQuery', function() {
         if (!that.getPanelWrapper().isPanelLocked()) {
           that.currentQuery.clearAllFilters();
         }
       });
 
-      this.listenTo(Assembl.message_vent, 'messageList:replyBoxFocus', function() {
+      this.listenTo(IdeaLoom.message_vent, 'messageList:replyBoxFocus', function() {
         that.onReplyBoxFocus();
       });
 
-      this.listenTo(Assembl.message_vent, 'messageList:replyBoxBlur', function() {
+      this.listenTo(IdeaLoom.message_vent, 'messageList:replyBoxBlur', function() {
         that.onReplyBoxBlur();
       });
     }

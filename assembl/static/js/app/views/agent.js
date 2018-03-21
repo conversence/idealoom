@@ -5,7 +5,7 @@
 
 import Marionette from 'backbone.marionette';
 
-import Assembl from '../app.js';
+import IdeaLoom from '../app.js';
 import _ from 'underscore';
 import $ from 'jquery';
 import Ctx from '../common/context.js';
@@ -89,7 +89,7 @@ function showUserMessages(userModel) {
   var modal = modalFactory.modal;
   var messageList = modalFactory.messageList;
 
-  Assembl.rootView.showChildView('slider', modal);
+  IdeaLoom.rootView.showChildView('slider', modal);
 }
 
 export default {

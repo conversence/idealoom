@@ -5,7 +5,7 @@
 
 import Marionette from 'backbone.marionette';
 
-import Assembl from './app.js';
+import IdeaLoom from './app.js';
 import Promise from 'bluebird';
 import Ctx from './common/context.js';
 import Agents from './models/agents.js';
@@ -159,90 +159,90 @@ var routeManager = Marionette.Object.extend({
   },
 
   edition: function() {
-    Assembl.rootView.showChildView('headerRegions', new NavBar());
+    IdeaLoom.rootView.showChildView('headerRegions', new NavBar());
     if (this.userHaveAccess()) {
       var edition = new AdminDiscussion();
-      Assembl.rootView.showChildView('groupContainer', edition);
+      IdeaLoom.rootView.showChildView('groupContainer', edition);
     }
   },
 
   partners: function() {
-    Assembl.rootView.showChildView('headerRegions', new NavBar());
+    IdeaLoom.rootView.showChildView('headerRegions', new NavBar());
     if (this.userHaveAccess()) {
       var partners = new AdminPartners();
-      Assembl.rootView.showChildView('groupContainer', partners);
+      IdeaLoom.rootView.showChildView('groupContainer', partners);
     }
   },
 
   notifications: function() {
-    Assembl.rootView.showChildView('headerRegions', new NavBar());
+    IdeaLoom.rootView.showChildView('headerRegions', new NavBar());
     if (this.userHaveAccess()) {
       var notifications = new AdminNotificationSubscriptions();
-      Assembl.rootView.showChildView('groupContainer', notifications);
+      IdeaLoom.rootView.showChildView('groupContainer', notifications);
     }
   },
 
   settings: function() {
-    Assembl.rootView.showChildView('headerRegions', new NavBar());
+    IdeaLoom.rootView.showChildView('headerRegions', new NavBar());
     if (this.userHaveAccess()) {
       var adminSetting = new AdminDiscussionSettings();
-      Assembl.rootView.showChildView('groupContainer', adminSetting);
+      IdeaLoom.rootView.showChildView('groupContainer', adminSetting);
     }
   },
 
   timeline: function() {
-    Assembl.rootView.showChildView('headerRegions', new NavBar());
+    IdeaLoom.rootView.showChildView('headerRegions', new NavBar());
     if (this.userHaveAccess()) {
       var adminSetting = new AdminTimeline();
-      Assembl.rootView.showChildView('groupContainer', adminSetting);
+      IdeaLoom.rootView.showChildView('groupContainer', adminSetting);
     }
   },
 
   adminDiscussionPreferences: function() {
-    Assembl.rootView.showChildView('headerRegions', new NavBar());
+    IdeaLoom.rootView.showChildView('headerRegions', new NavBar());
     if (this.userHaveAccess()) {
       var page = new PreferencesView.DiscussionPreferencesView();
-      Assembl.rootView.showChildView('groupContainer', page);
+      IdeaLoom.rootView.showChildView('groupContainer', page);
     }
   },
 
   adminGlobalPreferences: function() {
-    Assembl.rootView.showChildView('headerRegions', new NavBar());
+    IdeaLoom.rootView.showChildView('headerRegions', new NavBar());
     if (this.userHaveAccess()) {
       var page = new PreferencesView.GlobalPreferencesView();
-      Assembl.rootView.showChildView('groupContainer', page);
+      IdeaLoom.rootView.showChildView('groupContainer', page);
     }
   },
 
   userNotifications: function() {
-    Assembl.rootView.showChildView('headerRegions', new NavBar());
+    IdeaLoom.rootView.showChildView('headerRegions', new NavBar());
     if (this.userHaveAccess()) {
       var user = new UserNotificationSubscriptions();
-      Assembl.rootView.showChildView('groupContainer', user);
+      IdeaLoom.rootView.showChildView('groupContainer', user);
     }
   },
 
   profile: function() {
-    Assembl.rootView.showChildView('headerRegions', new NavBar());
+    IdeaLoom.rootView.showChildView('headerRegions', new NavBar());
     if (this.userHaveAccess()) {
       var profile = new Profile();
-      Assembl.rootView.showChildView('groupContainer', profile);
+      IdeaLoom.rootView.showChildView('groupContainer', profile);
     }
   },
 
   userDiscussionPreferences: function() {
-    Assembl.rootView.showChildView('headerRegions', new NavBar());
+    IdeaLoom.rootView.showChildView('headerRegions', new NavBar());
     if (this.userHaveAccess()) {
       var page = new PreferencesView.UserPreferencesView();
-      Assembl.rootView.showChildView('groupContainer', page);
+      IdeaLoom.rootView.showChildView('groupContainer', page);
     }
   },
 
   account: function() {
-    Assembl.rootView.showChildView('headerRegions', new NavBar());
+    IdeaLoom.rootView.showChildView('headerRegions', new NavBar());
     if (this.userHaveAccess()) {
       var account = new Account();
-      Assembl.rootView.showChildView('groupContainer', account);
+      IdeaLoom.rootView.showChildView('groupContainer', account);
     }
   },
 
@@ -257,7 +257,7 @@ var routeManager = Marionette.Object.extend({
         var messageList = firstGroup.findViewByType(PanelSpecTypes.MESSAGE_LIST);
         if (!messageList) {
           if (firstGroup.isSimpleInterface()) {
-            Assembl.other_vent.trigger("DEPRECATEDnavigation:selected", 'debate', null);
+            IdeaLoom.other_vent.trigger("DEPRECATEDnavigation:selected", 'debate', null);
           }
           else {
             throw new Error("WRITEME:  There was no group with a messagelist available");
@@ -274,7 +274,7 @@ var routeManager = Marionette.Object.extend({
           id = "local:SPost/" + id.substr(14);
         }
 
-        Assembl.message_vent.trigger('messageList:showMessageById', id);
+        IdeaLoom.message_vent.trigger('messageList:showMessageById', id);
 
         Backbone.history.navigate('/', {replace: true});
       });
@@ -286,12 +286,12 @@ var routeManager = Marionette.Object.extend({
     trackAnalyticsWithQueryString(qs, 'idea');
     this.restoreViews().then(function() {
       //We really need to address panels explicitely
-      Assembl.other_vent.trigger("DEPRECATEDnavigation:selected", 'debate', null);
+      IdeaLoom.other_vent.trigger("DEPRECATEDnavigation:selected", 'debate', null);
       if (id.substr(0, 11) === "local:Idea/") {
         // legacy URI
         id = "local:GenericIdeaNode/" + id.substr(11);
       }
-      Assembl.idea_vent.trigger('DEPRECATEDideaList:selectIdea', id, "from_url", true);
+      IdeaLoom.idea_vent.trigger('DEPRECATEDideaList:selectIdea', id, "from_url", true);
     });
 
     //TODO: fix this horrible hack that prevents calling
@@ -321,7 +321,7 @@ var routeManager = Marionette.Object.extend({
   },
 
   /*
-    Utilized for Angular based widgets loaded into Assembl
+    Utilized for Angular based widgets loaded into IdeaLoom
     in an iframe wrapped in a Backbone.Modal.
    */
   openExternalWidget: function(widget){
@@ -334,7 +334,7 @@ var routeManager = Marionette.Object.extend({
 
   /*
     Utilized for Marionette based widgets loaded into
-    Assembl by instantiating the view onto the Assembl
+    IdeaLoom by instantiating the view onto the IdeaLoom
     modal region
    */
   openLocalWidget: function(widget, arg){
@@ -355,7 +355,7 @@ var routeManager = Marionette.Object.extend({
         break;
     };
     Ctx.setCurrentModalView(View);
-    Assembl.rootView.showChildView('slider', new View({model: widget}));
+    IdeaLoom.rootView.showChildView('slider', new View({model: widget}));
   },
 
   // example: http://localhost:6543/jacklayton/widget/local%3AWidget%2F64/result
@@ -392,7 +392,7 @@ var routeManager = Marionette.Object.extend({
       this.restoreViews(undefined, undefined, true).then(function(groups) {
         var firstGroup = groups.children.first();
         if (firstGroup.isSimpleInterface()) {
-          Assembl.other_vent.trigger("DEPRECATEDnavigation:selected", 'about');
+          IdeaLoom.other_vent.trigger("DEPRECATEDnavigation:selected", 'about');
         } else {
             // should we then switch to simple interface?
         }
@@ -440,7 +440,7 @@ var routeManager = Marionette.Object.extend({
    */
   restoreViews: function(from_home, url_structure, skip_group_state) {
     var collectionManager = CollectionManager();
-    Assembl.rootView.showChildView('headerRegions', new NavBar());
+    IdeaLoom.rootView.showChildView('headerRegions', new NavBar());
     //On small screen (mobile) don't instantiate the infobar
     if(!Ctx.isSmallScreen()){
       collectionManager.getWidgetsForContextPromise(
@@ -456,10 +456,10 @@ var routeManager = Marionette.Object.extend({
             var model = new InfobarsModels.WidgetInfobarModel({widget: widgetModel});
             infobarsCollection.add(model);
           });
-          Assembl.rootView.showChildView('infobarRegion', new InfobarsViews.InfobarsView({collection: infobarsCollection}));
+          IdeaLoom.rootView.showChildView('infobarRegion', new InfobarsViews.InfobarsView({collection: infobarsCollection}));
         });
     }
-    Assembl.rootView.showChildView('groupContainer', new Loader());
+    IdeaLoom.rootView.showChildView('groupContainer', new Loader());
     /**
      * Render the current group of views
      * */
@@ -492,7 +492,7 @@ var routeManager = Marionette.Object.extend({
                                  // the table of ideas view did not start listening yet.
                                  // TODO: Break magic timeout.
                                  setTimeout(function() {
-                                   Assembl.idea_vent.trigger('DEPRECATEDideaList:selectIdea', idea.id);
+                                   IdeaLoom.idea_vent.trigger('DEPRECATEDideaList:selectIdea', idea.id);
                                  }, 250);
                                }
                              });
@@ -517,7 +517,7 @@ var routeManager = Marionette.Object.extend({
         }
       }
 
-      Assembl.rootView.showChildView('groupContainer', groupsView);
+      IdeaLoom.rootView.showChildView('groupContainer', groupsView);
 
       return Promise.resolve(groupsView);
     });
@@ -537,7 +537,7 @@ var routeManager = Marionette.Object.extend({
         error: 401,
         message: i18n.gettext('You must be logged in to access this page.')
       });
-      Assembl.rootView.showChildView('groupContainer', authorization);
+      IdeaLoom.rootView.showChildView('groupContainer', authorization);
       return;
     }
 
@@ -560,7 +560,7 @@ var routeManager = Marionette.Object.extend({
         error: 401,
         message: i18n.gettext('Your level of permissions do not allow you to see the rest of this content')
       });
-      Assembl.rootView.showChildView('groupContainer', authorization);
+      IdeaLoom.rootView.showChildView('groupContainer', authorization);
     }
 
     return access;

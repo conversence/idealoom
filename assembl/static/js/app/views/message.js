@@ -9,7 +9,7 @@ import Raven from 'raven-js';
 import Backbone from 'backbone';
 import BackboneModal from 'backbone.modal';
 import _ from 'underscore';
-import Assembl from '../app.js';
+import IdeaLoom from '../app.js';
 import Ctx from '../common/context.js';
 import i18n from '../utils/i18n.js';
 import Permissions from '../utils/permissions.js';
@@ -202,7 +202,7 @@ var IdeaClassificationNameListView = LoaderView.extend({
     });
 
     Ctx.setCurrentModalView(modalView);
-    Assembl.rootView.showChildView('slider', modalView);
+    IdeaLoom.rootView.showChildView('slider', modalView);
   }
 });
 
@@ -977,7 +977,7 @@ var MessageView = LoaderView.extend({
             //console.log("current_navigation_state:", current_navigation_state);
             if (current_navigation_state === 'about')
             {
-              that.listenToOnce(Assembl.other_vent, 'DEPRECATEDnavigation:selected', applyEllipsis);
+              that.listenToOnce(IdeaLoom.other_vent, 'DEPRECATEDnavigation:selected', applyEllipsis);
               return;
             }
 
@@ -1000,7 +1000,7 @@ var MessageView = LoaderView.extend({
         //console.log('current_navigation_state is:', current_navigation_state);
         if (current_navigation_state !== undefined) {
           //console.log('Setting listener on DEPRECATEDnavigation:selected');
-          that.listenTo(Assembl.other_vent, 'DEPRECATEDnavigation:selected', function(navSection) {
+          that.listenTo(IdeaLoom.other_vent, 'DEPRECATEDnavigation:selected', function(navSection) {
             //console.log('New navigation has just been selected:', navSection);
             if (navSection === 'debate') {
               //console.log('Updating dotdotdot because debate has just been selected');
@@ -1230,7 +1230,7 @@ var MessageView = LoaderView.extend({
                         if (that.messageListView.getContainingGroup().findViewByType(PanelSpecTypes.IDEA_PANEL)) {
                           //FIXME:  Even this isn't proper behaviour.  Maybe we should just pop a panel systematically in this case.
                           that.messageListView.getContainingGroup().setCurrentIdea(allIdeasCollection.get(annotation.idIdea), false, "from_annotation");
-                          Assembl.other_vent.trigger('DEPRECATEDideaPanel:showSegment', segment);
+                          IdeaLoom.other_vent.trigger('DEPRECATEDideaPanel:showSegment', segment);
                         }
                         else {
                           console.log("TODO:  NOT implemented yet.  Should pop panel in a lightbox.  See example at the end of Modal object in navigation.js ");
@@ -1240,7 +1240,7 @@ var MessageView = LoaderView.extend({
                           //FIXME:  We don't want to affect every panel, only the one in the current group
                           //FIXME:  Nothing listens to this anymore
                           console.error("FIXME:  Nothing listens to DEPRECATEDsegmentList:showSegment anymore");
-                          Assembl.other_vent.trigger('DEPRECATEDsegmentList:showSegment', segment);
+                          IdeaLoom.other_vent.trigger('DEPRECATEDsegmentList:showSegment', segment);
                         }
                         else {
                           console.log("TODO:  NOT implemented yet.  Should pop panel in a lightbox.  See example at the end of Modal object in navigation.js ");
@@ -1584,7 +1584,7 @@ var MessageView = LoaderView.extend({
       submitText: i18n.gettext('Yes'),
       onSubmit: onSubmit,
     });
-    Assembl.rootView.showChildView('slider', confirm);
+    IdeaLoom.rootView.showChildView('slider', confirm);
   },
 
   onShowTranslationClick: function(ev){
@@ -1949,12 +1949,12 @@ var MessageView = LoaderView.extend({
         this.model.setRead(true); // we do not call markAsRead on purpose
       }
 
-      Assembl.message_vent.trigger('messageList:replyBoxFocus');
+      IdeaLoom.message_vent.trigger('messageList:replyBoxFocus');
     },
 
   onReplyBoxBlur: function(e) {
       this.replyBoxHasFocus = false;
-      Assembl.message_vent.trigger('messageList:replyBoxBlur');
+      IdeaLoom.message_vent.trigger('messageList:replyBoxBlur');
     },
 
   /**

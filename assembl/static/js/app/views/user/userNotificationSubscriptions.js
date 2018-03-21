@@ -5,7 +5,7 @@
 
 import Marionette from 'backbone.marionette';
 
-import Assembl from '../../app.js';
+import IdeaLoom from '../../app.js';
 import $ from 'jquery';
 import _ from 'underscore';
 import Promise from 'bluebird';

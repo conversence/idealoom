@@ -10,7 +10,7 @@ import _ from 'underscore';
 import BackboneSubset from 'Backbone.Subset';
 import BackboneModal from 'backbone.modal';
 import Promise from 'bluebird';
-import Assembl from '../app.js';
+import IdeaLoom from '../app.js';
 import classlist from 'classlist-polyfill';
 import Ctx from '../common/context.js';
 import CollectionManager from '../common/collectionManager.js';
@@ -1671,7 +1671,7 @@ var TokenVoteSessionModal = Backbone.Modal.extend({
     this.remove();
     var modalView = new TokenVoteSessionSubmittedModal();
     Ctx.setCurrentModalView(modalView);
-    Assembl.rootView.showChildView('slider', modalView);
+    IdeaLoom.rootView.showChildView('slider', modalView);
   },
 
   /*

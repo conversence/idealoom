@@ -10,7 +10,7 @@ import BackboneModal from 'backbone.modal';
 import Promise from 'bluebird';
 import $ from 'jquery';
 import _ from 'underscore';
-import Assembl from '../app.js';
+import IdeaLoom from '../app.js';
 import Ctx from '../common/context.js';
 import GroupSpec from '../models/groupSpec.js';
 import CollectionManager from '../common/collectionManager.js';
@@ -50,10 +50,10 @@ var navBarLeft = Marionette.View.extend({
   },
   onRender: function() {
     var that = this;
-    this.listenTo(Assembl.socket_vent, 'socket:open', function() {
+    this.listenTo(IdeaLoom.socket_vent, 'socket:open', function() {
       that.$('#onlinedot').addClass('is-online');
     });
-    this.listenTo(Assembl.socket_vent, 'socket:close', function() {
+    this.listenTo(IdeaLoom.socket_vent, 'socket:close', function() {
       that.$('#onlinedot').removeClass('is-online');
     });
 
@@ -205,7 +205,7 @@ var navBarRight = LoaderView.extend({
 
   joinPopin: function() {
     var analytics = Analytics.getInstance();
-    Assembl.other_vent.trigger('navBar:joinDiscussion');
+    IdeaLoom.other_vent.trigger('navBar:joinDiscussion');
     analytics.trackEvent(analytics.events.JOIN_DISCUSSION_CLICK);
   }
 });
@@ -222,8 +222,8 @@ var navBar = Marionette.View.extend({
     this._store = window.localStorage;
     this.showPopInDiscussion();
     this.showPopInOnFirstLoginAfterAutoSubscribeToNotifications();
-    this.listenTo(Assembl.other_vent, 'navBar:subscribeOnFirstPost', this.showPopInOnFirstPost);
-    this.listenTo(Assembl.other_vent, 'navBar:joinDiscussion', this.joinDiscussion)
+    this.listenTo(IdeaLoom.other_vent, 'navBar:subscribeOnFirstPost', this.showPopInOnFirstPost);
+    this.listenTo(IdeaLoom.other_vent, 'navBar:joinDiscussion', this.joinDiscussion)
   },
   ui: {
     groups: '.js_addGroup',
@@ -264,7 +264,7 @@ var navBar = Marionette.View.extend({
     var collectionManager = new CollectionManager();
     var groupSpecsP = collectionManager.getGroupSpecsCollectionPromise(viewsFactory);
 
-    Assembl.rootView.showChildView('slider', new DefineGroupModal({groupSpecsP: groupSpecsP}));
+    IdeaLoom.rootView.showChildView('slider', new DefineGroupModal({groupSpecsP: groupSpecsP}));
   },
 
   /**
@@ -371,7 +371,7 @@ var navBar = Marionette.View.extend({
                   analytics.changeCurrentPage(this.returningPage, {default: true}); //if page is null, go back to / page
                 }
               });
-              Assembl.rootView.showChildView('slider', new Modal());
+              IdeaLoom.rootView.showChildView('slider', new Modal());
 
               //}
             }

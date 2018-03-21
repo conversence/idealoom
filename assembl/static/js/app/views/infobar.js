@@ -7,7 +7,7 @@ import Backbone from 'backbone';
 
 import BackboneModal from 'backbone.modal';
 import Marionette from 'backbone.marionette';
-import Assembl from '../app.js';
+import IdeaLoom from '../app.js';
 import CookiesManager from '../utils/cookiesManager.js';
 import Widget from '../models/widget.js';
 import Ctx from '../common/context.js';
@@ -29,14 +29,14 @@ var CookieInfobarItemView = Marionette.View.extend({
   },
   openCookiesSettings:function(){
     var piwikIframe = new PiwikIframeModal();
-    Assembl.rootView.showChildView('slider', piwikIframe); 
+    IdeaLoom.rootView.showChildView('slider', piwikIframe); 
     this.closeInfobar();
   },
   closeInfobar: function() {
     CookiesManager.setUserCookiesAuthorization();
     this.destroy();
     this.model.set("closeInfobar", true);
-    Assembl.other_vent.trigger('infobar:closeItem');
+    IdeaLoom.other_vent.trigger('infobar:closeItem');
   }
 });
 
@@ -129,7 +129,7 @@ var WidgetInfobarItemView = LoaderView.extend({
   closeInfobar: function() {
     this.destroy();
     this.model.set("closeInfobar", true);
-    Assembl.other_vent.trigger('infobar:closeItem');
+    IdeaLoom.other_vent.trigger('infobar:closeItem');
   }
 });
 
@@ -156,7 +156,7 @@ var InfobarsView = Marionette.CollectionView.extend({
   },
   //TO DO: refactor because should not be necessary to set the top of 'groupContainer' in js file
   adjustInfobarSize: function(evt) {
-    var el = Assembl.rootView.getRegion('groupContainer').$el;
+    var el = IdeaLoom.rootView.getRegion('groupContainer').$el;
     var n = this.collection.length;
     this.collection.each(function(itemView){
       if(itemView.get('closeInfobar')){

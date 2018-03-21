@@ -9,7 +9,7 @@ import $ from 'jquery';
 import _ from 'underscore';
 import Backbone from 'backbone';
 import BackboneModal from 'backbone.modal';
-import Assembl from '../../app.js';
+import IdeaLoom from '../../app.js';
 import Ctx from '../../common/context.js';
 import GroupSpec from '../../models/groupSpec.js';
 import CollectionManager from '../../common/collectionManager.js';
@@ -130,7 +130,7 @@ var DefineGroupModal = Backbone.Modal.extend({
           that.scrollToRight();
 
           if (hasNavSide) {
-            Assembl.other_vent.trigger('DEPRECATEDnavigation:selected', 'about');
+            IdeaLoom.other_vent.trigger('DEPRECATEDnavigation:selected', 'about');
           }
 
           that.$el.unbind();

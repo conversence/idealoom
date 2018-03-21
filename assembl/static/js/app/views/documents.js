@@ -8,7 +8,7 @@ import Marionette from 'backbone.marionette';
 import _ from 'underscore';
 import $ from 'jquery';
 import oembed from 'jquery-oembed-all/jquery.oembed';
-import Assembl from '../app.js';
+import IdeaLoom from '../app.js';
 import Promise from 'bluebird';
 import Ctx from '../common/context.js';
 import i18n from '../utils/i18n.js';
@@ -239,7 +239,7 @@ var AbstractEditView =  AbstractDocumentView.extend({
        * TODO: Re-Promisify the save operation
        *
        * For whatever reason, under promisification, handling the jqXhr
-       * fails to follow through. (ie. setting jqXhr.handled = true still crashes Assembl)
+       * fails to follow through. (ie. setting jqXhr.handled = true still crashes IdeaLoom)
        *
        * Previously this was: Promise.resolve(this.model.save()).then(function(){
        *  /*Handle success logic;*\/

@@ -3,7 +3,7 @@
  * @module app.views.navigation.about
  */
 
-import Assembl from '../../app.js';
+import IdeaLoom from '../../app.js';
 
 import AssemblPanel from '../assemblPanel.js';
 import PanelSpecTypes from '../../utils/panelSpecTypes.js';
@@ -29,7 +29,7 @@ var AboutNavPanel = AssemblPanel.extend({
       AssemblPanel.prototype.initialize.apply(this, arguments);
     },
   goToDebate: function() {
-    Assembl.other_vent.trigger("DEPRECATEDnavigation:selected", "debate");
+    IdeaLoom.other_vent.trigger("DEPRECATEDnavigation:selected", "debate");
   },
   testAnalytics: function(e){
     e.stopPropagation();

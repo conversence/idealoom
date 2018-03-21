@@ -96,7 +96,7 @@ var adminDiscussion = Marionette.View.extend({
       },
       error: function(model, resp, options) {
         Growl.showBottomGrowl(Growl.GrowlReason.ERROR, i18n.gettext("Your settings failed to update."));
-        resp.handled = true; //In order to avoid Assembl crashing completely!
+        resp.handled = true; //In order to avoid IdeaLoom crashing completely!
       }
     })
   },

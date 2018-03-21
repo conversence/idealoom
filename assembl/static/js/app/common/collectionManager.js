@@ -8,7 +8,7 @@ import Marionette from 'backbone.marionette';
 import Promise from 'bluebird';
 import Raven from 'raven-js';
 import $ from 'jquery';
-import Assembl from '../app.js';
+import IdeaLoom from '../app.js';
 import Ctx from './context.js';
 import Message from '../models/message.js';
 import groupSpec from '../models/groupSpec.js';

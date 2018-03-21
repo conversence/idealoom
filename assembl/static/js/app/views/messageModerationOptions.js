@@ -6,7 +6,7 @@
 import Backbone from 'backbone';
 
 import Marionette from 'backbone.marionette';
-import Assembl from '../app.js';
+import IdeaLoom from '../app.js';
 import _ from 'underscore';
 import $ from 'jquery';
 import Ctx from '../common/context.js';

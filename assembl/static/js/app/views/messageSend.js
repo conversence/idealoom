@@ -6,7 +6,7 @@
 import Backbone from 'backbone';
 
 import Marionette from 'backbone.marionette';
-import Assembl from '../app.js';
+import IdeaLoom from '../app.js';
 import _ from 'underscore';
 import $ from 'jquery';
 import Ctx from '../common/context.js';
@@ -365,7 +365,7 @@ var messageSendView = LoaderView.extend({
           that.sendInProgress = false;
           /**
            * Show a popin asking the user to receive notifications if he is posting his first message in the discussion, and does not already receive all default discussion's notifications.
-           * Note: Currently in Assembl we can receive notifications only if we have a "participant" role (which means that here we have a non-null "roles.get('role')"). This role is only given to a user in discussion's parameters, or when the user "subscribes" to the discussion (subscribing gives the "participant" role to the user and also activates discussion's default notifications for the user).
+           * Note: Currently in IdeaLoom we can receive notifications only if we have a "participant" role (which means that here we have a non-null "roles.get('role')"). This role is only given to a user in discussion's parameters, or when the user "subscribes" to the discussion (subscribing gives the "participant" role to the user and also activates discussion's default notifications for the user).
            * But, we cannot consider that the user does not already receive notifications by checking that he does not have the participant role. Because some discussions can give automatically the add_post permission to all logged in accounts (system.Authenticated role), instead of only those who have the participant role. So these accounts can post messages but are not subscribed to any notification, so we want to show them the first post pop-in.
            * */
           var collectionManager = new CollectionManager();
@@ -629,7 +629,7 @@ var messageSendView = LoaderView.extend({
   },
 
   showPopInFirstPost: function() {
-    Assembl.other_vent.trigger('navBar:subscribeOnFirstPost');
+    IdeaLoom.other_vent.trigger('navBar:subscribeOnFirstPost');
   }
 
 });

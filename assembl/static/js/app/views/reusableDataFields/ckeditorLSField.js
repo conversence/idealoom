@@ -7,7 +7,7 @@ import Marionette from 'backbone.marionette';
 
 import _ from 'underscore';
 import $ from 'jquery';
-import Assembl from '../../app.js';
+import IdeaLoom from '../../app.js';
 import Permissions from '../../utils/permissions.js';
 import LangString from '../../models/langstring.js';
 import CK from 'ckeditor';

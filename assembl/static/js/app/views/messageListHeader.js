@@ -10,7 +10,7 @@ import _ from 'underscore';
 import $ from 'jquery';
 import Ctx from '../common/context.js';
 import dropdown from 'bootstrap-dropdown';
-import Assembl from '../app.js';
+import IdeaLoom from '../app.js';
 import FlipSwitchButtonModel from '../models/flipSwitchButton.js';
 import FlipSwitchButtonView from './flipSwitchButton.js';
 import i18n from '../utils/i18n.js';
@@ -120,7 +120,7 @@ var MessageListHeader = Marionette.View.extend({
 
     this.renderQueryInfo();
     Ctx.initTooltips(this.$el);
-    Assembl.tour_vent.trigger("requestTour", "message_list_options");
+    IdeaLoom.tour_vent.trigger("requestTour", "message_list_options");
   },
 
   renderToggleButton: function() {

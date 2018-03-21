@@ -9,7 +9,7 @@ import Raven from 'raven-js';
 import _ from 'underscore';
 import $ from 'jquery';
 import Marionette from 'backbone.marionette';
-import Assembl from '../app.js';
+import IdeaLoom from '../app.js';
 import Ctx from '../common/context.js';
 import MessageModel from '../models/message.js';
 import ideaLink from '../models/ideaLink.js';
@@ -86,7 +86,7 @@ var SynthesisPanel = AssemblPanel.extend({
               }
             });
 
-    //Assembl.commands.setHandler('synthesisPanel:render', this.render);
+    //IdeaLoom.commands.setHandler('synthesisPanel:render', this.render);
 
     this.propagateVisibility(true);
   },
@@ -257,10 +257,10 @@ var SynthesisPanel = AssemblPanel.extend({
 
       if (that.getContainingGroup().model.get('navigationState') == "synthesis") {
         that.$('.synthesisPanel-introduction')[0].id = "tour_step_synthesis_intro";
-        Assembl.tour_vent.trigger("requestTour", "synthesis_intro");
+        IdeaLoom.tour_vent.trigger("requestTour", "synthesis_intro");
         if (roots.length > 0) {
           that.$('.synthesisPanel-ideas')[0].id = "tour_step_synthesis_idea1";
-          Assembl.tour_vent.trigger("requestTour", "synthesis_idea1");
+          IdeaLoom.tour_vent.trigger("requestTour", "synthesis_idea1");
         }
       }
     }
@@ -283,7 +283,7 @@ var SynthesisPanel = AssemblPanel.extend({
     if ( this.showAsMessage ){
       return;
     }
-    var el = Assembl.rootView.getRegion('groupContainer').$el;
+    var el = IdeaLoom.rootView.getRegion('groupContainer').$el;
     if ( el ){
       if (isVisible){
         el.addClass("hasSynthesisPanel");

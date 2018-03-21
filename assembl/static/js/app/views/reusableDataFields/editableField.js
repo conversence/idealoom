@@ -6,7 +6,7 @@
 import $ from 'jquery';
 import Marionette from 'backbone.marionette';
 import _ from 'underscore';
-import Assembl from '../../app.js';
+import IdeaLoom from '../../app.js';
 import Ctx from '../../common/context.js';
 
 var EditableField = Marionette.View.extend({
