@@ -112,7 +112,7 @@ def home_view(request):
         next_view = request.params.get('next', None)
         if not next_view and discussion:
             # If referred here from a post url, want to be able to
-            # send the user back. Usually, Assembl will send the user
+            # send the user back. Usually, IdeaLoom will send the user
             # here to login on private discussions.
             referrer = request.url
             next_view = path_qs(referrer)

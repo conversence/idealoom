@@ -768,7 +768,7 @@ class NotificationPushMethodType(DeclEnum):
     The type of event that caused the notification to be created
     """
     EMAIL = "EMAIL", "Email notification"
-    LOGIN_NOTIFICATION = "LOGIN_NOTIFICATION", "A notification upon next login to Assembl"
+    LOGIN_NOTIFICATION = "LOGIN_NOTIFICATION", "A notification upon next login to IdeaLoom"
 
 class NotificationDeliveryStateType(DeclEnum):
     """

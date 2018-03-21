@@ -89,8 +89,8 @@ countable_publication_states = {
 class Post(Content):
     """
     A Post represents input into the broader discussion taking place on
-    Assembl. It may be a response to another post, it may have responses, and
-    its content may be of any type.
+    the platform. It may be a response to another post, it may have responses,
+    and its content may be of any type.
     """
     __tablename__ = "post"
 
@@ -612,7 +612,7 @@ event.listen(Post, 'after_insert', orm_insert_listener, propagate=True)
 
 class AssemblPost(Post):
     """
-    A Post that originated directly on the Assembl system (wasn't imported from elsewhere).
+    A Post that originated directly on the platform (wasn't imported from elsewhere).
     """
     __tablename__ = "assembl_post"
 
@@ -771,7 +771,7 @@ class IdeaProposalPost(WidgetPost):
 
 class ImportedPost(Post):
     """
-    A Post that originated outside of the Assembl system (was imported from elsewhere).
+    A Post that originated outside of the platform (was imported from elsewhere).
     """
     __tablename__ = "imported_post"
     __table_args__ = (

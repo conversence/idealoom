@@ -237,7 +237,7 @@ class SimpleObjectImporter(object):
 
 
 class BaseOps(object):
-    """Base class for SQLAlchemy models in Assembl.
+    """Base class for SQLAlchemy models in IdeaLoom.
 
     Many protocols are defined here.
 

@@ -48,7 +48,7 @@ def test_participant1_webrequest(request, participant1_user, test_app_no_perm):
 
 @pytest.fixture(scope="function")
 def test_app_participant1(request, participant1_user, test_app_no_perm):
-    """A configured Assembl fixture with permissions
+    """A configured IdeaLoom fixture with permissions
     and an participant1 user logged in"""
 
     config = testing.setUp(

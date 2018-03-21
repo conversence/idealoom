@@ -1,6 +1,6 @@
 """ App URL routing and renderers are configured in this module. 
 
-Note that Assembl is a `hybrid app`_, and combines routes and :py:mod:`traversal`.
+Note that IdeaLoom is a `hybrid app`_, and combines routes and :py:mod:`traversal`.
 
 .. _`hybrid app`: http://docs.pylonsproject.org/projects/pyramid/en/latest/narr/hybrid.html
 """
@@ -309,7 +309,7 @@ def get_default_context(request, **kwargs):
         theme_name=theme_name,
         theme_relative_path=theme_relative_path,
         minified_js=config.get('minified_js') or False,
-        platform_name=config.get('platform_name') or "Assembl",
+        platform_name=config.get('platform_name') or "IdeaLoom",
         web_analytics=analytics_settings,
         help_url=help_url,
         socket_url=socket_url,
@@ -407,7 +407,7 @@ def error_view(exc, request):
     from datetime import datetime
     capture_exception(getattr(request, "exc_info", None))
     raise HTTPInternalServerError(
-        explanation="Sorry, Assembl had an internal issue and you have to reload. Please send this to a discussion administrator.",
+        explanation="Sorry, IdeaLoom had an internal issue and you have to reload. Please send this to a discussion administrator.",
         detail=datetime.utcnow().isoformat()+"\n"+repr(request.exception))
         # format_exc(request.exception))
 

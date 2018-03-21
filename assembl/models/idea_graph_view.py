@@ -387,7 +387,7 @@ class TableOfContents(IdeaGraphView):
     """
     Represents a Table of Ideas.
 
-    A ToI in Assembl is used to organize the core ideas of a discussion in a
+    A ToI in IdeaLoom is used to organize the core ideas of a discussion in a
     threaded hierarchy.
     """
     __tablename__ = "table_of_contents"

@@ -1,4 +1,4 @@
-"""The RDF namespaces used by Assembl"""
+"""The RDF namespaces used by IdeaLoom"""
 from rdflib import Graph as _Graph
 from rdflib.namespace import (
     Namespace, NamespaceManager as _NamespaceManager,

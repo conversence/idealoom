@@ -26,8 +26,7 @@ log = logging.getLogger('pytest.assembl')
 class PyramidWebTestRequest(TestRequest):
     """
     A mock Pyramid web request this pushes itself onto the threadlocal stack
-    that also contains the Assembl user_id according to authentication
-    model
+    that also contains the user_id according to authentication model.
     This is very useful because throughout the model logic, a request is often
     required to determine the current_user, but outside of a Pyramid view. The
     way a request is injected is via the current_thread from threadlocal.

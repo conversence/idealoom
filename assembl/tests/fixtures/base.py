@@ -95,7 +95,7 @@ def base_registry(request):
 
 @pytest.fixture(scope="module")
 def test_app_no_perm(request, base_registry, db_tables):
-    """A configured Assembl fixture with no permissions"""
+    """A configured IdeaLoom fixture with no permissions"""
     global_config = {
         '__file__': request.config.getoption('test_settings_file'),
         'here': get_distribution('assembl').location
@@ -126,7 +126,7 @@ def test_webrequest(request, test_app_no_perm, base_registry):
 def db_default_data(
         request, db_tables, base_registry):
     """An SQLAlchemy Session Maker fixture that is preloaded
-    with all Assembl tables, constraints, relationships, etc."""
+    with all platform tables, constraints, relationships, etc."""
 
     bootstrap_db_data(db_tables)
     transaction.commit()
@@ -242,7 +242,7 @@ def nologin_auth_policy(request, participant1_user, testing_configurator):
 @pytest.fixture(scope="function")
 def test_app(
         request, test_app_no_perm, testing_configurator, admin_auth_policy):
-    """A configured Assembl fixture with permissions
+    """A configured IdeaLoom fixture with permissions
     and an admin user logged in"""
 
     testing_configurator.set_authorization_policy(admin_auth_policy)
@@ -253,7 +253,7 @@ def test_app(
 @pytest.fixture(scope="function")
 def test_app_no_login(
         request, test_app_no_perm, testing_configurator, nologin_auth_policy):
-    """A configured Assembl fixture with permissions
+    """A configured IdeaLoom fixture with permissions
     and no user logged in"""
     testing_configurator.set_authorization_policy(nologin_auth_policy)
     testing_configurator.set_authentication_policy(nologin_auth_policy)

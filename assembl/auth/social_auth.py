@@ -1,4 +1,4 @@
-"""The Assembl-specific configuration of PythonSocialAuth_
+"""The IdeaLoom-specific configuration of PythonSocialAuth_
 
 .. _PythonSocialAuth: http://psa.matiasaguirre.net/
 """

@@ -158,7 +158,7 @@ class ContentSource(DiscussionBoundBase, OriginMixin):
 class PostSource(ContentSource):
     """
     A Discussion PostSource is where commentary that is handled in the form of
-    Assembl posts comes from.
+    internal posts comes from.
 
     A discussion source should have a method for importing all content, as well
     as only importing new content. Maybe the standard interface for this should
@@ -232,7 +232,7 @@ class AnnotatorSource(ContentSource):
 class ContentSourceIDs(Base):
     """
     A table that keeps track of the number of external identities that
-    an Assembl post can be exported to.
+    an internal post can be exported to.
 
     A stepping-stone to having Sinks
     """

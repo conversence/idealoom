@@ -6,7 +6,7 @@ from flaky import flaky
 def test_front_page(browser, test_server, db_default_data):
     """Test using real browser."""
     browser.visit(test_server.url)
-    assert browser.title == 'Assembl'
+    assert browser.title == 'IdeaLoom'
 
 
 def test_mocha(browser, test_server, discussion, test_session,

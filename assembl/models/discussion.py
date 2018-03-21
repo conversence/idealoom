@@ -56,9 +56,9 @@ log = logging.getLogger(__name__)
 
 class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
     """
-    The context for a specific Assembl discussion.
+    The context for a specific IdeaLoom discussion.
 
-    Most Assembl entities exist in the scope of a discussion, and inherit from
+    Most platform entities exist in the scope of a discussion, and inherit from
     :py:class:`assembl.models.DiscussionBoundBase`.
     """
     __tablename__ = "discussion"

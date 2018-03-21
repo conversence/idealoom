@@ -1,4 +1,4 @@
-"""Assembl is an application for Collective Intelligence.
+"""IdeaLoom is an application for Collective Intelligence.
 
 This is the startup module, which sets up the various components:
 

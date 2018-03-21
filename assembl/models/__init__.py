@@ -1,4 +1,4 @@
-"""The SQLAlchemy_ models of Assembl.
+"""The SQLAlchemy_ models of IdeaLoom.
 
 The base class of all models is Base, derived from :py:class:`assembl.lib.sqla.BaseOps`.
 Here, we also define some other base-level classes, such as :py:class:`DiscussionBoundBase` and :py:class:`DiscussionBoundTombstone`.

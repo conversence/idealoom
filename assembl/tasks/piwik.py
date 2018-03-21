@@ -93,7 +93,7 @@ def bind_piwik(discussion, admin=None):
         if not site_already_exists:
             # create a Piwik website
             site_name = discussion.slug
-            # TODO: Some parameters here should probably be variables received from somewhere, because they could be different from one Assembl instance to another, or from one discussion to another, like timezone for example
+            # TODO: Some parameters here should probably be variables received from somewhere, because they could be different from one platform instance to another, or from one discussion to another, like timezone for example
             addsite_result = piwik_SitesManager_addSite(piwik_url, piwik_api_token, site_name, discussion_urls, ecommerce="true", siteSearch="false", timezone="Europe/Paris", currency="EUR")
             if isinstance(addsite_result, int):
                 site_id = addsite_result

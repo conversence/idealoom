@@ -1,4 +1,4 @@
-"""The classical API for Assembl.
+"""The classical API for IdeaLoom.
 
 This is a RESTful API based on `cornice <https://cornice.readthedocs.io/en/latest/>`.
 It should remain somewhat stable, and allows optimization of complex queries.

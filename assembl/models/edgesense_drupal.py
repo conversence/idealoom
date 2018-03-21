@@ -111,7 +111,7 @@ class SourceSpecificAccount(AbstractAgentAccount):
     It is important to note that the IDs that come from edgeryder and
     other drupal sources will NOT be unique.
 
-    In order to ensure uniqueness within Assembl, for users at least, the
+    In order to ensure uniqueness within the platform, for users at least, the
     IDs are namespaced by adding a uniqueness constraint to the IDs
     stored, by the source that they come from.
     """

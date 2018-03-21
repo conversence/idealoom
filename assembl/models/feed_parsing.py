@@ -193,7 +193,7 @@ class LoomioFeedPost(FeedPost):
 class WebLinkAccount(AbstractAgentAccount):
     """
     An imported name that has not been validated nor authenticated
-    within Assembl. This is to keep track of an imported post's ownership.
+    within the platform. This is to keep track of an imported post's ownership.
     """
     __tablename__ = 'weblink_user'
 

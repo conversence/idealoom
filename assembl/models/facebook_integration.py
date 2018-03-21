@@ -771,7 +771,7 @@ class FacebookGenericSource(PostSource):
     def _manage_post(self, post, obj_id, posts_db, users_db,
                      upper, lower, reimport=False):
         """ Method that parses the json parsed facebook post and delegates
-        the creation of an Assembl post
+        the creation of a platform post
 
         :param post - The json parsed post data
         :param obj_id - The facebook ID of the creator of the content

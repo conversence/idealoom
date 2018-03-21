@@ -6,7 +6,7 @@ from .lib import signals
 from .lib.config import set_config
 from .tests.utils import log
 
-# Load all of the fixtures to be used by Assembl
+# Load all of the fixtures to be used by IdeaLoom
 from assembl.tests.fixtures.base import *
 from assembl.tests.fixtures.auth import *
 from assembl.tests.fixtures.discussion import *

@@ -932,7 +932,7 @@ class Email(ImportedPost):
         """
 
         sent_from = ' '.join([
-            "%(sender_name)s on Assembl" % {
+            "%(sender_name)s on IdeaLoom" % {
                 "sender_name": sender.display_name()
             },
             "<%(sender_email)s>" % {

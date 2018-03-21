@@ -17,7 +17,7 @@ def debug(sig, frame):
 
 
 def dumpstacks(signal, frame):
-    """Returns the traceback on all threads running Assembl"""
+    """Returns the traceback on all threads running IdeaLoom"""
     id2name = dict([(th.ident, th.name) for th in threading.enumerate()])
     code = []
     for threadId, stack in sys._current_frames().items():

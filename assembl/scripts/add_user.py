@@ -1,4 +1,4 @@
-"""Add a user to the Assembl instance.
+"""Add a user to the platform.
 
 Useful to populate the first sysadmin from the command line."""
 from __future__ import print_function

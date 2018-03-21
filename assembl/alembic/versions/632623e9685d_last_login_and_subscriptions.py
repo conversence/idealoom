@@ -35,7 +35,7 @@ def merge_min_max(mmdict, mmquery):
 def upgrade(pyramid_env):
     from assembl import models as m
     db = m.get_session_maker()()
-    # Add AgentStatusInDiscussion for users who have acted on Assembl
+    # Add AgentStatusInDiscussion for users who have acted on IdeaLoom
     with transaction.manager:
         q1 = db.query(m.User.id
             ).outerjoin(m.AgentStatusInDiscussion

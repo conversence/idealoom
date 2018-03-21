@@ -1,4 +1,4 @@
-"""Background tasks for running Assembl.
+"""Background tasks for running IdeaLoom.
 
 Tasks are kept running by Circus_.
 Short-lived tasks are written as Celery_ tasks; long-running tasks are
