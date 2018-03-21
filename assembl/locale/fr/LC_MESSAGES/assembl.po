@@ -2113,14 +2113,11 @@ msgid "You are not authorized to read this discussion."
 msgstr "Vous n’êtes pas autorisé à lire cette discussion."
 
 #: assembl/templates/cannot_read_discussion.jinja2:5
-#, fuzzy, python-format
-#| msgid "" "You may <a href=\"/%(slug)s/logout\">logout</a> and login as
-#| another user" " with those permissions."
 msgid ""
 "You may <a href=\"%(logout)s\">logout</a> and login as another user with "
 "those permissions."
 msgstr ""
-"Vous pouvez vous <a href=\"/%(slug)s/logout\">déconnecter</a> et vous "
+"Vous pouvez vous <a href=\"/%(logout)s\">déconnecter</a> et vous "
 "reconnecter avec un autre compte ayant ces permissions"
 
 #: assembl/templates/confirm.jinja2:23
@@ -4596,10 +4593,8 @@ msgid "You will enter the discussion as <b>{name}</b>."
 msgstr "Vous allez rejoindre la discussion en tant que <b>{name}</b>."
 
 #: assembl/views/auth/views.py:943
-#, fuzzy, python-format
-#| msgid "You will enter %s as <b>{name}</b>."
 msgid "You will enter {platform_name} as <b>{name}</b>."
-msgstr "Vous allez rejoindre %s en tant que <b>{name}</b>."
+msgstr "Vous allez rejoindre {platform_name} en tant que <b>{name}</b>."
 
 #: assembl/views/auth/views.py:946
 msgid "Please choose your password for security reasons."
