@@ -20,6 +20,10 @@ borg create \
     $IDEALOOM_PATH \
     --exclude $IDEALOOM_PATH/src \
     --exclude $IDEALOOM_PATH/venv \
+    --exclude $ASSEMBL_PATH/var/run \
+    --exclude $ASSEMBL_PATH/var/db \
+    --exclude $ASSEMBL_PATH/var/log \
+    --exclude $ASSEMBL_PATH/var/sessions \
     --exclude $IDEALOOM_PATH/vendor \
     --exclude $IDEALOOM_PATH/assembl/static/js/bower \
     --exclude $IDEALOOM_PATH/assembl/static/node_modules \
