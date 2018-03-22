@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from pyramid.compat import url_quote
 from pyramid.view import view_config
 from pyramid.response import Response, FileIter, _BLOCK_SIZE
-from pyramid.httpexceptions import HTTPServerError, HTTPBadRequest
+from pyramid.httpexceptions import HTTPServerError, HTTPNotAcceptable
 from pyramid.security import authenticated_userid, Everyone
 from pyramid.settings import asbool
 
@@ -55,6 +55,8 @@ def get_file(request):
     ctx = request.context
     document = ctx._instance
     f = File.get(document.id)
+    if f.infected:
+        raise HTTPNotAcceptable("Infected with a virus")
     escaped_double_quotes_filename = (f.title
         .replace(u'"', u'\\"')
         .encode('iso-8859-1', 'replace'))
