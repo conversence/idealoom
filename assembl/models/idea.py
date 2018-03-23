@@ -35,6 +35,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqla_rdfbridge.mapping import IriClass, PatternIriClass
+from pyramid.i18n import TranslationStringFactory
 
 from ..lib.utils import get_global_base_url
 from ..nlp.wordcounter import WordCounter
@@ -58,6 +59,9 @@ if DiscussionBoundBase.using_virtuoso:
     from virtuoso.alchemy import Timestamp
 else:
     from sqlalchemy.types import TIMESTAMP as Timestamp
+
+
+_ = TranslationStringFactory('assembl')
 
 
 class defaultdictlist(defaultdict):
@@ -340,6 +344,17 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
             & (IdeaLink.tombstone_date == None)).filter(
             (IdeaLink.target_id == self.id)
             & (Idea.tombstone_date == None)).all()
+
+    def safe_title(self, user_prefs, localizer=None):
+        if self.title:
+            entry = self.title.best_lang(user_prefs)
+            if entry:
+                return entry.value
+        # absurd fallback
+        text = _("Idea")
+        if localizer:
+            text = localizer.translate(text)
+        return " ".join((text, str(self.id)))
 
     @property
     def parent_uris(self):

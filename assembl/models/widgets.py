@@ -191,6 +191,7 @@ class Widget(DiscussionBoundBase):
 
     @property
     def activity_state(self):
+        # TODO: Convert to enum
         if not self.is_started():
             return "not started"
         if self.is_ended():
