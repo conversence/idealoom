@@ -26,7 +26,6 @@ from pyramid.settings import asbool
 from pyramid.path import DottedNameResolver
 from zope.component import getGlobalSiteManager
 from sqlalchemy.ext.baked import bake_lazy_loaders
-import sqltap.wsgi
 
 from .lib.sqla import (
     configure_engine, session_maker_is_initialized, using_virtuoso)
@@ -124,5 +123,6 @@ def main(global_config, **settings):
 
     wsgi_app = config.make_wsgi_app()
     if asbool(settings.get('sqltap', False)):
+        import sqltap.wsgi
         wsgi_app = sqltap.wsgi.SQLTapMiddleware(wsgi_app)
     return wsgi_app
