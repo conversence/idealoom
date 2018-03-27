@@ -79,7 +79,7 @@ reg==0.11
 requests-oauthlib==1.0.0
 requests==2.19.1
 rotate-backups==4.4
-simplejson==3.16.1
+simplejson==3.16.0
 six==1.11.0
 scikit-learn==0.19.2
 social-auth-core==1.7.0

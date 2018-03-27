@@ -242,9 +242,46 @@ def get_random_templates():
     return templates[0].split(':')[1:]
 
 
+def ensure_pip_compile():
+    if not exists(env.venvpath + "/bin/pip-compile"):
+        separate_pip_install('pip-tools')
+
+
 @task
-def generate_requirements():
-    venvcmd("pip-compile --output-file requirements.txt " + env.requirement_inputs)
+def generate_new_requirements():
+    ensure_pip_compile()
+    target = env.frozen_requirements % sys.version_info.major
+    local_venv = env.get("venvpath", "./venv")
+    assert os.path.exists(local_venv + "/bin/python"),\
+        "No usable local venv"
+    with settings(host_string="localhost", venvpath=local_venv,
+                  user=getuser(), projectpath=os.getcwd()):
+        venvcmd(" ".join(("pip-compile --output-file", target, env.requirement_inputs)))
+
+
+@task
+def ensure_requirements():
+    target = env.frozen_requirements % sys.version_info.major
+    if target:
+        with cd(env.projectpath):
+            run("cp %s requirements.txt" % target)
+    else:
+        # TODO: Compare a hash in the generated requirements
+        # with the hash of the input files, to avoid regeneration
+        generate_new_requirements()
+
+
+@task
+def generate_frozen_requirements():
+    local_venv = env.get("venvpath", "./venv")
+    assert os.path.exists(local_venv + "/bin/python"),\
+        "No usable local venv"
+    with settings(host_string="localhost", venvpath=local_venv,
+                  user=getuser(), projectpath=os.getcwd()):
+        venvcmd("fab -c configs/local_prod.rc generate_new_requirements")
+        venvcmd("fab -c configs/testing.rc generate_new_requirements")
+        venvcmd("fab -c configs/develop.rc generate_new_requirements")
+        # TODO: Check that no package has different versions in different files.
 
 
 @task
@@ -559,13 +596,21 @@ def build_virtualenv():
     run('rm /tmp/distribute* || echo "ok"')  # clean after myself
 
 
+def separate_pip_install(package, wrapper=None):
+    template = "egrep '^%%s' %(projectpath)s/requirements-prod.frozen.txt | sed -e 's/#.*//' | xargs %(venvpath)s/bin/pip install" % env
+    cmd = template % (package,)
+    if wrapper:
+        cmd = wrapper % (cmd,)
+    run(cmd)
+
+
 @task
 def update_pip_requirements(force_reinstall=False):
     """
     update external dependencies on remote host
     """
     print(cyan('Updating requirements using PIP'))
-    venvcmd('pip install -U "pip>=6" setuptools wheel')
+    venvcmd('pip install -U "pip>=6" setuptools')
     force_flag = "--ignore-installed" if force_reinstall else ""
     base_cmd = "%s/bin/pip install %s -r %s" % (
         env['venvpath'], force_flag, env['projectpath'])
@@ -750,6 +795,7 @@ def app_update_dependencies(force_reinstall=False):
     network connection to update
     """
     execute(update_vendor_themes)
+    execute(ensure_requirements)
     execute(update_pip_requirements, force_reinstall=force_reinstall)
     #Nodeenv is installed by python , so this must be after update_pip_requirements
     execute(update_node, force_reinstall=force_reinstall)

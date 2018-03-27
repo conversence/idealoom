@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import sys
 
@@ -11,7 +12,11 @@ from pip._internal.download import PipSession
 from pip._internal.req import parse_requirements
 
 # parse_requirements() returns generator of pip.req.InstallRequirement objects
-install_reqs = list(parse_requirements('requirements.txt', session=PipSession()))
+if not os.path.exists('requirements.txt'):
+    print("Please run first: fab -c configs/develop.rc ensure_requirements")
+    sys.exit(0)
+
+install_reqs = parse_requirements('requirements.txt', session=PipSession())
 
 # requires is a list of requirement
 # e.g. ['django==1.5.1', 'mezzanine==1.4.6']

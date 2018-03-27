@@ -64,4 +64,5 @@ saml_email = testing@idealoom.org
 mail.tls = false
 handoff_to_nginx = false
 upload_root = var/test_uploads
-requirement_inputs = requirements.in requirements-doc.in requirements-tests.in
+_requirement_inputs = requirements.in requirements_doc.in requirements_tests.in
+frozen_requirements = requirements-tests-%d.frozen
