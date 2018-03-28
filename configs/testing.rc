@@ -67,3 +67,4 @@ upload_root = var/test_uploads
 _requirement_inputs = requirements.in requirements_doc.in requirements_tests.in
 frozen_requirements = requirements-tests-%d.frozen
 _build_docs = true
+_can_test = true

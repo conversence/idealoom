@@ -87,7 +87,8 @@ def sanitize_env():
     for name in (
             "uses_memcache", "uses_uwsgi", "uses_apache",
             "uses_global_supervisor", "uses_apache",
-            "uses_ngnix", "mac", "is_production_env"):
+            "uses_ngnix", "mac", "is_production_env",
+            "build_docs", "can_test"):
         # Note that we use as_bool() instead of bool(),
         # so that a variable valued "False" in the .ini
         # file is recognized as boolean False
@@ -103,11 +104,11 @@ def sanitize_env():
     # nor env.host_string are set properly. Revisit with Fabric2.
     if not env.get('host_string', None):
         env.host_string = env.hosts[0]
-    #Are we on localhost
+    # Are we on localhost
     is_local = are_local(env.hosts)
     if env.get('mac', None) is None:
         if is_local:
-            #WARNING:  This code will run locally, NOT on the remote server,
+            # WARNING:  This code will run locally, NOT on the remote server,
             # so it's only valid if we are connecting to localhost
             env.mac = system().startswith('Darwin')
         else:
@@ -841,7 +842,7 @@ def app_compile():
     """
     execute(app_update_dependencies)
     execute(app_compile_noupdate)
-    if env.get('build_docs', False):
+    if env.build_docs:
         execute(build_doc)
 
 
@@ -1117,6 +1118,8 @@ def install_builddeps():
         sudo('apt-get install -y build-essential python3-dev')
         sudo('apt-get install -y automake bison flex gperf gawk')
         sudo('apt-get install -y graphviz pkg-config gfortran')
+    if env.can_test:
+        execute(install_testdeps)
     execute(update_python_package_builddeps)
 
 
@@ -1148,9 +1151,9 @@ def update_python_package_builddeps():
              'libxslt1-dev libffi-dev libhiredis-dev libxml2-dev libssl-dev '
              'libreadline-dev liblapack-dev libatlas-base-dev libblas-dev '
              'libxmlsec1-dev libgraphviz-dev libsnappy-dev')
-        print ("We are still trying to get some requirements right for linux, "
-               "See http://www.scipy.org/scipylib/building/linux.html "
-               "for details.")
+        print("We are still trying to get some requirements right for linux, "
+              "See http://www.scipy.org/scipylib/building/linux.html "
+              "for details.")
 
 
 @task
