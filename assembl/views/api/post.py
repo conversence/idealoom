@@ -20,7 +20,7 @@ from sqlalchemy.orm import (
 from sqlalchemy.sql.expression import bindparam, and_, or_
 from sqlalchemy.sql import cast, column, func, case
 
-from jwzthreading import restrip_pat
+from jwzthreading.jwzthreading import SUBJECT_RE
 
 import transaction
 
@@ -568,7 +568,7 @@ def create_post(request):
             locale = discussion.main_locale
         # print subject
         if subject is not None and len(subject):
-            new_subject = "Re: " + restrip_pat.sub('', subject).strip()
+            new_subject = "Re: " + SUBJECT_RE.sub('', subject).strip()
             if (in_reply_to_post and new_subject == subject and
                     in_reply_to_post.get_title()):
                 # reuse subject and translations

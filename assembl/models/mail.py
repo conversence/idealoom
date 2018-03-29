@@ -510,7 +510,7 @@ FROM post WHERE post.id IN (SELECT MAX(post.id) as max_post_id FROM imported_pos
         emails_for_threading = []
         for mail in emails:
             blob = AbstractMailbox.guess_encoding(mail.imported_blob)
-            email_for_threading = jwzthreading.make_message(email.message_from_string(blob))
+            email_for_threading = jwzthreading.Message(email.message_from_string(blob))
             #Store our emailsubject, jwzthreading does not decode subject itself
             email_for_threading.subject = mail.subject.first_original().value
             #Store our email object pointer instead of the raw message text
@@ -520,33 +520,33 @@ FROM post WHERE post.id IN (SELECT MAX(post.id) as max_post_id FROM imported_pos
         threaded_emails = jwzthreading.thread(emails_for_threading)
 
         # Output
-        L = list(threaded_emails.items())
-        L.sort()
-        for subj, container in L:
+        for container in threaded_emails:
             jwzthreading.print_container(container, 0, True)
 
-        def update_threading(threaded_emails, parent=None, debug=False):
+        def update_threading(threaded_emails, debug=False):
             log.debug("\n\nEntering update_threading() for %ld mails:" % len(threaded_emails))
             for container in threaded_emails:
+                message = container['message']
                 # if debug:
                     #jwzthreading.print_container(container)
                 message_string = "%s %s %d " % (
-                    container.message.subject, container.message.message_id,
-                    container.message.message.id) if container.message else "null "
+                    message.subject, message.message_id,
+                    message.message.id) if message else "null "
                 log.debug("Processing: %s container: %s parent: %s children :%s" % (
                     message_string, container, container.parent, container.children))
 
-                if(container.message):
-                    current_parent = container.message.message.parent
+                if(message):
+                    current_parent = message.message.parent
                     if(current_parent):
                         db_parent_message_id = current_parent.message_id
                     else:
                         db_parent_message_id = None
 
-                    if parent:
-                        if parent.message:
+                    if container.parent:
+                        parent_message = container.parent['message']
+                        if parent_message:
                             #jwzthreading strips the <>, re-add them
-                            algorithm_parent_message_id = u"<" + parent.message.message_id + u">"
+                            algorithm_parent_message_id = u"<" + parent_message.message_id + u">"
                         else:
                             log.warn("Parent was a dummy container, we may need "
                                      "to handle this case better, as we just "
@@ -556,22 +556,22 @@ FROM post WHERE post.id IN (SELECT MAX(post.id) as max_post_id FROM imported_pos
                         algorithm_parent_message_id = None
                     log.debug("Current parent from database: " + repr(db_parent_message_id))
                     log.debug("Current parent from algorithm: " + repr(algorithm_parent_message_id))
-                    log.debug("References: " + repr(container.message.references))
+                    log.debug("References: " + repr(message.references))
                     if algorithm_parent_message_id != db_parent_message_id:
                         if current_parent == None or isinstance(current_parent, Email):
-                            log.debug("UPDATING PARENT for :" + repr(container.message.message.message_id))
-                            new_parent = parent.message.message if algorithm_parent_message_id else None
+                            log.debug("UPDATING PARENT for :" + repr(message.message.message_id))
+                            new_parent = parent_message.message if algorithm_parent_message_id else None
                             log.debug(repr(new_parent))
-                            container.message.message.set_parent(new_parent)
+                            message.message.set_parent(new_parent)
                         else:
                             log.debug("Skipped reparenting:  the current parent "
                                       "isn't an email, the threading algorithm only "
                                       "considers mails")
-                    update_threading(container.children, container, debug=debug)
+                    update_threading(container.children, debug=debug)
                 else:
                     log.debug("Current message ID: None, was a dummy container")
-                    update_threading(container.children, parent, debug=debug)
-        update_threading(list(threaded_emails.values()), debug=False)
+                    update_threading(container.children, debug=debug)
+        update_threading(threaded_emails, debug=False)
 
     def reprocess_content(self):
         """ Allows re-parsing all content as if it were imported for the first time
