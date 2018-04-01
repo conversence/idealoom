@@ -3,6 +3,7 @@
 .. inheritance-diagram:: ContentSource Content PostSource AnnotatorSource assembl.models.post.Post assembl.models.post.LocalPost assembl.models.post.SynthesisPost assembl.models.post.WidgetPost assembl.models.post.IdeaProposalPost assembl.models.post.ImportedPost assembl.models.mail.AbstractMailbox assembl.models.mail.IMAPMailbox assembl.models.mail.MailingList assembl.models.mail.AbstractFilesystemMailbox assembl.models.mail.MaildirMailbox assembl.models.mail.Email assembl.models.annotation.Webpage
     :parts: 1
 """
+from future.utils import native_str_to_bytes
 from builtins import hex
 from datetime import datetime
 import logging
@@ -116,7 +117,7 @@ class ContentSource(DiscussionBoundBase, OriginMixin):
             import hashlib
             import base64
             d = hashlib.md5()
-            d.update(source_post_id)
+            d.update(native_str_to_bytes(source_post_id, 'utf-8'))
             d = base64.urlsafe_b64encode(d.digest())
             sanitized = sanitized[
                 :max(0, 64-len(d)-extra_length-1)]
