@@ -84,7 +84,7 @@ def get_file(request):
     url_quoted_utf8_filename = url_quote(f.title.encode('utf-8'))
     handoff_to_nginx = asbool(config.get('handoff_to_nginx', False))
     if handoff_to_nginx:
-        kwargs = dict(body='')
+        kwargs = dict()
     else:
         if 'Range' in request.headers:
             raise HTTPRequestRangeNotSatisfiable()
@@ -109,7 +109,7 @@ def get_file(request):
         **kwargs
     )
     if handoff_to_nginx:
-        r.headers[b'X-Accel-Redirect'] = f.handoff_url
+        r.headers['X-Accel-Redirect'] = f.handoff_url
     return r
 
 

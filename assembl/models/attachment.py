@@ -185,7 +185,7 @@ class File(Document):
 
     @classmethod
     def path_of(cls, id):
-        return cls.hashfs.get(id).abspath.encode('ascii')
+        return cls.hashfs.get(id).abspath
 
     @property
     def path(self):
@@ -193,7 +193,7 @@ class File(Document):
 
     @property
     def handoff_url(self):
-        return b'/private_uploads' + self.path[len(self.hashfs.root):]
+        return '/private_uploads' + self.path[len(self.hashfs.root):]
 
     @property
     def size(self):
