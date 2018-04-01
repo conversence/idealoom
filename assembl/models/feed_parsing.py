@@ -22,7 +22,7 @@ import requests
 from urllib.parse import urlparse, quote_plus
 
 from ..lib.sqla_types import URLString
-from .langstrings import LangString
+from .langstrings import LangString, LocaleLabel
 from .generic import PostSource
 from .post import ImportedPost
 from .auth import AbstractAgentAccount, AgentProfile
@@ -340,13 +340,13 @@ class FeedSourceReader(PullSourceReader):
                 sess.rollback()
                 raise ReaderError(e)
             finally:
-                self.source = FeedPostSource.get(self.source_id)
+                self.source = FeedPostSource.get(self.source_id, sess)
             if self.status != ReaderStatus.READING:
                 break
 
     def _process_reimport_post(self, entry, post, discussion=None):
         post.import_date = datetime.utcnow()
-        post.source_id = self._get_entry_id(entry)
+        post.source_post_id = self._get_entry_id(entry)
         post.source = self.source
         post.body_mime_type = self._get_body_mime_type(entry)
         post.creation_date = self._get_creation_date(entry)
@@ -373,7 +373,7 @@ class FeedSourceReader(PullSourceReader):
                 self.source.db.rollback()
                 raise ReaderError(e)
             finally:
-                self.source = FeedPostSource.get(self.source_id)
+                self.source = FeedPostSource.get(self.source_id, self.source.db)
 
     def _check_parser_loaded(self):
         if not self._parse_agent:
@@ -414,13 +414,27 @@ class FeedSourceReader(PullSourceReader):
         return entry['id']
 
     def _get_body_mime_type(self, entry):
-        return entry['content'][0]['type']
+        content = entry.get('content', None)
+        if content:
+            return content[0]['type']
+        return 'text/html'  # assumed when rss
 
     def _get_subject(self, entry):
-        return entry['title']
+        return LangString.create(entry['title'])
 
     def _get_body(self, entry):
-        return entry['content'][0]['value']
+        body = entry.get('content', None)
+        if body:
+            body = body[0]
+            language = body.get('language', None)
+            if language.lower() == 'none' or not language:
+                language = LocaleLabel.UNDEFINED
+            return LangString.create(body['value'], language)
+        else:
+            body = entry.get('description', None)
+            if body:
+                return LangString.create(body)
+        raise RuntimeError("could not find description for entry ", entry)
 
     def _get_author(self, entry):
         return entry['author']
@@ -449,8 +463,8 @@ class FeedSourceReader(PullSourceReader):
             discussion=source.discussion,
             body_mime_type=body_mime_type,
             creator=user,
-            subject=LangString.create(subject),
-            body=LangString.create(body))
+            subject=subject,
+            body=body)
 
 
 class LoomioSourceReader(FeedSourceReader):
@@ -463,11 +477,7 @@ class LoomioSourceReader(FeedSourceReader):
             _process_reimport_post(entry, post, discussion)
         post.subject = self._get_title_from_feed()
 
-    def _get_body(self,entry):
-        return entry['content'][0]['value']
-
-    def _convert_to_post(self,entry,account):
+    def _convert_to_post(self, entry, account):
         post = super(LoomioSourceReader, self)._convert_to_post(entry,account)
-        subject = self._get_title_from_feed()
-        body = self._get_body(entry)
+        post.subject = self._get_title_from_feed()
         return post
