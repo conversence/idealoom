@@ -715,7 +715,7 @@ var IdeaPanel = BasePanel.extend({
                  collectionManager.getAllIdeaLinksCollectionPromise(), fetchPromise,
         function(allExtractsCollection, allLinksCollection, fetchedJQHR) {
           //View could be gone, or model may have changed in the meantime
-          if (that.isRenderedAndNotYetDestroyed() && that.model) {
+          if (that.model && !that.isDestroyed()) {
             that.extractListSubset = new SegmentList.IdeaSegmentListSubset([], {
               parent: allExtractsCollection,
               ideaId: that.model.id
