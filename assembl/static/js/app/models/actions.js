@@ -21,7 +21,7 @@ var actionModel = Base.Model.extend({
    * @type {Object}
    */
   defaults: {
-    target: null,
+    what: null,
     user: null,
     target_type: "Content",
     '@id': null,

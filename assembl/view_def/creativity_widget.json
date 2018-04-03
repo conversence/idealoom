@@ -249,7 +249,7 @@
     },
     "ActionOnPost": {
         "@extends": "Update",
-        "target": "post",
+        "what": "post",
         "target_type": "'\"SPost\""
     },
     "LikedPost": {

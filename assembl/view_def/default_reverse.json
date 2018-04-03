@@ -198,7 +198,7 @@
     },
     "ActionOnPost": {
         "@extends": "Update",
-        "target": "post"
+        "what": "post"
     },
     "LikedPost": {
         "@extends": "ActionOnPost"
@@ -208,7 +208,7 @@
     },
     "ActionOnIdea": {
         "@extends": "Update",
-        "target": "idea"
+        "what": "idea"
     },
     "ViewIdea": {
         "@extends": "ActionOnIdea"
@@ -480,7 +480,7 @@
         "idObjectAttachedTo": "idea"
     },
     "Announcement": {
-        "creation_date": true,
+        "created": "creation_date",
         "modification_date": true,
         "creator": true,
         "last_updated_by": true,

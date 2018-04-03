@@ -28,7 +28,7 @@
     },
     "ActionOnIdea": {
         "@extends": "Update",
-        "target": "idea"
+        "what": "idea"
     },
     "ViewIdea": {
         "@extends": "ActionOnIdea"

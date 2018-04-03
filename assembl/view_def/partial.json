@@ -214,7 +214,7 @@
     },
     "ActionOnPost": {
         "@extends": "Update",
-        "target": "post"
+        "what": "post"
     },
     "LikedPost": {
         "@extends": "ActionOnPost"
@@ -224,7 +224,7 @@
     },
     "ActionOnIdea": {
         "@extends": "Update",
-        "target": "idea"
+        "what": "idea"
     },
     "ViewIdea": {
         "@extends": "ActionOnIdea"

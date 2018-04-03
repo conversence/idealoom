@@ -9,7 +9,7 @@
     },
     "NotificationSubscription": {
         "discussion": true,
-        "creation_date": true,
+        "created": "creation_date",
         "creation_origin": true,
         "parent_subscription": true,
         "status": true,

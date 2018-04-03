@@ -74,7 +74,7 @@
     },
     "ActionOnPost": {
         "@extends": "Update",
-        "target": "post",
+        "what": "post",
         "target_type": "'\"SPost\""
     },
     "LikedPost": {
@@ -85,7 +85,7 @@
     },
     "ActionOnIdea": {
         "@extends": "Update",
-        "target": "idea",
+        "what": "idea",
         "target_type": "'\"GenericIdeaNode\""
     },
     "ViewIdea": {
