@@ -28,7 +28,7 @@
     },
     "User": {
         "@extends": "Agent",
-        "creation_date": true,
+        "created": "creation_date",
         "last_login": true,
         "login_failures": false,
         "password": false,
@@ -53,7 +53,7 @@
     "Container": {
         "discussion_id": "discussion",
         "name": true,
-        "creation_date": true,
+        "created": "creation_date",
         "contents": [":partial"]
     },
     "PostSource": {
@@ -85,6 +85,7 @@
     },
     "SPost": {
         "date": "creation_date",
+        "created": "creation_date",
         "hidden": true,
         "like_count": true,
         "discussion": true,
@@ -138,7 +139,7 @@
         "in_reply_to": false
     },
     "Conversation": {
-        "creation_date": true,
+        "created": "creation_date",
         "slug": true,
         "topic": true,
         "permissions": "&get_roles_by_permission",
@@ -149,7 +150,7 @@
         "longTitle": "synthesis_title:extended",
         "shortTitle": "title:extended",
         "definition": "description:extended",
-        "creationDate": "creation_date",
+        "created": "creation_date",
         "order": "&get_order_from_first_parent",
         "discussion": true,
         "most_common_words": "most_common_words_prop",
@@ -179,7 +180,7 @@
         "order": true
     },
     "Map": {
-        "creation_date": true,
+        "created": "creation_date",
         "discussion": false
     },
     "ExplicitSubGraphView": {

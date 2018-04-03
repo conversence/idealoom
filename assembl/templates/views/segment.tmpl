@@ -3,7 +3,7 @@
     the <%= segment %> variable should be given.
 #}
 
-{% set segmentDate = '<%= ctx.getNiceDateTime(segment.get("creationDate")) %>' %}
+{% set segmentDate = '<%= ctx.getNiceDateTime(segment.get("created")) %>' %}
 {% set segmentCreatorName = '<%= harvester.get("name") %>' %}
 {% set harverterTooltip = gettext('Harvested by %(name)s %(date)s')|format(date=segmentDate, name=segmentCreatorName) %}
 

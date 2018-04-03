@@ -1,5 +1,5 @@
-{% set precise_date = "<%= ctx.getReadableDateTime(creation_date) %>" %}
-{% set nice_date = "<%= ctx.getNiceDate(creation_date, false, true) %>" %}
+{% set precise_date = "<%= ctx.getReadableDateTime(created) %>" %}
+{% set nice_date = "<%= ctx.getNiceDate(created, false, true) %>" %}
 <div class="js_announcement_title_region announcement_title"><%= title %></div>
 <div class="js_announcement_body_region announcement_body"><%= body %></div>
 <div class="creator_info">

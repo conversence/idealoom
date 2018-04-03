@@ -45,7 +45,7 @@ var SynthesisItem = LoaderView.extend({
     return {
       id: this.model.get('published_in_post'),
       subject: this.model.get('subject'),
-      date: Ctx.formatDate(this.model.get('creation_date'))
+      date: Ctx.formatDate(this.model.get('created'))
     };
   },
 
@@ -72,7 +72,7 @@ var SynthesisList = Marionette.CollectionView.extend({
     var publishedSyntheses = this.collection.getPublishedSyntheses();
 
     _.sortBy(publishedSyntheses, function(message) {
-      return message.get('creation_date');
+      return message.get('created');
     });
     publishedSyntheses.reverse();
 

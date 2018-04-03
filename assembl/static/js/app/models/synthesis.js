@@ -128,7 +128,7 @@ var SynthesisCollection = Base.Collection.extend({
     var lastSynthesis = null;
     if (publishedSyntheses.length > 0) {
       _.sortBy(publishedSyntheses, function(model) {
-        return model.get('creation_date');
+        return model.get('created');
       });
       lastSynthesis = _.last(publishedSyntheses);
     }

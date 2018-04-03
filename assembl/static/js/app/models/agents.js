@@ -33,7 +33,7 @@ var AgentModel = Base.Model.extend({
     preferred_email: null,
     verified: false,
     avatar_url_base: null,
-    creation_date: null,
+    created: null,
     is_first_visit: false,
     first_visit: null,
     last_visit: null,

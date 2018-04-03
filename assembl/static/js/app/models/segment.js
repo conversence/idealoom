@@ -33,11 +33,11 @@ var SegmentModel = Base.Model.extend({
    */
   initialize: function() {
     if (this.attributes.created) {
-      this.attributes.creationDate = this.attributes.created;
+      this.attributes.created = this.attributes.created;
     }
 
-    if (!this.get('creationDate')) {
-      this.set('creationDate', Ctx.getCurrentTime());
+    if (!this.get('created')) {
+      this.set('created', Ctx.getCurrentTime());
     }
 
     var ranges = this.attributes.ranges;
@@ -99,7 +99,7 @@ var SegmentModel = Base.Model.extend({
     quote: '',
     idPost: null,
     idIdea: null,
-    creationDate: null,
+    created: null,
     idCreator: null,
     important: false,
     ranges: [],
@@ -130,8 +130,8 @@ var SegmentModel = Base.Model.extend({
         attrs.idPost, attrs.uri);
     }
 
-    if (attrs.creationDate === null) {
-      return i18n.gettext('invalid creationDate: ') + attrs.creationDate;
+    if (attrs.created === null) {
+      return i18n.gettext('invalid created: ') + attrs.created;
     }
 
     if (attrs.idIdea !== null && typeof attrs.idIdea !== 'string') {

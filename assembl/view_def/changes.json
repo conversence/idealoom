@@ -20,7 +20,7 @@
     },
     "User": {
         "@extends": "Agent",
-        "creation_date": true,
+        "created": "creation_date",
         "last_login": true,
         "login_failures": false,
         "password": false,
@@ -43,7 +43,7 @@
     "Container": {
         "discussion_id": "discussion",
         "name": true,
-        "creation_date": true,
+        "created": "creation_date",
         "connection_error": "connection_error_as_text",
         "error_description": true,
         "error_backoff_until": true
@@ -88,6 +88,7 @@
     },
     "SPost": {
         "date": "creation_date",
+        "created": "creation_date",
         "hidden": true,
         "discussion": true,
         "import_date": false,
@@ -160,7 +161,7 @@
         "post_email_address": true
     },
     "Conversation": {
-        "creation_date": true,
+        "created": "creation_date",
         "slug": true,
         "topic": true
     },
@@ -169,7 +170,7 @@
         "longTitle": "synthesis_title:extended",
         "shortTitle": "title:extended",
         "definition": "description:extended",
-        "creationDate": "creation_date",
+        "created": "creation_date",
         "order": "&get_order_from_first_parent",
         "discussion": false,
         "hidden": true,
@@ -194,7 +195,7 @@
         "order": true
     },
     "Map": {
-        "creation_date": true,
+        "created": "creation_date",
         "discussion": false
     },
     "ExplicitSubGraphView": {

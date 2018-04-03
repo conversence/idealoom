@@ -12,7 +12,7 @@
             </div>
             <div class="session-comment">
                 <form id="postForm">
-                <div class="media user-comment" ng-if="ideas.length > 0" ng-repeat="idea in ideas | orderBy:'creationDate':'reverse' track by $index">
+                <div class="media user-comment" ng-if="ideas.length > 0" ng-repeat="idea in ideas | orderBy:'created':'reverse' track by $index">
                     <div class="pull-left">
                         <input type="checkbox" id="checkbox-{{idea.proposed_in_post['@id']}}"  value="{{idea.proposed_in_post['@id']}}" data-toggle="checkbox" class="sub-idea-post" ng-model="idea.proposed_in_post.selected">
                     </div>

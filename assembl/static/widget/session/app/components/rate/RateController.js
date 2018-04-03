@@ -54,7 +54,7 @@ RateModule.controller('RateController', [
             if (item.widget_add_post_endpoint) {
               var widgetName = $scope.widget['@id'];
               item.widget_add_post_endpoint = UtilsService.getURL(item.widget_add_post_endpoint[widgetName]);
-              item.beautify_date = UtilsService.getNiceDateTime(item.creationDate);
+              item.beautify_date = UtilsService.getNiceDateTime(item.created);
               ideas.push(item);
             }
           });

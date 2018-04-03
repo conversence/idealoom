@@ -30,7 +30,7 @@ var sourceModel = Base.Model.extend({
     'name': '',
     'admin_sender': '',
     'post_email_address': '',
-    'creation_date': '',
+    'created': '',
     'host': '',
     'discussion_id': '',
     '@type': '',

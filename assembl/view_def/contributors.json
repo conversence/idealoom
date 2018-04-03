@@ -16,7 +16,7 @@
     },
     "User": {
         "@extends": "Agent",
-        "creation_date": true,
+        "created": "creation_date",
         "last_login": true,
         "login_failures": false,
         "password": false,
@@ -26,7 +26,7 @@
         "longTitle": "synthesis_title:extended",
         "shortTitle": "title:extended",
         "definition": "description:extended",
-        "creationDate": "creation_date",
+        "created": "creation_date",
         "order": "&get_order_from_first_parent",
         "discussion": false,
         "hidden": true,

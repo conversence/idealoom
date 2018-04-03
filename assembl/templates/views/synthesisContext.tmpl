@@ -9,8 +9,8 @@
         <h2 class="lastSynthesisTitle">
           <span>{{ gettext('Last synthesis') }}</span>
           <span class='message-date vam mlxs'>
-            <time title=<%= ctx.getReadableDateTime(synthesis.get('creation_date')) %> >
-            <%= ctx.getNiceDateTime(synthesis.get('creation_date')) %>
+            <time title=<%= ctx.getReadableDateTime(synthesis.get('created')) %> >
+            <%= ctx.getNiceDateTime(synthesis.get('created')) %>
             </time>
           </span>
         </h2>

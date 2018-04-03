@@ -466,7 +466,7 @@ var IdeaList = BasePanel.extend({
     //console.log("should_be_newer_than: ", should_be_newer_than);
 
     var idea_criterion_value = function(idea){
-      return new Date(idea.get('creationDate'));
+      return new Date(idea.get('created'));
     };
     var creation_dates = ideas.map(idea_criterion_value); // create a list of idea creation dates
     var date_sort_asc = function (date1, date2) {

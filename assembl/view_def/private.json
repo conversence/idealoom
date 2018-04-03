@@ -49,7 +49,7 @@
     },
     "User": {
         "@extends": "Agent",
-        "creation_date": true,
+        "created": "creation_date",
         "last_login": true,
         "login_expiry": "&login_expiry_req",
         "login_failures": false,

@@ -23,7 +23,7 @@ var Source = Base.Model.extend({
   urlRoot: Ctx.getApiV2DiscussionUrl('sources'),
   localizedName: i18n.gettext("Abstract content source"),
   defaults: {
-    'creation_date': null,
+    'created': null,
     /*
       'discussion_id': null,
       If urlRoot of an object is a ClassInstance, then the front-end model

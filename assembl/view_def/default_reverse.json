@@ -73,7 +73,7 @@
     "Container": {
         "discussion_id": "discussion",
         "name": true,
-        "creation_date": false
+        "created": false
     },
     "PostSource": {
         "@extends": "Container",
@@ -146,6 +146,7 @@
     },
     "SPost": {
         "date": "creation_date",
+        "created": "creation_date",
         "like_count": false,
         "bodyMimeType": false,
         "body": "&safe_set_body",
@@ -215,7 +216,7 @@
     "Conversation": {
         "permissions": false,
         "widget_collection_url": false,
-        "creation_date": false,
+        "created": false,
         "slug": true,
         "posts": false,
         "topic": true,
@@ -235,7 +236,7 @@
         "longTitle": "synthesis_title",
         "shortTitle": "title",
         "definition": "description",
-        "creationDate": "creation_date",
+        "created": false,
         "discussion": false,
         "original_uri": false,
         "is_tombstone": false,

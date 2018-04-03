@@ -56,7 +56,7 @@ var IdeaContentLinkModel = Base.Model.extend({
     defaults: {
         idIdea: null,
         idPost: null,
-        creation_date: null,
+        created: null,
         idCreator: null,
         created: null
     },
@@ -153,12 +153,11 @@ var IdeaContentLinkModel = Base.Model.extend({
         return this.get('idPost') === this.collection.messageModel.id;
     },
   /**
-   * Backend sends a created field instead of a creation_date
    * @returns {String}
    * @function app.models.ideaContentLink.IdeaContentLinkModel.getCreationDate
    */
     getCreationDate: function(){
-        return this.get('creation_date') ? this.get('creation_date') : this.get('created');
+        return this.get('created');
     }
 });
 /**

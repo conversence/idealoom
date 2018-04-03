@@ -31,8 +31,8 @@ var IdeaModel = Base.Model.extend({
   initialize: function(obj) {
     obj = obj || {};
     var that = this;
-    obj.creationDate = obj.creationDate || Ctx.getCurrentTime();
-    this.set('creationDate', obj.creationDate);
+    obj.created = obj.created || Ctx.getCurrentTime();
+    this.set('created', obj.created);
     this.set('hasCheckbox', Ctx.getCurrentUser().can(Permissions.EDIT_SYNTHESIS));
     this.adjust_num_read_posts(obj);
   },
@@ -108,7 +108,7 @@ var IdeaModel = Base.Model.extend({
     parentId: null,
     widget_links: [],
     order: 1,
-    creationDate: null
+    created: null
   },
   //The following should be mostly in view code, but currently the longTitle editor code isn't common in ideaPanel and synthesisView. At least this is mostly DRY.
   /**

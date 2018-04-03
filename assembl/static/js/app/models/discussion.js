@@ -27,7 +27,7 @@ var discussionModel = Base.Model.extend({
   defaults: {
     'introduction': '',
     'objectives': '',
-    'creation_date': '',
+    'created': '',
     'topic': '',
     'introductionDetails': '',
     '@type': '',

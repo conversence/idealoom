@@ -93,7 +93,7 @@ var Synthesis = Marionette.View.extend({
       if (synthesisMessage) {
         var synthesis = options.allSynthesisCollection.get(synthesisMessage.get('publishes_synthesis'));
         this.model.set({
-          creation_date: synthesisMessage.get('date'),
+          created: synthesisMessage.get('date'),
           introduction: synthesis.get('introduction')
         });
       }
