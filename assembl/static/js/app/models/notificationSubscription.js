@@ -27,7 +27,7 @@ var notificationsSubscriptionModel = Base.Model.extend({
     parent_subscription: null,
     discussion: null,
     last_status_change_date: null,
-    creation_date: null,
+    created: null,
     creation_origin: null,
     human_readable_description: null,
     user: null

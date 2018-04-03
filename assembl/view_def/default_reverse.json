@@ -192,7 +192,7 @@
         "proposes_idea": false
     },
     "Update": {
-        "user": "actor",
+        "who": "actor",
         "when": "creation_date",
         "target_type": false
     },

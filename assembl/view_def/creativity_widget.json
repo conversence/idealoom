@@ -245,7 +245,7 @@
         "role": "&role_name"
     },
     "Update": {
-        "user": "actor"
+        "who": "actor"
     },
     "ActionOnPost": {
         "@extends": "Update",

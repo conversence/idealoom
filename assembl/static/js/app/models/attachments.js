@@ -82,7 +82,7 @@ var AttachmentModel = Base.Model.extend({
     description: undefined,
     attachmentPurpose: attachmentPurposeTypes.EMBED_ATTACHMENT.id,
     external_url: undefined,
-    creation_date: new Moment().utc()
+    created: new Moment().utc()
   },
   /**
    * Returns the model of the attachment according to its type (document or file)
@@ -211,7 +211,7 @@ var AttachmentModel = Base.Model.extend({
    * @function app.models.attachments.AttachmentModel.getCreationDate
    */
   getCreationDate: function(){
-    var date = this.get('creation_date');
+    var date = this.get('created');
     if ( (date) && (typeof date === 'string') ){
       date = new Moment(date);
     }

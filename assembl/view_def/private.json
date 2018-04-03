@@ -34,7 +34,7 @@
     },
     "Update": {
         "@private": "actor",
-        "user": "actor"
+        "who": "actor"
     },
     "ActionOnPost": {
         "@extends": "Update",

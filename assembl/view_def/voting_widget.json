@@ -47,7 +47,7 @@
     },
     "Update": {
         "when": "creation_date",
-        "user": "actor"
+        "who": "actor"
     },
     "ActionOnPost": {
         "@extends": "Update",
