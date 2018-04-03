@@ -427,7 +427,7 @@ class FeedSourceReader(PullSourceReader):
         if body:
             body = body[0]
             language = body.get('language', None)
-            if language.lower() == 'none' or not language:
+            if not language or language.lower() == 'none':
                 language = LocaleLabel.UNDEFINED
             return LangString.create(body['value'], language)
         else:
