@@ -769,15 +769,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
     def get_extract_graphs_cif(self):
         from .idea import Idea
         for e in self.get_bound_extracts():
-            yield {
-                "@graph": [
-                    {
-                        "expressesIdea": Idea.uri_generic(e.idea_id),
-                        "@id": e.local_uri_as_resource()
-                    }
-                ],
-                "@id": e.local_uri_as_graph()
-            }
+            yield e.extract_graph_json()
 
     def get_discussion_graph_cif(self):
         from .post import Post

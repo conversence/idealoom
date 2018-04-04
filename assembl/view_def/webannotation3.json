@@ -1,0 +1,8 @@
+{
+    "Excerpt": {
+        "type": "'\"Dataset\"",
+        "format": "'\"application/ld+json\"",
+        "value": "&extract_graph_json_wrap_flat",
+        "_default": false
+    }
+}

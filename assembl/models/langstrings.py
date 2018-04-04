@@ -132,6 +132,15 @@ class LangString(Base):
 
     id = Column(Integer, primary_key=True)
 
+    def as_jsonld(self, default_lang=None, use_map=False):
+        entries = [e.as_jsonld(default_lang) for e in self.entries]
+        if len(self.entries) == 1:
+            return self.entries[0].as_jsonld(default_lang)
+        elif use_map:
+            return {e.locale: e.value for e in self.entries}
+        else:
+            return [e.as_jsonld(default_lang) for e in self.entries]
+
     def _before_insert(self):
         if self.using_virtuoso:
             # This is a virtuoso workaround: virtuoso does not like
@@ -668,6 +677,12 @@ class LangStringEntry(TombstonableMixin, Base):
         doc="Type of error from the translation server")
     # tombstone_date = Column(DateTime) implicit from Tombstonable mixin
     value = Column(UnicodeText)  # not searchable in virtuoso
+
+    def as_jsonld(self, default_lang=None):
+        if self.locale in (default_lang, LocaleLabel.UNDEFINED):
+            return self.value
+        else:
+            return {"@language": self.locale, "@value": self.value}
 
     def set_value(self, value, clone=True):
         target = self

@@ -2,6 +2,7 @@
     "_default": {
         "id": false,
         "@id": "self",
+        "@type": "&external_typename",
         "_default": false
     },
     "Agent": {

@@ -1,0 +1,124 @@
+{
+    "_default": {
+        "id": "self",
+        "type": "&external_typename",
+        "_default": false
+    },
+    "Agent": {
+        "in_conversation": false
+    },
+    "User": {
+        "@extends": "Agent",
+        "created": "creation_date"
+    },
+    "Update": {
+        "when": "creation_date",
+        "who": "actor",
+        "in_conversation": "&get_discussion"
+    },
+    "UserAccount": {
+        "account_of": "profile",
+        "has_function": false
+    },
+    "EmailAccount": {
+        "@extends": "UserAccount"
+    },
+    "WebLinkAccount": {
+        "@extends": "UserAccount"
+    },
+    "LoomioAccount": {
+        "@extends": "WebLinkAccount"
+    },
+    "SourceSpecificAccount": {
+        "@extends": "UserAccount"
+    },
+    "SocialAuthAccount": {
+        "@extends": "UserAccount"
+    },
+    "Usergroup": {
+        "name": true
+    },
+    "SPost": {
+        "date": "creation_date",
+        "created": "creation_date",
+        "in_conversation": "discussion",
+        "title": "&get_original_subject"
+    },
+    "Post": {
+        "@extends": "SPost",
+        "reply_of": "parent",
+        "id": "message_id",
+        "has_creator": "creator"
+    },
+    "LocalPost": {
+        "@extends": "Post"
+    },
+    "WidgetPost": {
+        "@extends": "LocalPost"
+    },
+    "IdeaProposalPost": {
+        "@extends": "WidgetPost",
+        "proposes_idea": true
+    },
+    "SynthesisPost": {
+        "@extends": "LocalPost",
+        "publishes_synthesis": true
+    },
+    "ImportedPost": {
+        "@extends": "Post",
+        "has_origin": "source"
+    },
+    "FeedPost": {
+        "@extends": "ImportedPost"
+    },
+    "LoomioFeedPost": {
+        "@extends": "FeedPost"
+    },
+    "SourceSpecificPost": {
+        "@extends": "ImportedPost"
+    },
+    "FacebookPost": {
+        "@extends": "ImportedPost"
+    },
+    "Webpage": {
+        "@extends": "SPost",
+        "last_modified_date": true,
+        "url": true
+    },
+    "Email": {
+        "@extends": "ImportedPost",
+        "recipients": true,
+        "sender": true,
+        "full_message": false,
+        "in_reply_to": false
+    },
+    "Conversation": {
+        "created": "creation_date",
+        "title": "topic",
+        "uses_source": ["sources"]
+    },
+    "IdeaContentLink": {
+        "idIdea": "idea",
+        "idPost": "content",
+        "created": "creation_date",
+        "idCreator": "creator"
+    },
+    "IdeaContentPositiveLink": {
+        "@extends": "IdeaContentLink"
+    },
+    "IdeaRelatedPostLink": {
+        "@extends": "IdeaContentPositiveLink"
+    },
+    "IdeaContentNegativeLink": {
+        "@extends": "IdeaContentLink"
+    },
+    "IdeaThreadContextBreakLink": {
+        "@extends": "IdeaContentNegativeLink"
+    },
+    "Excerpt": {
+        "@extends": "IdeaContentPositiveLink",
+        "target": "self:webannotation2",
+        "body": "self:webannotation3",
+        "type": "'\"Annotation\""
+    }
+}

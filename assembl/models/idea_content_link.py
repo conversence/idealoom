@@ -4,6 +4,7 @@ import re
 import quopri
 from datetime import datetime
 import logging
+import simplejson as json
 
 from future.utils import as_native_str
 from sqlalchemy.orm import (relationship, backref)
@@ -22,6 +23,7 @@ from rdflib import URIRef
 from sqla_rdfbridge.mapping import PatternIriClass
 
 from . import DiscussionBoundBase, OriginMixin
+from ..semantic import context_url
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..lib.sqla import (CrudOperation, get_model_watcher)
 from ..lib.utils import get_global_base_url
@@ -261,6 +263,28 @@ class Extract(IdeaContentPositiveLink):
         reg = get_current_registry()
         host = reg.settings['public_hostname']
         return URIRef('http://%s/data/ExcerptGraph/%d' % (host, self.id))
+
+    def extract_graph_json(self):
+        return {
+            "@graph": [
+                {
+                    "expressesIdea": Idea.uri_generic(self.idea_id),
+                    "@id": self.local_uri_as_resource()
+                }
+            ],
+            "@id": self.local_uri_as_graph()
+        }
+
+    def extract_graph_json_wrap(self):
+        return {
+            "@context": context_url,
+            "@graph": [
+                self.extract_graph_json()
+            ]
+        }
+
+    def extract_graph_json_wrap_flat(self):
+        return json.dumps(self.extract_graph_json_wrap())
 
     def extract_graph_iri(self):
         return getattr(QUADNAMES, 'extract_%d_iri' % self.id)
