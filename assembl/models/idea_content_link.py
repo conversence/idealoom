@@ -264,6 +264,10 @@ class Extract(IdeaContentPositiveLink):
         host = reg.settings['public_hostname']
         return URIRef('http://%s/data/ExcerptGraph/%d' % (host, self.id))
 
+    def fragements_as_web_annotatation(self):
+        return sum((tfi.as_web_annotation()
+                    for tfi in  self.text_fragment_identifiers), [])
+
     def extract_graph_json(self):
         return {
             "@graph": [
@@ -277,7 +281,7 @@ class Extract(IdeaContentPositiveLink):
 
     def extract_graph_json_wrap(self):
         return {
-            "@context": context_url,
+            "@context": [context_url, {'local': get_global_base_url()}],
             "@graph": [
                 self.extract_graph_json()
             ]
@@ -558,6 +562,49 @@ class TextFragmentIdentifier(DiscussionBoundBase):
     def __json__(self):
         return {"start": self.xpath_start, "startOffset": self.offset_start,
                 "end": self.xpath_end, "endOffset": self.offset_end}
+
+    def as_web_annotation(self):
+        all = []
+        all.append({
+            "type": "TextQuoteSelector",
+            "exact": self.body})
+        all.append({
+            "conformsTo": "http://tools.ietf.org/rfc/rfc3023",
+            "type": "FragmentSelector",
+            "value": self.as_xpointer()})
+        if self.xpath_start == self.xpath_end:
+            all.append({
+                "id": self.uri(),
+                "type": "XPathSelector",
+                "value": self.xpath_start,
+                "refinedBy": {
+                    "type": "TextPositionSelector",
+                    "start": self.offset_start,
+                    "end": self.offset_end
+                }
+            })
+        else:
+            all.append({
+                "id": self.uri(),
+                "type": "RangeSelector",
+                "startSelector": {
+                    "type": "XPathSelector",
+                    "value": self.xpath_start,
+                    "refinedBy": {
+                        "type": "TextPositionSelector",
+                        "start": self.offset_start
+                    }
+                },
+                "endSelector": {
+                    "type": "XPathSelector",
+                    "value": self.xpath_end,
+                    "refinedBy": {
+                        "type": "TextPositionSelector",
+                        "end": self.offset_end
+                    }
+                }
+            })
+        return all
 
     @classmethod
     def from_xpointer(cls, extract_id, xpointer):
