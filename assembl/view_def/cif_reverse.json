@@ -224,7 +224,10 @@
         "hasTarget": false,
         "relevantToConversation": "discussion"
     },
+    "AnnotationSelector": {
+    },
     "FragmentSelector": {
+        "@extends": "AnnotationSelector",
         "value": "&from_xpointer"
     },
     "AbstractIdeaVote": {

@@ -804,7 +804,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
         for e in self.get_bound_extracts():
             yield e.generic_json(view_def_name="cif")
             yield e.generic_json(view_def_name="cif2")
-            for t in e.text_fragment_identifiers:
+            for t in e.selectors:
                 yield t.generic_json(view_def_name="cif")
 
     def get_public_graphs_cif(self):

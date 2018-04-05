@@ -226,6 +226,7 @@ from .idea_content_link import (
     IdeaContentWidgetLink,
     IdeaRelatedPostLink,
     IdeaThreadContextBreakLink,
+    AnnotationSelector,
     TextFragmentIdentifier,
 )
 from .idea_graph_view import (

@@ -8,7 +8,7 @@
         "@id": "&local_uri_as_resource",
         "@type": "'\"SpecificResource\"",
         "hasSource": "content",
-        "hasSelector": "text_fragment_identifiers",
+        "hasSelector": "selectors",
         "resourceExpressesIdea": "idea"
     },
     "Agent": {

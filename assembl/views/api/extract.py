@@ -15,7 +15,7 @@ from assembl.auth import (
     P_READ, P_ADD_EXTRACT, P_EDIT_EXTRACT, P_EDIT_MY_EXTRACT)
 from assembl.models import (
     AgentProfile, Extract, TextFragmentIdentifier,
-    AnnotatorSource, Post, Webpage, Idea)
+    AnnotatorSource, Post, Webpage, Idea, AnnotationSelector)
 from assembl.auth.util import user_has_permission
 from assembl.lib.web_token import decode_token
 from assembl.lib import sqla
@@ -80,8 +80,8 @@ def _get_extracts_real(request, view_def='default', ids=None, user_id=None):
     all_extracts = all_extracts.options(joinedload_all(
         Extract.content))
     all_extracts = all_extracts.options(
-        joinedload_all(Extract.text_fragment_identifiers).joinedload(
-            TextFragmentIdentifier.extract, innerjoin=True))
+        joinedload_all(Extract.selectors).joinedload(
+            AnnotationSelector.extract, innerjoin=True))
     permissions = request.permissions
 
     return [extract.generic_json(view_def, user_id, permissions)

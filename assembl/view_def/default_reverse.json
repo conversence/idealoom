@@ -300,13 +300,16 @@
         "discussion": false,
         "quote": false,
         "attributed_to": true,
-        "ranges": ["text_fragment_identifiers"],
+        "ranges": ["selectors"],
         "text": "annotation_text"
     },
+    "AnnotationSelector": {
+        "extract_id": false
+    },
     "FragmentSelector": {
+        "@extends": "AnnotationSelector",
         "end": "xpath_end",
         "endOffset": "offset_end",
-        "extract_id": false,
         "body": true,
         "start": "xpath_start",
         "startOffset": "offset_start"

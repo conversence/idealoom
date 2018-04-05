@@ -379,13 +379,16 @@
         "quote": true,
         "order": true,
         "discussion": false,
-        "ranges": ["text_fragment_identifiers:default"],
+        "ranges": ["selectors:default"],
         "text": "annotation_text"
     },
+    "AnnotationSelector": {
+        "extract_id": false
+    },
     "FragmentSelector": {
+        "@extends": "AnnotationSelector",
         "end": "xpath_end_calc",
         "endOffset": "offset_end",
-        "extract_id": false,
         "start": "xpath_start_calc",
         "startOffset": "offset_start"
     },

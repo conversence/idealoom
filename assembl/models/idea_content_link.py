@@ -266,7 +266,7 @@ class Extract(IdeaContentPositiveLink):
 
     def fragements_as_web_annotatation(self):
         return sum((tfi.as_web_annotation()
-                    for tfi in  self.text_fragment_identifiers), [])
+                    for tfi in  self.selectors), [])
 
     def extract_graph_json(self):
         return {
@@ -389,7 +389,7 @@ class Extract(IdeaContentPositiveLink):
 
     @property
     def quote(self):
-        return ' '.join((tf.body for tf in self.text_fragment_identifiers if tf.body))
+        return ' '.join((tf.body for tf in self.selectors if getattr(tf, 'body', None)))
 
     def _infer_text_fragment_inner(self, title, body, post_id):
         # dead code? If not needs to be refactored with langstrings
@@ -493,27 +493,68 @@ class IdeaThreadContextBreakLink(IdeaContentNegativeLink):
     }
 
 
-class TextFragmentIdentifier(DiscussionBoundBase):
-    __tablename__ = 'text_fragment_identifier'
-    __external_typename = "FragmentSelector"
-    rdf_class = OA.FragmentSelector
-
+class AnnotationSelector(DiscussionBoundBase):
+    __tablename__ = 'annotation_selector'
     id = Column(Integer, primary_key=True,
                 info={'rdf': QuadMapPatternS(None, ASSEMBL.db_id)})
     extract_id = Column(Integer, ForeignKey(
         Extract.id, ondelete="CASCADE"), nullable=False, index=True)
+    type = Column(String(60))
+    refines_id = Column(Integer, ForeignKey(id, ondelete="CASCADE"))
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'AbstractSelector',
+        'polymorphic_on': type,
+        'with_polymorphic': '*'
+    }
+
+    extract = relationship(Extract, backref=backref(
+        'selectors', cascade="all, delete-orphan"))
+
+    refined_by = relationship(
+        "AnnotationSelector",
+        backref=backref('refines', remote_side=[id]),
+        cascade="all, delete-orphan")
+
+    def get_discussion_id(self):
+        extract = self.extract or Extract.get(self.extract_id)
+        return extract.get_discussion_id()
+
+    @classmethod
+    def get_discussion_conditions(cls, discussion_id, alias_maker=None):
+        return ((cls.extract_id == Extract.id),
+                (Extract.discussion_id == discussion_id))
+
+    discussion = relationship(
+        Discussion, viewonly=True, uselist=False, secondary=Extract.__table__,
+        info={'rdf': QuadMapPatternS(None, ASSEMBL.in_conversation)})
+
+    crud_permissions = CrudPermissions(
+            P_ADD_EXTRACT, P_READ, P_EDIT_EXTRACT, P_EDIT_EXTRACT,
+            P_EDIT_MY_EXTRACT, P_EDIT_MY_EXTRACT)
+
+
+class TextFragmentIdentifier(AnnotationSelector):
+    __tablename__ = 'text_fragment_identifier'
+    __external_typename = "FragmentSelector"
+    rdf_class = OA.FragmentSelector
+
+    id = Column(Integer,
+                ForeignKey(
+                    AnnotationSelector.id,
+                    ondelete='CASCADE',
+                    onupdate='CASCADE'),
+                primary_key=True,
+                info={'rdf': QuadMapPatternS(None, ASSEMBL.db_id)})
     xpath_start = Column(String)
     offset_start = Column(Integer)
     xpath_end = Column(String)
     offset_end = Column(Integer)
     body = Column(UnicodeText)
-    extract = relationship(Extract, backref=backref(
-        'text_fragment_identifiers',
-        # TODO: Better ordering based on xpath_start, offset.
-        # But xpath_start should be the same in most cases.
-        order_by="TextFragmentIdentifier.offset_start",
-        cascade="all, delete-orphan"))
 
+    __mapper_args__ = {
+        'polymorphic_identity': 'AnnotatorRange'
+    }
 
     @classmethod
     def generate_post_xpath(cls, post, prefix=''):
@@ -628,20 +669,3 @@ class TextFragmentIdentifier(DiscussionBoundBase):
             except:
                 pass
         return None
-
-    def get_discussion_id(self):
-        extract = self.extract or Extract.get(self.extract_id)
-        return extract.get_discussion_id()
-
-    @classmethod
-    def get_discussion_conditions(cls, discussion_id, alias_maker=None):
-        return ((cls.extract_id == Extract.id),
-                (Extract.discussion_id == discussion_id))
-
-    discussion = relationship(
-        Discussion, viewonly=True, uselist=False, secondary=Extract.__table__,
-        info={'rdf': QuadMapPatternS(None, ASSEMBL.in_conversation)})
-
-    crud_permissions = CrudPermissions(
-            P_ADD_EXTRACT, P_READ, P_EDIT_EXTRACT, P_EDIT_EXTRACT,
-            P_EDIT_MY_EXTRACT, P_EDIT_MY_EXTRACT)
