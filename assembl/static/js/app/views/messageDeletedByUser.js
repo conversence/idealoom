@@ -75,6 +75,12 @@ var MessageDeletedByUserView = LoaderView.extend({
     this.showChildView('name', agentNameView);
   },
 
+  guardedRender: function(){
+    if(!this.isDestroyed()) {
+      this.render();
+    }
+  },
+
   onRender: function(){
     this.$el.attr("id", "message-" + this.model.get('@id'));
     
