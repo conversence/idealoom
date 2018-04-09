@@ -39,11 +39,12 @@ def upgrade(pyramid_env):
             "annotation_selector", ["id"], ["id"],
             onupdate="CASCADE", ondelete="CASCADE")
         op.drop_column('text_fragment_identifier', 'extract_id')
-        from assembl import models as m
-        db = m.get_session_maker()()
-        with transaction.manager:
-            (maxid,) = db.query('max(id) from annotation_selector').first()
-            db.query("setval('annotation_selector_id_seq'::regclass, %d)" % (maxid,))
+
+    from assembl import models as m
+    db = m.get_session_maker()()
+    with transaction.manager:
+        (maxid,) = db.query('max(id) from annotation_selector').first()
+        db.query("setval('annotation_selector_id_seq'::regclass, %d)" % (maxid,))
 
 
 def downgrade(pyramid_env):
