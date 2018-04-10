@@ -44,7 +44,7 @@ def upgrade(pyramid_env):
     db = m.get_session_maker()()
     with transaction.manager:
         (maxid,) = db.query('max(id) from annotation_selector').first()
-        db.query("setval('annotation_selector_id_seq'::regclass, %d)" % (maxid,))
+        db.query("setval('annotation_selector_id_seq'::regclass, %d)" % (maxid,)).first()
 
 
 def downgrade(pyramid_env):
