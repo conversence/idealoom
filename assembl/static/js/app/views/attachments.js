@@ -299,7 +299,7 @@ var AttachmentFileEditableViewIdeaPanel = AttachmentFileEditableView.extend({
    */
   onChange: function(e){
     var domObject = $(".content-ideapanel");
-    this.$el.find(".embedded-image-preview").load(function() {
+    this.$el.find(".embedded-image-preview").on("load", function() {
       var contentPanelPosition = $(window).height() / 3;
       var imgHeight = $(this).height();
       if(imgHeight > contentPanelPosition){

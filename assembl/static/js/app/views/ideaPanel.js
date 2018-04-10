@@ -191,7 +191,7 @@ var IdeaPanel = BasePanel.extend({
         this._calculateContentHeight(domObject, imageDomObject);
       }
       else {
-        this.$el.find(".embedded-image-preview").load(function() {
+        this.$el.find(".embedded-image-preview").on("load", function() {
           that.attachmentLoaded = true;
           that._calculateContentHeight(domObject, $(this));
         });
