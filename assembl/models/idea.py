@@ -14,7 +14,7 @@ from ..lib.clean_input import sanitize_text
 from rdflib import URIRef
 from sqlalchemy.orm import (
     relationship, backref, aliased, contains_eager, joinedload, deferred,
-    column_property, with_polymorphic)
+    column_property, with_polymorphic, remote, foreign)
 from sqlalchemy.orm.attributes import NO_VALUE
 from sqlalchemy.sql import text, column
 from sqlalchemy.sql.expression import union, bindparam, literal_column
@@ -45,7 +45,7 @@ from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..auth import (
     CrudPermissions, P_READ, P_ADMIN_DISC, P_EDIT_IDEA,
     P_ADD_IDEA)
-from .langstrings import LangString
+from .langstrings import LangString, LangStringEntry
 from ..semantic.namespaces import (
     SIOC, IDEA, ASSEMBL, DCTERMS, QUADNAMES, FOAF, RDF, VirtRDF)
 from ..lib.sqla import (CrudOperation, get_model_watcher)
@@ -227,6 +227,20 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
             'ideas_ts', order_by="Idea.creation_date",
             cascade="all, delete-orphan")
     )
+
+    title_entries = relationship(
+        LangStringEntry, viewonly=True, uselist=True,
+        primaryjoin=foreign(title_id)==remote(LangStringEntry.langstring_id))
+
+    description_entries = relationship(
+        LangStringEntry, viewonly=True, uselist=True,
+        primaryjoin=foreign(description_id)==remote(
+            LangStringEntry.langstring_id))
+
+    links = relationship(
+        "IdeaLink", viewonly=True, uselist=True,
+        primaryjoin="""(IdeaLink.tombstone_date == None) & (
+            (IdeaLink.source_id==Idea.id)|(IdeaLink.target_id==Idea.id))""")
 
     #widget_id = deferred(Column(Integer, ForeignKey('widget.id')))
     #widget = relationship("Widget", backref=backref('ideas', order_by=creation_date))
