@@ -17,6 +17,7 @@ from abc import abstractmethod, ABCMeta
 
 from sqlalchemy import and_
 from sqlalchemy.ext.declarative import DeclarativeMeta
+from future.utils import with_metaclass
 
 from ..lib.abc import abstractclassmethod
 from ..lib.sqla import (
@@ -24,8 +25,11 @@ from ..lib.sqla import (
     get_named_object, get_database_id, Tombstone, CrudOperation)
 from ..lib.history_mixin import (
     TombstonableMixin, HistoryMixin, OriginMixin, HistoryMixinWithOrigin,
-    TombstonableOriginMixin)
-from future.utils import with_metaclass
+    TombstonableOriginMixin, reln_in_history, as_time_proxy)
+
+
+Base.reln_in_history = reln_in_history
+Base.as_time_proxy = as_time_proxy
 
 
 class DeclarativeAbstractMeta(DeclarativeMeta, ABCMeta):

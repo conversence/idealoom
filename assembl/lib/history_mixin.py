@@ -9,6 +9,10 @@ from sqlalchemy import (
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.sql.expression import join, nullslast
 from sqlalchemy.orm import relationship, Query
+from sqlalchemy.sql.elements import (
+    BinaryExpression, BooleanClauseList, operators, True_)
+from sqlalchemy.sql.visitors import ReplacingCloningVisitor
+from sqlalchemy.ext.associationproxy import AssociationProxy
 
 from .sqla import DuplicateHandling
 from ..semantic.virtuoso_mapping import QuadMapPatternS
@@ -261,3 +265,134 @@ class HistoryMixinWithOrigin(HistoryMixin, OriginMixin):
         """
         return super(HistoryMixinWithOrigin, cls).version_at_time_q(
             base_id, timestamp, db).filter(cls.creation_date <= timestamp)
+
+
+class Dehistoricizer(ReplacingCloningVisitor):
+    """remove refs to tombstone_date in an expression"""
+    def __init__(self, *target_classes):
+        self.tscols = set([
+            target_cls.__mapper__.columns["tombstone_date"]
+            for target_cls in target_classes
+            if issubclass(target_cls, HistoryMixin)])
+
+    def replace(self, elem):
+        if isinstance(elem, BinaryExpression):
+            if elem.left in self.tscols or elem.right in self.tscols:
+                return True_()
+            return elem
+        elif isinstance(elem, BooleanClauseList):
+            clauses = [self.replace(c) for c in elem.clauses if not isinstance(c, True_)]
+            assert len(clauses)
+            if len(clauses) == 1:
+                return clauses[0]
+            elif elem.operator == operators.or_:
+                return BooleanClauseList.or_(*clauses)
+            elif elem.operator == operators.and_:
+                return BooleanClauseList.and_(*clauses)
+            raise RuntimeError(elem.operator)
+        return elem
+
+
+def reln_in_history(self, name, timestamp):
+    """read a relation at a given timestamp
+
+    monkey-patched as a method of Base in modules.__init__"""
+    my_cls = self.__class__
+    reln = my_cls.__mapper__.relationships.get(name, None)
+    if not reln:
+        # AssociationProxy
+        raise NotImplementedError()
+    if reln.secondary:
+        raise NotImplementedError()
+    target_cls = reln.mapper.class_
+    if not (issubclass(target_cls, (OriginMixin, TombstonableMixin)) or
+            isinstance(my_cls, (OriginMixin, TombstonableMixin))):
+        return getattr(self, name)
+    h = Dehistoricizer(target_cls, my_cls)
+    join_condition = h.traverse(reln.primaryjoin)
+    if isinstance(self, HistoryMixin):
+        filter = my_cls.base_id == self.base_id
+    else:
+        filter = my_cls.id == self.id
+    if isinstance(self, TombstonableMixin):
+        filter = filter & (
+            (my_cls.tombstone_date == None) |
+            (my_cls.tombstone_date > timestamp))
+    if isinstance(self, OriginMixin):
+        filter = filter & (my_cls.creation_date <= timestamp)
+    if issubclass(target_cls, TombstonableMixin):
+        filter = filter & (
+            (target_cls.tombstone_date == None) |
+            (target_cls.tombstone_date > timestamp))
+    if issubclass(target_cls, OriginMixin):
+        filter = filter & (target_cls.creation_date <= timestamp)
+    if issubclass(target_cls, HistoryMixin):
+        results = self.db.query(target_cls).distinct(target_cls.base_id).join(
+            my_cls, join_condition).filter(filter).order_by(
+            target_cls.base_id, nullslast(asc(target_cls.tombstone_date))).all()
+    else:
+        results = self.db.query(target_cls).join(
+            my_cls, join_condition).filter(filter).all()
+    if reln.uselist:
+        return results
+    else:
+        assert len(results) <= 1
+        if results:
+            return results[0]
+
+
+class HistoricalProxy(object):
+    """A proxy for base objects, that will wrap an object and related objects
+        with their version at a given time."""
+    def __init__(self, target, timestamp, assume_in_time=False):
+        ""
+        # We expect the target to already belong to the right period
+        # avoid setattr
+        self.__dict__["_target"] = target
+        self.__dict__["_timestamp"] = timestamp
+
+    @classmethod
+    def proxy_instance(cls, instance, timestamp, assume_in_time=False):
+        if (not assume_in_time) and isinstance(
+                instance, (HistoryMixin, OriginMixin)):
+            instance = instance.version_at_time(timestamp)
+            if instance is None:
+                return None
+        return cls(instance, timestamp)
+
+    def _wrap(self, value, assume_in_time=False):
+        from assembl.models import Base
+        if isinstance(value, Base):
+            return self.proxy_instance(value, self._timestamp, assume_in_time)
+        elif isinstance(value, (list, tuple)):
+            return list(filter(
+                lambda x: x is not None,
+                [self._wrap(x, assume_in_time) for x in value]))
+        elif isinstance(value, dict):
+            return {k: self._wrap(v, assume_in_time) for (k, v) in value.iteritems()}
+        elif isinstance(value, Query):
+            # punt. I think I could alter the query, but it requires looking into entities
+            raise NotImplementedError()
+        return value
+
+    def __getattr__(self, name):
+        if (name in self._target.__class__.__mapper__.relationships or
+                isinstance(getattr(self._target.__class__, name),
+                           AssociationProxy)):
+            return self._wrap(
+                self._target.reln_in_history(name, self._timestamp), True)
+        return self._wrap(getattr(self._target, name))
+
+    def __setattr__(self, name, value):
+        raise RuntimeError("HistoricalProxies are read-only")
+
+    def __call__(self, name, *args, **kwargs):
+        return self._wrap(self._target.__call__(name, *args, **kwargs))
+
+
+def as_time_proxy(self, timestamp, assume_in_time=False):
+    if not assume_in_time and isinstance(
+            self, (HistoryMixin, OriginMixin)):
+        self = self.version_at_time(timestamp)
+    if self is not None:
+        return HistoricalProxy(self, timestamp)
