@@ -60,7 +60,7 @@ from assembl.auth.util import get_permissions
 from assembl.models import (Discussion, Permission)
 from assembl.models.auth import create_default_permissions
 from ..traversal import InstanceContext, ClassContext
-from . import (JSON_HEADER, FORM_HEADER, CreationResponse)
+from . import (JSON_HEADER, FORM_HEADER, CreationResponse, instance_view)
 from ..api.discussion import etalab_discussions, API_ETALAB_DISCUSSIONS_PREFIX
 
 
@@ -199,6 +199,12 @@ def get_token(request):
         user_ids = "\n".join(user_ids)
         data["user_ids"] = obfuscator.obfuscate(user_ids).split("\n")
     return data
+
+
+# Have the basic version come before the jsonld one
+view_config(context=InstanceContext, renderer='json',
+            ctx_instance_class=Discussion, request_method='GET',
+            accept="application/json")(instance_view)
 
 
 @view_config(context=InstanceContext, name="jsonld",
