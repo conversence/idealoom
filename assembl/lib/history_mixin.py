@@ -5,7 +5,7 @@ from datetime import datetime
 
 from sqlalchemy import (
     Column, DateTime, Integer, UniqueConstraint, event, Table, ForeignKey,
-    Sequence, Index, asc)
+    Sequence, Index, asc, desc)
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.sql.expression import join, nullslast
 from sqlalchemy.orm import relationship, Query
@@ -226,6 +226,28 @@ class HistoryMixin(TombstonableMixin):
         """
         return self.version_at_time_q(self.base_id, timestamp, self.db).first()
 
+    def start_dates(self):
+        cls = self.__class__
+        dates = self.db.query(cls.tombstone_date
+            ).filter(cls.base_id==self.base_id
+            ).order_by(asc(cls.tombstone_date)).all()
+        dates = [x for (x,) in dates][:-1]
+        return [None] + dates
+
+    def valid_from(self):
+        cls = self.__class__
+        ts_col = cls.tombstone_date
+        if self.tombstone_date:
+            cond = cls.tombstone_date < self.tombstone_date
+        else:
+            cond = cls.tombstone_date != None
+        result = self.db.query(cls.tombstone_date).filter(
+            cond, cls.base_id == self.base_id
+            ).order_by(desc(cls.tombstone_date)).first()
+        if result:
+            return result[0]
+        # returns None to say the beginning of time
+
     def copy(self, tombstone=None, db=None, **kwargs):
         """Clone object, optionally as tombstone (aka snapshot)
         reuse base_id. Redefine in subclasses to define arguments"""
@@ -249,6 +271,9 @@ class OriginMixin(object):
         if self.creation_date <= timestamp:
             return self
 
+    def valid_from(self):
+        return self.creation_date
+
 
 class TombstonableOriginMixin(TombstonableMixin, OriginMixin):
     def version_at_time(self, timestamp):
@@ -256,6 +281,9 @@ class TombstonableOriginMixin(TombstonableMixin, OriginMixin):
                 self.tombstone_date is None or
                 self.tombstone_date > timestamp):
             return self
+
+    def valid_from(self):
+        return self.creation_date
 
 
 class HistoryMixinWithOrigin(HistoryMixin, OriginMixin):
@@ -265,6 +293,14 @@ class HistoryMixinWithOrigin(HistoryMixin, OriginMixin):
         """
         return super(HistoryMixinWithOrigin, cls).version_at_time_q(
             base_id, timestamp, db).filter(cls.creation_date <= timestamp)
+
+    def valid_from(self):
+        ts = super(HistoryMixinWithOrigin, self).valid_from()
+        return self.creation_date if ts is None else ts
+
+    def start_dates(self):
+        dates = super(HistoryMixinWithOrigin, self).start_dates()
+        return [self.creation_date] + dates[1:]
 
 
 class Dehistoricizer(ReplacingCloningVisitor):

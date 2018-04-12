@@ -47,6 +47,7 @@ from pyramid.httpexceptions import (
     HTTPBadRequest, HTTPNotImplemented, HTTPUnauthorized, HTTPNotFound)
 from pyramid.security import authenticated_userid, Everyone
 from pyramid.response import Response
+from pyramid.renderers import render
 from pyramid.settings import asbool
 from simplejson import dumps
 
@@ -157,7 +158,13 @@ def instance_view(request):
         raise HTTPUnauthorized()
     view = ctx.get_default_view() or 'default'
     view = request.GET.get('view', view)
-    return instance.generic_json(view, user_id, permissions)
+    json = instance.generic_json(view, user_id, permissions)
+    json = render("json", json, request)
+    tg_link = request.path_url+"/timegate"
+    resp = Response(json, content_type="application/json", charset="utf-8")
+    resp.headerlist.append(
+        ("Link", '<%s/timegate>; rel="timegate"' % request.path_url))
+    return resp
 
 
 @view_config(context=CollectionContext, renderer='json',
