@@ -3,6 +3,7 @@ from builtins import str
 from builtins import object
 from datetime import datetime
 
+from future.utils import string_types
 from sqlalchemy import (
     Column, DateTime, Integer, UniqueConstraint, event, Table, ForeignKey,
     Sequence, Index, asc, desc)
@@ -401,11 +402,13 @@ class HistoricalProxy(object):
         if isinstance(value, Base):
             return self.proxy_instance(value, self._timestamp, assume_in_time)
         elif isinstance(value, (list, tuple)):
-            return list(filter(
-                lambda x: x is not None,
-                [self._wrap(x, assume_in_time) for x in value]))
+            return [
+                None if x is None else self._wrap(x, assume_in_time) for x in value]
         elif isinstance(value, dict):
-            return {k: self._wrap(v, assume_in_time) for (k, v) in value.iteritems()}
+            return {k: self._wrap(v, assume_in_time) for (k, v) in value.items()}
+        # elif isinstance(value, string_types):
+        #     if value.startswith("local:") and "timegate" not in value:
+        #         return value + "/timegate?ts=" + self._timestamp.isoformat()
         elif isinstance(value, Query):
             # punt. I think I could alter the query, but it requires looking into entities
             raise NotImplementedError()
