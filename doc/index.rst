@@ -14,6 +14,7 @@ Installation and administration
    INSTALL
    configuration
    backups
+   python_requirements
 
 Stack and architecture
 ----------------------
