@@ -71,7 +71,7 @@ _uses_apache = false
 # We now use systemd instead of a global supervisor
 _uses_global_supervisor = false
 _uses_memcache = true
-_uses_ngnix = true
+_uses_nginx = true
 _uses_uwsgi = true
 _gitrepo = https://github.com/conversence/idealoom.git
 _gitbranch = master

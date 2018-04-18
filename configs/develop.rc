@@ -59,7 +59,7 @@ circus__use_statsd = false
 # UNIQUE_PER_SERVER
 circus__webapp_port = 8110
 
-_uses_ngnix = false
+_uses_nginx = false
 _uses_uwsgi = false
 _is_production_env = false
 _wsginame = dev.wsgi
