@@ -146,8 +146,6 @@ def instance_view_jsonld(request):
     return aqsm.quads_to_jsonld(triples)
 
 
-@view_config(context=InstanceContext, renderer='json',
-             request_method='GET', accept="application/json")
 def instance_view(request):
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
@@ -158,7 +156,13 @@ def instance_view(request):
         raise HTTPUnauthorized()
     view = ctx.get_default_view() or 'default'
     view = request.GET.get('view', view)
-    json = instance.generic_json(view, user_id, permissions)
+    return instance.generic_json(view, user_id, permissions)
+
+
+@view_config(context=InstanceContext, renderer='json',
+             request_method='GET', accept="application/json")
+def instance_view_with_memento(request):
+    json = instance_view(request)
     json = render("json", json, request)
     tg_link = request.path_url+"/timegate"
     resp = Response(json, content_type="application/json", charset="utf-8")
