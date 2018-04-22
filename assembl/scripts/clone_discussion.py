@@ -231,7 +231,8 @@ def get_mapper_info(mapper):
     if mapper not in class_info:
         pk_keys_cols = set([c for c in mapper.primary_key])
         direct_reln = {r for r in mapper.relationships
-                       if r.direction.name == 'MANYTOONE'}
+                       if r.direction.name == 'MANYTOONE'
+                       and r.viewonly == False}
         direct_reln_cols = set(itertools.chain(
             *[r.local_columns for r in direct_reln]))
         avoid_columns = pk_keys_cols.union(direct_reln_cols)
