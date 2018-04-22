@@ -5,6 +5,9 @@
 {% else %}
 <p>{{idea.short_title}}</p>
 {% endif %}
+{% if idea_assoc and idea_assoc.include_body %}
+<div class="definition" style="font-size:smaller;">{{idea.definition|safe}}</div>
+{% endif %}
 <p><i>
 {% for contributor in idea.latest.get_synthesis_contributors(False) %}{% if loop.first %}
 {{ gettext("By") }}

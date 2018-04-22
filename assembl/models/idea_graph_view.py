@@ -13,6 +13,7 @@ from sqlalchemy import (
     String,
     UnicodeText,
     DateTime,
+    Boolean,
     ForeignKey,
     UniqueConstraint,
 )
@@ -111,6 +112,7 @@ class SubGraphIdeaAssociation(DiscussionBoundBase):
         nullable=False, index=True)
     # reference to the "Idea" object for proxying
     idea = relationship("Idea", backref="in_subgraph_assoc")
+    include_body = Column(Boolean, server_default='false')
 
     @classmethod
     def special_quad_patterns(cls, alias_maker, discussion_id):
@@ -267,6 +269,9 @@ class ExplicitSubGraphView(IdeaGraphView):
             SubGraphIdeaLinkAssociation
             ).filter_by(sub_graph_id=self.id).all()
 
+    def get_idealink_assocs(self):
+        return self.idealink_assocs
+
     def get_ideas(self):
         # more efficient than the association_proxy
         return self.db.query(Idea).join(
@@ -275,38 +280,48 @@ class ExplicitSubGraphView(IdeaGraphView):
 
     def visit_ideas_depth_first(self, idea_visitor):
         # prefetch
-        ideas_by_id = {idea.id: idea for idea in self.get_ideas()}
+        idea_assocs_by_idea_id = {
+            link.idea_id: link for link in self.idea_assocs}
         children_links = defaultdict(list)
-        for link in self.get_idea_links():
-            children_links[link.source_id].append(link)
-        for links in children_links.values():
-            links.sort(key=lambda l: l.order)
-        root = self.discussion.root_idea
-        root = ideas_by_id.get(root.base_id, root)
-        return self._visit_ideas_depth_first(
-            root.id, ideas_by_id, children_links, idea_visitor, set(), 0, None)
+        with self.db.no_autoflush:
+            idealink_assocs = self.get_idealink_assocs()
+            for link_assoc in idealink_assocs:
+                children_links[link_assoc.idea_link.source_id].append(link_assoc)
+            for assocs in children_links.values():
+                assocs.sort(key=lambda l: l.idea_link.order)
+            root = self.discussion.root_idea
+            root_assoc = idea_assocs_by_idea_id.get(root.base_id, None)
+            root_id = root_assoc.idea_id if root_assoc else root.id
+            result = self._visit_ideas_depth_first(
+                root_id, idea_assocs_by_idea_id, children_links, idea_visitor,
+                set(), 0, None, None)
+            # special case for autocreated links
+            for link_assoc in idealink_assocs:
+                self.db.expunge(link_assoc)
+        return result
 
     def _visit_ideas_depth_first(
-            self, idea_id, ideas_by_id, children_links, idea_visitor,
-            visited, level, prev_result):
+            self, idea_id, idea_assocs_by_idea_id, children_links, idea_visitor,
+            visited, level, prev_result, parent_link_assoc):
         result = None
         if idea_id in visited:
             # not necessary in a tree, but let's start to think graph.
             return False
-        idea = ideas_by_id.get(idea_id, None)
-        if idea:
-            result = idea_visitor.visit_idea(idea, level, prev_result)
+        assoc = idea_assocs_by_idea_id.get(idea_id, None)
+        if assoc:
+            result = idea_visitor.visit_idea(
+                assoc, level, prev_result, parent_link_assoc)
         visited.add(idea_id)
         child_results = []
         if result is not IdeaVisitor.CUT_VISIT:
-            for link in children_links[idea_id]:
-                child_id = link.target_id
+            for link_assoc in children_links[idea_id]:
+                child_id = link_assoc.idea_link.target_id
                 r = self._visit_ideas_depth_first(
-                    child_id, ideas_by_id, children_links, idea_visitor,
-                    visited, level+1, result)
+                    child_id, idea_assocs_by_idea_id, children_links,
+                    idea_visitor, visited, level+1, result, link_assoc)
                 if r:
                     child_results.append((child_id, r))
-        return idea_visitor.end_visit(idea, level, result, child_results)
+        return idea_visitor.end_visit(assoc, level, result, child_results, parent_link_assoc)
 
     @classmethod
     def extra_collections(cls):
@@ -516,6 +531,15 @@ class Synthesis(ExplicitSubGraphView):
         else:
             return super(Synthesis, self).get_idea_links()
 
+    def get_idealink_assocs(self):
+        if self.is_next_synthesis:
+            return [
+                SubGraphIdeaLinkAssociation(
+                    idea_link=link)
+                for link in Idea.get_all_idea_links(self.discussion_id)]
+        else:
+            return super(Synthesis, self).get_idealink_assocs()
+
     @property
     def is_next_synthesis(self):
         return self.discussion.get_next_synthesis() == self
@@ -543,16 +567,18 @@ class SynthesisHtmlizationVisitor(IdeaVisitor):
         self.synthesis_template = jinja_env.get_template('synthesis.jinja2')
         self.graph_view = graph_view
 
-    def visit_idea(self, idea, level, prev_result):
+    def visit_idea(self, idea_assoc, level, prev_result, parent_link_assoc):
         return True
 
-    def end_visit(self, idea, level, prev_result, child_results):
+    def end_visit(self, idea_assoc, level, prev_result, child_results, parent_link_assoc):
         if prev_result is not True:
-            idea = None
-        if idea or child_results:
+            idea_assoc = None
+        if idea_assoc or child_results:
             results = [r for (c, r) in child_results]
+            idea = idea_assoc.idea if idea_assoc else None
             self.result = self.idea_template.render(
-                idea=idea, children=results, level=level)
+                idea=idea, children=results, level=level,
+                idea_assoc=idea_assoc, parent_link_assoc=parent_link_assoc)
             return self.result
 
     def as_html(self):
