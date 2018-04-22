@@ -97,3 +97,14 @@ def remove_idea_from_synthesis(request):
     return {
         "@tombstone": request.url
     }
+
+
+@view_config(context=InstanceContext, request_method='GET',
+             ctx_instance_class=Synthesis, permission=P_READ,
+             accept="text/html", name="preview")
+def html_export(request):
+    from pyramid_jinja2 import IJinja2Environment
+    jinja_env = request.registry.queryUtility(
+        IJinja2Environment, name='.jinja2')
+    return Response(request.context._instance.as_html(jinja_env),
+                    content_type='text/html', charset="utf-8")
