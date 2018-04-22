@@ -510,6 +510,12 @@ class Synthesis(ExplicitSubGraphView):
         self.visit_ideas_depth_first(v)
         return v.as_html()
 
+    def get_idea_links(self):
+        if self.is_next_synthesis:
+            return Idea.get_all_idea_links(self.discussion_id)
+        else:
+            return super(Synthesis, self).get_idea_links()
+
     @property
     def is_next_synthesis(self):
         return self.discussion.get_next_synthesis() == self
