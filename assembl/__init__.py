@@ -116,9 +116,6 @@ def main(global_config, **settings):
     config.include('pyramid_jinja2')
     config.add_jinja2_extension('jinja2.ext.i18n')
 
-    # Mailer
-    config.include('pyramid_mailer')
-
     config.include('.view_def')
 
     wsgi_app = config.make_wsgi_app()
