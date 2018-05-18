@@ -561,7 +561,10 @@ def update_pip_requirements(force_reinstall=False):
     """
     print(cyan('Updating requirements using PIP'))
     venvcmd('pip install -U "pip>=6" setuptools wheel')
-    req_file = "requirements_%d.txt" % sys.version_info.major
+    python_version = venvcmd("python --version")
+    major = re.match(r"Python (\d)\.", python_version)
+    major = major.group(1) if major else 2
+    req_file = "requirements_%s.txt" % major
     force_flag = "--ignore-installed" if force_reinstall else ""
     base_cmd = "%s/bin/pip install %s -r %s" % (
         env['venvpath'], force_flag, env['projectpath'])
