@@ -8,4 +8,5 @@ Fabric==1.14.0
 imaplib2==2.45.0
 ipython==5.6.0 # rq.filter: <6
 pycryptopp==0.7.1.869544967005693312591928092448767568728501330214
+python-openid==2.2.5
 python-saml==2.4.1

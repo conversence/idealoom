@@ -129,7 +129,6 @@ pytest-splinter==1.8.5
 pytest==3.5.1
 python-dateutil==2.7.2
 python-json-logger==0.1.8
-python-openid==2.2.5
 python-snappy==0.5.2
 pytz==2018.4
 PyYAML==3.12
