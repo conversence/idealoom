@@ -12,7 +12,7 @@ def logging_tween_factory(handler, registry):
             request.logger().info('response', status=response.status)
             return response
         except Exception as e:
-            request.logger().error("responseError", exc_info=sys.exc_info())
+            request.logger().error("responseError", exc_info=True)
             raise e
 
     return logging_tween

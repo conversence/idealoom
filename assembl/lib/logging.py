@@ -78,6 +78,8 @@ class ConsoleFormatter(structlog.stdlib.ProcessorFormatter):
             *args, **kwargs)
 
     def format(self, record):
+        if isinstance(getattr(record, 'exception', None), bytes):
+            record.exception = record.exception.decode('utf-8')
         return super(ConsoleFormatter, self).format(record)
 
 
