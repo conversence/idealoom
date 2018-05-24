@@ -16,7 +16,7 @@
     },
     "Update": {
         "when": "creation_date",
-        "who": "actor",
+        "who": "actor_dagent",
         "in_conversation": false
     },
     "ActionOnPost": {
@@ -116,7 +116,7 @@
         "@extends": "SPost",
         "reply_of": "parent",
         "id": "message_id",
-        "has_creator": "creator"
+        "has_creator": "creator_dagent"
     },
     "LocalPost": {
         "@extends": "Post"
@@ -204,7 +204,7 @@
         "idIdea": "idea",
         "idPost": "content",
         "created": "creation_date",
-        "idCreator": "creator"
+        "idCreator": "creator_dagent"
     },
     "IdeaContentPositiveLink": {
         "@extends": "IdeaContentLink"
@@ -232,7 +232,7 @@
     },
     "AbstractIdeaVote": {
         "subject_node": "idea",
-        "voter": true,
+        "voter": "voter_dagent",
         "widget": true,
         "voting_criterion": "criterion"
     },
@@ -263,7 +263,7 @@
     "LocalUserRole": {
         "@type": "'\"Role\"",
         "in_conversation": "discussion",
-        "function_of": "user",
+        "function_of": "dagent",
         "name": "&set_role_by_name"
     },
     "AbstractVoteSpecification": {

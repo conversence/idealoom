@@ -96,15 +96,15 @@ def synthesis_1(request, discussion, subidea_1, subidea_1_1, test_session):
 
 @pytest.fixture(scope="function")
 def extract_post_1_to_subidea_1_1(
-        request, participant2_user, reply_post_1,
+        request, participant2_dagent, reply_post_1,
         subidea_1_1, discussion, test_session):
     """ Links reply_post_1 to subidea_1_1 """
 
     from assembl.models import Extract
     e = Extract(
         annotation_text=u"body",
-        creator=participant2_user,
-        owner=participant2_user,
+        creator=participant2_dagent,
+        owner=participant2_dagent,
         content=reply_post_1,
         idea_id=subidea_1_1.id,  # strange bug: Using idea directly fails
         discussion=discussion)
@@ -124,7 +124,7 @@ def jack_layton_linked_discussion(
         request, test_session, jack_layton_mailbox, subidea_1, subidea_1_1,
         subidea_1_1_1, subidea_1_1_1_1, subidea_1_1_1_1_1, subidea_1_1_1_1_2,
         subidea_1_1_1_1_2_1, subidea_1_1_1_1_2_2, subidea_1_2, subidea_1_2_1,
-        admin_user):
+        admin_dagent):
     """A Discussion fixture with ideas and idea links"""
 
     jack_layton_mailbox.do_import_content(jack_layton_mailbox, True)
@@ -133,23 +133,23 @@ def jack_layton_linked_discussion(
     posts = test_session.query(Post).order_by(Post.creation_date).all()
     posts.insert(0, None)  # We are using 1-offset indices below.
     links = [
-        IdeaContentPositiveLink(idea=subidea_1, content=posts[1], creator=admin_user),
-        IdeaContentNegativeLink(idea=subidea_1, content=posts[5], creator=admin_user),
-        IdeaContentNegativeLink(idea=subidea_1, content=posts[16], creator=admin_user),
-        IdeaContentPositiveLink(idea=subidea_1_1, content=posts[6], creator=admin_user),
-        IdeaContentPositiveLink(idea=subidea_1_1_1, content=posts[18], creator=admin_user),
-        IdeaContentPositiveLink(idea=subidea_1_1_1_1, content=posts[8], creator=admin_user),
-        IdeaContentNegativeLink(idea=subidea_1_1_1_1, content=posts[16], creator=admin_user),
-        IdeaContentPositiveLink(idea=subidea_1_1_1_1_1, content=posts[18], creator=admin_user),
-        IdeaContentPositiveLink(idea=subidea_1_1_1_1_1, content=posts[15], creator=admin_user),
-        IdeaContentNegativeLink(idea=subidea_1_1_1_1_1, content=posts[16], creator=admin_user),
-        IdeaContentPositiveLink(idea=subidea_1_1_1_1_2, content=posts[19], creator=admin_user),
-        IdeaContentPositiveLink(idea=subidea_1_1_1_1_2_1, content=posts[19], creator=admin_user),
-        IdeaContentPositiveLink(idea=subidea_1_1_1_1_2_2, content=posts[20], creator=admin_user),
-        IdeaContentPositiveLink(idea=subidea_1_2, content=posts[4], creator=admin_user),
-        IdeaContentNegativeLink(idea=subidea_1_2, content=posts[16], creator=admin_user),
-        IdeaContentPositiveLink(idea=subidea_1_2_1, content=posts[4], creator=admin_user),
-        IdeaContentNegativeLink(idea=subidea_1_2_1, content=posts[16], creator=admin_user),
+        IdeaContentPositiveLink(idea=subidea_1, content=posts[1], creator=admin_dagent),
+        IdeaContentNegativeLink(idea=subidea_1, content=posts[5], creator=admin_dagent),
+        IdeaContentNegativeLink(idea=subidea_1, content=posts[16], creator=admin_dagent),
+        IdeaContentPositiveLink(idea=subidea_1_1, content=posts[6], creator=admin_dagent),
+        IdeaContentPositiveLink(idea=subidea_1_1_1, content=posts[18], creator=admin_dagent),
+        IdeaContentPositiveLink(idea=subidea_1_1_1_1, content=posts[8], creator=admin_dagent),
+        IdeaContentNegativeLink(idea=subidea_1_1_1_1, content=posts[16], creator=admin_dagent),
+        IdeaContentPositiveLink(idea=subidea_1_1_1_1_1, content=posts[18], creator=admin_dagent),
+        IdeaContentPositiveLink(idea=subidea_1_1_1_1_1, content=posts[15], creator=admin_dagent),
+        IdeaContentNegativeLink(idea=subidea_1_1_1_1_1, content=posts[16], creator=admin_dagent),
+        IdeaContentPositiveLink(idea=subidea_1_1_1_1_2, content=posts[19], creator=admin_dagent),
+        IdeaContentPositiveLink(idea=subidea_1_1_1_1_2_1, content=posts[19], creator=admin_dagent),
+        IdeaContentPositiveLink(idea=subidea_1_1_1_1_2_2, content=posts[20], creator=admin_dagent),
+        IdeaContentPositiveLink(idea=subidea_1_2, content=posts[4], creator=admin_dagent),
+        IdeaContentNegativeLink(idea=subidea_1_2, content=posts[16], creator=admin_dagent),
+        IdeaContentPositiveLink(idea=subidea_1_2_1, content=posts[4], creator=admin_dagent),
+        IdeaContentNegativeLink(idea=subidea_1_2_1, content=posts[16], creator=admin_dagent),
     ]
     for link in links:
         test_session.add(link)

@@ -45,7 +45,7 @@ def upgrade(pyramid_env):
         for (user_id, discussion_id) in db.query(
                 m.LocalUserRole.user_id, m.LocalUserRole.discussion_id).join(
                 m.Role).filter(m.Role.name == R_PARTICIPANT).distinct().all():
-            db.add(m.AgentStatusInDiscussion(
+            db.add(m.DiscussionAgent(
                 profile_id=user_id, discussion_id=discussion_id,
                 first_visit=now, last_visit=now, first_subscribed=now))
 

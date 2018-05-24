@@ -41,6 +41,7 @@ P_EXPORT_EXTERNAL_SOURCE = 'export_post'
 P_MODERATE = 'moderate_post'
 P_DISC_STATS = 'discussion_stats'
 P_OVERRIDE_SOCIAL_AUTOLOGIN = 'override_autologin'
+P_SEE_IDENTITY = 'see_identity'
 
 IF_OWNED = "IF_OWNED"
 
@@ -50,7 +51,7 @@ ASSEMBL_PERMISSIONS = set((
     P_EDIT_MY_EXTRACT, P_ADD_IDEA, P_EDIT_IDEA, P_EDIT_SYNTHESIS,
     P_SEND_SYNTHESIS, P_SELF_REGISTER, P_SELF_REGISTER_REQUEST,
     P_ADMIN_DISC, P_SYSADMIN, P_READ_PUBLIC_CIF, P_OVERRIDE_SOCIAL_AUTOLOGIN,
-    P_EXPORT_EXTERNAL_SOURCE, P_MODERATE, P_DISC_STATS))
+    P_EXPORT_EXTERNAL_SOURCE, P_MODERATE, P_DISC_STATS, P_SEE_IDENTITY))
 
 
 class CrudPermissions(object):
@@ -100,6 +101,37 @@ class CrudPermissions(object):
             return (self.delete, self.delete_owned)
         else:
             raise ValueError()
+
+
+class _EveryoneUAgentC(object):
+    """Something like an AgentProfile for Everyone"""
+    @property
+    def user(self):
+        return self
+
+    @property
+    def user_id(self):
+        return Everyone
+
+    @property
+    def isEveryone(self):
+        return True
+
+    def get_local_agent(self, discussion):
+        return None
+
+    def get_uagent(self, discussion):
+        return self
+
+    def get_permissions(self, discussion=None):
+        from .util import get_permissions
+        return get_permissions(Everyone, discussion.id if discussion else None)
+
+    def __bool__(self):
+        return False
+
+
+EveryoneUAgent = _EveryoneUAgentC()
 
 
 def includeme(config):

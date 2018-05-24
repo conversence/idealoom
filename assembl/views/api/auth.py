@@ -11,7 +11,7 @@ from sqlalchemy.orm import aliased, joinedload, joinedload_all, contains_eager
 
 from assembl.views.api import API_DISCUSSION_PREFIX
 from assembl.models import (
-    get_database_id, AgentProfile, User, Role, Permission, UserRole,
+    get_database_id, AgentProfile, DiscussionAgent, Role, Permission, UserRole,
     LocalUserRole, DiscussionPermission, Discussion)
 from assembl.auth import (
     P_READ, P_ADMIN_DISC, P_SYSADMIN, R_SYSADMIN, SYSTEM_ROLES)
@@ -49,28 +49,28 @@ roles = Service(
 
 global_roles_for_user = Service(
     name='generic_roles_for_user',
-    path=API_DISCUSSION_PREFIX + '/roles/globalfor/{user_id:.+}',
+    path=API_DISCUSSION_PREFIX + '/roles/globalfor/{agent_id:.+}',
     description="The universal roles of a given user",
     renderer='json', cors_policy=cors_policy
 )
 
 discussion_roles_for_user = Service(
     name='discussion_roles_for_user',
-    path=API_DISCUSSION_PREFIX + '/roles/localfor/{user_id:.+}',
+    path=API_DISCUSSION_PREFIX + '/roles/localfor/{agent_id:.+}',
     description="The per-discussion roles of a given user",
     renderer='json', cors_policy=cors_policy
 )
 
 permissions_for_user = Service(
     name='permissions_for_user',
-    path=API_DISCUSSION_PREFIX + '/permissions/u/{user_id:.+}',
+    path=API_DISCUSSION_PREFIX + '/permissions/u/{agent_id:.+}',
     description="The per-discussion permissions of a given user",
     renderer='json', cors_policy=cors_policy
 )
 
 user_has_permission = Service(
     name='user_has_permission',
-    path=API_DISCUSSION_PREFIX + '/permissions/{permission}/u/{user_id:.+}',
+    path=API_DISCUSSION_PREFIX + '/permissions/{permission}/u/{agent_id:.+}',
     description="Whether a given user has a specific permission",
     renderer='json'
 )
@@ -168,22 +168,23 @@ def put_roles(request):
 
 @global_roles_for_user.get(permission=P_READ)
 def get_global_roles_for_user(request):
-    user_id = request.matchdict['user_id']
-    user = User.get_instance(user_id)
-    if not user:
-        raise HTTPNotFound("User id %s does not exist" % (user_id,))
-    rolenames = User.default_db.query(Role.name).join(
-        UserRole).filter(UserRole.user == user)
+    agent_id = request.matchdict['agent_id']
+    dagent = DiscussionAgent.get_instance(agent_id)
+    if not dagent:
+        raise HTTPNotFound("User id %s does not exist" % (agent_id,))
+    rolenames = DiscussionAgent.default_db.query(Role.name).join(
+        UserRole).filter(UserRole.dagent == dagent)
     return [x[0] for x in rolenames]
 
 
 @global_roles_for_user.put(permission=P_SYSADMIN)
 def put_global_roles_for_user(request):
-    user_id = request.matchdict['user_id']
-    user = User.get_instance(user_id)
-    session = User.default_db
-    if not user:
-        raise HTTPNotFound("User id %d does not exist" % (user_id,))
+    agent_id = request.matchdict['agent_id']
+    dagent = DiscussionAgent.get_instance(agent_id)
+    user = dagent.agent_profile
+    session = DiscussionAgent.default_db
+    if not dagent:
+        raise HTTPNotFound("User id %d does not exist" % (agent_id,))
     try:
         data = json.loads(request.body)
     except Exception as e:
@@ -212,29 +213,34 @@ def put_global_roles_for_user(request):
 @discussion_roles_for_user.get(permission=P_READ)
 def get_discussion_roles_for_user(request):
     discussion = request.context
-    user_id = request.matchdict['user_id']
-    user = User.get_instance(user_id)
+    agent_id = request.matchdict['agent_id']
+    dagent = DiscussionAgent.get_instance(agent_id)
     session = Discussion.default_db
-    if not user:
-        raise HTTPNotFound("User id %d does not exist" % (user_id,))
+    if not dagent:
+        raise HTTPNotFound("User id %d does not exist" % (agent_id,))
     rolenames = session.query(Role.name).join(
-        LocalUserRole).filter(LocalUserRole.user == user,
-                              LocalUserRole.discussion_id == discussion.id)
+        LocalUserRole, DiscussionAgent).filter(
+            DiscussionAgent.id == dagent.id,
+            DiscussionAgent.discussion_id == discussion.id)
     return [x[0] for x in rolenames]
 
 
 @discussion_roles_for_user.put(permission=P_ADMIN_DISC)
 def put_discussion_roles_for_user(request):
     discussion = request.context
-    user_id = request.matchdict['user_id']
-    user = User.get_instance(user_id)
-    if not user:
-        raise HTTPNotFound("User id %d does not exist" % (user_id,))
+    session = discussion.db
+    agent_id = request.matchdict['agent_id']
+    dagent = DiscussionAgent.get_instance(agent_id)
+    if not dagent:
+        raise HTTPNotFound("User id %d does not exist" % (agent_id,))
+    dagent = dagent.get_local_agent(discussion)
+    if not dagent:
+        dagent = DiscussionAgent(discussion=discussion, profile=dagent)
+        session.add(dagent)
     try:
         data = json.loads(request.body)
     except Exception as e:
         raise HTTPBadRequest("Malformed Json")
-    session = Discussion.default_db
     if not isinstance(data, list):
         raise HTTPBadRequest("Not a list")
     if data and frozenset((type(x) for x in data)) != frozenset((str,)):
@@ -245,14 +251,14 @@ def put_discussion_roles_for_user(request):
         raise HTTPBadRequest("Not valid roles: %s" % (repr(
             data - set((p.name for p in roles))),))
     known_lu_roles = session.query(LocalUserRole).join(Role).filter(
-        user=user, discussion=discussion).all()
+        dagent=dagent, discussion=discussion).all()
     lur_by_role = {lur.role.name: lur for lur in known_lu_roles}
     known_roles = set(lur_by_role.keys())
     for role in known_roles - roles:
         session.query.delete(lur_by_role[role])
     for role in roles - known_roles:
         session.add(LocalUserRole(
-            user=user, role=role, discussion=discussion))
+            dagent=dagent, role=role, discussion=discussion))
     return {"added": list(roles - known_roles),
             "removed": list(known_roles - roles)}
 
@@ -265,20 +271,20 @@ def get_permissions_for_user(request):
 @user_has_permission.get()
 def get_user_has_permission(request):
     discussion = request.context
-    user_id = request.matchdict['user_id']
+    agent_id = request.matchdict['agent_id']
     permission = request.matchdict['permission']
-    if user_id not in (Authenticated, Everyone):
-        user = User.get_instance(user_id)
-        if not user:
-            raise HTTPNotFound("User id %s does not exist" % (user_id,))
-        user_id = user.id
-    return a_user_has_permission(discussion.id, user_id, permission)
+    if agent_id not in (Authenticated, Everyone):
+        dagent = DiscussionAgent.get_instance(agent_id)
+        if not dagent:
+            raise HTTPNotFound("User id %s does not exist" % (agent_id,))
+    return a_user_has_permission(discussion.id, dagent.user_id, permission)
 
 
 @users_with_permission.get()
 def get_user_has_permission(request):
     discussion = request.context
     permission = request.matchdict['permission']
+    # TODODA...
     return a_users_with_permission(discussion.id, permission)
 
 

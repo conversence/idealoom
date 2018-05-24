@@ -31,7 +31,7 @@ from .discussion import Discussion
 from .idea import Idea
 from .generic import Content
 from .post import Post
-from .auth import AgentProfile
+from .auth import AgentProfile, DiscussionAgent
 from ..auth import (
     CrudPermissions, P_READ, P_EDIT_IDEA,
     P_EDIT_EXTRACT, P_ADD_IDEA, P_ADD_EXTRACT,
@@ -70,16 +70,26 @@ class IdeaContentLink(DiscussionBoundBase, OriginMixin):
 
     order = Column(Float, nullable=False, default=0.0)
 
-    creator_id = Column(
+    # creator_id = Column(
+    #     Integer,
+    #     ForeignKey('agent_profile.id'),
+    #     nullable=False,
+    #     info={'rdf': QuadMapPatternS(None, SIOC.has_creator)}
+    # )
+
+    creator_dagent_id = Column(
         Integer,
-        ForeignKey('agent_profile.id'),
-        nullable=False,
-        info={'rdf': QuadMapPatternS(None, SIOC.has_creator)}
+        ForeignKey(DiscussionAgent.id)
     )
 
-    creator = relationship(
-        AgentProfile, foreign_keys=[creator_id], backref=backref(
+    creator_dagent = relationship(
+        DiscussionAgent, foreign_keys=[creator_dagent_id], backref=backref(
             'extracts_created', cascade="all")) # do not delete orphan
+
+    creator = relationship(
+        AgentProfile,
+        secondary=DiscussionAgent.__table__, uselist=False, viewonly=True,
+        backref=backref('extracts_created')) # do not delete orphan
 
     __mapper_args__ = {
         'polymorphic_identity': 'assembl:relatedToIdea',
@@ -246,9 +256,17 @@ class Extract(IdeaContentPositiveLink):
 
     important = Column('important', Boolean, server_default='0')
 
-    attributed_to_id = Column(
-        Integer, ForeignKey(AgentProfile.id,
+    # attributed_to_id = Column(
+    #     Integer, ForeignKey(AgentProfile.id,
+    #                         ondelete='SET NULL', onupdate='CASCADE'))
+
+    attributed_to_dagent_id = Column(
+        Integer, ForeignKey(DiscussionAgent.id,
                             ondelete='SET NULL', onupdate='CASCADE'))
+
+    attributed_to_dagent = relationship(
+        DiscussionAgent, foreign_keys=[attributed_to_dagent_id],
+        backref='extracts_attributed')
 
     def local_uri_as_graph(self):
         return 'local:ExcerptGraph/%d' % (self.id,)
@@ -330,25 +348,29 @@ class Extract(IdeaContentPositiveLink):
                 name=QUADNAMES.oa_hasSource),
             # TODO: Paths
             # QuadMapPatternS(
-            #     AgentProfile.iri_class().apply((cls.content_id, Post.creator_id)),
+            #     AgentProfile.iri_class().apply((cls.content_id, Post.creator_dagent_id)),
             #     DCTERMS.contributor,
             #     Idea.iri_class().apply(cls.idea_id),
             #     name=QUADNAMES.assembl_idea_contributor,
             #     conditions=(cls.idea_id != None,)),
             ]
 
-    owner_id = Column(
+    # owner_id = Column(
+    #     Integer,
+    #     ForeignKey(AgentProfile.id),
+    #     nullable=False,
+    # )
+    owner_dagent_id = Column(
         Integer,
-        ForeignKey('agent_profile.id'),
-        nullable=False,
+        ForeignKey(DiscussionAgent.id)
     )
 
-    owner = relationship(
-        AgentProfile, foreign_keys=[owner_id], backref='extracts_owned')
+    owner_dagent = relationship(
+        DiscussionAgent, foreign_keys=[owner_dagent_id], backref='extracts_owned')
 
-    attributed_to = relationship(
-        AgentProfile, foreign_keys=[attributed_to_id],
-        backref='extracts_attributed')
+    owner = relationship(
+        AgentProfile, secondary=DiscussionAgent.__table__, uselist=False, viewonly=True,
+        foreign_keys=[owner_dagent_id], backref='extracts_owned')
 
     extract_source = relationship(Content, backref="extracts")
     extract_ideas = relationship(Idea, backref="extracts")
@@ -450,11 +472,25 @@ class Extract(IdeaContentPositiveLink):
     @classmethod
     def restrict_to_owners(cls, query, user_id):
         "filter query according to object owners"
-        return query.filter(cls.owner_id == user_id)
+        return query.join(DiscussionAgent, DiscussionAgent.id==cls.owner_dagent_id
+            ).filter(DiscussionAgent.profile_id == user_id)
 
     crud_permissions = CrudPermissions(
             P_ADD_EXTRACT, P_READ, P_EDIT_EXTRACT, P_EDIT_EXTRACT,
             P_EDIT_MY_EXTRACT, P_EDIT_MY_EXTRACT)
+
+Extract.attributed_to = relationship(
+        AgentProfile,
+        secondary=DiscussionAgent.__table__, uselist=False, viewonly=True,
+        primaryjoin=Extract.attributed_to_dagent_id==DiscussionAgent.id,
+        backref='extracts_attributed')
+
+Extract.owner = relationship(
+        AgentProfile,
+        secondary=DiscussionAgent.__table__, uselist=False, viewonly=True,
+        primaryjoin=Extract.owner_dagent_id==DiscussionAgent.id,
+        backref='extracts_owned')
+
 
 class IdeaContentNegativeLink(IdeaContentLink):
     """

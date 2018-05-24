@@ -24,17 +24,17 @@ from . import (
 def widget_view(request):
     # IF_OWNED not applicable for widgets... so far
     ctx = request.context
-    user_id = authenticated_userid(request) or Everyone
+    uagent = request.uagent
     permissions = ctx.get_permissions()
-    check_permissions(ctx, user_id, CrudPermissions.READ)
+    check_permissions(ctx, uagent, CrudPermissions.READ)
     view = (request.matchdict or {}).get('view', None)\
         or ctx.get_default_view() or 'default'
-    json = ctx._instance.generic_json(view, user_id, permissions)
+    json = ctx._instance.generic_json(view, uagent, permissions)
     # json['discussion'] = ...
-    if user_id != Everyone:
-        user = User.get(user_id)
-        user_state = ctx._instance.get_user_state(user_id)
-        json['user'] = user.generic_json(view, user_id, permissions)
+    if not uagent.isEveryone:
+        user = User.get(uagent.user_id)
+        user_state = ctx._instance.get_user_state(uagent.id)
+        json['user'] = user.generic_json(view, uagent, permissions)
         json['user_permissions'] = permissions
         if user_state is not None:
             json['user_state'] = user_state
@@ -42,7 +42,7 @@ def widget_view(request):
     if target_id:
         idea = Idea.get_instance(target_id)
         if idea:
-            json['target'] = idea.generic_json(view, user_id, permissions)
+            json['target'] = idea.generic_json(view, uagent, permissions)
         else:
             raise HTTPNotFound("No idea "+target_id)
     return json
@@ -53,17 +53,17 @@ def widget_view(request):
 def widget_instance_put(request):
     # IF_OWNED not applicable for widgets... so far
     ctx = request.context
-    user_id = authenticated_userid(request)
-    if not user_id:
+    uagent = request.uagent
+    if not uagent:
         raise HTTPUnauthorized
-    check_permissions(ctx, user_id, CrudPermissions.UPDATE)
+    check_permissions(ctx, uagent, CrudPermissions.UPDATE)
     user_state = request.POST.get('user_state')
     if user_state:
         del request.POST['user_state']
     response = instance_put_form(request)
     if user_state:
         request.context._instance.set_user_state(
-            user_state, user_id)
+            user_state, uagent.id)
     return response
 
 

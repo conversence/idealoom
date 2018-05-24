@@ -465,7 +465,7 @@ def test_creativity_session_widget(
 
 def test_inspiration_widget(
         discussion, test_app, subidea_1, subidea_1_1,
-        participant1_user, test_session):
+        participant1_user, participant1_dagent, test_session):
     # Post the initial configuration
     format = lambda x: x.strftime('%Y-%m-%dT%H:%M:%S')
     new_widget_loc = test_app.post_json(
@@ -526,7 +526,7 @@ def test_inspiration_widget(
             "body": {"@type": "LangString", "entries": [{
                 "@type": "LangStringEntry", "value": "body",
                 "@language": "en"
-            }]}, "creator_id": participant1_user.id,
+            }]}, "creator_dagent_id": participant1_dagent.id,
             "metadata_json": {
                 "inspiration_url":
                     "https://www.youtube.com/watch?v=7E2FUSYO374"}})

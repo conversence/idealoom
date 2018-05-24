@@ -16,12 +16,13 @@ from datetime import datetime
 from ..lib.sqla_types import URLString
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..semantic.namespaces import DCTERMS
+from ..auth import (
+    CrudPermissions, P_READ, P_ADMIN_DISC, P_ADD_POST,
+    P_EDIT_POST, P_ADD_IDEA, P_EDIT_IDEA)
 from . import DiscussionBoundBase, OriginMixin
 from .idea import Idea
 from .langstrings import LangString
-from .auth import (
-    AgentProfile, CrudPermissions, P_READ, P_ADMIN_DISC, P_ADD_POST,
-    P_EDIT_POST, P_ADD_IDEA, P_EDIT_IDEA)
+from .auth import AgentProfile, DiscussionAgent
 
 
 class Announcement(DiscussionBoundBase, OriginMixin):
@@ -51,17 +52,20 @@ class Announcement(DiscussionBoundBase, OriginMixin):
 
     modification_date = Column(DateTime, nullable=False, default=datetime.utcnow)
 
-    creator_id = Column(Integer, ForeignKey('agent_profile.id'),
-                        nullable=False)
-    creator = relationship(
-        AgentProfile,
-        foreign_keys=[creator_id], backref="announcements_created")
+    # creator_id = Column(Integer, ForeignKey(AgentProfile.id),
+    #                     nullable=False)
+    creator_dagent_id = Column(Integer, ForeignKey(DiscussionAgent.id))
+    creator_dagent = relationship(
+        DiscussionAgent,
+        foreign_keys=[creator_dagent_id], backref="announcements_created")
 
-    last_updated_by_id = Column(Integer, ForeignKey('agent_profile.id'),
-                        nullable=False)
-    last_updated_by = relationship(
-        AgentProfile,
-        foreign_keys=[last_updated_by_id], backref="announcements_updated")
+    # last_updated_by_id = Column(Integer, ForeignKey(AgentProfile.id),
+    #                     nullable=False)
+    last_updated_by_dagent_id = Column(Integer, ForeignKey(DiscussionAgent.id))
+
+    last_updated_by_dagent = relationship(
+        DiscussionAgent,
+        foreign_keys=[last_updated_by_dagent_id], backref="announcements_updated")
 
     title_id = Column(
         Integer(), ForeignKey(LangString.id))
@@ -102,6 +106,19 @@ class Announcement(DiscussionBoundBase, OriginMixin):
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):
         return (cls.discussion_id == discussion_id,)
+
+
+Announcement.last_updated_by = relationship(
+        AgentProfile,
+        secondary=DiscussionAgent.__table__, uselist=False, viewonly=True,
+        primaryjoin=Announcement.last_updated_by_dagent_id == DiscussionAgent.id,
+        backref="announcements_updated")
+
+Announcement.creator = relationship(
+        AgentProfile,
+        secondary=DiscussionAgent.__table__, uselist=False, viewonly=True,
+        primaryjoin=Announcement.creator_dagent_id == DiscussionAgent.id,
+        backref="announcements_created")
 
 
 LangString.setup_ownership_load_event(

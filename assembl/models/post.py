@@ -31,7 +31,7 @@ from ..lib.decl_enums import DeclEnum
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..lib.sqla_types import CoerceUnicode
 from .generic import Content, ContentSource
-from .auth import AgentProfile
+from .auth import AgentProfile, DiscussionAgent
 from ..semantic.namespaces import SIOC, ASSEMBL, QUADNAMES
 from ..lib import config
 from .langstrings import LangString, LangStringEntry
@@ -166,11 +166,14 @@ class Post(Content):
                 conditions=(cls.parent_id != None,)),
         ]
 
-    creator_id = Column(
-        Integer, ForeignKey('agent_profile.id'), nullable=False, index=True,
-        info={'rdf': QuadMapPatternS(
-            None, SIOC.has_creator, AgentProfile.agent_as_account_iri.apply(None))})
-    creator = relationship(AgentProfile, foreign_keys=[creator_id], backref="posts_created")
+    # creator_id = Column(
+    #     Integer, ForeignKey(AgentProfile.id), nullable=False, index=True,
+    #     info={'rdf': QuadMapPatternS(
+    #         None, SIOC.has_creator, AgentProfile.agent_as_account_iri.apply(None))})
+    creator_dagent_id = Column(
+        Integer, ForeignKey(DiscussionAgent.id), index=True)
+    creator_dagent = relationship(
+        DiscussionAgent, foreign_keys=[creator_dagent_id], backref="posts_created")
 
     __mapper_args__ = {
         'polymorphic_identity': 'post',
@@ -178,8 +181,8 @@ class Post(Content):
     }
 
     def populate_from_context(self, context):
-        if not(self.creator or self.creator_id):
-            self.creator = context.get_instance_of_class(AgentProfile)
+        if not(self.creator_dagent or self.creator_dagent_id):
+            self.creator_dagent = context.get_instance_of_class(DiscussionAgent)
         super(Post, self).populate_from_context(context)
 
     def get_descendants(self):
@@ -504,7 +507,7 @@ class Post(Content):
                 icl = with_polymorphic(IdeaContentLink, IdeaContentLink)
                 co = with_polymorphic(Content, Content)
                 request._idea_content_link_cache1 = {x[0]: x for x in self.db.query(
-                    icl.id, icl.idea_id, icl.content_id, icl.creator_id, icl.type,
+                    icl.id, icl.idea_id, icl.content_id, icl.creator_dagent_id, icl.type,
                     icl.creation_date).join(co).filter(
                     co.discussion_id == self.discussion_id)}
             request._idea_content_link_cache2 = {}
@@ -518,7 +521,7 @@ class Post(Content):
                     "@id": IdeaContentLink.uri_generic(data[0]),
                     "idIdea": Idea.uri_generic(data[1]),
                     "idPost": Content.uri_generic(data[2]),
-                    "idCreator": AgentProfile.uri_generic(data[3]),
+                    "idCreator": DiscussionAgent.uri_generic(data[3]),
                     "@type": icl_polymap[data[4]].class_.external_typename(),
                     "created": data[5].isoformat() + "Z"
                 }
@@ -532,7 +535,8 @@ class Post(Content):
     def language_priors(self, translation_service):
         from .auth import User, UserLanguagePreferenceCollection
         priors = super(Post, self).language_priors(translation_service)
-        creator = self.creator or AgentProfile.get(self.creator_id)
+        dagent = self.creator_dagent or AgentProfile.get(self.creator_dagent_id)
+        creator = dagent.user if dagent else None
         if creator and isinstance(creator, User):
             # probably a language that the user knows
             try:
@@ -584,7 +588,7 @@ class Post(Content):
     @classmethod
     def restrict_to_owners(cls, query, user_id):
         "filter query according to object owners"
-        return query.filter(cls.creator_id == user_id)
+        return query.join(DiscussionAgent).filter(DiscussionAgent.profile_id == user_id)
 
 
 def orm_insert_listener(mapper, connection, target):
@@ -597,15 +601,24 @@ def orm_insert_listener(mapper, connection, target):
     # In which case, tell the discussion about this new participant,
     # which was not in Discussion.get_participants_query originally.
     if target.db.query(Post).filter_by(
-            creator_id=target.creator_id,
+            creator_dagent_id=target.creator_dagent_id,
             discussion_id=target.discussion_id).count() <= 1:
-        creator = target.creator or AgentProfile.get(target.creator_id)
+        creator = target.creator or DiscussionAgent.get(target.creator_dagent_id)
         creator.send_to_changes(connection, CrudOperation.UPDATE, target.discussion_id)
+        # TODODA: creator or creator.user?
     # Eagerly translate the post
     # Actually causes DB deadlocks. TODO: Revise this.
     # Let's only do this on import.
     # from ..tasks.translate import translate_content_task
     # translate_content_task.delay(target.id)
+
+
+Post.creator = relationship(
+    AgentProfile,
+    primaryjoin=Post.creator_dagent_id==DiscussionAgent.id,
+    secondary=DiscussionAgent.__table__, uselist=False, viewonly=True,
+    backref="posts_created")
+
 
 event.listen(Post, 'after_insert', orm_insert_listener, propagate=True)
 

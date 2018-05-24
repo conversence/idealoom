@@ -285,7 +285,7 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
         return value
 
     def generic_json(
-            self, view_def_name='default', user_id=Everyone,
+            self, view_def_name='default', uagent=None,
             permissions=(P_READ, ), base_uri='local:'):
         # TODO: permissions
         values = self.local_values_json
@@ -544,6 +544,7 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
                     P_EXPORT_EXTERNAL_SOURCE,
                     P_MODERATE,
                     P_OVERRIDE_SOCIAL_AUTOLOGIN,
+                    P_SEE_IDENTITY,
                     P_SEND_SYNTHESIS,
                     P_VOTE,
                 ],
@@ -556,6 +557,7 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
                     P_EDIT_IDEA,
                     P_EDIT_MY_EXTRACT,
                     P_OVERRIDE_SOCIAL_AUTOLOGIN,
+                    P_SEE_IDENTITY,
                     P_VOTE,
                 ],
                 R_MODERATOR: [
@@ -573,12 +575,14 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
                     P_EXPORT_EXTERNAL_SOURCE,
                     P_MODERATE,
                     P_OVERRIDE_SOCIAL_AUTOLOGIN,
+                    P_SEE_IDENTITY,
                     P_SEND_SYNTHESIS,
                     P_VOTE,
                 ],
                 R_PARTICIPANT: [
                     P_ADD_POST,
                     P_DELETE_MY_POST,
+                    P_SEE_IDENTITY,
                     P_VOTE,
                 ],
                 Authenticated: [

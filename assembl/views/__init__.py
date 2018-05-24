@@ -186,6 +186,7 @@ def get_default_context(request, **kwargs):
     localizer = request.localizer
     _ = TranslationStringFactory('assembl')
     user = request.user
+    uagent = request.uagent
     if user and user.username:
         user_profile_edit_url = request.route_url(
             'profile_user', type='u', identifier=user.username)
@@ -217,9 +218,9 @@ def get_default_context(request, **kwargs):
         help_url = help_url % localizer.locale_name
 
     first_login_after_auto_subscribe_to_notifications = False
-    if (user and discussion and discussion.id and user.is_first_visit
+    if (uagent and discussion and discussion.id and uagent.is_first_visit
             and discussion.subscribe_to_notifications_on_signup
-            and user.is_participant(discussion.id)):
+            and uagent.is_participant()):
         first_login_after_auto_subscribe_to_notifications = True
     locales = config.get('available_languages').split()
     countries_for_locales = defaultdict(set)
@@ -299,7 +300,7 @@ def get_default_context(request, **kwargs):
         request=request,
         application_url=application_url,
         get_route=get_route,
-        user=user,
+        user=uagent,
         templates=get_template_views(),
         discussion=discussion or {},  # Templates won't load without a discussion object
         preferences=discussion.preferences if discussion else {},

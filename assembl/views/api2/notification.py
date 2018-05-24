@@ -40,9 +40,9 @@ def view_notification_subscription_collection(request):
              ctx_collection_class=NotificationSubscription)
 def notif_collection_add_json(request):
     ctx = request.context
-    user_id = authenticated_userid(request) or Everyone
+    uagent = ctx.get_uagent()
     permissions = ctx.get_permissions()
-    check_permissions(ctx, user_id, CrudPermissions.CREATE)
+    check_permissions(ctx, uagent, CrudPermissions.CREATE)
     typename = ctx.collection_class.external_typename()
     typename = request.json_body.get(
         '@type', ctx.collection_class.external_typename())
@@ -61,7 +61,7 @@ def notif_collection_add_json(request):
         if templates:
             templates.parent_instance.reset_notification_subscriptions_from_defaults(False)
         view = request.GET.get('view', None) or 'default'
-        return CreationResponse(first, user_id, permissions, view)
+        return CreationResponse(first, uagent, permissions, view)
 
 
 @view_config(context=InstanceContext, request_method='GET',

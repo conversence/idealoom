@@ -27,10 +27,6 @@ from sqlalchemy.orm import (
     backref,
     deferred,
     undefer)
-from .auth import (
-    IdentityProvider,
-)
-from .social_auth import SocialAuthAccount
 
 from ..auth import (CrudPermissions, P_EXPORT_EXTERNAL_SOURCE, P_SYSADMIN)
 from ..lib.config import get_config
@@ -38,6 +34,8 @@ from ..lib.sqla import Base
 from ..lib.sqla_types import URLString
 from ..lib.parsedatetime import parse_datetime
 from ..tasks.source_reader import PullSourceReader, ReaderStatus
+from .auth import IdentityProvider, DiscussionAgent
+from .social_auth import SocialAuthAccount
 from .langstrings import LangString
 from .generic import PostSource, ContentSourceIDs
 from .post import ImportedPost
@@ -703,7 +701,7 @@ class FacebookGenericSource(PostSource):
                     title=attachment.get('title'),
                     description=attachment.get('description'),
                     document=doc,
-                    creator=self.creator.user,
+                    creator_dagent=self.creator.user.get_local_agent(discussion),
                     attachmentPurpose=ATTACHMENT_PURPOSES.get('EMBED_ATTACHMENT')
                 )
 
@@ -1234,8 +1232,8 @@ class FacebookAccessToken(Base):
         now = datetime.utcnow()
         return now > self.expiration
 
-    def is_owner(self, user_id):
-        return self.user.profile_id == user_id
+    def is_owner(self, uagent):
+        return self.fb_account.profile_id == uagent.user_id
 
     def get_token_expiration(self):
         # Makes external call. This is not async.
@@ -1249,7 +1247,7 @@ class FacebookAccessToken(Base):
     @classmethod
     def restrict_to_owners(cls, query, user_id):
         "filter query according to object owners"
-        return query.join(cls.user).\
+        return query.join(SocialAuthAccount).\
             filter(SocialAuthAccount.profile_id == user_id)
 
     crud_permissions = CrudPermissions(P_EXPORT_EXTERNAL_SOURCE, P_SYSADMIN,

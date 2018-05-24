@@ -30,17 +30,17 @@ from . import (FORM_HEADER, JSON_HEADER, check_permissions)
              ctx_collection_class=AbstractIdeaVote)
 def votes_collection_view(request):
     ctx = request.context
-    user_id = authenticated_userid(request)
-    if not user_id:
+    uagent = request.uagent
+    if not uagent:
         raise HTTPUnauthorized
     view = request.GET.get('view', None) or ctx.get_default_view() or 'id_only'
     tombstones = asbool(request.GET.get('tombstones', False))
     q = ctx.create_query(view == 'id_only', tombstones).join(
-        User, AbstractIdeaVote.voter).filter(User.id == user_id)
+        User, AbstractIdeaVote.voter).filter(User.id == uagent.user_id)
     if view == 'id_only':
         return [ctx.collection_class.uri_generic(x) for (x,) in q.all()]
     else:
-        return [i.generic_json(view, user_id) for i in q.all()]
+        return [i.generic_json(view, uagent) for i in q.all()]
 
 
 @view_config(context=CollectionContext, request_method='POST',
@@ -48,11 +48,11 @@ def votes_collection_view(request):
              ctx_collection_class=AbstractIdeaVote)
 def votes_collection_add_json(request):
     ctx = request.context
-    user_id = authenticated_userid(request)
-    if not user_id:
+    uagent = request.uagent
+    if not uagent:
         raise HTTPUnauthorized
     permissions = ctx.get_permissions()
-    check_permissions(ctx, user_id, CrudPermissions.CREATE)
+    check_permissions(ctx, uagent, CrudPermissions.CREATE)
     spec = ctx.get_instance_of_class(AbstractVoteSpecification)
     if spec:
         required = spec.get_vote_class()
@@ -74,7 +74,7 @@ def votes_collection_add_json(request):
     else:
         typename = required.external_typename()
     json = request.json_body
-    json['voter'] = User.uri_generic(user_id)
+    json['voter'] = User.uri_generic(uagent.user_id)
     if "@type" not in json:
         json["@type"] = typename
     else:
@@ -94,7 +94,7 @@ def votes_collection_add_json(request):
             raise HTTPBadRequest("Invalid vote")
         view = request.GET.get('view', None) or 'default'
         return Response(
-            dumps(first.generic_json(view, user_id, permissions)),
+            dumps(first.generic_json(view, uagent, permissions)),
             location=first.uri_generic(first.id),
             status_code=201)
 
@@ -105,8 +105,8 @@ def votes_collection_add_json(request):
              permission=P_READ)
 def vote_results(request):
     ctx = request.context
-    user_id = authenticated_userid(request)
-    if not user_id:
+    uagent = request.uagent
+    if not uagent:
         raise HTTPUnauthorized
     histogram = request.GET.get('histogram', None)
     if histogram:
@@ -129,8 +129,8 @@ def vote_results(request):
              name="vote_results_csv", permission=P_DISC_STATS)
 def vote_results_csv(request):
     ctx = request.context
-    user_id = authenticated_userid(request)
-    if not user_id:
+    uagent = request.uagent
+    if not uagent:
         raise HTTPUnauthorized
     histogram = request.GET.get('histogram', None)
     if histogram:

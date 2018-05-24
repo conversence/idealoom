@@ -26,7 +26,7 @@ from .idea import (Idea, IdeaLink)
 from .idea_content_link import IdeaContentWidgetLink
 from .generic import Content
 from .post import Post, IdeaProposalPost
-from .auth import User
+from .auth import User, DiscussionAgent
 from .votes import AbstractVoteSpecification, AbstractIdeaVote
 from ..views.traversal import (
     RelationCollectionDefinition, AbstractCollectionDefinition,
@@ -139,30 +139,30 @@ class Widget(DiscussionBoundBase):
     def state_json(self, val):
         self.state = json.dumps(val)
 
-    def get_user_state(self, user_id):
+    def get_user_state(self, dagent_id):
         state = self.db.query(WidgetUserConfig).filter_by(
-            widget=self, user_id=user_id).first()
+            widget=self, dagent_id=dagent_id).first()
         if state:
             return state.state_json
 
     def get_all_user_states(self):
         return [c.state_json for c in self.user_configs]
 
-    def set_user_state(self, user_state, user_id):
+    def set_user_state(self, user_state, dagent_id):
         state = self.db.query(WidgetUserConfig).filter_by(
-            widget=self, user_id=user_id).first()
+            widget=self, dagent_id=dagent_id).first()
         if not state:
-            state = WidgetUserConfig(widget=self, user_id=user_id)
+            state = WidgetUserConfig(widget=self, dagent_id=dagent_id)
             self.db.add(state)
         state.state_json = user_state
 
-    def update_from_json(self, json, user_id=None, context=None, object_importer=None,
+    def update_from_json(self, json, uagent=None, context=None, object_importer=None,
                          permissions=None, parse_def_name='default_reverse'):
         modified = super(Widget, self).update_from_json(
-            json, user_id, context, object_importer, permissions, parse_def_name)
+            json, uagent, context, object_importer, permissions, parse_def_name)
 
-        if user_id and user_id != Everyone and 'user_state' in json:
-            modified.set_user_state(json['user_state'], user_id)
+        if uagent and 'user_state' in json:
+            modified.set_user_state(json['user_state'], uagent.id)
         return modified
 
     @classmethod
@@ -608,7 +608,7 @@ class IdeaCreatingWidget(BaseIdeaWidget):
                 inst_ctx['proposed_in_post'],
                 IdeaProposalPost(
                     proposes_idea=obj,
-                    creator=ctx.get_instance_of_class(User),
+                    creator_dagent=ctx.get_instance_of_class(DiscussionAgent),
                     discussion=obj.discussion,
                     subject=(obj.short_title.clone()
                              if obj.short_title
@@ -721,30 +721,30 @@ class CreativitySessionWidget(IdeaCreatingWidget):
     def num_participants(self):
         participant_ids = set()
         # participants from user_configs
-        participant_ids.update((c.user_id for c in self.user_configs))
+        participant_ids.update((c.user_dagent_id for c in self.user_configs))
         # Participants from comments
         participant_ids.update((c[0] for c in self.db.query(
-            Post.creator_id).join(IdeaContentWidgetLink).filter(
+            Post.creator_dagent_id).join(IdeaContentWidgetLink).filter(
                 Widget.id == self.id)))
         # Participants from created ideas
         participant_ids.update((c[0] for c in self.db.query(
-            IdeaProposalPost.creator_id).join(
+            IdeaProposalPost.creator_dagent_id).join(
                 Idea, GeneratedIdeaWidgetLink).filter(
                     Widget.id == self.id)))
         return len(participant_ids)
 
-    def num_posts_by(self, user_id):
+    def num_posts_by(self, dagent_id):
         from .post import WidgetPost
         return self.db.query(WidgetPost
             ).join(self.__class__
-            ).filter(WidgetPost.creator_id==user_id).count()
+            ).filter(WidgetPost.creator_dagent_id==dagent_id).count()
 
     @property
     def num_posts_by_current_user(self):
-        from ..auth.util import get_current_user_id
-        user_id = get_current_user_id()
+        from ..auth.util import get_current_dagent_id
+        user_id = get_current_dagent_id()
         if user_id:
-            return self.num_posts_by(user_id)
+            return self.num_posts_by(dagent_id)
 
     def get_add_post_endpoint(self, idea):
         return 'local:Conversation/%d/widgets/%d/base_idea/-/children/%d/widgetposts' % (
@@ -989,12 +989,18 @@ class WidgetUserConfig(DiscussionBoundBase):
     widget = relationship(Widget, backref=backref(
         "user_configs", cascade="all, delete-orphan"))
 
-    user_id = Column(
+    # user_id = Column(
+    #     Integer,
+    #     ForeignKey('user.id',
+    #                ondelete="CASCADE", onupdate="CASCADE"),
+    #     nullable=False, index=True)
+    dagent_id = Column(
         Integer,
-        ForeignKey('user.id',
+        ForeignKey(DiscussionAgent.id,
                    ondelete="CASCADE", onupdate="CASCADE"),
-        nullable=False, index=True)
-    user = relationship(User)
+        index=True)
+    dagent = relationship(DiscussionAgent)
+    user = relationship(User, secondary=DiscussionAgent.__table__, uselist=False, viewonly=True)
 
     state = Column('settings', Text)  # JSON blob
 

@@ -80,7 +80,7 @@ def init_key_for_classes(db):
     user_refs = {
         Action: 'actor',
         NotificationSubscription: 'user',
-        LocalUserRole: 'user',
+        # LocalUserRole: 'user', TODODA ok what here?
         DiscussionPerUserNamespacedKeyValue: 'user',
     }
     special_extra_tests = {
@@ -100,8 +100,8 @@ def is_special_class(ob):
         if ob.__class__ in special_extra_tests:
             return special_extra_tests[ob.__class__](ob)
         return True
-    if ob.__class__.__name__ == 'UserTemplate':
-        return False
+    # if ob.__class__.__name__ == 'UserTemplate':
+    #     return False
     assert not isinstance(ob, tuple(fn_for_classes.keys())),\
         "Missing subclass: " + ob.__class__
     return False

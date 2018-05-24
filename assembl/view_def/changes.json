@@ -105,7 +105,7 @@
         "message_id": false,
         "ancestry": false,
         "parentId": "parent",
-        "idCreator": "creator"
+        "idCreator": "creator_dagent"
     },
     "LocalPost": {
         "@extends": "Post"
@@ -219,10 +219,10 @@
         "idPost": "content",
         "target": true,
         "created": "creation_date",
-        "idCreator": "creator",
-        "attributed_to": true,
+        "idCreator": "creator_dagent",
+        "attributed_to": "attributed_to_dagent",
         "important": true,
-        "owner": true,
+        "owner": "owner_dagent",
         "quote": true,
         "order": true,
         "discussion": false,
@@ -256,7 +256,7 @@
         "role": "&get_role_name"
     },
     "LocalUserRole": {
-        "@private": "user",
+        "@private": "dagent",
         "discussion": true,
         "role": "&get_role_name"
     },

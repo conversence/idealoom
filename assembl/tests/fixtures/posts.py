@@ -6,13 +6,13 @@ from datetime import datetime
 
 
 @pytest.fixture(scope="function")
-def root_post_1(request, participant1_user, discussion, test_session):
+def root_post_1(request, participant1_dagent, discussion, test_session):
     """
-    From participant1_user
+    From participant1_dagent
     """
     from assembl.models import Post, LangString
     p = Post(
-        discussion=discussion, creator=participant1_user,
+        discussion=discussion, creator_dagent=participant1_dagent,
         subject=LangString.create(u"a root post"),
         body=LangString.create(u"post body"), moderator=None,
         creation_date=datetime(year=2000, month=1, day=1),
@@ -29,13 +29,13 @@ def root_post_1(request, participant1_user, discussion, test_session):
 
 
 @pytest.fixture(scope="function")
-def discussion2_root_post_1(request, participant1_user, discussion2, test_session):
+def discussion2_root_post_1(request, participant1_dagent, discussion2, test_session):
     """
-    From participant1_user
+    From participant1_dagent
     """
     from assembl.models import Post, LangString
     p = Post(
-        discussion=discussion2, creator=participant1_user,
+        discussion=discussion2, creator_dagent=participant1_dagent,
         subject=LangString.create(u"a root post"),
         body=LangString.create(u"post body"),
         creation_date=datetime(year=2000, month=1, day=2),
@@ -52,13 +52,13 @@ def discussion2_root_post_1(request, participant1_user, discussion2, test_sessio
 
 
 @pytest.fixture(scope="function")
-def synthesis_post_1(request, participant1_user, discussion, test_session,
+def synthesis_post_1(request, participant1_dagent, discussion, test_session,
                      synthesis_1):
     """A Syntehsis Post fixture"""
 
     from assembl.models import SynthesisPost, LangString
     p = SynthesisPost(
-        discussion=discussion, creator=participant1_user,
+        discussion=discussion, creator_dagent=participant1_dagent,
         subject=LangString.create(u"a synthesis post"),
         body=LangString.create(u"post body (unused, it's a synthesis...)"),
         message_id="msg1s@example.com",
@@ -83,7 +83,7 @@ def reply_post_1(request, participant2_user, discussion,
     """
     from assembl.models import Post, LangString
     p = Post(
-        discussion=discussion, creator=participant2_user,
+        discussion=discussion, creator_dagent=participant2_user,
         subject=LangString.create(u"re1: root post"),
         body=LangString.create(u"post body"),
         creation_date=datetime(year=2000, month=1, day=4),
@@ -102,14 +102,14 @@ def reply_post_1(request, participant2_user, discussion,
 
 
 @pytest.fixture(scope="function")
-def reply_post_2(request, participant1_user, discussion,
+def reply_post_2(request, participant1_dagent, discussion,
                  reply_post_1, test_session):
     """
-    From participant1_user, in reply to reply_post_1
+    From participant1_dagent, in reply to reply_post_1
     """
     from assembl.models import Post, LangString
     p = Post(
-        discussion=discussion, creator=participant1_user,
+        discussion=discussion, creator_dagent=participant1_dagent,
         subject=LangString.create(u"re2: root post"),
         body=LangString.create(u"post body"),
         creation_date=datetime(year=2000, month=1, day=5),
@@ -135,7 +135,7 @@ def reply_post_3(request, participant2_user, discussion,
     """
     from assembl.models import Post, LangString
     p = Post(
-        discussion=discussion, creator=participant2_user,
+        discussion=discussion, creator_dagent=participant2_user,
         subject=LangString.create(u"re2: root post"),
         body=LangString.create(u"post body"),
         type="post", message_id="msg4@example.com")
@@ -160,7 +160,7 @@ def reply_deleted_post_4(request, participant2_user, discussion,
     """
     from assembl.models import Post, LangString, PublicationStates
     p = Post(
-        discussion=discussion, creator=participant2_user,
+        discussion=discussion, creator_dagent=participant2_user,
         subject=LangString.create(u"re2: root post"),
         body=LangString.create(u"post body"),
         publication_state=PublicationStates.DELETED_BY_ADMIN,
@@ -180,14 +180,14 @@ def reply_deleted_post_4(request, participant2_user, discussion,
 
 @pytest.fixture(scope="function")
 def reply_to_deleted_post_5(
-        request, participant1_user, discussion,
+        request, participant1_dagent, discussion,
         reply_deleted_post_4, test_session):
     """
     From participant2_user, in reply to root_post_1
     """
     from assembl.models import Post, LangString
     p = Post(
-        discussion=discussion, creator=participant1_user,
+        discussion=discussion, creator_dagent=participant1_dagent,
         subject=LangString.create(u"re3: root post"),
         body=LangString.create(u"post body"),
         type="post", message_id="msg6@example.com")
@@ -206,7 +206,7 @@ def reply_to_deleted_post_5(
 
 @pytest.fixture(scope="function")
 def fully_ambiguous_post(
-        request, test_session, discussion, participant1_user):
+        request, test_session, discussion):
     from assembl.models import Content, LangString
     p = Content(
         discussion=discussion,
@@ -244,11 +244,11 @@ def post_subject_locale_determined_by_body(
 
 @pytest.fixture(scope="function")
 def post_body_locale_determined_by_creator(
-        request, test_session, discussion, admin_user,
+        request, test_session, discussion, admin_dagent,
         user_language_preference_fr_cookie):
     from assembl.models import Post, LangString
     p = Post(
-        discussion=discussion, creator=admin_user,
+        discussion=discussion, creator_dagent=admin_dagent,
         subject=LangString.create(u"testa"),
         body=LangString.create(u"testa"),
         message_id="msg9@example.com")
@@ -265,10 +265,10 @@ def post_body_locale_determined_by_creator(
 
 @pytest.fixture(scope="function")
 def post_body_locale_determined_by_import(
-        request, test_session, discussion, admin_user, mailbox):
+        request, test_session, discussion, admin_dagent, mailbox):
     from assembl.models import Email, LangString
     p = Email(
-        discussion=discussion, creator=admin_user,
+        discussion=discussion, creator_dagent=admin_dagent,
         subject=LangString.create(u"testa"),
         body=LangString.create(u"testa"),
         source=mailbox,

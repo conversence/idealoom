@@ -13,7 +13,7 @@ from pyisemail import is_email
 from assembl.lib.locale import (to_posix_string, strip_country)
 from assembl.models import (
     Discussion, DiscussionPermission, Role, Permission, UserRole,
-    LocalUserRole)
+    LocalUserRole, DiscussionAgent)
 from .. import get_default_context
 from assembl.models.mail import IMAPMailbox, MailingList
 from assembl.auth import (
@@ -184,9 +184,10 @@ def discussion_admin(request):
         else:
             discussion = Discussion(
                 topic=topic,
-                creator_id=user_id,
                 slug=slug
             )
+            dagent = DiscussionAgent(discussion=discussion, profile=user)
+            discussion.creator_dagent = dagent
 
             # Could raise an exception if there is no/incorrect scheme passed
             discussion.homepage = homepage
@@ -223,11 +224,11 @@ def discussion_admin(request):
 def discussion_edit(request):
     discussion_id = int(request.matchdict['discussion_id'])
     discussion = Discussion.get_instance(discussion_id)
-    user_id = get_non_expired_user_id(request)
-    assert user_id
+    uagent = request.user
+    assert user
     permissions = request.permissions
     partners = json.dumps([p.generic_json(
-        user_id=user_id, permissions=permissions
+        uagent=user, permissions=permissions
         ) for p in discussion.partner_organizations])
 
     if not discussion:
@@ -296,13 +297,15 @@ def discussion_permissions(request):
                             for dp in disc_perms)
     disc_perms_dict = {(dp.role.name, dp.permission.name): dp
                        for dp in disc_perms}
-    local_roles = db.query(LocalUserRole).filter_by(
-        discussion_id=discussion_id).join(Role, User).all()
-    local_roles_as_set = set((lur.user.id, lur.role.name)
+    local_roles = db.query(LocalUserRole).join(Role, DiscussionAgent).filter(
+        DiscussionAgent.discussion_id==discussion_id,
+        DiscussionAgent.template == False).all()
+    # TODODA: preload user from LocalUserRole... and rewrite everything
+    local_roles_as_set = set((lur.dagent.profile_id, lur.role.name)
                              for lur in local_roles)
-    local_roles_dict = {(lur.user.id, lur.role.name): lur
+    local_roles_dict = {(lur.dagent.profile_id, lur.role.name): lur
                         for lur in local_roles}
-    users = set(lur.user for lur in local_roles)
+    users = set(lur.dagent.agent_profile for lur in local_roles)
     num_users = ''
 
     if request.POST:
@@ -354,16 +357,17 @@ def discussion_permissions(request):
                     has_role_text = 'has_%s_%d' % (role, user.id)
                     if (user.id, role) not in local_roles_as_set and \
                             has_role_text in request.POST:
+                        dagent = user.create_agent_status_in_discussion(discussion)
                         lur = LocalUserRole(
                             role=roles_by_name[role],
-                            user=user,
+                            dagent=dagent,
                             discussion_id=discussion_id)
                         local_roles.append(lur)
 
                         # TODO revisit this if Roles and Subscription are
                         # de-coupled
                         if role == 'r:participant':
-                            user.update_agent_status_subscribe(discussion)
+                            dagent.update_agent_status_subscribe()
 
                         local_roles_dict[(user.id, role)] = lur
                         local_roles_as_set.add((user.id, role))
@@ -378,7 +382,7 @@ def discussion_permissions(request):
                         # TODO revisit this if Roles and Subscription are
                         # de-coupled
                         if role == 'r:participant':
-                            user.update_agent_status_unsubscribe(discussion)
+                            dagent.update_agent_status_unsubscribe()
 
                         db.delete(lur)
 
@@ -387,7 +391,8 @@ def discussion_permissions(request):
             other_users = db.query(User).filter(
                 AgentProfile.name.ilike(search_string)
                 | User.username.ilike(search_string)
-                | User.preferred_email.ilike(search_string)).all()
+                | User.preferred_email.ilike(search_string)
+                ).options(subqueryload(DiscussionAgent)).all()
             users.update(other_users)
         elif 'submit_user_file' in request.POST:
             role = request.POST['add_with_role'] or R_PARTICIPANT

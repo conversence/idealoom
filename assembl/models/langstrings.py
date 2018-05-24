@@ -305,11 +305,11 @@ class LangString(Base):
             cls = [cls for (cls, _) in self._owning_relns if cls.__name__ == cls_name][0]
             return self.db.query(cls).filter_by(id=id).first()
 
-    def user_can(self, user_id, operation, permissions):
+    def user_can(self, uagent, operation, permissions):
         owner_object = self.get_owner_object()
         if owner_object is not None:
-            return owner_object.user_can(user_id, operation, permissions)
-        return super(LangString, self).user_can(user_id, operation, permissions)
+            return owner_object.user_can(uagent, operation, permissions)
+        return super(LangString, self).user_can(uagent, operation, permissions)
 
     @classmethod
     def _do_create_from_json(
@@ -415,12 +415,12 @@ class LangString(Base):
 
     # TODO: Reinstate when the javascript can handle empty body/subject.
     # def generic_json(
-    #         self, view_def_name='default', user_id=None,
+    #         self, view_def_name='default', uagent=None,
     #         permissions=(P_READ, ), base_uri='local:'):
     #     if self.id == self.EMPTY_ID:
     #         return None
     #     return super(LangString, self).generic_json(
-    #         view_def_name=view_def_name, user_id=user_id,
+    #         view_def_name=view_def_name, uagent=uagent,
     #         permissions=permissions, base_uri=base_uri)
 
     @property
@@ -835,10 +835,10 @@ class LangStringEntry(TombstonableMixin, Base):
         self.error_code = None
         self.error_count = 0
 
-    def user_can(self, user_id, operation, permissions):
+    def user_can(self, uagent, operation, permissions):
         if self.langstring is not None:
-            return self.langstring.user_can(user_id, operation, permissions)
-        return super(LangStringEntry, self).user_can(user_id, operation, permissions)
+            return self.langstring.user_can(uagent, operation, permissions)
+        return super(LangStringEntry, self).user_can(uagent, operation, permissions)
 
     # Those permissions are for an ownerless object. Accept Create before ownership.
     crud_permissions = CrudPermissions(P_READ, P_SYSADMIN, P_SYSADMIN, P_SYSADMIN)

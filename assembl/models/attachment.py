@@ -26,12 +26,12 @@ from ..lib.hash_fs import get_hashfs
 from ..lib.abc import classproperty
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..semantic.namespaces import DCTERMS
+from ..auth import (CrudPermissions, P_READ, P_ADMIN_DISC, P_ADD_POST,
+    P_EDIT_POST, P_ADD_IDEA, P_EDIT_IDEA)
 from . import DiscussionBoundBase, OriginMixin
 from .post import Post
 from .idea import Idea
-from .auth import (
-    AgentProfile, CrudPermissions, P_READ, P_ADMIN_DISC, P_ADD_POST,
-    P_EDIT_POST, P_ADD_IDEA, P_EDIT_IDEA)
+from .auth import AgentProfile, DiscussionAgent
 
 
 class AttachmentPurpose(enum.Enum):
@@ -299,9 +299,14 @@ class Attachment(DiscussionBoundBase, OriginMixin):
             'attachments'), # chronological?
     )
 
-    creator_id = Column(Integer, ForeignKey('agent_profile.id'),
-                        nullable=False)
-    creator = relationship(AgentProfile, backref="attachments")
+    # creator_id = Column(Integer, ForeignKey('agent_profile.id'),
+    #                     nullable=False)
+    creator_dagent_id = Column(Integer, ForeignKey(DiscussionAgent.id))
+    creator_dagent = relationship(DiscussionAgent, backref="attachments")
+    creator = relationship(
+        AgentProfile,
+        secondary=DiscussionAgent.__table__, uselist=False, viewonly=True,
+        backref="attachments")
     title = Column(CoerceUnicode(1024), server_default="",
                    info={'rdf': QuadMapPatternS(None, DCTERMS.title)})
     description = Column(

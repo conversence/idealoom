@@ -68,7 +68,7 @@ second score, if any, indicates how well this idea's children can be distinguish
 <h1>Discussion: {{discussion.topic}}</h1>
 {% if test_code %}
 <form action="test_results" method="POST">
-    <input type="hidden" name="user_id" value="{{ analyzer.user_id }}">
+    <input type="hidden" name="dagent_id" value="{{ analyzer.dagent_id }}">
     <input type="hidden" name="server" value="{{ server }}">
     <input type="hidden" name="discussion" value="{{ discussion.id }}">
     <input type="hidden" name="test_code" value="{{ test_code }}">

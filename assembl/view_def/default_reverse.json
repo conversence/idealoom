@@ -164,7 +164,7 @@
         "message_id": false,
         "ancestry": false,
         "parentId": "parent",
-        "idCreator": "creator",
+        "idCreator": "creator_dagent",
         "attachments": false
     },
     "ImportedPost": {
@@ -193,7 +193,7 @@
         "proposes_idea": false
     },
     "Update": {
-        "who": "actor",
+        "who": "actor_dagent",
         "when": "creation_date",
         "target_type": false
     },
@@ -225,7 +225,7 @@
         "introduction": true,
         "introductionDetails": true,
         "instigator": true,
-        "creator": true,
+        "creator": "creator_dagent",
         "subscribe_to_notifications_on_signup": true,
         "web_analytics_piwik_id_site": true,
         "help_url": true,
@@ -282,7 +282,7 @@
         "idIdea": "idea",
         "idPost": "content",
         "created": "creation_date",
-        "idCreator": "creator"
+        "idCreator": "creator_dagent"
     },
     "IdeaContentPositiveLink": {
         "@extends": "IdeaContentLink"
@@ -300,7 +300,7 @@
         "@extends": "IdeaContentPositiveLink",
         "discussion": false,
         "quote": false,
-        "attributed_to": true,
+        "attributed_to": "attributed_to_dagent",
         "ranges": ["selectors"],
         "text": "annotation_text"
     },
@@ -465,7 +465,7 @@
     },
     "Attachment": {
         "idAttachedDocument": "document",
-        "idCreator": "creator",
+        "idCreator": "creator_dagent",
         "attachmentPurpose": true,
         "title": true,
         "description": true,
@@ -486,8 +486,8 @@
     "Announcement": {
         "created": "creation_date",
         "modification_date": true,
-        "creator": true,
-        "last_updated_by": true,
+        "creator": "creator_dagent",
+        "last_updated_by": "last_updated_by_dagent",
         "title": true,
         "body": true
     },

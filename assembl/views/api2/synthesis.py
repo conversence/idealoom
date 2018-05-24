@@ -24,9 +24,9 @@ def discussion_notifications(request):
              accept="application/json")
 def get_syntheses(request, default_view='default'):
     ctx = request.context
-    user_id = authenticated_userid(request) or Everyone
+    uagent = request.uagent
     permissions = ctx.get_permissions()
-    check_permissions(ctx, user_id, permissions, CrudPermissions.READ)
+    check_permissions(ctx, uagent, permissions, CrudPermissions.READ)
     include_unpublished = P_EDIT_SYNTHESIS in permissions
     view = request.GET.get('view', None) or ctx.get_default_view() or default_view
     include_tombstones = asbool(request.GET.get('tombstones', False))
@@ -38,7 +38,7 @@ def get_syntheses(request, default_view='default'):
         q = q.with_entities(Synthesis.id)
         return [ctx.collection_class.uri_generic(x) for (x,) in q.all()]
     else:
-        res = [i.generic_json(view, user_id, permissions) for i in q.all()]
+        res = [i.generic_json(view, uagent, permissions) for i in q.all()]
         return [x for x in res if x is not None]
 
 

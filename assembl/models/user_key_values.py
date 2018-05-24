@@ -26,7 +26,7 @@ from pyramid.httpexceptions import HTTPUnauthorized
 from ..lib.abc import abstractclassmethod
 from . import DiscussionBoundBase
 from assembl.lib import config
-from .auth import User
+from .auth import User, DiscussionAgent
 from ..auth.util import user_has_permission
 from .discussion import Discussion
 from .preferences import Preferences
@@ -108,27 +108,30 @@ class AbstractPerUserNamespacedKeyValue(
         AbstractNamespacedKeyValue):
     """Mixin class for user-namespace-key-value quads in a user-local namespaced dictionaries (dict of dict)"""
     # No table name, these are simply common columns
+    # @declared_attr
+    # def user_id(self):
+    #     """The user of the key-value tuple"""
+    #     return Column("user_id", Integer, ForeignKey(User.id), index=True)
+
     @declared_attr
-    def user_id(self):
+    def dagent_id(self):
         """The user of the key-value tuple"""
-        return Column("user_id", Integer, ForeignKey(User.id), index=True)
+        return Column("dagent_id", Integer, ForeignKey(DiscussionAgent.id), index=True)
 
     @declared_attr
     def __table_args__(cls):
-        schema, user = config.get('db_schema'), config.get('db_user')
         return (UniqueConstraint(
             getattr(cls, cls.target_id_name),
             cls.namespace,
             cls.key,
-            cls.user_id,
-            name="%s_%s_%s_unique_constraint" % (
-                schema, user, cls.__tablename__)),)
+            cls.dagent_id,
+            name="%s_unique_c" % (cls.__tablename__)),)
 
     @classmethod
-    def add_nukv(cls, target, user, namespace, key, value):
+    def add_nukv(cls, target, dagent, namespace, key, value):
         db = cls.default_db
         args = {
-            "user": user,
+            "dagent": dagent,
             "namespace": namespace,
             "key": key,
             cls.target_name: target
@@ -139,10 +142,10 @@ class AbstractPerUserNamespacedKeyValue(
         cls.default_db.add(cls(value=json.dumps(value), **args))
 
     @classmethod
-    def delete_nuk(cls, target, user, namespace, key):
+    def delete_nuk(cls, target, dagent, namespace, key):
         db = cls.default_db
         args = {
-            "user": user,
+            "dagent": dagent,
             "namespace": namespace,
             "key": key,
             cls.target_name: target
@@ -152,10 +155,10 @@ class AbstractPerUserNamespacedKeyValue(
             existing.delete()
 
     @classmethod
-    def clear_namespace_for_user(cls, target, user, namespace):
+    def clear_namespace_for_user(cls, target, dagent, namespace):
         db = cls.default_db
         args = {
-            "user": user,
+            "dagent": dagent,
             "namespace": namespace,
             cls.target_name: target
         }
@@ -165,16 +168,16 @@ class AbstractPerUserNamespacedKeyValue(
 class NamespacedUserKVCollection(MutableMapping):
     """View of the :py:class:`AbstractPerUserNamespacedKeyValue` for a given namespace as a python dict"""
 
-    def __init__(self, target, user_id, namespace):
+    def __init__(self, target, dagent_id, namespace):
         self.target = target
-        self.user_id = user_id
+        self.dagent_id = dagent_id
         self.namespace = namespace
 
     def __len__(self):
         ukv_cls = self.target.per_user_namespaced_kv_class
         return self.target.db.query(
             ukv_cls.key).filter_by(
-                user_id=self.user_id,
+                dagent_id=self.dagent_id,
                 namespace=self.namespace,
                 **{ukv_cls.target_name: self.target}).count()
 
@@ -182,7 +185,7 @@ class NamespacedUserKVCollection(MutableMapping):
         ukv_cls = self.target.per_user_namespaced_kv_class
         ns = self.target.db.query(
             ukv_cls.key).filter_by(
-                user_id=self.user_id,
+                dagent_id=self.dagent_id,
                 namespace=self.namespace,
                 **{ukv_cls.target_name: self.target})
         return (x for (x,) in ns)
@@ -193,7 +196,7 @@ class NamespacedUserKVCollection(MutableMapping):
         ukv_cls = self.target.per_user_namespaced_kv_class
         kvpairs = self.target.db.query(
             ukv_cls).filter_by(
-                user_id=self.user_id,
+                dagent_id=self.dagent_id,
                 namespace=self.namespace,
                 **{ukv_cls.target_name: self.target})
         return ((kvpair.key, json.loads(kvpair.value)) for kvpair in kvpairs)
@@ -202,7 +205,7 @@ class NamespacedUserKVCollection(MutableMapping):
         ukv_cls = self.target.per_user_namespaced_kv_class
         value = self.target.db.query(
             ukv_cls.value).filter_by(
-                user_id=self.user_id,
+                dagent_id=self.dagent_id,
                 namespace=self.namespace,
                 key=key,
                 **{ukv_cls.target_name: self.target}).first()
@@ -215,7 +218,7 @@ class NamespacedUserKVCollection(MutableMapping):
         ukv_cls = self.target.per_user_namespaced_kv_class
         kvpair = self.target.db.query(
             ukv_cls).filter_by(
-                user_id=self.user_id,
+                dagent_id=self.dagent_id,
                 namespace=self.namespace,
                 key=key,
                 **{ukv_cls.target_name: self.target}).first()
@@ -223,7 +226,7 @@ class NamespacedUserKVCollection(MutableMapping):
             kvpair.value = json.dumps(value)
         else:
             self.target.db.add(ukv_cls(
-                user_id=self.user_id,
+                dagent_id=self.dagent_id,
                 namespace=self.namespace,
                 key=key,
                 value=json.dumps(value),
@@ -233,7 +236,7 @@ class NamespacedUserKVCollection(MutableMapping):
         ukv_cls = self.target.per_user_namespaced_kv_class
         kvpair = self.target.db.query(
             ukv_cls).filter_by(
-                user_id=self.user_id,
+                dagent_id=self.dagent_id,
                 namespace=self.namespace,
                 key=key,
                 **{ukv_cls.target_name: self.target}).first()
@@ -245,7 +248,7 @@ class NamespacedUserKVCollection(MutableMapping):
         ukv_cls = self.target.per_user_namespaced_kv_class
         value = self.target.db.query(
             ukv_cls.id).filter_by(
-                user_id=self.user_id,
+                dagent_id=self.dagent_id,
                 namespace=self.namespace,
                 key=key,
                 **{ukv_cls.target_name: self.target}).first()
@@ -340,13 +343,13 @@ class UserPreferenceCollection(NamespacedUserKVCollection):
     PREFERENCE_NAMESPACE = "preferences"
     ALLOW_OVERRIDE = "allow_user_override"
 
-    def __init__(self, user_id, discussion=None):
+    def __init__(self, dagent_id, discussion=None):
         if discussion is None:
             self.dprefs = Preferences.get_by_name()
         else:
             self.dprefs = discussion.preferences
         super(UserPreferenceCollection, self).__init__(
-            discussion, user_id, self.PREFERENCE_NAMESPACE)
+            discussion, dagent_id, self.PREFERENCE_NAMESPACE)
 
     def __len__(self):
         return len(self.dprefs.property_defaults)
@@ -357,9 +360,9 @@ class UserPreferenceCollection(NamespacedUserKVCollection):
         pref_data = self.dprefs.get_preference_data()
         req_permission = pref_data.get(key, {}).get(
             self.ALLOW_OVERRIDE, False)
-        if (not req_permission) or not user_has_permission(
+        if (not req_permission) or not dagent_has_permission(
                 self.target.id if self.target else None,
-                self.user_id, req_permission):
+                self.dagent_id, req_permission):
             raise HTTPUnauthorized("Cannot edit")
         self.dprefs.validate(key, value)
         super(UserPreferenceCollection, self).__setitem__(key, value)
@@ -409,22 +412,22 @@ class UserPreferenceCollection(NamespacedUserKVCollection):
 
 class UserNsDict(MutableMapping):
     """The dictonary of :py:class:NamespacedUserKVCollection, indexed by namespace, as a python dict"""
-    def __init__(self, target, user_id):
+    def __init__(self, target, dagent_id):
         self.target = target
-        self.user_id = user_id
+        self.dagent_id = dagent_id
 
     def __len__(self):
         ukv_cls = self.target.per_user_namespaced_kv_class
         return self.target.db.query(
             ukv_cls.namespace).filter_by(
-                user_id=self.user_id,
+                dagent_id=self.dagent_id,
                 **{ukv_cls.target_name: self.target}).distinct().count()
 
     def __iter__(self):
         ukv_cls = self.target.per_user_namespaced_kv_class
         ns = self.target.db.query(
             ukv_cls.namespace).filter_by(
-                user_id=self.user_id,
+                dagent_id=self.dagent_id,
                 **{ukv_cls.target_name: self.target}).distinct()
         return (x for (x,) in ns)
 
@@ -434,13 +437,13 @@ class UserNsDict(MutableMapping):
         ukv_cls = self.target.per_user_namespaced_kv_class
         ns = self.target.db.query(
             ukv_cls.namespace).filter_by(
-                user_id=self.user_id,
+                dagent_id=self.dagent_id,
                 **{ukv_cls.target_name: self.target}).distinct()
-        return {x: NamespacedUserKVCollection(self.target, self.user_id, x)
+        return {x: NamespacedUserKVCollection(self.target, self.dagent_id, x)
                 for (x,) in ns}
 
     def __getitem__(self, key):
-        return NamespacedUserKVCollection(self.target, self.user_id, key)
+        return NamespacedUserKVCollection(self.target, self.dagent_id, key)
 
     def __setitem__(self, key, value):
         raise NotImplementedError()
@@ -449,7 +452,7 @@ class UserNsDict(MutableMapping):
         ukv_cls = self.target.per_user_namespaced_kv_class
         self.target.db.query(
             ukv_cls).filter_by(
-                user_id=self.user_id,
+                dagent_id=self.dagent_id,
                 namespace=key,
                 **{ukv_cls.target_name: self.target}).delete()
 
@@ -507,8 +510,8 @@ class DiscussionPerUserNamespacedKeyValue(
     target_class = Discussion
     discussion = relationship(
         Discussion, backref="namespaced_peruser_key_values")
-    user = relationship(
-        User, backref="discussion_namespaced_key_values")
+    dagent = relationship(
+        DiscussionAgent, backref="discussion_namespaced_key_values")
 
     def get_discussion_id(self):
         return self.discussion_id
@@ -528,7 +531,7 @@ class DiscussionPerUserNamespacedKeyValue(
         query, _ = super(DiscussionPerUserNamespacedKeyValue, self
             ).unique_query()
         query = query.filter(
-            AbstractNamespacedKeyValue.user_id == self.user_id,
+            AbstractNamespacedKeyValue.dagent_id == self.dagent_id,
             AbstractNamespacedKeyValue.namespace == self.namespace,
             AbstractNamespacedKeyValue.key == self.key)
         return (query, True)

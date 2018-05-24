@@ -25,7 +25,7 @@ from assembl.auth import (
 from assembl.auth.social_auth import maybe_social_logout
 from assembl.models import (
     User, Discussion, LocalUserRole, AbstractAgentAccount, AgentProfile,
-    UserLanguagePreference, EmailAccount, AgentStatusInDiscussion)
+    UserLanguagePreference, EmailAccount, DiscussionAgent)
 from assembl.auth.password import (
     verify_password_change_token, get_data_token_time, Validity)
 from assembl.auth.util import discussion_from_request
@@ -66,17 +66,18 @@ def add_local_role_on_class(request):
     header=JSON_HEADER, renderer='json')
 @view_config(
     context=CollectionContext, request_method="POST",
-    ctx_named_collection="User.local_roles",
+    ctx_named_collection="DiscussionAgent.local_roles",
     header=JSON_HEADER, renderer='json')
 def add_local_role(request):
     # Do not use check_permissions, this is a special case
+    # TODODA: still on User, DiscussionAgent or both?
     ctx = request.context
-    user_id = authenticated_userid(request)
-    if not user_id:
+    dagent = request.uagent
+    if not dagent:
         raise HTTPUnauthorized()
     discussion_id = ctx.get_discussion_id()
     discussion = Discussion.get(discussion_id)
-    user_uri = User.uri_generic(user_id)
+    user_uri = dagent.uri()
     if discussion_id is None:
         raise HTTPBadRequest()
     permissions = ctx.get_permissions()
@@ -92,7 +93,7 @@ def add_local_role(request):
         if P_SELF_REGISTER in permissions:
             json['requested'] = False
             json['role'] = R_PARTICIPANT
-            req_user = User.get_instance(requested_user)
+            req_user = DiscussionAgent.get_instance(requested_user)
             if not discussion.check_authorized_email(req_user):
                 raise HTTPForbidden()
         elif P_SELF_REGISTER_REQUEST in permissions:
@@ -114,14 +115,14 @@ def add_local_role(request):
         # Side effect: materialize subscriptions.
         if not first.requested:
             # relationship may not be initialized
-            user = first.user or User.get(first.user_id)
-            user.get_notification_subscriptions(discussion_id, True, request)
+            dagent = first.dagent or DiscussionAgent.get(first.dagent_id)
+            dagent.get_notification_subscriptions(True, request)
 
-        # Update the user's AgentStatusInDiscussion
-        user.update_agent_status_subscribe(discussion)
+        # Update the user's DiscussionAgent
+        dagent.update_agent_status_subscribe()
 
         view = request.GET.get('view', None) or 'default'
-        return CreationResponse(first, user_id, permissions, view)
+        return CreationResponse(first, dagent, permissions, view)
 
 
 @view_config(
@@ -147,6 +148,7 @@ def set_local_role(request):
     user_id = authenticated_userid(request)
     if not user_id:
         raise HTTPUnauthorized()
+    uagent = request.uagent
     discussion_id = ctx.get_discussion_id()
     user_uri = User.uri_generic(user_id)
     if discussion_id is None:
@@ -166,18 +168,16 @@ def set_local_role(request):
             json['requested'] = True
         else:
             raise HTTPUnauthorized()
-    updated = instance.update_from_json(json, user_id, ctx)
+    updated = instance.update_from_json(json, uagent, ctx)
     view = request.GET.get('view', None) or 'default'
 
-    # Update the user's AgentStatusInDiscussion
-    user = User.get(user_id)
-    discussion = Discussion.get(discussion_id)
-    user.update_agent_status_subscribe(discussion)
+    # Update the user's DiscussionAgent
+    uagent.update_agent_status_subscribe()
 
     if view == 'id_only':
         return [updated.uri()]
     else:
-        return updated.generic_json(view, user_id, permissions)
+        return updated.generic_json(view, uagent, permissions)
 
 
 @view_config(
@@ -186,28 +186,26 @@ def set_local_role(request):
     renderer='json')
 @view_config(
     context=InstanceContext, request_method='DELETE',
-    ctx_named_collection_instance="User.local_roles",
+    ctx_named_collection_instance="DiscussionAgent.local_roles",
     renderer='json')
 def delete_local_role(request):
     ctx = request.context
     instance = ctx._instance
-    user_id = authenticated_userid(request)
-    if not user_id:
+    uagent = request.uagent
+    if not uagent:
         raise HTTPUnauthorized()
     discussion_id = ctx.get_discussion_id()
 
     if discussion_id is None:
         raise HTTPBadRequest()
     permissions = ctx.get_permissions()
-    requested_user = instance.user
-    if requested_user.id != user_id and P_ADMIN_DISC not in permissions:
+    requested_dagent = instance.dagent
+    if requested_dagent.id != uagent.id and P_ADMIN_DISC not in permissions:
         raise HTTPUnauthorized()
 
-    user = User.get(user_id)
-    discussion = Discussion.get(discussion_id)
     instance.db.delete(instance)
-    # Update the user's AgentStatusInDiscussion
-    user.update_agent_status_unsubscribe(discussion)
+    # Update the user's DiscussionAgent
+    uagent.update_agent_status_unsubscribe()
     instance.db.flush()  # maybe unnecessary
     return {}
 
@@ -255,14 +253,14 @@ def view_profile_collection(request):
         if discussion:
             from assembl.models import Post, AgentProfile
             num_posts_per_user = \
-                AgentProfile.count_posts_in_discussion_all_profiles(discussion)
+                DiscussionAgent.count_posts_in_discussion_all_profiles(discussion)
             for x in content:
                 id = AgentProfile.get_database_id(x['@id'])
                 if id in num_posts_per_user:
                     x['post_count'] = num_posts_per_user[id]
     return content
 
-
+#TODODA: most of the following should be based on DiscussionAgent
 @view_config(context=InstanceContext, renderer='json', request_method='GET',
              ctx_instance_class=AgentProfile,
              accept="application/json", permission=P_READ)
@@ -484,14 +482,14 @@ def assembl_register_user(request):
         session.add(user)
         session.flush()
 
-        user.update_from_json(json, user_id=user.id)
+        user.update_from_json(json, uagent=user)
         if discussion and not (
                 P_SELF_REGISTER in permissions or
                 P_SELF_REGISTER_REQUEST in permissions):
             # Consider it without context
             discussion = None
         if discussion:
-            agent_status = AgentStatusInDiscussion(
+            agent_status = DiscussionAgent(
                 agent_profile=user, discussion=discussion,
                 first_visit=now, last_visit=now,
                 user_created_on_this_discussion=True)
@@ -516,7 +514,7 @@ def assembl_register_user(request):
             if discussion:
                 maybe_auto_subscribe(user, discussion)
         session.flush()
-        return CreationResponse(user, Everyone, permissions)
+        return CreationResponse(user, user, permissions)
     finally:
         session.autoflush = old_autoflush
 
@@ -526,10 +524,10 @@ def assembl_register_user(request):
     request_method='DELETE', renderer='json')
 def delete_abstract_agent_account(request):
     ctx = request.context
-    user_id = authenticated_userid(request) or Everyone
+    uagent = request.uagent
     permissions = ctx.get_permissions()
     instance = ctx._instance
-    if not instance.user_can(user_id, CrudPermissions.DELETE, permissions):
+    if not instance.user_can(uagent, CrudPermissions.DELETE, permissions):
         raise HTTPUnauthorized()
     if instance.email:
         accounts_with_mail = [a for a in instance.profile.accounts if a.email]
@@ -592,7 +590,7 @@ def set_user_dis_connected(request, connecting):
     except TokenInvalid:
         raise HTTPUnauthorized()
 
-    status = user.get_status_in_discussion(discussion_id)
+    status = user.get_local_agent(discussion_id)
     assert status
     if connecting:
         status.last_connected = datetime.now()
@@ -643,9 +641,9 @@ def interesting_ideas(request):
              header=JSON_HEADER, ctx_collection_class=UserLanguagePreference)
 def add_user_language_preference(request):
     ctx = request.context
-    user_id = authenticated_userid(request) or Everyone
+    uagent = ctx.get_uagent()
     permissions = ctx.get_permissions()
-    check_permissions(ctx, user_id, CrudPermissions.CREATE)
+    check_permissions(ctx, uagent, CrudPermissions.CREATE)
     typename = ctx.collection_class.external_typename()
     json = request.json_body
     try:
@@ -661,7 +659,7 @@ def add_user_language_preference(request):
             db.add(instance)
         db.flush()
         view = request.GET.get('view', None) or 'default'
-        return CreationResponse(first, user_id, permissions, view)
+        return CreationResponse(first, uagent, permissions, view)
 
 
 @view_config(context=InstanceContext, request_method='PUT', renderer="json",
@@ -671,18 +669,18 @@ def add_user_language_preference(request):
 def modify_user_language_preference(request):
     json_data = request.json_body
     ctx = request.context
-    user_id = authenticated_userid(request) or Everyone
+    uagent = ctx.get_uagent()
     permissions = ctx.get_permissions()
     instance = ctx._instance
-    if not instance.user_can(user_id, CrudPermissions.UPDATE, permissions):
+    if not instance.user_can(uagent, CrudPermissions.UPDATE, permissions):
         raise HTTPUnauthorized()
     try:
-        updated = instance.update_from_json(json_data, user_id, ctx)
+        updated = instance.update_from_json(json_data, uagent, ctx)
         view = request.GET.get('view', None) or 'default'
         if view == 'id_only':
             return [updated.uri()]
         else:
-            return updated.generic_json(view, user_id, permissions)
+            return updated.generic_json(view, uagent, permissions)
 
     except NotImplementedError:
         raise HTTPNotImplemented()

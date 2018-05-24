@@ -14,7 +14,7 @@
         "parent_subscription": true,
         "status": true,
         "last_status_change_date": true,
-        "user": true
+        "user": "dagent"
     },
     "NotificationSubscriptionFollowSyntheses": {
         "@extends": "NotificationSubscription"

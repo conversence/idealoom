@@ -567,7 +567,7 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
                 cls.default_db(), discussion_id, include_deleted=include_deleted)
         else:
             return counters.paths[root_idea_id].as_clause(
-                cls.default_db(), discussion_id, counters.user_id, Content,
+                cls.default_db(), discussion_id, counters.dagent_id, Content,
                 include_deleted=include_deleted)
 
     @classmethod
@@ -580,9 +580,10 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
         if req:
             discussion_data = getattr(req, "discussion_data", None)
         if create and not discussion_data:
+            local_agent = req.uagent if req else None
             discussion_data = DiscussionGlobalData(
                 cls.default_db(), discussion_id,
-                authenticated_userid(req) if req else None)
+                local_agent.id if local_agent else None)
             if req:
                 req.discussion_data = discussion_data
         return discussion_data
@@ -591,7 +592,7 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
     def prepare_counters(cls, discussion_id, calc_all=False):
         discussion_data = cls.get_discussion_data(discussion_id)
         return discussion_data.post_path_counter(
-            discussion_data.user_id, calc_all)
+            discussion_data.dagent_id, calc_all)
 
     def get_related_posts_query(self, partial=False, include_deleted=False):
         return self.get_related_posts_query_c(
@@ -606,7 +607,7 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
         Excludes synthesis posts """
         counters = cls.prepare_counters(discussion_id)
         return counters.orphan_clause(
-            counters.user_id if get_read_status else None,
+            counters.dagent_id if get_read_status else None,
             content_alias, include_deleted=include_deleted)
 
     @property
@@ -768,31 +769,32 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
     def get_synthesis_contributors(self, id_only=True):
         # author of important extracts
         from .idea_content_link import Extract
-        from .auth import AgentProfile
+        from .auth import DiscussionAgent
         from .post import Post
         from .generic import Content
         from sqlalchemy.sql.functions import count
         subquery = self.get_descendants_query()
         query = self.db.query(
-            Post.creator_id
+            Post.creator_dagent_id
             ).join(Extract
             ).join(subquery, Extract.idea_id == subquery.c.id
             ).filter(Extract.important == True
-            ).group_by(Post.creator_id
+            ).group_by(Post.creator_dagent_id
             ).order_by(count(Extract.id).desc())
         if id_only:
-            return [AgentProfile.uri_generic(a) for (a,) in query]
+            return [DiscussionAgent.uri_generic(a) for (a,) in query]
         else:
             ids = [x for (x,) in query]
             if not ids:
                 return []
-            agents = {a.id: a for a in self.db.query(AgentProfile).filter(
-                AgentProfile.id.in_(ids))}
+            agents = {a.id: a for a in self.db.query(DiscussionAgent).filter(
+                DiscussionAgent.id.in_(ids))}
             return [agents[id] for id in ids]
 
     def get_contributors(self):
         from .generic import Content
         from .post import Post
+        from .auth import DiscussionAgent
         from sqlalchemy.sql.functions import count
         related = self.get_related_posts_query(True)
         content = with_polymorphic(
@@ -801,17 +803,17 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
         post = with_polymorphic(
             Post, [], Post.__table__,
             aliased=False, flat=True)
-        query = self.db.query(post.creator_id
+        query = self.db.query(post.creator_dagent_id
             ).join(content, post.id == content.id
             ).join(related, content.id == related.c.post_id
             ).filter(content.hidden == False,
                 content.discussion_id == self.discussion_id
             ).group_by(
-                post.creator_id
+                post.creator_dagent_id
             ).order_by(
                 count(post.id.distinct()).desc())
 
-        return ['local:Agent/' + str(i) for (i,) in query]
+        return [DiscussionAgent.uri_generic(i) for (i,) in query]
 
     def applyTypeRules(self):
         from ..semantic.inference import get_inference_store
@@ -967,7 +969,7 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
         return ideas
 
     @classmethod
-    def idea_read_counts(cls, discussion_id, post_id, user_id):
+    def idea_read_counts(cls, discussion_id, post_id):
         """Given a post and a user, give the total and read count
             of posts for each affected idea"""
         idea_ids = cls.get_idea_ids_showing_post(post_id)
@@ -1087,7 +1089,7 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
                     inst_ctx['attachments'],
                     PostAttachment(
                         discussion=post.discussion,
-                        creator=post.creator,
+                        creator_dagent=post.creator_dagent,
                         document=doc,
                         attachmentPurpose='EMBED_ATTACHMENT',
                         post=post))
@@ -1224,7 +1226,7 @@ class RootIdea(Idea):
             ViewPost,
             (ViewPost.post_id == Post.id)
             & (ViewPost.tombstone_date == None)
-            & (ViewPost.actor_id == discussion_data.user_id)
+            & (ViewPost.actor_dagent_id == discussion_data.dagent_id)
         ).count()
         return int(result)
 
@@ -1233,7 +1235,7 @@ class RootIdea(Idea):
         """ In the root idea, num_posts is the count of contributors to
         all non-deleted mesages in the discussion """
         from .post import Post
-        result = self.db.query(Post.creator_id).filter(
+        result = self.db.query(Post.creator_dagent_id).filter(
             Post.discussion_id == self.discussion_id,
             Post.hidden==False,
             Post.tombstone_condition()

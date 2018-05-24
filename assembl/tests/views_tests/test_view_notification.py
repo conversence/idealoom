@@ -27,7 +27,7 @@ def test_default_notifications(
     asid.last_visit = datetime.utcnow()
     role = Role.get_role(R_PARTICIPANT, test_session)
     test_session.add(
-        LocalUserRole(user=participant1_user, discussion=discussion, role=role))
+        LocalUserRole(dagent=asid, discussion=discussion, role=role))
     test_session.flush()
     # Template created
     testing_configurator.set_authentication_policy(participant_auth_policy)

@@ -190,6 +190,19 @@ def admin_user(request, test_session, db_default_data):
 
 
 @pytest.fixture(scope="function")
+def admin_dagent(request, test_session, admin_user, discussion):
+    from assembl.models import DiscussionAgent
+    da = DiscussionAgent(profile=admin_user, discussion=discussion)
+    test_session.flush()
+
+    def fin():
+        print("finalizer participant1_dagent")
+        test_session.delete(da)
+    request.add_finalizer(fin)
+    return da
+
+
+@pytest.fixture(scope="function")
 def test_adminuser_webrequest(request, admin_user, test_app_no_perm, base_registry):
     """A Pyramid request fixture with an ADMIN user authorized"""
     req = PyramidWebTestRequest.blank('/', method="GET")

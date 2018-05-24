@@ -157,7 +157,7 @@ class SemanticAnalysisData(object):
 
     # data used by semantic analysis
     def __init__(self, discussion, num_topics=200, min_samples=4, eps=None,
-                 model_cls=None, metric=None, user_id=None, test_code=None):
+                 model_cls=None, metric=None, dagent_id=None, test_code=None):
         self.discussion = discussion
         self.num_topics = num_topics
         self.min_samples = min_samples
@@ -165,7 +165,7 @@ class SemanticAnalysisData(object):
         self.metric = metric or 'cosine'
         self.model_cls = model_cls or gmodels.lsimodel.LsiModel
         self.test_code = test_code
-        self.user_id = user_id
+        self.dagent_id = dagent_id
         self._ideas_by_post = {}
         self._posts_by_idea = {}
         # self._direct_ideas_by_post = {}
@@ -685,11 +685,11 @@ class SKLearnClusteringSemanticAnalysis(SemanticAnalysisData):
 
     def __init__(self, discussion, num_topics=200, min_samples=4, eps=None,
                  model_cls=None, metric=None, silhouette_cutoff=0.05,
-                 algorithm="DBSCAN", user_id=None, test_code=None,
+                 algorithm="DBSCAN", dagent_id=None, test_code=None,
                  **algo_kwargs):
         super(SKLearnClusteringSemanticAnalysis, self).__init__(
             discussion, num_topics, min_samples, eps, model_cls, metric,
-            user_id, test_code)
+            dagent_id, test_code)
         self.silhouette_cutoff = silhouette_cutoff
         self.algorithm = algorithm
         self.eps = eps
@@ -924,11 +924,11 @@ class OpticsSemanticsAnalysis(SemanticAnalysisData):
     _remainder = None
 
     def __init__(self, discussion, num_topics=200, min_samples=4, eps=None,
-                 model_cls=None, metric=None, user_id=None, test_code=None):
+                 model_cls=None, metric=None, dagent_id=None, test_code=None):
         super(OpticsSemanticsAnalysis, self).__init__(
             discussion, num_topics, min_samples, eps=eps or 0.02,
             model_cls=model_cls, metric=metric or 'cosine',
-            user_id=user_id, test_code=test_code)
+            dagent_id=dagent_id, test_code=test_code)
 
     def get_cluster_idea_data(self, root_idea, post_clusters):
 
@@ -1292,12 +1292,12 @@ class OpticsSemanticsAnalysisWithSuggestions(OpticsSemanticsAnalysis):
     # and see if adding it improves the silhouette. (Recurse)
 
     def __init__(self, discussion, num_topics=200, min_samples=4, eps=None,
-                 model_cls=None, metric=None, user_id=None, test_code=None,
+                 model_cls=None, metric=None, dagent_id=None, test_code=None,
                  max_additions=15):
         super(OpticsSemanticsAnalysisWithSuggestions, self).__init__(
             discussion, num_topics, min_samples, eps=eps or 0.02,
             model_cls=model_cls, metric=metric or 'cosine',
-            user_id=user_id, test_code=test_code)
+            dagent_id=dagent_id, test_code=test_code)
         self.max_additions = max_additions
 
     def is_under_idea_id(self, post_id, idea_id):
@@ -1708,7 +1708,7 @@ class OpticsSemanticsAnalysisWithSuggestions(OpticsSemanticsAnalysis):
             discussion=self.discussion,
             url=self.discussion_url,
             test_code=self.test_code,
-            user_id=self.user_id,
+            dagent_id=self.dagent_id,
             server=get_config()['public_hostname'],
             suggestions_add=suggestions_add,
             suggestions_partition=suggestions_partition,

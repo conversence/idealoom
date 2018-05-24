@@ -127,7 +127,7 @@
 {% endblock %}
 
 {% block facebook_sdk_load %}
-    {%if user and 'export_post' in user.permissions_for_current_discussion[discussion.uri()] %}
+    {%if user and 'export_post' in user.get_permissions() %}
         {% include 'includes/fb.jinja2' %}
     {% endif%}
 {% endblock%}

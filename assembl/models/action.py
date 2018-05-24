@@ -28,7 +28,7 @@ from . import (
 from ..semantic.namespaces import (
     ASSEMBL, QUADNAMES, VERSION, RDF, VirtRDF)
 from ..semantic.virtuoso_mapping import QuadMapPatternS
-from .auth import User, AgentProfile
+from .auth import User, AgentProfile, DiscussionAgent
 from .generic import Content
 from .discussion import Discussion
 from .idea import Idea
@@ -54,18 +54,28 @@ class Action(TombstonableMixin, OriginMixin, DiscussionBoundBase):
         'with_polymorphic': '*'
     }
 
-    actor_id = Column(
+    # actor_id = Column(
+    #     Integer,
+    #     ForeignKey('user.id', ondelete='CASCADE', onupdate='CASCADE'),
+    #     nullable=False, index=True,
+    #     info={'rdf': QuadMapPatternS(
+    #         None, VERSION.who, AgentProfile.agent_as_account_iri.apply(None))}
+    # )
+
+    actor_dagent_id = Column(
         Integer,
-        ForeignKey('user.id', ondelete='CASCADE', onupdate='CASCADE'),
-        nullable=False, index=True,
-        info={'rdf': QuadMapPatternS(
-            None, VERSION.who, AgentProfile.agent_as_account_iri.apply(None))}
-    )
+        ForeignKey(DiscussionAgent.id, ondelete='CASCADE', onupdate='CASCADE'),
+        index=True)
+
+    actor_dagent = relationship(
+        DiscussionAgent,
+        backref=backref('actions', order_by="Action.creation_date",
+                        cascade="all, delete-orphan"))
 
     actor = relationship(
         User,
-        backref=backref('actions', order_by="Action.creation_date",
-                        cascade="all, delete-orphan")
+        secondary=DiscussionAgent.__table__, uselist=False, viewonly=True,
+        backref=backref('actions', order_by="Action.creation_date")
     )
 
     verb = 'did something to'
@@ -78,9 +88,9 @@ class Action(TombstonableMixin, OriginMixin, DiscussionBoundBase):
     #         name=QUADNAMES.class_Action_class)]
 
     def populate_from_context(self, context):
-        if not(self.actor or self.actor_id):
-            from .auth import User
-            self.actor = context.get_instance_of_class(User)
+        if not(self.actor_dagent or self.actor_dagent_id):
+            from .auth import DiscussionAgent
+            self.actor_dagent = context.get_instance_of_class(DiscussionAgent)
         super(Action, self).populate_from_context(context)
 
     @as_native_str()
@@ -91,8 +101,8 @@ class Action(TombstonableMixin, OriginMixin, DiscussionBoundBase):
             self.verb,
             self.object_type)
 
-    def is_owner(self, user_id):
-        return self.actor_id == user_id
+    def is_owner(self, uagent):
+        return self.actor_dagent.profile_id == uagent.user_id
 
     def container_url(self):
         return "/data/Discussion/%d/all_users/%d/actions" % (
@@ -104,7 +114,7 @@ class Action(TombstonableMixin, OriginMixin, DiscussionBoundBase):
 
     @classmethod
     def restrict_to_owners(cls, q, user_id):
-        return q.filter(cls.actor_id == user_id)
+        return q.join(DiscussionAgent).filter(DiscussionAgent.profile_id == user_id)
 
     crud_permissions = CrudPermissions(
         P_READ, P_SYSADMIN, P_SYSADMIN, P_SYSADMIN, P_READ, P_READ, P_READ)

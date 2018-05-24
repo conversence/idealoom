@@ -232,12 +232,12 @@ def get_posts(request):
         #Maybe we should do something if the date is invalid.  benoitg
 
     if post_author_id:
-        posts = posts.filter(PostClass.creator_id == post_author_id)
+        posts = posts.filter(PostClass.creator_dagent_id == post_author_id)
 
     if post_replies_to:
         parent_alias = aliased(PostClass)
         posts = posts.join(parent_alias, PostClass.parent)
-        posts = posts.filter(parent_alias.creator_id == post_replies_to)
+        posts = posts.filter(parent_alias.creator_dagent_id == post_replies_to)
 
     if keywords:
         locales = request.GET.getall('locale')
@@ -248,35 +248,37 @@ def get_posts(request):
     is_unread = request.GET.get('is_unread')
     translations = None
     if user_id != Everyone:
+        uagent = request.uagent
         # This is horrible, but the join creates complex subqueries that
         # virtuoso cannot decode properly.
         read_posts = {v.post_id for v in discussion.db.query(
             ViewPost).filter(
                 ViewPost.tombstone_condition(),
-                ViewPost.actor_id == user_id,
+                ViewPost.actor_dagent_id == uagent.id,
                 *ViewPost.get_discussion_conditions(discussion.id))}
         liked_posts = {l.post_id: l.id for l in discussion.db.query(
             LikedPost).filter(
                 LikedPost.tombstone_condition(),
-                LikedPost.actor_id == user_id,
+                LikedPost.actor_dagent_id == uagent.id,
                 *LikedPost.get_discussion_conditions(discussion.id))}
         if is_unread != None:
             posts = posts.outerjoin(
                 ViewPost, and_(
-                    ViewPost.actor_id==user_id,
+                    ViewPost.actor_dagent_id==uagent.id,
                     ViewPost.post_id==PostClass.id,
                     ViewPost.tombstone_date == None))
             if is_unread == "true":
                 posts = posts.filter(ViewPost.id == None)
             elif is_unread == "false":
                 posts = posts.filter(ViewPost.id != None)
-        user = AgentProfile.get(user_id)
+        user = uagent.user
         service = discussion.translation_service()
         if service.canTranslate is not None:
             translations = PrefCollectionTranslationTable(
                 service, LanguagePreferenceCollection.getCurrent(request))
     else:
         #If there is no user_id, all posts are always unread
+        uagent = None
         if is_unread == "false":
             raise HTTPBadRequest(localizer.translate(
                 _("You must be logged in to view which posts are read")))
@@ -373,7 +375,7 @@ def get_posts(request):
                 translate_content(
                     post, translation_table=translations, service=service)
         serializable_post = post.generic_json(
-            view_def, user_id, permissions) or {}
+            view_def, uagent, permissions) or {}
         if order == 'score':
             score = query_result[1]
             serializable_post['score'] = score
@@ -383,8 +385,9 @@ def get_posts(request):
             no_of_posts_viewed_by_user += 1
         elif user_id != Everyone and root_post is not None and root_post.id == post.id:
             # Mark post read, we requested it explicitely
+            dagent = request.uagent
             viewed_post = ViewPost(
-                actor_id=user_id,
+                actor_dagent=dagent,
                 post=root_post
                 )
             discussion.db.add(viewed_post)
@@ -411,7 +414,7 @@ def get_posts(request):
     #    Post
     #).filter(
     #    Post.discussion_id == discussion.id,
-    #    ViewPost.actor_id == user_id,
+    #    ViewPost.actor_dagent_id == user_id,
     #).count() if user_id else 0
 
     data = {}
@@ -440,10 +443,9 @@ def get_post(request):
     if not post:
         raise HTTPNotFound("Post with id '%s' not found." % post_id)
     discussion = request.context
-    user_id = authenticated_userid(request) or Everyone
     permissions = request.permissions
 
-    return post.generic_json(view_def, user_id, permissions)
+    return post.generic_json(view_def, request.uagent, permissions)
 
 
 @post_read.put(permission=P_READ)
@@ -458,28 +460,29 @@ def mark_post_read(request):
     user_id = authenticated_userid(request)
     if not user_id:
         raise HTTPUnauthorized()
+    dagent = request.uagent
     read_data = json.loads(request.body)
     db = discussion.db
     change = False
     with transaction.manager:
         if read_data.get('read', None) is False:
             view = db.query(ViewPost).filter_by(
-                post_id=post_id, actor_id=user_id,
+                post_id=post_id, actor_dagent=dagent,
                 tombstone_date=None).first()
             if view:
                 change = True
                 view.is_tombstone = True
         else:
             count = db.query(ViewPost).filter_by(
-                post_id=post_id, actor_id=user_id,
+                post_id=post_id, actor_dagent=dagent,
                 tombstone_date=None).count()
             if not count:
                 change = True
-                db.add(ViewPost(post=post, actor_id=user_id))
+                db.add(ViewPost(post=post, actor_dagent=dagent))
 
     new_counts = []
     if change:
-        new_counts = Idea.idea_read_counts(discussion.id, post_id, user_id)
+        new_counts = Idea.idea_read_counts(discussion.id, post_id)
 
     return { "ok": True, "ideas": [
         {"@id": Idea.uri_generic(idea_id),
@@ -581,9 +584,10 @@ def create_post(request):
                 "empty subject.  This is not supposed to happen.")
             subject = LangString.EMPTY(discussion.db)
 
+    dagent = request.uagent
     post_constructor_args = {
         'discussion': discussion,
-        'creator_id': user_id,
+        'creator_dagent_id': dagent.id,
         'subject': subject,
         'body': body
     }
@@ -604,7 +608,7 @@ def create_post(request):
         new_post.set_parent(in_reply_to_post)
     if in_reply_to_idea:
         idea_post_link = IdeaRelatedPostLink(
-            creator_id=user_id,
+            creator_dagent_id=dagent_id,
             content=new_post,
             idea=in_reply_to_idea
         )
@@ -621,4 +625,4 @@ def create_post(request):
             source.send_post(new_post)
     permissions = request.permissions
 
-    return new_post.generic_json('default', user_id, permissions)
+    return new_post.generic_json('default', dagent, permissions)

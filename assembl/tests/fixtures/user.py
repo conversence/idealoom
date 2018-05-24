@@ -19,10 +19,10 @@ def participant1_user(request, test_session, discussion):
              verified=True, last_idealoom_login=datetime.utcnow())
     email = EmailAccount(email="abloon@gmail.com", profile=u, verified=True)
     test_session.add(u)
-    r = Role.get_role(R_PARTICIPANT, test_session)
-    ur = UserRole(user=u, role=r)
-    test_session.add(ur)
-    u.subscribe(discussion)
+    # r = Role.get_role(R_PARTICIPANT, test_session)
+    # ur = UserRole(user=u, role=r)
+    # test_session.add(ur)
+    # u.subscribe(discussion)
     test_session.flush()
 
     def fin():
@@ -31,6 +31,25 @@ def participant1_user(request, test_session, discussion):
         test_session.flush()
     request.addfinalizer(fin)
     return u
+
+
+@pytest.fixture(scope="function")
+def participant1_dagent(request, test_session, participant1_user, discussion):
+    from assembl.models import DiscussionAgent, LocaleUserRole
+    da = DiscussionAgent(profile=participant1_user, discussion=discussion)
+    r = Role.get_role(R_PARTICIPANT, test_session)
+    lur = LocaleUserRole(dagent=da, discussion=discussion, role=r)
+    test_session.add(da)
+    test_session.add(lur)
+    participant1_user.subscribe(discussion)
+    test_session.flush()
+
+    def fin():
+        print("finalizer participant1_dagent")
+        test_session.delete(lur)
+        test_session.delete(da)
+    request.add_finalizer(fin)
+    return da
 
 
 @pytest.fixture(scope="function")
@@ -70,9 +89,9 @@ def participant2_user(request, test_session):
     u = User(name=u"James T. Expert", type="user",
              last_idealoom_login=datetime.utcnow())
     test_session.add(u)
-    r = Role.get_role(R_PARTICIPANT, test_session)
-    ur = UserRole(user=u, role=r)
-    test_session.add(ur)
+    # r = Role.get_role(R_PARTICIPANT, test_session)
+    # ur = UserRole(user=u, role=r)
+    # test_session.add(ur)
     test_session.flush()
 
     def fin():
@@ -81,3 +100,23 @@ def participant2_user(request, test_session):
         test_session.flush()
     request.addfinalizer(fin)
     return u
+
+
+@pytest.fixture(scope="function")
+def participant2_dagent(request, test_session, participant2_user, discussion):
+    from assembl.models import DiscussionAgent, LocaleUserRole
+    da = DiscussionAgent(profile=participant2_user, discussion=discussion)
+    r = Role.get_role(R_PARTICIPANT, test_session)
+    lur = LocaleUserRole(dagent=da, discussion=discussion, role=r)
+    test_session.add(da)
+    test_session.add(lur)
+    # participant2_user.subscribe(discussion)
+    test_session.flush()
+
+    def fin():
+        print("finalizer participant1_dagent")
+        test_session.delete(lur)
+        test_session.delete(da)
+    request.add_finalizer(fin)
+    return da
+

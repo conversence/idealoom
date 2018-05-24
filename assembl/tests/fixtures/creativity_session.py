@@ -36,7 +36,7 @@ def creativity_session_widget(
 @pytest.fixture(scope="function")
 def creativity_session_widget_new_idea(
         request, test_session, discussion, subidea_1,
-        creativity_session_widget, participant1_user):
+        creativity_session_widget, participant1_dagent):
     """An Idea fixture with an bound ideaLink,
     GeneratedIdeaWidgetLink, and a IdeaProposalPost"""
 
@@ -52,7 +52,7 @@ def creativity_session_widget_new_idea(
         widget=creativity_session_widget,
         idea=i)
     ipp = IdeaProposalPost(
-        proposes_idea=i, creator=participant1_user, discussion=discussion,
+        proposes_idea=i, creator_dagent=participant1_dagent, discussion=discussion,
         message_id='proposal@example.com',
         subject=LangString.create(u"propose idea"),
         body=LangString.EMPTY(test_session))
@@ -72,14 +72,14 @@ def creativity_session_widget_new_idea(
 
 @pytest.fixture(scope="function")
 def creativity_session_widget_post(
-        request, test_session, discussion, participant1_user,
+        request, test_session, discussion, participant1_dagent,
         creativity_session_widget, creativity_session_widget_new_idea):
     """A Post fixture with a bound to a creativity widget to a new idea and
     an idea content link"""
 
     from assembl.models import (Post, IdeaContentWidgetLink, LangString)
     p = Post(
-        discussion=discussion, creator=participant1_user,
+        discussion=discussion, creator_dagent=participant1_dagent,
         subject=LangString.create(u"re: generated idea"),
         body=LangString.create(u"post body"),
         type="post", message_id="comment_generated@example.com")
@@ -87,7 +87,7 @@ def creativity_session_widget_post(
     test_session.flush()
     icwl = IdeaContentWidgetLink(
         content=p, idea=creativity_session_widget_new_idea,
-        creator=participant1_user)
+        creator_dagent=participant1_dagent)
     test_session.add(icwl)
 
     def fin():

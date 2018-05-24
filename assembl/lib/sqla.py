@@ -48,7 +48,8 @@ from .parsedatetime import parse_datetime
 from ..view_def import get_view_def
 from .zmqlib import get_pub_socket, send_changes
 from ..semantic.namespaces import QUADNAMES
-from ..auth import (Everyone, CrudPermissions, IF_OWNED, P_READ)
+from ..auth import (
+    Everyone, CrudPermissions, IF_OWNED, P_READ, EveryoneUAgent)
 from .decl_enums import EnumSymbol, DeclEnumType
 from .utils import get_global_base_url
 from ..lib.config import get_config
@@ -725,11 +726,17 @@ class BaseOps(object):
     _props_by_class = {}
     @classmethod
     def get_single_arg_methods(cls):
+        if sys.version_info[0] < 3:
+            test_spec = lambda spec: len(spec[0]) - len(spec[3] or ())
+        else:
+            test_spec = lambda spec: len(spec.args) - len(spec.defaults or ())
+        def test_method(m):
+            if not (pyinspect.ismethod(m) or pyinspect.isfunction(m)):
+                return False
+            return test_spec(pyinspect.getargspec(m)) == 1
         if cls not in cls._methods_by_class:
-            cls._methods_by_class[cls] = dict(pyinspect.getmembers(
-                cls, lambda m: (
-                    pyinspect.ismethod(m) or pyinspect.isfunction(m))
-                    and m.__code__.co_argcount == 1))
+            cls._methods_by_class[cls] = dict(
+                pyinspect.getmembers(cls, test_method))
         return cls._methods_by_class[cls]
     @classmethod
     def get_props_of(cls):
@@ -739,12 +746,12 @@ class BaseOps(object):
         return cls._props_by_class[cls]
 
     def generic_json(
-            self, view_def_name='default', user_id=None,
+            self, view_def_name='default', uagent=None,
             permissions=(P_READ, ), base_uri='local:'):
         """Return a representation of this object as a JSON object,
         according to the given view_def and access control."""
-        user_id = user_id or Everyone
-        if not self.user_can(user_id, CrudPermissions.READ, permissions):
+        uagent = uagent or EveryoneUAgent
+        if not self.user_can(uagent, CrudPermissions.READ, permissions):
             return None
         view_def = get_view_def(view_def_name or 'default')
         my_typename = self.external_typename()
@@ -818,11 +825,11 @@ class BaseOps(object):
                 if isinstance(v, Base):
                     p = getattr(v, 'user_can', None)
                     if p and not v.user_can(
-                            user_id, CrudPermissions.READ, permissions):
+                            uagent, CrudPermissions.READ, permissions):
                         return None
                     if view_name:
                         return v.generic_json(
-                            view_name, user_id, permissions, base_uri)
+                            view_name, uagent, permissions, base_uri)
                     else:
                         return v.uri(base_uri)
                 elif isinstance(v, (
@@ -846,7 +853,7 @@ class BaseOps(object):
             if prop_name == 'self':
                 if view_name:
                     r = self.generic_json(
-                        view_name, user_id, permissions, base_uri)
+                        view_name, uagent, permissions, base_uri)
                     if r is not None:
                         result[name] = r
                 else:
@@ -912,17 +919,17 @@ class BaseOps(object):
                         result[name] = {
                             ob.uri(base_uri):
                             ob.generic_json(
-                                view_name, user_id, permissions, base_uri)
+                                view_name, uagent, permissions, base_uri)
                             for ob in vals
                             if ob.user_can(
-                                user_id, CrudPermissions.READ, permissions)}
+                                uagent, CrudPermissions.READ, permissions)}
                     else:
                         result[name] = [
                             ob.generic_json(
-                                view_name, user_id, permissions, base_uri)
+                                view_name, uagent, permissions, base_uri)
                             for ob in vals
                             if ob.user_can(
-                                user_id, CrudPermissions.READ, permissions)]
+                                uagent, CrudPermissions.READ, permissions)]
                 else:
                     assert not isinstance(spec, dict),\
                         "in viewdef %s, class %s, dict without viewname for %s" % (
@@ -930,7 +937,7 @@ class BaseOps(object):
                     result[name] = [
                         ob.uri(base_uri) for ob in vals
                         if ob.user_can(
-                            user_id, CrudPermissions.READ, permissions)]
+                            uagent, CrudPermissions.READ, permissions)]
                 continue
             assert not isinstance(spec, dict),\
                 "in viewdef %s, class %s, dict for non-list relation %s" % (
@@ -938,9 +945,9 @@ class BaseOps(object):
             if view_name:
                 ob = getattr(self, prop_name)
                 if ob and ob.user_can(
-                        user_id, CrudPermissions.READ, permissions):
+                        uagent, CrudPermissions.READ, permissions):
                     val = ob.generic_json(
-                        view_name, user_id, permissions, base_uri)
+                        view_name, uagent, permissions, base_uri)
                     if val is not None:
                         if isinstance(spec, list):
                             result[name] = [val]
@@ -1107,16 +1114,16 @@ class BaseOps(object):
     def _do_create_from_json(
             cls, json, parse_def, context,
             duplicate_handling=None, object_importer=None):
-        user_id = context.get_user_id()
+        uagent = context.get_uagent()
         permissions = context.get_permissions()
         duplicate_handling = \
             duplicate_handling or cls.default_duplicate_handling
         can_create = cls.user_can_cls(
-            user_id, CrudPermissions.CREATE, permissions)
+            uagent, CrudPermissions.CREATE, permissions)
         if duplicate_handling == DuplicateHandling.ERROR and not can_create:
             raise HTTPUnauthorized(
                 "User id <%s> cannot create a <%s> object" % (
-                    user_id, cls.__name__))
+                    uagent.user_id, cls.__name__))
         # creating an object can be a weird way to find an object by attributes
         inst = cls()
         i_context = inst.get_instance_context(context)
@@ -1132,14 +1139,14 @@ class BaseOps(object):
         if result is inst and not can_create:
             raise HTTPUnauthorized(
                 "User id <%s> cannot create a <%s> object" % (
-                    user_id, cls.__name__))
+                    uagent.user_id, cls.__name__))
         elif result is not inst and \
             not result.user_can(
-                user_id, CrudPermissions.UPDATE, permissions
+                uagent, CrudPermissions.UPDATE, permissions
                 ) and cls.default_db.is_modified(result, False):
             raise HTTPUnauthorized(
                 "User id <%s> cannot modify a <%s> object" % (
-                    user_id, cls.__name__))
+                    uagent.user_id, cls.__name__))
         if result is not inst:
             i_context = result.get_instance_context(context)
             cls.default_db.add(result)
@@ -1148,13 +1155,13 @@ class BaseOps(object):
         return i_context
 
     def update_from_json(
-            self, json, user_id=None, context=None, object_importer=None,
+            self, json, uagent=None, context=None, object_importer=None,
             permissions=None, parse_def_name='default_reverse'):
         """Update (patch) an object from its JSON representation."""
         # object_importer = object_importer or SimpleObjectImporter()
         parse_def = get_view_def(parse_def_name)
         context = context or self.get_instance_context()
-        user_id = context.get_user_id()
+        uagent = uagent or context.get_uagent()
         from assembl.models import DiscussionBoundBase, Discussion
         discussion = context.get_instance_of_class(Discussion)
         if not discussion and isinstance(self, DiscussionBoundBase):
@@ -1162,10 +1169,10 @@ class BaseOps(object):
         if permissions is None:
             permissions = context.get_permissions()
         if not self.user_can(
-                user_id, CrudPermissions.UPDATE, permissions):
+                uagent, CrudPermissions.UPDATE, permissions):
             raise HTTPUnauthorized(
                 "User id <%s> cannot modify a <%s> object" % (
-                    user_id, self.__class__.__name__))
+                    uagent.user_id, self.__class__.__name__))
         with self.db.no_autoflush:
             # We need this to allow db.is_modified to work well
             self._do_update_from_json(
@@ -1490,8 +1497,6 @@ class BaseOps(object):
     def _do_local_update_from_json(
             self, json, parse_def, context,
             duplicate_handling=None, object_importer=None):
-        user_id = context.get_user_id()
-
         local_view = self.expand_view_def(parse_def)
         # False means it's illegal to get this.
         assert local_view is not False
@@ -1961,7 +1966,7 @@ class BaseOps(object):
                 request=request, user_id=user_id)
             return CollectionContext(parent_context, collection, self)
 
-    def is_owner(self, user_id):
+    def is_owner(self, uagent):
         """The user owns this ressource, and has more permissions."""
         return False
 
@@ -1975,25 +1980,25 @@ class BaseOps(object):
     crud_permissions = CrudPermissions()
 
     @classmethod
-    def user_can_cls(cls, user_id, operation, permissions):
+    def user_can_cls(cls, uagent, operation, permissions):
         """Whether the user, with the given permissions,
         can perform the given Crud operation on instances of this class."""
         perm = cls.crud_permissions.can(operation, permissions)
-        user_id = user_id or Everyone
-        if perm == IF_OWNED and user_id == Everyone:
+        uagent = uagent or EveryoneUAgent
+        if perm == IF_OWNED and uagent.user_id == Everyone:
             return False
         return perm
 
-    def user_can(self, user_id, operation, permissions):
+    def user_can(self, uagent, operation, permissions):
         """Whether the user, with the given permissions,
         can perform the given Crud operation on this instance."""
-        user_id = user_id or Everyone
+        uagent = uagent or EveryoneUAgent
         perm = self.crud_permissions.can(operation, permissions)
         if perm != IF_OWNED:
             return perm
-        if user_id == Everyone:
+        if uagent.user_id == Everyone:
             return False
-        return self.is_owner(user_id)
+        return self.is_owner(uagent)
 
 
 class Timestamped(BaseOps):

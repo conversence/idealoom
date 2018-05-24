@@ -11,7 +11,7 @@
         "idIdea": "idea",
         "idPost": "content",
         "created": "creation_date",
-        "idCreator": "creator"
+        "idCreator": "creator_dagent"
     },
     "IdeaContentPositiveLink": {
         "@extends": "IdeaContentLink"

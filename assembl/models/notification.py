@@ -40,16 +40,18 @@ from pyramid_mailer.message import Message
 from jinja2 import Environment, PackageLoader
 
 from . import Base, DiscussionBoundBase, OriginMixin
+from ..auth import (Everyone, P_ADMIN_DISC, CrudPermissions, P_READ)
 from ..lib.model_watcher import BaseModelEventWatcher
 from ..lib.decl_enums import DeclEnum
 from ..lib.utils import waiting_get
 from ..lib.sqla import DuplicateHandling
 from ..lib import config
-from .auth import (
-    User, Everyone, P_ADMIN_DISC, CrudPermissions, P_READ, UserTemplate)
+from .auth import User, UserTemplate, DiscussionAgent
 from .discussion import Discussion
 from .generic import Content
 from .post import Post, SynthesisPost
+from .idea import Idea
+from .idea_content_link import Extract
 from assembl.semantic.virtuoso_mapping import QuadMapPatternS
 from assembl.semantic.namespaces import ASSEMBL
 
@@ -140,7 +142,7 @@ class NotificationSubscription(DiscussionBoundBase, OriginMixin):
         index=True)
     discussion_id = Column(
         Integer,
-        ForeignKey('discussion.id',
+        ForeignKey(Discussion.id,
                    ondelete='CASCADE',
                    onupdate='CASCADE'),
         nullable=False,
@@ -176,20 +178,35 @@ class NotificationSubscription(DiscussionBoundBase, OriginMixin):
         DateTime,
         nullable = False,
         default = datetime.utcnow)
-    user_id = Column(
+    # user_id = Column(
+    #     Integer,
+    #     ForeignKey(
+    #         'user.id',
+    #         ondelete='CASCADE',
+    #         onupdate='CASCADE'),
+    #         nullable = False,
+    #         index = True)
+    dagent_id = Column(
         Integer,
         ForeignKey(
-            'user.id',
+            DiscussionAgent.id,
             ondelete='CASCADE',
             onupdate='CASCADE'),
-            nullable = False,
-            index = True)
-    user = relationship(
-        User,
+        nullable = False,
+        index = True)
+    dagent = relationship(
+        DiscussionAgent,
         backref=backref(
             'notification_subscriptions',
             order_by="NotificationSubscription.creation_date",
             cascade="all, delete-orphan")
+    )
+    user = relationship(
+        User,
+        secondary=DiscussionAgent.__table__, uselist=False, viewonly=True,
+        backref=backref(
+            'notification_subscriptions',
+            order_by="NotificationSubscription.creation_date")
     )
 
     #allowed_transports Ex: email_bounce cannot be bounced by the same email.  For now we'll special case in code
@@ -205,7 +222,7 @@ class NotificationSubscription(DiscussionBoundBase, OriginMixin):
     def can_merge(self, other):
         return (self.discussion_id == other.discussion_id
             and self.type == other.type
-            and self.user_id == other.user_id
+            and self.dagent_id == other.dagent_id
             and self.parent_subscription_id == other.parent_subscription_id)
 
     def merge(self, other):
@@ -274,26 +291,26 @@ class NotificationSubscription(DiscussionBoundBase, OriginMixin):
                 duplicate_handling=None, object_importer=None):
         from ..auth.util import user_has_permission
         user_id = ctx.get_user_id()
-        target_user_id = user_id
+        dagent_id = ctx.get_uagent().id
         user = ctx.get_instance_of_class(User)
         if user:
-            target_user_id = user.id
-        if self.user_id:
-            if target_user_id != self.user_id:
+            dagent_id = user.id
+        if self.dagent_id:
+            if dagent_id != self.dagent_id:
                 if not user_has_permission(self.discussion_id, user_id, P_ADMIN_DISC):
                     raise HTTPUnauthorized()
             # For now, do not allow changing user, it's way too complicated.
-            if 'user' in json and User.get_database_id(json['user']) != self.user_id:
+            if 'user' in json and DiscussionAgent.get_database_id(json['user']) != self.dagent_id:
                 raise HTTPBadRequest()
         else:
-            json_user_id = json.get('user', None)
-            if json_user_id is None:
-                json_user_id = target_user_id
+            dagent_id = json.get('user', None)
+            if dagent_id is None:
+                json_user_id = dagent_id
             else:
-                json_user_id = User.get_database_id(json_user_id)
-                if json_user_id != user_id and not user_has_permission(self.discussion_id, user_id, P_ADMIN_DISC):
+                json_user_id = DiscussionAgent.get_database_id(dagent_id)
+                if dagent_id != json_user_id and not user_has_permission(self.discussion_id, dagent_id, P_ADMIN_DISC):
                     raise HTTPUnauthorized()
-            self.user_id = json_user_id
+            self.dagent_id = json_user_id
         if self.discussion_id:
             if 'discussion_id' in json and Discussion.get_database_id(json['discussion_id']) != self.discussion_id:
                 raise HTTPBadRequest()
@@ -328,12 +345,12 @@ class NotificationSubscription(DiscussionBoundBase, OriginMixin):
     def unique_query(self):
         # documented in lib/sqla
         query, _ = super(NotificationSubscription, self).unique_query()
-        user_id = self.user_id or self.user.id
+        dagent_id = self.dagent_id or self.dagent.id
         return query.filter_by(
-            user_id=user_id, type=self.type), False
+            dagent_id=dagent_id, type=self.type), False
 
-    def is_owner(self, user_id):
-        return self.user_id == user_id
+    def is_owner(self, uagent):
+        return self.dagent.profile_id == uagent.user_id
 
     def reset_defaults(self):
         # This notification belongs to a template and was changed;
@@ -353,24 +370,14 @@ class NotificationSubscription(DiscussionBoundBase, OriginMixin):
     def restrict_to_owners(cls, query, user_id):
         """Filter query according to object owners.
         Also allow to read subscriptions of templates."""
-        # optimize the join on a single table
-        utt = inspect(UserTemplate).tables[0]
-        # Find the alias for this class with black magic
-        alias = None
-        for aipaths in query._joinpath.keys():
-            for ainsp in aipaths:
-                if getattr(ainsp, '_target', None) == cls:
-                    alias = ainsp.entity
-                    break
-            if alias:
-                break
-        assert alias
-        return query.outerjoin(utt, alias.user_id == utt.c.id).filter(
-            (cls.user_id == user_id) | (utt.c.id != None))
+        return query.join(DiscussionAgent
+            ).filter((DiscussionAgent.profile_id == user_id) |
+                     (DiscussionAgent.template == True))
 
-    def user_can(self, user_id, operation, permissions):
+    def user_can(self, uagent, operation, permissions):
         # special case: If you can read the discussion, you can read
         # the template's notification.
+        user_id = uagent.user_id
         if user_id == Everyone:
             user = None
         else:
@@ -380,9 +387,9 @@ class NotificationSubscription(DiscussionBoundBase, OriginMixin):
                 user = User.get(user_id)
         if (operation == CrudPermissions.READ
                 and user and isinstance(user, UserTemplate)):
-            return self.discussion.user_can(user_id, operation, permissions)
+            return self.discussion.user_can(uagent, operation, permissions)
         return super(NotificationSubscription, self).user_can(
-            user_id, operation, permissions)
+            uagent, operation, permissions)
 
     crud_permissions = CrudPermissions(
         P_READ, P_ADMIN_DISC, P_ADMIN_DISC, P_ADMIN_DISC,
@@ -447,7 +454,7 @@ class NotificationSubscriptionOnPost(NotificationSubscriptionOnObject):
     ), primary_key=True)
 
     post_id = Column(
-        Integer, ForeignKey("post.id",
+        Integer, ForeignKey(Post.id,
             ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
 
     post = relationship("Post", backref=backref(
@@ -490,7 +497,7 @@ class NotificationSubscriptionOnIdea(NotificationSubscriptionOnObject):
     ), primary_key=True)
 
     idea_id = Column(
-        Integer, ForeignKey("idea.id",
+        Integer, ForeignKey(Idea.id,
             ondelete='CASCADE', onupdate='CASCADE'),
         nullable=False, index=True)
 
@@ -534,7 +541,7 @@ class NotificationSubscriptionOnExtract(NotificationSubscriptionOnObject):
     ), nullable=False, primary_key=True)
 
     extract_id = Column(
-        Integer, ForeignKey("extract.id",
+        Integer, ForeignKey(Extract.id,
             ondelete='CASCADE', onupdate='CASCADE'),
         nullable=False, index=True)
 
@@ -577,25 +584,37 @@ class NotificationSubscriptionOnUserAccount(NotificationSubscriptionOnObject):
         onupdate='CASCADE'
     ), primary_key=True)
 
-    on_user_id = Column(
-        Integer, ForeignKey("user.id",
+    # on_user_id = Column(
+    #     Integer, ForeignKey("user.id",
+    #         ondelete='CASCADE', onupdate='CASCADE'),
+    #     nullable=False, index=True)
+
+    on_dagent_id = Column(
+        Integer, ForeignKey(DiscussionAgent.id,
             ondelete='CASCADE', onupdate='CASCADE'),
         nullable=False, index=True)
 
-    on_user = relationship("User", foreign_keys=[on_user_id], backref=backref(
-        "subscriptions_on_user", cascade="all, delete-orphan"))
+    on_dagent = relationship(
+        DiscussionAgent,
+        foreign_keys=[on_dagent_id],
+        backref=backref(
+            "subscriptions_on_user", cascade="all, delete-orphan"))
+
+    on_user = relationship(
+        User, secondary=DiscussionAgent.__table__, uselist=False, viewonly=True,
+        backref=backref("subscriptions_on_user"))
 
     def followed_object(self):
         return self.user
 
     def can_merge(self, other):
         return (super(NotificationSubscriptionOnPost, self).can_merge(other)
-            and self.on_user_id == other.on_user_id)
+            and self.on_dagent_id == other.on_dagent_id)
 
     def unique_query(self):
         query, _ = super(NotificationSubscriptionOnUserAccount, self).unique_query()
-        on_user_id = self.on_user_id or self.on_user.id
-        return query.filter_by(on_user_id=on_user_id), True
+        on_dagent_id = self.on_dagent_id or self.on_dagent.id
+        return query.filter_by(on_dagent_id=on_dagent_id), True
 
     def _do_update_from_json(
             self, json, parse_def, ctx,
@@ -604,7 +623,7 @@ class NotificationSubscriptionOnUserAccount(NotificationSubscriptionOnObject):
             NotificationSubscriptionOnUserAccount, self)._do_update_from_json(
                 json, parse_def, ctx, duplicate_handling, object_importer)
         if updated == self:
-            self.on_user_id = json.get('on_user_id', self.on_user_id)
+            self.on_dagent_id = json.get('on_user_id', self.on_dagent_id)
         return updated
 
 
@@ -730,12 +749,12 @@ class ModelEventWatcherNotificationSubscriptionDispatcher(BaseModelEventWatcher)
         for subscriptionClass in subscriptionClasses:
             applicableInstances = subscriptionClass.findApplicableInstances(objectInstance.get_discussion_id(), CrudVerbs.CREATE, objectInstance)
             for subscription in applicableInstances:
-                applicableInstancesByUser[subscription.user_id].append(subscription)
+                applicableInstancesByUser[subscription.dagent_id].append(subscription)
         num_instances = len([v for v in applicableInstancesByUser.values() if v])
         print("processEvent: %d notifications created for %s %s %d" % (
             num_instances, verb, objectClass.__name__, objectId))
         with transaction.manager:
-            for userId, applicableInstances in applicableInstancesByUser.items():
+            for agentId, applicableInstances in applicableInstancesByUser.items():
                 if(len(applicableInstances) > 0):
                     applicableInstances.sort(key=lambda n: n.priority)
                     applicableInstances[0].process(objectInstance.get_discussion_id(), verb, objectInstance, applicableInstances[1:])
@@ -1008,7 +1027,7 @@ class Notification(Base):
         return message
 
 
-User.notifications = relationship(
+DiscussionAgent.notifications = relationship(
     Notification, viewonly=True,
     secondary=NotificationSubscription.__mapper__.mapped_table,
     backref="owner")

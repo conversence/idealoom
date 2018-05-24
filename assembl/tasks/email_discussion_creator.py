@@ -29,7 +29,7 @@ class EmailCreatorAtDiscussionCreation(object):
         from assembl.models import Notification
         from ..lib.frontend_urls import FrontendUrls
         from premailer import Premailer
-        profile = discussion.creator
+        profile = discussion.dagent_creator.user
         assert profile
         jinja_env = Notification.make_jinja_env()
         (assembl_css, ink_css) = Notification.get_css_paths(discussion)

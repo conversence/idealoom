@@ -144,7 +144,7 @@ from .uriref import (
 from .auth import (
     AbstractAgentAccount,
     AgentProfile,
-    AgentStatusInDiscussion,
+    DiscussionAgent,
     AnonymousUser,
     DiscussionPermission,
     EmailAccount,

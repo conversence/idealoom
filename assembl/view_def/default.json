@@ -30,48 +30,35 @@
         "translate_to_name": "translate"
     },
     "Agent": {
+        "discussion": true,
+        "first_visit": true,
+        "last_visit": true,
+        "first_subscribed": true,
+        "last_unsubscribed": true,
+        "user_created_on_this_discussion": true,
+
         "description": true,
         "avatar_url_base": "&external_avatar_url",
         "name": "&display_name",
         "real_name": "&real_name",
         "preferred_email": false,
-        "was_created_on_current_discussion": false,
-        "is_first_visit": false,
-        "accounts": [":default"]
-    },
-    "User": {
-        "@extends": "Agent",
-        "created": "creation_date",
-        "last_login": true,
+        "accounts": ["&get_accounts:default"],
+
+        "created": "first_visit",
         "login_expiry": "&login_expiry_req",
-        "login_failures": false,
-        "password": false,
         "verified": true,
         "is_first_visit": true,
-        "last_visit": true,
-        "first_visit": true,
         "accepted_tos_version": true,
-        "was_created_on_current_discussion": true,
-        "permissions": "permissions_for_current_discussion",
+        "permissions": "&get_permissions",
         "username": true
     },
     "UserTemplate": {
-        "@extends": "User",
         "discussion": true,
-        "for_role": ":"
-    },
-    "AgentStatusInDiscussion": {
-        "discussion": true,
-        "agent_profile": true,
-        "first_visit": true,
-        "last_visit": true,
-        "first_subscribed": true,
-        "last_unsubscribed": true,
-        "user_created_on_this_discussion": true
+        "name": "&display_name"
     },
     "Update": {
         "when": "creation_date",
-        "who": "actor"
+        "who": "actor_dagent"
     },
     "ActionOnPost": {
         "@extends": "Update",
@@ -95,8 +82,7 @@
     "UserAccount": {
         "preferred": true,
         "email": true,
-        "verified": true,
-        "profile": true
+        "verified": true
     },
     "EmailAccount": {
         "@extends": "UserAccount",
@@ -225,7 +211,7 @@
         "message_id": false,
         "ancestry": false,
         "parentId": "parent",
-        "idCreator": "creator",
+        "idCreator": "creator_dagent",
         "bodyMimeType": "&get_body_mime_type",
         "attachments": [":default"],
         "extracts": [":id_only"]
@@ -283,7 +269,7 @@
         "widget_collection_url": true,
         "objectives": true,
         "instigator": true,
-        "creator": true,
+        "creator": "creator_dagent",
         "introduction": true,
         "introductionDetails": true,
         "sources": [":partial"],
@@ -356,7 +342,7 @@
         "idIdea": "idea",
         "idPost": "content",
         "created": "creation_date",
-        "idCreator": "creator"
+        "idCreator": "creator_dagent"
     },
     "IdeaContentPositiveLink": {
         "@extends": "IdeaContentLink"
@@ -375,8 +361,8 @@
         "target": true,
         "important": true,
         "annotator_schema_version": "'\"v1.0\"",
-        "owner": true,
-        "attributed_to": true,
+        "owner": "owner_dagent",
+        "attributed_to": "attributed_to_dagent",
         "quote": true,
         "order": true,
         "discussion": false,
@@ -485,7 +471,7 @@
         "value": true,
         "original_uri": true,
         "vote_spec": true,
-        "voter": true
+        "voter": "voter_dagent"
     },
     "BinaryVote": {
         "@extends": "AbstractIdeaVote"
@@ -539,7 +525,7 @@
         "last_status_change_date": true,
         "followed_object": "&followed_object",
         "human_readable_description": "&get_human_readable_description",
-        "user": true
+        "user": "dagent"
     },
     "NotificationSubscriptionFollowSyntheses": {
         "@extends": "NotificationSubscription"
@@ -566,7 +552,7 @@
         "@extends": "Notification"
     },
     "LocalUserRole": {
-        "user": true,
+        "user": "dagent",
         "requested": true,
         "role": "&get_role_name",
         "discussion": true
@@ -638,7 +624,7 @@
     "Attachment": {
         "document": [":"],
         "idAttachedDocument": "document",
-        "idCreator": "creator",
+        "idCreator": "creator_dagent",
         "attachmentPurpose": true,
         "title": true,
         "description": true,
@@ -659,8 +645,8 @@
     "Announcement": {
         "created": "creation_date",
         "modification_date": true,
-        "creator": true,
-        "last_updated_by": true,
+        "creator": "creator_dagent",
+        "last_updated_by": "last_updated_by_dagent",
         "title": ":extended",
         "body": ":extended"
     },

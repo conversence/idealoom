@@ -11,7 +11,7 @@ from sqlalchemy.orm import (joinedload, subqueryload, undefer)
 
 from assembl.views.api import API_DISCUSSION_PREFIX
 from assembl.models import (
-    Idea, RootIdea, IdeaLink, Discussion,
+    Idea, RootIdea, IdeaLink, Discussion, DiscussionAgent,
     Extract, SubGraphIdeaAssociation, LangString)
 from assembl.auth import (P_READ, P_ADD_IDEA, P_EDIT_IDEA)
 

@@ -7,7 +7,7 @@ def notification_key(notif):
         NotificationSubscriptionOnPost,
         NotificationSubscriptionOnIdea, NotificationSubscriptionOnExtract,
         NotificationSubscriptionOnUserAccount)
-    key = (notif.discussion_id, notif.user_id,
+    key = (notif.discussion_id, notif.dagent_id,
            notif.parent_subscription_id, notif.type)
     if isinstance(notif, NotificationSubscriptionOnPost):
         key = tuple(chain(key, (notif.post_id, )))

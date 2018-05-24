@@ -71,22 +71,22 @@ MULTIPART_HEADER = "Content-Type:multipart/form-data"
 
 
 def check_permissions(
-        ctx, user_id, operation, cls=None):
+        ctx, uagent, operation, cls=None):
     cls = cls or ctx.get_target_class()
     permissions = ctx.get_permissions()
-    allowed = cls.user_can_cls(user_id, operation, permissions)
-    if not allowed or (allowed == IF_OWNED and user_id == Everyone):
+    allowed = cls.user_can_cls(uagent, operation, permissions)
+    if not allowed or (allowed == IF_OWNED and uagent.isEveryone):
         raise HTTPUnauthorized()
     return allowed
 
 
 class CreationResponse(Response):
     def __init__(
-            self, ob_created, user_id=Everyone, permissions=(P_READ,),
+            self, ob_created, uagent=Everyone, permissions=(P_READ,),
             view='default', uri=None):
         uri = uri or ob_created.uri()
         super(CreationResponse, self).__init__(
-            dumps(ob_created.generic_json(view, user_id, permissions)),
+            dumps(ob_created.generic_json(view, uagent, permissions)),
             location=uri, status_code=201, content_type="application/json",
             charset="utf-8")
 
@@ -95,20 +95,21 @@ class CreationResponse(Response):
              request_method='GET', permission=P_READ)
 def class_view(request):
     ctx = request.context
-    user_id = authenticated_userid(request) or Everyone
-    check = check_permissions(ctx, user_id, CrudPermissions.READ)
+    uagent = ctx.get_uagent()
+    user_id = uagent.user_id
+    check = check_permissions(ctx, uagent, CrudPermissions.READ)
     view = request.GET.get('view', None) or ctx.get_default_view() or 'id_only'
     tombstones = asbool(request.GET.get('tombstones', False))
     q = ctx.create_query(view == 'id_only', tombstones)
     if check == IF_OWNED:
-        if user_id == Everyone:
+        if uagent.isEveryone:
             raise HTTPUnauthorized()
         q = ctx.get_target_class().restrict_to_owners(q, user_id)
     if view == 'id_only':
         return [ctx._class.uri_generic(x) for (x,) in q.all()]
     else:
         permissions = ctx.get_permissions()
-        r = [i.generic_json(view, user_id, permissions) for i in q.all()]
+        r = [i.generic_json(view, uagent, permissions) for i in q.all()]
         return [x for x in r if x is not None]
 
 
@@ -125,10 +126,10 @@ def instance_view_jsonld(request):
     from assembl.semantic.virtuoso_mapping import AppQuadStorageManager
     from rdflib import URIRef, ConjunctiveGraph
     ctx = request.context
-    user_id = authenticated_userid(request) or Everyone
+    uagent = request.uagent
     permissions = ctx.get_permissions()
     instance = ctx._instance
-    if not instance.user_can(user_id, CrudPermissions.READ, permissions):
+    if not instance.user_can(uagent, CrudPermissions.READ, permissions):
         raise HTTPUnauthorized()
     discussion = ctx.get_instance_of_class(Discussion)
     if not discussion:
@@ -152,35 +153,35 @@ def instance_view_jsonld(request):
              request_method='GET', accept="application/json")
 def instance_view(request):
     ctx = request.context
-    user_id = authenticated_userid(request) or Everyone
+    uagent = request.uagent
     permissions = ctx.get_permissions()
     instance = ctx._instance
     request.logger().info('instance_view', instance=instance, _name='assembl.views.api2')
-    if not instance.user_can(user_id, CrudPermissions.READ, permissions):
+    if not instance.user_can(uagent, CrudPermissions.READ, permissions):
         raise HTTPUnauthorized()
     view = ctx.get_default_view() or 'default'
     view = request.GET.get('view', view)
-    return instance.generic_json(view, user_id, permissions)
+    return instance.generic_json(view, uagent, permissions)
 
 
 @view_config(context=CollectionContext, renderer='json',
              request_method='GET')
 def collection_view(request, default_view='default'):
     ctx = request.context
-    user_id = authenticated_userid(request) or Everyone
+    uagent = request.uagent
     permissions = ctx.get_permissions()
-    check = check_permissions(ctx, user_id, CrudPermissions.READ)
+    check = check_permissions(ctx, uagent, CrudPermissions.READ)
     view = request.GET.get('view', None) or ctx.get_default_view() or default_view
     tombstones = asbool(request.GET.get('tombstones', False))
     q = ctx.create_query(view == 'id_only', tombstones)
     if check == IF_OWNED:
-        if user_id == Everyone:
+        if uagent.isEveryone:
             raise HTTPUnauthorized()
-        q = ctx.get_target_class().restrict_to_owners(q, user_id)
+        q = ctx.get_target_class().restrict_to_owners(q, uagent.user_id)
     if view == 'id_only':
         return [ctx.collection_class.uri_generic(x) for (x,) in q.all()]
     else:
-        res = [i.generic_json(view, user_id, permissions) for i in q.all()]
+        res = [i.generic_json(view, uagent, permissions) for i in q.all()]
         return [x for x in res if x is not None]
 
 
@@ -194,18 +195,18 @@ def instance_post(request):
 def instance_put_json(request, json_data=None):
     json_data = json_data or request.json_body
     ctx = request.context
-    user_id = authenticated_userid(request) or Everyone
+    uagent = request.uagent
     permissions = ctx.get_permissions()
     instance = ctx._instance
-    if not instance.user_can(user_id, CrudPermissions.UPDATE, permissions):
+    if not instance.user_can(uagent, CrudPermissions.UPDATE, permissions):
         raise HTTPUnauthorized()
     try:
-        updated = instance.update_from_json(json_data, user_id, ctx)
+        updated = instance.update_from_json(json_data, uagent, ctx)
         view = request.GET.get('view', None) or 'default'
         if view == 'id_only':
             return [updated.uri()]
         else:
-            return updated.generic_json(view, user_id, permissions)
+            return updated.generic_json(view, uagent, permissions)
 
     except NotImplementedError:
         raise HTTPNotImplemented()
@@ -267,27 +268,26 @@ def update_from_form(instance, form_data=None):
 def instance_put_form(request, form_data=None):
     form_data = form_data or request.params
     ctx = request.context
-    user_id = authenticated_userid(request) or Everyone
+    uagent = request.uagent
     permissions = ctx.get_permissions()
     instance = ctx._instance
-    if not instance.user_can(user_id, CrudPermissions.UPDATE, permissions):
+    if not instance.user_can(uagent, CrudPermissions.UPDATE, permissions):
         raise HTTPUnauthorized()
     update_from_form(instance, form_data)
     view = request.GET.get('view', None) or 'default'
     if view == 'id_only':
         return [instance.uri()]
     else:
-        user_id = authenticated_userid(request) or Everyone
-        return instance.generic_json(view, user_id, permissions)
+        return instance.generic_json(view, uagent, permissions)
 
 
 @view_config(context=InstanceContext, request_method='DELETE', renderer='json')
 def instance_del(request):
     ctx = request.context
-    user_id = authenticated_userid(request) or Everyone
+    uagent = request.uagent
     permissions = ctx.get_permissions()
     instance = ctx._instance
-    if not instance.user_can(user_id, CrudPermissions.DELETE, permissions):
+    if not instance.user_can(uagent, CrudPermissions.DELETE, permissions):
         raise HTTPUnauthorized()
     if isinstance(instance, TombstonableMixin):
         instance.is_tombstone = True
@@ -314,11 +314,11 @@ def show_class_names(request):
 def collection_add_json(request, json=None):
     ctx = request.context
     json = request.json_body if json is None else json
-    user_id = authenticated_userid(request) or Everyone
+    uagent = ctx.get_uagent()
     permissions = ctx.get_permissions()
     cls = ctx.get_collection_class(json.get('@type', None))
     typename = cls.external_typename()
-    check_permissions(ctx, user_id, CrudPermissions.CREATE, cls)
+    check_permissions(ctx, uagent, CrudPermissions.CREATE, cls)
     try:
         instances = ctx.create_object(typename, json)
     except Exception as e:
@@ -330,7 +330,7 @@ def collection_add_json(request, json=None):
             db.add(instance)
         db.flush()
         view = request.GET.get('view', None) or 'default'
-        return CreationResponse(first, user_id, permissions, view)
+        return CreationResponse(first, uagent, permissions, view)
 
 
 def includeme(config):

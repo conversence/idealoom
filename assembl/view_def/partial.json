@@ -23,21 +23,15 @@
         "value": true
     },
     "Agent": {
-        "description": false,
-        "preferred_email": false,
-        "name": "&display_name"
-    },
-    "User": {
-        "@extends": "Agent",
-        "created": "creation_date",
-        "last_login": true,
-        "login_failures": false,
-        "password": false
+        "discussion": true,
+        "name": "&display_name",
+        "created": "first_visit",
+        "last_visit": true
     },
     "UserTemplate": {
-        "@extends": "User",
+        "@extends": "Agent",
         "discussion": true,
-        "for_role": true
+        "roles": [":default"]
     },
     "EmailAccount": false,
     "SocialAuthAccount": false,
@@ -88,7 +82,7 @@
         "message_id": false,
         "ancestry": false,
         "parentId": "parent",
-        "idCreator": "creator"
+        "idCreator": "creator_dagent"
     },
     "LocalPost": {
         "@extends": "Post"
@@ -172,7 +166,7 @@
         "idIdea": "idea",
         "idPost": "content",
         "created": "creation_date",
-        "idCreator": "creator"
+        "idCreator": "creator_dagent"
     },
     "IdeaContentPositiveLink": {
         "@extends": "IdeaContentLink"
@@ -189,8 +183,8 @@
     "Excerpt": {
         "@extends": "IdeaContentPositiveLink",
         "important": true,
-        "owner": true,
-        "attributed_to": true,
+        "owner": "owner_dagent",
+        "attributed_to": "attributed_to_dagent",
         "quote": true,
         "order": true,
         "discussion": false,
@@ -213,7 +207,7 @@
         "role": "&role_name"
     },
     "Update": {
-        "who": "actor"
+        "who": "actor_dagent"
     },
     "ActionOnPost": {
         "@extends": "Update",
@@ -259,7 +253,7 @@
     "AbstractIdeaVote": {
         "idea": true,
         "value": true,
-        "voter": true
+        "voter": "voter_dagent"
     },
     "BinaryVote": {
         "@extends": "AbstractIdeaVote"

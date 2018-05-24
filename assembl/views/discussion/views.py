@@ -100,6 +100,7 @@ def home_view(request):
     """The main view on a discussion"""
     user_id = get_non_expired_user_id(request) or Everyone
     context = get_default_context(request)
+    uagent = request.uagent
     discussion = context["discussion"]
     canRead = user_has_permission(discussion.id, user_id, P_READ)
     if not canRead and user_id == Everyone:
@@ -170,10 +171,10 @@ def home_view(request):
     session = Discussion.default_db
     if user_id != Everyone:
         from assembl.models import UserPreferenceCollection
-        user = User.get(user_id)
-        preferences = UserPreferenceCollection(user_id, discussion)
+        preferences = UserPreferenceCollection(uagent.id, discussion)
         # TODO: user may not exist. Case of session with BD change.
-        user.is_visiting_discussion(discussion.id)
+        uagent.is_visiting_discussion()
+        user = uagent.user
 
         if '_LOCALE_' in request.cookies:
             locale = request.cookies['_LOCALE_']

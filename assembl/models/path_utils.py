@@ -328,7 +328,7 @@ class PostPathLocalCollection(object):
             q = q.alias("relposts")
         return q
 
-    def as_clause(self, db, discussion_id, user_id=None, content=None,
+    def as_clause(self, db, discussion_id, dagent_id=None, content=None,
                   include_deleted=False):
         subq = self.as_clause_base(db, discussion_id, include_deleted=include_deleted)
         content = content or with_polymorphic(
@@ -350,13 +350,13 @@ class PostPathLocalCollection(object):
             else:
                 q = q.filter(content.tombstone_date == None)
 
-        if user_id:
+        if dagent_id:
             # subquery?
             q = q.outerjoin(
                 ViewPost,
                 (ViewPost.post_id == content.id)
                 & (ViewPost.tombstone_date == None)
-                & (ViewPost.actor_id == user_id)
+                & (ViewPost.actor_dagent_id == dagent_id)
                 ).add_columns(ViewPost.id)
         return q
 
@@ -440,7 +440,7 @@ class PostPathCombiner(PostPathGlobalCollection, IdeaVisitor):
         self.root_idea_id = idea_id
         return result
 
-    def orphan_clause(self, user_id=None, content=None, include_deleted=False):
+    def orphan_clause(self, dagent_id=None, content=None, include_deleted=False):
         root_path = self.paths[self.root_idea_id]
         db = self.discussion.default_db
         subq = root_path.as_clause_base(db, self.discussion.id, include_deleted=include_deleted)
@@ -466,26 +466,26 @@ class PostPathCombiner(PostPathGlobalCollection, IdeaVisitor):
             else:
                 q = q.filter(content.tombstone_date == None)
 
-        if user_id:
+        if dagent_id:
             # subquery?
             q = q.outerjoin(
                 ViewPost,
                 (ViewPost.post_id == content.id)
                 & (ViewPost.tombstone_date == None)
-                & (ViewPost.actor_id == user_id)
+                & (ViewPost.actor_dagent_id == dagent_id)
                 ).add_columns(ViewPost.id)
         return q
 
 
 class PostPathCounter(PostPathCombiner):
     "Adds the ability to do post counts to PostPathCombiner."
-    def __init__(self, discussion, user_id=None, calc_subset=None):
+    def __init__(self, discussion, dagent_id=None, calc_subset=None):
         super(PostPathCounter, self).__init__(discussion)
         self.counts = {}
         self.viewed_counts = {}
         self.read_counts = {}
         self.contributor_counts = {}
-        self.user_id = user_id
+        self.dagent_id = dagent_id
         self.calc_subset = calc_subset
 
     def copy_result(self, idea_id, parent_result, child_result):
@@ -513,16 +513,16 @@ class PostPathCounter(PostPathCombiner):
             post, (content_entity.id == post.id) &
                   (post.publication_state.in_(countable_publication_states)))
 
-        if self.user_id:
+        if self.dagent_id:
             action_entity = entities['action']
             return q.with_entities(
                 count(content_entity.id),
-                count(post.creator_id.distinct()),
+                count(post.creator_dagent_id.distinct()),
                 count(action_entity.id)).first()
         else:
             (post_count, contributor_count) = q.with_entities(
                 count(content_entity.id),
-                count(post.creator_id.distinct())).first()
+                count(post.creator_dagent_id.distinct())).first()
             return (post_count, contributor_count, 0)
 
     def get_counts(self, idea_id):
@@ -543,7 +543,7 @@ class PostPathCounter(PostPathCombiner):
             self.viewed_counts[idea_id] = 0
             return (0, 0, 0)
         q = path_collection.as_clause(
-            self.discussion.db, self.discussion.id, user_id=self.user_id,
+            self.discussion.db, self.discussion.id, dagent_id=self.dagent_id,
             include_deleted=None)
         (
             post_count, contributor_count, viewed_count
@@ -562,7 +562,7 @@ class PostPathCounter(PostPathCombiner):
 
     def get_orphan_counts(self, include_deleted=False):
         return self.get_counts_for_query(
-            self.orphan_clause(self.user_id, include_deleted=include_deleted))
+            self.orphan_clause(self.dagent_id, include_deleted=include_deleted))
 
     def end_visit(self, idea_id, level, result, child_results):
         if isinstance(idea_id, Idea):
@@ -576,10 +576,10 @@ class PostPathCounter(PostPathCombiner):
 
 class DiscussionGlobalData(object):
     "Cache for global discussion data, lasts as long as the pyramid request object."
-    def __init__(self, db, discussion_id, user_id=None, discussion=None):
+    def __init__(self, db, discussion_id, dagent_id=None, discussion=None):
         self.discussion_id = discussion_id
         self.db = db
-        self.user_id = user_id
+        self.dagent_id = dagent_id
         self._discussion = discussion
         self._parent_dict = None
         self._children_dict = None
@@ -642,12 +642,12 @@ class DiscussionGlobalData(object):
             self._post_path_collection_raw = PostPathGlobalCollection(self.discussion)
         return self._post_path_collection_raw
 
-    def post_path_counter(self, user_id, calc_all):
+    def post_path_counter(self, dagent_id, calc_all):
         if (self._post_path_counter is None
                 or not isinstance(self._post_path_counter, PostPathCounter)):
             collection = self.post_path_collection_raw
             counter = PostPathCounter(
-                self.discussion, user_id, None if calc_all else ())
+                self.discussion, dagent_id, None if calc_all else ())
             counter.init_from(self.post_path_collection_raw)
             Idea.visit_idea_ids_depth_first(
                 counter, self.discussion_id, self.children_dict)

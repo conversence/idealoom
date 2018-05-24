@@ -46,7 +46,7 @@ from ..auth import (
     CrudPermissions, Authenticated, Everyone)
 from .auth import (
     DiscussionPermission, Role, Permission, User, UserRole, LocalUserRole,
-    UserTemplate)
+    UserTemplate, DiscussionAgent)
 from .preferences import Preferences
 from ..semantic.namespaces import (CATALYST, ASSEMBL, DCTERMS)
 
@@ -83,11 +83,23 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
     homepage_url = Column(URLString, nullable=True, default=None)
     show_help_in_debate_section = Column(Boolean, default=True)
     preferences_id = Column(Integer, ForeignKey(Preferences.id))
-    creator_id = Column(Integer, ForeignKey('user.id', ondelete="SET NULL"))
+    # creator_id = Column(Integer, ForeignKey('user.id', ondelete="SET NULL"))
+    creator_dagent_id = Column(Integer, ForeignKey(DiscussionAgent.id, ondelete="SET NULL"))
 
     preferences = relationship(Preferences, backref=backref(
         'discussion'), cascade="all, delete-orphan", single_parent=True)
-    creator = relationship('User', backref="discussions_created")
+    creator_dagent = relationship(
+        DiscussionAgent,
+        primaryjoin="Discussion.creator_dagent_id==DiscussionAgent.id",
+        backref="discussions_created")
+    creator = relationship(
+        User,
+        primaryjoin="Discussion.creator_dagent_id==DiscussionAgent.id",
+        secondary=DiscussionAgent.__table__, uselist=False, viewonly=True,
+        backref="discussions_created")
+
+    user_templates = relationship(
+        UserTemplate, primaryjoin=UserTemplate.discussion_id == id)
 
     @classmethod
     def get_naming_column_name(cls):
@@ -140,21 +152,21 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
         url = self.check_url_or_none(url)
         self.logo_url = url
 
-    def read_post_ids(self, user_id):
+    def read_post_ids(self, dagent_id):
         from .post import Post
         from .action import ViewPost
         return (x[0] for x in self.db.query(Post.id).join(
             ViewPost
         ).filter(
             Post.discussion_id == self.id,
-            ViewPost.actor_id == user_id,
+            ViewPost.actor_dagent_id == dagent_id,
             ViewPost.post_id == Post.id
         ))
 
-    def get_read_posts_ids_preload(self, user_id):
+    def get_read_posts_ids_preload(self, dagent_id):
         from .post import Post
         return json.dumps([
-            Post.uri_generic(id) for id in self.read_post_ids(user_id)])
+            Post.uri_generic(id) for id in self.read_post_ids(dagent_id)])
 
     def import_from_sources(self, only_new=True):
         for source in self.sources:
@@ -190,11 +202,13 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
             yield self.next_synthesis.get_instance_context(
                 self.get_collection_context("next_synthesis", context))
         participant = self.db.query(Role).filter_by(name=R_PARTICIPANT).one()
-        ut = UserTemplate(
-            discussion=self, for_role=participant)
+        ut = UserTemplate(discussion=self)
         template_ctx = ut.get_instance_context(
             self.get_collection_context("user_templates", context))
         yield template_ctx
+        lur = LocalUserRole(dagent=ut, discussion=discussion_id, role=participant)
+        lur_ctxt = template_ctx.get_collection_context("local_user_roles")
+        yield lur.get_instance_context(lur_ctxt)
         nss, _ = ut.get_notification_subscriptions_and_changed(False)
         subs_ctx = ut.get_collection_context(
             "notification_subscriptions", template_ctx)
@@ -318,11 +332,11 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
 
     def get_readers(self):
         session = self.db
-        users = session.query(User).join(
-            UserRole, Role, DiscussionPermission, Permission).filter(
+        users = session.query(DiscussionAgent).join(
+            User, UserRole, Role, DiscussionPermission, Permission).filter(
                 DiscussionPermission.discussion_id == self.id and
                 Permission.name == P_READ
-            ).union(self.db.query(User).join(
+            ).union(self.db.query(DiscussionAgent).join(
                 LocalUserRole, Role, DiscussionPermission, Permission).filter(
                     DiscussionPermission.discussion_id == self.id and
                     LocalUserRole.discussion_id == self.id and
@@ -341,13 +355,15 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
             pass  # add a pseudo-anonymous user?
         return users
 
-    def get_all_agents_preload(self, user=None):
+    def get_all_agents_preload(self, uagent=None):
         from assembl.views.api.agent import _get_agents_real
-        from pyramid.threadlocal import get_current_request
-        request = get_current_request()
-        assert request
+        if uagent is None:
+            from pyramid.threadlocal import get_current_request
+            request = get_current_request()
+            if request:
+                uagent = request.uagent
         return json.dumps(_get_agents_real(
-            request, user.id if user else Everyone, 'partial'))
+            self, uagent, view_def='partial'))
 
     def get_readers_preload(self):
         return json.dumps([user.generic_json('partial') for user in self.get_readers()])
@@ -462,7 +478,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
 
     def get_user_template(self, role_name, autocreate=False, on_thread=True):
         template = self.db.query(UserTemplate).join(
-            Role).filter(Role.name == role_name).join(
+            LocalUserRole, Role).filter(Role.name == role_name).join(
             Discussion, UserTemplate.discussion).filter(
             Discussion.id == self.id).first()
         changed = False
@@ -472,8 +488,10 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
             from .notification import (
                 NotificationCreationOrigin, NotificationSubscriptionFollowSyntheses)
             role = self.db.query(Role).filter_by(name=role_name).one()
-            template = UserTemplate(for_role=role, discussion=self)
+            template = UserTemplate(discussion=self)
+            lur = LocalUserRole(dagent=template, role=role, discussion=self)
             self.db.add(template)
+            self.db.add(lur)
             self.db.flush()
             subs, changed = template.get_notification_subscriptions_and_changed(on_thread)
             self.db.flush()
@@ -494,7 +512,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
             changed |= changed2
             for subscription in template_subscriptions:
                 if subscription.status == NotificationSubscriptionStatus.ACTIVE:
-                    roles_subscribed[subscription.__class__].append(template.role_id)
+                    roles_subscribed[subscription.__class__].append(template.for_role.id)
         if force or changed:
             needed_classes = UserTemplate.get_applicable_notification_subscriptions_classes()
             for notif_cls in needed_classes:
@@ -505,17 +523,13 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
         from .notification import (
             NotificationSubscription, NotificationSubscriptionStatus,
             NotificationCreationOrigin)
-        from .auth import AgentStatusInDiscussion
+        from .auth import DiscussionAgent
         # Make most subscriptions inactive (simpler than deciding which ones should be)
         default_ns = self.db.query(notif_cls.id
-            ).join(User, notif_cls.user_id == User.id
-            ).join(LocalUserRole, LocalUserRole.user_id == User.id
-            ).join(AgentStatusInDiscussion,
-                   AgentStatusInDiscussion.profile_id == User.id
+            ).join(DiscussionAgent, notif_cls.dagent_id == DiscussionAgent.id
             ).filter(
-                LocalUserRole.discussion_id == self.id,
-                AgentStatusInDiscussion.discussion_id == self.id,
-                AgentStatusInDiscussion.last_visit != None,
+                DiscussionAgent.discussion_id == self.id,
+                DiscussionAgent.last_visit != None,
                 notif_cls.discussion_id == self.id,
                 notif_cls.creation_origin == NotificationCreationOrigin.DISCUSSION_DEFAULT)
         deactivated = default_ns.filter(
@@ -532,15 +546,13 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
                      "last_status_change_date": datetime.utcnow()},
                     synchronize_session=False)
             # Materialize missing subscriptions
-            missing_subscriptions_query = self.db.query(User.id
-                ).join(LocalUserRole, LocalUserRole.user_id == User.id
-                ).join(AgentStatusInDiscussion,
-                       AgentStatusInDiscussion.profile_id == User.id
-                ).outerjoin(notif_cls, (notif_cls.user_id == User.id) & (
+            missing_subscriptions_query = self.db.query(DiscussionAgent.id
+                ).join(LocalUserRole, LocalUserRole.dagent_id == DiscussionAgent.id
+                ).outerjoin(notif_cls, (notif_cls.dagent_id == DiscussionAgent.id) & (
                                         notif_cls.discussion_id == self.id)
                 ).filter(LocalUserRole.discussion_id == self.id,
-                         AgentStatusInDiscussion.discussion_id == self.id,
-                         AgentStatusInDiscussion.last_visit != None,
+                         DiscussionAgent.discussion_id == self.id,
+                         DiscussionAgent.last_visit != None,
                          LocalUserRole.role_id.in_(roles_subscribed),
                          notif_cls.id == None).distinct()
 
@@ -548,10 +560,10 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
                 return [
                     notif_cls(
                         discussion_id=self.id,
-                        user_id=user_id,
+                        dagent_id=dagent_id,
                         creation_origin=NotificationCreationOrigin.DISCUSSION_DEFAULT,
                         status=NotificationSubscriptionStatus.ACTIVE)
-                    for (user_id,) in missing_subscriptions_query]
+                    for (dagent_id,) in missing_subscriptions_query]
 
             self.locked_object_creation(
                 missing_subscriptions_gen, NotificationSubscription, 10)
@@ -595,7 +607,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
 
         class AllUsersCollection(AbstractCollectionDefinition):
             def __init__(self, cls):
-                super(AllUsersCollection, self).__init__(cls, 'all_users', User)
+                super(AllUsersCollection, self).__init__(cls, 'all_users', DiscussionAgent)
 
             def decorate_query(self, query, owner_alias, last_alias, parent_instance, ctx):
                 from ..auth.util import get_current_user_id
@@ -613,7 +625,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
                 try:
                     current_user = get_current_user_id()
                     # shortcut
-                    if instance.id == current_user:
+                    if instance.profile_id == current_user:
                         return True
                 except RuntimeError:
                     pass
@@ -624,24 +636,22 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
         class ConnectedUsersCollection(AbstractCollectionDefinition):
             def __init__(self, cls):
                 super(ConnectedUsersCollection, self).__init__(
-                    cls, 'connected_users', User)
+                    cls, 'connected_users', DiscussionAgent)
 
             def decorate_query(self, query, owner_alias, last_alias, parent_instance, ctx):
-                from .auth import AgentStatusInDiscussion
-                return query.join(AgentStatusInDiscussion).join(
+                from .auth import DiscussionAgent
+                return query.join(
+                    # TODODA
                     owner_alias, owner_alias.id != None).filter(
-                    (AgentStatusInDiscussion.last_connected != None) & (
-                    (AgentStatusInDiscussion.last_disconnected
-                        < AgentStatusInDiscussion.last_connected ) |
-                    (AgentStatusInDiscussion.last_disconnected == None)))
+                    (DiscussionAgent.last_connected != None) & (
+                    (DiscussionAgent.last_disconnected
+                        < DiscussionAgent.last_connected ) |
+                    (DiscussionAgent.last_disconnected == None)))
 
             def contains(self, parent_instance, instance):
-                ast = instance.get_status_in_discussion(parent_instance.id)
-                if not ast:
-                    return False
-                return ast.last_connected and (
-                    (ast.last_disconnected < ast.last_connected) or (
-                    ast.last_disconnected is None))
+                return instance.last_connected and (
+                    (instance.last_disconnected < instance.last_connected) or (
+                    instance.last_disconnected is None))
 
         class ActiveWidgetsCollection(RelationCollectionDefinition):
 
@@ -692,19 +702,19 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
                 DiscussionPreferenceCollection(cls))
 
     all_participants = relationship(
-        User, viewonly=True, secondary=LocalUserRole.__table__,
+        DiscussionAgent, viewonly=True, secondary=LocalUserRole.__table__,
         primaryjoin="LocalUserRole.discussion_id == Discussion.id",
-        secondaryjoin=((LocalUserRole.user_id == User.id)
+        secondaryjoin=((LocalUserRole.dagent_id == DiscussionAgent.id)
             & (LocalUserRole.requested == False)),
         backref="involved_in_discussion")
 
     #The list of praticipants actually subscribed to the discussion
     simple_participants = relationship(
-        User, viewonly=True,
+        DiscussionAgent, viewonly=True,
         secondary=join(LocalUserRole, Role,
             ((LocalUserRole.role_id == Role.id) & (Role.name == R_PARTICIPANT))),
         primaryjoin="LocalUserRole.discussion_id == Discussion.id",
-        secondaryjoin=((LocalUserRole.user_id == User.id)
+        secondaryjoin=((LocalUserRole.dagent_id == DiscussionAgent.id)
             & (LocalUserRole.requested == False)),
         backref="participant_in_discussion")
 
@@ -720,35 +730,37 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
         attachment = with_polymorphic(Attachment, [Attachment])
         extract = with_polymorphic(Extract, [Extract])
         db = self.db
+        # Maybe replace by simple DiscussionAgent.id query?
+        # BUT you can read a discussion without participating.
         queries = [
-            db.query(LocalUserRole.user_id.label('user_id')).filter(
+            db.query(DiscussionAgent.id.label('user_id')
+                ).join(LocalUserRole, LocalUserRole.dagent_id==DiscussionAgent.profile_id).filter(
                 LocalUserRole.discussion_id == self.id),
-            db.query(post.creator_id.label('user_id')).filter(
+            db.query(post.creator_dagent_id.label('user_id')).filter(
                 post.discussion_id == self.id),
-            db.query(extract.creator_id.label('user_id')).filter(
+            db.query(extract.creator_dagent_id.label('user_id')).filter(
                 extract.discussion_id == self.id),
-            db.query(extract.owner_id.label('user_id')).filter(
+            db.query(extract.owner_dagent_id.label('user_id')).filter(
                 extract.discussion_id == self.id),
-            db.query(extract.attributed_to_id.label('user_id')).filter(
+            db.query(extract.attributed_to_dagent_id.label('user_id')).filter(
                 extract.discussion_id == self.id),
-            db.query(Announcement.creator_id.label('user_id')).filter(
+            db.query(Announcement.creator_dagent_id.label('user_id')).filter(
                 Announcement.discussion_id == self.id),
-            db.query(attachment.creator_id.label('user_id')).filter(
+            db.query(attachment.creator_dagent_id.label('user_id')).filter(
                 attachment.discussion_id == self.id),
-            db.query(UserRole.user_id.label('user_id')),
+            # db.query(UserRole.user_id.label('user_id')),
         ]
-        if self.creator_id is not None:
-            queries.append(db.query(literal(self.creator_id).label('user_id')))
-        if current_user is not None:
-            queries.append(db.query(literal(current_user).label('user_id')))
+        if self.creator_dagent_id is not None:
+            queries.append(db.query(literal(self.creator_dagent_id).label('user_id')))
+        # TODODA: Is this implicit?
+        # if current_user is not None:
+        #     queries.append(db.query(literal(current_user).label('user_id')))
         if include_readers:
-            queries.append(db.query(ViewPost.actor_id.label('user_id')).join(
-                Content, Content.id==ViewPost.post_id).filter(
-                Content.discussion_id==self.id))
+            queries.append(db.query(ViewPost.actor_dagent_id.label('user_id')))
         query = queries[0].union(*queries[1:]).distinct()
         if ids_only:
             return query
-        return db.query(AgentProfile).filter(AgentProfile.id.in_(query))
+        return db.query(DiscussionAgent).filter(DiscussionAgent.id.in_(query))
 
     def get_participants(self, ids_only=False):
         query = self.get_participants_query(ids_only)
@@ -849,39 +861,39 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
     def count_contributions_per_agent(
             self, start_date=None, end_date=None, as_agent=True):
         from .post import Post
-        from .auth import AgentProfile
+        from .auth import DiscussionAgent
         query = self.db.query(
-            func.count(Post.id), Post.creator_id).filter(
+            func.count(Post.id), Post.creator_dagent_id).filter(
                 Post.discussion_id==self.id,
                 Post.tombstone_condition())
         if start_date:
             query = query.filter(Post.creation_date >= start_date)
         if end_date:
             query = query.filter(Post.creation_date < end_date)
-        query = query.group_by(Post.creator_id)
+        query = query.group_by(Post.creator_dagent_id)
         results = query.all()
         # from highest to lowest
         results.sort(reverse=True)
         if not as_agent:
             return [(id, count) for (count, id) in results]
         agent_ids = [ag for (c, ag) in results]
-        agents = self.db.query(AgentProfile).filter(
-            AgentProfile.id.in_(agent_ids))
+        agents = self.db.query(DiscussionAgent).filter(
+            DiscussionAgent.id.in_(agent_ids))
         agents_by_id = {ag.id: ag for ag in agents}
         return [(agents_by_id[id], count) for (count, id) in results]
 
     def count_new_visitors(
             self, start_date=None, end_date=None, as_agent=True):
-        from .auth import AgentStatusInDiscussion
+        from .auth import DiscussionAgent
         query = self.db.query(
-            func.count(AgentStatusInDiscussion.id)).filter_by(
+            func.count(DiscussionAgent.id)).filter_by(
             discussion_id=self.id)
         if start_date:
             query = query.filter(
-                AgentStatusInDiscussion.first_visit >= start_date)
+                DiscussionAgent.first_visit >= start_date)
         if end_date:
             query = query.filter(
-                AgentStatusInDiscussion.first_visit < end_date)
+                DiscussionAgent.first_visit < end_date)
         return query.first()[0]
 
     def count_post_viewers(

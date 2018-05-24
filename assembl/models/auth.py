@@ -86,7 +86,6 @@ class AgentProfile(Base):
     Agents have at least one :py:class:`AbstractAgentAccount`.
     """
     __tablename__ = "agent_profile"
-    __external_typename = "Agent"
     __table_args__ = (
         Index("agent_profile_name_vidx",
               func.to_tsvector('simple', 'agent_profile.name'),
@@ -116,6 +115,51 @@ class AgentProfile(Base):
         'polymorphic_on': type,
         'with_polymorphic': '*'
     }
+
+    @property
+    def user(self):
+        return self
+
+    @property
+    def user_id(self):
+        return self.id
+
+    @property
+    def isEveryone(self):
+        return False
+
+    def get_uagent(self, discussion):
+        # Either self or DiscussionAgent
+        if discussion is None:
+            return self
+        return self.get_local_agent(discussion) or EveryoneUAgent
+
+    def get_local_agent(self, discussion):
+        from .discussion import Discussion
+        if discussion is None:
+            return None
+        if isinstance(discussion, Discussion):
+            discussion = discussion.id
+        return self.db.query(DiscussionAgent).filter_by(
+            discussion_id=discussion, profile_id=self.id).first()
+
+    @property
+    def status_in_current_discussion(self):
+        # Use from api v2
+        from ..auth.util import get_current_discussion
+        return self.get_local_agent(get_current_discussion())
+
+    def create_agent_status_in_discussion(self, discussion):
+        s = self.get_local_agent(discussion.id)
+        if s:
+            return s
+
+        s = DiscussionAgent(
+            agent_profile=self,
+            discussion=discussion)
+
+        self.db.add(s)
+        return s
 
     @as_native_str()
     def __repr__(self):
@@ -173,6 +217,7 @@ class AgentProfile(Base):
         All foreign keys that refer to the other agent profile must now refer
         to this one."""
         from .social_auth import SocialAuthAccount
+        import pdb; pdb.set_trace()
         log.warn("Merging AgentProfiles: %d <= %d" % (self.id, other_profile.id))
         session = self.db
         assert self.id
@@ -234,18 +279,8 @@ class AgentProfile(Base):
                     status.agent_profile = self
 
 
-    def has_permission(self, verb, subject):
-        if self is subject.owner:
-            return True
-
-        return self.db.query(Permission).filter_by(
-            actor_id=self.id,
-            subject_id=subject.id,
-            verb=verb,
-            allow=True
-        ).one()
-
     def avatar_url(self, size=32, app_url=None, email=None):
+        # TODODA: try using pydenticon
         default = config.get('avatar.default_image_url') or \
             (app_url and app_url+'/static/img/icon/user.png')
 
@@ -272,43 +307,6 @@ class AgentProfile(Base):
 
     def external_avatar_url(self):
         return "/user/id/%d/avatar/" % (self.id,)
-
-    def get_agent_preload(self, view_def='default'):
-        result = self.generic_json(view_def, user_id=self.id)
-        return json.dumps(result)
-
-    @classmethod
-    def count_posts_in_discussion_all_profiles(cls, discussion):
-        from .post import Post
-        return dict(discussion.db.query(
-            Post.creator_id, count(Post.id)).filter_by(
-            discussion_id=discussion.id, hidden=False).group_by(
-            Post.creator_id))
-
-    def count_posts_in_discussion(self, discussion_id):
-        from .post import Post
-        return self.db.query(Post).filter_by(
-            creator_id=self.id, discussion_id=discussion_id).count()
-
-    def count_posts_in_current_discussion(self):
-        "CAN ONLY BE CALLED FROM API V2"
-        from ..auth.util import get_current_discussion
-        discussion = get_current_discussion()
-        if discussion is None:
-            return None
-        return self.count_posts_in_discussion(discussion.id)
-
-    def get_status_in_discussion(self, discussion_id):
-        return self.db.query(AgentStatusInDiscussion).filter_by(
-            discussion_id=discussion_id, profile_id=self.id).first()
-
-    @property
-    def status_in_current_discussion(self):
-        # Use from api v2
-        from ..auth.util import get_current_discussion
-        discussion = get_current_discussion()
-        if discussion:
-            return self.get_status_in_discussion(discussion.id)
 
     def is_visiting_discussion(self, discussion_id):
         from assembl.models.discussion import Discussion
@@ -364,8 +362,8 @@ class AgentProfile(Base):
             return status.user_created_on_this_discussion
         return False
 
-    def is_owner(self, user_id):
-        return user_id == self.id
+    def is_owner(self, uagent):
+        return uagent.user_id == self.id
 
     def get_preferred_locale(self):
         # TODO: per-user preferred locale
@@ -515,8 +513,8 @@ class AbstractAgentAccount(Base):
     def merge(self, other):
         pass
 
-    def is_owner(self, user_id):
-        return self.profile_id == user_id
+    def is_owner(self, uagent):
+        return self.profile_id == uagent.user_id
 
     @classmethod
     def restrict_to_owners(cls, query, user_id):
@@ -534,27 +532,27 @@ class AbstractAgentAccount(Base):
         P_READ, P_READ, P_READ)
 
     @classmethod
-    def user_can_cls(cls, user_id, operation, permissions):
+    def user_can_cls(cls, uagent, operation, permissions):
         s = super(AbstractAgentAccount, cls).user_can_cls(
-            user_id, operation, permissions)
+            uagent, operation, permissions)
         return IF_OWNED if s is False else s
 
-    def user_can(self, user_id, operation, permissions):
+    def user_can(self, uagent, operation, permissions):
         # bypass for permission-less new users
-        if user_id == self.profile_id:
+        if uagent.user_id == self.profile_id:
             return True
         return super(AbstractAgentAccount, self).user_can(
-            user_id, operation, permissions)
+            uagent, operation, permissions)
 
     def update_from_json(
-            self, json, user_id=None, context=None, object_importer=None,
+            self, json, uagent=None, context=None, object_importer=None,
             permissions=None, parse_def_name='default_reverse'):
         # DO NOT update email... but we still want
         # to allow to set it on create.
         if 'email' in json:
             del json['email']
         return super(AbstractAgentAccount, self).update_from_json(
-            json, user_id, context, object_importer, permissions, parse_def_name)
+            json, uagent, context, object_importer, permissions, parse_def_name)
 
 
 class EmailAccount(AbstractAgentAccount):
@@ -674,24 +672,29 @@ class IdentityProvider(Base):
                 db_provider.trust_emails = (provider in trusted_providers)
 
 
-class AgentStatusInDiscussion(DiscussionBoundBase):
+class DiscussionAgent(NamedClassMixin, DiscussionBoundBase):
     """Information about a user's activity in a discussion
 
     Whether the user has logged in and is subscribed to notifications."""
     __tablename__ = 'agent_status_in_discussion'
+    __external_typename = "Agent"
     __table_args__ = (
-        UniqueConstraint('discussion_id', 'profile_id'), )
+        UniqueConstraint('discussion_id', 'profile_id'),
+        UniqueConstraint('discussion_id', 'pseudonym'))
 
     id = Column(Integer, primary_key=True)
+    template = Column(Boolean, server_default='false')
     discussion_id = Column(Integer, ForeignKey(
             "discussion.id", ondelete='CASCADE', onupdate='CASCADE'),
         nullable=False, index=True)
     discussion = relationship(
-        "Discussion", backref=backref(
+        "Discussion",
+        primaryjoin="Discussion.id==DiscussionAgent.discussion_id",
+        backref=backref(
             "agent_status_in_discussion", cascade="all, delete-orphan"))
     profile_id = Column(Integer, ForeignKey(
-            "agent_profile.id", ondelete='CASCADE', onupdate='CASCADE'),
-        nullable=False, index=True)
+            AgentProfile.id, ondelete='CASCADE', onupdate='CASCADE'),
+        nullable=False, index=True)  # must allow nullable = True
     agent_profile = relationship(
         AgentProfile, backref=backref(
             "agent_status_in_discussion", cascade="all, delete-orphan"))
@@ -699,27 +702,419 @@ class AgentStatusInDiscussion(DiscussionBoundBase):
     last_visit = Column(DateTime)
     first_subscribed = Column(DateTime)
     last_unsubscribed = Column(DateTime)
-    user_created_on_this_discussion = Column(Boolean, server_default='0')
+    user_created_on_this_discussion = Column(Boolean, server_default='false')
+    forget_identity = Column(Boolean, server_default='false')
+    always_pseudonymize = Column(Boolean, server_default='false')
+    pseudonym = Column(CoerceUnicode(40))
     last_connected = Column(DateTime)
     last_disconnected = Column(DateTime)
     accepted_tos_version = Column(Integer)
 
+    accounts = relationship(
+        AbstractAgentAccount, secondary=AgentProfile.__table__, viewonly=True)
+
+    __mapper_args__ = {
+        'polymorphic_identity': False,
+        'polymorphic_on': template,
+        'with_polymorphic': '*'
+    }
+
+    @property
+    def user(self):
+        return self.agent_profile
+
+    @property
+    def user_id(self):
+        return self.profile_id
+
+    @property
+    def isEveryone(self):
+        return False
+
+    @classmethod
+    def getByName(cls, name, session=None, query=None):
+        if name == 'current':
+            from pyramid.threadlocal import get_current_request
+            request = get_current_request()
+            uagent = request.uagent
+            if isinstance(uagent, DiscussionAgent):
+                return uagent
+
+    # temporary
+    @property
+    def description(self):
+        return self.agent_profile.description
+
+    def external_avatar_url(self):
+        if self.can_show_identity():
+            return self.agent_profile.external_avatar_url()
+        # TODODA
+        return "/data/discussion/%d/all_users/%d/avatar" % (
+            self.discussion_id, self.id,)
+
+    def get_pseudonym(self):
+        if self.pseudonym:
+            return self.pseudonym
+        # TODODA placeholder. Note: localize.
+        return "Anonymous %d" % self.id
+
+    def real_name(self):
+        if self.can_show_identity():
+            return self.agent_profile.real_name()
+        else:
+            return self.get_pseudonym()
+
+    def display_name(self):
+        if self.can_show_identity():
+            return self.agent_profile.display_name()
+        else:
+            return self.get_pseudonym()
+
+    def preferred_email(self):
+        # more security is done upstream
+        if not self.forget_identity:
+            return self.agent_profile.preferred_email()
+
+    def get_accounts(self):
+        if self.can_show_identity():
+            return self.agent_profile.accounts
+
+    def can_show_identity(self, uagent=None):
+        if self.always_pseudonymize or self.forget_identity:
+            return False
+        if uagent is None:
+            from ..auth.util import get_current_user_id
+            uid = get_current_user_id()
+            if uid:
+                uagent = User.get(uid)
+        uagent = uagent or EveryoneUAgent
+        return P_SEE_IDENTITY in uagent.get_permissions(self.discussion)
+
+    def get_permissions(self, discussion_id=None):
+        from ..auth.util import get_permissions
+        # TODODA: Cache
+        return get_permissions(self.id, self.discussion_id)
+
+    @classmethod
+    def count_posts_in_discussion_all_profiles(cls, discussion):
+        from .post import Post
+        return dict(discussion.db.query(
+            Post.creator_dagent_id, count(Post.id)).filter_by(
+            discussion_id=discussion.id, hidden=False).group_by(
+            Post.creator_dagent_id))
+
+    def count_posts_in_discussion(self, discussion_id):
+        from .post import Post
+        return self.db.query(Post).filter_by(
+            creator_dagent_id=self.id, discussion_id=discussion_id).count()
+
+    def get_preferred_email(self):
+        return self.agent_profile.get_preferred_email()
+
+    def count_posts_in_current_discussion(self):
+        "CAN ONLY BE CALLED FROM API V2"
+        from ..auth.util import get_current_discussion
+        discussion = get_current_discussion()
+        if discussion is None:
+            return None
+        return self.count_posts_in_discussion(discussion.id)
+
+    def login_expiry_req(self):
+        """Get login expiry date. May be None."""
+        return self.agent_profile.login_expiry(self.discussion)
+
     def get_discussion_id(self):
         return self.discussion_id or self.discussion.id
+
+    @property
+    def verified(self):
+        return self.agent_profile.verified
+
+    @property
+    def is_first_visit(self):
+        return self.last_visit == self.first_visit
+
+    @property
+    def username(self):
+        if self.can_show_identity():
+            return self.agent_profile.username
+
+    def has_permission(self, verb, subject):
+        if self is subject.owner:
+            return True
+
+        return self.db.query(Permission).filter_by(
+            actor_dagent_id=self.id,
+            subject_id=subject.id,
+            verb=verb,
+            allow=True
+        ).one()
+
+    def has_role(self, role):
+        return self.db.query(LocalUserRole).join(Role).filter(
+            LocalUserRole.profile_id == self.id,
+            Role.name == role,
+            LocalUserRole.requested == False,  # noqa: E712
+            ).first()
+
+    def is_participant(self):
+        return self.has_role(R_PARTICIPANT)
+
+    def get_agent_preload(self, view_def='default'):
+        result = self.generic_json(view_def, uagent=self)
+        return json.dumps(result)
+
+    def is_visiting_discussion(self):
+        self.update_agent_status_last_visit()
+
+    def update_agent_status_last_visit(self, status=None):
+        _now = datetime.utcnow()
+        self.last_visit = _now
+        if not self.first_visit:
+            self.first_visit = _now
+
+    def update_agent_status_subscribe(self):
+        if not self.first_subscribed:
+            _now = datetime.utcnow()
+            self.first_subscribed = _now
+
+    def update_agent_status_unsubscribe(self):
+        self.last_unsubscribed = datetime.utcnow()
+
+    def get_preferences_for_discussion(self, discussion):
+        from .user_key_values import UserPreferenceCollection
+        return UserPreferenceCollection(self.id, discussion)
+
+    def get_preferences_for_current_discussion(self):
+        from ..auth.util import get_current_discussion
+        discussion = get_current_discussion()
+        if discussion:
+            return self.get_preferences_for_discussion(discussion)
+
+    def get_notification_subscriptions(
+            self, reset_defaults=False, on_thread=True):
+        """the notification subscriptions for this user and discussion.
+        Includes materialized subscriptions from the template."""
+        from .notification import (
+            NotificationSubscription, NotificationSubscriptionStatus, NotificationCreationOrigin,
+            NotificationSubscriptionGlobal)
+        from .discussion import Discussion
+        from ..auth.util import get_roles
+        discussion_id = self.discussion_id or self.discussion.id
+        discussion = self.discussion or Discussion.get(discussion_id)
+        my_subscriptions = self.db.query(NotificationSubscription).filter_by(
+            discussion_id=self.discussion_id, dagent_id=self.id).all()
+        by_class = defaultdict(list)
+        for sub in my_subscriptions:
+            by_class[sub.__class__].append(sub)
+        my_subscriptions_classes = set(by_class.keys())
+        needed_classes = UserTemplate.get_applicable_notification_subscriptions_classes()
+        missing = set(needed_classes) - my_subscriptions_classes
+        changed = False
+        for cl, subs in by_class.items():
+            if issubclass(cl, NotificationSubscriptionGlobal):
+                if len(subs) > 1:
+                    # This may not actually be an error, in the case of non-global.
+                    log.error("There were many subscriptions of class %s" % (cl))
+                    subs.sort(key=lambda sub: sub.id)
+                    first_sub = subs[0]
+                    for sub in subs[1:]:
+                        first_sub.merge(sub)
+                        sub.delete()
+                        changed = True
+            else:
+                # Is this needed? Looking for mergeable subscriptions in non-global
+                # This code will not be active for some time anyway.
+                local_changed = True
+                while local_changed:
+                    local_changed = False
+                    for a, b in permutations(subs, 2):
+                        if a.id > b.id:
+                            continue  # break symmetry, merge newer on older
+                        if a.can_merge(b):
+                            a.merge(b)
+                            b.delete()
+                            local_changed = True
+                            changed = True
+                            subs.remove(b)
+                            break  # inner, re-permute w/o b
+        if changed:
+            self.db.flush()
+            my_subscriptions = list(chain(*list(by_class.items())))
+        if (not missing) and not reset_defaults:
+            return my_subscriptions
+        my_roles = get_roles(self.id, discussion_id)
+        subscribed = defaultdict(bool)
+        for role in my_roles:
+            template, changed = discussion.get_user_template(
+                role, role == R_PARTICIPANT, on_thread)
+            if template is None:
+                continue
+            template_subscriptions = template.get_notification_subscriptions()
+            for subscription in template_subscriptions:
+                subscribed[subscription.__class__] |= subscription.status == NotificationSubscriptionStatus.ACTIVE
+        if reset_defaults:
+            for sub in my_subscriptions[:]:
+                if (sub.creation_origin ==
+                        NotificationCreationOrigin.DISCUSSION_DEFAULT
+                        # only actual defaults
+                        and sub.__class__ in subscribed):
+                    if (sub.status == NotificationSubscriptionStatus.ACTIVE
+                            and not subscribed[sub.__class__]):
+                        sub.status = NotificationSubscriptionStatus.INACTIVE_DFT
+                    elif (sub.status == NotificationSubscriptionStatus.INACTIVE_DFT
+                            and subscribed[sub.__class__]):
+                        sub.status = NotificationSubscriptionStatus.ACTIVE
+
+        def create_missing(include_inactive=False):
+            my_sub_types = self.db.query(NotificationSubscription.type).filter_by(
+                discussion_id=discussion_id, dagent_id=self.id).distinct().all()
+            my_sub_types = {x for (x,) in my_sub_types}
+            discussion_kwarg = (dict(discussion_id=discussion.id)
+                if discussion.id else dict(discussion=discussion))
+            return [
+                cls(
+                    dagent_id=self.id,
+                    creation_origin=NotificationCreationOrigin.DISCUSSION_DEFAULT,
+                    status=(NotificationSubscriptionStatus.ACTIVE if subscribed[cls]
+                            else NotificationSubscriptionStatus.INACTIVE_DFT),
+                    **discussion_kwarg
+                )
+                for cls in needed_classes
+                if (include_inactive or subscribed[cls]) and
+                cls.__mapper_args__['polymorphic_identity'] not in my_sub_types]
+
+        if on_thread:
+            if self.locked_object_creation(create_missing, NotificationSubscription, 10):
+                # if changes, recalculate my_subscriptions
+                my_subscriptions = self.db.query(NotificationSubscription).filter_by(
+                    discussion_id=discussion_id, dagent_id=self.id).all()
+        else:
+            for ob in create_missing():
+                self.db.add(ob)
+                my_subscriptions.append(ob)
+        # Now calculate the dematerialized ones (always out-of-thread)
+        defaults = create_missing(True)
+        return chain(my_subscriptions, defaults)
+
+    def subscribe(self, role=R_PARTICIPANT):
+        if not self.has_role_in(discussion.id, role):
+            role = self.db.query(Role).filter_by(name=role).one()
+            self.db.add(LocalUserRole(
+                dagent=self, role=role, discussion=self.discussion))
+        # Set the DiscussionAgent
+        self.update_agent_status_subscribe()
+
+    def unsubscribe(self, role=R_PARTICIPANT):
+        lur = self.has_role_in(discussion.id, role)
+        if lur:
+            self.db.delete(lur)
+        # Set the DiscussionAgent
+        self.update_agent_status_unsubscribe()
+
+    @classmethod
+    def extra_collections(cls):
+        from assembl.views.traversal import (
+            RelationCollectionDefinition, AbstractCollectionDefinition,
+            UserNSBoundDictContext)
+        from .notification import NotificationSubscription
+        from .discussion import Discussion
+        from .user_key_values import UserPreferenceCollection
+        class NotificationSubscriptionCollection(RelationCollectionDefinition):
+            def __init__(self, cls):
+                super(NotificationSubscriptionCollection, self).__init__(
+                    cls, DiscussionAgent.notification_subscriptions.property)
+
+            def decorate_query(self, query, owner_alias, last_alias, parent_instance, ctx):
+
+                query = super(
+                    NotificationSubscriptionCollection, self).decorate_query(
+                    query, owner_alias, last_alias, parent_instance, ctx)
+                discussion = parent_instance.discussion
+                if discussion is not None:
+                    # Materialize active subscriptions... TODO: Make this batch,
+                    # also dematerialize
+                    parent_instance.get_notification_subscriptions()
+                    query = query.filter(last_alias.discussion_id == discussion.id)
+                return query
+
+            def contains(self, parent_instance, instance):
+                if not super(NotificationSubscriptionCollection, self).contains(
+                        parent_instance, instance):
+                    return False
+                # Don't I need the context to get the discussion? Rats!
+                return True
+
+            def get_default_view(self):
+                return "extended"
+
+        class LocalRoleCollection(RelationCollectionDefinition):
+            def __init__(self, cls):
+                super(LocalRoleCollection, self).__init__(
+                    cls, DiscussionAgent.local_roles.property)
+
+            def decorate_query(self, query, owner_alias, last_alias, parent_instance, ctx):
+
+                query = super(
+                    LocalRoleCollection, self).decorate_query(
+                    query, owner_alias, last_alias, parent_instance, ctx)
+                discussion = ctx.get_instance_of_class(Discussion)
+                if discussion is not None:
+                    query = query.filter(last_alias.discussion_id == discussion.id)
+                return query
+
+            def contains(self, parent_instance, instance):
+                if not super(LocalRoleCollection, self).contains(
+                        parent_instance, instance):
+                    return False
+                # Don't I need the context to get the discussion? Rats!
+                return True
+
+            def get_default_view(self):
+                return "default"
+
+        class PreferencePseudoCollection(AbstractCollectionDefinition):
+            def __init__(self):
+                super(PreferencePseudoCollection, self).__init__(
+                    cls, 'preferences', UserPreferenceCollection)
+
+            def decorate_query(
+                    self, query, owner_alias, coll_alias, parent_instance,
+                    ctx):
+                log.error("This should not happen")
+
+            def contains(self, parent_instance, instance):
+                log.error("This should not happen")
+
+            def make_context(self, parent_ctx):
+                from ..auth.util import (
+                    get_current_user_id, user_has_permission)
+                dagent = parent_ctx._instance
+                current_user_id = get_current_user_id()
+                if dagent.user_id != current_user_id and not user_has_permission(
+                        discussion_id, current_user_id, P_SYSADMIN):
+                    raise HTTPUnauthorized()
+                coll = UserPreferenceCollection(dagent.id, dagent.discussion)
+                return UserNSBoundDictContext(coll, parent_ctx)
+
+        return (NotificationSubscriptionCollection(cls),
+                LocalRoleCollection(cls),
+                PreferencePseudoCollection())
+
 
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):
         return (cls.discussion_id == discussion_id,)
 
-    def is_owner(self, user_id):
-        return user_id == self.profile_id
+    def is_owner(self, uagent):
+        return uagent.user_id == self.profile_id
 
     crud_permissions = CrudPermissions(
         P_READ, P_ADMIN_DISC, P_ADMIN_DISC, P_ADMIN_DISC,
         P_READ, P_READ, P_READ)
 
 
-@event.listens_for(AgentStatusInDiscussion, 'after_insert', propagate=True)
+@event.listens_for(DiscussionAgent, 'after_insert', propagate=True)
 def send_user_to_socket_for_asid(mapper, connection, target):
     agent_profile = target.agent_profile
     if not target.agent_profile:
@@ -893,7 +1288,7 @@ class User(NamedClassMixin, OriginMixin, AgentProfile):
             for notification_subscription in \
                     other_user.notification_subscriptions[:]:
                 notification_subscription.user = self
-                notification_subscription.user_id = self.id
+                notification_subscription.user_id = self.id #TODODA
                 if notification_subscription.find_duplicate(False) is not None:
                     self.db.delete(notification_subscription)
             session.autoflush = old_autoflush
@@ -926,8 +1321,9 @@ class User(NamedClassMixin, OriginMixin, AgentProfile):
                     request.permissions}
         return self.get_all_permissions()
 
-    def get_permissions(self, discussion_id):
+    def get_permissions(self, discussion_id=None):
         from ..auth.util import get_permissions
+        # TODODA: cache
         return get_permissions(self.id, discussion_id)
 
     def get_all_permissions(self):
@@ -950,292 +1346,32 @@ class User(NamedClassMixin, OriginMixin, AgentProfile):
             watcher.processAccountCreated(self.id)
 
     def has_role_in(self, discussion_id, role):
-        return self.db.query(LocalUserRole).join(Role).filter(
-            LocalUserRole.user_id == self.id,
+        return self.db.query(LocalUserRole).join(Role).join(DiscussionAgent).filter(
+            DiscussionAgent.profile_id == self.id,
             Role.name == role,
             LocalUserRole.requested == False,  # noqa: E712
-            LocalUserRole.discussion_id == discussion_id).first()
+            DiscussionAgent.discussion_id == discussion_id).first()
 
     def is_participant(self, discussion_id):
         return self.has_role_in(discussion_id, R_PARTICIPANT)
 
-    def create_agent_status_in_discussion(self, discussion):
-        s = self.get_status_in_discussion(discussion.id)
-        if s:
-            return s
-
-        s = AgentStatusInDiscussion(
-            agent_profile=self,
-            discussion=discussion)
-
-        self.db.add(s)
-        return s
-
     def update_agent_status_last_visit(self, discussion, status=None):
         agent_status = status or self.create_agent_status_in_discussion(discussion)
-        _now = datetime.utcnow()
-        agent_status.last_visit = _now
-        if not agent_status.first_visit:
-            agent_status.first_visit = _now
-
-    def update_agent_status_subscribe(self, discussion):
-        # Set the AgentStatusInDiscussion
-        agent_status = self.create_agent_status_in_discussion(discussion)
-        if not agent_status.first_subscribed:
-            _now = datetime.utcnow()
-            agent_status.first_subscribed = _now
-
-    def update_agent_status_unsubscribe(self, discussion):
-        agent_status = self.create_agent_status_in_discussion(discussion)
-        _now = datetime.utcnow()
-        agent_status.last_unsubscribed = _now
+        agent_status.update_agent_status_last_visit(status=status)
 
     def subscribe(self, discussion, role=R_PARTICIPANT):
-        if not self.has_role_in(discussion.id, role):
-            role = self.db.query(Role).filter_by(name=role).one()
-            self.db.add(LocalUserRole(
-                user=self, role=role, discussion=discussion))
-        # Set the AgentStatusInDiscussion
-        self.update_agent_status_subscribe(discussion)
+        dagent = self.create_agent_status_in_discussion(discussion)
+        dagent.subscribe(role=role)
 
     def unsubscribe(self, discussion, role=R_PARTICIPANT):
-        lur = self.has_role_in(discussion.id, role)
-        if lur:
-            self.db.delete(lur)
-        # Set the AgentStatusInDiscussion
-        self.update_agent_status_unsubscribe(discussion)
+        dagent = self.create_agent_status_in_discussion(discussion)
+        dagent.unsubscribe(role=role)
 
-    @classmethod
-    def extra_collections(cls):
-        from assembl.views.traversal import (
-            RelationCollectionDefinition, AbstractCollectionDefinition,
-            UserNSBoundDictContext)
-        from .notification import NotificationSubscription
-        from .discussion import Discussion
-        from .user_key_values import UserPreferenceCollection
-        class NotificationSubscriptionCollection(RelationCollectionDefinition):
-            def __init__(self, cls):
-                super(NotificationSubscriptionCollection, self).__init__(
-                    cls, User.notification_subscriptions.property)
-
-            def decorate_query(self, query, owner_alias, last_alias, parent_instance, ctx):
-
-                query = super(
-                    NotificationSubscriptionCollection, self).decorate_query(
-                    query, owner_alias, last_alias, parent_instance, ctx)
-                discussion = ctx.get_instance_of_class(Discussion)
-                if discussion is not None:
-                    # Materialize active subscriptions... TODO: Make this batch,
-                    # also dematerialize
-                    if isinstance(parent_instance, UserTemplate):
-                        parent_instance.get_notification_subscriptions()
-                    else:
-                        parent_instance.get_notification_subscriptions(
-                            discussion.id, request=ctx.get_request())
-                    query = query.filter(last_alias.discussion_id == discussion.id)
-                return query
-
-            def contains(self, parent_instance, instance):
-                if not super(NotificationSubscriptionCollection, self).contains(
-                        parent_instance, instance):
-                    return False
-                # Don't I need the context to get the discussion? Rats!
-                return True
-
-            def get_default_view(self):
-                return "extended"
-
-        class LocalRoleCollection(RelationCollectionDefinition):
-            def __init__(self, cls):
-                super(LocalRoleCollection, self).__init__(
-                    cls, User.local_roles.property)
-
-            def decorate_query(self, query, owner_alias, last_alias, parent_instance, ctx):
-
-                query = super(
-                    LocalRoleCollection, self).decorate_query(
-                    query, owner_alias, last_alias, parent_instance, ctx)
-                discussion = ctx.get_instance_of_class(Discussion)
-                if discussion is not None:
-                    query = query.filter(last_alias.discussion_id == discussion.id)
-                return query
-
-            def contains(self, parent_instance, instance):
-                if not super(LocalRoleCollection, self).contains(
-                        parent_instance, instance):
-                    return False
-                # Don't I need the context to get the discussion? Rats!
-                return True
-
-            def get_default_view(self):
-                return "default"
-
-        class PreferencePseudoCollection(AbstractCollectionDefinition):
-            def __init__(self):
-                super(PreferencePseudoCollection, self).__init__(
-                    cls, 'preferences', UserPreferenceCollection)
-
-            def decorate_query(
-                    self, query, owner_alias, coll_alias, parent_instance,
-                    ctx):
-                log.error("This should not happen")
-
-            def contains(self, parent_instance, instance):
-                log.error("This should not happen")
-
-            def make_context(self, parent_ctx):
-                from ..auth.util import (
-                    get_current_user_id, user_has_permission)
-                user_id = parent_ctx._instance.id
-                discussion = None
-                discussion_id = parent_ctx.get_discussion_id()
-                current_user_id = get_current_user_id()
-                if user_id != current_user_id and not user_has_permission(
-                        discussion_id, current_user_id, P_SYSADMIN):
-                    raise HTTPUnauthorized()
-                if discussion_id:
-                    discussion = Discussion.get(discussion_id)
-                coll = UserPreferenceCollection(user_id, discussion)
-                return UserNSBoundDictContext(coll, parent_ctx)
-
-        return (NotificationSubscriptionCollection(cls),
-                LocalRoleCollection(cls),
-                PreferencePseudoCollection())
-
-    def get_notification_subscriptions_for_current_discussion(self):
-        "CAN ONLY BE CALLED WITH A CURRENT REQUEST"
-        from .discussion import Discussion
-        from pyramid.threadlocal import get_current_request
-        request = get_current_request()
-        discussion = request.discussion
-        if discussion is None:
-            return []
-        return self.get_notification_subscriptions(discussion.id, request=request)
-
-    def get_preferences_for_discussion(self, discussion):
-        from .user_key_values import UserPreferenceCollection
-        return UserPreferenceCollection(self.id, discussion)
-
-    def get_preferences_for_current_discussion(self):
-        from ..auth.util import get_current_discussion
-        discussion = get_current_discussion()
-        if discussion:
-            return self.get_preferences_for_discussion(discussion)
-
-    def get_notification_subscriptions(
-            self, discussion_id, reset_defaults=False, request=None, on_thread=True):
-        """the notification subscriptions for this user and discussion.
-        Includes materialized subscriptions from the template."""
-        from .notification import (
-            NotificationSubscription, NotificationSubscriptionStatus, NotificationCreationOrigin,
-            NotificationSubscriptionGlobal)
-        from .discussion import Discussion
-        from ..auth.util import get_roles
-        my_subscriptions = self.db.query(NotificationSubscription).filter_by(
-            discussion_id=discussion_id, user_id=self.id).all()
-        by_class = defaultdict(list)
-        for sub in my_subscriptions:
-            by_class[sub.__class__].append(sub)
-        my_subscriptions_classes = set(by_class.keys())
-        needed_classes = UserTemplate.get_applicable_notification_subscriptions_classes()
-        missing = set(needed_classes) - my_subscriptions_classes
-        changed = False
-        for cl, subs in by_class.items():
-            if issubclass(cl, NotificationSubscriptionGlobal):
-                if len(subs) > 1:
-                    # This may not actually be an error, in the case of non-global.
-                    log.error("There were many subscriptions of class %s" % (cl))
-                    subs.sort(key=lambda sub: sub.id)
-                    first_sub = subs[0]
-                    for sub in subs[1:]:
-                        first_sub.merge(sub)
-                        sub.delete()
-                        changed = True
-            else:
-                # Is this needed? Looking for mergeable subscriptions in non-global
-                # This code will not be active for some time anyway.
-                local_changed = True
-                while local_changed:
-                    local_changed = False
-                    for a, b in permutations(subs, 2):
-                        if a.id > b.id:
-                            continue  # break symmetry, merge newer on older
-                        if a.can_merge(b):
-                            a.merge(b)
-                            b.delete()
-                            local_changed = True
-                            changed = True
-                            subs.remove(b)
-                            break  # inner, re-permute w/o b
-        if changed:
-            self.db.flush()
-            my_subscriptions = list(chain(*list(by_class.items())))
-        if (not missing) and not reset_defaults:
-            return my_subscriptions
-        discussion = Discussion.get(discussion_id)
-        assert discussion
-        if request is None:
-            my_roles = get_roles(self.id, discussion_id)
-        else:
-            my_roles = request.roles
-        subscribed = defaultdict(bool)
-        for role in my_roles:
-            template, changed = discussion.get_user_template(
-                role, role == R_PARTICIPANT, on_thread)
-            if template is None:
-                continue
-            template_subscriptions = template.get_notification_subscriptions()
-            for subscription in template_subscriptions:
-                subscribed[subscription.__class__] |= subscription.status == NotificationSubscriptionStatus.ACTIVE
-        if reset_defaults:
-            for sub in my_subscriptions[:]:
-                if (sub.creation_origin ==
-                        NotificationCreationOrigin.DISCUSSION_DEFAULT
-                        # only actual defaults
-                        and sub.__class__ in subscribed):
-                    if (sub.status == NotificationSubscriptionStatus.ACTIVE
-                            and not subscribed[sub.__class__]):
-                        sub.status = NotificationSubscriptionStatus.INACTIVE_DFT
-                    elif (sub.status == NotificationSubscriptionStatus.INACTIVE_DFT
-                            and subscribed[sub.__class__]):
-                        sub.status = NotificationSubscriptionStatus.ACTIVE
-
-        def create_missing(include_inactive=False):
-            my_sub_types = self.db.query(NotificationSubscription.type).filter_by(
-                discussion_id=discussion_id, user_id=self.id).distinct().all()
-            my_sub_types = {x for (x,) in my_sub_types}
-            discussion_kwarg = (dict(discussion_id=discussion.id)
-                if discussion.id else dict(discussion=discussion))
-            return [
-                cls(
-                    user_id=self.id,
-                    creation_origin=NotificationCreationOrigin.DISCUSSION_DEFAULT,
-                    status=(NotificationSubscriptionStatus.ACTIVE if subscribed[cls]
-                            else NotificationSubscriptionStatus.INACTIVE_DFT),
-                    **discussion_kwarg
-                )
-                for cls in needed_classes
-                if (include_inactive or subscribed[cls]) and
-                cls.__mapper_args__['polymorphic_identity'] not in my_sub_types]
-
-        if on_thread:
-            if self.locked_object_creation(create_missing, NotificationSubscription, 10):
-                # if changes, recalculate my_subscriptions
-                my_subscriptions = self.db.query(NotificationSubscription).filter_by(
-                    discussion_id=discussion_id, user_id=self.id).all()
-        else:
-            for ob in create_missing():
-                self.db.add(ob)
-                my_subscriptions.append(ob)
-        # Now calculate the dematerialized ones (always out-of-thread)
-        defaults = create_missing(True)
-        return chain(my_subscriptions, defaults)
-
-    def user_can(self, user_id, operation, permissions):
+    def user_can(self, uagent, operation, permissions):
         # bypass for permission-less new users
-        if user_id == self.id:
+        if uagent.user_id == self.id:
             return True
-        return super(User, self).user_can(user_id, operation, permissions)
+        return super(User, self).user_can(uagent, operation, permissions)
 
 
 User.creation_date.info['rdf'] = QuadMapPatternS(
@@ -1334,11 +1470,20 @@ class LocalUserRole(DiscussionBoundBase, PrivateObjectMixin):
     rdf_class = SIOC.Role
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE', onupdate='CASCADE'),
+    # user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE', onupdate='CASCADE'),
+    #     nullable=False, index=True,
+    #     info={'rdf': QuadMapPatternS(
+    #         None, SIOC.function_of, AgentProfile.agent_as_account_iri.apply(None))})
+    dagent_id = Column(
+        Integer, ForeignKey(DiscussionAgent.id, ondelete='CASCADE', onupdate='CASCADE'),
         nullable=False, index=True,
         info={'rdf': QuadMapPatternS(
             None, SIOC.function_of, AgentProfile.agent_as_account_iri.apply(None))})
-    user = relationship(User, backref=backref("local_roles", cascade="all, delete-orphan"))
+    dagent = relationship(DiscussionAgent, backref=backref("local_roles", cascade="all, delete-orphan"))
+    user = relationship(
+        User,
+        secondary=DiscussionAgent.__table__, uselist=False, viewonly=True,
+        backref=backref("local_roles"))
     discussion_id = Column(Integer, ForeignKey(
         'discussion.id', ondelete='CASCADE'), nullable=False, index=True,
         info={'rdf': QuadMapPatternS(None, SIOC.has_scope)})
@@ -1364,7 +1509,7 @@ class LocalUserRole(DiscussionBoundBase, PrivateObjectMixin):
 
     def container_url(self):
         return "/data/Discussion/%d/all_users/%d/local_roles" % (
-            self.discussion_id, self.user_id)
+            self.discussion_id, self.dagent_id)
 
     def get_default_parent_context(self, request=None, user_id=None):
         return self.user.get_collection_context('roles', request=request, user_id=user_id)
@@ -1381,27 +1526,28 @@ class LocalUserRole(DiscussionBoundBase, PrivateObjectMixin):
 
     def unique_query(self):
         query, _ = super(LocalUserRole, self).unique_query()
-        user_id = self.user_id or self.user.id
+        dagent_id = self.dagent_id or self.dagent.id
         role_id = self.role_id or self.role.id
         return query.filter_by(
-            user_id=user_id, role_id=role_id), True
+            dagent_id=dagent_id, role_id=role_id), True
 
     def get_user_uri(self):
-        return User.uri_generic(self.user_id)
+        return DiscussionAgent.uri_generic(self.dagent_id)
 
     def _do_update_from_json(
             self, json, parse_def, ctx,
             duplicate_handling=None, object_importer=None):
-        user_id = ctx.get_user_id()
-        json_user_id = json.get('user', None)
-        if json_user_id is None:
-            json_user_id = user_id
+        uagent = ctx.get_uagent()
+        dagent_id = uagent.id
+        json_dagent_id = json.get('user', None)
+        if json_dagent_id is None:
+            json_dagent_id = dagent_id
         else:
-            json_user_id = User.get_database_id(json_user_id)
+            json_dagent_id = DiscussionAgent.get_database_id(json_dagent_id)
             # Do not allow changing user
-            if self.user_id is not None and json_user_id != self.user_id:
+            if self.dagent_id is not None and json_dagent_id != self.dagent_id:
                 raise HTTPBadRequest()
-        self.user_id = json_user_id
+        self.dagent_id = json_dagent_id
         role_name = json.get("role", None)
         if not (role_name or self.role_id):
             role_name = R_PARTICIPANT
@@ -1424,13 +1570,13 @@ class LocalUserRole(DiscussionBoundBase, PrivateObjectMixin):
                 raise HTTPBadRequest()
         return self
 
-    def is_owner(self, user_id):
-        return self.user_id == user_id
+    def is_owner(self, uagent):
+        return self.dagent.profile_id == uagent.user_id
 
     @classmethod
     def restrict_to_owners(cls, query, user_id):
         "filter query according to object owners"
-        return query.filter(cls.user_id == user_id)
+        return query.join(AgentProfile).filter(AgentProfile.profile_id == user_id)
 
     @classmethod
     def base_conditions(cls, alias=None, alias_maker=None):
@@ -1441,7 +1587,7 @@ class LocalUserRole(DiscussionBoundBase, PrivateObjectMixin):
     def special_quad_patterns(cls, alias_maker, discussion_id):
         role_alias = alias_maker.alias_from_relns(cls.role)
         return [
-            QuadMapPatternS(AgentProfile.agent_as_account_iri.apply(cls.user_id),
+            QuadMapPatternS(AgentProfile.agent_as_account_iri.apply(cls.dagent_id),
                 SIOC.has_function, cls.iri_class().apply(cls.id),
                 name=QUADNAMES.class_LocalUserRole_global,
                 conditions=(cls.requested == False,),
@@ -1457,25 +1603,27 @@ class LocalUserRole(DiscussionBoundBase, PrivateObjectMixin):
         P_SELF_REGISTER, P_SELF_REGISTER, P_READ)
 
     @classmethod
-    def user_can_cls(cls, user_id, operation, permissions):
+    def user_can_cls(cls, uagent, operation, permissions):
         # bypass... more checks are required upstream,
         # see assembl.views.api2.auth.add_local_role
         if operation == CrudPermissions.CREATE \
                 and P_SELF_REGISTER_REQUEST in permissions:
             return True
         return super(LocalUserRole, cls).user_can_cls(
-            user_id, operation, permissions)
+            uagent, operation, permissions)
 
 
 @event.listens_for(LocalUserRole, 'after_delete', propagate=True)
 @event.listens_for(LocalUserRole, 'after_insert', propagate=True)
 def send_user_to_socket_for_local_user_role(
         mapper, connection, target):
-    user = target.user
-    if not target.user:
-        user = User.get(target.user_id)
-    user.send_to_changes(connection, CrudOperation.UPDATE, target.discussion_id)
-    user.send_to_changes(
+    dagent = target.dagent
+    if dagent is None:
+        dagent = DiscussionAgent.get(target.dagent_id)
+    user = dagent.user
+    # TODODA: send user or dagent? Probably dagent.
+    dagent.send_to_changes(connection, CrudOperation.UPDATE, target.discussion_id)
+    dagent.send_to_changes(
         connection, CrudOperation.UPDATE, target.discussion_id, "private")
 
 
@@ -1590,41 +1738,11 @@ class AnonymousUser(DiscussionBoundBase, User):
                 source.discussion_id == discussion_id)
 
 
-class UserTemplate(DiscussionBoundBase, User):
+class UserTemplate(DiscussionAgent):
     "A fake user with default permissions and Notification Subscriptions."
-    __tablename__ = "user_template"
-
     __mapper_args__ = {
-        'polymorphic_identity': 'user_template'
+        'polymorphic_identity': True
     }
-
-    id = Column(
-        Integer,
-        ForeignKey('user.id', ondelete='CASCADE', onupdate='CASCADE'),
-        primary_key=True
-    )
-
-    discussion_id = Column(Integer, ForeignKey(
-        "discussion.id", ondelete='CASCADE', onupdate='CASCADE'),
-        nullable=False, index=True)
-    discussion = relationship(
-        "Discussion", backref=backref(
-            "user_templates", cascade="all, delete-orphan"),
-        info={'rdf': QuadMapPatternS(None, ASSEMBL.in_conversation)})
-
-    role_id = Column(Integer, ForeignKey(
-        Role.id, ondelete='CASCADE', onupdate='CASCADE'),
-        nullable=False, index=True)
-    for_role = relationship(Role)
-
-    # Create an index for (discussion, role)?
-
-    def get_discussion_id(self):
-        return self.discussion_id or self.discussion.id
-
-    @classmethod
-    def get_discussion_conditions(cls, discussion_id, alias_maker=None):
-        return (cls.discussion_id == discussion_id,)
 
     @classmethod
     def get_applicable_notification_subscriptions_classes(cls):
@@ -1656,11 +1774,11 @@ class UserTemplate(DiscussionBoundBase, User):
         # But have duplication issues, probably due to calls on multiple
         # threads. So iterate until it works.
         query = self.db.query(NotificationSubscription).filter_by(
-            discussion_id=self.discussion_id, user_id=self.id)
+            discussion_id=self.discussion_id, dagent_id=self.id)
         changed = False
         discussion = self.discussion
         my_id = self.id
-        role_name = self.for_role.name.split(':')[-1]
+        role_name = self.local_roles[0].role.name.split(':')[-1]
         # TODO: Fill from config.
         subscribed = defaultdict(bool)
         default_config = config.get_config().get(
@@ -1698,7 +1816,7 @@ class UserTemplate(DiscussionBoundBase, User):
                 if discussion.id else dict(discussion=discussion))
             return [
                 cls(
-                    user_id=my_id,
+                    dagent_id=my_id,
                     creation_origin=NotificationCreationOrigin.DISCUSSION_DEFAULT,
                     status=(NotificationSubscriptionStatus.ACTIVE
                             if subscribed[cls.__mapper__.polymorphic_identity.name]
@@ -1717,8 +1835,18 @@ class UserTemplate(DiscussionBoundBase, User):
             self.db.expire(self, ['notification_subscriptions'])
         return self.notification_subscriptions, changed
 
+    def can_show_identity(self, uagent=None):
+        return False
 
-Index("user_template", "discussion_id", "role_id")
+    @property
+    def for_role(self):
+        return self.local_roles[0].role
+
+    def display_name(self):
+        return "Template for " + self.for_role.name
+
+
+# Index("user_template", "discussion_id", "role_id")
 
 
 class PartnerOrganization(DiscussionBoundBase):
@@ -1955,8 +2083,8 @@ class UserLanguagePreference(Base):
             P_READ, P_SYSADMIN, P_SYSADMIN, P_SYSADMIN,
             P_READ, P_READ, P_READ)
 
-    def is_owner(self, user_id):
-        return user_id == self.user_id
+    def is_owner(self, uagent):
+        return uagent.user_id == self.user_id
 
     def __eq__(self, other):
         return self is other
@@ -2008,3 +2136,9 @@ class UserLanguagePreference(Base):
                 LanguagePreferenceOrder(self.source_of_evidence).name,
                 self.preferred_order or 0
             )
+
+
+DiscussionAgent.language_preference = relationship(
+    UserLanguagePreference,
+    primaryjoin=DiscussionAgent.profile_id == User.id,
+    secondary=User.__table__, viewonly=True)

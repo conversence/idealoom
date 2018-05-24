@@ -22,7 +22,7 @@ from ..lib.sqla import DuplicateHandling
 from ..lib.sqla_types import URLString
 from .discussion import Discussion
 from .idea import Idea, AppendingVisitor
-from .auth import AgentProfile
+from .auth import AgentProfile, DiscussionAgent
 from ..auth import CrudPermissions, P_VOTE, P_SYSADMIN, P_ADMIN_DISC, P_READ
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..semantic.namespaces import (VOTE, ASSEMBL, DCTERMS, QUADNAMES)
@@ -162,8 +162,10 @@ class AbstractVoteSpecification(DiscussionBoundBase):
             return self.votes_of(user_id)
 
     def votes_of(self, user_id):
-        return self.db.query(AbstractIdeaVote).filter_by(
-            vote_spec_id=self.id, tombstone_date=None, voter_id=user_id).all()
+        return self.db.query(AbstractIdeaVote
+            ).filter_by(vote_spec_id=self.id, tombstone_date=None
+            ).join(DiscussionAgent, AbstractIdeaVote.voter_dagent_id==DiscussionAgent.id
+            ).filter_by(profile_id=user_id).all()
 
     @classmethod
     def extra_collections(cls):
@@ -752,20 +754,39 @@ class AbstractIdeaVote(HistoryMixinWithOrigin, DiscussionBoundBase):
                              "AbstractIdeaVote.tombstone_date == None)",
             ))
 
-    voter_id = Column(
+    # voter_id = Column(
+    #     Integer,
+    #     ForeignKey(AgentProfile.id, ondelete="CASCADE", onupdate="CASCADE"),
+    #     nullable=False, index=True,
+    #     info={'rdf': QuadMapPatternS(None, VOTE.voter)}
+    # )
+    voter_dagent_id = Column(
         Integer,
-        ForeignKey(AgentProfile.id, ondelete="CASCADE", onupdate="CASCADE"),
-        nullable=False, index=True,
-        info={'rdf': QuadMapPatternS(None, VOTE.voter)}
+        ForeignKey(DiscussionAgent.id, ondelete="CASCADE", onupdate="CASCADE"),
+        index=True
     )
-    voter_ts = relationship(
-        AgentProfile, backref=backref("votes_ts", cascade="all, delete-orphan"))
-    voter = relationship(
-        AgentProfile,
-        primaryjoin="AgentProfile.id==AbstractIdeaVote.voter_id",
+    voter_dagent_ts = relationship(
+        DiscussionAgent, backref=backref("votes_ts", cascade="all, delete-orphan"))
+    voter_dagent = relationship(
+        DiscussionAgent,
+        primaryjoin="and_(DiscussionAgent.id==AbstractIdeaVote.voter_dagent_id, "
+                         "AbstractIdeaVote.tombstone_date == None)",
         backref=backref(
             "votes",
-            primaryjoin="and_(AgentProfile.id==AbstractIdeaVote.voter_id, "
+            primaryjoin="and_(DiscussionAgent.id==AbstractIdeaVote.voter_dagent_id, "
+                             "AbstractIdeaVote.tombstone_date == None)"))
+    voter_ts = relationship(
+        AgentProfile,
+        secondary=DiscussionAgent.__table__, uselist=False, viewonly=True,
+        backref=backref("votes_ts"))
+    voter = relationship(
+        AgentProfile,
+        secondary=DiscussionAgent.__table__, uselist=False, viewonly=True,
+        primaryjoin="and_(DiscussionAgent.id==AbstractIdeaVote.voter_dagent_id, "
+                         "AbstractIdeaVote.tombstone_date == None)",
+        backref=backref(
+            "votes",
+            primaryjoin="and_(DiscussionAgent.id==AbstractIdeaVote.voter_dagent_id, "
                              "AbstractIdeaVote.tombstone_date == None)"))
 
     def populate_from_context(self, context):
@@ -782,13 +803,13 @@ class AbstractIdeaVote(HistoryMixinWithOrigin, DiscussionBoundBase):
         # Note: Criterion is not in context
         super(AbstractIdeaVote, self).populate_from_context(context)
 
-    def is_owner(self, user_id):
-        return self.voter_id == user_id
+    def is_owner(self, uagent):
+        return self.voter_dagent.profile_id == uagent.user_id
 
     @classmethod
     def restrict_to_owners(cls, query, user_id):
         "filter query according to object owners"
-        return query.filter(cls.voter_id == user_id)
+        return query.join(DiscussionAgent).filter(DiscussionAgent.profile_id == user_id)
 
     # Do we still need this? Can access through vote_spec
     widget_id = Column(

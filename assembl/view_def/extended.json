@@ -28,10 +28,7 @@
         "name": "&display_name",
         "real_name": "&real_name",
         "post_count": "&count_posts_in_current_discussion",
-        "preferred_email": false
-    },
-    "User": {
-        "@extends": "Agent",
+        "preferred_email": false,
         "created": "creation_date",
         "last_login": true,
         "login_expiry": "&login_expiry_req",
@@ -42,8 +39,8 @@
         "notification_subscriptions": "&get_notification_subscriptions_for_current_discussion:"
     },
     "UserTemplate": {
-        "@extends": "User",
         "discussion": true,
+        "name": "&display_name",
         "for_role": ":",
         "notification_subscriptions": "&get_notification_subscriptions:"
     },
@@ -110,7 +107,7 @@
         "message_id": false,
         "ancestry": false,
         "parentId": "parent",
-        "idCreator": "creator",
+        "idCreator": "creator_dagent",
         "bodyMimeType": "&get_body_mime_type",
         "attachments": [":default"],
         "extracts": [":partial"]
@@ -155,7 +152,7 @@
         "widget_collection_url": true,
         "objectives": true,
         "instigator": true,
-        "creator": true,
+        "creator": "creator_dagent",
         "introduction": true,
         "introductionDetails": true,
         "participant_template": "&get_participant_template:",
@@ -219,7 +216,7 @@
         "idIdea": "idea",
         "idPost": "content",
         "created": "creation_date",
-        "idCreator": "creator"
+        "idCreator": "creator_dagent"
     },
     "IdeaContentPositiveLink": {
         "@extends": "IdeaContentLink"
@@ -238,8 +235,8 @@
         "target": true,
         "important": true,
         "annotator_schema_version": "'\"v1.0\"",
-        "owner": true,
-        "attributed_to": true,
+        "owner_dagent": true,
+        "attributed_to_dagent": true,
         "quote": true,
         "order": true,
         "discussion": false,
@@ -264,7 +261,7 @@
     },
     "Update": {
         "when": "creation_date",
-        "who": "actor"
+        "who": "actor_dagent"
     },
     "ActionOnPost": {
         "@extends": "Update",
@@ -356,7 +353,7 @@
         "idea": true,
         "criterion": true,
         "widget": true,
-        "voter": true
+        "voter": "voter_dagent"
     },
     "BinaryVote": {
         "@extends": "AbstractIdeaVote",
@@ -405,7 +402,7 @@
         "last_status_change_date": true,
         "followed_object": "&followed_object",
         "human_readable_description": "&get_human_readable_description",
-        "user": true
+        "user": "dagent"
     },
     "NotificationSubscriptionFollowSyntheses": {
         "@extends": "NotificationSubscription"
@@ -435,7 +432,7 @@
         "name": true
     },
     "LocalUserRole": {
-        "user": true,
+        "user": "dagent",
         "requested": true,
         "role": "&get_role_name",
         "discussion": true

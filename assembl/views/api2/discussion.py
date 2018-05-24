@@ -54,7 +54,7 @@ from assembl.lib.json import DateJSONEncoder
 from assembl.lib.utils import get_global_base_url
 from assembl.auth import (
     P_READ, P_READ_PUBLIC_CIF, P_ADMIN_DISC, P_DISC_STATS, P_SYSADMIN,
-    R_ADMINISTRATOR)
+    R_ADMINISTRATOR, EveryoneUAgent)
 from assembl.auth.password import verify_data_token, data_token, Validity
 from assembl.auth.util import get_permissions
 from assembl.models import (Discussion, Permission)
@@ -347,14 +347,14 @@ def get_time_series_analytics(request):
         discussion.db.execute(intervals_table.insert(), intervals)
 
         from assembl.models import (
-            Post, AgentProfile, AgentStatusInDiscussion, ViewPost, Idea,
+            Post, AgentProfile, DiscussionAgent, ViewPost, Idea,
             AbstractIdeaVote, Action, ActionOnPost, ActionOnIdea, Content)
 
         # The posters
         post_subquery = discussion.db.query(intervals_table.c.interval_id,
             func.count(distinct(Post.id)).label('count_posts'),
-            func.count(distinct(Post.creator_id)).label('count_post_authors'),
-            # func.DB.DBA.BAG_AGG(Post.creator_id).label('post_authors'),
+            func.count(distinct(Post.creator_dagent_id)).label('count_post_authors'),
+            # func.DB.DBA.BAG_AGG(Post.creator_dagent_id).label('post_authors'),
             # func.DB.DBA.BAG_AGG(Post.id).label('post_ids'),
             )
         post_subquery = post_subquery.outerjoin(Post, and_(
@@ -368,7 +368,7 @@ def get_time_series_analytics(request):
         cumulative_posts_aliased = aliased(Post)
         cumulative_posts_subquery = discussion.db.query(intervals_table.c.interval_id,
             func.count(distinct(cumulative_posts_aliased.id)).label('count_cumulative_posts'),
-            func.count(distinct(cumulative_posts_aliased.creator_id)).label('count_cumulative_post_authors')
+            func.count(distinct(cumulative_posts_aliased.creator_dagent_id)).label('count_cumulative_post_authors')
             # func.DB.DBA.BAG_AGG(cumulative_posts_aliased.id).label('cumulative_post_ids')
             )
         cumulative_posts_subquery = cumulative_posts_subquery.outerjoin(cumulative_posts_aliased, and_(
@@ -380,8 +380,8 @@ def get_time_series_analytics(request):
         # The top posters
         top_post_subquery = discussion.db.query(intervals_table.c.interval_id,
             func.count(distinct(Post.id)).label('count_top_posts'),
-            func.count(distinct(Post.creator_id)).label('count_top_post_authors'),
-            # func.DB.DBA.BAG_AGG(Post.creator_id).label('post_authors'),
+            func.count(distinct(Post.creator_dagent_id)).label('count_top_post_authors'),
+            # func.DB.DBA.BAG_AGG(Post.creator_dagent_id).label('post_authors'),
             # func.DB.DBA.BAG_AGG(Post.id).label('post_ids'),
             )
         top_post_subquery = top_post_subquery.outerjoin(Post, and_(
@@ -396,7 +396,7 @@ def get_time_series_analytics(request):
         cumulative_top_posts_aliased = aliased(Post)
         cumulative_top_posts_subquery = discussion.db.query(intervals_table.c.interval_id,
             func.count(distinct(cumulative_top_posts_aliased.id)).label('count_cumulative_top_posts'),
-            func.count(distinct(cumulative_top_posts_aliased.creator_id)).label('count_cumulative_top_post_authors')
+            func.count(distinct(cumulative_top_posts_aliased.creator_dagent_id)).label('count_cumulative_top_post_authors')
             # func.DB.DBA.BAG_AGG(cumulative_top_posts_aliased.id).label('cumulative_post_ids')
             )
         cumulative_top_posts_subquery = cumulative_top_posts_subquery.outerjoin(cumulative_top_posts_aliased, and_(
@@ -422,7 +422,7 @@ def get_time_series_analytics(request):
         post_viewers_subquery = post_viewers_subquery.subquery()
 
         # The cumulative visitors
-        cumulativeVisitorAgent = aliased(AgentStatusInDiscussion)
+        cumulativeVisitorAgent = aliased(DiscussionAgent)
         cumulative_visitors_query = discussion.db.query(intervals_table.c.interval_id,
             func.count(distinct(cumulativeVisitorAgent.id)).label('count_cumulative_logged_in_visitors'),
             # func.DB.DBA.BAG_AGG(cumulativeVisitorAgent.id).label('first_time_visitors')
@@ -435,7 +435,7 @@ def get_time_series_analytics(request):
         # query = cumulative_visitors_query
 
         # The members (can go up and down...)  Assumes that first_subscribed is available
-        memberAgentStatus = aliased(AgentStatusInDiscussion)
+        memberAgentStatus = aliased(DiscussionAgent)
         members_subquery = discussion.db.query(intervals_table.c.interval_id,
             func.count(memberAgentStatus.id).label('count_approximate_members')
             )
@@ -443,7 +443,7 @@ def get_time_series_analytics(request):
         members_subquery = members_subquery.group_by(intervals_table.c.interval_id)
         members_subquery = members_subquery.subquery()
 
-        subscribersAgentStatus = aliased(AgentStatusInDiscussion)
+        subscribersAgentStatus = aliased(DiscussionAgent)
         subscribers_query = discussion.db.query(intervals_table.c.interval_id,
             func.sum(
                 case([
@@ -537,7 +537,7 @@ def get_time_series_analytics(request):
 
         posts = discussion.db.query(
             intervals_table.c.interval_id.label('interval_id'),
-            Post.creator_id.label('actor_id'))
+            Post.creator_dagent_id.label('actor_id'))
         posts = posts.outerjoin(Post, and_(
             Post.discussion_id == discussion.id,
             Post.creation_date >= intervals_table.c.interval_start,
@@ -568,7 +568,7 @@ def get_time_series_analytics(request):
 
         posts = discussion.db.query(
             intervals_table.c.interval_id.label('interval_id'),
-            Post.creator_id.label('actor_id'))
+            Post.creator_dagent_id.label('actor_id'))
         posts = posts.outerjoin(Post, and_(
             Post.discussion_id == discussion.id,
             Post.creation_date < intervals_table.c.interval_end))
@@ -782,9 +782,9 @@ def get_visit_count(request):
             readers=discussion.count_post_viewers(start, end),
             first_visitors=discussion.count_new_visitors(start, end))
         if not start:
-            from assembl.models import AgentStatusInDiscussion
+            from assembl.models import DiscussionAgent
             (start,) = discussion.db.query(
-                func.min(AgentStatusInDiscussion.first_visit)).filter_by(
+                func.min(DiscussionAgent.first_visit)).filter_by(
                 discussion_id=discussion.id).first()
         r["start"] = start
         if not end:
@@ -950,17 +950,20 @@ def show_optics_cluster(request):
     discussion = request.context._instance
     output = BytesIO()
     output_utf8 = TextIOWrapper(output, encoding='utf-8')
-    user_id = authenticated_userid(request) or Everyone
+    dagent = request.uagent
+    if not dagent:
+        from urllib.parse import quote
+        return HTTPFound(location="/login?next="+quote(request.path))
     from assembl.nlp.clusters import (
         OpticsSemanticsAnalysis, OpticsSemanticsAnalysisWithSuggestions)
     if asbool(suggestions):
         analysis = OpticsSemanticsAnalysisWithSuggestions(
             discussion, min_samples=min_samples, eps=eps,
-            user_id=user_id, test_code=test_code)
+            dagent_id=dagent.id, test_code=test_code)
     else:
         analysis = OpticsSemanticsAnalysis(
             discussion, min_samples=min_samples, eps=eps,
-            user_id=user_id, test_code=test_code)
+            dagent_id=dagent.id, test_code=test_code)
     from pyramid_jinja2 import IJinja2Environment
     jinja_env = request.registry.queryUtility(
         IJinja2Environment, name='.jinja2')
@@ -975,15 +978,15 @@ def show_optics_cluster(request):
              permission=P_READ)
 def show_suggestions_test(request):
     discussion = request.context._instance
-    user_id = authenticated_userid(request)
-    if not user_id:
+    dagent = request.uagent
+    if not dagent:
         from urllib.parse import quote
         return HTTPFound(location="/login?next="+quote(request.path))
     discussion = request.context._instance
     output = StringIO()
     from assembl.nlp.clusters import OpticsSemanticsAnalysisWithSuggestions
     analysis = OpticsSemanticsAnalysisWithSuggestions(
-        discussion, user_id=user_id, min_samples=3, test_code=str(user_id))
+        discussion, dagent_id=dagent.id, min_samples=3, test_code=str(dagent.id))
     from pyramid_jinja2 import IJinja2Environment
     jinja_env = request.registry.queryUtility(
         IJinja2Environment, name='.jinja2')
@@ -1062,8 +1065,10 @@ def post_discussion(request):
             'discussion_' + json.get('slug', str(discussion.id)))
         create_default_permissions(discussion)
         if user is not None:
+            dagent = DiscussionAgent(profile=user, discussion=discussion)
+            instances.append(dagent)
             role = db.query(Role).filter_by(name=R_ADMINISTRATOR).first()
-            local_role = LocalUserRole(discussion=discussion, user=user, role=role)
+            local_role = LocalUserRole(discussion=discussion, dagent=dagent, role=role)
             instances.append(local_role)
         discussion.invoke_callbacks_after_creation()
     except ObjectNotUniqueError as e:
@@ -1080,8 +1085,9 @@ def post_discussion(request):
         db.flush()
         view = request.GET.get('view', None) or default_view
         uri = "/".join((API_ETALAB_DISCUSSIONS_PREFIX, str(first.id))) if is_etalab_request else None
+        dagent = dagent or EveryoneUAgent
         return CreationResponse(
-            first, user_id, ctx.get_permissions(), view, uri=uri, charset="utf-8")
+            first, dagent, ctx.get_permissions(), view, uri=uri, charset="utf-8")
 
 
 class defaultdict_of_dict(defaultdict):
@@ -1158,9 +1164,9 @@ def get_participant_time_series_analytics(request):
         discussion.db.execute(intervals_table.insert(), intervals)
 
         from assembl.models import (
-            Post, AgentProfile, AgentStatusInDiscussion, ViewPost, Idea,
+            Post, AgentProfile, DiscussionAgent, ViewPost, LikedPost,
             AbstractIdeaVote, Action, ActionOnPost, ActionOnIdea, Content,
-            PublicationStates, LikedPost, AbstractAgentAccount)
+            PublicationStates, AbstractAgentAccount, Idea, DiscussionAgent)
 
         content = with_polymorphic(
                     Content, [], Content.__table__,
@@ -1182,7 +1188,7 @@ def get_participant_time_series_analytics(request):
                 Post.creation_date >= intervals_table.c.interval_start,
                 Post.creation_date < intervals_table.c.interval_end,
                 Post.discussion_id == discussion.id))
-            post_query = post_query.join(AgentProfile, Post.creator_id == AgentProfile.id)
+            post_query = post_query.join(DiscussionAgent, Post.creator_dagent_id == DiscussionAgent.id)
             post_query = post_query.group_by(intervals_table.c.interval_id, AgentProfile.id)
             query_components.append(post_query)
 
@@ -1199,7 +1205,8 @@ def get_participant_time_series_analytics(request):
                 Post.creation_date < intervals_table.c.interval_end,
                 Post.publication_state == PublicationStates.PUBLISHED,
                 Post.discussion_id == discussion.id))
-            cumulative_post_query = cumulative_post_query.join(AgentProfile, Post.creator_id == AgentProfile.id)
+            cumulative_post_query = cumulative_post_query.join(DiscussionAgent, Post.creator_dagent_id == DiscussionAgent.id)
+            cumulative_post_query = cumulative_post_query.join(AgentProfile)
             cumulative_post_query = cumulative_post_query.group_by(intervals_table.c.interval_id, AgentProfile.id)
             query_components.append(cumulative_post_query)
 
@@ -1218,7 +1225,8 @@ def get_participant_time_series_analytics(request):
                 Post.parent_id == None,
                 Post.discussion_id == discussion.id))
             top_post_query = top_post_query.join(
-                AgentProfile, Post.creator_id == AgentProfile.id)
+                DiscussionAgent, Post.creator_dagent_id == DiscussionAgent.id)
+            top_post_query = top_post_query.join(AgentProfile)
             top_post_query = top_post_query.group_by(
                 intervals_table.c.interval_id, AgentProfile.id)
             query_components.append(top_post_query)
@@ -1238,7 +1246,8 @@ def get_participant_time_series_analytics(request):
                 Post.parent_id == None,
                 Post.discussion_id == discussion.id))
             cumulative_top_post_query = cumulative_top_post_query.join(
-                AgentProfile, Post.creator_id == AgentProfile.id)
+                DiscussionAgent, Post.creator_dagent_id == DiscussionAgent.id)
+            cumulative_top_post_query = cumulative_top_post_query.join(AgentProfile)
             cumulative_top_post_query = cumulative_top_post_query.group_by(
                 intervals_table.c.interval_id, AgentProfile.id)
             query_components.append(cumulative_top_post_query)
@@ -1257,7 +1266,8 @@ def get_participant_time_series_analytics(request):
                 LikedPost.creation_date >= intervals_table.c.interval_start,
                 LikedPost.creation_date < intervals_table.c.interval_end,
                 LikedPost.post_id == Post.id))
-            liking_query = liking_query.join(AgentProfile, LikedPost.actor_id == AgentProfile.id)
+            liking_query = liking_query.join(DiscussionAgent, LikedPost.actor_dagent_id == DiscussionAgent.id)
+            liking_query = liking_query.join(AgentProfile)
             liking_query = liking_query.group_by(intervals_table.c.interval_id, AgentProfile.id)
             query_components.append(liking_query)
 
@@ -1275,7 +1285,8 @@ def get_participant_time_series_analytics(request):
                 LikedPost.tombstone_date == None,
                 LikedPost.creation_date < intervals_table.c.interval_end,
                 LikedPost.post_id == Post.id))
-            cumulative_liking_query = cumulative_liking_query.join(AgentProfile, LikedPost.actor_id == AgentProfile.id)
+            cumulative_liking_query = cumulative_liking_query.join(DiscussionAgent, LikedPost.actor_dagent_id == DiscussionAgent.id)
+            cumulative_liking_query = cumulative_liking_query.join(AgentProfile)
             cumulative_liking_query = cumulative_liking_query.group_by(intervals_table.c.interval_id, AgentProfile.id)
             query_components.append(cumulative_liking_query)
 
@@ -1293,7 +1304,8 @@ def get_participant_time_series_analytics(request):
                 LikedPost.creation_date >= intervals_table.c.interval_start,
                 LikedPost.creation_date < intervals_table.c.interval_end,
                 LikedPost.post_id == Post.id))
-            liked_query = liked_query.join(AgentProfile, Post.creator_id == AgentProfile.id)
+            liked_query = liked_query.join(DiscussionAgent, Post.creator_dagent_id == DiscussionAgent.id)
+            liked_query = liked_query.join(AgentProfile)
             liked_query = liked_query.group_by(intervals_table.c.interval_id, AgentProfile.id)
             query_components.append(liked_query)
 
@@ -1311,7 +1323,8 @@ def get_participant_time_series_analytics(request):
                 LikedPost.tombstone_date == None,
                 LikedPost.creation_date < intervals_table.c.interval_end,
                 LikedPost.post_id == Post.id))
-            cumulative_liked_query = cumulative_liked_query.outerjoin(AgentProfile, Post.creator_id == AgentProfile.id)
+            cumulative_liked_query = cumulative_liked_query.outerjoin(DiscussionAgent, Post.creator_dagent_id == DiscussionAgent.id)
+            cumulative_liked_query = cumulative_liked_query.join(AgentProfile)
             cumulative_liked_query = cumulative_liked_query.group_by(intervals_table.c.interval_id, AgentProfile.id)
             query_components.append(cumulative_liked_query)
 
@@ -1330,7 +1343,8 @@ def get_participant_time_series_analytics(request):
                     reply_post.creation_date < intervals_table.c.interval_end,
                     reply_post.discussion_id == discussion.id)
                 ).join(original_post, original_post.id == reply_post.parent_id
-                ).join(AgentProfile, original_post.creator_id == AgentProfile.id
+                ).join(DiscussionAgent, original_post.creator_dagent_id == DiscussionAgent.id
+                ).join(AgentProfile
                 ).group_by(intervals_table.c.interval_id, AgentProfile.id)
             query_components.append(reply_post_query)
 
@@ -1351,7 +1365,8 @@ def get_participant_time_series_analytics(request):
                 ).join(original_post, and_(
                     original_post.id == reply_post.parent_id,
                     original_post.publication_state == PublicationStates.PUBLISHED)
-                ).join(AgentProfile, original_post.creator_id == AgentProfile.id
+                ).join(DiscussionAgent, original_post.creator_dagent_id == DiscussionAgent.id
+                ).join(AgentProfile
                 ).group_by(intervals_table.c.interval_id, AgentProfile.id)
             query_components.append(cumulative_reply_post_query)
 
@@ -1386,7 +1401,7 @@ def get_participant_time_series_analytics(request):
 
             posts = discussion.db.query(
                 intervals_table.c.interval_id.label('interval_id'),
-                Post.creator_id.label('actor_id'),
+                Post.creator_dagent_id.label('actor_id'),
                 Post.id.label('id'))
             posts = posts.join(Post, and_(
                 Post.discussion_id == discussion.id,
@@ -1401,7 +1416,8 @@ def get_participant_time_series_analytics(request):
                 literal('active').label('key'),
                 cast(func.count(actions_union_subquery.c.id) > 0, Integer).label('value')
                 ).join(actions_union_subquery, actions_union_subquery.c.interval_id == intervals_table.c.interval_id
-                ).join(AgentProfile, actions_union_subquery.c.actor_id == AgentProfile.id
+                ).join(DiscussionAgent, actions_union_subquery.c.actor_dagent_id == DiscussionAgent.id
+                ).join(AgentProfile
                 ).group_by(intervals_table.c.interval_id, AgentProfile.id)
             query_components.append(active_query)
 

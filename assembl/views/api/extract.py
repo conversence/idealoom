@@ -69,7 +69,7 @@ def get_extract(request):
 
 def _get_extracts_real(request, view_def='default', ids=None, user_id=None):
     discussion = request.discussion
-    user_id = user_id or Everyone
+    uagent = request.uagent
     all_extracts = discussion.db.query(Extract).filter(
         Extract.discussion_id == discussion.id
     )
@@ -84,7 +84,7 @@ def _get_extracts_real(request, view_def='default', ids=None, user_id=None):
             AnnotationSelector.extract, innerjoin=True))
     permissions = request.permissions
 
-    return [extract.generic_json(view_def, user_id, permissions)
+    return [extract.generic_json(view_def, uagent, permissions)
             for extract in all_extracts]
 
 
@@ -108,12 +108,21 @@ def post_extract(request):
     user_id = authenticated_userid(request)
     if not user_id:
         # Straight from annotator
+        # TODODA: Move in request methods
         token = request.headers.get('X-Annotator-Auth-Token')
         if token:
             token = decode_token(
                 token, request.registry.settings['session.secret'])
             if token:
                 user_id = token['userId']
+                if user_id:
+                    user = User.get(user_id)
+                    if user:
+                        dagent = user.create_agent_status_in_discussion(discussion)
+                    else:
+                        user_id = None
+    else:
+        dagent = request.uagent
     user_id = user_id or Everyone
     if not user_has_permission(discussion.id, user_id, P_ADD_EXTRACT):
         #TODO: maparent:  restore this code once it works:
@@ -168,8 +177,8 @@ def post_extract(request):
         idea = None
 
     new_extract = Extract(
-        creator_id=user_id,
-        owner_id=user_id,
+        creator_dagent=dagent,
+        owner_dagent=dagent,
         discussion=discussion,
         idea=idea,
         important=important,
@@ -209,6 +218,14 @@ def put_extract(request):
                 token, request.registry.settings['session.secret'])
             if token:
                 user_id = token['userId']
+                if user_id:
+                    user = User.get(user_id)
+                    if user:
+                        dagent = user.create_agent_status_in_discussion(discussion)
+                    else:
+                        user_id = None
+    else:
+        dagent = request.uagent
     user_id = user_id or Everyone
 
     updated_extract_data = json.loads(request.body)
@@ -218,10 +235,10 @@ def put_extract(request):
 
     if not (user_has_permission(discussion.id, user_id, P_EDIT_EXTRACT)
         or (user_has_permission(discussion.id, user_id, P_EDIT_MY_EXTRACT)
-            and user_id == extract.owner_id)):
+            and dagent == extract.owner_dagent)):
         raise HTTPForbidden()
 
-    extract.owner_id = user_id or AgentProfile.get_database_id(extract.owner_id)
+    extract.owner_dagent = dagent or extract.owner_dagent
     extract.order = updated_extract_data.get('order', extract.order)
     extract.important = updated_extract_data.get('important', extract.important)
     idea_id = updated_extract_data.get('idIdea', None)
@@ -253,6 +270,14 @@ def delete_extract(request):
                 token, request.registry.settings['session.secret'])
             if token:
                 user_id = token['userId']
+                if user_id:
+                    user = User.get(user_id)
+                    if user:
+                        dagent = user.create_agent_status_in_discussion(discussion)
+                    else:
+                        user_id = None
+    else:
+        dagent = request.uagent
     user_id = user_id or Everyone
 
     extract_id = request.matchdict['id']
@@ -260,7 +285,7 @@ def delete_extract(request):
 
     if not (user_has_permission(discussion.id, user_id, P_EDIT_EXTRACT)
         or (user_has_permission(discussion.id, user_id, P_EDIT_MY_EXTRACT)
-            and user_id == extract.owner_id)):
+            and dagent == extract.owner_dagent)):
         raise HTTPForbidden()
 
     if not extract:

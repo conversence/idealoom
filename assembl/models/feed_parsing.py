@@ -353,12 +353,12 @@ class FeedSourceReader(PullSourceReader):
         post.subject = self._get_subject(entry)
         post.body = self._get_body(entry)
 
-    def _process_reimport_user(self, entry, user, user_desc=None):
-        if not user.profile.name:
-            user.profile.name = self._get_author(entry)
-        if not user.profile.description:
-            user.profile.description = \
-                user_desc if not None else user.profile.description
+    def _process_reimport_user(self, entry, account, user_desc=None):
+        if not account.profile.name:
+            account.profile.name = self._get_author(entry)
+        if not account.profile.description:
+            account.profile.description = \
+                user_desc if not None else account.user.description
 
     def _add_entries(self):
         for post, account in self._generate_post_stream():

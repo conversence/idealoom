@@ -11,6 +11,7 @@ import logging
 from future.utils import string_types, as_native_str
 from sqlalchemy.orm import aliased
 from sqlalchemy.orm.attributes import InstrumentedAttribute
+from sqlalchemy.orm.util import join as util_join
 from sqlalchemy.sql.expression import and_
 from sqlalchemy.inspection import inspect as sqlainspect
 from sqlalchemy.exc import InvalidRequestError
@@ -20,7 +21,7 @@ from pyramid.httpexceptions import HTTPNotFound
 from abc import ABCMeta, abstractmethod
 import reg
 
-from assembl.auth import P_READ, R_SYSADMIN
+from assembl.auth import P_READ, R_SYSADMIN, EveryoneUAgent
 from assembl.auth.util import discussion_from_request
 from assembl.lib.sqla import uses_list, get_named_class, Base
 from assembl.lib.logging import getLogger
@@ -62,6 +63,10 @@ class BaseContext(object):
 
     def get_user_id(self):
         return self.__parent__.get_user_id()
+
+    def get_uagent(self):
+        # get a AgentProfile or DiscussionAgent
+        return self.__parent__.get_uagent()
 
     def context_chain(self):
         yield self
@@ -130,6 +135,7 @@ class AppRoot(DictContext):
         self.user_id = user_id
         self._permissions = None
         self._user_cache = None
+        self._dagent_cache = None
         super(AppRoot, self).__init__('', ACL_READABLE, [
             Api2Context(self, ACL_RESTRICTIVE),
             DictContext('admin', ACL_RESTRICTIVE, [
@@ -173,22 +179,52 @@ class AppRoot(DictContext):
         if request:
             return request.authenticated_userid
 
+    def get_uagent(self):
+        discussion = self.get_discussion_id()
+        request = self.get_request()
+        if self.request:
+            return request.uagent
+        else:
+            user_id = self.get_user_id()
+            if user_id:
+                profile = AgentProfile.get(user_id)
+                if profile:
+                    return profile.get_uagent(discussion)
+        return EveryoneUAgent
+
     def get_instance_ctx_of_class(self, cls):
         return None # I'm the holder of the user, but not the user's context
 
     def get_instance_of_class(self, cls):
-        from assembl.models import AgentProfile
-        if issubclass(cls, AgentProfile):
+        from assembl.models import AgentProfile, DiscussionAgent
+        if issubclass(cls, (AgentProfile, DiscussionAgent)):
+            if self.request:
+                uagent = self.request.uagent
+                if uagent:
+                    if issubclass(cls, DiscussionAgent):
+                        return uagent
+                    else:
+                        return uagent.user
             user_id = self.get_user_id()
             if user_id and user_id != Everyone:
                 if self._user_cache is None:
                     self._user_cache = AgentProfile.get(user_id)
-                return self._user_cache
+                if issubclass(cls, AgentProfile):
+                    return self._user_cache
+                if self._dagent_cache is None:
+                    d_id = self.get_discussion_id()
+                    if d_id:
+                        self._dagent_cache = (
+                            self._user_cache.get_local_agent(d_id))
+                return self._dagent_cache
 
     def get_all_instances(self):
-        from assembl.models import User
-        user = self.get_instance_of_class(User)
+        from assembl.models import DiscussionAgent, User
+        user = self.get_instance_of_class(DiscussionAgent)
         if user is not None:
+            yield user
+        else:
+            user = self.get_instance_of_class(User)
             yield user
 
     def get_permissions(self):
@@ -333,13 +369,15 @@ class ClassContext(TraversalContext):
         self.class_alias = aliased(cls, name="alias_%s" % (cls.__name__))
 
     def __getitem__(self, key):
-        from assembl.models import Preferences
+        from assembl.models import Preferences, Discussion
         instance = self._class.get_instance(key)
         if not instance:
             raise KeyError()
         # TODO: use a protocol for this
         if isinstance(instance, Preferences):
             return PreferenceContext(self, instance)
+        elif isinstance(instance, Discussion):
+            return DiscussionInstanceContext(self, instance)
         return InstanceContext(self, instance)
 
     def get_default_view(self):
@@ -501,6 +539,13 @@ class InstanceContext(TraversalContext):
 
     def __hash__(self):
         return super(ClassContext, self).hash() % id(self._instance)
+
+
+class DiscussionInstanceContext(InstanceContext):
+    def __init__(self, parent, instance):
+        super(DiscussionInstanceContext, self).__init__(parent, instance)
+        request = parent.get_request()
+        request._discussion = instance
 
 
 class InstanceContextPredicate(object):
@@ -830,9 +875,9 @@ class RelationCollectionDefinition(AbstractCollectionDefinition):
             query = query.join(owner_alias,
                                getattr(coll_alias, inv.key))
         else:
-            # hope for the best
+            # strange use of best
             try:
-                query = query.join(owner_alias)
+                query = query.select_from(util_join(owner_alias, coll_alias, self.relationship))
             except InvalidRequestError:
                 getLogger().error("Could not join %s to %s" % (owner_alias, query))
                 # This is very likely to fail downstream
@@ -1014,13 +1059,13 @@ class UserNsDictCollection(AbstractCollectionDefinition):
         from assembl.models.user_key_values import UserNsDict
         request = get_current_request()
         if request is not None:
-            user_id = request.unauthenticated_userid
+            uagent = request.uagent
             # Check again downstream for real userid
-            if user_id is None:
+            if uagent is None:
                 raise HTTPUnauthorized()
         else:
             raise RuntimeError()
-        return UserNsDict(parent_instance, user_id)
+        return UserNsDict(parent_instance, uagent.id)
 
     def get_instance(self, namespace, parent_instance):
         c = self.as_collection(parent_instance)

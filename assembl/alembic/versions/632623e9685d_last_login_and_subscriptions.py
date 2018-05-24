@@ -35,11 +35,11 @@ def merge_min_max(mmdict, mmquery):
 def upgrade(pyramid_env):
     from assembl import models as m
     db = m.get_session_maker()()
-    # Add AgentStatusInDiscussion for users who have acted on IdeaLoom
+    # Add DiscussionAgent for users who have acted on IdeaLoom
     with transaction.manager:
         q1 = db.query(m.User.id
-            ).outerjoin(m.AgentStatusInDiscussion
-            ).filter(m.AgentStatusInDiscussion.id == None,
+            ).outerjoin(m.DiscussionAgent
+            ).filter(m.DiscussionAgent.id == None,
                      (m.User.last_login == m.User.creation_date) |
                      (m.User.last_login == None)).subquery()
         # look at actions on posts
@@ -77,10 +77,10 @@ def upgrade(pyramid_env):
                 m.NotificationCreationOrigin.USER_REQUESTED
             ).group_by(m.User.id, m.NotificationSubscription.discussion_id)
         merge_min_max(min_maxes, q9)
-        # create AgentStatusInDiscussion
+        # create DiscussionAgent
         for ((profile_id, discussion_id), (first_date, last_date)
                 ) in min_maxes.items():
-            db.add(m.AgentStatusInDiscussion(
+            db.add(m.DiscussionAgent(
                 profile_id=profile_id, discussion_id=discussion_id,
                 first_visit=first_date, last_visit=last_date,
                 first_subscribed=first_date))
@@ -89,8 +89,8 @@ def upgrade(pyramid_env):
             profile_id for ((profile_id, discussion_id), (first_date, last_date))
                 in list(min_maxes.items()) if first_date == last_date}
 
-    # Clear last_login for non-social users without m.AgentStatusInDiscussion,
-    # or where for all m.AgentStatusInDiscussion, last_visit == first_subscribed
+    # Clear last_login for non-social users without m.DiscussionAgent,
+    # or where for all m.DiscussionAgent, last_visit == first_subscribed
     with transaction.manager:
         q4 = db.query(m.User.id
             ).outerjoin(m.Action
@@ -101,28 +101,28 @@ def upgrade(pyramid_env):
                 m.LocalPost.id == None,
                 m.User.last_login == m.User.creation_date)
 
-        q5 = q4.outerjoin(m.AgentStatusInDiscussion
-            ).filter(m.AgentStatusInDiscussion.id == None).subquery()
+        q5 = q4.outerjoin(m.DiscussionAgent
+            ).filter(m.DiscussionAgent.id == None).subquery()
         db.query(m.User).filter(m.User.id.in_(q5)
             ).update({m.User.last_login: None}, synchronize_session=False)
 
         q6 = q4.filter(
             m.User.id.notin_(known_logged_in)
-            ).join(m.AgentStatusInDiscussion
+            ).join(m.DiscussionAgent
             ).group_by(m.User.id
-            ).having(sa.func.max(m.AgentStatusInDiscussion.first_subscribed) ==
-                     sa.func.min(m.AgentStatusInDiscussion.last_visit)
+            ).having(sa.func.max(m.DiscussionAgent.first_subscribed) ==
+                     sa.func.min(m.DiscussionAgent.last_visit)
             ).subquery()
         db.query(m.User).filter(m.User.id.in_(q6)
             ).update({m.User.last_login: None}, synchronize_session=False)
         mark_changed()
 
-    # Update missing last_logins from AgentStatusInDiscussion
+    # Update missing last_logins from DiscussionAgent
     with transaction.manager:
-        dates = db.query(m.User.id, sa.func.max(m.AgentStatusInDiscussion.last_visit)
-            ).join(m.AgentStatusInDiscussion
+        dates = db.query(m.User.id, sa.func.max(m.DiscussionAgent.last_visit)
+            ).join(m.DiscussionAgent
             ).filter(m.User.last_login == None,
-            m.AgentStatusInDiscussion.last_visit != None
+            m.DiscussionAgent.last_visit != None
             ).group_by(m.User.id)
         datesp = [{'uid':id, 'date': d} for (id, d) in dates]
         if datesp:

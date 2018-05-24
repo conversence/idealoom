@@ -5,6 +5,7 @@ from io import TextIOWrapper, BytesIO
 import base64
 
 from future.utils import string_types
+from sqlalchemy import inspect
 from sqlalchemy.sql.expression import and_
 from pyramid.security import (Everyone, Authenticated, forget)
 from pyramid.httpexceptions import HTTPNotFound
@@ -14,11 +15,11 @@ from pyramid.authentication import SessionAuthenticationPolicy
 
 from assembl.lib.locale import _
 from ..lib.sqla import get_session_maker
-from . import R_SYSADMIN, P_READ, SYSTEM_ROLES
+from . import R_SYSADMIN, P_READ, SYSTEM_ROLES, EveryoneUAgent
 from .password import verify_data_token, Validity
 from ..models.auth import (
     User, Role, UserRole, LocalUserRole, Permission,
-    DiscussionPermission, AgentProfile, EmailAccount)
+    DiscussionPermission, AgentProfile, EmailAccount, DiscussionAgent)
 
 
 _ = TranslationStringFactory('assembl')
@@ -28,6 +29,14 @@ def get_user(request):
     logged_in = request.unauthenticated_userid
     if logged_in:
         return User.get(logged_in)
+    return EveryoneUAgent
+
+
+def get_uagent(request):
+    user = request.user
+    if user:
+        return user.get_uagent(request.discussion)
+    return EveryoneUAgent
 
 
 def get_roles(user_id, discussion_id=None):
@@ -39,10 +48,10 @@ def get_roles(user_id, discussion_id=None):
     if discussion_id:
         roles = roles.union(
             session.query(Role.name).join(
-                LocalUserRole).filter(and_(
-                    LocalUserRole.user_id == user_id,
+                LocalUserRole).join(DiscussionAgent).filter(and_(
+                    DiscussionAgent.profile_id == user_id,
                     LocalUserRole.requested == False,
-                    LocalUserRole.discussion_id == discussion_id)))
+                    DiscussionAgent.discussion_id == discussion_id)))
     return [x[0] for x in roles.distinct()]
 
 
@@ -79,10 +88,10 @@ def get_permissions(user_id, discussion_id):
                 UserRole.user_id == user_id,
                 DiscussionPermission.discussion_id == discussion_id
             ).union(session.query(Permission.name).join(
-                DiscussionPermission, Role, LocalUserRole).filter(and_(
-                    LocalUserRole.user_id == user_id,
+                DiscussionPermission, Role, LocalUserRole, DiscussionAgent).filter(and_(
+                    DiscussionAgent.profile_id == user_id,
                     LocalUserRole.requested == False,
-                    LocalUserRole.discussion_id == discussion_id,
+                    DiscussionAgent.discussion_id == discussion_id,
                     DiscussionPermission.discussion_id == discussion_id))
             ).union(session.query(Permission.name).join(
                 DiscussionPermission, Role).filter(and_(
@@ -132,6 +141,13 @@ def discussion_id_from_request_reified(request):
 def discussion_from_request(request):
     from ..models import Discussion
     from assembl.views.traversal import BaseContext
+    # Set by traversal context
+    discussion = getattr(request, '_discussion', None)
+    if discussion:
+        # sometimes gets detached
+        if inspect(discussion).detached:
+            request._discussion = Discussion.get(inspect(discussion).key[1][0])
+        return request._discussion
     if request.matchdict:
         if 'discussion_id' in request.matchdict:
             discussion_id = int(request.matchdict['discussion_id'])
@@ -306,13 +322,12 @@ def discussions_with_access(userid, permission=P_READ):
                 User.id == userid).filter(
                     Permission.name == permission
                 ).union(db.query(DiscussionPermission).join(
-                    Role, Permission).join(
-                        LocalUserRole, and_(
-                            LocalUserRole.discussion_id == DiscussionPermission.discussion_id,
-                            LocalUserRole.requested == False)
-                    ).join(User).filter(
-                        User.id == userid).filter(
-                            Permission.name == permission)
+                    # TODODA rewrite
+                    Role, Permission, LocalUserRole, DiscussionAgent).filter(
+                        LocalUserRole.profile_id == userid).filter(
+                        LocalUserRole.requested == False,
+                        DiscussionAgent.discussion_id == DiscussionPermission.discussion_id,
+                        Permission.name == permission)
                 ).union(db.query(DiscussionPermission).join(
                     Role, Permission).filter(
                         Role.name.in_((Authenticated, Everyone))).filter(
@@ -365,14 +380,14 @@ def user_has_permission(discussion_id, user_id, permission):
                     Permission.name == permission
                 ).union(
                     db.query(DiscussionPermission
-                        ).join(Permission, Role, LocalUserRole).filter(and_(
+                        ).join(Permission, Role, LocalUserRole, DiscussionAgent).filter(
                             # Virtuoso disregards this explicit condition
                             DiscussionPermission.discussion_id == discussion_id,
                             # So I have to add this one as well.
-                            LocalUserRole.discussion_id == discussion_id,
-                            LocalUserRole.user_id == user_id,
+                            DiscussionAgent.discussion_id == discussion_id,
+                            DiscussionAgent.user_id == user_id,
                             LocalUserRole.requested == False,
-                            Permission.name == permission))
+                            Permission.name == permission)
                 ).union(
                     db.query(DiscussionPermission).join(
                             Permission, Role).filter(
@@ -388,10 +403,10 @@ def users_with_permission(discussion_id, permission, id_only=True):
     # assume all ids valid
     db = Discussion.default_db
     user_ids = db.query(User.id).join(
-        LocalUserRole, Role, DiscussionPermission, Permission).filter(and_(
+        DiscussionAgent, LocalUserRole, Role, DiscussionPermission, Permission).filter(and_(
         Permission.name == permission,
         LocalUserRole.requested == False,
-        LocalUserRole.discussion_id == discussion_id,
+        DiscussionAgent.discussion_id == discussion_id,
         DiscussionPermission.discussion_id == discussion_id)
         ).union(
             db.query(User.id).join(
@@ -449,6 +464,8 @@ def add_user(name, email, password, role, force=False, username=None,
             discussion_ob = db.query(Discussion).get(discussion)
         discussion = discussion_ob
         assert discussion
+    else:
+        assert localrole is None
     existing_email = db.query(EmailAccount).filter(
         EmailAccount.email_ci == email).first()
     assert force or not existing_email,\
@@ -521,13 +538,14 @@ def add_user(name, email, password, role, force=False, username=None,
     if localrole:
         localrole = all_roles[localrole]
         lur = None
+        dagent = user.create_agent_status_in_discussion(discussion)
         if old_user:
             lur = db.query(LocalUserRole).filter_by(
-                user=user, discussion=discussion, role=localrole).first()
+                dagent=dagent, discussion=discussion, role=localrole).first()
         if not lur:
             created_localrole = True
             db.add(LocalUserRole(
-                user=user, role=localrole, discussion=discussion))
+                dagent=dagent, role=localrole, discussion=discussion))
     # Do this at login
     # if discussion:
     #     user.get_notification_subscriptions(discussion.id)
@@ -566,7 +584,7 @@ def add_multiple_users_csv(
             discussion=discussion_id, change_old_password=False)
         status_in_discussion = None
         if send_password_change and not (created_user or created_localrole):
-            status_in_discussion = user.get_status_in_discussion(discussion_id)
+            status_in_discussion = user.get_local_agent(discussion_id)
         if send_password_change and (
                 created_user or created_localrole or (
                     resend_if_not_logged_in and (
@@ -586,6 +604,8 @@ def includeme(config):
     """Pre-parse certain settings for python_social_auth, then load it."""
     config.add_request_method(
         'assembl.auth.util.get_user', 'user', property=True)
+    config.add_request_method(
+        'assembl.auth.util.get_uagent', 'uagent', property=True)
     config.add_request_method(
         'assembl.auth.util.permissions_from_request',
         'permissions', reify=True)

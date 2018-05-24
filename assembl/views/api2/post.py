@@ -71,11 +71,12 @@ def delete_post_instance(request):
     # - user who has the P_DELETE_POST permission in this discussion
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
+    local_agent = request.uagent
     permissions = ctx.get_permissions()
     instance = ctx._instance
 
     allowed = False
-    if (user_id == instance.creator_id and P_DELETE_MY_POST in permissions) or (P_DELETE_POST in permissions):
+    if (local_agent.id == instance.creator_dagent_id and P_DELETE_MY_POST in permissions) or (P_DELETE_POST in permissions):
         allowed = True
     if not allowed:
         raise HTTPUnauthorized()
@@ -86,7 +87,7 @@ def delete_post_instance(request):
     for extract in extracts_to_remove:
         extract.delete()
 
-    if user_id == instance.creator_id and P_DELETE_MY_POST in permissions:
+    if local_agent == instance.creator_dagent and P_DELETE_MY_POST in permissions:
         cause = PublicationStates.DELETED_BY_USER
     elif P_DELETE_POST in permissions:
         cause = PublicationStates.DELETED_BY_ADMIN

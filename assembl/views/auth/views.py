@@ -40,8 +40,8 @@ from social_core.exceptions import (
 
 from assembl.models import (
     EmailAccount, IdentityProvider, SocialAuthAccount,
-    AgentProfile, User, Role, LocalUserRole, Preferences,
-    AbstractAgentAccount, Discussion, AgentStatusInDiscussion)
+    AgentProfile, User, Preferences,
+    AbstractAgentAccount, Discussion, DiscussionAgent)
 from assembl.auth import (
     P_READ, R_PARTICIPANT, P_SELF_REGISTER, P_SELF_REGISTER_REQUEST)
 from assembl.auth.password import (
@@ -413,7 +413,7 @@ def assembl_register_view(request):
             discussion = None
     if discussion:
         _now = datetime.utcnow()
-        agent_status = AgentStatusInDiscussion(
+        agent_status = DiscussionAgent(
             agent_profile=user, discussion=discussion,
             first_visit=_now, last_visit=_now,
             user_created_on_this_discussion=True)

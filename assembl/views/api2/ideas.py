@@ -15,10 +15,10 @@ from assembl.models import (
              ctx_instance_class=Idea, permission=P_EDIT_IDEA)
 def instance_del(request):
     ctx = request.context
-    user_id = authenticated_userid(request) or Everyone
+    uagent = request.uagent
     idea = ctx._instance
     if not idea.user_can(
-            user_id, CrudPermissions.DELETE, ctx.get_permissions()):
+            uagent, CrudPermissions.DELETE, ctx.get_permissions()):
         raise HTTPUnauthorized()
     for link in idea.source_links:
         link.is_tombstone = True

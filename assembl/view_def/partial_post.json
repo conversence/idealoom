@@ -22,7 +22,7 @@
         "@extends": "SPost",
         "date": "creation_date",
         "parentId": "parent",
-        "idCreator": "creator",
+        "idCreator": "creator_dagent",
         "publication_state": true
     },
     "LocalPost": {
