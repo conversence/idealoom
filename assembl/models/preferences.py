@@ -433,6 +433,34 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
             "default": False  # for development
         },
 
+        # Terms of service version
+        {
+            "id": "tos_version",
+            "name": _("Terms of service version"),
+            "value_type": "int",
+            # "scalar_values": {value: "label"},
+            "description": _("Version number of terms of service. Increment when terms change, participants will be alerted."),
+            "allow_user_override": None,
+            "modification_permission": P_ADMIN_DISC,
+            # "frontend_validator_function": func_name...?,
+            # "backend_validator_function": func_name...?,
+            "default": 1
+        },
+
+        # Terms of service version
+        {
+            "id": "terms_of_service",
+            "name": _("Terms of service"),
+            "value_type": "dict_of_locale_to_text",
+            # "scalar_values": {value: "label"},
+            "description": _("Terms of service. Multilingual HTML String."),
+            "allow_user_override": None,
+            "modification_permission": P_ADMIN_DISC,
+            # "frontend_validator_function": func_name...?,
+            # "backend_validator_function": func_name...?,
+            "default": None  # for development
+        },
+
         {
             "id": "authorization_server_backend",
             "value_type": "scalar",

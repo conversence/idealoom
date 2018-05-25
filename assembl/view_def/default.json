@@ -50,6 +50,7 @@
         "is_first_visit": true,
         "last_visit": true,
         "first_visit": true,
+        "accepted_tos_version": true,
         "was_created_on_current_discussion": true,
         "permissions": "permissions_for_current_discussion",
         "username": true

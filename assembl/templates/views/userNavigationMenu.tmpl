@@ -13,6 +13,9 @@
   <li <% if (selectedSection == 'discussion_preferences'){ %>class="active"<% } %>>
     <a href="#user/discussion_preferences" class="menu">{{ gettext('Discussion preferences') }}</a>
   </li>
+  <li <% if (selectedSection == 'tos'){ %>class="active"<% } %>>
+    <a href="#user/tos" class="menu">{{ gettext('Terms of service') }}</a>
+  </li>
   <li class="mtxl">
     <a href="{{ get_route('home') }}">{{ gettext('Return to the discussion') }}</a>
   </li>

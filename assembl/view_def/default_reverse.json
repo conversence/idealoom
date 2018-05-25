@@ -45,6 +45,7 @@
         "password": "password_p",
         "permissions": false,
         "username": true,
+        "accepted_tos_version": true,
         "real_name": "real_name_p"
     },
     "UserAccount": {

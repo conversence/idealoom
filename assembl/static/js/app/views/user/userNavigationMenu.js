@@ -10,6 +10,7 @@ import i18n from '../../utils/i18n.js';
 import Ctx from '../../common/context.js';
 import CollectionManager from '../../common/collectionManager.js';
 import Roles from '../../utils/roles.js';
+import LocalRoles from '../../models/roles.js';
 import LoaderView from '../loaderView.js';
 import Permissions from '../../utils/permissions.js';
 
@@ -26,18 +27,23 @@ var userNavigationMenu = LoaderView.extend({
   initialize: function(options) {
     var that = this;
     var collectionManager = new CollectionManager();
-    this.setLoading(true);
 
     if ( "selectedSection" in options ){
       this.selectedSection = options.selectedSection;
     }
-    collectionManager.getLocalRoleCollectionPromise().then(function(localRoles) {
-      if(!that.isDestroyed()) {
-        that.localRoles = localRoles;
-        that.setLoading(false);
-        that.render();
-      }
-    });
+    var user = Ctx.getCurrentUser();
+    if (user.isUnknownUser()) {
+        this.localRoles = new LocalRoles.Collection();
+    } else {
+        this.setLoading(true);
+        collectionManager.getLocalRoleCollectionPromise().then(function(localRoles) {
+          if(!that.isDestroyed()) {
+            that.localRoles = localRoles;
+            that.setLoading(false);
+            that.render();
+          }
+        });
+    }
   },
 
   serializeData: function() {

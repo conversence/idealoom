@@ -35,6 +35,7 @@ class FrontendUrls(object):
         'partners': '/partners',
         'settings': '/settings',
         'timeline': '/timeline',
+        'tos': '/user/tos',
         'about': '/about',
         'admin_discussion_preferences': '/discussion_preferences',
         'notifications': '/notifications',

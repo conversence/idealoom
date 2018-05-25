@@ -39,6 +39,7 @@ var AgentModel = Base.Model.extend({
     last_visit: null,
     last_login: null,
     real_name: null,
+    accepted_tos_version: null,
     permissions: [],
     '@type': null,
     '@view': null
@@ -170,7 +171,7 @@ var AgentModel = Base.Model.extend({
    * @function app.models.agents.AgentModel.isUnknownUser
    */
   isUnknownUser: function() {
-    return this.getId() === UNKNOWN_USER_ID;
+    return this.getId() === UNKNOWN_USER_ID || this.getId() === undefined;
   },
   /**
    * Validate the model attributes

@@ -28,6 +28,7 @@ body{
             <input type="password" name="password" class="form-control defaultfield" placeholder="{{ gettext('Password') }}" required />
             <input type="password" name="password2" class="form-control defaultfield" placeholder="{{ gettext('Repeat password') }}" required />
             <input type="submit" name="register" value="{{ gettext('Sign up') }}" class="btn btn-primary js_register" />
+        {% if discussion %}<p>{{gettext('Please view our <a href="/{0}/user/tos">Terms of service</a>').format(discussion.slug)|safe}}</p>{% endif %}
         </form>
         {% endif %}
         <div class="subcontent">

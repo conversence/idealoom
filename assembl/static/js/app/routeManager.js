@@ -13,11 +13,10 @@ import Storage from './objects/storage.js';
 import Loader from './views/loader.js';
 import NavBar from './views/navBar.js';
 import InfobarsViews from './views/infobar.js';
-import InfobarsModels from './models/infobar.js';
+import InfobarsCollection from './models/infobar.js';
 import UrlParser from './url/url.pegjs';
 import GroupContainer from './views/groups/groupContainer.js';
 import PanelSpecTypes from './utils/panelSpecTypes.js';
-import CookiesManager from './utils/cookiesManager.js';
 import CollectionManager from './common/collectionManager.js';
 import ViewsFactory from './objects/viewsFactory.js';
 import AdminDiscussion from './views/admin/adminDiscussion.js';
@@ -29,6 +28,7 @@ import AgentViews from './views/agent.js';
 import Authorization from './views/authorization.js';
 import Permissions from './utils/permissions.js';
 import Account from './views/user/account.js';
+import UserTOS from './views/user/tos.js';
 import Widget from './models/widget.js';
 import AdminDiscussionSettings from './views/admin/adminDiscussionSettings.js';
 import AdminTimeline from './views/admin/adminTimelineEvents.js';
@@ -180,6 +180,12 @@ var routeManager = Marionette.Object.extend({
       var notifications = new AdminNotificationSubscriptions();
       IdeaLoom.rootView.showChildView('groupContainer', notifications);
     }
+  },
+
+  tos: function() {
+    IdeaLoom.rootView.showChildView('headerRegions', new NavBar());
+    var tos = new UserTOS();
+    IdeaLoom.rootView.showChildView('groupContainer', tos);
   },
 
   settings: function() {
@@ -443,19 +449,7 @@ var routeManager = Marionette.Object.extend({
     IdeaLoom.rootView.showChildView('headerRegions', new NavBar());
     //On small screen (mobile) don't instantiate the infobar
     if(!Ctx.isSmallScreen()){
-      collectionManager.getWidgetsForContextPromise(
-        Widget.Model.prototype.INFO_BAR, null, ["closeInfobar"]).then(
-        function(widgetCollection) {
-          var discussionSettings = Ctx.getPreferences();
-          var infobarsCollection = new InfobarsModels.InfobarsCollection();
-          var isCookieUserChoice = CookiesManager.getUserCookiesAuthorization();
-          if(!isCookieUserChoice && discussionSettings.cookies_banner){
-            infobarsCollection.add(new InfobarsModels.CookieInfobarModel());
-          }
-          widgetCollection.each(function(widgetModel){
-            var model = new InfobarsModels.WidgetInfobarModel({widget: widgetModel});
-            infobarsCollection.add(model);
-          });
+        InfobarsCollection.prototype.createCollection(collectionManager, function(infobarsCollection) {
           IdeaLoom.rootView.showChildView('infobarRegion', new InfobarsViews.InfobarsView({collection: infobarsCollection}));
         });
     }

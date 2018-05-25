@@ -10,10 +10,13 @@ import Marionette from 'backbone.marionette';
 import IdeaLoom from '../app.js';
 import CookiesManager from '../utils/cookiesManager.js';
 import Widget from '../models/widget.js';
+import InfobarsCollection from '../models/infobar.js';
 import Ctx from '../common/context.js';
 import LoaderView from './loaderView.js';
 import CollectionManager from '../common/collectionManager.js';
 import $ from 'jquery';
+import i18n from '../utils/i18n.js';
+
 var CookieInfobarItemView = Marionette.View.extend({
   constructor: function CookiebarItem() {
     Marionette.View.apply(this, arguments);
@@ -39,6 +42,33 @@ var CookieInfobarItemView = Marionette.View.extend({
     IdeaLoom.other_vent.trigger('infobar:closeItem');
   }
 });
+
+
+var TosInfobarItemView = Marionette.View.extend({
+  constructor: function TosInfobarItemView() {
+    Marionette.View.apply(this, arguments);
+  },
+  template: '#tmpl-tos_infobar',
+  events:{
+    'click .js_closeInfobar': 'closeInfobar',
+  },
+  serializeModel: function() {
+    var model = this.model.get('widget');
+    return {
+      model: model,
+      message: i18n.sprintf(i18n.gettext(
+        'Please review our new <a href="/%s/user/tos">Terms of service</a>'),
+        Ctx.getDiscussionSlug()),
+      locale: Ctx.getLocale(),
+    };
+  },
+  closeInfobar: function() {
+    this.destroy();
+    this.model.set("closeInfobar", true);
+    IdeaLoom.other_vent.trigger('infobar:closeItem');
+  }
+});
+
 
 var PiwikIframeModal = Backbone.Modal.extend({
   constructor: function PiwikIframeModal(){
@@ -74,7 +104,7 @@ var WidgetInfobarItemView = LoaderView.extend({
   constructor: function InfobarItem() {
     LoaderView.apply(this, arguments);
   },
-  template: '#tmpl-infobar',
+  template: '#tmpl-widget_infobar',
   className: 'content-infobar',
   ui: {
     button: ".btn"
@@ -137,12 +167,16 @@ var InfobarsView = Marionette.CollectionView.extend({
   constructor: function Infobars() {
     Marionette.CollectionView.apply(this, arguments);
   },
-  childView:function(item){
-    var submodel = item.get('widget');
-    if(submodel && submodel instanceof Widget.Model){
-      return WidgetInfobarItemView;
-    } else {
-      return CookieInfobarItemView;
+  childView:function(item) {
+    switch (item.view_name) {
+        case InfobarsCollection.prototype.view_names.WIDGET:
+            return WidgetInfobarItemView;
+        case InfobarsCollection.prototype.view_names.COOKIE:
+            return CookieInfobarItemView;
+        case InfobarsCollection.prototype.view_names.TOS:
+            return TosInfobarItemView;
+        default:
+            console.error("Unknown item view_name", item.view_name);
     }
   },
   initialize: function(options) {

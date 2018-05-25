@@ -1099,7 +1099,7 @@ var CollectionManager = Marionette.Object.extend({
       });
   },
   /**
-   * Returns the collection of preferences for all discussions
+   * Returns the collection of preferences for this discussion
    * @returns {BaseCollection}
    * @function app.common.collectionManager.CollectionManager.getDiscussionPreferencePromise
   **/
@@ -1120,7 +1120,7 @@ var CollectionManager = Marionette.Object.extend({
   /**
    * Returns the collection of preferences for all discussions
    * @returns {BaseCollection}
-   * @function app.common.collectionManager.CollectionManager.getDiscussionPreferencePromise
+   * @function app.common.collectionManager.CollectionManager.getGlobalPreferencePromise
   **/
   getGlobalPreferencePromise: function() {
     if (this._globalPreferencesPromise) {

@@ -139,22 +139,13 @@
   padding: 10px;
 }
 
-.content-infobar {
-  .cookie-banner{
-    position: relative;
-    height: 50px;
-    font-size: 12px;
-    text-align: center;
-    box-sizing: border-box;
-    line-height: 50px;
-  }
-  .widget-banner{
+.infobar {
     position: relative;
     height: $infobar_height;
-    background-color: $theme_infobar_bg_color;
     font-size: 12px;
     text-align: center;
     box-sizing: border-box; /* include border in height */
+    background-color: $theme_infobar_bg_color;
     border-top: 1px solid $theme_btn_primary_bg_color;
     .close {
       position: absolute;
@@ -164,14 +155,6 @@
       opacity: initial;
       cursor: pointer;
       font-size: 20px;
-    }
-    .session {
-      border: none;
-      background-color: $white;
-      color: #AAAAAA;
-      border-radius: 2px;
-      padding: 6px;
-      cursor: pointer;
     }
     .content {
       margin: 0;
@@ -186,6 +169,18 @@
         color: $white;
         text-decoration: underline;
       }
+    }
+  &.cookie-banner{
+    line-height: 50px;
+  }
+  &.widget-banner{
+    .session {
+      border: none;
+      background-color: $white;
+      color: #AAAAAA;
+      border-radius: 2px;
+      padding: 6px;
+      cursor: pointer;
     }
   }
 }

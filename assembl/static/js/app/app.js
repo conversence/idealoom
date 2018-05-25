@@ -17,7 +17,7 @@ var RootView = Marionette.View.extend({
   el: 'body',
   regions: {
     headerRegions: '#header',
-    infobarRegion: '#infobar',
+    infobarRegion: '#infobars',
     groupContainer: '#groupContainer',
     contentContainer: '#content-container',
     slider: '#slider',

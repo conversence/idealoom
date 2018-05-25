@@ -34,6 +34,7 @@ var Router = Marionette.AppRouter.extend({
     "user/notifications": "userNotifications",
     "user/profile": "profile",
     "user/account": "account",
+    "user/tos": "tos",
     "user/discussion_preferences": "userDiscussionPreferences",
     "posts/*id": "post",
     "idea/*id": "idea",

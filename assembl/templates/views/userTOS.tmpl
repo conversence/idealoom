@@ -1,0 +1,22 @@
+<div class="grid-pad">
+    <div class="col-3-12 navigation-menu-holder"></div>
+    <div class="col-9-12">
+        <div class="col-1-1 no-pad admin-section">
+            <section class="section">
+                <div class="admin-title">
+                    <h3 class="h3">{{ gettext('%s Terms of service')|format(platform_name) }}</h3>
+                </div>
+                <div id="content-container" class="content-container">
+                    <div id="js_tos"><%= tos %></div>
+                    <% if (profile.isUnknownUser()){ %>
+                    <a href='../register'>{{ gettext('Return to registration') }}</a>
+                    <% } else if (accepted) { %>
+                    <p>{{ gettext('Thank you for accepting!') }}</p>
+                    <% } else { %>
+                    <button id="accept-button">{{ gettext('Accept') }}</button>
+                    <% } %>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>

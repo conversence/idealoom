@@ -347,6 +347,18 @@ class AgentProfile(Base):
             return status.first_visit
 
     @property
+    def accepted_tos_version(self):
+        status = self.status_in_current_discussion
+        if status:
+            return status.accepted_tos_version
+
+    @accepted_tos_version.setter
+    def accepted_tos_version(self, value):
+        status = self.status_in_current_discussion
+        assert status
+        status.accepted_tos_version = int(value)
+
+    @property
     def was_created_on_current_discussion(self):
         # Use from api v2
         status = self.status_in_current_discussion
@@ -692,6 +704,7 @@ class AgentStatusInDiscussion(DiscussionBoundBase):
     user_created_on_this_discussion = Column(Boolean, server_default='0')
     last_connected = Column(DateTime)
     last_disconnected = Column(DateTime)
+    accepted_tos_version = Column(Integer)
 
     def get_discussion_id(self):
         return self.discussion_id or self.discussion.id
