@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: assembl 0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-03-21 17:20-0400\n"
+"POT-Creation-Date: 2018-05-25 00:16-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Marc-Antoine Parent <maparent@acm.org>, 2016\n"
 "Language: es\n"
@@ -58,7 +58,7 @@ msgstr "Alguien responde directamente a uno de tus mensajes"
 msgid "SYNTHESIS: "
 msgstr "Síntesis:"
 
-#: assembl/models/preferences.py:86 assembl/models/preferences.py:440
+#: assembl/models/preferences.py:86 assembl/models/preferences.py:468
 msgid "No special authentication"
 msgstr "Sin autentificación especial"
 
@@ -130,11 +130,32 @@ msgstr ""
 msgid "Run an anti-virus on file attachments"
 msgstr ""
 
+#: assembl/models/preferences.py:439
+msgid "Terms of service version"
+msgstr ""
+
 #: assembl/models/preferences.py:442
+msgid ""
+"Version number of terms of service. Increment when terms change, "
+"participants will be alerted."
+msgstr ""
+
+#: assembl/models/preferences.py:453
+#: assembl/templates/views/userNavigationMenu.tmpl:17
+#, fuzzy
+#| msgid "Translation service"
+msgid "Terms of service"
+msgstr "Servicio de traducción"
+
+#: assembl/models/preferences.py:456
+msgid "Terms of service. Multilingual HTML String."
+msgstr ""
+
+#: assembl/models/preferences.py:470
 msgid "Authentication service type"
 msgstr ""
 
-#: assembl/models/preferences.py:444
+#: assembl/models/preferences.py:472
 msgid ""
 "A primary authentication server for this discussion, defined as a python-"
 "social-auth backend. Participants will be auto-logged in to that server, "
@@ -142,19 +163,19 @@ msgid ""
 "backend."
 msgstr ""
 
-#: assembl/models/preferences.py:459
+#: assembl/models/preferences.py:487
 msgid "Allow access to moderated text"
 msgstr "Permitir acceso al texto moderado"
 
-#: assembl/models/preferences.py:462
+#: assembl/models/preferences.py:490
 msgid "Are moderated posts simply hidden or made inaccessible by default?"
 msgstr "Las publicaciones moderadas son inaccesibles o sólo están escondidas?"
 
-#: assembl/models/preferences.py:475
+#: assembl/models/preferences.py:503
 msgid "Idea panel opens automatically"
 msgstr "El panel Idea se abre automaticamente"
 
-#: assembl/models/preferences.py:478
+#: assembl/models/preferences.py:506
 msgid ""
 "Does the Idea panel automatically open when an idea is clicked ? (and "
 "close when a special section is clicked)"
@@ -162,21 +183,20 @@ msgstr ""
 "El panel Idea se abre automaticamente cuando se hace click sobre una "
 "idea? (y se cierra cuando se hace click sobre una sección?)"
 
-#: assembl/models/preferences.py:490
+#: assembl/models/preferences.py:518
 #, fuzzy
-#| msgid "need no additional permissions"
 msgid "Default permissions"
 msgstr "No se necesitan permisos especiales"
 
-#: assembl/models/preferences.py:493
+#: assembl/models/preferences.py:521
 msgid "The basic permissions for a new discussion"
 msgstr ""
 
-#: assembl/models/preferences.py:569
+#: assembl/models/preferences.py:597
 msgid "Require Email Domain"
 msgstr "Se requiere un correo electrónico"
 
-#: assembl/models/preferences.py:572
+#: assembl/models/preferences.py:600
 msgid ""
 "List of domain names of user email address required for self-"
 "registration. Only accounts with at least an email from those domains can"
@@ -189,99 +209,98 @@ msgstr ""
 "esta discusión. Si este apartado está vacío, cualquier usuario puede "
 "autoinscribirse."
 
-#: assembl/models/preferences.py:588
+#: assembl/models/preferences.py:616
 msgid "Show CI Dashboard"
 msgstr "Mostrar el tablero de indicadores CI"
 
-#: assembl/models/preferences.py:591
+#: assembl/models/preferences.py:619
 msgid "Show the CI Dashboard in the panel group window"
 msgstr "Mostrar el tablero de indicadores CI en el panel de ventanas grupales"
 
-#: assembl/models/preferences.py:603
+#: assembl/models/preferences.py:631
 msgid "Idea Typology"
 msgstr ""
 
-#: assembl/models/preferences.py:605
+#: assembl/models/preferences.py:633
 msgid "Idea types, must be present in ontology"
 msgstr ""
 
-#: assembl/models/preferences.py:617
+#: assembl/models/preferences.py:645
 #, fuzzy
-#| msgid "Extract"
 msgid "Extra CSS"
 msgstr "Extracto"
 
-#: assembl/models/preferences.py:619
+#: assembl/models/preferences.py:647
 msgid "CSS"
 msgstr ""
 
-#: assembl/models/preferences.py:630
+#: assembl/models/preferences.py:658
 msgid "URL of CI Dashboard"
 msgstr "URL del tablero de indicadores CI"
 
-#: assembl/models/preferences.py:632
+#: assembl/models/preferences.py:660
 msgid "Configuration of the visualizations shown in the CI Dashboard"
 msgstr ""
 
-#: assembl/models/preferences.py:650
+#: assembl/models/preferences.py:678
 msgid "Catalyst Visualizations"
 msgstr "Visualizaciones "
 
-#: assembl/models/preferences.py:653
+#: assembl/models/preferences.py:681
 msgid "A JSON description of available Catalyst visualizations"
 msgstr ""
 
-#: assembl/models/preferences.py:665
+#: assembl/models/preferences.py:693
 msgid "Navigation sections"
 msgstr "Secciones de navegación"
 
-#: assembl/models/preferences.py:668
+#: assembl/models/preferences.py:696
 msgid ""
 "A JSON specification of Catalyst visualizations to show in the navigation"
 " section"
 msgstr ""
 
-#: assembl/models/preferences.py:681
+#: assembl/models/preferences.py:709
 msgid "Catalyst translations"
 msgstr "Traducción catalyst"
 
-#: assembl/models/preferences.py:684
+#: assembl/models/preferences.py:712
 msgid "Translations applicable to Catalyst visualizations, in Jed (JSON) format"
 msgstr ""
 "Traducciones applicables a las visualizaciones Catalyst, en formato Jed "
 "(JSON)"
 
-#: assembl/models/preferences.py:701
+#: assembl/models/preferences.py:729
 msgid "Default Table of Ideas Collapsed state"
 msgstr "Panel de Ideas plegado por defecto"
 
-#: assembl/models/preferences.py:704
+#: assembl/models/preferences.py:732
 msgid ""
 "Default expanded/collapsed state of each idea in the table of ideas. A "
 "user can override it by opening/closing an idea"
 msgstr ""
 
-#: assembl/models/preferences.py:719
+#: assembl/models/preferences.py:747
 msgid "Preference data"
 msgstr "Datos de preferencia"
 
-#: assembl/models/preferences.py:722
+#: assembl/models/preferences.py:750
 msgid "The preference configuration; override only with care"
 msgstr "Configuración de preferencia; pasar a modo manual con cuidado"
 
-#: assembl/models/preferences.py:734
+#: assembl/models/preferences.py:762
 msgid "Cookies banner"
 msgstr "Cookies banner"
 
-#: assembl/models/preferences.py:737
+#: assembl/models/preferences.py:765
 msgid "Show the banner offering to disable Piwik cookies"
 msgstr ""
 
-#: assembl/static/js/app/routeManager.js:538
+#: assembl/static/js/app/routeManager.js:532
 msgid "You must be logged in to access this page."
 msgstr "Debe conectarse para acceder a esta página"
 
-#: assembl/static/js/app/routeManager.js:561
+#: assembl/static/js/app/routeManager.js:555
 msgid "Your level of permissions do not allow you to see the rest of this content"
 msgstr "No ti"
 
@@ -301,35 +320,35 @@ msgstr "Mensajes completos"
 msgid "Extract"
 msgstr "Extracto"
 
-#: assembl/static/js/app/models/agents.js:131
+#: assembl/static/js/app/models/agents.js:132
 msgid "need no additional permissions"
 msgstr "No se necesitan permisos especiales"
 
-#: assembl/static/js/app/models/agents.js:146
+#: assembl/static/js/app/models/agents.js:147
 #, python-format
 msgid "you must first <a href='%s'>Sign in</a>"
 msgstr "Antes debe <a href='%s'> conectarse</a>"
 
-#: assembl/static/js/app/models/agents.js:152
+#: assembl/static/js/app/models/agents.js:153
 msgid "you must first join this discussion"
 msgstr "Debe unirse a la discussión"
 
-#: assembl/static/js/app/models/agents.js:157
+#: assembl/static/js/app/models/agents.js:158
 #, python-format
 msgid "you must ask a discussion administrator for the following role: %s"
 msgid_plural "you must ask a discussion administrator for one of the following roles: %s"
 msgstr[0] ""
 msgstr[1] ""
 
-#: assembl/static/js/app/models/agents.js:161
+#: assembl/static/js/app/models/agents.js:162
 msgid "the administrator has closed this discussion to all contributions"
 msgstr ""
 
-#: assembl/static/js/app/models/agents.js:164
+#: assembl/static/js/app/models/agents.js:165
 msgid "you need additional permissions"
 msgstr ""
 
-#: assembl/static/js/app/models/agents.js:231
+#: assembl/static/js/app/models/agents.js:232
 msgid "Unknown user"
 msgstr ""
 
@@ -390,7 +409,7 @@ msgid ""
 msgstr ""
 
 #: assembl/static/js/app/models/segment.js:134
-msgid "invalid creationDate: "
+msgid "invalid created: "
 msgstr ""
 
 #: assembl/static/js/app/models/segment.js:138
@@ -1134,6 +1153,11 @@ msgstr ""
 
 #: assembl/static/js/app/views/ideaPanel.js:1045
 msgid "You may want to describe this idea for users here..."
+msgstr ""
+
+#: assembl/static/js/app/views/infobar.js:59
+#, python-format
+msgid "Please review our new <a href=\"/%s/user/tos\">Terms of service</a>"
 msgstr ""
 
 #: assembl/static/js/app/views/message.js:179
@@ -1959,6 +1983,15 @@ msgstr ""
 msgid "Your settings failed to update"
 msgstr ""
 
+#: assembl/static/js/app/views/user/tos.js:73
+#: assembl/templates/views/userTOS.tmpl:14
+msgid "Thank you for accepting!"
+msgstr ""
+
+#: assembl/static/js/app/views/user/tos.js:76
+msgid "We could not register your acceptance."
+msgstr ""
+
 #: assembl/tasks/email_discussion_creator.py:70
 msgid "Your consultation was created"
 msgstr ""
@@ -2034,12 +2067,12 @@ msgstr ""
 msgid "Repeat password"
 msgstr ""
 
-#: assembl/templates/idea_in_synthesis.jinja2:10
+#: assembl/templates/idea_in_synthesis.jinja2:13
 #: assembl/templates/views/ideaInSynthesis.tmpl:6
 msgid "By"
 msgstr ""
 
-#: assembl/templates/idea_in_synthesis.jinja2:14
+#: assembl/templates/idea_in_synthesis.jinja2:17
 msgid "See the conversation around this idea"
 msgstr ""
 
@@ -2181,11 +2214,15 @@ msgstr ""
 msgid "Full name"
 msgstr ""
 
-#: assembl/templates/register.jinja2:34
+#: assembl/templates/register.jinja2:31
+msgid "Please view our <a href=\"/{0}/user/tos\">Terms of service</a>"
+msgstr ""
+
+#: assembl/templates/register.jinja2:35
 msgid "Do you already have an account?"
 msgstr ""
 
-#: assembl/templates/register.jinja2:34
+#: assembl/templates/register.jinja2:35
 msgid "Log in!"
 msgstr ""
 
@@ -2947,7 +2984,7 @@ msgstr ""
 
 #: assembl/templates/views/discussionAdminNavigationMenu.tmpl:21
 #: assembl/templates/views/userAccountForm.tmpl:43
-#: assembl/templates/views/userNavigationMenu.tmpl:17
+#: assembl/templates/views/userNavigationMenu.tmpl:20
 #: assembl/templates/views/userProfile.tmpl:75
 msgid "Return to the discussion"
 msgstr ""
@@ -3020,7 +3057,6 @@ msgstr ""
 #: assembl/templates/views/discussionStatisticsModal.tmpl:37
 #: assembl/templates/views/discussionStatisticsModal.tmpl:52
 #, fuzzy
-#| msgid "All posts"
 msgid "Posts"
 msgstr "Todas las publicaciones"
 
@@ -4071,6 +4107,19 @@ msgstr ""
 msgid "unsubscribed"
 msgstr ""
 
+#: assembl/templates/views/userTOS.tmpl:7
+#, python-format
+msgid "%s Terms of service"
+msgstr ""
+
+#: assembl/templates/views/userTOS.tmpl:12
+msgid "Return to registration"
+msgstr ""
+
+#: assembl/templates/views/userTOS.tmpl:16
+msgid "Accept"
+msgstr ""
+
 #: assembl/views/admin/views.py:412
 msgid "No file given."
 msgstr ""
@@ -4427,5 +4476,8 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "You will enter %s as <b>{name}</b>."
+#~ msgstr ""
+
+#~ msgid "invalid creationDate: "
 #~ msgstr ""
 
