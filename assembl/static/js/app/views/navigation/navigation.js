@@ -272,7 +272,7 @@ var NavigationView = BasePanel.extend({
       this.li_height = 40;
       marginHeightLi = 2;
     }
-    var _header = $('#header').height() + $('#infobar').height();
+    var _header = $('#header').height() + $('#infobars').height();
     var _window = $(window).height();
     var _li = this.li_height * this.num_items;
     var _headerGroup = ($(".groupHeader").first().hasClass('editable')) ? this.group_editable_header_height : this.group_header_height;
