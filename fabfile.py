@@ -23,7 +23,7 @@ from functools import wraps
 from tempfile import NamedTemporaryFile
 
 from fabric.operations import (
-    put, get, local, sudo, run, require)
+    put, get, local, run, sudo as fabsudo)
 from fabric.contrib.files import (exists, is_link)
 from fabric.api import (
     abort, cd, env, execute, hide, prefix, settings, task as fab_task)
@@ -31,6 +31,15 @@ from fabric.colors import yellow, cyan, red, green
 
 
 DEFAULT_SECTION = "DEFAULT"
+
+
+def sudo(*args, **kwargs):
+    sudoer = env.get("sudoer", "root") or env.get("user")
+    with settings(user=sudoer):
+        if sudoer == "root":
+            run(*args, **kwargs)
+        else:
+            fabsudo(*args, **kwargs)
 
 
 def combine_rc(rc_filename, overlay=None):
