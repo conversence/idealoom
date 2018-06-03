@@ -1,14 +1,14 @@
 """dedup_registrations
 
 Revision ID: 407441ce1b20
-Revises: ce427c9d6013
+Revises: bb2849f2c085
 Create Date: 2018-06-03 15:48:35.931332
 
 """
 
 # revision identifiers, used by Alembic.
 revision = '407441ce1b20'
-down_revision = 'ce427c9d6013'
+down_revision = 'bb2849f2c085'
 
 from alembic import context, op
 import sqlalchemy as sa
