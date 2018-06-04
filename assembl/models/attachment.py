@@ -59,13 +59,13 @@ class Document(DiscussionBoundBase, OriginMixin):
         Integer, primary_key=True)
 
     type = Column(String(60), nullable=False)
+
+    __table_args__ = (UniqueConstraint('discussion_id', 'uri_id'), )
+
     """
     The cannonical identifier of this document.  If a URL, it's to be
     interpreted as a purl
     """
-
-    __table_args__ = (UniqueConstraint('discussion_id', 'uri_id'), )
-
     uri_id = Column(URLString)
     discussion_id = Column(Integer, ForeignKey(
         'discussion.id',
