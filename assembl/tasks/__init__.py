@@ -98,9 +98,12 @@ def config_celery_app(celery_app, settings=None):
         "CELERY_ACKS_LATE": True,
         "CELERY_STORE_ERRORS_EVEN_IF_IGNORED": True}
     if settings is not None:
-        config['BROKER_URL'] = settings.get(
+        broker = settings.get(
             '%s.broker' % (celery_app.main,), None
             ) or settings.get('celery_tasks.broker')
+        config['BROKER_URL'] = broker
+        config['CELERY_CACHE_BACKEND'] = broker
+        config['CELERY_RESULT_BACKEND'] = broker
         celery_app.config_from_object(config, force=True)
     else:
         log.error("**** config_celery_app w/o broker. should not happen anymore")
