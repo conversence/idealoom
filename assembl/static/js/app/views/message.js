@@ -614,7 +614,9 @@ var MessageView = LoaderView.extend({
 
 
     var publication_state = this.model.get('publication_state');
-    if ( publication_state && publication_state in MessageModel.ModeratedPublicationStates ){
+    var isModerated = publication_state ? (
+        publication_state in MessageModel.ModeratedPublicationStates) : this.moderationOptions.isModerated;
+    if ( isModerated ){
     //if (this.model.get("moderation_text")) {
       bodyFormat = "text/html";
       //@TODO: should the body be this._body??
@@ -671,7 +673,7 @@ var MessageView = LoaderView.extend({
       creator: this.creator,
       parentId: this.model.get('parentId'),
       subject: this._subject,
-      body: this.moderationOptions.isModerated ? moderatedBody : this._body,
+      body: isModerated ? moderatedBody : this._body,
       bodyTranslationError: this.bodyTranslationError,
       bodyFormatClass: bodyFormatClass,
       messageBodyId: Ctx.ANNOTATOR_MESSAGE_BODY_ID_PREFIX + this.model.get('@id'),
