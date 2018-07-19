@@ -5,7 +5,6 @@
 """
 from future.utils import native_str_to_bytes, bytes_to_native_str
 from builtins import hex
-from datetime import datetime
 import logging
 from abc import abstractmethod
 import re
@@ -23,11 +22,11 @@ from sqlalchemy import (
     ForeignKey,
 )
 from sqlalchemy.orm import relationship, backref, aliased
-from ..lib.sqla_types import CoerceUnicode
 from ..lib import config
 from sqla_rdfbridge.mapping import PatternIriClass
 
-from ..lib.sqla import (CrudOperation, get_model_watcher, Base)
+from ..lib.sqla import (CrudOperation, Base)
+from ..lib.model_watcher import get_model_watcher
 from ..lib.utils import get_global_base_url
 from . import DiscussionBoundBase, OriginMixin
 from .langstrings import (LangString, LangStringEntry)

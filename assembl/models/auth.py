@@ -36,19 +36,17 @@ from sqlalchemy import (
 from pyramid.httpexceptions import HTTPBadRequest, HTTPUnauthorized
 from sqlalchemy.orm import (
     relationship, backref, deferred)
-from sqlalchemy.types import Text
 from sqlalchemy.orm.attributes import NO_VALUE
 from sqlalchemy.sql.functions import count
-from pyramid.security import Everyone, Authenticated
+from pyramid.security import Everyone
 from rdflib import URIRef
 from sqla_rdfbridge.mapping import PatternIriClass
-import transaction
 
 from ..lib import config
 from ..lib.utils import get_global_base_url
-from ..lib.locale import to_posix_string, locale_compatible, locale_ancestry
-from ..lib.sqla import (
-    CrudOperation, get_model_watcher, ObjectNotUniqueError)
+from ..lib.locale import locale_compatible, locale_ancestry
+from ..lib.model_watcher import get_model_watcher
+from ..lib.sqla import CrudOperation
 from ..lib.sqla_types import (
     URLString, EmailString, EmailUnicode, CaseInsensitiveWord, CoerceUnicode)
 from ..lib.raven_client import capture_message
@@ -1796,7 +1794,6 @@ class LanguagePreferenceCollection(object):
     @classmethod
     def getCurrent(cls, req=None):
         from pyramid.threadlocal import get_current_request
-        from pyramid.security import Everyone
         # Very very hackish, but this call is costly and frequent.
         # Let's cache it in the request. Useful for view_def use.
         if req is None:

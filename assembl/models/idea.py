@@ -48,8 +48,9 @@ from ..auth import (
     P_ADD_IDEA)
 from .langstrings import LangString, LangStringEntry
 from ..semantic.namespaces import (
-    SIOC, IDEA, ASSEMBL, DCTERMS, QUADNAMES, FOAF, RDF, VirtRDF)
-from ..lib.sqla import (CrudOperation, get_model_watcher)
+    SIOC, IDEA, ASSEMBL, QUADNAMES, FOAF, RDF, VirtRDF)
+from ..lib.sqla import CrudOperation
+from ..lib.model_watcher import get_model_watcher
 from assembl.views.traversal import (
     AbstractCollectionDefinition, RelationCollectionDefinition,
     collection_creation_side_effects, InstanceContext)

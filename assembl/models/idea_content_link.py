@@ -2,7 +2,6 @@
 from __future__ import print_function
 import re
 import quopri
-from datetime import datetime
 import logging
 import simplejson as json
 
@@ -15,7 +14,6 @@ from sqlalchemy import (
     String,
     Float,
     UnicodeText,
-    DateTime,
     ForeignKey,
     event,
 )
@@ -25,7 +23,8 @@ from sqla_rdfbridge.mapping import PatternIriClass
 from . import DiscussionBoundBase, OriginMixin
 from ..semantic import context_url
 from ..semantic.virtuoso_mapping import QuadMapPatternS
-from ..lib.sqla import (CrudOperation, get_model_watcher)
+from ..lib.sqla import CrudOperation
+from ..lib.model_watcher import get_model_watcher
 from ..lib.utils import get_global_base_url
 from ..lib.clean_input import sanitize_html
 from .discussion import Discussion
@@ -33,7 +32,6 @@ from .idea import Idea
 from .generic import Content
 from .post import Post
 from .auth import AgentProfile
-from .mail import IMAPMailbox
 from ..auth import (
     CrudPermissions, P_READ, P_EDIT_IDEA,
     P_EDIT_EXTRACT, P_ADD_IDEA, P_ADD_EXTRACT,
