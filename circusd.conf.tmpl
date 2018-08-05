@@ -18,20 +18,28 @@ port = 8125
 sample_rate = 1.0
 application_name = %(instance_name)s
 
-[watcher:celery_imap]
+[watcher:celery]
 working_dir = %(here)s
 virtualenv = %(VIRTUAL_ENV)s
 copy_env = True
-cmd = celery worker -E -l info -A assembl.tasks.imap -n imap -c %(IMAP_CELERY_NUM_WORKERS)s -b %(IMAP_CELERY_BROKER)s -Q imap
-autostart = %(autostart_celery_imap)s
+cmd = celery worker -E -l info -A assembl.tasks.celery -c %(CELERY_NUM_WORKERS)s -b %(CELERY_BROKER)s
+autostart = %(autostart_celery)s
 startsecs = 2
 stopasgroup = false
 stopwaitsecs = 60
 # If the process didn't kill it's children after 60 seconds, it's unlikely to
 # ever reap them, so kill them all
 killasgroup = true
+stdout_stream.class = FileStream
+stdout_stream.filename = %(here)s/var/log/celery.log
+stdout_stream.max_bytes = 1073741824
+stdout_stream.backup_count = 3
+stderr_stream.class = FileStream
+stderr_stream.filename = %(here)s/var/log/celery.err.log
+stderr_stream.max_bytes = 1073741824
+stderr_stream.backup_count = 3
 
-[env:celery*]
+[env:celery]
 LC_CTYPE = %(lcctype)s
 
 [watcher:source_reader]
@@ -56,53 +64,11 @@ stderr_stream.backup_count = 3
 [env:source_reader]
 LC_CTYPE = %(lcctype)s
 
-[watcher:celery_notification_dispatch]
-working_dir = %(here)s
-virtualenv = %(VIRTUAL_ENV)s
-copy_env = True
-cmd = celery worker -E -l info -A assembl.tasks.notification_dispatch -n notification_dispatch -c %(NOTIF_DISPATCH_CELERY_NUM_WORKERS)s -b %(NOTIF_DISPATCH_CELERY_BROKER)s -Q notification_dispatch
-autostart = %(autostart_celery_notification_dispatch)s
-startsecs = 2
-stopasgroup = false
-stopwaitsecs = 60
-# If the process didn't kill it's children after 60 seconds, it's unlikely to
-# ever reap them, so kill them all
-killasgroup = true
-stdout_stream.class = FileStream
-stdout_stream.filename = %(here)s/var/log/celery_notification_dispatch.log
-stdout_stream.max_bytes = 1073741824
-stdout_stream.backup_count = 3
-stderr_stream.class = FileStream
-stderr_stream.filename = %(here)s/var/log/celery_notification_dispatch.err.log
-stderr_stream.max_bytes = 1073741824
-stderr_stream.backup_count = 3
-
-[watcher:celery_notify]
-working_dir = %(here)s
-virtualenv = %(VIRTUAL_ENV)s
-copy_env = True
-cmd = celery worker -E -l info -A assembl.tasks.notify -n notify -c %(NOTIFY_CELERY_NUM_WORKERS)s -b %(NOTIFY_CELERY_BROKER)s -Q notify
-autostart = %(autostart_celery_notify)s
-startsecs = 2
-stopasgroup = false
-stopwaitsecs = 60
-# If the process didn't kill it's children after 60 seconds, it's unlikely to
-# ever reap them, so kill them all
-killasgroup = true
-stdout_stream.class = FileStream
-stdout_stream.filename = %(here)s/var/log/celery_notify.log
-stdout_stream.max_bytes = 1073741824
-stdout_stream.backup_count = 3
-stderr_stream.class = FileStream
-stderr_stream.filename = %(here)s/var/log/celery_notify.err.log
-stderr_stream.max_bytes = 1073741824
-stderr_stream.backup_count = 3
-
 [watcher:celery_notify_beat]
 working_dir = %(here)s
 virtualenv = %(VIRTUAL_ENV)s
 copy_env = True
-cmd = celery -A assembl.tasks.notify beat -b %(NOTIFY_CELERY_BROKER)s
+cmd = celery -A assembl.tasks.notify beat -b %(CELERY_BROKER)s
 autostart = %(autostart_celery_notify_beat)s
 startsecs = 2
 stopasgroup = false
@@ -118,19 +84,6 @@ stderr_stream.class = FileStream
 stderr_stream.filename = %(here)s/var/log/celery_notify_beat.err.log
 stderr_stream.max_bytes = 1073741824
 stderr_stream.backup_count = 3
-
-[watcher:celery_translate]
-working_dir = %(here)s
-virtualenv = %(VIRTUAL_ENV)s
-copy_env = True
-cmd = celery worker -E -l info -A assembl.tasks.translate -n translate -c %(TRANSLATE_CELERY_NUM_WORKERS)s -b %(TRANSLATE_CELERY_BROKER)s -Q translate
-autostart = %(autostart_celery_translate)s
-startsecs = 2
-stopasgroup = false
-stopwaitsecs = 60
-# If the process didn't kill it's children after 60 seconds, it's unlikely to
-# ever reap them, so kill them all
-killasgroup = true
 
 [watcher:changes_router]
 working_dir = %(here)s

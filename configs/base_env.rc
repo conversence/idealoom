@@ -88,11 +88,8 @@ _projectname = idealoom
 # _projectpath
 # _dbdumps_dir
 
-
-circus__autostart_celery_notification_dispatch = true
-circus__autostart_celery_notify = true
+circus__autostart_celery = true
 circus__autostart_celery_notify_beat = true
-circus__autostart_celery_translate = false
 circus__autostart_source_reader = true
 circus__autostart_changes_router = true
 circus__autostart_pserve = false
