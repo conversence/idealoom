@@ -7,7 +7,9 @@ from time import sleep
 from datetime import datetime, timedelta
 
 import transaction
+from pyramid.settings import asbool
 
+from ..lib import config
 from ..lib.raven_client import capture_exception
 from ..lib.logging import getLogger
 from . import celery, SMTP_DOMAIN_DELAYS
@@ -63,6 +65,10 @@ def process_notification(notification):
         logger.warning(
             "Refusing to process notification %d because its delivery state is: %s" % (
                 notification.id, notification.delivery_state))
+        return
+    if asbool(config.get('disable_notifications', False)):
+        logger.debug("Notifications disabled, setting to obsolete")
+        notification.delivery_state = NotificationDeliveryStateType.OBSOLETED
         return
     try:
         email = notification.render_to_message()
