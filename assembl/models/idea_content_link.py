@@ -557,8 +557,17 @@ class TextFragmentIdentifier(AnnotationSelector):
     }
 
     @classmethod
-    def generate_post_xpath(cls, post, prefix=''):
-        return "%s//div[@id='message-body-local:SPost/%d']" % (prefix, post.id)
+    def generate_post_xpath(cls, post, original_xpath='', prefix=''):
+        parts = original_xpath.split("/")
+        suffix = ''
+        for (n, p) in enumerate(parts):
+            if ':SPost' in p:
+                parts = parts[n+2:]
+                if parts:
+                    suffix = '/' + '/'.join(parts)
+                break
+        return "%s//div[@id='message-body-local:SPost/%d']%s" % (
+            prefix, post.id, suffix)
 
     @classmethod
     def special_quad_patterns(cls, alias_maker, discussion_id):
@@ -583,16 +592,16 @@ class TextFragmentIdentifier(AnnotationSelector):
     @property
     def xpath_start_calc(self):
         if isinstance(self.extract.extract_source, Post):
-            return self.generate_post_xpath(self.extract.extract_source)
-        else:
-            return self.xpath_start
+            return self.generate_post_xpath(
+                self.extract.extract_source, self.xpath_start)
+        return self.xpath_start
 
     @property
     def xpath_end_calc(self):
         if isinstance(self.extract.extract_source, Post):
-            return self.generate_post_xpath(self.extract.extract_source)
-        else:
-            return self.xpath_end
+            return self.generate_post_xpath(
+                self.extract.extract_source, self.xpath_start)
+        return self.xpath_end
 
     def as_xpointer(self):
         return ("xpointer(start-point(string-range(%s,'',%d))/"
