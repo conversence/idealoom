@@ -13,7 +13,9 @@ from email.header import decode_header as decode_email_header, Header
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import parseaddr, mktime_tz, parsedate_tz
+from email.message import Message
 import logging
+from html import escape
 
 from future.utils import native_str, as_native_str, binary_type, PY2, bytes_to_native_str
 from past.builtins import str as oldstr
@@ -41,6 +43,7 @@ from .langstrings import LangString
 from .generic import PostSource
 from .post import ImportedPost
 from .auth import EmailAccount
+from .attachment import File, PostAttachment, AttachmentPurpose
 from ..tasks.imap import import_mails
 from ..tasks.translate import translate_content
 
@@ -104,6 +107,10 @@ class AbstractMailbox(PostSource):
         if message_id and message_id.startswith("<") and message_id.endswith(">"):
             return message_id[1:-1]
         return message_id
+
+    @staticmethod
+    def text_to_html(message_body):
+        return "<pre>%s</pre>" % escape(message_body)
 
     @staticmethod
     def strip_full_message_quoting_plaintext(message_body):
@@ -335,40 +342,77 @@ class AbstractMailbox(PostSource):
             bytes_to_native_str(message_bytes))
         body = None
         error_description = None
+        default_charset = parsed_email.get_charset() or 'ISO-8859-1'
 
-        def get_payload(message):
-            """ Returns the first text/html body, and falls back to text/plain body """
-
-            def process_part(part, default_charset, text_part, html_part):
-                """ Returns the first text/plain body as a unicode object, and the first text/html body """
-                if part.is_multipart():
-                    for part in part.get_payload():
-                        charset = part.get_content_charset(default_charset)
-                        (text_part, html_part) = process_part(
-                            part, charset, text_part, html_part)
+        def extract_text(part):
+            """ Returns HTML or Text parts of a message"""
+            mimetype = part.get_content_type()
+            if part.is_multipart():
+                if mimetype == "multipart/alternative":
+                    text_part = None
+                    for subpart in part.get_payload():
+                        (subpart_c, subtype) = extract_text(subpart)
+                        if subpart_c is None:
+                            continue
+                        elif subtype == "text/html":
+                            return (subpart_c, subtype)
+                        elif subtype == "text/plain":
+                            text_part = subpart_c
+                        else:
+                            log.debug("cannot treat alternative %s", subtype)
+                    if text_part:
+                        return (text_part, "text/plain")
+                    return (None, None)
                 else:
-                    charset = part.get_content_charset(default_charset)
-                    decoded_part = part.get_payload(decode=True)
-                    decoded_part = decoded_part.decode(charset, 'replace')
-                    if part.get_content_type() == 'text/plain' and text_part is None:
-                        text_part = decoded_part
-                    elif part.get_content_type() == 'text/html' and html_part is None:
-                        html_part = decoded_part
-                return (text_part, html_part)
-
-            html_part = None
-            text_part = None
-            default_charset = message.get_charset() or 'ISO-8859-1'
-            (text_part, html_part) = process_part(message, default_charset, text_part, html_part)
-            if html_part:
-                return ('text/html', sanitize_html(
-                    AbstractMailbox.strip_full_message_quoting_html(html_part)))
-            elif text_part:
-                return ('text/plain', AbstractMailbox.strip_full_message_quoting_plaintext(text_part))
+                    parts = []
+                    parts_type = None
+                    for subpart in part.get_payload():
+                        (subpart_c, subtype) = extract_text(subpart)
+                        if not subpart_c:
+                            continue
+                        elif subtype == 'text/html':
+                            if parts_type == 'text/plain':
+                                parts = [AbstractMailbox.text_to_html(p)
+                                         for p in parts]
+                            parts_type = 'text/html'
+                            parts.append(subpart_c)
+                        elif subtype == 'text/plain':
+                            if parts_type == 'text/html':
+                                subpart_c = AbstractMailbox.text_to_html(subpart_c)
+                            else:
+                                parts_type = 'text/plain'
+                            parts.append(subpart_c)
+                        elif not subpart.is_attachment():
+                            log.debug("cannot treat text subpart %s", subtype)
+                    if not parts:
+                        return (None, None)
+                    if len(parts) == 1:
+                        return (parts[0], parts_type)
+                    if parts_type == "text/html":
+                        return ("\n".join([
+                            "<div>%s</div>" % p for p in parts]), parts_type)
+                    if parts_type == "text/plain":
+                        return ("\n".join(parts), parts_type)
+            elif part.get_content_disposition():
+                # TODO: Inline attachments
+                return (None, None)
+            elif mimetype in ("text/html", "text/plain"):
+                charset = part.get_content_charset(default_charset)
+                decoded_part = part.get_payload(decode=True)
+                decoded_part = decoded_part.decode(charset, 'replace')
+                if mimetype == "text/html":
+                    decoded_part = sanitize_html(
+                        AbstractMailbox.strip_full_message_quoting_html(
+                            decoded_part))
+                else:
+                    decoded_part = AbstractMailbox.strip_full_message_quoting_plaintext(
+                        decoded_part)
+                return (decoded_part, mimetype)
             else:
-                return ('text/plain',u"Sorry, no assembl-supported mime type found in message parts")
+                log.debug("cannot treat part %s", mimetype)
+                return (None, None)
 
-        (mimeType, body) = get_payload(parsed_email)
+        (body, mimeType) = extract_text(parsed_email)
 
         def email_header_to_unicode(header_string, join_crlf=True):
             text = u''.join(
@@ -444,6 +488,7 @@ class AbstractMailbox(PostSource):
                 body_mime_type = mimeType,
                 imported_blob=message_bytes
             )
+
         except MultipleResultsFound:
             """ TO find duplicates (this should no longer happen, but in case it ever does...
 
@@ -478,6 +523,31 @@ FROM post WHERE post.id IN (SELECT MAX(post.id) as max_post_id FROM imported_pos
                 new_message_id, self.id))
         email_object.creator = sender_email_account.profile
         # email_object = self.db.merge(email_object)
+
+        if not email_object.attachments:
+            attachment_parts = [p for p in parsed_email.walk()
+                                if p.get_content_disposition()]
+            for (num, part) in enumerate(attachment_parts):
+                title = part.get_filename("file %d" % num)
+                doc = File(
+                    discussion=self.discussion,
+                    mime_type=part.get_content_type(),
+                    title=title)
+                payload = part.get_payload(decode=True)
+                if part.get_content_type() == "message/rfc822":
+                    payload = part.as_bytes()
+                doc.add_raw_data(payload)
+                attachment = PostAttachment(
+                    discussion=self.discussion,
+                    document=doc,
+                    post=email_object,
+                    # the following should reflect whether part.get_content_disposition()
+                    # is inline or attachment
+                    attachmentPurpose='EMBED_ATTACHMENT',
+                    creator=email_object.creator,
+                    title=title)
+                self.db.add(attachment)
+
         email_object.guess_languages()
         return (email_object, parsed_email, error_description)
 
