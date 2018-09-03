@@ -280,6 +280,26 @@ class IdeaWidgetLink(DiscussionBoundBase):
 # Note: declare all subclasses of IdeaWidgetLink here,
 # so we can use polymorphic_filter later.
 
+
+def PolymorphicMixinFactory(base_class):
+    """A factory for PolymorphicMixin marker classes"""
+    class PolymorphicMixin(object):
+        "A marker class that provides polymorphic_filter"
+        @classmethod
+        def polymorphic_identities(cls):
+            "Return the list of polymorphic identities defined in subclasses"
+            return [k for (k, v)
+                    in base_class.__mapper__.polymorphic_map.items()
+                    if issubclass(v.class_, cls)]
+
+        @classmethod
+        def polymorphic_filter(cls):
+            "Return a SQLA expression that tests for subclasses of this class"
+            return base_class.__mapper__.polymorphic_on.in_(
+                cls.polymorphic_identities())
+    return PolymorphicMixin
+
+
 class BaseIdeaWidgetLink(IdeaWidgetLink):
     __mapper_args__ = {
         'polymorphic_identity': 'base_idea_widget_link',
@@ -292,23 +312,16 @@ class GeneratedIdeaWidgetLink(IdeaWidgetLink):
     }
 
 
-class IdeaShowingWidgetLink(IdeaWidgetLink):
-    "Widgets that should show up in the IdeaPanel"
-    __mapper_args__ = {
-        'polymorphic_identity': 'idea_showing_widget_link',
-    }
+IdeaShowingWidgetLink = PolymorphicMixinFactory(
+    IdeaWidgetLink)
 
 
-class IdeaDescendantsShowingWidgetLink(IdeaShowingWidgetLink):
-    "Widgets that should show up in the IdeaPanel "
-    "of an idea and its descendants"
-    __mapper_args__ = {
-        'polymorphic_identity': 'idea_desc_showing_widget_link',
-    }
+IdeaDescendantsShowingWidgetLink = PolymorphicMixinFactory(
+    IdeaWidgetLink)
 
 
 class IdeaInspireMeWidgetLink(
-        BaseIdeaWidgetLink, IdeaDescendantsShowingWidgetLink):
+        IdeaDescendantsShowingWidgetLink, BaseIdeaWidgetLink):
     __mapper_args__ = {
         'polymorphic_identity': 'idea_inspire_me_widget_link',
     }
@@ -316,13 +329,13 @@ class IdeaInspireMeWidgetLink(
 
 
 class IdeaCreativitySessionWidgetLink(
-        BaseIdeaWidgetLink, IdeaShowingWidgetLink):
+        IdeaShowingWidgetLink, BaseIdeaWidgetLink):
     __mapper_args__ = {
         'polymorphic_identity': 'idea_creativity_session_widget_link',
     }
 
 
-class VotableIdeaWidgetLink(IdeaShowingWidgetLink):
+class VotableIdeaWidgetLink(IdeaShowingWidgetLink, IdeaWidgetLink):
     __mapper_args__ = {
         'polymorphic_identity': 'votable_idea_widget_link',
     }
@@ -346,26 +359,26 @@ Idea.widgets = association_proxy('widget_links', 'widget')
 
 Widget.showing_idea_links = relationship(
     IdeaWidgetLink,
-    primaryjoin=((Widget.id == IdeaShowingWidgetLink.widget_id)
+    primaryjoin=((Widget.id == IdeaWidgetLink.widget_id)
                  & IdeaShowingWidgetLink.polymorphic_filter()))
 Idea.has_showing_widget_links = relationship(
     IdeaWidgetLink,
-    primaryjoin=((Idea.id == IdeaShowingWidgetLink.idea_id)
+    primaryjoin=((Idea.id == IdeaWidgetLink.idea_id)
                  & IdeaShowingWidgetLink.polymorphic_filter()))
 
 Widget.showing_ideas = relationship(
-    Idea, viewonly=True, secondary=IdeaShowingWidgetLink.__table__,
-    primaryjoin=((Widget.id == IdeaShowingWidgetLink.widget_id)
+    Idea, viewonly=True, secondary=IdeaWidgetLink.__table__,
+    primaryjoin=((Widget.id == IdeaWidgetLink.widget_id)
                  & IdeaShowingWidgetLink.polymorphic_filter()),
-    secondaryjoin=IdeaShowingWidgetLink.idea_id == Idea.id,
+    secondaryjoin=IdeaWidgetLink.idea_id == Idea.id,
     backref='showing_widget')
 
 
 Idea.active_showing_widget_links = relationship(
     IdeaWidgetLink, viewonly=True,
-    primaryjoin=((IdeaShowingWidgetLink.idea_id == Idea.id)
+    primaryjoin=((IdeaWidgetLink.idea_id == Idea.id)
                  & IdeaShowingWidgetLink.polymorphic_filter()
-                 & (IdeaShowingWidgetLink.widget_id == Widget.id)
+                 & (IdeaWidgetLink.widget_id == Widget.id)
                  & Widget.test_active()))
 
 
