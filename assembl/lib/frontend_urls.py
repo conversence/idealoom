@@ -104,7 +104,7 @@ class FrontendUrls(object):
 
     def getDiscussionLogoUrl(self):
         return urljoin(
-            self.discussion.get_base_url(), '/static/img/assembl.png')
+            self.discussion.get_base_url(), '/static/img/idealoom.png')
 
     def get_discussion_url(self):
         from pyramid.request import Request
