@@ -9,7 +9,7 @@ pidfile = %(here)s/var/run/circusd.pid
 endpoint = ipc://%(here)s/var/run/circus_endpoint
 pubsub_endpoint = ipc://%(here)s/var/run/circus_pubsub
 stats_endpoint = ipc://%(here)s/var/run/circus_stats
-logoutput = %(here)s/var/log/circus.log
+logoutput = %(log_dir)s/circus.log
 
 [plugin:statsd]
 use = circus.plugins.statsd.FullStats
@@ -31,13 +31,13 @@ stopwaitsecs = 60
 # ever reap them, so kill them all
 killasgroup = true
 stdout_stream.class = FileStream
-stdout_stream.filename = %(here)s/var/log/celery.log
-stdout_stream.max_bytes = 1073741824
-stdout_stream.backup_count = 3
+stdout_stream.filename = %(log_dir)s/celery.log
 stderr_stream.class = FileStream
-stderr_stream.filename = %(here)s/var/log/celery.err.log
-stderr_stream.max_bytes = 1073741824
-stderr_stream.backup_count = 3
+stderr_stream.filename = %(log_dir)s/celery.err.log
+stdout_stream.max_bytes = %(circus_log_size_celery_out)s
+stdout_stream.backup_count = %(circus_log_backups_celery_out)s
+stderr_stream.max_bytes = %(circus_log_size_celery_err)s
+stderr_stream.backup_count = %(circus_log_backups_celery_err)s
 
 [env:celery]
 LC_CTYPE = %(lcctype)s
@@ -53,13 +53,13 @@ stopasgroup = false
 stopwaitsecs = 60
 killasgroup = true
 stdout_stream.class = FileStream
-stdout_stream.filename = %(here)s/var/log/source_reader.log
-stdout_stream.max_bytes = 1073741824
-stdout_stream.backup_count = 3
+stdout_stream.filename = %(log_dir)s/source_reader.log
 stderr_stream.class = FileStream
-stderr_stream.filename = %(here)s/var/log/source_reader.err.log
-stderr_stream.max_bytes = 1073741824
-stderr_stream.backup_count = 3
+stderr_stream.filename = %(log_dir)s/source_reader.err.log
+stdout_stream.max_bytes = %(circus_log_size_source_reader_out)s
+stdout_stream.backup_count = %(circus_log_backups_source_reader_out)s
+stderr_stream.max_bytes = %(circus_log_size_source_reader_err)s
+stderr_stream.backup_count = %(circus_log_backups_source_reader_err)s
 
 [env:source_reader]
 LC_CTYPE = %(lcctype)s
@@ -77,13 +77,13 @@ stopwaitsecs = 60
 # ever reap them, so kill them all
 killasgroup = true
 stdout_stream.class = FileStream
-stdout_stream.filename = %(here)s/var/log/celery_notify_beat.log
-stdout_stream.max_bytes = 1073741824
-stdout_stream.backup_count = 3
+stdout_stream.filename = %(log_dir)s/celery_notify_beat.log
 stderr_stream.class = FileStream
-stderr_stream.filename = %(here)s/var/log/celery_notify_beat.err.log
-stderr_stream.max_bytes = 1073741824
-stderr_stream.backup_count = 3
+stderr_stream.filename = %(log_dir)s/celery_notify_beat.err.log
+stdout_stream.max_bytes = %(circus_log_size_celery_notify_beat_out)s
+stdout_stream.backup_count = %(circus_log_backups_celery_notify_beat_out)s
+stderr_stream.max_bytes = %(circus_log_size_celery_notify_beat_err)s
+stderr_stream.backup_count = %(circus_log_backups_celery_notify_beat_err)s
 
 [watcher:changes_router]
 working_dir = %(here)s
@@ -96,13 +96,13 @@ stopwaitsecs = 5
 startretries = 3
 startsecs = 5
 stdout_stream.class = FileStream
-stdout_stream.filename = %(here)s/var/log/changes_router.log
-stdout_stream.max_bytes = 1073741824
-stdout_stream.backup_count = 3
+stdout_stream.filename = %(log_dir)s/changes_router.log
 stderr_stream.class = FileStream
-stderr_stream.filename = %(here)s/var/log/changes_router.err.log
-stderr_stream.max_bytes = 1073741824
-stderr_stream.backup_count = 3
+stderr_stream.filename = %(log_dir)s/changes_router.err.log
+stdout_stream.max_bytes = %(circus_log_size_changes_router_out)s
+stdout_stream.backup_count = %(circus_log_backups_changes_router_out)s
+stderr_stream.max_bytes = %(circus_log_size_changes_router_err)s
+stderr_stream.backup_count = %(circus_log_backups_changes_router_err)s
 
 [env:changes_router]
 LC_CTYPE = %(lcctype)s
@@ -115,13 +115,13 @@ cmd = pserve --reload %(CONFIG_FILE)s
 autostart = %(autostart_pserve)s
 respawn = false
 stdout_stream.class = FileStream
-stdout_stream.filename = %(here)s/var/log/pserve.log
-stdout_stream.max_bytes = 1073741824
-stdout_stream.backup_count = 3
+stdout_stream.filename = %(log_dir)s/pserve.log
 stderr_stream.class = FileStream
-stderr_stream.filename = %(here)s/var/log/pserve.err.log
-stderr_stream.max_bytes = 1073741824
-stderr_stream.backup_count = 3
+stderr_stream.filename = %(log_dir)s/pserve.err.log
+stdout_stream.max_bytes = %(circus_log_size_pserve_out)s
+stdout_stream.backup_count = %(circus_log_backups_pserve_out)s
+stderr_stream.max_bytes = %(circus_log_size_pserve_err)s
+stderr_stream.backup_count = %(circus_log_backups_pserve_err)s
 
 [env:pserve]
 LC_CTYPE = %(lcctype)s
@@ -134,13 +134,13 @@ cmd = chaussette --fd $(circus.sockets.web) --backend waitress paste:%(CONFIG_FI
 autostart = %(autostart_chaussette)s
 respawn = false
 stdout_stream.class = FileStream
-stdout_stream.filename = %(here)s/var/log/chaussette.log
-stdout_stream.max_bytes = 1073741824
-stdout_stream.backup_count = 3
+stdout_stream.filename = %(log_dir)s/chaussette.log
 stderr_stream.class = FileStream
-stderr_stream.filename = %(here)s/var/log/chaussette.err.log
-stderr_stream.max_bytes = 1073741824
-stderr_stream.backup_count = 3
+stderr_stream.filename = %(log_dir)s/chaussette.err.log
+stdout_stream.max_bytes = %(circus_log_size_chaussette_out)s
+stdout_stream.backup_count = %(circus_log_backups_chaussette_out)s
+stderr_stream.max_bytes = %(circus_log_size_chaussette_err)s
+stderr_stream.backup_count = %(circus_log_backups_chaussette_err)s
 
 [env:chaussette]
 LC_CTYPE = %(lcctype)s
@@ -156,13 +156,13 @@ copy_env = True
 cmd = %(here)s/assembl/static/node_modules/.bin/webpack-dev-server -d --config webpack.dev.config.js
 autostart = %(autostart_webpack)s
 stdout_stream.class = FileStream
-stdout_stream.filename = %(here)s/var/log/webpack.log
-stdout_stream.max_bytes = 1073741824
-stdout_stream.backup_count = 3
+stdout_stream.filename = %(log_dir)s/webpack.log
 stderr_stream.class = FileStream
-stderr_stream.filename = %(here)s/var/log/webpack.err.log
-stderr_stream.max_bytes = 1073741824
-stderr_stream.backup_count = 3
+stderr_stream.filename = %(log_dir)s/webpack.err.log
+stdout_stream.max_bytes = %(circus_log_size_webpack_out)s
+stdout_stream.backup_count = %(circus_log_backups_webpack_out)s
+stderr_stream.max_bytes = %(circus_log_size_webpack_err)s
+stderr_stream.backup_count = %(circus_log_backups_webpack_err)s
 
 [env:webpack]
 ASSEMBL_URL = %(ASSEMBL_URL)s
@@ -176,13 +176,13 @@ umask=002
 autostart = %(autostart_uwsgi)s
 #user=www-data
 stdout_stream.class = FileStream
-stdout_stream.filename = %(here)s/var/log/uwsgi.log
-stdout_stream.max_bytes = 1073741824
-stdout_stream.backup_count = 3
+stdout_stream.filename = %(log_dir)s/uwsgi.log
 stderr_stream.class = FileStream
-stderr_stream.filename = %(here)s/var/log/uwsgi.err.log
-stderr_stream.max_bytes = 1073741824
-stderr_stream.backup_count = 3
+stderr_stream.filename = %(log_dir)s/uwsgi.err.log
+stdout_stream.max_bytes = %(circus_log_size_uwsgi_out)s
+stdout_stream.backup_count = %(circus_log_backups_uwsgi_out)s
+stderr_stream.max_bytes = %(circus_log_size_uwsgi_err)s
+stderr_stream.backup_count = %(circus_log_backups_uwsgi_err)s
 
 [env:uwsgi]
 LC_CTYPE = %(lcctype)s
@@ -193,28 +193,28 @@ cmd = uwsgi --die-on-term --ini maintenance.ini
 umask=002
 autostart = false
 stdout_stream.class = FileStream
-stdout_stream.filename = %(here)s/var/log/uwsgi.log
-stdout_stream.max_bytes = 1073741824
-stdout_stream.backup_count = 3
+stdout_stream.filename = %(log_dir)s/uwsgi_m.log
 stderr_stream.class = FileStream
-stderr_stream.filename = %(here)s/var/log/uwsgi.err.log
-stderr_stream.max_bytes = 1073741824
-stderr_stream.backup_count = 3
+stderr_stream.filename = %(log_dir)s/uwsgi_m.err.log
+stdout_stream.max_bytes = %(circus_log_size_maintenance_out)s
+stdout_stream.backup_count = %(circus_log_backups_maintenance_out)s
+stderr_stream.max_bytes = %(circus_log_size_maintenance_err)s
+stderr_stream.backup_count = %(circus_log_backups_maintenance_err)s
 
 [watcher:metrics]
 working_dir = %(metrics_code_dir)s
 cmd = %(metrics_cl)s -l %(metrics_code_dir)s/metrics-startup.lisp
 copy_env = true
 close_child_stdin = false
-autostart = %(autostart_metrics_server)s
+autostart = %(autostart_metrics)s
 stdout_stream.class = FileStream
-stdout_stream.filename = %(here)s/var/log/metrics.log
-stdout_stream.max_bytes = 1073741824
-stdout_stream.backup_count = 3
+stdout_stream.filename = %(log_dir)s/metrics.log
 stderr_stream.class = FileStream
-stderr_stream.filename = %(here)s/var/log/metrics.err.log
-stderr_stream.max_bytes = 1073741824
-stderr_stream.backup_count = 3
+stderr_stream.filename = %(log_dir)s/metrics.err.log
+stdout_stream.max_bytes = %(circus_log_size_metrics_out)s
+stdout_stream.backup_count = %(circus_log_backups_metrics_out)s
+stderr_stream.max_bytes = %(circus_log_size_metrics_err)s
+stderr_stream.backup_count = %(circus_log_backups_metrics_err)s
 
 [env:metrics]
 LC_CTYPE = %(lcctype)s
@@ -224,15 +224,15 @@ working_dir = %(metrics_code_dir)s
 cmd = python %(metrics_code_dir)s/startup.py
 virtualenv = %(VIRTUAL_ENV)s
 copy_env = true
-autostart = %(autostart_metrics_server)s
+autostart = %(autostart_metrics)s
 stdout_stream.class = FileStream
-stdout_stream.filename = %(here)s/var/log/metrics_py.log
-stdout_stream.max_bytes = 1073741824
-stdout_stream.backup_count = 3
+stdout_stream.filename = %(log_dir)s/metrics_py.log
 stderr_stream.class = FileStream
-stderr_stream.filename = %(here)s/var/log/metrics_py.err.log
-stderr_stream.max_bytes = 1073741824
-stderr_stream.backup_count = 3
+stderr_stream.filename = %(log_dir)s/metrics_py.err.log
+stdout_stream.max_bytes = %(circus_log_size_metrics_py_out)s
+stdout_stream.backup_count = %(circus_log_backups_metrics_py_out)s
+stderr_stream.max_bytes = %(circus_log_size_metrics_py_err)s
+stderr_stream.backup_count = %(circus_log_backups_metrics_py_err)s
 
 [env:metrics_py]
 LC_CTYPE = %(lcctype)s

@@ -10,7 +10,7 @@ import sys
 import os
 import io
 from os.path import exists, join, dirname, abspath
-from configparser import (NoSectionError, ConfigParser)
+from configparser import (NoSectionError, NoOptionError, ConfigParser)
 from argparse import ArgumentParser, FileType
 import logging
 from future.utils import string_types
@@ -66,6 +66,8 @@ DEFAULTS = {
     'autostart_uwsgi': 'false',
     'autostart_metrics_server': 'false',
     'autostart_edgesense_server': 'false',
+    'circus_log_size': '1048576',  # ~1Mb
+    'circus_log_backups': '3',
     'instance_name': 'idealoom',
 }
 
@@ -138,16 +140,16 @@ def generate_ini_files(config, config_fname):
     if config.has_option(SECTION, 'webpack_host'):
         webpack_host = config.get(SECTION, 'webpack_host')
     webpack_url = "http://%s:%d" % (webpack_host, webpack_port)
+    here = dirname(abspath('circusd.conf'))
+    log_dir = join(here, 'var', 'log')
     vars = {
         'CELERY_BROKER': celery_broker,
         'CELERY_NUM_WORKERS': config.get(
             SECTION, 'celery_tasks.num_workers'),
         'instance_name': config.get(SECTION, 'instance_name'),
-        'here': dirname(abspath('circusd.conf')),
+        'here': here,
+        'log_dir': log_dir,
         'CONFIG_FILE': config_fname,
-        'autostart_metrics_server': (config.get(
-            'circus', 'autostart_metrics_server')
-            if has_metrics_server else 'false'),
         'metrics_code_dir': metrics_code_dir,
         'metrics_cl': metrics_cl,
         'circus_statsd': config.get('circus', 'use_statsd'),
@@ -155,9 +157,6 @@ def generate_ini_files(config, config_fname):
         'lcctype': config.get(SECTION, 'lcctype'),
         'circus_webapp_port': int(config.get('circus', 'webapp_port')),
         'chaussette_port': int(config.get('circus', 'chaussette_port')),
-        'autostart_edgesense_server': (config.get(
-            'circus', 'autostart_edgesense_server')
-            if has_edgesense_server else 'false'),
         'edgesense_venv': edgesense_venv_directive,
         'VIRTUAL_ENV': os.environ['VIRTUAL_ENV'],
         'edgesense_code_dir': edgesense_code_dir,
@@ -165,21 +164,49 @@ def generate_ini_files(config, config_fname):
         'server_port': config.getint('server:main', 'port'),
         'ASSEMBL_URL': url,
     }
-    for var in (
-            'autostart_celery',
-            'autostart_celery_notify_beat',
-            'autostart_source_reader',
-            'autostart_changes_router',
-            'autostart_pserve',
-            'autostart_webpack',
-            'autostart_chaussette',
-            'autostart_uwsgi'):
-        vars[var] = config.get('circus', var)
+    for procname in (
+            'celery',
+            'celery_notify_beat',
+            'source_reader',
+            'changes_router',
+            'pserve',
+            'webpack',
+            'chaussette',
+            'maintenance',
+            'metrics',
+            'metrics_py',
+            # 'edgesense',
+            'uwsgi'):
+        name = 'autostart_' + procname
+        if procname == 'metrics_py':
+            name = 'autostart_metrics'
+        autostart = config.get('circus', name)
+        if procname == 'edgesense':
+            autostart = autostart and has_edgesense_server
+        elif procname == 'metrics':
+            autostart = autostart and has_metrics_server
+        vars[name] = autostart
+        for component in ('size', 'backups'):
+            for stream in ('err', 'out'):
+                name0 = 'circus_log_' + component
+                name1 = '_'.join((name0, procname))
+                name = '_'.join((name1, stream))
+                try:
+                    val = config.get('circus', name)
+                except NoOptionError:
+                    try:
+                        val = config.get('circus', name1)
+                    except NoOptionError:
+                        # Fallbacks to value from DEFAULTS
+                        val = config.get('circus', name0)
+                vars[name] = val
 
     for fname in ('circusd.conf',):
-        print(fname)
-        with open(fname + '.tmpl') as tmpl, open(fname, 'w') as inifile:
+        templateloc = join(dirname(dirname(__file__)),
+                           'templates', 'system', fname + '.tmpl')
+        with open(templateloc) as tmpl, open(fname, 'w') as inifile:
             inifile.write(tmpl.read() % vars)
+        print(fname)
 
 
 def combine_ini(config, overlay, adding=True):
@@ -250,6 +277,8 @@ def populate_random(random_file, random_templates=None, saml_info=None):
     base = ConfigParser(interpolation=None)
     assert random_templates, "Please give one or more templates"
     for template in random_templates:
+        if (not exists(template)):
+            template = join(dirname(dirname(__file__)), 'templates', 'system', template)
         assert exists(template), "Cannot find template " + template
         base.read(template)
     existing = ConfigParser(interpolation=None)
