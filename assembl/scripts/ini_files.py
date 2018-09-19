@@ -9,7 +9,7 @@ from builtins import str as new_str
 import sys
 import os
 import io
-from os.path import exists, join, dirname, abspath
+from os.path import exists, dirname, abspath, join, realpath
 from configparser import (NoSectionError, NoOptionError, ConfigParser)
 from argparse import ArgumentParser, FileType
 import logging
@@ -32,6 +32,8 @@ logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 # Case sensitive options
 ConfigParser.optionxform = lambda self, option: option
 
+
+code_root = dirname(dirname(realpath(__file__)))
 
 SECTION = 'app:assembl'
 RANDOM_FILE = 'random.ini'
@@ -202,8 +204,7 @@ def generate_ini_files(config, config_fname):
                 vars[name] = val
 
     for fname in ('circusd.conf',):
-        templateloc = join(dirname(dirname(__file__)),
-                           'templates', 'system', fname + '.tmpl')
+        templateloc = join(code_root, 'templates', 'system', fname + '.tmpl')
         with open(templateloc) as tmpl, open(fname, 'w') as inifile:
             inifile.write(tmpl.read() % vars)
         print(fname)
@@ -278,7 +279,7 @@ def populate_random(random_file, random_templates=None, saml_info=None):
     assert random_templates, "Please give one or more templates"
     for template in random_templates:
         if (not exists(template)):
-            template = join(dirname(dirname(__file__)), 'templates', 'system', template)
+            template = join(code_root, 'templates', 'system', template)
         assert exists(template), "Cannot find template " + template
         base.read(template)
     existing = ConfigParser(interpolation=None)

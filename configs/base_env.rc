@@ -93,10 +93,11 @@ circus__autostart_celery_notify_beat = true
 circus__autostart_source_reader = true
 circus__autostart_changes_router = true
 circus__autostart_pserve = false
-circus__autostart_nodesass = false
-circus__autostart_gulp = false
 circus__autostart_webpack = false
 circus__autostart_uwsgi = true
-circus__autostart_metrics_server = false
-circus__autostart_edgesense_server = false
+circus__autostart_metrics = false
+circus__autostart_edgesense = false
+circus__autostart_chaussette = false
+circus__autostart_maintenance = false
 
+alembic__script_location = %(code_root)s/assembl/alembic

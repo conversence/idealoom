@@ -15,7 +15,7 @@ from configparser import ConfigParser, SafeConfigParser, NoOptionError
 from io import StringIO
 import sys
 # Importing the "safe" os.path commands
-from os.path import join, dirname, split, normpath
+from os.path import join, dirname, split, normpath, realpath
 # Other calls to os.path rarely mostly don't work remotely. Use locally only.
 import os.path
 import re
@@ -31,6 +31,7 @@ from fabric.colors import yellow, cyan, red, green
 
 
 DEFAULT_SECTION = "DEFAULT"
+code_root = dirname(dirname(realpath(__file__)))
 
 
 def sudo(*args, **kwargs):
@@ -67,6 +68,7 @@ def combine_rc(rc_filename, overlay=None):
         service_config.update(overlay)
     service_config.pop('_extends', None)
     service_config.pop('', None)
+    service_config['*code_root'] = code_root
     return service_config
 
 
