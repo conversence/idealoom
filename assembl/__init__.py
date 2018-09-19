@@ -14,9 +14,6 @@ This is the startup module, which sets up the various components:
 """
 from __future__ import absolute_import
 
-from os import putenv
-from os.path import dirname, join
-
 import transaction
 from pyramid.config import Configurator
 from pyramid.authentication import SessionAuthenticationPolicy
@@ -34,9 +31,6 @@ from .lib.config import set_config
 from .lib.database_functions import ensure_functions
 
 # Do not import models here, it will break tests.
-
-#Use a local odbc.ini
-putenv('ODBCINI', join(dirname(dirname(__file__)), 'odbc.ini'))
 
 resolver = DottedNameResolver(__package__)
 
