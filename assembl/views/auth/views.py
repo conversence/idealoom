@@ -56,7 +56,7 @@ from assembl.lib.sqla_types import EmailString
 from assembl.lib.utils import normalize_email_name, get_global_base_url
 from .. import (
     get_default_context, JSONError, get_provider_data,
-    HTTPTemporaryRedirect, create_get_route)
+    HTTPTemporaryRedirect, create_get_route, sanitize_next_view)
 
 _ = TranslationStringFactory('assembl')
 log = logging.getLogger(__name__)
@@ -113,7 +113,7 @@ def handle_next_view(request, consume=False, default_suffix=''):
     slug = request.matchdict.get('discussion_slug', None)
     default = "/".join((x for x in ('', slug, default_suffix)
                         if x is not None))
-    return request.params.get('next', None) or default
+    return sanitize_next_view(request.params.get('next', None)) or default
 
 
 def maybe_contextual_route(request, route_name, **args):
@@ -142,7 +142,8 @@ def get_social_autologin(request, discussion=None, next_view=None):
     auto_login_backend = preferences['authorization_server_backend']
     if not auto_login_backend:
         return None
-    next_view = next_view or request.params.get('next', None)
+    next_view = next_view or sanitize_next_view(
+        request.params.get('next', None))
     if discussion and not next_view:
         next_view = request.route_path('home', discussion_slug=discussion.slug)
     query = {"next": next_view}

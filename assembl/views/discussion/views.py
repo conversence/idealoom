@@ -24,7 +24,9 @@ from ...models.auth import (
     User,
 )
 from assembl.auth.util import user_has_permission
-from .. import HTTPTemporaryRedirect, get_default_context as base_default_context
+from .. import (
+    HTTPTemporaryRedirect, sanitize_next_view,
+    get_default_context as base_default_context)
 from assembl.lib.frontend_urls import FrontendUrls
 from assembl.nlp.translation_service import DummyGoogleTranslationService
 from ..auth.views import get_social_autologin
@@ -109,7 +111,7 @@ def home_view(request):
         # that is the next view. If not stated, the referer takes
         # precedence. In case of failure, login redirects to the
         # discussion which is its context.
-        next_view = request.params.get('next', None)
+        next_view = sanitize_next_view(request.params.get('next', None))
         if not next_view and discussion:
             # If referred here from a post url, want to be able to
             # send the user back. Usually, IdeaLoom will send the user
