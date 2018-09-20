@@ -15,6 +15,7 @@ from configparser import ConfigParser, SafeConfigParser, NoOptionError
 from io import StringIO
 import sys
 # Importing the "safe" os.path commands
+from os import getcwd
 from os.path import join, dirname, split, normpath, realpath
 # Other calls to os.path rarely mostly don't work remotely. Use locally only.
 import os.path
@@ -31,7 +32,33 @@ from fabric.colors import yellow, cyan, red, green
 
 
 DEFAULT_SECTION = "DEFAULT"
-code_root = dirname(dirname(realpath(__file__)))
+local_code_root = dirname(dirname(realpath(__file__)))
+
+
+def sanitize_hosts(alt_env=None):
+    alt_env = alt_env or env
+    if not alt_env.get('hosts', None):
+        public_hostname = alt_env.get("public_hostname", "localhost")
+        alt_env['hosts'] = [public_hostname]
+    elif not isinstance(alt_env['hosts'], list):
+        alt_env['hosts'] = alt_env['hosts'].split()
+
+
+def is_local(hostname):
+    return hostname in ['localhost', '127.0.0.1']
+    # TODO: look at sys('hostname')
+
+
+def are_local(hostnames):
+    return all((is_local(h) for h in hostnames))
+
+
+def running_locally(alt_env=None):
+    alt_env = alt_env or env
+    # make sure sanitize_hosts has been called when reaching here
+    hosts = alt_env.get('hosts', None) or [
+        alt_env.get('host_string', 'localhost')]
+    return are_local(hosts)
 
 
 def sudo(*args, **kwargs):
@@ -42,6 +69,38 @@ def sudo(*args, **kwargs):
             run(*args, **kwargs)
         else:
             fabsudo(*args, **kwargs)
+
+
+def get_prefixed(key, alt_env=None, default=None):
+    alt_env = alt_env or env
+    for prefx in ('', '_', '*'):
+        val = alt_env.get(prefx + key, None)
+        if val:
+            return val
+    return default
+
+
+def venv_path(alt_env=None):
+    alt_env = alt_env or env
+    path = alt_env.get('venvpath', None)
+    if path:
+        return path
+    if running_locally(alt_env):
+        # Trust VIRTUAL_ENV, important for Jenkins case.
+        return getenv('VIRTUAL_ENV', None)
+    return join(get_prefixed('projectpath', alt_env, getcwd()), 'venv')
+
+
+def code_root(alt_env=None):
+    alt_env = alt_env or env
+    sanitize_hosts(alt_env)
+    if running_locally(alt_env):
+        return local_code_root
+    else:
+        if (as_bool(get_prefixed('package_install', alt_env, False))):
+            return os.path.join(venv_path(alt_env), 'lib', 'python2.7', 'site-packages')
+        else:
+            return get_prefixed('projectpath', alt_env, getcwd())
 
 
 def combine_rc(rc_filename, overlay=None):
@@ -57,7 +116,7 @@ def combine_rc(rc_filename, overlay=None):
         # We want fname to be usable both on host and target.
         # Use project-path-relative names to that effect.
         if fname.startswith('~/'):
-            path = dirname(dirname(__file__))
+            path = local_code_root
             if not is_local(env.host_string):
                 path = env.get('projectpath', path)
             fname = join(path, fname[2:])
@@ -68,7 +127,6 @@ def combine_rc(rc_filename, overlay=None):
         service_config.update(overlay)
     service_config.pop('_extends', None)
     service_config.pop('', None)
-    service_config['*code_root'] = code_root
     return service_config
 
 
@@ -85,15 +143,6 @@ def as_bool(b):
     return str(b).lower() in {"1", "true", "yes", "t", "on"}
 
 
-def is_local(hostname):
-    return hostname in ['localhost', '127.0.0.1']
-    # TODO: look at sys('hostname')
-
-
-def are_local(hostnames):
-    return all((is_local(h) for h in hostnames))
-
-
 def sanitize_env():
     """Ensure boolean and list env variables are such"""
     for name in (
@@ -105,11 +154,7 @@ def sanitize_env():
         # so that a variable valued "False" in the .ini
         # file is recognized as boolean False
         setattr(env, name, as_bool(getattr(env, name, False)))
-    public_hostname = env.get("public_hostname", "localhost")
-    if not env.get('hosts', None):
-        env.hosts = [public_hostname]
-    elif not isinstance(env.hosts, list):
-        env.hosts = env.hosts.split()
+    sanitize_hosts()
     # Note: normally, fab would set host_string from hosts.
     # But since we use the private name _hosts, and fallback
     # at this stage within task execution, neither env.hosts
@@ -117,7 +162,7 @@ def sanitize_env():
     if not env.get('host_string', None):
         env.host_string = env.hosts[0]
     # Are we on localhost
-    is_local = are_local(env.hosts)
+    is_local = running_locally()
     if env.get('mac', None) is None:
         if is_local:
             # WARNING:  This code will run locally, NOT on the remote server,
@@ -125,13 +170,10 @@ def sanitize_env():
             env.mac = system().startswith('Darwin')
         else:
             env.mac = False
-    env.projectpath = env.get('projectpath', dirname(dirname(__file__)))
+    env.projectpath = env.get('projectpath', getcwd())
     if not env.get('venvpath', None):
-        if is_local:
-            # Trust VIRTUAL_ENV, important for Jenkins case.
-            env.venvpath = getenv('VIRTUAL_ENV', None)
-        if not env.get('venvpath', None):
-            env.venvpath = join(env.projectpath, 'venv')
+        env.venvpath = venv_path()
+    env.code_root = code_root()
     env.random_file = env.get('random_file', 'random.ini')
     env.dbdumps_dir = env.get('dbdumps_dir', join(
         env.projectpath, '%s_dumps' % env.get("projectname", 'idealoom')))
@@ -149,6 +191,7 @@ def load_rcfile_config():
     env.update(filter_global_names(env))
     env.update(filter_global_names(combine_rc(rc_file)))
     sanitize_env()
+    env.code_root = code_root()
 
 
 def task(func):
@@ -184,7 +227,7 @@ def listdir(path):
 def update_vendor_config():
     """Update the repository of the currently used config file"""
     config_file_dir = dirname(env.rcfile)
-    here = dirname(dirname(__file__))
+    here = getcwd()
     if config_file_dir.startswith(here):
         config_file_dir = config_file_dir[len(here)+1:]
     while config_file_dir:

@@ -5,7 +5,8 @@ from __future__ import print_function
 from future import standard_library
 standard_library.install_aliases()
 standard_library.install_hooks()
-from builtins import str as new_str
+from future.utils import bytes_to_native_str
+
 import sys
 import os
 import io
@@ -16,9 +17,7 @@ import logging
 from future.utils import string_types
 import locale
 
-from future.utils import PY2, bytes_to_native_str
-sys.path.insert(0, dirname(dirname(dirname(__file__))))
-from ..fabfile import combine_rc
+from ..fabfile import combine_rc, code_root
 
 
 if sys.platform == 'darwin':
@@ -33,7 +32,7 @@ logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 ConfigParser.optionxform = lambda self, option: option
 
 
-code_root = dirname(dirname(realpath(__file__)))
+local_code_root = dirname(dirname(realpath(__file__)))
 
 SECTION = 'app:assembl'
 RANDOM_FILE = 'random.ini'
@@ -204,7 +203,7 @@ def generate_ini_files(config, config_fname):
                 vars[name] = val
 
     for fname in ('circusd.conf',):
-        templateloc = join(code_root, 'templates', 'system', fname + '.tmpl')
+        templateloc = join(local_code_root, 'templates', 'system', fname + '.tmpl')
         with open(templateloc) as tmpl, open(fname, 'w') as inifile:
             inifile.write(tmpl.read() % vars)
         print(fname)
@@ -279,7 +278,7 @@ def populate_random(random_file, random_templates=None, saml_info=None):
     assert random_templates, "Please give one or more templates"
     for template in random_templates:
         if (not exists(template)):
-            template = join(code_root, 'templates', 'system', template)
+            template = join(local_code_root, 'templates', 'system', template)
         assert exists(template), "Cannot find template " + template
         base.read(template)
     existing = ConfigParser(interpolation=None)
@@ -341,7 +340,7 @@ def rc_to_ini(rc_info, default_section=SECTION):
     """
     p = ConfigParser(interpolation=None)
     for key, val in rc_info.items():
-        if not key or key.startswith('_'):
+        if not key or key.startswith('_') or key is 'hosts':
             continue
         if key[0] == '*':
             # Global keys
@@ -442,6 +441,7 @@ def diff_ini(first, second, diff=None, existing_only=False):
 def compose(rc_filename, random_file=None):
     """Compose local.ini from the given .rc file"""
     rc_info = combine_rc(rc_filename)
+    rc_info['*code_root'] = code_root(rc_info)
     ini_sequence = rc_info.get('ini_files', None)
     assert ini_sequence, "Define ini_files"
     ini_sequence = ini_sequence.split()
