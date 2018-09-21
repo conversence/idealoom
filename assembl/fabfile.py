@@ -1368,7 +1368,7 @@ def check_and_create_database_user(host=None, user=None, password=None):
     host = host or env.db_host
     user = user or env.db_user
     password = password or env.db_password
-    pypsql = join(env.projectpath, 'assembl', 'scripts', 'pypsql.py')
+    pypsql = join(code_root(), 'assembl', 'scripts', 'pypsql.py')
     with settings(warn_only=True):
         runner = run
         if exists(env.venvpath):
