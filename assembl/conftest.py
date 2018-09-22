@@ -50,5 +50,5 @@ def pytest_configure(config):
     # Use an unzopish sessionmaker
     configure_engine(app_settings, session_maker=initialize_session_maker(False))
     from .lib.zmqlib import configure_zmq
-    configure_zmq(app_settings['changes.socket'],
-                  app_settings['changes.multiplex'])
+    configure_zmq(app_settings['changes_socket'],
+                  app_settings['changes_multiplex'])

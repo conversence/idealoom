@@ -156,14 +156,14 @@ if __name__ == '__main__':
 
     logging.config.fileConfig(sys.argv[1],)
 
-    settings = configparser.ConfigParser({'changes.prefix': ''})
+    settings = configparser.ConfigParser({'changes_prefix': ''})
     settings.read(sys.argv[-1])
 
 
-    changes_socket = settings.get(SECTION, 'changes.socket')
-    changes_prefix = settings.get(SECTION, 'changes.prefix')
+    changes_socket = settings.get(SECTION, 'changes_socket')
+    changes_prefix = settings.get(SECTION, 'changes_prefix')
     TOKEN_SECRET = settings.get(SECTION, 'session.secret')
-    websocket_port = settings.getint(SECTION, 'changes.websocket.port')
+    websocket_port = settings.getint(SECTION, 'changes_websocket_port')
     # NOTE: Not sure those are always what we want.
     REQUIRES_SECURE = settings.getboolean(SECTION, 'require_secure_connection')
     SERVER_PROTOCOL = 'https' if REQUIRES_SECURE else 'http'

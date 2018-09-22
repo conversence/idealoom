@@ -1,0 +1,115 @@
+{% if require_secure_connection %}
+server {
+    listen   80;
+    {% if nginx_ipv6 %}
+      listen   [::]:80;
+    {% endif %}
+    server_name {{public_hostname}};
+    return 301 https://$host$request_uri;
+}
+{% endif %}
+
+server {
+  {% if accept_secure_connection %}
+    listen 443 ssl http2;
+    {% if nginx_ipv6 %}
+        listen   [::]:443 ssl http2;
+    {% endif %}
+
+    {% if use_letsencrypt %}
+      ssl_certificate     /etc/letsencrypt/live/{{public_hostname}}/fullchain.pem;
+      ssl_certificate_key /etc/letsencrypt/live/{{public_hostname}}/privkey.pem;
+    {% endif %}
+
+    ssl_session_timeout 1d;
+    ssl_session_cache shared:SSL:50m;
+    # Warning: Setting `ssl_session_tickets` to `off` works only if its value is the same for all `server{}` blocks of all server configurations, or if it is set in an `http{}` block. See https://community.letsencrypt.org/t/errors-from-browsers-with-ssl-session-tickets-off-nginx/18124/5 . It is recommended to either set it to `off` (because implementations are not good enough for the moment), or keep forward secrecy by restarting web servers often enough. See https://github.com/mozilla/server-side-tls/issues/135 and https://wiki.mozilla.org/Security/Server_Side_TLS#TLS_tickets_.28RFC_5077.29
+    ssl_session_tickets off;
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+    ssl_ciphers ECDH+AESGCM:ECDH+CHACHA20:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:RSA+AESGCM:RSA+AES:!aNULL:!MD5:!DSS;
+    ssl_prefer_server_ciphers on;
+    add_header Strict-Transport-Security max-age=15768000;
+    ssl_stapling on;
+    ssl_stapling_verify on;
+    {% if ocsp_path %}
+      ssl_trusted_certificate {{ ocsp_path }};
+    {% endif %}
+    {% if ssl_dhparam %}
+      ssl_dhparam {{ ssl_dhparam }};
+    {% endif %}
+  {% else %}
+    listen    80;
+    {% if nginx_ipv6 %}
+        listen   [::]:80;
+    {% endif %}
+  {% endif %}
+
+  add_header x-xss-protection "1; mode=block" always;
+  add_header x-frame-options "SAMEORIGIN" always;
+  add_header X-Content-Type-Options "nosniff" always;
+
+  server_tokens off;
+  {% if csp_header %}
+    add_header Content-Security-Policy "{{ csp_header }}";
+  {% endif %}
+
+  # This is the server name, if you're running multiple servers
+  server_name {{public_hostname}};
+
+  {% if disallow_robots %}
+    location /robots.txt {
+        return 200 "User-agent: *\nDisallow: /";
+    }
+  {% endif %}
+
+  {% if use_letsencrypt %}
+  location /.well-known {
+      #This is for domain verification
+      alias /var/www/html/.well-known;
+  }
+  {% endif %}
+
+  {% if changes_websocket_proxied %}
+    location /socket {
+        proxy_pass http://{{changes_websocket_host}}:{{changes_websocket_port}}{{changes_prefix}};
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+  {% endif %}
+
+  location /static {
+      #Do NOT put something like "expires modified +1h;" here, it WILL cause problems when deploying a new version.
+      #Nor will it help your performance after the first hour...
+      autoindex off;
+      add_header Cache-Control "public, max-age=3600";
+      alias {{code_root}}/assembl/static;
+  }
+
+  location /private_uploads {
+    internal;
+    alias {{ here }}/var/uploads;
+  }
+
+  location / {
+      include uwsgi_params;
+      uwsgi_read_timeout 5m;
+      {% if uwsgi_port %}
+        uwsgi_pass uwsgi://{{ uwsgi_host }}:{{ uwsgi_port }};
+      {% else %}
+        uwsgi_pass unix://{{ here }}/var/run/uwsgi.sock;
+      {% endif %}
+  }
+
+  # So files uploaded to the database are not artificailly limited by nginx
+  client_max_body_size 500M;
+
+  # Save some bandwidth
+  gzip on;
+  gzip_http_version 1.1;
+  gzip_vary on;
+  gzip_comp_level 6;
+  gzip_proxied any;
+  #text/html is implicit
+  gzip_types text/plain text/css application/json application/ld+json application/x-javascript text/xml application/xml application/xml+rss text/javascript application/javascript text/x-js image/svg+xml font/truetype font/opentype application/vnd.ms-fontobject;
+}

@@ -25,7 +25,7 @@ _settings = config.file_config._sections['app:assembl']
 _settings['in_alembic'] = True
 set_config(_settings)
 pyramid_env = bootstrap(config.config_file_name)
-configure_zmq(pyramid_env['registry'].settings['changes.socket'], False)
+configure_zmq(pyramid_env['registry'].settings['changes_socket'], False)
 
 configure_engine(pyramid_env['registry'].settings, False)
 

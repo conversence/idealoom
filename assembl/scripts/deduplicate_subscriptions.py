@@ -56,7 +56,7 @@ if __name__ == '__main__':
     env = bootstrap(conf)
     settings = get_appsettings(conf, 'assembl')
     set_config(settings)
-    configure_zmq(settings['changes.socket'], False)
+    configure_zmq(settings['changes_socket'], False)
     configure_model_watcher(env['registry'], 'assembl')
     engine = configure_engine(settings, True)
     from assembl import models as m

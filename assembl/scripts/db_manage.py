@@ -27,7 +27,7 @@ def main():
     args = parser.parse_args()
     settings = get_appsettings(args.configuration, 'assembl')
     set_config(settings)
-    configure_zmq(settings['changes.socket'], False)
+    configure_zmq(settings['changes_socket'], False)
     engine = configure_engine(settings, True)
     if args.command == "bootstrap":
         db = bootstrap_db(args.configuration)
