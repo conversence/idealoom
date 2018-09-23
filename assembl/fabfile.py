@@ -929,6 +929,22 @@ def app_compile_nodbupdate():
 
 
 @task
+def app_create_wheel():
+    """Create a wheel for assembl. Should be run locally."""
+    execute(update_npm_requirements)
+    execute(compile_stylesheets_and_js)
+    execute(compile_messages)
+    run("rm -rf dist build idealoom.egg-info")
+    venvcmd("python setup.py bdist_wheel")
+
+
+@task
+def generate_dh_group():
+    """Generate Diffie-Hellman Group"""
+    sudo("openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048")
+
+
+@task
 def webservers_reload():
     """
     Reload the webserver stack.
