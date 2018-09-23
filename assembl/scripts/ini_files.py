@@ -17,7 +17,7 @@ import logging
 from future.utils import string_types
 import locale
 
-from ..fabfile import combine_rc, code_root, venv_path
+from ..fabfile import combine_rc, code_root, venv_path, filter_global_names
 
 
 if sys.platform == 'darwin':
@@ -648,7 +648,7 @@ def main():
     if args.command == 'dump':
         dump(args.ini)
     if args.command == 'template':
-        rc_info = combine_rc(args.input)
+        rc_info = filter_global_names(combine_rc(args.input))
         fill_template(args.template, rc_info, args.output)
 
 
