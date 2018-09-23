@@ -32,7 +32,10 @@ from fabric.colors import yellow, cyan, red, green
 
 
 DEFAULT_SECTION = "DEFAULT"
-local_code_root = dirname(dirname(realpath(__file__)))
+_local_file = __file__
+if _local_file.endswith('.pyc'):
+    _local_file = _local_file[:-1]
+local_code_root = dirname(dirname(realpath(_local_file)))
 
 
 def sanitize_hosts(alt_env=None):
