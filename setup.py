@@ -64,6 +64,8 @@ setup(name='assembl',
               'static/js/bower/*/*.css',
               # Missing: Widgets
               'view_def/*.json',
+              'configs/*.rc',
+              'configs/*.ini',
               'templates/*.jinja2',
               'templates/*/*.jinja2',
               'templates/*/*/*.jinja2',

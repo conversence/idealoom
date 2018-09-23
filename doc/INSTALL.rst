@@ -74,10 +74,12 @@ or:
 
     git clone https://github.com/conversence/idealoom.git
     cd idealoom
-    fab -f assembl/fabfile.py -c configs/develop.rc install_single_server
-    fab -f assembl/fabfile.py -c configs/develop.rc bootstrap_from_checkout
+    fab -f assembl/fabfile.py -c assembl/configs/develop.rc install_single_server
+    fab -f assembl/fabfile.py -c assembl/configs/develop.rc bootstrap_from_checkout
 
-Note: If on Mac, command fab -c configs/develop.rc install_single_server outputs "Low level socket error: connecting to host localhost on port 22: Unable to connect to port 22 on 127.0.0.1", you have to go to System preferences > Sharing > check "Enable remote login", and retry the command.
+Note: If on Mac: replace ``assembl/configs/develop.rc`` with ``assembl/configs/mac.rc``.
+
+Note: If on Mac, command fab -c assembl/configs/develop.rc install_single_server outputs "Low level socket error: connecting to host localhost on port 22: Unable to connect to port 22 on 127.0.0.1", you have to go to System preferences > Sharing > check "Enable remote login", and retry the command.
 
 Note: If you get the following error: ``fabric.exceptions.NetworkError: Incompatible ssh server (no acceptable macs)`` Then you'll need to reconfigure your ssh server
 
@@ -127,11 +129,11 @@ Multiple environments
 ~~~~~~~~~~~~~~~~~~~~~
 
 If you want to run multiple environments on your machine, you should
-have different values for various parameters in ``.rc`` files in the ``configs``
-directory. You would create a ``configs/local.rc`` based on ``configs/develop.rc``,
+have different values for various parameters in ``.rc`` files in the ``assembl/configs``
+directory. You would create a ``local.rc`` based on ``assembl/configs/develop.rc``,
 as described in :doc:`configuration`.
 
-Once you create your local.rc, re-run the ``fab -c configs/local.rc app_setup``
+Once you create your local.rc, re-run the ``fab -c assembl/configs/local.rc app_setup``
 step.
 
 The variables that have to be different between instances are the
@@ -168,7 +170,7 @@ Updating an environment
 
     cd ~/idealoom
     #Any git operations (ex:  git pull)
-    fab -c configs/develop.rc app_compile
+    fab -c assembl/configs/develop.rc app_compile
     $venv/bin/circusctl start pserve webpack
 
 You can monitor any of the processes, for example pserve, with these
@@ -191,14 +193,14 @@ css, all compiled files, update dependencies, database schema, etc.):
 
 .. code:: sh
 
-    fab -c configs/develop.rc app_compile
+    fab -c assembl/configs/develop.rc app_compile
 
 Updating an environment to it's specified branch, tag or revision:
 
 .. code:: sh
 
     cd ~/idealoom
-    fab -c configs/develop.rc app_fullupdate
+    fab -c assembl/configs/develop.rc app_fullupdate
 
 Schema migrations
 ~~~~~~~~~~~~~~~~~
@@ -329,10 +331,10 @@ If you do not have an SSL certificate, then you have to set ``accept_secure_conn
 
     exit  # this logs out from the idealoom_user user, back to the initial sudoer account
     cd /home/idealoom_user/idealoom
-    fab -c configs/develop.rc install_single_server
+    fab -c assembl/configs/develop.rc install_single_server
     sudo -u idealoom_user -i  # back to the idealoom user
     cd /home/idealoom_user/idealoom
-    fab -c configs/develop.rc bootstrap_from_checkout
+    fab -c assembl/configs/develop.rc bootstrap_from_checkout
     source venv/bin/activate
     assembl-add-user --email your_email@email.com --name "Your Name" --username desiredusername --password yourpassword local.ini
 

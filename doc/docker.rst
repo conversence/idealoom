@@ -7,31 +7,31 @@ First the image itself:
 
     docker build --tag idealoom docker
 
-Then, create a ``configs/my_docker.rc`` with the following content:
+Then, create a ``my_docker.rc`` with the following content:
 
 .. code:: ini
 
     _extends = docker.rc
     docker_idealoom_hosts = <public hostnames of your IdeaLoom processes>
 
-Look at ``configs/docker.rc`` for other variables to override, notably mail servers. Stop postgres, redis and memcached locally. Decide whether you want to use an in-docker sentry or an external sentry server.
+Look at ``assembl/configs/docker.rc`` for other variables to override, notably mail servers. Stop postgres, redis and memcached locally. Decide whether you want to use an in-docker sentry or an external sentry server.
 
 .. code:: sh
 
-    env PYTHONPATH=. assembl-ini-files random -o configs/docker_random.ini configs/docker.rc
+    env PYTHONPATH=. assembl-ini-files random -o docker_random.ini assembl/configs/docker.rc
     rm docker/build/*
 
-If doing this procedure for many containers, you'll have to save ``configs/docker_random.ini`` in ``configs/my_docker_random.ini`` and set ``random_file = configs/my_docker_random.ini`` in ``configs/my_docker.rc``.
+If doing this procedure for many containers, you'll have to save ``assembl/configs/docker_random.ini`` in ``my_docker_random.ini`` and set ``random_file = my_docker_random.ini`` in ``assembl/configs/my_docker.rc``.
 
 If using Sentry in Docker:
 
 .. code:: sh
 
-    fab -c configs/docker.rc docker_compose
+    fab -c assembl/configs/docker.rc docker_compose
     docker-compose -f docker/build/docker-compose-stage1.yml up
 
 
-Go to ``localhost:9000`` to create a token for the admin user (username in ``configs/docker.rc``, generated password in ``configs/docker_random.ini``). Make sure that token can administer projects (and organizations?). Add ``sentry_api_token = (the token)`` to your ``my_docker.rc``.
+Go to ``localhost:9000`` to create a token for the admin user (username in ``assembl/configs/docker.rc``, generated password in ``docker_random.ini``). Make sure that token can administer projects (and organizations?). Add ``sentry_api_token = (the token)`` to your ``my_docker.rc``.
 
 Then stop the docker containers (``Ctrl-C`` in the docker-compose window, or ``docker-compose -f docker/build/docker-compose-stage1.yml down`` in another)
 
@@ -43,7 +43,7 @@ Whether or not using Sentry:
 
 .. code:: sh
 
-    fab -c configs/my_docker.rc docker_compose
+    fab -c assembl/configs/my_docker.rc docker_compose
     docker-compose -f docker/build/docker-compose.yml up
 
 Your admin user for each assembl server will be ``admin@hostname``. Use the password recovery process to set its initial password. (If you want to pshell instead, you can do it from ``docker exec -i -t build_idealoom1_1 bash``.)

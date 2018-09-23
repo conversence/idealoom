@@ -1,4 +1,4 @@
-_extends = ./base_env.rc
+_extends = base_env.rc
 _wsginame = dev.wsgi
 _urlhost = localhost
 _uses_apache = false
