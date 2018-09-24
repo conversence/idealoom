@@ -8,7 +8,14 @@ var path = require('path'),
     base_config = require('./webpack.config.js'),
     DashboardPlugin = require('webpack-dashboard/plugin'),
     webpackHost = process.env.WEBPACK_URL.split('://')[1].split(':')[0],
-    webpack_port = parseInt(process.env.WEBPACK_URL.split(':')[2]);
+    webpack_port = parseInt(process.env.WEBPACK_URL.split(':')[2]),
+    disableHostCheck = false;
+
+if (true) {
+  // allow access from outside
+  webpackHost = "0.0.0.0";
+  disableHostCheck = true;
+}
 
 base_config.entry.main = [
   'webpack-dev-server/client?' + process.env.WEBPACK_URL,
@@ -28,6 +35,7 @@ module.exports = _.extend(base_config, {
     },
     port: webpack_port,
     host: webpackHost,
+    disableHostCheck: disableHostCheck,
   },
   plugins: [
       new webpack.HotModuleReplacementPlugin(),
