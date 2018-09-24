@@ -149,7 +149,7 @@ def generate_ini_files(config, config_fname):
     webpack_host = public_hostname
     if config.has_option(SECTION, 'webpack_port'):
         webpack_port = config.getint(SECTION, 'webpack_port')
-    if config.has(SECTION, 'webpack_host'):
+    if config.has_option(SECTION, 'webpack_host'):
         webpack_host = config.get(SECTION, 'webpack_host')
     webpack_url = "http://%s:%d" % (webpack_host, webpack_port)
     vars = {
