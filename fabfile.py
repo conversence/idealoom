@@ -1055,8 +1055,6 @@ def install_builddeps():
             run('brew install autoconf')
         if not exists('/usr/local/bin/automake'):
             run('brew install automake')
-        if not exists('/usr/local/bin/pandoc'):
-            run('brew install pandoc')
         if not exists('/usr/local/bin/twopi'):
             run('brew install graphviz')
             # may require a sudo
@@ -1068,7 +1066,7 @@ def install_builddeps():
         if not exists('/usr/local/bin/gfortran'):
             run('brew install gcc isl')
     else:
-        sudo('apt-get install -y build-essential python3-dev pandoc')
+        sudo('apt-get install -y build-essential python3-dev')
         sudo('apt-get install -y automake bison flex gperf gawk')
         sudo('apt-get install -y graphviz pkg-config gfortran')
     execute(update_python_package_builddeps)
