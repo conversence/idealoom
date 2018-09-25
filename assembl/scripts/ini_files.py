@@ -17,6 +17,7 @@ from future.utils import string_types
 import locale
 
 from future.utils import PY2, bytes_to_native_str
+sys.path.insert(0, dirname(dirname(dirname(__file__))))
 from fabfile import combine_rc
 
 
