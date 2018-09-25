@@ -1,0 +1,12 @@
+-e git+https://github.com/assembl/jasmine-splinter-runner.git#egg=jasmine-splinter-runner
+codecov==2.0.15
+cov-core==1.15.0
+coverage==4.1
+mock==2.0.0
+pytest-cov==2.6.0
+pytest-localserver==0.4.1
+pytest-mock==1.10.0
+pytest-splinter==2.0.0
+pytest==3.8.1
+splinter==0.9.0
+WebTest==2.0.30

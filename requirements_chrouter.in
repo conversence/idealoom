@@ -1,0 +1,14 @@
+-e git+https://github.com/assembl/sockjs-tornado.git@conflicting_localhost#egg=sockjs_tornado
+-e git+https://github.com/maparent/tornadio2.git@session_id_str#egg=tornadIO2
+tornado==4.5.3  # rq.filter: <5
+# Those chrouter reqs repeat requirements in requirements.in, keep in sync.
+PyJWT==1.6.4
+pytz==2018.5
+pyzmq==16.0.4  # rq.filter: <17
+raven==6.9.0
+requests-oauthlib==1.0.0
+requests==2.19.1
+simplejson==3.16.0
+
+# is this really needed by tornado?
+# greenlet==0.4.15
