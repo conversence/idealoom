@@ -44,7 +44,7 @@ click==6.7                # via pip-tools
 codecov==2.0.15
 colander==1.5.1
 colorama==0.3.9
-coloredlogs==7.3
+coloredlogs==10.0
 colour==0.1.5
 contextlib2==0.5.5
 cornice==3.4.0
@@ -59,7 +59,7 @@ dnspython==1.15.0         # via pyisemail
 docutils==0.14            # via botocore, cornice-sphinx, sphinx
 dogpile.cache==0.6.7      # via pyramid-dogpile-cache
 et-xmlfile==1.0.1         # via openpyxl
-executor==20.0            # via rotate-backups
+executor==20.0            # via rotate-backups, update-dotdee
 fabric3==1.14.post1 ; python_version >= "3"
 facebook-sdk==1.0.0
 fasteners==0.14.1         # via executor
@@ -70,13 +70,9 @@ gensim==3.6.0
 google-api-python-client==1.7.4
 google-auth-httplib2==0.0.3  # via google-api-python-client
 google-auth==1.5.1        # via google-api-python-client, google-auth-httplib2
-graphene-sqlalchemy==1.1.1
-graphene==1.4.1
-graphql-core==1.1
-graphql-relay==0.4.5
 hiredis==0.2.0
 httplib2==0.11.3          # via google-api-python-client, google-auth-httplib2
-humanfriendly==4.16.1     # via coloredlogs, executor, property-manager, rotate-backups
+humanfriendly==4.16.1     # via coloredlogs, executor, property-manager, rotate-backups, update-dotdee
 hupper==1.3               # via pyramid
 idna==2.7                 # via cryptography, requests
 imagesize==1.1.0          # via sphinx
@@ -85,7 +81,7 @@ imaplib2==2.45.0
 ipython-genutils==0.2.0   # via traitlets
 ipython==6.5.0 ; python_version >= "3"
 iso639==0.1.4
-iso8601==0.1.12           # via colander, graphene-sqlalchemy
+iso8601==0.1.12           # via colander
 isodate==0.6.0
 jdcal==1.4                # via openpyxl
 jedi==0.12.1              # via ipython
@@ -101,12 +97,12 @@ mock==2.0.0
 monotonic==1.5            # via fasteners
 montague==0.2.1
 more-itertools==4.3.0     # via pytest
-naturalsort==1.5.1        # via rotate-backups
+naturalsort==1.5.1        # via rotate-backups, update-dotdee
 ndg_httpsclient==0.5.1
 nodeenv==1.3.2
 numpy==1.15.2             # via gensim, scipy
 oauthlib==2.1.0           # via requests-oauthlib, social-auth-core
-openpyxl==2.5.7
+openpyxl==2.5.8
 packaging==17.1           # via sphinx
 paramiko==2.4.2           # via fabric3
 parso==0.3.1              # via jedi
@@ -122,9 +118,8 @@ pluggy==0.7.1             # via pytest
 ply==3.11                 # via jsonpath-ng
 polib==1.1.0
 premailer==3.2.0
-promise==2.1              # via graphene, graphql-core, graphql-relay
 prompt-toolkit==1.0.15    # via ipython
-property-manager==2.3.1   # via executor, rotate-backups
+property-manager==2.3.1   # via executor, rotate-backups, update-dotdee
 psutil==5.4.7             # via circus
 psycopg2==2.7.5
 ptyprocess==0.6.0         # via pexpect
@@ -170,7 +165,7 @@ repoze.lru==0.7           # via pyramid, reg
 repoze.sendmail==4.4.1    # via pyramid-mailer
 requests-oauthlib==1.0.0
 requests==2.19.1
-rotate-backups==4.4
+rotate-backups==6.0
 rsa==4.0                  # via google-auth
 s3transfer==0.1.13        # via boto3
 scikit-learn==0.19.2
@@ -179,7 +174,6 @@ selenium==3.14.1          # via pytest-splinter, splinter
 simpleeval==0.9.1         # via rotate-backups
 simplegeneric==0.8.1      # via ipython
 simplejson==3.16.0
-singledispatch==3.4.0.3   # via graphene-sqlalchemy
 six==1.11.0
 smart-open==1.7.1         # via gensim
 snowballstemmer==1.2.1    # via sphinx
@@ -202,8 +196,8 @@ tornado==4.5.3            # via circus, tomako, tornadio2
 traitlets==4.3.2          # via ipython
 transaction==2.2.1
 translationstring==1.3
-typing==3.6.6             # via promise
 unidecode==1.0.22
+update-dotdee==5.0        # via rotate-backups
 uritemplate==3.0.0        # via google-api-python-client
 urllib3==1.23             # via botocore, pytest-splinter, requests, selenium
 uwsgitop==0.10
