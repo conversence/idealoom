@@ -65,6 +65,6 @@ mail.tls = false
 handoff_to_nginx = false
 upload_root = var/test_uploads
 _requirement_inputs = requirements.in requirements_doc.in requirements_tests.in
-frozen_requirements = requirements-tests-%(python_major)d.frozen
+frozen_requirements = requirements-tests-{python_major}.frozen
 _build_docs = true
 _can_test = true
