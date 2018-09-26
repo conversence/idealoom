@@ -1284,10 +1284,11 @@ def check_and_create_database_user(host=None, user=None, password=None):
     host = host or env.db_host
     user = user or env.db_user
     password = password or env.db_password
+    pypsql = join(env.projectpath, 'assembl', 'scripts', 'pypsql.py')
     with settings(warn_only=True):
-        checkUser = venvcmd('assembl-pypsql -1 -u {user} -p {password} -n {host} "{command}"'.format(
+        checkUser = run('python2 {pypsql} -1 -u {user} -p {password} -n {host} "{command}"'.format(
             command="SELECT 1 FROM pg_roles WHERE rolname='%s'" % (user),
-            password=password, host=host, user=user, projectpath=env.projectpath))
+            pypsql=pypsql, password=password, host=host, user=user))
     if checkUser.failed:
         print(yellow("User does not exist, let's try to create it. (The error above is not problematic if the next command which is going to be run now will be successful. This next command tries to create the missing Postgres user.)"))
         db_user = system_db_user()
@@ -1302,8 +1303,7 @@ def check_and_create_database_user(host=None, user=None, password=None):
         run_db_command('python {pypsql} -u {db_user} -n {host} {db_password_string} "{command}"'.format(
             command="CREATE USER %s WITH CREATEDB ENCRYPTED PASSWORD '%s'; COMMIT;" % (
                 user, password),
-            pypsql=join(env.projectpath, 'assembl', 'scripts', 'pypsql.py'),
-            db_user=db_user, host=host, db_password_string=db_password_string),
+            pypsql=pypsql, db_user=db_user, host=host, db_password_string=db_password_string),
             sudo_user)
     else:
         print(green("User exists and can connect"))
