@@ -251,7 +251,8 @@ def ensure_pip_compile():
 @task
 def generate_new_requirements():
     ensure_pip_compile()
-    target = env.frozen_requirements % sys.version_info.major
+    target = env.frozen_requirements % {
+        "python_major": sys.version_info.major}
     local_venv = env.get("venvpath", "./venv")
     assert os.path.exists(local_venv + "/bin/python"),\
         "No usable local venv"
@@ -262,7 +263,8 @@ def generate_new_requirements():
 
 @task
 def ensure_requirements():
-    target = env.frozen_requirements % sys.version_info.major
+    target = env.frozen_requirements % {
+        "python_major": sys.version_info.major}
     if target:
         with cd(env.projectpath):
             run("cp %s requirements.txt" % target)

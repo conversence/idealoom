@@ -24,7 +24,7 @@ mysql_host=localhost
 webpack_host=%(public_hostname)s
 
 _requirement_inputs = requirements.in requirements_chrouter.in
-frozen_requirements = requirements-prod-%d.frozen
+frozen_requirements = requirements-prod-%(python_major)d.frozen
 
 # External hostname: Will almost always be overridden in a host-specific rc file.
 # Note that unlike _hosts, the DNS for public_hostname need not exist at time of creation.
