@@ -1298,7 +1298,10 @@ def check_and_create_database_user(host=None, user=None, password=None):
     password = password or env.db_password
     pypsql = join(env.projectpath, 'assembl', 'scripts', 'pypsql.py')
     with settings(warn_only=True):
-        checkUser = run('python2 {pypsql} -1 -u {user} -p {password} -n {host} "{command}"'.format(
+        runner = run
+        if exists(env.venvpath):
+            runner = venvcmd
+        checkUser = runner('python {pypsql} -1 -u {user} -p {password} -n {host} "{command}"'.format(
             command="SELECT 1 FROM pg_roles WHERE rolname='%s'" % (user),
             pypsql=pypsql, password=password, host=host, user=user))
     if checkUser.failed:
