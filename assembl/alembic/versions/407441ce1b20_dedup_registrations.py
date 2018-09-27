@@ -10,6 +10,8 @@ Create Date: 2018-06-03 15:48:35.931332
 revision = '407441ce1b20'
 down_revision = 'bb2849f2c085'
 
+from functools import reduce
+
 from alembic import context, op
 import sqlalchemy as sa
 import transaction
