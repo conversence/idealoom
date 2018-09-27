@@ -38,7 +38,7 @@ def upgrade(pyramid_env):
         duplicates = [v for v in bymail.values() if len(v)>1]
 
         def order(acc):
-            return (acc.verified, acc.profile.creation_date)
+            return (acc.verified, acc.profile.id)
 
         for dups in duplicates:
             # the "best" (verified, latest) will be last
