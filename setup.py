@@ -1,27 +1,29 @@
 from __future__ import print_function
 import os
-import sys
 
 from setuptools import setup, find_packages
-
-here = os.path.abspath(os.path.dirname(__file__))
-README = open(os.path.join(here, 'README.md')).read()
-CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
-
 from pip._internal.download import PipSession
 from pip._internal.req import parse_requirements
 
-# parse_requirements() returns generator of pip.req.InstallRequirement objects
-if not os.path.exists('requirements.txt'):
-    print("Please run first: fab -c configs/develop.rc ensure_requirements")
-    sys.exit(0)
 
-install_reqs = parse_requirements('requirements.txt', session=PipSession())
+HERE = os.path.abspath(os.path.dirname(__file__))
+README = open(os.path.join(HERE, 'README.md')).read()
+CHANGES = open(os.path.join(HERE, 'CHANGES.txt')).read()
 
-# requires is a list of requirement
-# e.g. ['django==1.5.1', 'mezzanine==1.4.6']
-requires = [str(ir.req) for ir in install_reqs
-            if (not ir.markers) or ir.markers.evaluate()]
+
+def parse_reqs(*req_files):
+    """returns a list of requirements from a list of req files"""
+    requirements = set()
+    session = PipSession()
+    for req_file in req_files:
+        # parse_requirements() returns generator of
+        # pip.req.InstallRequirement objects
+        parsed = parse_requirements(req_file, session=session)
+        requirements.update({
+            str(ir.req) for ir in parsed
+            if (not ir.markers) or ir.markers.evaluate()})
+    return list(requirements)
+
 
 setup(name='assembl',
       version='0.0',
@@ -43,7 +45,8 @@ setup(name='assembl',
       license='AGPLv3',
       keywords='web wsgi pyramid',
       # find_packages misses alembic somehow.
-      packages=find_packages() + ['assembl.alembic', 'assembl.alembic.versions'],
+      packages=find_packages() + [
+          'assembl.alembic', 'assembl.alembic.versions'],
       # scripts=['fabfile.py'],
       package_data={
           'assembl': [
@@ -77,26 +80,32 @@ setup(name='assembl',
       zip_safe=False,
       test_suite='assembl',
       setup_requires=['pip>=6'],
-      install_requires=requires,
-      entry_points={
-        "paste.app_factory": [
-            "main = assembl:main",
-            "maintenance = assembl.maintenance:main",
-        ],
-        "console_scripts": [
-            "assembl-db-manage = assembl.scripts.db_manage:main",
-            "assembl-ini-files = assembl.scripts.ini_files:main",
-            "assembl-imap-test = assembl.scripts.imap_test:main",
-            "assembl-add-user = assembl.scripts.add_user:main",
-            "assembl-pypsql = assembl.scripts.pypsql:main",
-        ],
-        'plaster.loader_factory': [
-            'iloom+ini=assembl.lib.plaster:Loader',
-            'iloom=assembl.lib.plaster:Loader',
-        ],
-        'plaster.wsgi_loader_factory': [
-            'iloom+ini=assembl.lib.plaster:Loader',
-            'iloom=assembl.lib.plaster:Loader',
-        ],
+      install_requires=parse_reqs(
+          'requirements.in', 'requirements-chrouter.in'),
+      tests_require=parse_reqs('requirements-tests.in'),
+      extras_require={
+          'docs': parse_reqs('requirements-doc.in'),
+          'dev': parse_reqs('requirements-dev.in'),
       },
-    )
+      entry_points={
+          "paste.app_factory": [
+              "main = assembl:main",
+              "maintenance = assembl.maintenance:main",
+          ],
+          "console_scripts": [
+              "assembl-db-manage = assembl.scripts.db_manage:main",
+              "assembl-ini-files = assembl.scripts.ini_files:main",
+              "assembl-imap-test = assembl.scripts.imap_test:main",
+              "assembl-add-user = assembl.scripts.add_user:main",
+              "assembl-pypsql = assembl.scripts.pypsql:main",
+          ],
+          'plaster.loader_factory': [
+              'iloom+ini=assembl.lib.plaster:Loader',
+              'iloom=assembl.lib.plaster:Loader',
+          ],
+          'plaster.wsgi_loader_factory': [
+              'iloom+ini=assembl.lib.plaster:Loader',
+              'iloom=assembl.lib.plaster:Loader',
+          ],
+      },
+      )
