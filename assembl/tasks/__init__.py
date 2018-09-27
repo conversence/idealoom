@@ -38,7 +38,7 @@ resolver = DottedNameResolver(__package__)
 
 
 def configure(registry, task_name):
-    global _settings
+    global _settings, celery
     settings = registry.settings
     if _settings is None:
         _settings = settings
@@ -102,7 +102,7 @@ class CeleryWithConfig(Celery):
         if not exists(settings_file):
             settings_file = join(rootdir, 'production.ini')
         _settings = settings = get_appsettings(settings_file, 'assembl')
-        configure_zmq(settings['changes_socket'], False)
+        configure_zmq(settings['changes.socket'], False)
         config = configparser.SafeConfigParser()
         config.read(settings_file)
         registry = getGlobalSiteManager()
@@ -122,7 +122,7 @@ class CeleryWithConfig(Celery):
             threaded_watcher_class_name)
         self.mailer = mailer_factory_from_settings(settings)
         # setup SETTINGS_SMTP_DELAY
-        for name, val in settings.iteritems():
+        for name, val in settings.items():
             if name.startswith(SETTINGS_SMTP_DELAY):
                 try:
                     val = timedelta(seconds=float(val))
