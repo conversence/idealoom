@@ -15,6 +15,7 @@ standard_library.install_aliases()
 standard_library.install_hooks()
 from os.path import join, dirname, realpath, exists
 import logging
+import configparser
 
 from pyramid.paster import get_appsettings
 from pyramid.path import DottedNameResolver
@@ -95,17 +96,23 @@ class CeleryWithConfig(Celery):
     def init_from_celery(self):
         # A task is called through celery, so it may not have basic
         # configuration setup. Go through that setup the first time.
-        global _settings
+        global _settings, SMTP_DOMAIN_DELAYS
         rootdir = dirname(dirname(dirname(realpath(__file__))))
         settings_file = join(rootdir, 'local.ini')
         if not exists(settings_file):
             settings_file = join(rootdir, 'production.ini')
         _settings = settings = get_appsettings(settings_file, 'assembl')
+        configure_zmq(settings['changes_socket'], False)
+        config = configparser.SafeConfigParser()
+        config.read(settings_file)
         registry = getGlobalSiteManager()
         registry.settings = settings
         setup_raven(settings, settings_file)
         set_config(settings)
         configure_engine(settings, True)
+        if settings.get('%s_debug_signal' % (self.main,), False):
+            from assembl.lib import signals
+            signals.listen()
         configure(registry, self.main)
         from .threaded_model_watcher import ThreadDispatcher
         threaded_watcher_class_name = settings.get(
