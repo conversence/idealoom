@@ -92,7 +92,7 @@ class CeleryWithConfig(Celery):
             # i.e. includeme not called, i.e. not from pyramid
             self.init_from_celery()
 
-    def init_from_celery(celery_app):
+    def init_from_celery(self):
         # A task is called through celery, so it may not have basic
         # configuration setup. Go through that setup the first time.
         global _settings
@@ -106,10 +106,10 @@ class CeleryWithConfig(Celery):
         setup_raven(settings, settings_file)
         set_config(settings)
         configure_engine(settings, True)
-        configure(registry, celery_app.main)
+        configure(registry, self.main)
         from .threaded_model_watcher import ThreadDispatcher
         threaded_watcher_class_name = settings.get(
-            '%s.threadedmodelwatcher' % (celery_app.main,),
+            '%s.threadedmodelwatcher' % (self.main,),
             "assembl.lib.model_watcher.BaseModelEventWatcher")
         ThreadDispatcher.mw_class = resolver.resolve(
             threaded_watcher_class_name)

@@ -93,7 +93,7 @@ class LocaleLabel(Base):
         fname = join(dirname(dirname(__file__)),
                      'nlp/data/language-names.json')
         with open(fname) as f:
-            names = json.load(f)
+            names = json.load(f, encoding="utf-8")
         locales = {x[0] for x in names}.union({x[1] for x in names})
         existing = set(db.query(cls.named_locale, cls.locale_of_label).all())
         missing = []
