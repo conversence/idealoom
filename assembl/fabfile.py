@@ -305,6 +305,7 @@ def ensure_pip_compile():
 
 @task
 def generate_new_requirements():
+    "Generate frozen requirements.txt file (with name taken from environment)."
     ensure_pip_compile()
     target = env.frozen_requirements.format(
         python_major=sys.version_info.major)
@@ -318,6 +319,7 @@ def generate_new_requirements():
 
 @task
 def ensure_requirements():
+    "Copy the appropriate frozen requirements file into requirements.txt"
     target = env.frozen_requirements.format(
         python_major=sys.version_info.major)
     if target:
@@ -331,6 +333,7 @@ def ensure_requirements():
 
 @task
 def generate_frozen_requirements():
+    "Generate all frozen requirements file"
     local_venv = env.get("venvpath", "./venv")
     assert os.path.exists(local_venv + "/bin/python"),\
         "No usable local venv"
@@ -1760,12 +1763,13 @@ def as_rc(ini_filename):
 
 @task
 def docker_compose():
+    "Create configuration files needed by docker_compose"
     from jinja2 import Environment, FileSystemLoader
     assert env.docker_idealoom_hosts, "Define docker_idealoom_hosts"
     if not os.path.exists("./docker/build"):
         os.mkdir("./docker/build")
     else:
-        pass # TODO: Delete contents
+        pass  # TODO: Delete contents
     if not isinstance(env.docker_idealoom_hosts, list):
         env.docker_idealoom_hosts = env.docker_idealoom_hosts.split()
     jenv = Environment(
