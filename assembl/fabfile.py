@@ -56,7 +56,7 @@ def combine_rc(rc_filename, overlay=None):
         # We want fname to be usable both on host and target.
         # Use project-path-relative names to that effect.
         if fname.startswith('~/'):
-            path = dirname(__file__)
+            path = dirname(dirname(__file__))
             if not is_local(env.host_string):
                 path = env.get('projectpath', path)
             fname = join(path, fname[2:])
@@ -123,7 +123,7 @@ def sanitize_env():
             env.mac = system().startswith('Darwin')
         else:
             env.mac = False
-    env.projectpath = env.get('projectpath', dirname(__file__))
+    env.projectpath = env.get('projectpath', dirname(dirname(__file__)))
     if not env.get('venvpath', None):
         if is_local:
             # Trust VIRTUAL_ENV, important for Jenkins case.
@@ -182,7 +182,7 @@ def listdir(path):
 def update_vendor_config():
     """Update the repository of the currently used config file"""
     config_file_dir = dirname(env.rcfile)
-    here = dirname(__file__)
+    here = dirname(dirname(__file__))
     if config_file_dir.startswith(here):
         config_file_dir = config_file_dir[len(here)+1:]
     while config_file_dir:
