@@ -51,9 +51,7 @@ def configure(registry, task_name):
         "CELERY_RESULT_BACKEND": settings.get('celery_tasks.broker', ''),
         "CELERY_STORE_ERRORS_EVEN_IF_IGNORED": True,
     }
-    config['BROKER_URL'] = settings.get(
-        '%s.broker' % (celery.main,), None
-    ) or settings.get('celery_tasks.broker')
+    config['BROKER_URL'] = settings.get('celery_tasks.broker')
     celery.config_from_object(config, force=True)
 
 
@@ -110,13 +108,13 @@ class CeleryWithConfig(Celery):
         setup_raven(settings, settings_file)
         set_config(settings)
         configure_engine(settings, True)
-        if settings.get('%s_debug_signal' % (self.main,), False):
+        if settings.get('celery_tasks_debug_signal', False):
             from assembl.lib import signals
             signals.listen()
-        configure(registry, self.main)
+        configure(registry, 'celery_tasks')
         from .threaded_model_watcher import ThreadDispatcher
         threaded_watcher_class_name = settings.get(
-            '%s.threadedmodelwatcher' % (self.main,),
+            'celery_tasks.threadedmodelwatcher',
             "assembl.lib.model_watcher.BaseModelEventWatcher")
         ThreadDispatcher.mw_class = resolver.resolve(
             threaded_watcher_class_name)

@@ -7,4 +7,4 @@ with all the tasks. You can monitor celery tasks with:
     celery -A assembl.tasks -b redis://localhost:6379/0 flower
 """
 
-from . import celery
+from . import CELERY as celery
