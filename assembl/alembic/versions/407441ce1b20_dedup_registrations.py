@@ -31,25 +31,28 @@ def upgrade(pyramid_env):
     db = m.get_session_maker()()
     with transaction.manager:
         bymail = defaultdict(list)
-        emails=db.query(m.EmailAccount).options(
+        emails = db.query(m.EmailAccount).join(
+            m.User, m.User.id == m.EmailAccount.profile_id).options(
             joinedload(m.EmailAccount.profile)).all()
-        for e in emails:
-           bymail[e.email].append(e)
+        for email in emails:
+            bymail[email.email].append(email)
 
         # all emails with duplicate accounts
-        duplicates = [v for v in bymail.values() if len(v)>1]
+        duplicates = [v for v in bymail.values() if len(v) > 1]
 
         def order(acc):
-            return (acc.verified, acc.profile.id)
+            return (acc.verified, acc.profile, acc.profile.id)
 
         for dups in duplicates:
+            # Make the profile verified iff one verified account
+            for acc in dups:
+                acc.profile.verified = reduce(or_, [
+                    a.verified for a in acc.profile.accounts])
             # the "best" (verified, latest) will be last
             dups.sort(key=order)
             for acc in dups[:-1]:
                 assert not acc.verified
             acc = dups[-1]
-            # Make the profile verified iff one verified account
-            acc.profile.verified = reduce(or_, [a.verified for a in acc.profile.accounts])
 
         for dups in duplicates:
             # keep last profile
@@ -59,11 +62,8 @@ def upgrade(pyramid_env):
                 # i.e. delete profile if not last.
                 # There were cases of 2 accounts to one profile, one verified
                 if acc.profile_id != keep_profile:
-                    if acc.profile.username:
-                        acc.profile.username.delete()
                     acc.profile.delete()
 
 
 def downgrade(pyramid_env):
-    with context.begin_transaction():
-        pass
+    pass
