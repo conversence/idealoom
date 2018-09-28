@@ -97,6 +97,11 @@ def ensureSection(config, section):
 def generate_ini_files(config, config_fname):
     """Generate the circusd.conf from its template and .ini file."""
     # TODO: Use .rc file instead of .ini file.
+    def get_default(key, default=None, section=SECTION):
+        if config.has_option(section, key):
+            return config.get(section, key)
+        return default
+
     try:
         metrics_code_dir = config.get('metrics', 'metrics_code_dir')
         metrics_cl = config.get('metrics', 'metrics_cl')
@@ -134,12 +139,8 @@ def generate_ini_files(config, config_fname):
     if secure and port == 80:
         # old misconfiguration
         port = 443
-    webpack_port = 8080
-    webpack_host = public_hostname
-    if config.has_option(SECTION, 'webpack_port'):
-        webpack_port = config.getint(SECTION, 'webpack_port')
-    if config.has_option(SECTION, 'webpack_host'):
-        webpack_host = config.get(SECTION, 'webpack_host')
+    webpack_port = int(get_default('webpack_port', 8080))
+    webpack_host = get_default('webpack_host', public_hostname)
     webpack_url = "http://%s:%d" % (webpack_host, webpack_port)
     here = dirname(abspath('circusd.conf'))
     log_dir = join(here, 'var', 'log')
