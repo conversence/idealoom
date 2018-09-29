@@ -17,10 +17,10 @@ The procedure is as follows:
 6. fab -c assembl/configs/develop.rc check_and_create_database_user
 	This may need your root password, as well as the password of user postgres in the postgresql database
 7. fab -c assembl/configs/develop.rc database_create
-8. assembl-db-manage local_pg.ini bootstrap
+8. idealoom-db-manage local_pg.ini bootstrap
 9. cp local_virtuoso.ini local.ini
 10. python ./assembl/scripts/clone_database.py ./local_virtuoso.ini ./local_pg.ini
 11. cp local_pg.ini local.ini
-12. assembl-ini-files local.ini
+12. idealoom-ini-files local.ini
 13. fab -c assembl/configs/develop.rc supervisor_restart
 14. If all is well, you should be able to get back on the master (or develop) branch and update virtuoso.

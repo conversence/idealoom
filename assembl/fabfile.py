@@ -751,7 +751,7 @@ def app_db_install():
     """
     execute(database_create)
     print(cyan('Installing database'))
-    venvcmd('assembl-db-manage %s bootstrap' % (env.ini_file))
+    venvcmd('idealoom-db-manage %s bootstrap' % (env.ini_file))
 
 
 @task
@@ -1546,7 +1546,7 @@ def create_sentry_project():
 
 def check_if_database_exists():
     with settings(warn_only=True):
-        checkDatabase = venvcmd('assembl-pypsql -1 -u {user} -p {password} -n {host} "{command}"'.format(
+        checkDatabase = venvcmd('idealoom-pypsql -1 -u {user} -p {password} -n {host} "{command}"'.format(
             command="SELECT 1 FROM pg_database WHERE datname='%s'" % (env.db_database),
             password=env.db_password, host=env.db_host, user=env.db_user))
         return not checkDatabase.failed
@@ -1554,7 +1554,7 @@ def check_if_database_exists():
 
 def check_if_db_tables_exist():
     with settings(warn_only=True):
-        checkDatabase = venvcmd('assembl-pypsql -1 -u {user} -p {password} -n {host} -d {database} "{command}"'.format(
+        checkDatabase = venvcmd('idealoom-pypsql -1 -u {user} -p {password} -n {host} -d {database} "{command}"'.format(
             command="SELECT count(*) from permission", database=env.db_database,
             password=env.db_password, host=env.db_host, user=env.db_user))
         return not checkDatabase.failed
@@ -1562,7 +1562,7 @@ def check_if_db_tables_exist():
 
 def check_if_first_user_exists():
     with settings(warn_only=True):
-        checkDatabase = venvcmd('assembl-pypsql -1 -u {user} -p {password} -n {host} -d {database} "{command}"'.format(
+        checkDatabase = venvcmd('idealoom-pypsql -1 -u {user} -p {password} -n {host} -d {database} "{command}"'.format(
             command="SELECT count(*) from public.user", database=env.db_database,
             password=env.db_password, host=env.db_host, user=env.db_user))
         return not checkDatabase.failed and int(checkDatabase.strip('()L,')) > 0
@@ -1570,12 +1570,12 @@ def check_if_first_user_exists():
 
 @task
 def database_create():
-    """Create the database for this assembl instance"""
+    """Create the database for this idealoom instance"""
     execute(check_and_create_database_user)
 
     if not check_if_database_exists():
         print(yellow("Cannot connect to database, trying to create"))
-        createDatabase = venvcmd('assembl-pypsql --autocommit -u {user} -p {password} -n {host}'
+        createDatabase = venvcmd('idealoom-pypsql --autocommit -u {user} -p {password} -n {host}'
                 ' "CREATE DATABASE {database} WITH OWNER = {user} TEMPLATE = template0 ENCODING = UNICODE"'.format(
                     user=env.db_user, password=env.db_password, host=env.db_host,
                     database=env.db_database))
@@ -1708,7 +1708,7 @@ def database_delete():
     execute(check_and_create_database_user)
 
     with settings(warn_only=True), hide('stdout'):
-        checkDatabase = venvcmd('assembl-pypsql -1 -u {user} -p {password} -n {host} "{command}"'.format(
+        checkDatabase = venvcmd('idealoom-pypsql -1 -u {user} -p {password} -n {host} "{command}"'.format(
             command="SELECT 1 FROM pg_database WHERE datname='%s'" % (env.db_database),
             password=env.db_password, host=env.db_host, user=env.db_user))
     if not checkDatabase.failed:
@@ -1874,7 +1874,7 @@ def docker_compose():
                 public_hostname_=hostname, idealoom_index=i + 1, **env))
         with settings(host_string="localhost", venvpath=local_venv,
                       user=getuser(), projectpath=os.getcwd()):
-            venvcmd("assembl-ini-files template -o %s %s nginx_default.jinja2" % (
+            venvcmd("idealoom-ini-files template -o %s %s nginx_default.jinja2" % (
                 nginx_filename, rc_filename))
     with open('./docker/build/docker-compose.yml', 'w') as f:
         f.write(compose_template.render(**env))
@@ -1920,7 +1920,7 @@ def docker_startup():
 def create_first_admin_user():
     email = env.get("first_admin_email", None)
     assert email, "Please set the first_admin_email in the .rc environment"
-    venvcmd("assembl-add-user -m %s -u admin -n Admin -p admin --bypass-password %s" % (
+    venvcmd("idealoom-add-user -m %s -u admin -n Admin -p admin --bypass-password %s" % (
         email, env.ini_file))
 
 

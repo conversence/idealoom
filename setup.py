@@ -25,8 +25,8 @@ def parse_reqs(*req_files):
     return list(requirements)
 
 
-setup(name='assembl',
-      version='0.0',
+setup(name='idealoom',
+      version='0.1.0',
       description='Collective Intelligence platform',
       long_description=README + '\n\n' + CHANGES,
       classifiers=[
@@ -41,7 +41,7 @@ setup(name='assembl',
       ],
       author='',
       author_email='',
-      url='http://assembl.org/',
+      url='https://idealoom.org/',
       license='AGPLv3',
       keywords='web wsgi pyramid',
       # find_packages misses alembic somehow.
@@ -93,11 +93,11 @@ setup(name='assembl',
               "maintenance = assembl.maintenance:main",
           ],
           "console_scripts": [
-              "assembl-db-manage = assembl.scripts.db_manage:main",
-              "assembl-ini-files = assembl.scripts.ini_files:main",
-              "assembl-imap-test = assembl.scripts.imap_test:main",
-              "assembl-add-user = assembl.scripts.add_user:main",
-              "assembl-pypsql = assembl.scripts.pypsql:main",
+              "idealoom-db-manage = assembl.scripts.db_manage:main",
+              "idealoom-ini-files = assembl.scripts.ini_files:main",
+              "idealoom-imap-test = assembl.scripts.imap_test:main",
+              "idealoom-add-user = assembl.scripts.add_user:main",
+              "idealoom-pypsql = assembl.scripts.pypsql:main",
           ],
           'plaster.loader_factory': [
               'iloom+ini=assembl.lib.plaster:Loader',

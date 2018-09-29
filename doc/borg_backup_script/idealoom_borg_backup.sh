@@ -10,7 +10,7 @@ echo "Do not worry if the above command fails, it is expected to fail except the
 
 cd $IDEALOOM_PATH
 #In case the database backup fails
-$IDEALOOM_PATH/venv/bin/assembl-db-manage local.ini backup
+$IDEALOOM_PATH/venv/bin/idealoom-db-manage local.ini backup
 #Make sure we back up the database dump from the last deployment:
 cp --dereference $IDEALOOM_PATH/idealoom-backup.pgdump $IDEALOOM_PATH/idealoom-backup-real.pgdump
 NAME="`hostname`-`basename $IDEALOOM_PATH`-`date --iso-8601='minutes'`"

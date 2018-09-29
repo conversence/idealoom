@@ -18,7 +18,7 @@ Look at ``assembl/configs/docker.rc`` for other variables to override, notably m
 
 .. code:: sh
 
-    env PYTHONPATH=. assembl-ini-files random -o docker_random.ini assembl/configs/docker.rc
+    env PYTHONPATH=. idealoom-ini-files random -o docker_random.ini assembl/configs/docker.rc
     rm docker/build/*
 
 If doing this procedure for many containers, you'll have to save ``assembl/configs/docker_random.ini`` in ``my_docker_random.ini`` and set ``random_file = my_docker_random.ini`` in ``assembl/configs/my_docker.rc``.
