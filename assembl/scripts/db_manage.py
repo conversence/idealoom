@@ -65,7 +65,7 @@ def main():
 
         if not db_version:
             sys.stderr.write('Database not initialized.\n'
-                             'Try this: "assembl-db-manage %s bootstrap"\n'
+                             'Try this: "idealoom-db-manage %s bootstrap"\n'
                              % args.configuration)
             sys.exit(2)
 

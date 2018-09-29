@@ -1,6 +1,6 @@
 #dropdb -U assembl assembl
 #createdb -U assembl assembl
-#assembl-db-manage local.ini bootstrap
+#idealoom-db-manage local.ini bootstrap
 
 #In pshell iloom:local.ini, paste:
 

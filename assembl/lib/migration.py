@@ -85,21 +85,21 @@ def ensure_db_version(config_uri, session_maker):
 
     if not db_version:
         sys.stderr.write('Database not initialized.\n'
-                         'Try this: "assembl-db-manage %s bootstrap".\n'
+                         'Try this: "idealoom-db-manage %s bootstrap".\n'
                          % config_uri)
         sys.exit(2)
 
     if db_version != repo_version:
         sys.stderr.write('Stopping: DB version (%s) not up-to-date (%s).\n'
                          % (db_version, repo_version))
-        sys.stderr.write('Try this: "assembl-db-manage %s upgrade head".\n'
+        sys.stderr.write('Try this: "idealoom-db-manage %s upgrade head".\n'
                          % config_uri)
         sys.exit(2)
 
 
 def is_migration_script():
     """Determine weather the current process is a migration script."""
-    return 'alembic' in sys.argv[0] or 'assembl-db-manage' in sys.argv[0]
+    return 'alembic' in sys.argv[0] or 'idealoom-db-manage' in sys.argv[0]
 
 
 def delete_boolean_constraint(db, table, column):
