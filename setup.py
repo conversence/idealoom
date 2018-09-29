@@ -81,11 +81,11 @@ setup(name='assembl',
       test_suite='assembl',
       setup_requires=['pip>=6'],
       install_requires=parse_reqs(
-          'requirements.in', 'requirements-chrouter.in'),
-      tests_require=parse_reqs('requirements-tests.in'),
+          'requirements.in', 'requirements_chrouter.in'),
+      tests_require=parse_reqs('requirements_tests.in'),
       extras_require={
-          'docs': parse_reqs('requirements-doc.in'),
-          'dev': parse_reqs('requirements-dev.in'),
+          'docs': parse_reqs('requirements_doc.in'),
+          'dev': parse_reqs('requirements_dev.in'),
       },
       entry_points={
           "paste.app_factory": [
