@@ -466,7 +466,7 @@ def includeme(config):
 
     config.include(backbone_include, route_prefix='/{discussion_slug}')
 
-    if asbool(config.get_settings().get('assembl_handle_exceptions', 'true')):
+    if asbool(config.get_settings().get('idealoom_handle_exceptions', 'true')):
         config.add_view(error_view, context=Exception)
 
     #  authentication

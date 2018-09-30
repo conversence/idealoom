@@ -10,7 +10,7 @@ The procedure is as follows:
 4. In the local_pg.ini file, change the following parameters:
     1. db_schema = public
     2. db_database should be set to the former value of db_schema
-    3. set both instances of sqlalchemy.url (in app:assembl and alembic sections) to the following pattern: postgresql+psycopg2://{db_user}:{db_password}@localhost/{db_database}
+    3. set both instances of sqlalchemy.url (in app:idealoom and alembic sections) to the following pattern: postgresql+psycopg2://{db_user}:{db_password}@localhost/{db_database}
     (Make appropriate substitutions! So typically postgresql+psycopg2://assembl:assembl@localhost/assembl )
     4. autostart_virtuoso = false
 5. cp local_pg.ini local.ini

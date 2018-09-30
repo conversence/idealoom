@@ -28,10 +28,10 @@ def upgrade(pyramid_env):
     from assembl import models as m
     db = m.get_session_maker()()
     admin_email = None
-    for section in ('app:main', 'app:assembl'):
+    for section in ('app:main', 'app:idealoom'):
         try:
             admin_email = context.config.get_section_option(
-                section, 'assembl.admin_email')
+                section, 'idealoom_admin_email')
         except:
             pass
     assert admin_email

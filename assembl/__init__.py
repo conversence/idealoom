@@ -44,7 +44,7 @@ def main(global_config, **settings):
     settings = set_config(settings)
     if not session_maker_is_initialized():
         configure_engine(settings)
-    if settings.get('assembl_debug_signal', False):
+    if settings.get('idealoom_debug_signal', False):
         from assembl.lib import signals
         signals.listen()
 

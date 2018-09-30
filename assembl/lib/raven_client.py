@@ -39,7 +39,7 @@ def setup_raven(settings, settings_file=None):
         log.error("Calling setup_raven when raven is already set up.")
         return
     if isinstance(settings, configparser.ConfigParser):
-        raven_url = settings.get('app:assembl', 'raven_url')
+        raven_url = settings.get('app:idealoom', 'raven_url')
     else:
         raven_url = settings.get('raven_url', '')
     if raven_url and len(raven_url) > 12:

@@ -191,7 +191,7 @@ In ``local.ini``
 
 .. code-block:: ini
 
-    assembl.admin_email = assembl@example.domain
+    idealoom_admin_email = assembl@example.domain
     mail.host = localhost
     mail.username = assembl@example.domain
     mail.password = (password of the assembl user.)
@@ -216,7 +216,7 @@ to test postfix, start a ``pshell`` in assembl, and try the following with a rea
 
     mailer = get_mailer(request)
     message = Message(subject="hello world",
-       sender=config.get('assembl.admin_email'),
+       sender=config.get('idealoom_admin_email'),
        recipients=["test_recipient@example.com"],body="test")
     mailer.send_immediately(message)
 

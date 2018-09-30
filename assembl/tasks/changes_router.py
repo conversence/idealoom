@@ -35,7 +35,7 @@ from assembl.lib.web_token import decode_token, TokenInvalid
 
 log = logging.getLogger("assembl.tasks.changes_router")
 
-SECTION = 'app:assembl'
+SECTION = 'app:idealoom'
 Everyone = 'system.Everyone'
 
 global TOKEN_SECRET, SERVER_URL

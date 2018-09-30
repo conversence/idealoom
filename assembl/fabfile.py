@@ -1837,7 +1837,7 @@ def as_rc(ini_filename):
         for k, v in cp.items(section):
             if k[0] in ("_*"):
                 k = k[1:]
-            elif section not in ('app:assembl', DEFAULT_SECTION):
+            elif section not in ('app:idealoom', DEFAULT_SECTION):
                 k = "__".join((section, k))
             r[k] = v
     return r

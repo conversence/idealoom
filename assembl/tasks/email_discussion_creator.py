@@ -58,7 +58,7 @@ class EmailCreatorAtDiscussionCreation(object):
         text_template = jinja_env.get_template(
             'notifications/txt_new_discussion.jinja2')
         text_body = text_template.render(**template_data)
-        sender_email = config.get('assembl.admin_email')
+        sender_email = config.get('idealoom_admin_email')
         mailer = get_mailer(request)
         localizer = request.localizer
         sender_name = discussion.topic

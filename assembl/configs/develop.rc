@@ -48,7 +48,7 @@ changes_websocket_port = 8085
 # /0 thru /2: reserved for development
 # /3 thru /4: reserved for automated testing
 # /5-: production
-changes_socket = ipc:///tmp/assembl_changes/0
+changes_socket = ipc:///tmp/idealoom_changes/0
 env.wsginame = dev.wsgi
 _gitbranch = develop
 circus__autostart_celery = false

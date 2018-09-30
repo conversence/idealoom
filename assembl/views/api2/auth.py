@@ -467,7 +467,7 @@ def assembl_register_user(request):
         raise errors
 
     validate_registration = asbool(settings.get(
-        'assembl.validate_registration_emails'))
+        'idealoom_validate_registration_emails'))
 
     old_autoflush = session.autoflush
     session.autoflush = False

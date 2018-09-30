@@ -34,7 +34,7 @@ ConfigParser.optionxform = lambda self, option: option
 
 local_code_root = dirname(dirname(realpath(__file__)))
 
-SECTION = 'app:assembl'
+SECTION = 'app:idealoom'
 RANDOM_FILE = 'random.ini'
 
 # The defaults allow to set sensible values and not edit all the local.ini
@@ -347,7 +347,7 @@ def populate_random(random_file, random_templates=None, saml_info=None):
 def rc_to_ini(rc_info, default_section=SECTION):
     """Convert a .rc file to a ConfigParser (.ini-like object)
 
-    Items are assumed to be in app:assembl section,
+    Items are assumed to be in app:idealoom section,
         unless prefixed by "{section}__" .
     Keys prefixed with an underscore are not passed on.
     Keys prefixed with a star are put in the global (DEFAULT) section.

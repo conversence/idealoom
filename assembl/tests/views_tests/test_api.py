@@ -207,7 +207,7 @@ def test_api_register(discussion, test_app_no_perm,
                       test_webrequest):
     from assembl.models import AbstractAgentAccount
     test_app_no_perm.app.registry.\
-        settings['assembl.validate_registration_emails'] = 'true'
+        settings['idealoom_validate_registration_emails'] = 'true'
     with mock.patch('repoze.sendmail.mailer.SMTPMailer.smtp') as mock_mail:
         mailer = mock_mail.return_value
         mailer.set_debuglevel.return_value = None
@@ -272,7 +272,7 @@ def test_csv_subscribe(discussion, test_app_no_perm,
                        test_app, test_webrequest):
     from assembl.models import User, AbstractAgentAccount
     test_app_no_perm.app.registry.\
-        settings['assembl.validate_registration_emails'] = 'true'
+        settings['idealoom_validate_registration_emails'] = 'true'
     with mock.patch('repoze.sendmail.mailer.SMTPMailer.smtp') as mock_mail:
         mailer = mock_mail.return_value
         mailer.set_debuglevel.return_value = None

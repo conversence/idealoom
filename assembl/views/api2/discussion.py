@@ -994,7 +994,7 @@ def test_results(request):
     config = get_config()
     message = Message(
         subject="test_results",
-        sender=config.get('assembl.admin_email'),
+        sender=config.get('idealoom_admin_email'),
         recipients=["maparent@acm.org"],
         body=json.dumps(request.POST.dict_of_lists()))
     mailer.send(message)

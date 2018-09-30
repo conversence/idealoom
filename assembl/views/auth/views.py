@@ -390,7 +390,7 @@ def assembl_register_view(request):
     # TODO: Validate password quality
     # otherwise create.
     validate_registration = asbool(config.get(
-        'assembl.validate_registration_emails'))
+        'idealoom_validate_registration_emails'))
 
     user = User(
         name=name,
@@ -1066,7 +1066,7 @@ The {assembl} Team"""))
     )
     message = Message(
         subject=subject.format(**data),
-        sender=config.get('assembl.admin_email'),
+        sender=config.get('idealoom_admin_email'),
         recipients=["%s <%s>" % (email.profile.name, email.email)],
         body=text_message.format(**data),
         html=html_message.format(**data))
@@ -1088,7 +1088,7 @@ def send_change_password_email(
             request,
             'welcome' if welcome else 'do_password_change',
             token=password_change_token(profile)))
-    sender_email = config.get('assembl.admin_email')
+    sender_email = config.get('idealoom_admin_email')
     if discussion:
         data.update(dict(
             discussion_topic=discussion.topic,

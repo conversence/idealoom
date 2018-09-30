@@ -20,7 +20,7 @@ config = context.config
 # This line sets up loggers basically.
 fileConfig(config.config_file_name)
 
-_settings = config.file_config._sections['app:assembl']
+_settings = config.file_config._sections['app:idealoom']
 # Add a marker that we're in alembic, some things need not happen
 _settings['in_alembic'] = True
 set_config(_settings)

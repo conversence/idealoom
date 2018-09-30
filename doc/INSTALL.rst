@@ -143,7 +143,7 @@ the ini file):
 .. code:: ini
 
     public_port = 6543
-    changes.socket = ipc:///tmp/assembl_changes/0
+    changes.socket = ipc:///tmp/idealoom_changes/0
     changes.websocket.port = 8085
     redis_socket = 0
     webpack_port = 8080
@@ -292,7 +292,7 @@ Put your chosen database username and password in
 * ``db_user``
 * ``db_pasasword``
 * ``sqlalchemy.url``  # CAREFUL: sqlalchemy.url needs to be edited TWICE in the file
-* ``assembl.admin_email``
+* ``idealoom_admin_email``
 
 Just type a random strings in these two:
 ``session.secret``, ``security.email_token_salt``
@@ -316,7 +316,7 @@ The following must all be unique to the instance.  If you only have one instance
 * ``celery_tasks.translate.broker``
 * ``public_port``
 
-The ``public_port`` field (located in ``app:assembl`` section) is the actual port used by the UWSGI server which is rerouted through the reverse proxy served by nginx. For production context, use 80.
+The ``public_port`` field (located in ``app:idealoom`` section) is the actual port used by the UWSGI server which is rerouted through the reverse proxy served by nginx. For production context, use 80.
 There is also a ``port`` field in ``server:main`` section, which defaults to 6543. If not proxied by nginx or something, ``port`` needs to match ``public_port``.
 
 Also, set the ``uid`` field of your ini file to the username of the unix user you created above. For example: ``uid = idealoom_user``

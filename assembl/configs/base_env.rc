@@ -33,7 +33,7 @@ require_secure_connection = true
 _sentry_db_host = localhost
 # _sentry_db_password =
 # Replace with your admin email if necessary
-assembl.admin_email = webmaster@%(public_hostname)s
+idealoom_admin_email = webmaster@%(public_hostname)s
 
 memcached_host = localhost
 mysql_host=localhost
@@ -66,7 +66,7 @@ redis_socket = 5
 # /0 thru /2: reserved for development
 # /3 thru /4: reserved for automated testing
 # /5-: production
-changes_socket = ipc:///tmp/assembl_changes/5
+changes_socket = ipc:///tmp/idealoom_changes/5
 disallow_robots = false
 
 # Circus web port
