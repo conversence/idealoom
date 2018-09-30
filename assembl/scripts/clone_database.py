@@ -98,7 +98,7 @@ def copy_table(source_session, dest_session, source_table, dest_table):
 
 
 def engine_from_settings(config, full_config=False):
-    settings = get_appsettings(config, 'assembl')
+    settings = get_appsettings(config, 'idealoom')
     if settings['sqlalchemy.url'].startswith('virtuoso:'):
         db_schema = '.'.join((settings['db_schema'], settings['db_user']))
     else:
@@ -108,7 +108,7 @@ def engine_from_settings(config, full_config=False):
     if full_config:
         env = bootstrap(config)
         configure_zmq(settings['changes_socket'], False)
-        configure_model_watcher(env['registry'], 'assembl')
+        configure_model_watcher(env['registry'], 'idealoom')
         logging.config.fileConfig(config)
     else:
         session = make_session_maker(zope_tr=True)

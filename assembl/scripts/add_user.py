@@ -57,10 +57,10 @@ def main():
         " recovery function to assign a password to this user later.")
     args = parser.parse_args()
     env = bootstrap(args.configuration)
-    settings = get_appsettings(args.configuration, 'assembl')
+    settings = get_appsettings(args.configuration, 'idealoom')
     set_config(settings)
     configure_zmq(settings['changes_socket'], False)
-    configure_model_watcher(env['registry'], 'assembl')
+    configure_model_watcher(env['registry'], 'idealoom')
     engine = configure_engine(settings, True)
     from assembl.models import Role
     from assembl.auth.util import add_user

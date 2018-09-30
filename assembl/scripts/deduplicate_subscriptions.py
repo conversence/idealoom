@@ -54,10 +54,10 @@ if __name__ == '__main__':
 
     conf = argv[-1] or 'local.ini'
     env = bootstrap(conf)
-    settings = get_appsettings(conf, 'assembl')
+    settings = get_appsettings(conf, 'idealoom')
     set_config(settings)
     configure_zmq(settings['changes_socket'], False)
-    configure_model_watcher(env['registry'], 'assembl')
+    configure_model_watcher(env['registry'], 'idealoom')
     engine = configure_engine(settings, True)
     from assembl import models as m
     with transaction.manager:

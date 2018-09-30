@@ -38,7 +38,7 @@ def kill_weird_links(db=None):
 
 if __name__ == '__main__':
     configuration = sys.argv[1]
-    settings = get_appsettings(configuration, 'assembl')
+    settings = get_appsettings(configuration, 'idealoom')
     set_config(settings)
     logging.config.fileConfig(configuration)
     configure_zmq(settings['changes_socket'], False)

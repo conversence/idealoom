@@ -107,7 +107,7 @@ class CeleryWithConfig(Celery):
             settings_file = join(rootdir, 'production.ini')
         if not exists(settings_file):
             raise RuntimeError("Missing settings file")
-        _settings = settings = get_appsettings(settings_file, 'assembl')
+        _settings = settings = get_appsettings(settings_file, 'idealoom')
         configure_zmq(settings['changes_socket'], False)
         config = configparser.SafeConfigParser()
         config.read(settings_file)

@@ -27,7 +27,7 @@ def clean_avatars(db):
 
 if __name__ == '__main__':
     config_fname = sys.argv[1]
-    settings = get_appsettings(config_fname, 'assembl')
+    settings = get_appsettings(config_fname, 'idealoom')
     set_config(settings)
     logging.config.fileConfig(config_fname)
     configure_zmq(settings['changes_socket'], False)

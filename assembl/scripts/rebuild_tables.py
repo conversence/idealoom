@@ -291,7 +291,7 @@ if __name__ == '__main__':
     parser.add_argument("--reset_extract_discussion", action="store_true", default=False,
                         help="Special case: rebuild a dependent foreign key on extract table")
     args = parser.parse_args()
-    settings = get_appsettings(args.configuration, 'assembl')
+    settings = get_appsettings(args.configuration, 'idealoom')
     set_config(settings)
     logging.config.fileConfig(args.configuration)
     configure_zmq(settings['changes_socket'], False)

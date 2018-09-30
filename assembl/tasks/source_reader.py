@@ -580,7 +580,7 @@ if __name__ == '__main__':
     if len(sys.argv) != 2:
         print("usage: python source_reader.py configuration.ini")
     config_file_name = sys.argv[-1]
-    settings = get_appsettings(config_file_name, 'assembl')
+    settings = get_appsettings(config_file_name, 'idealoom')
     registry = getGlobalSiteManager()
     registry.settings = settings
     set_config(settings)

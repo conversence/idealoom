@@ -45,7 +45,7 @@ def pytest_configure(config):
     signals.listen()
     log.setLevel(config.getoption('logging_level'))
     app_settings_file = config.getoption('test_settings_file')
-    app_settings = get_appsettings(app_settings_file, 'assembl')
+    app_settings = get_appsettings(app_settings_file, 'idealoom')
     set_config(app_settings)
     # Use an unzopish sessionmaker
     configure_engine(app_settings, session_maker=initialize_session_maker(False))

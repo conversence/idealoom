@@ -13,10 +13,10 @@ from ..lib.config import set_config
 def boostrap_configuration(config):
     logging.config.fileConfig(config)
     env = bootstrap(config)
-    settings = get_appsettings(config, 'assembl')
+    settings = get_appsettings(config, 'idealoom')
     set_config(settings)
     configure_zmq(settings['changes_socket'], False)
-    configure_model_watcher(env['registry'], 'assembl')
+    configure_model_watcher(env['registry'], 'idealoom')
     configure_engine(settings, True)
     session = get_session_maker()()
     return session
