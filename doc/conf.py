@@ -65,8 +65,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Assembl'
-copyright = u"2012-2016, Clouds Collective of skills inc., Bluenove Group inc., Imagination For People, Caravan Web Worker Cooperative inc., Technologies Coeus inc., Solutions Conversence inc."
+project = u'Idealoom'
+copyright = u"2012-2018, Clouds Collective of skills inc., Bluenove Group inc., Imagination For People, Caravan Web Worker Cooperative inc., Technologies Coeus inc., Solutions Conversence inc."
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -252,8 +252,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'assembl', u'Assembl Documentation',
-     [u'Imagination For People'], 1)
+    ('index', 'idealoom', u'IdeaLoom Documentation',
+     [u'Conversence'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -266,8 +266,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'Assembl', u'Assembl Documentation',
-   u'Imagination For People', 'Assembl', 'One line description of project.',
+  ('index', 'IdeaLoom', u'IdeaLoom Documentation',
+   u'Imagination For People', 'IdeaLoom', 'One line description of project.',
    'Miscellaneous'),
 ]
 
@@ -287,10 +287,10 @@ texinfo_documents = [
 # -- Options for Epub output ----------------------------------------------
 
 # Bibliographic Dublin Core info.
-epub_title = u'Assembl'
-epub_author = u'Imagination For People'
-epub_publisher = u'Imagination For People'
-epub_copyright = u'2014, Imagination For People'
+epub_title = u'IdeaLoom'
+epub_author = u'Conversence'
+epub_publisher = u'Conversence'
+epub_copyright = u'2018, Conversence'
 
 # The basename for the epub file. It defaults to the project name.
 #epub_basename = u'Assembl'
