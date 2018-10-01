@@ -1,5 +1,5 @@
 IdeaLoom Configuration files
-===========================
+============================
 
 Rationale and history
 ---------------------
@@ -154,7 +154,7 @@ piwik_host:
 \*db_database:\
     The postgres database used
 
-*db_user:
+\*db_user:\
     The postgres user for connection to the database
 
 \*db_password:\
@@ -215,6 +215,8 @@ _wsginame:
 \*sentry_port:\
     The port of the sentry server
 
+package_install:
+    true if installing from wheels
 
 (to be continued)
 

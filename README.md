@@ -20,4 +20,4 @@ IdeaLoom is tested on multiple browsers using [BrowserStack](http://www.browsers
 
 IdeaLoom is developed by [Conversence](http://www.conversence.com) and is based on Assembl by [bluenove](http://assembl.bluenove.com)
 
-Installation is described in [INSTALL](https://github.com/conversence/idealoom/blob/develop/doc/INSTALL.rst)
+Installation is described in [INSTALL](https://idealoom.org/techdocs/INSTALL.html)

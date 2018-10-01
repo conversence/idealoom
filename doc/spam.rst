@@ -7,7 +7,7 @@ In most cases, the mail domain name and the application domain name will be iden
 
 Important: The reverse DNS of the server (both IPv4 and IPv6) must point back to the mail domain name.
 
-See the :ref:`vmm` documentation for further postfix configuration, even if you don't install vmm.
+See the :doc:`vmm` documentation for further postfix configuration, even if you don't install vmm.
 
 DNS records
 -----------
