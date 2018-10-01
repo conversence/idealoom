@@ -61,6 +61,7 @@ pyramid-dogpile-cache==0.0.4
 pyramid-ipython==0.2
 pyramid-jinja2==2.7
 pyramid-mailer==0.15.1
+pyramid-retry==0.5
 pyramid-tm==2.2
 python-json-logger==0.1.9
 python-saml==2.4.2;python_version<"3"

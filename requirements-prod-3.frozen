@@ -131,6 +131,7 @@ pyramid-dogpile-cache==0.0.4
 pyramid-ipython==0.2
 pyramid-jinja2==2.7
 pyramid-mailer==0.15.1
+pyramid-retry==0.5
 pyramid-tm==2.2
 pyramid==1.9.2
 pystemmer==1.3.0
