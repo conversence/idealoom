@@ -11,10 +11,14 @@ redis_socket = 0
 # Change this to the port visible from the outside
 # Typically 80 for prod, 6543 for dev
 # In dev, will often match server:main__port unless proxying
+# UNIQUE_PER_SERVER
 public_port = 6543
 # Other public_port values
 # public_port = 9991
 # public_port = 8080
+
+# UNIQUE_PER_SERVER
+webpack_port = 8080
 
 _requirement_inputs = requirements.in requirements_chrouter.in requirements_dev.in requirements_doc.in requirements_tests.in
 frozen_requirements = requirements-dev-{python_major}.frozen.txt

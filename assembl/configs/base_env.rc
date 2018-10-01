@@ -2,10 +2,10 @@ ini_files = production.ini RANDOM:random.ini.tmpl:saml_random.ini.tmpl RC_DATA
 # The file that will hold the generated random keys.
 random_file = random.ini
 *db_host = localhost
-*db_user = assembl
+*db_user = idealoom_user
 # TODO: If generated remotely, fetch in fabfile
-*db_password = assembl
-*db_database = assembl
+*db_password = idealoom
+*db_database = idealoom
 db_schema = public
 _postgres_db_user = postgres
 _postgres_db_password =
@@ -95,7 +95,7 @@ _wsginame = prod.wsgi
 _ini_file = local.ini
 _projectname = idealoom
 
-# Is assembl installed as a python package in the venv, or as a development package
+# Is idealoom installed as a python package in the venv, or as a development package
 _package_install = false
 
 # Those need to be overridden in the server-specific file
