@@ -25,6 +25,17 @@ def parse_reqs(*req_files):
     return list(requirements)
 
 
+def widget_components():
+    paths = []
+    exclusions = {
+        'browserify', 'jasmine', 'jsdoc', 'karma', 'mocha',
+        'serve', 'src', '.sass-cache'}
+    for (path, directories, filenames) in os.walk('assembl/static/widget'):
+        if not set(path.split('/')).intersection(exclusions):
+            paths.append(path)
+    return [path[8:] + "/*" for path in paths]
+
+
 setup(name='idealoom',
       version='0.1.0',
       description='Collective Intelligence platform',
@@ -65,7 +76,6 @@ setup(name='idealoom',
               'static/js/bower/*/dist/img/*',
               'static/js/bower/*/css/*.css',
               'static/js/bower/*/*.css',
-              # Missing: Widgets
               'view_def/*.json',
               'configs/*.rc',
               'configs/*.ini',
@@ -75,7 +85,9 @@ setup(name='idealoom',
               'templates/*/*.tmpl',
               'nlp/data/*',
               'nlp/data/stopwords/*',
-          ]
+              'semantic/ontology/*.ttl',
+              'semantic/ontology/cache/*.ttl',
+          ] + widget_components()
       },
       zip_safe=False,
       test_suite='assembl',
