@@ -839,6 +839,17 @@ def bootstrap_from_checkout():
     execute(webservers_reload)
 
 
+@task
+def bootstrap_from_wheel():
+    """
+    Creates the virtualenv and install the app from git checkout
+    """
+    execute(app_setup)
+    execute(check_and_create_database_user)
+    execute(set_file_permissions)
+    execute(app_db_install)
+
+
 def clone_repository():
     """
     Clone repository
@@ -865,10 +876,10 @@ def updatemaincode():
         run('git checkout %s' % env.gitbranch)
         run('git pull %s %s' % (env.gitrepo, env.gitbranch))
         run('git submodule update --init')
+        venvcmd('pip install -e ./')
 
 
 def app_setup():
-    venvcmd('pip install -e ./')
     execute(setup_var_directory)
     if not exists(env.ini_file):
         execute(create_local_ini)
@@ -1121,7 +1132,8 @@ def install_single_server():
     execute(install_assembl_server_deps)
     execute(install_redis)
     execute(install_memcached)
-    execute(install_yarn, False)
+    if not env.package_install:
+        execute(install_yarn, False)
 
 
 @task
