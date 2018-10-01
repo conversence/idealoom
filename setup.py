@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import print_function
 import os
 
@@ -40,9 +41,11 @@ setup(name='idealoom',
       version='0.1.0',
       description='Collective Intelligence platform',
       long_description=README + '\n\n' + CHANGES,
+      long_description_content_type="text/markdown",
       classifiers=[
+          "Programming Language :: Python :: 3.5",
+          "Programming Language :: Python :: 3.6",
           "Programming Language :: Python :: 2.7",
-          "Programming Language :: Javascript",
           "Framework :: Pyramid",
           "Topic :: Communications",
           "Topic :: Internet :: WWW/HTTP",
@@ -50,15 +53,19 @@ setup(name='idealoom',
           "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
           "License :: OSI Approved :: GNU Affero General Public License v3",
       ],
-      author='Marc-Antoine Parent and others',
+      author='Marc-Antoine Parent, Benoit Grégoire and others',
       author_email='maparent@conversence.com',
       url='https://idealoom.org/',
+      project_urls={
+          'Source': 'https://github.com/conversence/idealoom/',
+          'Documentation': 'https://idealoom.org/techdocs/',
+          'Gitter': 'https://gitter.im/conversence/idealoom',
+      },
       license='AGPLv3',
       keywords='web wsgi pyramid',
       # find_packages misses alembic somehow.
       packages=find_packages() + [
           'assembl.alembic', 'assembl.alembic.versions'],
-      # scripts=['fabfile.py'],
       package_data={
           'assembl': [
               'locale/*/LC_MESSAGES/*.json',
