@@ -1,18 +1,14 @@
-from builtins import object
-from datetime import datetime
 import logging
 
 from sqlalchemy import (
     Column, ForeignKey, Integer, DateTime, Table,
-    UniqueConstraint, Unicode, String, Boolean,
-    CheckConstraint, event, Index)
+    UniqueConstraint, Unicode, String, Index)
 from sqlalchemy.orm import relationship
 from future.utils import string_types
 import simplejson as json
 from rdflib_jsonld.context import Context
-from pyramid.threadlocal import get_current_registry
 
-from . import DiscussionBoundBase, Base
+from . import DiscussionBoundBase
 from .uriref import URIRefDb
 from .generic import ContentSource
 from ..lib.sqla import get_named_class, get_named_object
@@ -20,7 +16,6 @@ from ..lib.generic_pointer import (
     UniversalTableRefColType, generic_relationship)
 from ..lib.utils import get_global_base_url
 from ..semantic import jsonld_context
-from ..tests.utils import PyramidWebTestRequest
 
 
 log = logging.getLogger(__name__)
