@@ -7,9 +7,11 @@ from abc import abstractmethod
 from collections import defaultdict
 from datetime import datetime, timedelta
 from urllib.parse import urlparse, parse_qs
+from os.path import dirname, join
 import logging
 
 import facebook
+import simplejson as json
 from sqlalchemy import (
     Column,
     ForeignKey,
@@ -49,7 +51,7 @@ DEFAULT_TIMEOUT = 30  # seconds
 DOMAIN = 'facebook.com'
 
 
-facebook_sdk_locales = defaultdict(set)
+facebook_sdk_locales = None
 
 FacebookPostTypes = {
     'photo': 'photo',
@@ -60,24 +62,15 @@ FacebookPostTypes = {
 
 
 def fetch_facebook_sdk_locales():
-    import requests as r
-    from lxml import etree
     global facebook_sdk_locales
-    xml_path = 'https://www.facebook.com/translations/FacebookLocales.xml'
-    req = r.get(xml_path)
-    if not req.ok:
-        return
-    xml = req.content
-    root = etree.fromstring(xml)
-    locales = root.xpath('//representation/text()')
-    for locale in locales:
-        lang, country = locale.split('_')
-        facebook_sdk_locales[lang].add(country)
+    with open(join(dirname(dirname(__file__)),
+                   'nlp', 'data', 'facebook_locales.json')) as f:
+        facebook_sdk_locales = json.load(f)
 
 
 def run_setup():
     from requests.exceptions import ConnectionError
-    if not list(facebook_sdk_locales.keys()):
+    if not facebook_sdk_locales:
         try:
             fetch_facebook_sdk_locales()
         except ConnectionError:
