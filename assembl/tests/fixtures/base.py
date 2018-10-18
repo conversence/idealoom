@@ -98,7 +98,7 @@ def test_app_no_perm(request, base_registry, db_tables):
     """A configured IdeaLoom fixture with no permissions"""
     global_config = {
         '__file__': request.config.getoption('test_settings_file'),
-        'here': get_distribution('assembl').location
+        'here': get_distribution('idealoom').location
     }
     config = dict(get_config())
     config['nosecurity'] = True
