@@ -102,7 +102,7 @@ and then run
 Installing the application
 --------------------------
 
-First, choose a directory for installation (which we will call application root). If you install from source, it may be the same as the git directory. These commands should be run as the ``assembl_user`` if you created one. (You may use ``sudo -u idealoom_user -i`` to do so.)
+First, choose a directory for installation (which we will call application root). If you install from source, it may be the same as the git directory. These commands should be run as the ``idealoom_user`` if you created one. (You may use ``sudo -u idealoom_user -i`` to do so.)
 
 
 Installing from wheel
