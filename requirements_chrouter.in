@@ -3,11 +3,11 @@
 tornado==4.5.3  # rq.filter: <5
 # Those chrouter reqs repeat requirements in requirements.in, keep in sync.
 PyJWT==1.6.4
-pytz==2018.5
+pytz==2018.7
 pyzmq==16.0.4  # rq.filter: <17
 raven==6.9.0
 requests-oauthlib==1.0.0
-requests==2.19.1
+requests==2.21.0
 simplejson==3.16.0
 
 # is this really needed by tornado?
