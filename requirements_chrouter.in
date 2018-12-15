@@ -2,7 +2,7 @@
 -e git+https://github.com/maparent/tornadio2.git@session_id_str#egg=tornadIO2
 tornado==4.5.3  # rq.filter: <5
 # Those chrouter reqs repeat requirements in requirements.in, keep in sync.
-PyJWT==1.6.4
+PyJWT==1.7.1
 pytz==2018.7
 pyzmq==16.0.4  # rq.filter: <17
 raven==6.9.0
