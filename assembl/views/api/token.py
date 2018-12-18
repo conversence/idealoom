@@ -38,7 +38,7 @@ def auth_token(request, extra_headers=None):
         'consumerKey': 'assembl', 'userId': (user_id or Everyone), 'ttl': 86400
     }
     token = encode_token(payload, request.registry.settings['session.secret'])
-    return Response(token, 200, headers, content_type='text/plain', charset="ascii")
+    return Response(token, 200, headers, content_type='application/jwt', charset="ascii")
 
 
 @view_config(route_name='check_password_token', request_method='GET',
