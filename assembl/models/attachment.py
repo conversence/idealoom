@@ -2,8 +2,9 @@
 import enum
 from datetime import datetime
 from mimetypes import guess_all_extensions
-from os import path
 from io import BytesIO
+from tempfile import NamedTemporaryFile
+import os.path
 
 from sqlalchemy import (
     Column,
@@ -22,8 +23,6 @@ from ..lib.sqla_types import CoerceUnicode
 from ..lib.antivirus import get_antivirus
 from ..lib.sqla import DuplicateHandling
 from ..lib.sqla_types import URLString
-from ..lib.hash_fs import get_hashfs
-from ..lib.abc import classproperty
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..semantic.namespaces import DCTERMS
 from . import DiscussionBoundBase, OriginMixin
@@ -174,43 +173,36 @@ class File(Document):
                 onupdate='CASCADE'), primary_key=True)
 
     file_identity = Column(String(64), index=True)
+    file_size = Column(Integer)
     av_checked = Column(Enum(*AntiVirusStatus.__members__.keys(),
                              name="anti_virus_status"),
                         server_default='unchecked')
 
-    @classproperty
-    def hashfs(self):
-        return get_hashfs()
-
-    @classmethod
-    def path_of(cls, id):
-        return cls.hashfs.get(id).abspath
+    @property
+    def attachment_service(self):
+        return self.discussion.attachment_service
 
     @property
     def path(self):
-        return self.path_of(self.file_identity)
+        return self.attachment_service.get_file_path(self.file_identity)
 
     @property
     def handoff_url(self):
-        return '/private_uploads' + self.path[len(self.hashfs.root):]
+        return self.attachment_service.get_file_url(self.file_identity)
 
     @property
-    def size(self):
-        return path.getsize(self.path)
+    def file_stream(self):
+        return self.attachment_service.get_file_stream(self.file_identity)
 
     def add_file_data(self, dataf):
         # dataf may be a file-like object or a file path
-        address = self.hashfs.put(dataf)
-        self.file_identity = address.id
+        self.file_identity = self.attachment_service.put_file(dataf)
+        self.file_size = dataf.tell()
 
     def add_raw_data(self, data):
         dataf = BytesIO(data)
         dataf.seek(0)
         self.add_file_data(dataf)
-
-    @classmethod
-    def delete_file_by_id(cls, id):
-        cls.hashfs.delete(id)
 
     def count_other_files(self):
         return self.db.query(File).filter(
@@ -222,7 +214,7 @@ class File(Document):
         if check_uniqueness:
             count = self.count_other_files()
         if not count:
-            self.delete_file_by_id(self.file_identity)
+            self.attachment_service.delete_file(self.file_identity)
 
     def guess_extension(self):
         extensions = guess_all_extensions(self.mime_type)
@@ -236,9 +228,20 @@ class File(Document):
         # Lock row to avoid multiple antivirus processes
         (status,) = self.db.query(File.av_checked).filter_by(id=self.id).with_for_update().first()
         if status == AntiVirusStatus.failed.unchecked.name:
-            safe = antivirus.check(self.path)
-            status = AntiVirusStatus.passed.name if safe else AntiVirusStatus.failed.name
-            self.av_checked = status
+            path = self.path
+            temp = None
+            try:
+                if not path:
+                    temp = NamedTemporaryFile(delete=False)
+                    for data in self.file_stream:
+                        temp.write(data)
+                    path = temp.name
+                safe = antivirus.check(path)
+                status = AntiVirusStatus.passed.name if safe else AntiVirusStatus.failed.name
+                self.av_checked = status
+            finally:
+                if temp:
+                    os.path.delete(path)
         return status
 
     @property
