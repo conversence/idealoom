@@ -23,6 +23,7 @@ from ..lib.sqla_types import CoerceUnicode
 from ..lib.antivirus import get_antivirus
 from ..lib.sqla import DuplicateHandling
 from ..lib.sqla_types import URLString
+from ..lib.attachment_service import AttachmentService
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..semantic.namespaces import DCTERMS
 from . import DiscussionBoundBase, OriginMixin
@@ -180,7 +181,7 @@ class File(Document):
 
     @property
     def attachment_service(self):
-        return self.discussion.attachment_service
+        return AttachmentService.get_service()
 
     @property
     def path(self):
