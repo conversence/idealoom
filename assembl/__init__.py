@@ -37,6 +37,7 @@ resolver = DottedNameResolver(__package__)
 # Do not import models here, it will break tests.
 def main(global_config, **settings):
     """ Return a Pyramid WSGI application. """
+    settings = dict(global_config, **settings)
     settings['config_uri'] = global_config['__file__']
 
     # here we create the engine and bind it to the (not really a) session
