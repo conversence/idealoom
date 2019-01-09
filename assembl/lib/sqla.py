@@ -16,7 +16,6 @@ import types
 from collections import Iterable, defaultdict
 import atexit
 from abc import abstractmethod
-import logging
 from time import sleep
 from random import random
 from threading import Thread
@@ -42,6 +41,7 @@ from sqlalchemy.util import classproperty
 from sqlalchemy.orm.session import object_session, Session
 from sqlalchemy.engine import strategies
 from sqla_rdfbridge.mapping import PatternIriClass
+from sqlalchemy.engine.url import URL
 from zope.sqlalchemy import ZopeTransactionExtension
 from zope.sqlalchemy.datamanager import mark_changed as z_mark_changed
 from pyramid.httpexceptions import HTTPUnauthorized, HTTPBadRequest
@@ -50,15 +50,18 @@ from .parsedatetime import parse_datetime
 from ..view_def import get_view_def
 from .zmqlib import get_pub_socket, send_changes
 from ..semantic.namespaces import QUADNAMES
+from .config import CascadingSettings
 from ..auth import (
     Everyone, Authenticated, CrudPermissions, MAYBE, P_READ, R_OWNER,
     P_SYSADMIN, P_READ_IDEA)
 from .decl_enums import EnumSymbol, DeclEnumType
 from .utils import get_global_base_url
 from ..lib.config import get_config
+from . import logging
+from .read_write_session import ReadWriteSession
 
 atexit_engines = []
-log = logging.getLogger(__name__)
+log = logging.getLogger()
 
 
 class CrudOperation(Enum):
@@ -122,8 +125,8 @@ _using_virtuoso = None
 def using_virtuoso():
     global _using_virtuoso
     if _using_virtuoso is None:
-        _using_virtuoso = get_config(
-            )["sqlalchemy.url"].startswith('virtuoso:')
+        _using_virtuoso = str(get_config(
+            )["sqlalchemy.url"]).startswith('virtuoso:')
     return _using_virtuoso
 
 
@@ -2354,6 +2357,7 @@ class TimestampedMixin(object):
 def make_session_maker(zope_tr=True, autoflush=True):
     return scoped_session(sessionmaker(
         autoflush=autoflush,
+        class_=ReadWriteSession,
         extension=ZopeTransactionExtension() if zope_tr else None))
 
 
@@ -2492,33 +2496,41 @@ event.listen(BaseOps, 'after_update', orm_update_listener, propagate=True)
 event.listen(BaseOps, 'after_delete', orm_delete_listener, propagate=True)
 
 
-def aws_connection_url(settings):
-    rds_iam_role = settings.get('rds_iam_role', None)
-    if not rds_iam_role:
+def connection_url(settings, prefix='db_'):
+    db_host = settings.get(prefix + 'host', None)
+    db_user = settings.get(prefix + 'user', None)
+    db_database = settings.get(prefix + 'database', None)
+    rds_iam_role = settings.get(prefix + 'iam_role', None)
+    if not (db_host or db_user or db_database or rds_iam_role):
         return None
-    import boto3
-    from sqlalchemy.engine.url import URL
-    region = settings.get("aws_region", 'eu-west-1')
-    sts = boto3.client('sts', region)
-    role = sts.assume_role(RoleArn=rds_iam_role, RoleSessionName='assembl')
-    credentials = role['Credentials']
-    db_user = settings.get('db_user')
-    db_host = settings.get('db_host')
-    db_database = settings.get('db_database')
-    rds = boto3.client(
-        'rds', region, aws_access_key_id=credentials['AccessKeyId'],
-        aws_secret_access_key=credentials['SecretAccessKey'],
-        aws_session_token=credentials['SessionToken'])
-    password = rds.generate_db_auth_token(
-        DBHostname=db_host,
-        Port=5432,
-        DBUsername=db_user,
-        Region=region)
-    certificate = settings.get('rds_certificate', None)
-    if certificate:
-        query = {'sslmode': 'verify-full', 'sslrootcert': certificate}
+    # fallback to base prefix
+    db_host = db_host or settings.get('db_host')
+    db_user = db_user or settings.get('db_user')
+    db_database = db_database or settings.get('db_database')
+    rds_iam_role = rds_iam_role or settings.get('db_iam_role')
+    if rds_iam_role:
+        import boto3
+        region = settings.get("aws_region", 'eu-west-1')
+        sts = boto3.client('sts', region)
+        role = sts.assume_role(RoleArn=rds_iam_role, RoleSessionName='assembl')
+        credentials = role['Credentials']
+        rds = boto3.client(
+            'rds', region, aws_access_key_id=credentials['AccessKeyId'],
+            aws_secret_access_key=credentials['SecretAccessKey'],
+            aws_session_token=credentials['SessionToken'])
+        password = rds.generate_db_auth_token(
+            DBHostname=db_host,
+            Port=5432,
+            DBUsername=db_user,
+            Region=region)
+        certificate = settings.get('rds_certificate', None)
+        if certificate:
+            query = {'sslmode': 'verify-full', 'sslrootcert': certificate}
+        else:
+            query = {'sslmode': 'require'}
     else:
-        query = {'sslmode': 'require'}
+        query = {'sslmode': 'disable' if db_host == 'localhost' else 'require'}
+        password = settings.get(prefix + 'password', None) or settings.get('db_password')
     return URL(
         'postgresql+psycopg2', db_user, password, db_host, 5432, db_database, query)
 
@@ -2535,13 +2547,17 @@ def configure_engine(settings, zope_tr=True, autoflush=True, session_maker=None,
     engine = session_maker.session_factory.kw['bind']
     if engine:
         return engine
-    url = aws_connection_url(settings)
-    if url:
-        settings = dict(settings)
-        settings['sqlalchemy.url'] = url
-
+    url = connection_url(CascadingSettings(settings))
+    settings['sqlalchemy.url'] = url
     engine = engine_from_config(settings, 'sqlalchemy.', **engine_kwargs)
-    session_maker.configure(bind=engine)
+    read_url = connection_url(settings, "dbro_")
+    if read_url:
+        settings = dict(settings)
+        settings['sqlalchemy.url'] = read_url
+        read_engine = engine_from_config(settings, 'sqlalchemy.', **engine_kwargs)
+    else:
+        read_engine = None
+    session_maker.configure(bind=engine, read_bind=read_engine)
     global db_schema, _metadata, Base, class_registry
     if str(settings['sqlalchemy.url']).startswith('virtuoso:'):
         db_schema = '.'.join((settings['db_schema'], settings['db_user']))
