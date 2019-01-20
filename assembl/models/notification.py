@@ -7,7 +7,6 @@ from builtins import object
 from datetime import datetime
 from collections import defaultdict
 from abc import abstractmethod
-import transaction
 import os
 from os.path import join, dirname
 import email
@@ -50,7 +49,7 @@ from .auth import (
 from .permissions import UserTemplate
 from .discussion import Discussion
 from .generic import Content
-from .post import Post, SynthesisPost
+from .post import Post, SynthesisPost, PublicationStates
 from assembl.semantic.virtuoso_mapping import QuadMapPatternS
 from assembl.semantic.namespaces import ASSEMBL
 
@@ -619,7 +618,12 @@ class NotificationSubscriptionFollowSyntheses(NotificationSubscriptionGlobal):
 
     def wouldCreateNotification(self, discussion_id, verb, object):
         parentWouldCreate = super(NotificationSubscriptionFollowSyntheses, self).wouldCreateNotification(discussion_id, verb, object)
-        return parentWouldCreate and (verb == CrudVerbs.CREATE) and isinstance(object, SynthesisPost) and discussion_id == object.get_discussion_id()
+        return (
+            parentWouldCreate and
+            (verb in (CrudVerbs.CREATE, CrudVerbs.UPDATE)) and
+            isinstance(object, SynthesisPost) and
+            object.publication_state == PublicationStates.PUBLISHED and
+            discussion_id == object.get_discussion_id())
 
     def process(self, discussion_id, verb, objectInstance, otherApplicableSubscriptions):
         from ..tasks.notify import notify
@@ -647,7 +651,12 @@ class NotificationSubscriptionFollowAllMessages(NotificationSubscriptionGlobal):
     
     def wouldCreateNotification(self, discussion_id, verb, object):
         parentWouldCreate = super(NotificationSubscriptionFollowAllMessages, self).wouldCreateNotification(discussion_id, verb, object)
-        return parentWouldCreate and (verb == CrudVerbs.CREATE) and isinstance(object, Post) and discussion_id == object.get_discussion_id()
+        return (
+            parentWouldCreate and
+            (verb in (CrudVerbs.CREATE, CrudVerbs.UPDATE)) and
+            isinstance(object, Post) and
+            object.publication_state == PublicationStates.PUBLISHED and
+            discussion_id == object.get_discussion_id())
 
     def process(self, discussion_id, verb, objectInstance, otherApplicableSubscriptions):
         assert self.wouldCreateNotification(discussion_id, verb, objectInstance)
@@ -675,13 +684,15 @@ class NotificationSubscriptionFollowOwnMessageDirectReplies(NotificationSubscrip
     
     def wouldCreateNotification(self, discussion_id, verb, object):
         parentWouldCreate = super(NotificationSubscriptionFollowOwnMessageDirectReplies, self).wouldCreateNotification(discussion_id, verb, object)
-        return ( parentWouldCreate
-                 and (verb == CrudVerbs.CREATE)
-                 and isinstance(object, Post)
-                 and discussion_id == object.get_discussion_id()
-                 and object.parent is not None
-                 and object.parent.creator == self.user
-                 )
+        return (
+            parentWouldCreate and
+            (verb in (CrudVerbs.CREATE, CrudVerbs.UPDATE)) and
+            isinstance(object, Post) and
+            discussion_id == object.get_discussion_id() and
+            object.publication_state == PublicationStates.PUBLISHED and
+            object.parent is not None and
+            object.parent.creator == self.user
+        )
 
     def process(self, discussion_id, verb, objectInstance, otherApplicableSubscriptions):
         assert self.wouldCreateNotification(discussion_id, verb, objectInstance)
@@ -708,12 +719,14 @@ class ModelEventWatcherNotificationSubscriptionDispatcher(BaseModelEventWatcher)
     protocol"""
 
     def processPostCreated(self, objectId):
-        self.createNotifications(objectId)
+        self.createNotifications(objectId, CrudVerbs.CREATE)
 
-    @classmethod
-    def createNotifications(cls, objectId):
+    def processPostModified(self, objectId, state_changed):
+        if state_changed:
+            self.createNotifications(objectId, CrudVerbs.UPDATE)
+
+    def createNotifications(self, objectId, verb):
         from ..lib.utils import get_concrete_subclasses_recursive
-        verb = CrudVerbs.CREATE
         objectClass = Content
         assert objectId
         objectInstance = waiting_get(objectClass, objectId)
@@ -730,11 +743,10 @@ class ModelEventWatcherNotificationSubscriptionDispatcher(BaseModelEventWatcher)
         num_instances = len([v for v in applicableInstancesByUser.values() if v])
         print("processEvent: %d notifications created for %s %s %d" % (
             num_instances, verb, objectClass.__name__, objectId))
-        with transaction.manager:
-            for userId, applicableInstances in applicableInstancesByUser.items():
-                if(len(applicableInstances) > 0):
-                    applicableInstances.sort(key=lambda n: n.priority)
-                    applicableInstances[0].process(objectInstance.get_discussion_id(), verb, objectInstance, applicableInstances[1:])
+        for userId, applicableInstances in applicableInstancesByUser.items():
+            if(len(applicableInstances) > 0):
+                applicableInstances.sort(key=lambda n: n.priority)
+                applicableInstances[0].process(objectInstance.get_discussion_id(), verb, objectInstance, applicableInstances[1:])
 
 
 class NotificationPushMethodType(DeclEnum):

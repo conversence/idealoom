@@ -39,10 +39,12 @@ resolver = DottedNameResolver(__package__)
 
 def configure(registry, task_name):
     global _settings, celery
+    from .threaded_model_watcher import configure_threaded_watcher
     settings = registry.settings
     if _settings is None:
         _settings = settings
     # temporary solution
+    configure_threaded_watcher(settings)
     configure_model_watcher(registry, task_name)
     region = get('aws_region', 'us-east-1')
     config = {

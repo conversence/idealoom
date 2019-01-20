@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
 
-from assembl.models.notification import (
-    ModelEventWatcherNotificationSubscriptionDispatcher)
-
 
 def test_subscribe_to_discussion(
         test_session, discussion, participant2_user):
