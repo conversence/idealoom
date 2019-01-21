@@ -31,11 +31,6 @@ def main():
     engine = configure_engine(settings, True)
     if args.command == "bootstrap":
         db = bootstrap_db(args.configuration)
-        mark_changed()
-        transaction.commit()
-        bootstrap_db_data(db)
-        mark_changed()
-        transaction.commit()
 
     elif args.command == "backup":
         projectpath = dirname(dirname(dirname(__file__)))

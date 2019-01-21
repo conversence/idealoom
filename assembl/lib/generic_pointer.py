@@ -47,9 +47,9 @@ def init_datatype(base_class):
     type.reset_enum()
 
 
-def init_dbtype(db):
+def init_dbtype(session):
     from ..models.import_records import ImportRecord
-    bind = db.session_factory.kw['bind']
+    bind = session.bind
     type = ImportRecord.__mapper__.columns['target_table'].type
     type.update_type(bind)
 

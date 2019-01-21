@@ -14,7 +14,6 @@ This is the startup module, which sets up the various components:
 """
 from __future__ import absolute_import
 
-import transaction
 from pyramid.config import Configurator
 from pyramid.authentication import SessionAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
@@ -87,12 +86,10 @@ def main(global_config, **settings):
         config.set_authentication_policy(auth_policy)
         config.set_authorization_policy(ACLAuthorizationPolicy())
     # ensure default roles and permissions at startup
-    from .models import get_session_maker
-    if not settings.get('in_alembic', False):
-        with transaction.manager:
-            session = get_session_maker()
-            from .lib.migration import bootstrap_db_data
-            bootstrap_db_data(session, settings['config_uri'] != "testing.ini")
+    if not settings.get('in_migration', False):
+        from .lib.migration import bootstrap_db, bootstrap_db_data
+        db = bootstrap_db(settings['config_uri'])
+        bootstrap_db_data(db, settings['config_uri'] != "testing.ini")
 
     config.add_static_view('static', 'static', cache_max_age=3600)
     config.add_static_view('widget', 'widget', cache_max_age=3600)

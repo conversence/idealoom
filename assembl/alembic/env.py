@@ -23,7 +23,7 @@ fileConfig(config.config_file_name)
 
 _settings = config.get_section('app:idealoom')
 # Add a marker that we're in alembic, some things need not happen
-_settings['in_alembic'] = True
+_settings['in_migration'] = True
 set_config(_settings)
 pyramid_env = bootstrap(config.config_file_name)
 configure_zmq(pyramid_env['registry'].settings['changes_socket'], False)
