@@ -177,6 +177,7 @@ s3transfer==0.3.3         # via boto3
 scikit-learn==0.22.1      # via -r requirements.in
 scipy==1.4.1              # via gensim, scikit-learn
 selenium==3.141.0         # via pytest-splinter, splinter
+semantic-version==2.8.4   # via -r requirements.in
 sentry-sdk==0.14.3        # via -r requirements.in
 simpleeval==0.9.10        # via rotate-backups
 simplejson==3.17.0        # via -r requirements.in, cornice, tornadio2

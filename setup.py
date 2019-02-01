@@ -1,11 +1,17 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 import os
+from subprocess import check_output
 
 from setuptools import setup, find_packages
 from pip._internal.network.session import PipSession
 from pip._internal.req import parse_requirements
 
+try:
+    from semantic_version import Version
+except ImportError as e:
+    print("Please, first 'pip install semantic-version'")
+    raise e
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(HERE, 'README.md')).read()
@@ -26,6 +32,17 @@ def parse_reqs(*req_files):
     return list(requirements)
 
 
+def compose_version():
+    tag = check_output('git describe --tags', shell=True).decode('ascii')
+    tag = tag.strip().lstrip('v')
+    parts = tag.rsplit('-', 2)
+    if len(parts) == 1:
+        # We're on the tag
+        return tag
+    else:
+        return str(Version(parts[0]).next_patch())
+
+
 def widget_components():
     paths = []
     exclusions = {
@@ -38,7 +55,7 @@ def widget_components():
 
 
 setup(name='idealoom',
-      version='0.1.0',
+      version=compose_version(),
       description='Collective Intelligence platform',
       long_description=README + '\n\n' + CHANGES,
       long_description_content_type="text/markdown",
