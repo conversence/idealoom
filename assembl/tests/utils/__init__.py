@@ -4,20 +4,16 @@ All utility methods, classes and functions needed for testing applications
 
 from builtins import str
 from builtins import object
-import logging
-import sys
 from itertools import chain
 
-import transaction
-from sqlalchemy.sql.functions import count
 from webtest import TestRequest
 from webob.request import environ_from_url
 from pyramid.request import apply_request_extensions
 from pyramid.threadlocal import manager
 
 from assembl.lib.sqla import (
-    configure_engine, get_session_maker,
-    get_metadata, is_zopish, mark_changed)
+    get_session_maker, get_metadata, mark_changed)
+from assembl.lib import logging
 
 
 log = logging.getLogger('pytest.assembl')

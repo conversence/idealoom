@@ -10,7 +10,7 @@ from alembic.environment import EnvironmentContext
 from alembic.script import ScriptDirectory
 
 from ..lib.sqla import (
-    get_metadata, get_session_maker, mark_changed)
+    get_metadata, get_session_maker, mark_changed, is_zopish)
 from ..lib.text_search import update_indices
 
 
@@ -30,7 +30,7 @@ def locked_transaction(db, num):
     cnx.execute("select pg_advisory_lock(%d)" % num).first()
     try:
         session = db()
-        if db.session_factory.kw.get('extension'):
+        if is_zopish():
             import transaction
             with transaction.manager:
                 session = db()

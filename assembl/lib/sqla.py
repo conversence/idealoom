@@ -158,11 +158,14 @@ class TableLockCreationThread(Thread):
         try:
             for num in range(self.num_attempts):
                 db = session_maker()
-                # Get the ThreadTransactionManager in a still quite horrible way.
-                tm = getattr(session_maker.session_factory.kw['extension'], 'transaction_manager', None)
-                if tm is None:
-                    # testing
-                    from contextlib import contextmanager
+                # Get the ThreadTransactionManager in a quite horrible way.
+                if is_zopish():
+                    tm = getattr(session_maker.session_factory.kw[
+                        'extension'], 'transaction_manager', None)
+                else:
+                    # Ad hoc transaction manager. TODO: Use existing machinery.
+                    # This is only used in testing, though.
+
                     @contextmanager
                     def CommittingTm(db):
                         try:
