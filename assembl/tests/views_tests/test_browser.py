@@ -3,7 +3,7 @@ from time import sleep
 from flaky import flaky
 
 
-def test_front_page(browser, test_server, db_default_data):
+def test_front_page(browser, test_server):
     """Test using real browser."""
     browser.visit(test_server.url)
     assert browser.title == 'IdeaLoom'

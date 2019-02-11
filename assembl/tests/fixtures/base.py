@@ -105,6 +105,14 @@ def test_app_no_perm(request, base_registry, db_tables):
     app.PyramidWebTestRequest = PyramidWebTestRequest
     PyramidWebTestRequest._pyramid_app = app.app
     PyramidWebTestRequest.registry = base_registry
+
+    def fin():
+        print("finalizer test_app_no_perm")
+        session = db_tables()
+        with transaction.manager:
+            clear_rows(get_config(), session)
+    request.addfinalizer(fin)
+
     return app
 
 
@@ -121,31 +129,12 @@ def test_webrequest(request, test_app_no_perm, base_registry):
     return req
 
 
-@pytest.fixture(scope="module")
-def db_default_data(
-        request, db_tables, base_registry):
-    """An SQLAlchemy Session Maker fixture that is preloaded
-    with all platform tables, constraints, relationships, etc."""
-    bootstrap_db_data(db_tables)
-
-    def fin():
-        print("finalizer db_default_data")
-        session = db_tables()
-        clear_rows(get_config(), session)
-        session.commit()
-        from assembl.models import Locale, LangString
-        Locale.reset_cache()
-        LangString.reset_cache()
-    request.addfinalizer(fin)
-    return db_tables  # session_factory
-
-
 @pytest.fixture(scope="function")
-def test_session(request, db_default_data):
+def test_session(request, test_app_no_perm, db_tables):
     """An SQLAlchemy Session Maker fixture (A DB connection session)-
     Use this session fixture for all fixture purposes"""
 
-    session = db_default_data()
+    session = db_tables()
 
     def fin():
         print("finalizer test_session")
@@ -161,7 +150,7 @@ def test_session(request, db_default_data):
 
 
 @pytest.fixture(scope="function")
-def admin_user(request, test_session, db_default_data):
+def admin_user(request, test_session):
     """A User fixture with R_SYSADMIN role"""
 
     from assembl.models import User, UserRole, Role
