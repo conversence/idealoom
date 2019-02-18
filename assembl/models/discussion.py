@@ -510,7 +510,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
         # Make most subscriptions inactive (simpler than deciding which ones should be)
         default_ns = self.db.query(notif_cls.id
             ).join(User, notif_cls.user_id == User.id
-            ).join(LocalUserRole, LocalUserRole.user_id == User.id
+            ).join(LocalUserRole, LocalUserRole.profile_id == User.id
             ).join(AgentStatusInDiscussion,
                    AgentStatusInDiscussion.profile_id == User.id
             ).filter(
@@ -534,7 +534,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
                     synchronize_session=False)
             # Materialize missing subscriptions
             missing_subscriptions_query = self.db.query(User.id
-                ).join(LocalUserRole, LocalUserRole.user_id == User.id
+                ).join(LocalUserRole, LocalUserRole.profile_id == User.id
                 ).join(AgentStatusInDiscussion,
                        AgentStatusInDiscussion.profile_id == User.id
                 ).outerjoin(notif_cls, (notif_cls.user_id == User.id) & (
@@ -695,7 +695,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
     all_participants = relationship(
         User, viewonly=True, secondary=LocalUserRole.__table__,
         primaryjoin="LocalUserRole.discussion_id == Discussion.id",
-        secondaryjoin=((LocalUserRole.user_id == User.id)
+        secondaryjoin=((LocalUserRole.profile_id == User.id)
             & (LocalUserRole.requested == False)),
         backref="involved_in_discussion")
 
@@ -705,7 +705,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
         secondary=join(LocalUserRole, Role,
             ((LocalUserRole.role_id == Role.id) & (Role.name == R_PARTICIPANT))),
         primaryjoin="LocalUserRole.discussion_id == Discussion.id",
-        secondaryjoin=((LocalUserRole.user_id == User.id)
+        secondaryjoin=((LocalUserRole.profile_id == User.id)
             & (LocalUserRole.requested == False)),
         backref="participant_in_discussion")
 
@@ -722,7 +722,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
         extract = with_polymorphic(Extract, [Extract])
         db = self.db
         queries = [
-            db.query(LocalUserRole.user_id.label('user_id')).filter(
+            db.query(LocalUserRole.profile_id.label('user_id')).filter(
                 LocalUserRole.discussion_id == self.id),
             db.query(post.creator_id.label('user_id')).filter(
                 post.discussion_id == self.id),
@@ -736,7 +736,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
                 Announcement.discussion_id == self.id),
             db.query(attachment.creator_id.label('user_id')).filter(
                 attachment.discussion_id == self.id),
-            db.query(UserRole.user_id.label('user_id')),
+            db.query(UserRole.profile_id.label('user_id')),
         ]
         if self.creator_id is not None:
             queries.append(db.query(literal(self.creator_id).label('user_id')))

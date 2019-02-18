@@ -43,7 +43,7 @@ def upgrade(pyramid_env):
     now = datetime.utcnow()
     with transaction.manager:
         for (user_id, discussion_id) in db.query(
-                m.LocalUserRole.user_id, m.LocalUserRole.discussion_id).join(
+                m.LocalUserRole.profile_id, m.LocalUserRole.discussion_id).join(
                 m.Role).filter(m.Role.name == R_PARTICIPANT).distinct().all():
             db.add(m.AgentStatusInDiscussion(
                 profile_id=user_id, discussion_id=discussion_id,

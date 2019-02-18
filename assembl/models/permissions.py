@@ -59,20 +59,20 @@ class UserRole(Base, PrivateObjectMixin):
     rdf_class = SIOC.Role
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(
-        Integer, ForeignKey('user.id', ondelete='CASCADE', onupdate='CASCADE'),
+    profile_id = Column(
+        Integer, ForeignKey('agent_profile.id', ondelete='CASCADE', onupdate='CASCADE'),
         nullable=False, index=True, info={'rdf': QuadMapPatternS(
             None, SIOC.function_of,
             AgentProfile.agent_as_account_iri.apply(None))})
     user = relationship(
-        User, backref=backref("roles", cascade="all, delete-orphan"))
+        AgentProfile, backref=backref("roles", cascade="all, delete-orphan"))
     role_id = Column(
         Integer, ForeignKey('role.id', ondelete='CASCADE', onupdate='CASCADE'),
         nullable=False, index=True)
     role = relationship(Role, lazy="joined")
 
     def get_user_uri(self):
-        return User.uri_generic(self.user_id)
+        return AgentProfile.uri_generic(self.profile_id)
 
     def get_role_name(self):
         return self.role.name
@@ -82,6 +82,14 @@ class UserRole(Base, PrivateObjectMixin):
 
     def container_url(self):
         return "/data/User/%d/roles" % (self.user_id)
+
+    def is_owner(self, user_id):
+        return self.profile_id == user_id
+
+    @classmethod
+    def restrict_to_owners(cls, query, user_id):
+        "filter query according to object owners"
+        return query.filter(cls.profile_id == user_id)
 
     def get_default_parent_context(self, request=None, user_id=None):
         return self.user.get_collection_context(
@@ -123,11 +131,11 @@ class LocalUserRole(DiscussionBoundBase, PrivateObjectMixin):
     rdf_class = SIOC.Role
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('user.id', ondelete='CASCADE', onupdate='CASCADE'),
+    profile_id = Column(Integer, ForeignKey('agent_profile.id', ondelete='CASCADE', onupdate='CASCADE'),
         nullable=False, index=True,
         info={'rdf': QuadMapPatternS(
             None, SIOC.function_of, AgentProfile.agent_as_account_iri.apply(None))})
-    user = relationship(User, backref=backref("local_roles", cascade="all, delete-orphan"))
+    user = relationship(AgentProfile, backref=backref("local_roles", cascade="all, delete-orphan"))
     discussion_id = Column(Integer, ForeignKey(
         'discussion.id', ondelete='CASCADE'), nullable=False, index=True,
         info={'rdf': QuadMapPatternS(None, SIOC.has_scope)})
@@ -146,14 +154,14 @@ class LocalUserRole(DiscussionBoundBase, PrivateObjectMixin):
     # TODO: Bug virtuoso about this,
     # or introduce the schema name in the index name as workaround.
     # __table_args__ = (
-    #     Index('user_discussion_idx', 'user_id', 'discussion_id'),)
+    #     Index('user_discussion_idx', 'profile_id', 'discussion_id'),)
 
     def get_discussion_id(self):
         return self.discussion_id or self.discussion.id
 
     def container_url(self):
         return "/data/Discussion/%d/all_users/%d/local_roles" % (
-            self.discussion_id, self.user_id)
+            self.discussion_id, self.profile_id)
 
     def get_default_parent_context(self, request=None, user_id=None):
         return self.user.get_collection_context('roles', request=request, user_id=user_id)
@@ -170,13 +178,13 @@ class LocalUserRole(DiscussionBoundBase, PrivateObjectMixin):
 
     def unique_query(self):
         query, _ = super(LocalUserRole, self).unique_query()
-        user_id = self.user_id or self.user.id
+        profile_id = self.profile_id or self.user.id
         role_id = self.role_id or self.role.id
         return query.filter_by(
-            user_id=user_id, role_id=role_id), True
+            profile_id=profile_id, role_id=role_id), True
 
     def get_user_uri(self):
-        return User.uri_generic(self.user_id)
+        return AgentProfile.uri_generic(self.profile_id)
 
     def _do_update_from_json(
             self, json, parse_def, ctx,
@@ -186,11 +194,11 @@ class LocalUserRole(DiscussionBoundBase, PrivateObjectMixin):
         if json_user_id is None:
             json_user_id = user_id
         else:
-            json_user_id = User.get_database_id(json_user_id)
+            json_user_id = AgentProfile.get_database_id(json_user_id)
             # Do not allow changing user
-            if self.user_id is not None and json_user_id != self.user_id:
+            if self.profile_id is not None and json_user_id != self.profile_id:
                 raise HTTPBadRequest()
-        self.user_id = json_user_id
+        self.profile_id = json_user_id
         role_name = json.get("role", None)
         if not (role_name or self.role_id):
             role_name = R_PARTICIPANT
@@ -214,12 +222,12 @@ class LocalUserRole(DiscussionBoundBase, PrivateObjectMixin):
         return self
 
     def is_owner(self, user_id):
-        return self.user_id == user_id
+        return self.profile_id == user_id
 
     @classmethod
     def restrict_to_owners(cls, query, user_id):
         "filter query according to object owners"
-        return query.filter(cls.user_id == user_id)
+        return query.filter(cls.profile_id == user_id)
 
     @classmethod
     def base_conditions(cls, alias=None, alias_maker=None):
@@ -230,7 +238,7 @@ class LocalUserRole(DiscussionBoundBase, PrivateObjectMixin):
     def special_quad_patterns(cls, alias_maker, discussion_id):
         role_alias = alias_maker.alias_from_relns(cls.role)
         return [
-            QuadMapPatternS(AgentProfile.agent_as_account_iri.apply(cls.user_id),
+            QuadMapPatternS(AgentProfile.agent_as_account_iri.apply(cls.profile_id),
                 SIOC.has_function, cls.iri_class().apply(cls.id),
                 name=QUADNAMES.class_LocalUserRole_global,
                 conditions=(cls.requested == False,),
@@ -262,7 +270,7 @@ def send_user_to_socket_for_local_user_role(
         mapper, connection, target):
     user = target.user
     if not target.user:
-        user = User.get(target.user_id)
+        user = User.get(target.profile_id)
     user.send_to_changes(connection, CrudOperation.UPDATE, target.discussion_id)
     user.send_to_changes(
         connection, CrudOperation.UPDATE, target.discussion_id, "private")

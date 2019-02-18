@@ -35,12 +35,12 @@ def get_roles(user_id, discussion_id=None):
         return [user_id]
     session = get_session_maker()()
     roles = session.query(Role.name).join(UserRole).filter(
-        UserRole.user_id == user_id)
+        UserRole.profile_id == user_id)
     if discussion_id:
         roles = roles.union(
             session.query(Role.name).join(
                 LocalUserRole).filter(and_(
-                    LocalUserRole.user_id == user_id,
+                    LocalUserRole.profile_id == user_id,
                     LocalUserRole.requested == False,
                     LocalUserRole.discussion_id == discussion_id)))
     return [x[0] for x in roles.distinct()]
@@ -69,18 +69,18 @@ def get_permissions(user_id, discussion_id):
                 & (Role.name.in_((Authenticated, Everyone))))
     else:
         sysadmin = session.query(UserRole).filter_by(
-            user_id=user_id).join(Role).filter_by(name=R_SYSADMIN).first()
+            profile_id=user_id).join(Role).filter_by(name=R_SYSADMIN).first()
         if sysadmin:
             return [x[0] for x in session.query(Permission.name).all()]
         if not discussion_id:
             return []
         permissions = session.query(Permission.name).join(
             DiscussionPermission, Role, UserRole).filter(
-                UserRole.user_id == user_id,
+                UserRole.profile_id == user_id,
                 DiscussionPermission.discussion_id == discussion_id
             ).union(session.query(Permission.name).join(
                 DiscussionPermission, Role, LocalUserRole).filter(and_(
-                    LocalUserRole.user_id == user_id,
+                    LocalUserRole.profile_id == user_id,
                     LocalUserRole.requested == False,
                     LocalUserRole.discussion_id == discussion_id,
                     DiscussionPermission.discussion_id == discussion_id))
@@ -297,7 +297,7 @@ def discussions_with_access(userid, permission=P_READ):
                 Role.name.in_((Authenticated, Everyone))))
     else:
         sysadmin = db.query(UserRole).filter_by(
-            user_id=userid).join(Role).filter_by(name=R_SYSADMIN).first()
+            profile_id=userid).join(Role).filter_by(name=R_SYSADMIN).first()
         if sysadmin:
             return db.query(Discussion).all()
 
@@ -355,13 +355,13 @@ def user_has_permission(discussion_id, user_id, permission):
                         Permission.name == permission).first()
         return permission is not None
     sysadmin = db.query(UserRole).filter_by(
-        user_id=user_id).join(Role).filter_by(name=R_SYSADMIN).first()
+        profile_id=user_id).join(Role).filter_by(name=R_SYSADMIN).first()
     if sysadmin:
         return True
     permission = db.query(DiscussionPermission).join(
         Permission, Role, UserRole).filter(
             DiscussionPermission.discussion_id == discussion_id).filter(
-                UserRole.user_id == user_id).filter(
+                UserRole.profile_id == user_id).filter(
                     Permission.name == permission
                 ).union(
                     db.query(DiscussionPermission
@@ -370,7 +370,7 @@ def user_has_permission(discussion_id, user_id, permission):
                             DiscussionPermission.discussion_id == discussion_id,
                             # So I have to add this one as well.
                             LocalUserRole.discussion_id == discussion_id,
-                            LocalUserRole.user_id == user_id,
+                            LocalUserRole.profile_id == user_id,
                             LocalUserRole.requested == False,
                             Permission.name == permission))
                 ).union(

@@ -949,7 +949,7 @@ class User(NamedClassMixin, OriginMixin, AgentProfile):
     def has_role_in(self, discussion_id, role):
         from .permissions import Role, LocalUserRole
         return self.db.query(LocalUserRole).join(Role).filter(
-            LocalUserRole.user_id == self.id,
+            LocalUserRole.profile_id == self.id,
             Role.name == role,
             LocalUserRole.requested == False,  # noqa: E712
             LocalUserRole.discussion_id == discussion_id).first()

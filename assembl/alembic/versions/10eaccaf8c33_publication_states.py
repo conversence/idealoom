@@ -55,6 +55,22 @@ def upgrade(pyramid_env):
                 "langstring.id", ondelete="SET NULL", onupdate="CASCADE")),
             sa.UniqueConstraint('flow_id', 'label'),
         )
+        op.drop_constraint('local_user_role_user_id_fkey', 'local_user_role')
+        op.alter_column('local_user_role', 'user_id', new_column_name='profile_id')
+        op.create_foreign_key(
+            'local_user_role_profile_id_fkey',
+            'local_user_role', 'agent_profile',
+            ['profile_id'], ['id'],
+            ondelete='CASCADE', onupdate='CASCADE')
+        op.drop_constraint('user_role_user_id_fkey', 'user_role')
+        op.alter_column('user_role', 'user_id', new_column_name='profile_id')
+        op.create_foreign_key(
+            'user_role_profile_id_fkey',
+            'user_role', 'agent_profile',
+            ['profile_id'], ['id'],
+            ondelete='CASCADE', onupdate='CASCADE')
+
+
 
     # Do stuff with the app's models here.
     from assembl import models as m
@@ -68,3 +84,17 @@ def downgrade(pyramid_env):
         op.drop_table("publication_transition")
         op.drop_table("publication_state")
         op.drop_table("publication_flow")
+        op.drop_constraint('local_user_role_profile_id_fkey', 'local_user_role')
+        op.alter_column('local_user_role', 'profile_id', new_column_name='user_id')
+        op.create_foreign_key(
+            'local_user_role_user_id_fkey',
+            'local_user_role', 'user',
+            ['user_id'], ['id'],
+            ondelete='CASCADE', onupdate='CASCADE')
+        op.drop_constraint('user_role_profile_id_fkey', 'user_role')
+        op.alter_column('user_role', 'profile_id', new_column_name='user_id')
+        op.create_foreign_key(
+            'user_role_user_id_fkey',
+            'user_role', 'user',
+            ['user_id'], ['id'],
+            ondelete='CASCADE', onupdate='CASCADE')

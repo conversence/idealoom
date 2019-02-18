@@ -157,4 +157,3 @@ class PublicationTransition(Base):
     def unique_query(self):
         query, _ = super(PublicationTransition, self).unique_query()
         return query.filter_by(label=self.label, flow=self.flow), True
-
