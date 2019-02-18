@@ -22,8 +22,8 @@ from assembl.auth import (
 from assembl.auth.util import (
     add_multiple_users_csv, user_has_permission, get_non_expired_user_id)
 from assembl.models.auth import (
-    create_default_permissions, User, AgentProfile,
-    LanguagePreferenceOrder)
+    User, AgentProfile, LanguagePreferenceOrder)
+from assembl.models.permissions import create_default_permissions
 from assembl.models import Preferences
 from assembl.lib.utils import get_global_base_url
 from assembl.nlp.translation_service import DummyGoogleTranslationService

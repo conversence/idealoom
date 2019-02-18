@@ -58,7 +58,7 @@ from assembl.auth import (
 from assembl.auth.password import verify_data_token, data_token, Validity
 from assembl.auth.util import get_permissions
 from assembl.models import (Discussion, Permission)
-from assembl.models.auth import create_default_permissions
+from assembl.models.permissions import create_default_permissions
 from ..traversal import InstanceContext, ClassContext
 from . import (JSON_HEADER, FORM_HEADER, CreationResponse, instance_view)
 from ..api.discussion import etalab_discussions, API_ETALAB_DISCUSSIONS_PREFIX

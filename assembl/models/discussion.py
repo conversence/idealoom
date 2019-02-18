@@ -44,8 +44,9 @@ from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..auth import (
     P_READ, R_SYSADMIN, P_ADMIN_DISC, R_PARTICIPANT, P_SYSADMIN,
     CrudPermissions, Authenticated, Everyone)
-from .auth import (
-    DiscussionPermission, Role, Permission, User, UserRole, LocalUserRole,
+from .auth import User
+from .permissions import (
+    DiscussionPermission, Role, Permission, UserRole, LocalUserRole,
     UserTemplate)
 from .preferences import Preferences
 from ..semantic.namespaces import (CATALYST, ASSEMBL, DCTERMS)

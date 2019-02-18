@@ -146,18 +146,12 @@ from .auth import (
     AgentProfile,
     AgentStatusInDiscussion,
     AnonymousUser,
-    DiscussionPermission,
     EmailAccount,
     IdentityProvider,
     LanguagePreferenceCollection,
-    LocalUserRole,
     PartnerOrganization,
-    Permission,
-    Role,
     User,
     UserLanguagePreference,
-    UserRole,
-    UserTemplate,
 )
 from .social_auth import (
     Nonce,
@@ -174,6 +168,14 @@ from .publication_states import (
     PublicationFlow,
     PublicationState,
     PublicationTransition,
+)
+from .permissions import (
+    DiscussionPermission,
+    LocalUserRole,
+    Permission,
+    Role,
+    UserRole,
+    UserTemplate,
 )
 from .discussion import Discussion
 from .user_key_values import (

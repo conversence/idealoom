@@ -46,7 +46,8 @@ from ..lib.utils import waiting_get
 from ..lib.sqla import DuplicateHandling
 from ..lib import config
 from .auth import (
-    User, Everyone, P_ADMIN_DISC, CrudPermissions, P_READ, UserTemplate)
+    User, Everyone, P_ADMIN_DISC, CrudPermissions, P_READ)
+from .permissions import UserTemplate
 from .discussion import Discussion
 from .generic import Content
 from .post import Post, SynthesisPost

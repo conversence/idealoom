@@ -16,9 +16,9 @@ from assembl.lib.locale import _
 from ..lib.sqla import get_session_maker
 from . import R_SYSADMIN, P_READ, SYSTEM_ROLES
 from .password import verify_data_token, Validity
-from ..models.auth import (
-    User, Role, UserRole, LocalUserRole, Permission,
-    DiscussionPermission, AgentProfile, EmailAccount)
+from ..models.auth import User, AgentProfile, EmailAccount
+from ..models.permissions import (
+    Role, UserRole, LocalUserRole, Permission, DiscussionPermission)
 
 
 _ = TranslationStringFactory('assembl')

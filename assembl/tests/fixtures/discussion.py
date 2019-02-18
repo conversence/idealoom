@@ -10,7 +10,7 @@ def discussion(request, test_session, default_preferences,
                test_adminuser_webrequest):
     """An empty Discussion fixture with default preferences"""
     from assembl.models import Discussion
-    from assembl.models.auth import create_default_permissions
+    from assembl.models.permissions import create_default_permissions
     d = Discussion(
         topic=u"Jack Layton", slug="jacklayton2",
         subscribe_to_notifications_on_signup=False,
