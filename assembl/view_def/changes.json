@@ -269,12 +269,12 @@
     },
     "UserRole": {
         "@private": "user",
-        "role": "&get_role_name"
+        "role": "role_name"
     },
     "LocalUserRole": {
         "@private": "user",
         "discussion": true,
-        "role": "&get_role_name"
+        "role": "role_name"
     },
     "Widget": {
         "discussion": true,

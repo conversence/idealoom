@@ -170,10 +170,12 @@ class LocalUserRole(DiscussionBoundBase, PrivateObjectMixin):
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):
         return (cls.discussion_id == discussion_id,)
 
-    def get_role_name(self):
+    @property
+    def role_name(self):
         return self.role.name
 
-    def set_role_by_name(self, name):
+    @role_name.setter
+    def role_name(self, name):
         self.role = Role.getRole(name)
 
     def unique_query(self):

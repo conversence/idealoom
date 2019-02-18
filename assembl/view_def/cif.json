@@ -251,13 +251,13 @@
         "@type": "'\"Role\"",
         "in_conversation": false,
         "function_of": "user",
-        "name": "&get_role_name"
+        "name": "role_name"
     },
     "LocalUserRole": {
         "@type": "'\"Role\"",
         "in_conversation": "discussion",
         "function_of": "user",
-        "name": "&get_role_name"
+        "name": "role_name"
     },
     "AbstractVoteSpecification": {},
     "LickertRange": {
