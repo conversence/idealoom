@@ -55,6 +55,38 @@ def upgrade(pyramid_env):
                 "langstring.id", ondelete="SET NULL", onupdate="CASCADE")),
             sa.UniqueConstraint('flow_id', 'label'),
         )
+
+        op.create_table(
+            'state_discussion_permission',
+            sa.Column("id", sa.Integer, primary_key=True),
+            sa.Column("discussion_id", sa.Integer, sa.ForeignKey(
+                'discussion.id', ondelete='CASCADE', onupdate='CASCADE'),
+                nullable=False, index=True),
+            sa.Column("role_id", sa.Integer, sa.ForeignKey(
+                'role.id', ondelete='CASCADE', onupdate='CASCADE'),
+                nullable=False, index=True),
+            sa.Column("permission_id", sa.Integer, sa.ForeignKey(
+                'permission.id', ondelete='CASCADE', onupdate='CASCADE'),
+                nullable=False, index=True),
+            sa.Column("pub_state_id", sa.Integer, sa.ForeignKey(
+                'publication_state.id', ondelete='CASCADE', onupdate='CASCADE'),
+                nullable=False, index=True)
+        )
+
+        op.create_table(
+            'role_allowed_transition',
+            sa.Column("id", sa.Integer, primary_key=True),
+            sa.Column("discussion_id", sa.Integer, sa.ForeignKey(
+                'discussion.id', ondelete='CASCADE', onupdate='CASCADE'),
+                nullable=False, index=True),
+            sa.Column("role_id", sa.Integer, sa.ForeignKey(
+                'role.id', ondelete='CASCADE', onupdate='CASCADE'),
+                nullable=False, index=True),
+            sa.Column("pub_transition_id", sa.Integer, sa.ForeignKey(
+                'publication_transition.id', ondelete='CASCADE', onupdate='CASCADE'),
+                nullable=False, index=True)
+        )
+
         op.drop_constraint('local_user_role_user_id_fkey', 'local_user_role')
         op.alter_column('local_user_role', 'user_id', new_column_name='profile_id')
         op.create_foreign_key(
@@ -81,6 +113,8 @@ def upgrade(pyramid_env):
 
 def downgrade(pyramid_env):
     with context.begin_transaction():
+        op.drop_table("state_discussion_permission")
+        op.drop_table("role_allowed_transition")
         op.drop_table("publication_transition")
         op.drop_table("publication_state")
         op.drop_table("publication_flow")

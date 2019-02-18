@@ -27,6 +27,7 @@ from ..semantic.namespaces import (
 from ..semantic.virtuoso_mapping import (
     QuadMapPatternS, USER_SECTION, AppQuadStorageManager)
 from .auth import User, AgentProfile
+from .publication_states import PublicationState, PublicationTransition
 
 log = logging.getLogger(__name__)
 
@@ -278,6 +279,7 @@ def send_user_to_socket_for_local_user_role(
         connection, CrudOperation.UPDATE, target.discussion_id, "private")
 
 
+
 class Permission(Base):
     """A permission that a user may have"""
     __tablename__ = 'permission'
@@ -325,6 +327,73 @@ class DiscussionPermission(DiscussionBoundBase):
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):
         return (cls.discussion_id == discussion_id, )
+
+
+class StateDiscussionPermission(DiscussionBoundBase):
+    """Which permissions are given to which roles for a given publication state."""
+    __tablename__ = 'state_discussion_permission'
+    id = Column(Integer, primary_key=True)
+    discussion_id = Column(Integer, ForeignKey(
+        'discussion.id', ondelete='CASCADE', onupdate='CASCADE'),
+        nullable=False, index=True)
+    role_id = Column(Integer, ForeignKey(
+        'role.id', ondelete='CASCADE', onupdate='CASCADE'),
+        nullable=False, index=True)
+    permission_id = Column(Integer, ForeignKey(
+        'permission.id', ondelete='CASCADE', onupdate='CASCADE'),
+        nullable=False, index=True)
+    pub_state_id = Column(Integer, ForeignKey(
+        'publication_state.id', ondelete='CASCADE', onupdate='CASCADE'),
+        nullable=False, index=True)
+    discussion = relationship('Discussion')
+    role = relationship(Role, lazy="joined")
+    permission = relationship(Permission, lazy="joined")
+    publication_state = relationship(PublicationState, lazy="joined")
+
+    @property
+    def role_name(self):
+        return self.role.name
+
+    @property
+    def permission_name(self):
+        return self.permission.name
+
+    def get_discussion_id(self):
+        return self.discussion_id or self.discussion.id
+
+    @classmethod
+    def get_discussion_conditions(cls, discussion_id, alias_maker=None):
+        return (cls.discussion_id == discussion_id, )
+
+
+class RoleAllowedTransition(DiscussionBoundBase):
+    """Which roles are allowed to launch a given transition."""
+    __tablename__ = 'role_allowed_transition'
+    id = Column(Integer, primary_key=True)
+    discussion_id = Column(Integer, ForeignKey(
+        'discussion.id', ondelete='CASCADE', onupdate='CASCADE'),
+        nullable=False, index=True)
+    role_id = Column(Integer, ForeignKey(
+        'role.id', ondelete='CASCADE', onupdate='CASCADE'),
+        nullable=False, index=True)
+    pub_transition_id = Column(Integer, ForeignKey(
+        'publication_transition.id', ondelete='CASCADE', onupdate='CASCADE'),
+        nullable=False, index=True)
+    discussion = relationship('Discussion')
+    role = relationship(Role, lazy="joined")
+    publication_transition = relationship(PublicationTransition, lazy="joined", backref="allowed_roles")
+
+    @property
+    def role_name(self):
+        return self.role.name
+
+    def get_discussion_id(self):
+        return self.discussion_id or self.discussion.id
+
+    @classmethod
+    def get_discussion_conditions(cls, discussion_id, alias_maker=None):
+        return (cls.discussion_id == discussion_id, )
+
 
 
 def create_default_permissions(discussion):
