@@ -160,6 +160,22 @@
         "@extends": "IMAPMailbox",
         "post_email_address": true
     },
+    "PublicationFlow": {
+        "label": true,
+        "name": ":extended"
+    },
+    "PublicationState": {
+        "label": true,
+        "name": ":extended",
+        "flow": true
+    },
+    "PublicationTransition": {
+        "label": true,
+        "name": ":extended",
+        "flow": true,
+        "source": true,
+        "target": true
+    },
     "Conversation": {
         "created": "creation_date",
         "slug": true,

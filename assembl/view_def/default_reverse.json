@@ -214,6 +214,24 @@
     "ViewIdea": {
         "@extends": "ActionOnIdea"
     },
+    "PublicationFlow": {
+        "label": true,
+        "name": true
+    },
+    "PublicationState": {
+        "label": true,
+        "name": true,
+        "flow": false
+    },
+    "PublicationTransition": {
+        "label": true,
+        "name": true,
+        "flow": false,
+        "source": true,
+        "target": true,
+        "source_label": true,
+        "target_label": true
+    },
     "Conversation": {
         "permissions": false,
         "widget_collection_url": false,

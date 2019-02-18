@@ -275,6 +275,26 @@
         "full_message": false,
         "in_reply_to": false
     },
+    "PublicationFlow": {
+        "label": true,
+        "name": ":extended",
+        "states": true,
+        "transitions": true
+    },
+    "PublicationState": {
+        "label": true,
+        "name": ":extended",
+        "flow": true
+    },
+    "PublicationTransition": {
+        "label": true,
+        "name": ":extended",
+        "flow": true,
+        "source": true,
+        "target": true,
+        "source_label": true,
+        "target_label": true
+    },
     "Conversation": {
         "created": "creation_date",
         "slug": true,
