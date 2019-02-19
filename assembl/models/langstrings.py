@@ -95,6 +95,11 @@ class LocaleLabel(Base):
         with open(fname, encoding='utf-8') as f:
             names = json.load(f, encoding="utf-8")
         locales = {x[0] for x in names}.union({x[1] for x in names})
+        count_locales = db.query(cls.named_locale.label('loc')).union(db.query(cls.locale_of_label.label('loc'))).distinct().count()
+        count_names = db.query(cls.id).count()
+        if count_names == len(names) and count_locales == len(locales):
+            # shortcut
+            return
         existing = set(db.query(cls.named_locale, cls.locale_of_label).all())
         missing = []
         for (lcode, tcode, name) in names:
