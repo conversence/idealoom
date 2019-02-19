@@ -20,19 +20,18 @@ from rdflib import URIRef
 
 from ..lib import config
 from ..lib.sqla import CrudOperation
-from . import Base, DiscussionBoundBase, PrivateObjectMixin
+from . import Base, DiscussionBoundBase, PrivateObjectMixin, NamedClassMixin
 from ..auth import *
 from ..semantic.namespaces import (
     SIOC, ASSEMBL, QUADNAMES)
 from ..semantic.virtuoso_mapping import (
     QuadMapPatternS, USER_SECTION, AppQuadStorageManager)
 from .auth import User, AgentProfile
-from .publication_states import PublicationState, PublicationTransition
 
 log = logging.getLogger(__name__)
 
 
-class Role(Base):
+class Role(Base, NamedClassMixin):
     """A role that a user may have in a discussion"""
     __tablename__ = 'role'
 
@@ -40,9 +39,8 @@ class Role(Base):
     name = Column(String(20), nullable=False)
 
     @classmethod
-    def get_role(cls, name, session=None):
-        session = session or cls.default_db()
-        return session.query(cls).filter_by(name=name).first()
+    def get_naming_column_name(cls):
+        return "name"
 
     @classmethod
     def populate_db(cls, db=None):
@@ -280,7 +278,7 @@ def send_user_to_socket_for_local_user_role(
 
 
 
-class Permission(Base):
+class Permission(Base, NamedClassMixin):
     """A permission that a user may have"""
     __tablename__ = 'permission'
     id = Column(Integer, primary_key=True)
@@ -293,6 +291,10 @@ class Permission(Base):
         perms = {p[0] for p in db.query(cls.name).all()}
         for perm in ASSEMBL_PERMISSIONS - perms:
             db.add(cls(name=perm))
+
+    @classmethod
+    def get_naming_column_name(cls):
+        return "name"
 
 
 class DiscussionPermission(DiscussionBoundBase):
@@ -307,7 +309,7 @@ class DiscussionPermission(DiscussionBoundBase):
             "acls", cascade="all, delete-orphan"),
         info={'rdf': QuadMapPatternS(None, ASSEMBL.in_conversation)})
     role_id = Column(Integer, ForeignKey(
-        'role.id', ondelete='CASCADE', onupdate='CASCADE'),
+        Role.id, ondelete='CASCADE', onupdate='CASCADE'),
         nullable=False, index=True)
     role = relationship(Role, lazy="joined")
     permission_id = Column(Integer, ForeignKey(
@@ -327,73 +329,6 @@ class DiscussionPermission(DiscussionBoundBase):
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):
         return (cls.discussion_id == discussion_id, )
-
-
-class StateDiscussionPermission(DiscussionBoundBase):
-    """Which permissions are given to which roles for a given publication state."""
-    __tablename__ = 'state_discussion_permission'
-    id = Column(Integer, primary_key=True)
-    discussion_id = Column(Integer, ForeignKey(
-        'discussion.id', ondelete='CASCADE', onupdate='CASCADE'),
-        nullable=False, index=True)
-    role_id = Column(Integer, ForeignKey(
-        'role.id', ondelete='CASCADE', onupdate='CASCADE'),
-        nullable=False, index=True)
-    permission_id = Column(Integer, ForeignKey(
-        'permission.id', ondelete='CASCADE', onupdate='CASCADE'),
-        nullable=False, index=True)
-    pub_state_id = Column(Integer, ForeignKey(
-        'publication_state.id', ondelete='CASCADE', onupdate='CASCADE'),
-        nullable=False, index=True)
-    discussion = relationship('Discussion')
-    role = relationship(Role, lazy="joined")
-    permission = relationship(Permission, lazy="joined")
-    publication_state = relationship(PublicationState, lazy="joined")
-
-    @property
-    def role_name(self):
-        return self.role.name
-
-    @property
-    def permission_name(self):
-        return self.permission.name
-
-    def get_discussion_id(self):
-        return self.discussion_id or self.discussion.id
-
-    @classmethod
-    def get_discussion_conditions(cls, discussion_id, alias_maker=None):
-        return (cls.discussion_id == discussion_id, )
-
-
-class RoleAllowedTransition(DiscussionBoundBase):
-    """Which roles are allowed to launch a given transition."""
-    __tablename__ = 'role_allowed_transition'
-    id = Column(Integer, primary_key=True)
-    discussion_id = Column(Integer, ForeignKey(
-        'discussion.id', ondelete='CASCADE', onupdate='CASCADE'),
-        nullable=False, index=True)
-    role_id = Column(Integer, ForeignKey(
-        'role.id', ondelete='CASCADE', onupdate='CASCADE'),
-        nullable=False, index=True)
-    pub_transition_id = Column(Integer, ForeignKey(
-        'publication_transition.id', ondelete='CASCADE', onupdate='CASCADE'),
-        nullable=False, index=True)
-    discussion = relationship('Discussion')
-    role = relationship(Role, lazy="joined")
-    publication_transition = relationship(PublicationTransition, lazy="joined", backref="allowed_roles")
-
-    @property
-    def role_name(self):
-        return self.role.name
-
-    def get_discussion_id(self):
-        return self.discussion_id or self.discussion.id
-
-    @classmethod
-    def get_discussion_conditions(cls, discussion_id, alias_maker=None):
-        return (cls.discussion_id == discussion_id, )
-
 
 
 def create_default_permissions(discussion):

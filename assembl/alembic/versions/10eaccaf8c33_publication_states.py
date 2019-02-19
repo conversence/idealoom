@@ -23,7 +23,7 @@ def upgrade(pyramid_env):
         op.create_table(
             "publication_flow",
             sa.Column("id", sa.Integer, primary_key=True),
-            sa.Column("label", sa.String(60), nullable=False, unique=True),
+            sa.Column("label", sa.String(), nullable=False, unique=True),
             sa.Column("name_id", sa.Integer(), sa.ForeignKey(
                 "langstring.id", ondelete="SET NULL", onupdate="CASCADE")),
         )
@@ -33,7 +33,7 @@ def upgrade(pyramid_env):
             sa.Column("flow_id", sa.Integer, sa.ForeignKey(
                 "publication_flow.id", ondelete="CASCADE", onupdate="CASCADE"),
                 nullable=False, index=True),
-            sa.Column("label", sa.String(60), nullable=False),
+            sa.Column("label", sa.String(), nullable=False),
             sa.Column("name_id", sa.Integer(), sa.ForeignKey(
                 "langstring.id", ondelete="SET NULL", onupdate="CASCADE")),
             sa.UniqueConstraint('flow_id', 'label'),
@@ -50,7 +50,10 @@ def upgrade(pyramid_env):
             sa.Column("target_id", sa.Integer, sa.ForeignKey(
                 "publication_state.id", ondelete="CASCADE", onupdate="CASCADE"),
                 nullable=False, index=True),
-            sa.Column("label", sa.String(60), nullable=False),
+            sa.Column("requires_permission_id", sa.Integer, sa.ForeignKey(
+                "permission.id", ondelete="CASCADE", onupdate="CASCADE"),
+                nullable=False),
+            sa.Column("label", sa.String(), nullable=False),
             sa.Column("name_id", sa.Integer(), sa.ForeignKey(
                 "langstring.id", ondelete="SET NULL", onupdate="CASCADE")),
             sa.UniqueConstraint('flow_id', 'label'),
@@ -70,20 +73,6 @@ def upgrade(pyramid_env):
                 nullable=False, index=True),
             sa.Column("pub_state_id", sa.Integer, sa.ForeignKey(
                 'publication_state.id', ondelete='CASCADE', onupdate='CASCADE'),
-                nullable=False, index=True)
-        )
-
-        op.create_table(
-            'role_allowed_transition',
-            sa.Column("id", sa.Integer, primary_key=True),
-            sa.Column("discussion_id", sa.Integer, sa.ForeignKey(
-                'discussion.id', ondelete='CASCADE', onupdate='CASCADE'),
-                nullable=False, index=True),
-            sa.Column("role_id", sa.Integer, sa.ForeignKey(
-                'role.id', ondelete='CASCADE', onupdate='CASCADE'),
-                nullable=False, index=True),
-            sa.Column("pub_transition_id", sa.Integer, sa.ForeignKey(
-                'publication_transition.id', ondelete='CASCADE', onupdate='CASCADE'),
                 nullable=False, index=True)
         )
 
@@ -114,7 +103,6 @@ def upgrade(pyramid_env):
 def downgrade(pyramid_env):
     with context.begin_transaction():
         op.drop_table("state_discussion_permission")
-        op.drop_table("role_allowed_transition")
         op.drop_table("publication_transition")
         op.drop_table("publication_state")
         op.drop_table("publication_flow")

@@ -19,7 +19,7 @@ def participant1_user(request, test_session, discussion):
              verified=True, last_idealoom_login=datetime.utcnow())
     email = EmailAccount(email="abloon@gmail.com", profile=u, verified=True)
     test_session.add(u)
-    r = Role.get_role(R_PARTICIPANT, test_session)
+    r = Role.getByName(R_PARTICIPANT, test_session)
     ur = UserRole(user=u, role=r)
     test_session.add(ur)
     u.subscribe(discussion)
@@ -70,7 +70,7 @@ def participant2_user(request, test_session):
     u = User(name=u"James T. Expert", type="user",
              last_idealoom_login=datetime.utcnow())
     test_session.add(u)
-    r = Role.get_role(R_PARTICIPANT, test_session)
+    r = Role.getByName(R_PARTICIPANT, test_session)
     ur = UserRole(user=u, role=r)
     test_session.add(ur)
     test_session.flush()

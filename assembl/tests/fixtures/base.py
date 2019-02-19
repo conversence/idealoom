@@ -171,7 +171,7 @@ def admin_user(request, test_session, db_default_data):
     account = EmailAccount(email="admin@assembl.com", profile=u, verified=True)
 
     test_session.add(u)
-    r = Role.get_role(R_SYSADMIN, test_session)
+    r = Role.getByName(R_SYSADMIN, test_session)
     ur = UserRole(user=u, role=r)
     test_session.add(ur)
     test_session.flush()

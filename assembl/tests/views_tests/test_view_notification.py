@@ -21,11 +21,11 @@ def test_default_notifications(
         test_app, test_session, discussion, testing_configurator,
         admin_auth_policy, participant_auth_policy, participant1_user):
     from assembl.auth import R_PARTICIPANT
-    from assembl.models.permission import Role, LocalUserRole
+    from assembl.models.permissions import Role, LocalUserRole
     # Set conditions for user to be subscribable
     asid = participant1_user.create_agent_status_in_discussion(discussion)
     asid.last_visit = datetime.utcnow()
-    role = Role.get_role(R_PARTICIPANT, test_session)
+    role = Role.getByName(R_PARTICIPANT, test_session)
     test_session.add(
         LocalUserRole(user=participant1_user, discussion=discussion, role=role))
     test_session.flush()

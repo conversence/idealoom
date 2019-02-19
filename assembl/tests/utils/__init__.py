@@ -78,6 +78,7 @@ class PyramidWebTestRequest(TestRequest):
 
     # TODO: Find a way to change user here
     authenticated_userid = None
+    unauthenticated_userid = None
 
     # How come this is missing in TestRequest?
     # TODO: Use the negotiator

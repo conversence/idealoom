@@ -20,14 +20,16 @@ from sqlalchemy import (
 )
 
 from ..lib.sqla import CrudOperation, Base, DuplicateHandling
+from . import DiscussionBoundBase, NamedClassMixin
 from .langstrings import LangString
+from .permissions import Permission, Role
 
 
-class PublicationFlow(Base):
+class PublicationFlow(Base, NamedClassMixin):
     """A state automaton for publication states and transitions"""
     __tablename__ = "publication_flow"
     id = Column(Integer, primary_key=True)
-    label = Column(String(60), nullable=False, unique=True)
+    label = Column(String(), nullable=False, unique=True)
     name_id = Column(
         Integer(), ForeignKey(LangString.id, ondelete="SET NULL", onupdate="CASCADE"))
     name = relationship(
@@ -37,6 +39,10 @@ class PublicationFlow(Base):
         backref=backref("pub_flow_from_name", lazy="dynamic"),
         cascade="all")
     default_duplicate_handling = DuplicateHandling.USE_ORIGINAL
+
+    @classmethod
+    def get_naming_column_name(cls):
+        return "label"
 
     def state_by_label(self, label):
         for state in self.states:
@@ -72,7 +78,7 @@ class PublicationFlow(Base):
         return target
 
 
-class PublicationState(Base):
+class PublicationState(Base, NamedClassMixin):
     """A publication state"""
     __tablename__ = "publication_state"
     __table_args__ = (
@@ -83,7 +89,7 @@ class PublicationState(Base):
     flow_id = Column(Integer, ForeignKey(
             PublicationFlow.id, ondelete="CASCADE", onupdate="CASCADE"),
         nullable=False, index=True)
-    label = Column(String(60), nullable=False)
+    label = Column(String(), nullable=False)
     name_id = Column(
         Integer(), ForeignKey(
             LangString.id, ondelete="SET NULL", onupdate="CASCADE"))
@@ -96,12 +102,16 @@ class PublicationState(Base):
         cascade="all")
     default_duplicate_handling = DuplicateHandling.USE_ORIGINAL
 
+    @classmethod
+    def get_naming_column_name(cls):
+        return "label"
+
     def unique_query(self):
         query, _ = super(PublicationState, self).unique_query()
         return query.filter_by(label=self.label, flow=self.flow), True
 
 
-class PublicationTransition(Base):
+class PublicationTransition(Base, NamedClassMixin):
     """A publication transition"""
     __tablename__ = "publication_transition"
     __table_args__ = (
@@ -118,7 +128,10 @@ class PublicationTransition(Base):
     target_id = Column(Integer, ForeignKey(
             PublicationState.id, ondelete="CASCADE", onupdate="CASCADE"),
         nullable=False, index=True)
-    label = Column(String(60), nullable=False)
+    label = Column(String(), nullable=False)
+    requires_permission_id = Column(Integer, ForeignKey(
+            Permission.id, ondelete="CASCADE", onupdate="CASCADE"),
+        nullable=False)
     name_id = Column(
         Integer(), ForeignKey(LangString.id))
     flow = relationship(PublicationFlow, backref="transitions")
@@ -130,6 +143,9 @@ class PublicationTransition(Base):
         PublicationState,
         primaryjoin=target_id==PublicationState.id,
         backref="transitions_from")
+    requires_permission = relationship(
+        Permission,
+        primaryjoin=requires_permission_id==Permission.id)
     name = relationship(
         LangString,
         lazy="joined",
@@ -137,6 +153,10 @@ class PublicationTransition(Base):
         backref=backref("pub_transition_from_name", lazy="dynamic"),
         cascade="all")
     default_duplicate_handling = DuplicateHandling.USE_ORIGINAL
+
+    @classmethod
+    def get_naming_column_name(cls):
+        return "label"
 
     @property
     def source_label(self):
@@ -157,3 +177,48 @@ class PublicationTransition(Base):
     def unique_query(self):
         query, _ = super(PublicationTransition, self).unique_query()
         return query.filter_by(label=self.label, flow=self.flow), True
+
+
+class StateDiscussionPermission(DiscussionBoundBase):
+    """Which permissions are given to which roles for a given publication state."""
+    __tablename__ = 'state_discussion_permission'
+    id = Column(Integer, primary_key=True)
+    discussion_id = Column(Integer, ForeignKey(
+        'discussion.id', ondelete='CASCADE', onupdate='CASCADE'),
+        nullable=False, index=True)
+    role_id = Column(Integer, ForeignKey(
+        Role.id, ondelete='CASCADE', onupdate='CASCADE'),
+        nullable=False, index=True)
+    permission_id = Column(Integer, ForeignKey(
+        Permission.id, ondelete='CASCADE', onupdate='CASCADE'),
+        nullable=False, index=True)
+    pub_state_id = Column(Integer, ForeignKey(
+        PublicationState.id, ondelete='CASCADE', onupdate='CASCADE'),
+        nullable=False, index=True)
+    discussion = relationship('Discussion')
+    role = relationship(Role, lazy="joined")
+    permission = relationship(Permission, lazy="joined")
+    publication_state = relationship(PublicationState, lazy="joined")
+
+    @property
+    def role_name(self):
+        return self.role.name
+
+    @role_name.setter
+    def role_name(self, label):
+        self.role = Role.getByName(label)
+
+    @property
+    def permission_name(self):
+        return self.permission.name
+
+    @permission_name.setter
+    def permission_name(self, label):
+        self.permission = Permission.getByName(label)
+
+    def get_discussion_id(self):
+        return self.discussion_id or self.discussion.id
+
+    @classmethod
+    def get_discussion_conditions(cls, discussion_id, alias_maker=None):
+        return (cls.discussion_id == discussion_id, )
