@@ -995,19 +995,29 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
                 if isinstance(wl, GeneratedIdeaWidgetLink)]
 
     def extra_permissions_for(self, user_id):
-        from assembl.auth.util import get_permissions
-        # TODO: Optimize ruthlessly!
-        if not self.pub_state_id and not self.local_user_roles:
-            return []
-        return list(set(get_permissions(user_id, self.discussion_id, self)) - 
-                    set(get_permissions(user_id, self.discussion_id)))
+        from assembl.auth.util import get_permissions, permissions_for_state
+        from pyramid.threadlocal import get_current_request
+        request = get_current_request()
+        if request.unauthenticated_userid != user_id:
+            request = None
+        base_permissions = request.base_permissions if request else get_permissions(user_id, self.discussion_id)
+        if not self.local_user_roles:
+            if not self.pub_state_id:
+                return []
+            if request:
+                permissions = request.permissions_for_states[self.pub_state.label]
+            else:
+                permissions = permissions_for_state(self.discussion_id, self.pub_state_id)
+        else:
+            permissions = get_permissions(user_id, self.discussion_id, self)
+        return list(set(permissions) - set(base_permissions))
 
     def extra_permissions(self):
         from pyramid.threadlocal import get_current_request
-        from pyramid.security import authenticated_userid
         request = get_current_request()
         assert request, "Only use from a request"
-        user_id = authenticated_userid(request)
+        # authenticated hits database.
+        user_id = request.unauthenticated_userid
         return self.extra_permissions_for(user_id)
 
     # def get_notifications(self):

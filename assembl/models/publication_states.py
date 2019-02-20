@@ -232,6 +232,10 @@ class StateDiscussionPermission(DiscussionBoundBase):
     def permission_name(self, label):
         self.permission = Permission.getByName(label)
 
+    @property
+    def publication_state_label(self):
+        return self.publication_state.label
+
     def get_discussion_id(self):
         return self.discussion_id or self.discussion.id
 

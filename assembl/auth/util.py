@@ -3,6 +3,8 @@ from csv import reader
 from datetime import datetime, timedelta
 from io import TextIOWrapper, BytesIO
 import base64
+from itertools import groupby
+from collections import defaultdict
 
 from future.utils import string_types
 from sqlalchemy.sql.expression import and_
@@ -84,6 +86,8 @@ def get_permissions(user_id, discussion_id, target_instance=None):
     user_id = user_id or Everyone
     session = get_session_maker()()
     if not discussion_id:
+        if user_id == Everyone:
+            return []
         is_sysadmin = session.query(UserRole).filter_by(profile_id=user_id
             ).join(Role).filter_by(name=R_SYSADMIN).count()
         return ASSEMBL_PERMISSIONS if is_sysadmin else []
@@ -108,6 +112,11 @@ def get_permissions(user_id, discussion_id, target_instance=None):
     return [x[0] for x in permissions.distinct()]
 
 
+def base_permissions_from_request(request):
+    return get_permissions(
+        request.authenticated_userid, request.discussion_id())
+
+
 def permissions_from_request(request):
     from ..views.traversal import BaseContext
     ctx = request.context
@@ -116,6 +125,32 @@ def permissions_from_request(request):
         instance = ctx.get_first_instance()
     return get_permissions(
         request.authenticated_userid, request.discussion_id(), instance)
+
+
+def permissions_for_states(discussion_id):
+    from ..models import Idea, StateDiscussionPermission
+    db = get_session_maker()()
+    states = db.query(Idea.pub_state_id).filter_by(discussion_id=discussion_id).distinct()
+    states = [x[0] for x in states if x[0]]
+    sdps = db.query(StateDiscussionPermission).filter(
+        StateDiscussionPermission.discussion_id==discussion_id,
+        StateDiscussionPermission.pub_state_id.in_(states))
+    result = defaultdict(list)
+    for sdp in sdps:
+        result[sdp.publication_state_label].append(sdp.permission_name)
+    return result
+
+
+def permissions_for_state(discussion_id, state_id):
+    from ..models import StateDiscussionPermission
+    db = get_session_maker()()
+    perms = db.query(Permission.name).join(StateDiscussionPermission).filter_by(
+        discussion_id=discussion_id, pub_state_id=state_id)
+    return [p[0] for p in perms]
+
+
+def permissions_for_states_from_req(request):
+    return permissions_for_states(request.discussion_id())
 
 
 def discussion_id_from_request(request):
@@ -611,6 +646,12 @@ def includeme(config):
     config.add_request_method(
         'assembl.auth.util.permissions_from_request',
         'permissions', reify=True)
+    config.add_request_method(
+        'assembl.auth.util.base_permissions_from_request',
+        'base_permissions', reify=True)
+    config.add_request_method(
+        'assembl.auth.util.permissions_for_states_from_req',
+        'permissions_for_states', reify=True)
     config.add_request_method(
         'assembl.auth.util.roles_from_request', 'roles', reify=True)
     config.add_request_method(
