@@ -5,7 +5,7 @@ from pyramid.response import Response
 from pyramid.httpexceptions import HTTPUnauthorized, HTTPBadRequest
 from pyramid.security import authenticated_userid, Everyone
 
-from assembl.auth import P_READ, P_MODERATE, P_DELETE_POST, P_DELETE_MY_POST
+from assembl.auth import P_READ, P_MODERATE, P_DELETE_POST
 from assembl.models import Content, Post, SynthesisPost, User, Extract, Discussion
 from assembl.models.post import PublicationStates
 from ..traversal import InstanceContext, CollectionContext
@@ -67,17 +67,13 @@ def show_posts_similar_to_text(request):
     ctx_instance_class=Post, renderer='json')
 def delete_post_instance(request):
     # Users who are allowed to delete (actually tombstone) a Post instance:
-    # - user who is the author of the Post instance and who has the P_DELETE_MY_POST permission in this discussion
-    # - user who has the P_DELETE_POST permission in this discussion
+    # - user who has the P_DELETE_POST permission in this discussion or on this post
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
     permissions = ctx.get_permissions()
     instance = ctx._instance
 
-    allowed = False
-    if (user_id == instance.creator_id and P_DELETE_MY_POST in permissions) or (P_DELETE_POST in permissions):
-        allowed = True
-    if not allowed:
+    if P_DELETE_POST not in permissions:
         raise HTTPUnauthorized()
 
     # Remove extracts associated to this post
@@ -86,9 +82,9 @@ def delete_post_instance(request):
     for extract in extracts_to_remove:
         extract.delete()
 
-    if user_id == instance.creator_id and P_DELETE_MY_POST in permissions:
+    if user_id == instance.creator_id:
         cause = PublicationStates.DELETED_BY_USER
-    elif P_DELETE_POST in permissions:
+    else:
         cause = PublicationStates.DELETED_BY_ADMIN
 
     instance.delete_post(cause)

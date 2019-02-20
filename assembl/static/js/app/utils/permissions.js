@@ -4,26 +4,27 @@
  */
 
 var Permissions = {
-  READ: "read",
-  READ_PUBLIC_CIF: "read_public_cif",
-  SELF_REGISTER: "self_register",
-  ADD_POST: "add_post",
-  EDIT_POST: "edit_post",
-  DELETE_POST: "delete_post",
-  DELETE_MY_POST: "delete_my_post",
-  VOTE: "vote",
-  ADD_EXTRACT: "add_extract",
-  EDIT_EXTRACT: "edit_extract",
-  EDIT_MY_EXTRACT: "edit_my_extract",
-  ADD_IDEA: "add_idea",
-  EDIT_IDEA: "edit_idea",
-  EDIT_SYNTHESIS: "edit_synthesis",
-  SEND_SYNTHESIS: "send_synthesis",
-  ADMIN_DISCUSSION: "admin_discussion",
-  SYSADMIN: "sysadmin",
-  MODERATE_POST: "moderate_post",
-  DISC_STATS: 'discussion_stats',
-  EXPORT_EXTERNAL_SOURCE: "export_post"
+  P_READ_USER_INFO = 'User.R.baseInfo'
+  P_READ = 'Conversation.R'
+  P_ADD_POST = 'Post.C'
+  P_EDIT_POST = 'Post.U'
+  P_DELETE_POST = 'Post.D'
+  P_VOTE = 'Idea.C.Vote'
+  P_ADD_EXTRACT = 'Content.C.Extract'
+  P_EDIT_EXTRACT = 'Extract.U'
+  P_ADD_IDEA = 'Idea.C'
+  P_EDIT_IDEA = 'Idea.U'
+  P_EDIT_SYNTHESIS = 'Synthesis.U'
+  P_SEND_SYNTHESIS = 'Synthesis.U.send'
+  P_SELF_REGISTER = 'Conversation.A.User'
+  P_SELF_REGISTER_REQUEST = 'Conversation.A.User.request'
+  P_ADMIN_DISC = 'Conversation.U'
+  P_SYSADMIN = '*'
+  P_EXPORT_EXTERNAL_SOURCE = 'Content.U.export'
+  P_MODERATE = 'Content.U.moderate'
+  P_DISC_STATS = 'Conversation.U.stats'
+  P_OVERRIDE_SOCIAL_AUTOLOGIN = 'Conversation.A.User.override_autologin'
+  P_ASSOCIATE_EXTRACT = 'Idea.A.Extract'
 };
 
 export default Permissions;

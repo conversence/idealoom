@@ -12,7 +12,8 @@ import simplejson as json
 
 from assembl.views.api import API_DISCUSSION_PREFIX
 from assembl.auth import (
-    P_READ, P_ADD_EXTRACT, P_EDIT_EXTRACT, P_EDIT_MY_EXTRACT)
+    P_READ, P_ADD_EXTRACT, P_EDIT_EXTRACT)
+from assembl.auth.util import get_permissions
 from assembl.models import (
     AgentProfile, Extract, TextFragmentIdentifier,
     AnnotatorSource, Post, Webpage, Idea, AnnotationSelector)
@@ -114,8 +115,11 @@ def post_extract(request):
                 token, request.registry.settings['session.secret'])
             if token:
                 user_id = token['userId']
-    user_id = user_id or Everyone
-    if not user_has_permission(discussion.id, user_id, P_ADD_EXTRACT):
+        user_id = user_id or Everyone
+        permissions = get_permissions(user_id, discussion_id)
+    else:
+        permissions = request.permissions
+    if P_ADD_EXTRACT not in permissions:
         #TODO: maparent:  restore this code once it works:
         #raise HTTPForbidden(result=ACLDenied(permission=P_ADD_EXTRACT))
         raise HTTPForbidden()
@@ -209,17 +213,17 @@ def put_extract(request):
                 token, request.registry.settings['session.secret'])
             if token:
                 user_id = token['userId']
-    user_id = user_id or Everyone
+        user_id = user_id or Everyone
 
-    updated_extract_data = json.loads(request.body)
     extract = Extract.get_instance(extract_id)
     if not extract:
         raise HTTPNotFound("Extract with id '%s' not found." % extract_id)
+    permissions = get_permissions(user_id, discussion_id, extract)
 
-    if not (user_has_permission(discussion.id, user_id, P_EDIT_EXTRACT)
-        or (user_has_permission(discussion.id, user_id, P_EDIT_MY_EXTRACT)
-            and user_id == extract.owner_id)):
+    if P_EDIT_EXTRACT not in permissions:
         raise HTTPForbidden()
+
+    updated_extract_data = json.loads(request.body)
 
     extract.owner_id = user_id or AgentProfile.get_database_id(extract.owner_id)
     extract.order = updated_extract_data.get('order', extract.order)
@@ -253,14 +257,12 @@ def delete_extract(request):
                 token, request.registry.settings['session.secret'])
             if token:
                 user_id = token['userId']
-    user_id = user_id or Everyone
+        user_id = user_id or Everyone
 
     extract_id = request.matchdict['id']
     extract = Extract.get_instance(extract_id)
-
-    if not (user_has_permission(discussion.id, user_id, P_EDIT_EXTRACT)
-        or (user_has_permission(discussion.id, user_id, P_EDIT_MY_EXTRACT)
-            and user_id == extract.owner_id)):
+    permissions = get_permissions(user_id, discussion_id, extract)
+    if P_EDIT_EXTRACT not in permissions:
         raise HTTPForbidden()
 
     if not extract:

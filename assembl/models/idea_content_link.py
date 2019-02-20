@@ -34,8 +34,7 @@ from .post import Post
 from .auth import AgentProfile
 from ..auth import (
     CrudPermissions, P_READ, P_EDIT_IDEA,
-    P_EDIT_EXTRACT, P_ADD_IDEA, P_ADD_EXTRACT,
-    P_EDIT_MY_EXTRACT)
+    P_EDIT_EXTRACT, P_ADD_IDEA, P_ADD_EXTRACT)
 from ..semantic.namespaces import (
     CATALYST, ASSEMBL, DCTERMS, OA, QUADNAMES, RDF, SIOC)
 
@@ -453,8 +452,7 @@ class Extract(IdeaContentPositiveLink):
         return query.filter(cls.owner_id == user_id)
 
     crud_permissions = CrudPermissions(
-            P_ADD_EXTRACT, P_READ, P_EDIT_EXTRACT, P_EDIT_EXTRACT,
-            P_EDIT_MY_EXTRACT, P_EDIT_MY_EXTRACT)
+            P_ADD_EXTRACT, P_READ, P_EDIT_EXTRACT, P_EDIT_EXTRACT)
 
 class IdeaContentNegativeLink(IdeaContentLink):
     """
@@ -528,8 +526,7 @@ class AnnotationSelector(DiscussionBoundBase):
         info={'rdf': QuadMapPatternS(None, ASSEMBL.in_conversation)})
 
     crud_permissions = CrudPermissions(
-            P_ADD_EXTRACT, P_READ, P_EDIT_EXTRACT, P_EDIT_EXTRACT,
-            P_EDIT_MY_EXTRACT, P_EDIT_MY_EXTRACT)
+            P_ADD_EXTRACT, P_READ, P_EDIT_EXTRACT, P_EDIT_EXTRACT)
 
 
 class TextFragmentIdentifier(AnnotationSelector):

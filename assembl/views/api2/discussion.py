@@ -53,7 +53,7 @@ from assembl.lib.sqla import ObjectNotUniqueError
 from assembl.lib.json import DateJSONEncoder
 from assembl.lib.utils import get_global_base_url
 from assembl.auth import (
-    P_READ, P_READ_PUBLIC_CIF, P_ADMIN_DISC, P_DISC_STATS, P_SYSADMIN,
+    P_READ, P_READ_USER_INFO, P_ADMIN_DISC, P_DISC_STATS, P_SYSADMIN,
     R_ADMINISTRATOR)
 from assembl.auth.password import verify_data_token, data_token, Validity
 from assembl.auth.util import get_permissions
@@ -110,8 +110,8 @@ def read_user_token(request):
     user_id = authenticated_userid(request) or Everyone
     discussion_id = request.context.get_discussion_id()
     permissions = ctx.get_permissions()
-    if P_READ in permissions:
-        permissions.append(P_READ_PUBLIC_CIF)
+    if P_READ_USER_INFO in permissions:
+        permissions.append(P_READ)
 
     if 'token' in request.GET:
         token = request.GET['token']
@@ -134,8 +134,8 @@ def read_user_token(request):
             raise HTTPUnauthorized("Token for another discussion")
         if user_id == Everyone:
             permissions = get_permissions(t_user_id, discussion_id)
-            if P_READ in permissions:
-                permissions.append(P_READ_PUBLIC_CIF)
+            if P_READ_USER_INFO in permissions:
+                permissions.append(P_READ)
         elif t_user_id != user_id:
             raise HTTPUnauthorized("Token for another user")
         user_id = t_user_id
@@ -183,12 +183,12 @@ def get_token(request):
     if permission_sets:
         permission_sets = [s.split(',') for s in permission_sets]
         for permissions in permission_sets:
-            if P_READ in permissions:
-                permissions.append(P_READ_PUBLIC_CIF)
+            if P_READ_USER_INFO in permissions:
+                permissions.append(P_READ)
         permission_sets = [sorted(set(permissions))
                            for permissions in permission_sets]
     else:
-        permission_sets = [[P_READ, P_READ_PUBLIC_CIF]]
+        permission_sets = [[P_READ, P_READ_USER_INFO]]
     random_str = urandom(16)
     data = {','.join(permissions): permission_token(
         user_id, discussion_id, permissions, random_str)
@@ -216,7 +216,7 @@ def discussion_instance_view_jsonld(request):
             content_type='application/json', charset='utf-8')
     discussion = request.context._instance
     user_id, permissions, salt = read_user_token(request)
-    if not (P_READ in permissions or P_READ_PUBLIC_CIF in permissions):
+    if P_READ not in permissions:
         raise HTTPUnauthorized()
     if not salt and P_ADMIN_DISC not in permissions:
         salt = base64.urlsafe_b64encode(urandom(12))
@@ -243,7 +243,7 @@ def user_private_view_jsonld(request):
         return HTTPFound(get_global_base_url(True) + request.path_qs)
     discussion_id = request.context.get_discussion_id()
     user_id, permissions, salt = read_user_token(request)
-    if P_READ not in permissions:
+    if P_READ_USER_INFO not in permissions:
         raise HTTPUnauthorized()
     if not salt and P_ADMIN_DISC not in permissions:
         salt = base64.urlsafe_b64encode(urandom(12))
@@ -874,7 +874,7 @@ def get_analytics_alerts(discussion, user_id, types, all_users=False):
         host += ':' + port
     seed = urandom(8)
     obfuscator = AESObfuscator(seed)
-    token = permission_token(user_id, discussion.id, [P_READ_PUBLIC_CIF], seed)
+    token = permission_token(user_id, discussion.id, [P_READ], seed)
     metrics_requests = [{
         "metric": "alerts",
         "types": types}]

@@ -20,38 +20,36 @@ SYSTEM_ROLES = set(
      R_MODERATOR, R_ADMINISTRATOR, R_SYSADMIN, R_OWNER))
 
 # Permissions
-P_READ = 'read'
-P_READ_PUBLIC_CIF = 'read_public_cif'
-P_ADD_POST = 'add_post'
-P_EDIT_POST = 'edit_post'
-P_DELETE_POST = 'delete_post'
-P_DELETE_MY_POST = 'delete_my_post'
-P_VOTE = 'vote'
-P_ADD_EXTRACT = 'add_extract'
-P_EDIT_EXTRACT = 'edit_extract'
-P_EDIT_MY_EXTRACT = 'edit_my_extract'
-P_ADD_IDEA = 'add_idea'
-P_EDIT_IDEA = 'edit_idea'
-P_EDIT_SYNTHESIS = 'edit_synthesis'
-P_SEND_SYNTHESIS = 'send_synthesis'
-P_SELF_REGISTER = 'self_register'
-P_SELF_REGISTER_REQUEST = 'self_register_req'
-P_ADMIN_DISC = 'admin_discussion'
-P_SYSADMIN = 'sysadmin'
-P_EXPORT_EXTERNAL_SOURCE = 'export_post'
-P_MODERATE = 'moderate_post'
-P_DISC_STATS = 'discussion_stats'
-P_OVERRIDE_SOCIAL_AUTOLOGIN = 'override_autologin'
+P_READ_USER_INFO = 'User.R.baseInfo'
+P_READ = 'Conversation.R'
+P_ADD_POST = 'Post.C'
+P_EDIT_POST = 'Post.U'
+P_DELETE_POST = 'Post.D'
+P_VOTE = 'Idea.C.Vote'
+P_ADD_EXTRACT = 'Content.C.Extract'
+P_EDIT_EXTRACT = 'Extract.U'
+P_ADD_IDEA = 'Idea.C'
+P_EDIT_IDEA = 'Idea.U'
+P_EDIT_SYNTHESIS = 'Synthesis.U'
+P_SEND_SYNTHESIS = 'Synthesis.U.send'
+P_SELF_REGISTER = 'Conversation.A.User'
+P_SELF_REGISTER_REQUEST = 'Conversation.A.User.request'
+P_ADMIN_DISC = 'Conversation.U'
+P_SYSADMIN = '*'
+P_EXPORT_EXTERNAL_SOURCE = 'Content.U.export'
+P_MODERATE = 'Content.U.moderate'
+P_DISC_STATS = 'Conversation.U.stats'
+P_OVERRIDE_SOCIAL_AUTOLOGIN = 'Conversation.A.User.override_autologin'
+P_ASSOCIATE_EXTRACT = 'Idea.A.Extract'
 
 IF_OWNED = "IF_OWNED"
 
 ASSEMBL_PERMISSIONS = set((
-    P_READ, P_ADD_POST, P_EDIT_POST, P_DELETE_POST, P_DELETE_MY_POST,
-    P_VOTE, P_ADD_EXTRACT, P_EDIT_EXTRACT,
-    P_EDIT_MY_EXTRACT, P_ADD_IDEA, P_EDIT_IDEA, P_EDIT_SYNTHESIS,
+    P_READ, P_ADD_POST, P_EDIT_POST, P_DELETE_POST, P_VOTE, P_ADD_EXTRACT,
+    P_EDIT_EXTRACT, P_ADD_IDEA, P_EDIT_IDEA, P_EDIT_SYNTHESIS,
     P_SEND_SYNTHESIS, P_SELF_REGISTER, P_SELF_REGISTER_REQUEST,
-    P_ADMIN_DISC, P_SYSADMIN, P_READ_PUBLIC_CIF, P_OVERRIDE_SOCIAL_AUTOLOGIN,
-    P_EXPORT_EXTERNAL_SOURCE, P_MODERATE, P_DISC_STATS))
+    P_ADMIN_DISC, P_SYSADMIN, P_READ_USER_INFO, P_OVERRIDE_SOCIAL_AUTOLOGIN,
+    P_EXPORT_EXTERNAL_SOURCE, P_MODERATE, P_DISC_STATS, P_ASSOCIATE_EXTRACT))
 
 
 class CrudPermissions(object):
