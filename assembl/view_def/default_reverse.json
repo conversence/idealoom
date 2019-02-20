@@ -230,7 +230,8 @@
         "source": true,
         "target": true,
         "source_label": true,
-        "target_label": true
+        "target_label": true,
+        "req_permission_name": true
     },
     "Conversation": {
         "permissions": false,

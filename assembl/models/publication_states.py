@@ -23,6 +23,8 @@ from ..lib.sqla import CrudOperation, Base, DuplicateHandling
 from . import DiscussionBoundBase, NamedClassMixin
 from .langstrings import LangString
 from .permissions import Permission, Role
+from ..auth import (
+    CrudPermissions, P_READ, P_SYSADMIN, P_ADMIN_DISC)
 
 
 class PublicationFlow(Base, NamedClassMixin):
@@ -77,6 +79,8 @@ class PublicationFlow(Base, NamedClassMixin):
             transition.update_from_json(transitionJ, context=ctx)
         return target
 
+    crud_permissions = CrudPermissions(P_READ, P_SYSADMIN)
+
 
 class PublicationState(Base, NamedClassMixin):
     """A publication state"""
@@ -109,6 +113,8 @@ class PublicationState(Base, NamedClassMixin):
     def unique_query(self):
         query, _ = super(PublicationState, self).unique_query()
         return query.filter_by(label=self.label, flow=self.flow), True
+
+    crud_permissions = CrudPermissions(P_READ, P_SYSADMIN)
 
 
 class PublicationTransition(Base, NamedClassMixin):
@@ -178,6 +184,16 @@ class PublicationTransition(Base, NamedClassMixin):
         query, _ = super(PublicationTransition, self).unique_query()
         return query.filter_by(label=self.label, flow=self.flow), True
 
+    @property
+    def req_permission_name(self):
+        return self.requires_permission.name
+
+    @req_permission_name.setter
+    def req_permission_name(self, label):
+        self.requires_permission = Permission.getByName(label)
+
+    crud_permissions = CrudPermissions(P_READ, P_SYSADMIN)
+
 
 class StateDiscussionPermission(DiscussionBoundBase):
     """Which permissions are given to which roles for a given publication state."""
@@ -222,3 +238,5 @@ class StateDiscussionPermission(DiscussionBoundBase):
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):
         return (cls.discussion_id == discussion_id, )
+
+    crud_permissions = CrudPermissions(P_READ, P_ADMIN_DISC)

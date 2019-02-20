@@ -999,7 +999,7 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
         # TODO: Optimize ruthlessly!
         if not self.pub_state_id and not self.local_user_roles:
             return []
-        return list(set(get_permissions(user_id, self.discussion_id, this)) - 
+        return list(set(get_permissions(user_id, self.discussion_id, self)) - 
                     set(get_permissions(user_id, self.discussion_id)))
 
     def extra_permissions(self):

@@ -14,7 +14,8 @@ from pyramid.authentication import SessionAuthenticationPolicy
 
 from assembl.lib.locale import _
 from ..lib.sqla import get_session_maker
-from . import R_SYSADMIN, P_READ, R_OWNER, SYSTEM_ROLES
+from . import (
+    R_SYSADMIN, P_READ, R_OWNER, SYSTEM_ROLES, ASSEMBL_PERMISSIONS)
 from .password import verify_data_token, Validity
 from ..models.auth import User, AgentProfile, EmailAccount
 from ..models.permissions import (
@@ -75,15 +76,17 @@ def roles_from_request(request):
     ctx = getattr(request, 'context', None)
     instance = None
     if isinstance(ctx, BaseContext):
-        instance_gen = ctx.get_all_instances()
-        instance = next(instance_gen)
-        instance_gen.close()
+        instance = ctx.get_first_instance()
     return get_roles(request.unauthenticated_userid, request.discussion_id(), instance)
 
 
 def get_permissions(user_id, discussion_id, target_instance=None):
     user_id = user_id or Everyone
     session = get_session_maker()()
+    if not discussion_id:
+        is_sysadmin = session.query(UserRole).filter_by(profile_id=user_id
+            ).join(Role).filter_by(name=R_SYSADMIN).count()
+        return ASSEMBL_PERMISSIONS if is_sysadmin else []
     roles = get_role_query(user_id, discussion_id, target_instance
         ).with_entities(Role.id)
 
@@ -110,9 +113,7 @@ def permissions_from_request(request):
     ctx = request.context
     instance = None
     if isinstance(ctx, BaseContext):
-        instance_gen = ctx.get_all_instances()
-        instance = next(instance_gen)
-        instance_gen.close()
+        instance = ctx.get_first_instance()
     return get_permissions(
         request.authenticated_userid, request.discussion_id(), instance)
 

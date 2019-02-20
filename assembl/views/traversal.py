@@ -60,6 +60,15 @@ class BaseContext(object):
         for i in self.__parent__.get_all_instances():
             yield i
 
+    def get_first_instance(self):
+        gen = self.get_all_instances()
+        try:
+            return next(gen)
+        except StopIteration:
+            return None
+        finally:
+            gen.close()
+
     def get_user_id(self):
         return self.__parent__.get_user_id()
 
