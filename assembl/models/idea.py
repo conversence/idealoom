@@ -994,6 +994,22 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
         return [wl.context_url for wl in self.widget_links
                 if isinstance(wl, GeneratedIdeaWidgetLink)]
 
+    def extra_permissions_for(self, user_id):
+        from assembl.auth.util import get_permissions
+        # TODO: Optimize ruthlessly!
+        if not self.pub_state_id and not self.local_user_roles:
+            return []
+        return list(set(get_permissions(user_id, self.discussion_id, this)) - 
+                    set(get_permissions(user_id, self.discussion_id)))
+
+    def extra_permissions(self):
+        from pyramid.threadlocal import get_current_request
+        from pyramid.security import authenticated_userid
+        request = get_current_request()
+        assert request, "Only use from a request"
+        user_id = authenticated_userid(request)
+        return self.extra_permissions_for(user_id)
+
     # def get_notifications(self):
     #     # Dead code?
     #     from .widgets import BaseIdeaWidgetLink
@@ -1498,7 +1514,7 @@ class IdeaLocalUserRole(AbstractLocalUserRole):
         Idea.id, ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
     idea = relationship(
         Idea, backref=backref(
-            "local_user_roles", cascade="all, delete-orphan"))
+            "local_user_roles", cascade="all, delete-orphan", lazy="subquery"))
 
     @classmethod
     def filter_on_instance(cls, instance, query):
