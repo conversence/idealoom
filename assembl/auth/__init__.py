@@ -12,11 +12,12 @@ R_CATCHER = 'r:catcher'
 R_MODERATOR = 'r:moderator'
 R_ADMINISTRATOR = 'r:administrator'
 R_SYSADMIN = 'r:sysadmin'
+R_OWNER = 'r:owner'
 
 
 SYSTEM_ROLES = set(
     (Everyone, Authenticated, R_PARTICIPANT, R_CATCHER,
-     R_MODERATOR, R_ADMINISTRATOR, R_SYSADMIN))
+     R_MODERATOR, R_ADMINISTRATOR, R_SYSADMIN, R_OWNER))
 
 # Permissions
 P_READ = 'read'

@@ -31,6 +31,7 @@ from sqlalchemy import (
     ForeignKey,
     inspect,
     select,
+    event,
     func,
 )
 from sqlalchemy.ext.associationproxy import association_proxy
@@ -46,11 +47,14 @@ from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..auth import (
     CrudPermissions, P_READ, P_ADMIN_DISC, P_EDIT_IDEA,
     P_ADD_IDEA)
+from .permissions import AbstractLocalUserRole
 from .langstrings import LangString, LangStringEntry
 from ..semantic.namespaces import (
     SIOC, IDEA, ASSEMBL, QUADNAMES, FOAF, RDF, VirtRDF)
 from ..lib.sqla import CrudOperation
 from ..lib.model_watcher import get_model_watcher
+from .auth import AgentProfile
+from .publication_states import PublicationState
 from assembl.views.traversal import (
     AbstractCollectionDefinition, RelationCollectionDefinition,
     collection_creation_side_effects, InstanceContext)
@@ -187,6 +191,10 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
         cascade="all")
     hidden = Column(Boolean, server_default='0')
     last_modified = Column(Timestamp)
+    creator_id = Column(Integer, ForeignKey(
+        AgentProfile.id, ondelete="SET NULL", onupdate="CASCADE"))
+    pub_state_id = Column(Integer, ForeignKey(
+        PublicationState.id, ondelete="SET NULL", onupdate="CASCADE"))
     # TODO: Make this autoupdate on change. see
     # http://stackoverflow.com/questions/1035980/update-timestamp-when-row-is-updated-in-postgresql
 
@@ -246,6 +254,8 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
         "IdeaLink", viewonly=True, uselist=True,
         primaryjoin="""(IdeaLink.tombstone_date == None) & (
             (IdeaLink.source_id==Idea.id)|(IdeaLink.target_id==Idea.id))""")
+    creator = relationship(AgentProfile, backref="created_ideas")
+    pub_state = relationship(PublicationState)
 
     #widget_id = deferred(Column(Integer, ForeignKey('widget.id')))
     #widget = relationship("Widget", backref=backref('ideas', order_by=creation_date))
@@ -364,6 +374,9 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
     @property
     def children_uris(self):
         return [Idea.uri_generic(l.target_id) for l in self.target_links]
+
+    def is_owner(self, user_id):
+        return user_id == self.creator_id
 
     @property
     def widget_add_post_endpoint(self):
@@ -768,7 +781,6 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
     def get_synthesis_contributors(self, id_only=True):
         # author of important extracts
         from .idea_content_link import Extract
-        from .auth import AgentProfile
         from .post import Post
         from .generic import Content
         from sqlalchemy.sql.functions import count
@@ -1474,3 +1486,100 @@ Idea.num_children = column_property(
         & (_it.c.tombstone_date == None)
         ).correlate_except(_ilt),
     deferred=True)
+
+
+class IdeaLocalUserRole(AbstractLocalUserRole):
+    """The role that a user has in the context of a discussion"""
+    __tablename__ = 'idea_user_role'
+
+    user = relationship(AgentProfile, backref=backref("local_idea_roles", cascade="all, delete-orphan"))
+
+    idea_id = Column(Integer, ForeignKey(
+        Idea.id, ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
+    idea = relationship(
+        Idea, backref=backref(
+            "local_user_roles", cascade="all, delete-orphan"))
+
+    @classmethod
+    def filter_on_instance(cls, instance, query):
+        assert isinstance(instance, Idea)
+        return query.filter_by(idea_id=instance.id)
+
+    def get_discussion_id(self):
+        return self.idea.discussion_id
+
+    def container_url(self):
+        return "/data/Discussion/%d/ideas/%d/local_user_roles" % (
+            self.discussion_id, self.idea_id)
+
+    def get_default_parent_context(self, request=None, user_id=None):
+        return self.idea.get_collection_context('local_user_roles', request=request, user_id=user_id)
+
+    @classmethod
+    def get_discussion_conditions(cls, discussion_id, alias_maker=None):
+        if alias_maker is None:
+            idea_local_role = cls
+            idea = Idea
+        else:
+            idea_local_role = alias_maker.alias_from_class(cls)
+            idea = alias_maker.alias_from_relns(idea_local_role.idea)
+        return ((idea_local_role.idea_id == idea.id),
+                (idea.discussion_id == discussion_id))
+
+    def unique_query(self):
+        query, _ = super(IdeaLocalUserRole, self).unique_query()
+        profile_id = self.profile_id or self.user.id
+        role_id = self.role_id or self.role.id
+        idea_id = self.idea_id or self.idea.id
+        return query.filter_by(
+            profile_id=profile_id, role_id=role_id, idea_id=idea_id), True
+
+    def _do_update_from_json(
+            self, json, parse_def, ctx,
+            duplicate_handling=None, object_importer=None):
+        user_id = ctx.get_user_id()
+        json_user_id = json.get('user', None)
+        if json_user_id is None:
+            json_user_id = user_id
+        else:
+            json_user_id = AgentProfile.get_database_id(json_user_id)
+            # Do not allow changing user
+            if self.profile_id is not None and json_user_id != self.profile_id:
+                raise HTTPBadRequest()
+        self.profile_id = json_user_id
+        role_name = json.get("role", None)
+        if not (role_name or self.role_id):
+            role_name = R_PARTICIPANT
+        if role_name:
+            role = Role.getByName(role_name)
+            if not role:
+                raise HTTPBadRequest("Invalid role name:"+role_name)
+            self.role = role
+        json_discussion_id = json.get('discussion', None)
+        if json_discussion_id:
+            from .discussion import Discussion
+            json_discussion_id = Discussion.get_database_id(json_discussion_id)
+            # Do not allow change of discussion
+            if self.discussion_id is not None \
+                    and json_discussion_id != self.discussion_id:
+                raise HTTPBadRequest()
+            self.discussion_id = json_discussion_id
+        else:
+            if not self.discussion_id:
+                raise HTTPBadRequest()
+        return self
+
+    crud_permissions = CrudPermissions(P_ADMIN_DISC, P_READ)
+
+
+@event.listens_for(IdeaLocalUserRole, 'after_delete', propagate=True)
+@event.listens_for(IdeaLocalUserRole, 'after_insert', propagate=True)
+def send_user_to_socket_for_idea_local_user_role(
+        mapper, connection, target):
+    user = target.user
+    if not target.user:
+        user = User.get(target.profile_id)
+    user.send_to_changes(connection, CrudOperation.UPDATE, target.get_discussion_id())
+    user.send_to_changes(
+        connection, CrudOperation.UPDATE, target.get_discussion_id(), "private")
+

@@ -710,7 +710,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
         backref="participant_in_discussion")
 
     def get_participants_query(self, ids_only=False, include_readers=False, current_user=None):
-        from .auth import AgentProfile, LocalUserRole
+        from .auth import AgentProfile
         from .generic import Content
         from .post import Post
         from .action import ViewPost

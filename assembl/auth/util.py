@@ -14,11 +14,13 @@ from pyramid.authentication import SessionAuthenticationPolicy
 
 from assembl.lib.locale import _
 from ..lib.sqla import get_session_maker
-from . import R_SYSADMIN, P_READ, SYSTEM_ROLES
+from . import R_SYSADMIN, P_READ, R_OWNER, SYSTEM_ROLES
 from .password import verify_data_token, Validity
 from ..models.auth import User, AgentProfile, EmailAccount
 from ..models.permissions import (
     Role, UserRole, LocalUserRole, Permission, DiscussionPermission)
+from ..models.publication_states import (
+    StateDiscussionPermission, PublicationState)
 
 
 _ = TranslationStringFactory('assembl')
@@ -30,70 +32,89 @@ def get_user(request):
         return User.get(logged_in)
 
 
-def get_roles(user_id, discussion_id=None):
-    if user_id in SYSTEM_ROLES:
-        return [user_id]
-    session = get_session_maker()()
-    roles = session.query(Role.name).join(UserRole).filter(
-        UserRole.profile_id == user_id)
-    if discussion_id:
-        roles = roles.union(
-            session.query(Role.name).join(
-                LocalUserRole).filter(and_(
-                    LocalUserRole.profile_id == user_id,
-                    LocalUserRole.requested == False,
-                    LocalUserRole.discussion_id == discussion_id)))
-    return [x[0] for x in roles.distinct()]
-
-
-def roles_from_request(request):
-    return get_roles(request.unauthenticated_userid, request.discussion_id())
-
-
-def get_permissions(user_id, discussion_id):
+def get_role_query(user_id, discussion_id, target_instance=None):
     user_id = user_id or Everyone
     session = get_session_maker()()
     if user_id == Everyone:
         if not discussion_id:
             return []
-        permissions = session.query(Permission.name).join(
-            DiscussionPermission, Role).filter(
-                (DiscussionPermission.discussion_id == discussion_id)
-                & (Role.name == user_id))
+        roles = session.query(Role).filter(Role.name == user_id)
     elif user_id == Authenticated:
         if not discussion_id:
             return []
-        permissions = session.query(Permission.name).join(
-            DiscussionPermission, Role).filter(
-                (DiscussionPermission.discussion_id == discussion_id)
-                & (Role.name.in_((Authenticated, Everyone))))
+        roles = session.query(Role).filter(Role.name.in_((Authenticated, Everyone)))
     else:
-        sysadmin = session.query(UserRole).filter_by(
-            profile_id=user_id).join(Role).filter_by(name=R_SYSADMIN).first()
-        if sysadmin:
-            return [x[0] for x in session.query(Permission.name).all()]
-        if not discussion_id:
-            return []
-        permissions = session.query(Permission.name).join(
-            DiscussionPermission, Role, UserRole).filter(
-                UserRole.profile_id == user_id,
-                DiscussionPermission.discussion_id == discussion_id
-            ).union(session.query(Permission.name).join(
-                DiscussionPermission, Role, LocalUserRole).filter(and_(
-                    LocalUserRole.profile_id == user_id,
-                    LocalUserRole.requested == False,
-                    LocalUserRole.discussion_id == discussion_id,
-                    DiscussionPermission.discussion_id == discussion_id))
-            ).union(session.query(Permission.name).join(
-                DiscussionPermission, Role).filter(and_(
-                    DiscussionPermission.discussion_id == discussion_id,
-                    Role.name.in_((Authenticated, Everyone)))))
+        base_roles = [Authenticated, Everyone]
+        if target_instance and user_id and target_instance.is_owner(user_id):
+            base_roles.append(R_OWNER)
+        clauses = []
+        roles = session.query(Role).join(UserRole).filter(
+                UserRole.profile_id == user_id)
+        if discussion_id:
+            clauses.append(session.query(Role).join(LocalUserRole).filter(and_(
+                        LocalUserRole.profile_id == user_id,
+                        LocalUserRole.requested == False,
+                        LocalUserRole.discussion_id == discussion_id)))
+        clauses.append(session.query(Role).filter(Role.name.in_(base_roles)))
+        if target_instance and hasattr(target_instance, 'local_user_roles'):
+            target_cls = target_instance.__class__.__mapper__.relationships['local_user_roles'].argument.class_
+            clauses.append(target_cls.filter_on_instance(
+                target_instance, session.query(Role).join(target_cls).filter(
+                    target_cls.profile_id==user_id)))
+        roles = roles.union(*clauses)
+    return roles.distinct()
+
+
+def get_roles(user_id, discussion_id=None, target_instance=None):
+    return [x[0] for x in get_role_query(user_id, discussion_id, target_instance
+        ).with_entities(Role.name)]
+
+
+def roles_from_request(request):
+    from ..views.traversal import BaseContext
+    ctx = getattr(request, 'context', None)
+    instance = None
+    if isinstance(ctx, BaseContext):
+        instance_gen = ctx.get_all_instances()
+        instance = next(instance_gen)
+        instance_gen.close()
+    return get_roles(request.unauthenticated_userid, request.discussion_id(), instance)
+
+
+def get_permissions(user_id, discussion_id, target_instance=None):
+    user_id = user_id or Everyone
+    session = get_session_maker()()
+    roles = get_role_query(user_id, discussion_id, target_instance
+        ).with_entities(Role.id)
+
+    rp_query = session.query(
+            DiscussionPermission.role_id.label('role_id'),
+            DiscussionPermission.permission_id.label('permission_id')).filter(
+        DiscussionPermission.discussion_id == discussion_id)
+    if target_instance and hasattr(target_instance, 'pub_state_id'):
+        rp_query = rp_query.union(
+            session.query(
+                StateDiscussionPermission.role_id.label('role_id'),
+                StateDiscussionPermission.permission_id.label('permission_id')).join(
+            PublicationState, PublicationState.id == StateDiscussionPermission.pub_state_id).filter(
+            PublicationState.id == target_instance.pub_state_id))
+    rp_query = rp_query.subquery()
+    permissions = session.query(Permission.name).join(
+        rp_query, rp_query.c.permission_id == Permission.id).join(
+        Role, (rp_query.c.role_id == Role.id) & Role.id.in_(roles))
     return [x[0] for x in permissions.distinct()]
 
 
 def permissions_from_request(request):
+    from ..views.traversal import BaseContext
+    ctx = request.context
+    instance = None
+    if isinstance(ctx, BaseContext):
+        instance_gen = ctx.get_all_instances()
+        instance = next(instance_gen)
+        instance_gen.close()
     return get_permissions(
-        request.authenticated_userid, request.discussion_id())
+        request.authenticated_userid, request.discussion_id(), instance)
 
 
 def discussion_id_from_request(request):

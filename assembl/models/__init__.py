@@ -168,6 +168,7 @@ from .publication_states import (
     PublicationFlow,
     PublicationState,
     PublicationTransition,
+    StateDiscussionPermission,
 )
 from .permissions import (
     DiscussionPermission,
@@ -216,6 +217,7 @@ from .idea import (
     Idea,
     IdeaLink,
     RootIdea,
+    IdeaLocalUserRole,
 )
 from .action import (
     Action,

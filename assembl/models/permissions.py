@@ -13,12 +13,14 @@ from sqlalchemy import (
     event,
     Index,
 )
-from pyramid.httpexceptions import HTTPBadRequest
+from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import (
     relationship, backref)
+from pyramid.httpexceptions import HTTPBadRequest
 from rdflib import URIRef
 
 from ..lib import config
+from ..lib.abc import abstractclassmethod
 from ..lib.sqla import CrudOperation
 from . import Base, DiscussionBoundBase, PrivateObjectMixin, NamedClassMixin
 from ..auth import *
@@ -122,19 +124,63 @@ def send_user_to_socket_for_user_role(mapper, connection, target):
     user.send_to_changes(connection, CrudOperation.UPDATE)
 
 
+class AbstractLocalUserRole(DiscussionBoundBase, PrivateObjectMixin):
+    __abstract__ = True
 
-class LocalUserRole(DiscussionBoundBase, PrivateObjectMixin):
+    @declared_attr
+    def id(self):
+        return Column(Integer, primary_key=True)
+
+    @declared_attr
+    def profile_id(self):
+        return Column(Integer, ForeignKey(
+                'agent_profile.id', ondelete='CASCADE', onupdate='CASCADE'),
+            nullable=False, index=True,
+            info={'rdf': QuadMapPatternS(
+                None, SIOC.function_of, AgentProfile.agent_as_account_iri.apply(None))})
+
+    @declared_attr
+    def role_id(self):
+        return Column(Integer, ForeignKey(
+            'role.id', ondelete='CASCADE', onupdate='CASCADE'),
+            index=True, nullable=False)
+
+    @declared_attr
+    def role(self):
+        return relationship(Role, lazy="joined")
+
+    @property
+    def role_name(self):
+        return self.role.name
+
+    @role_name.setter
+    def role_name(self, name):
+        self.role = Role.getRole(name)
+
+    def get_user_uri(self):
+        return AgentProfile.uri_generic(self.profile_id)
+
+    @abstractclassmethod
+    def filter_on_instance(cls, instance, query):
+        return query
+
+    def is_owner(self, user_id):
+        return self.profile_id == user_id
+
+    @classmethod
+    def restrict_to_owners(cls, query, user_id):
+        "filter query according to object owners"
+        return query.filter(cls.profile_id == user_id)
+
+
+class LocalUserRole(AbstractLocalUserRole):
     """The role that a user has in the context of a discussion"""
     __tablename__ = 'local_user_role'
     rdf_sections = (USER_SECTION,)
     rdf_class = SIOC.Role
 
-    id = Column(Integer, primary_key=True)
-    profile_id = Column(Integer, ForeignKey('agent_profile.id', ondelete='CASCADE', onupdate='CASCADE'),
-        nullable=False, index=True,
-        info={'rdf': QuadMapPatternS(
-            None, SIOC.function_of, AgentProfile.agent_as_account_iri.apply(None))})
     user = relationship(AgentProfile, backref=backref("local_roles", cascade="all, delete-orphan"))
+
     discussion_id = Column(Integer, ForeignKey(
         'discussion.id', ondelete='CASCADE'), nullable=False, index=True,
         info={'rdf': QuadMapPatternS(None, SIOC.has_scope)})
@@ -142,10 +188,6 @@ class LocalUserRole(DiscussionBoundBase, PrivateObjectMixin):
         'Discussion', backref=backref(
             "local_user_roles", cascade="all, delete-orphan"),
         info={'rdf': QuadMapPatternS(None, ASSEMBL.in_conversation)})
-    role_id = Column(Integer, ForeignKey(
-        'role.id', ondelete='CASCADE', onupdate='CASCADE'),
-        index=True, nullable=False)
-    role = relationship(Role, lazy="joined")
     requested = Column(Boolean, server_default='0', default=False)
     # BUG in virtuoso: It will often refuse to create an index
     # whose name exists in another schema. So having this index in
@@ -169,13 +211,10 @@ class LocalUserRole(DiscussionBoundBase, PrivateObjectMixin):
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):
         return (cls.discussion_id == discussion_id,)
 
-    @property
-    def role_name(self):
-        return self.role.name
-
-    @role_name.setter
-    def role_name(self, name):
-        self.role = Role.getRole(name)
+    @classmethod
+    def filter_on_instance(cls, instance, query):
+        assert instance.__class__.__name__ == 'Discussion'
+        return query.filter_by(discussion_id=instance.id)
 
     def unique_query(self):
         query, _ = super(LocalUserRole, self).unique_query()
@@ -183,9 +222,6 @@ class LocalUserRole(DiscussionBoundBase, PrivateObjectMixin):
         role_id = self.role_id or self.role.id
         return query.filter_by(
             profile_id=profile_id, role_id=role_id), True
-
-    def get_user_uri(self):
-        return AgentProfile.uri_generic(self.profile_id)
 
     def _do_update_from_json(
             self, json, parse_def, ctx,
@@ -221,14 +257,6 @@ class LocalUserRole(DiscussionBoundBase, PrivateObjectMixin):
             if not self.discussion_id:
                 raise HTTPBadRequest()
         return self
-
-    def is_owner(self, user_id):
-        return self.profile_id == user_id
-
-    @classmethod
-    def restrict_to_owners(cls, query, user_id):
-        "filter query according to object owners"
-        return query.filter(cls.profile_id == user_id)
 
     @classmethod
     def base_conditions(cls, alias=None, alias_maker=None):
