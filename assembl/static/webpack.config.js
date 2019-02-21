@@ -124,7 +124,7 @@ module.exports = {
         test: /bootstrap.*\.js|jquery[-\.]/,
         use: [
           {
-            loader: 'imports-loader?jQuery=jquery',
+            loader: 'imports-loader?jquery,jQuery=jquery',
           },
         ],
       },
@@ -133,7 +133,7 @@ module.exports = {
         use: [{
             loader: 'babel-loader',
             options: {
-                presets: ['es2015-webpack2'],
+                presets: ['@babel/preset-env'],
                 cacheDirectory: false,
             },
         }],
