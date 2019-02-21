@@ -34,8 +34,9 @@ class Webpage(Content):
         return LangString.create(self.url, LocaleLabel.NON_LINGUISTIC)
 
     @classmethod
-    def get_instance(cls, uri):
-        page = cls.get_by(url=uri)
+    def get_instance(cls, uri, session=None):
+        session = session or cls.defaul_db
+        page = session.query(cls).filter_by(url=uri).first()
         if page:
             return page
         return Content.get_instance(uri)

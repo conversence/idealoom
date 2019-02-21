@@ -119,13 +119,14 @@ class DiscussionBoundTombstone(Tombstone):
 
 
 class NamedClassMixin(object):
-    """A mix-in for models that have a unique name"""
+    """A mix-in for models that have a globally unique name"""
+
     @abstractclassmethod
     def get_naming_column_name(self):
         return "name"
 
     @classmethod
-    def getByName(cls, name, session=None, query=None):
+    def getByName(cls, name, session=None, query=None, parent_object=None):
         session = session or cls.default_db
         query = query or session.query(cls)
         return query.filter_by(**{cls.get_naming_column_name(): name}).first()
@@ -136,6 +137,28 @@ class NamedClassMixin(object):
         if instance:
             return instance
         return cls.getByName(id, session)
+
+
+class ContextualNamedClassMixin(NamedClassMixin):
+    """A mix-in for models that have a unique name within a context"""
+
+    @abstractclassmethod
+    def get_parent_relation_name(self):
+        return "name"
+
+    @classmethod
+    def getByName(cls, name, session=None, query=None, parent_object=None):
+        assert parent_object, "parent object must be given"
+        session = session or cls.default_db
+        query = query or session.query(cls)
+        query = query.filter_by(**{cls.get_parent_relation_name(): parent_object})
+        return super(ContextualNamedClassMixin, cls).getByName(
+            name, session, query, parent_object)
+
+    @classmethod
+    def get_instance(cls, id, session=None):
+        # bypass NamedClassMixin.get_instance
+        return super(NamedClassMixin, cls).get_instance(id, session)
 
 
 from .uriref import (

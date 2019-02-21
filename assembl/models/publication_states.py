@@ -20,14 +20,14 @@ from sqlalchemy import (
 )
 
 from ..lib.sqla import CrudOperation, Base, DuplicateHandling
-from . import DiscussionBoundBase, NamedClassMixin
+from . import DiscussionBoundBase, NamedClassMixin, ContextualNamedClassMixin
 from .langstrings import LangString
 from .permissions import Permission, Role
 from ..auth import (
     CrudPermissions, P_READ, P_SYSADMIN, P_ADMIN_DISC)
 
 
-class PublicationFlow(Base, NamedClassMixin):
+class PublicationFlow(NamedClassMixin, Base):
     """A state automaton for publication states and transitions"""
     __tablename__ = "publication_flow"
     id = Column(Integer, primary_key=True)
@@ -82,7 +82,7 @@ class PublicationFlow(Base, NamedClassMixin):
     crud_permissions = CrudPermissions(P_READ, P_SYSADMIN)
 
 
-class PublicationState(Base, NamedClassMixin):
+class PublicationState(ContextualNamedClassMixin, Base):
     """A publication state"""
     __tablename__ = "publication_state"
     __table_args__ = (
@@ -110,6 +110,10 @@ class PublicationState(Base, NamedClassMixin):
     def get_naming_column_name(cls):
         return "label"
 
+    @classmethod
+    def get_parent_relation_name(self):
+        return "flow"
+
     def unique_query(self):
         query, _ = super(PublicationState, self).unique_query()
         return query.filter_by(label=self.label, flow=self.flow), True
@@ -117,7 +121,7 @@ class PublicationState(Base, NamedClassMixin):
     crud_permissions = CrudPermissions(P_READ, P_SYSADMIN)
 
 
-class PublicationTransition(Base, NamedClassMixin):
+class PublicationTransition(ContextualNamedClassMixin, Base):
     """A publication transition"""
     __tablename__ = "publication_transition"
     __table_args__ = (
@@ -163,6 +167,10 @@ class PublicationTransition(Base, NamedClassMixin):
     @classmethod
     def get_naming_column_name(cls):
         return "label"
+
+    @classmethod
+    def get_parent_relation_name(self):
+        return "flow"
 
     @property
     def source_label(self):

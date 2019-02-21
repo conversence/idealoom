@@ -902,6 +902,7 @@ class RelationCollectionDefinition(AbstractCollectionDefinition):
             return instance == self.get_attribute(parent_instance)
 
     def get_instance(self, key, parent_instance):
+        from ..models import NamedClassMixin
         instance = None
         if key == '-':
             if not uses_list(self.relationship):
@@ -913,7 +914,9 @@ class RelationCollectionDefinition(AbstractCollectionDefinition):
                 if len(instances) == 1:
                     return instances[0]
                 raise KeyError()
-        else:
+        elif issubclass(self.collection_class, NamedClassMixin):
+            instance = self.collection_class.getByName(key, parent_object=parent_instance)
+        if not instance:
             instance = self.collection_class.get_instance(key)
         # Validate that the instance belongs to the collection...
         if instance and not self.contains(parent_instance, instance):

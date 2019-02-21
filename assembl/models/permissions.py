@@ -33,7 +33,7 @@ from .auth import User, AgentProfile
 log = logging.getLogger(__name__)
 
 
-class Role(Base, NamedClassMixin):
+class Role(NamedClassMixin, Base):
     """A role that a user may have in a discussion"""
     __tablename__ = 'role'
 
@@ -306,7 +306,7 @@ def send_user_to_socket_for_local_user_role(
 
 
 
-class Permission(Base, NamedClassMixin):
+class Permission(NamedClassMixin, Base):
     """A permission that a user may have"""
     __tablename__ = 'permission'
     id = Column(Integer, primary_key=True)

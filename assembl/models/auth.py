@@ -781,7 +781,7 @@ class User(NamedClassMixin, OriginMixin, AgentProfile):
         return "username"
 
     @classmethod
-    def getByName(cls, name, session=None, query=None):
+    def getByName(cls, name, session=None, query=None, parent_object=None):
         if name == 'current':
             from ..auth.util import get_current_user_id
             user_id = get_current_user_id()
