@@ -4,27 +4,27 @@
  */
 
 var Permissions = {
-  P_READ_USER_INFO = 'User.R.baseInfo'
-  P_READ = 'Conversation.R'
-  P_ADD_POST = 'Post.C'
-  P_EDIT_POST = 'Post.U'
-  P_DELETE_POST = 'Post.D'
-  P_VOTE = 'Idea.C.Vote'
-  P_ADD_EXTRACT = 'Content.C.Extract'
-  P_EDIT_EXTRACT = 'Extract.U'
-  P_ADD_IDEA = 'Idea.C'
-  P_EDIT_IDEA = 'Idea.U'
-  P_EDIT_SYNTHESIS = 'Synthesis.U'
-  P_SEND_SYNTHESIS = 'Synthesis.U.send'
-  P_SELF_REGISTER = 'Conversation.A.User'
-  P_SELF_REGISTER_REQUEST = 'Conversation.A.User.request'
-  P_ADMIN_DISC = 'Conversation.U'
-  P_SYSADMIN = '*'
-  P_EXPORT_EXTERNAL_SOURCE = 'Content.U.export'
-  P_MODERATE = 'Content.U.moderate'
-  P_DISC_STATS = 'Conversation.U.stats'
-  P_OVERRIDE_SOCIAL_AUTOLOGIN = 'Conversation.A.User.override_autologin'
-  P_ASSOCIATE_EXTRACT = 'Idea.A.Extract'
+  READ_USER_INFO: 'User.R.baseInfo',
+  READ: 'Conversation.R',
+  ADD_POST: 'Post.C',
+  EDIT_POST: 'Post.U',
+  DELETE_POST: 'Post.D',
+  VOTE: 'Idea.C.Vote',
+  ADD_EXTRACT: 'Content.C.Extract',
+  EDIT_EXTRACT: 'Extract.U',
+  ADD_IDEA: 'Idea.C',
+  EDIT_IDEA: 'Idea.U',
+  EDIT_SYNTHESIS: 'Synthesis.U',
+  SEND_SYNTHESIS: 'Synthesis.U.send',
+  SELF_REGISTER: 'Conversation.A.User',
+  SELF_REGISTER_REQUEST: 'Conversation.A.User.request',
+  ADMIN_DISCUSSION: 'Conversation.U',
+  SYSADMIN: '*',
+  EXPORT_EXTERNAL_SOURCE: 'Content.U.export',
+  MODERATE: 'Content.U.moderate',
+  DISC_STATS: 'Conversation.U.stats',
+  OVERRIDE_SOCIAL_AUTOLOGIN: 'Conversation.A.User.override_autologin',
+  ASSOCIATE_EXTRACT: 'Idea.A.Extract',
 };
 
 export default Permissions;
