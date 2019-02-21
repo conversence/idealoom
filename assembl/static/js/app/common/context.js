@@ -1354,7 +1354,6 @@ Context.prototype = {
     var user = this.getCurrentUser();
     if (user.can(Permissions.ADD_EXTRACT) ||
         user.can(Permissions.EDIT_EXTRACT) ||
-        user.can(Permissions.EDIT_MY_EXTRACT) ||
         user.can(Permissions.ADD_IDEA) ||
         user.can(Permissions.EDIT_IDEA) ||
         user.can(Permissions.EDIT_SYNTHESIS) ||

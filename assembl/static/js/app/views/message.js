@@ -663,7 +663,7 @@ var MessageView = LoaderView.extend({
       html_export_url = Ctx.getApiV2DiscussionUrl("posts/" + this.model.getNumericId() + "/html_export");
     }
 
-    var user_can_delete_this_message = ( Ctx.getCurrentUserId() === Ctx.extractId(this.model.get('idCreator')) && Ctx.getCurrentUser().can(Permissions.DELETE_MY_POST) ) || Ctx.getCurrentUser().can(Permissions.DELETE_POST);
+    var user_can_delete_this_message = Ctx.getCurrentUser().can(Permissions.DELETE_POST); // TODO: check local permissions on post
 
     return {
       message: this.model,

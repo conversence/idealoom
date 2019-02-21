@@ -13,11 +13,11 @@
 
 
 <div class="bx bx-default postit" 
-  <% if (canEditExtracts || (canEditMyExtracts && harvester == ctx.getCurrentUser())) { %>
+  <% if (canEditExtracts) { %>
     draggable="true"
   <% } %>
 data-segmentid="<%= segment.cid %>">
-  <% if (canEditExtracts || (canEditMyExtracts && harvester == ctx.getCurrentUser())) { %>
+  <% if (canEditExtracts) { %>
   <button class="btn btn-cancel btn-sm bx-close js_closeExtract" type="button" data-segmentid="<%= segment.cid %>">
     <i class="icon-delete"></i>
   </button>

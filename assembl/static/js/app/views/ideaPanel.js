@@ -365,7 +365,6 @@ var IdeaPanel = BasePanel.extend({
       canDelete: currentUser.can(Permissions.EDIT_IDEA),
       canEditNextSynthesis: canEditNextSynthesis,
       canEditExtracts: currentUser.can(Permissions.EDIT_EXTRACT),
-      canEditMyExtracts: currentUser.can(Permissions.EDIT_MY_EXTRACT),
       canAddExtracts: currentUser.can(Permissions.EDIT_EXTRACT), //TODO: This is a bit too coarse
       Ctx: Ctx,
       direct_link_relative_url: direct_link_relative_url,
@@ -815,7 +814,7 @@ var IdeaPanel = BasePanel.extend({
 
     var collectionManager = new CollectionManager();
 
-    //TODO: Deal with editing own extract (EDIT_MY_EXTRACT)
+    //TODO: Deal with local permissions
     if (Ctx.getCurrentUser().can(Permissions.EDIT_EXTRACT)) {
       collectionManager.getAllExtractsCollectionPromise()
             .then(function(allExtractsCollection) {
