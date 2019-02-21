@@ -53,8 +53,8 @@ def update_with_kwargs(logger, method_name, event_dict):
             # Special case: allow to set _name in logging parameters
             # to override default logger name.
             event_dict['logger'] = record._name
-            extra_keys.remove('_name')
-        event_dict.update({k: getattr(record, k) for k in extra_keys})
+            record.__dict__.pop('_name')
+        event_dict.update({k: getattr(record, k) for k in extra_keys if k != '_name'})
     for k in ('user', 'request'):
         v = getattr(record, k, None)
         if v is not None:
@@ -78,8 +78,10 @@ class ConsoleFormatter(structlog.stdlib.ProcessorFormatter):
             *args, **kwargs)
 
     def format(self, record):
-        if isinstance(getattr(record, 'exception', None), bytes):
-            record.exception = record.exception.decode('utf-8')
+        for arg in ('exception', '_name'):
+            val = getattr(record, arg, None)
+            if isinstance(val, bytes):
+                setattr(record, arg, val.decode('utf-8'))
         return super(ConsoleFormatter, self).format(record)
 
 
