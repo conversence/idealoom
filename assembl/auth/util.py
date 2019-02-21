@@ -73,13 +73,16 @@ def get_roles(user_id, discussion_id=None, target_instance=None):
         ).with_entities(Role.name)]
 
 
-def roles_from_request(request):
+def request_main_target(request):
     from ..views.traversal import BaseContext
     ctx = getattr(request, 'context', None)
-    instance = None
     if isinstance(ctx, BaseContext):
-        instance = ctx.get_first_instance()
-    return get_roles(request.unauthenticated_userid, request.discussion_id(), instance)
+        return ctx.get_first_instance()
+
+
+def roles_from_request(request):
+    return get_roles(
+        request.unauthenticated_userid, request.discussion_id(), request.main_target)
 
 
 def get_permissions(user_id, discussion_id, target_instance=None):
@@ -118,13 +121,8 @@ def base_permissions_from_request(request):
 
 
 def permissions_from_request(request):
-    from ..views.traversal import BaseContext
-    ctx = request.context
-    instance = None
-    if isinstance(ctx, BaseContext):
-        instance = ctx.get_first_instance()
     return get_permissions(
-        request.authenticated_userid, request.discussion_id(), instance)
+        request.authenticated_userid, request.discussion_id(), request.main_target)
 
 
 def permissions_for_states(discussion_id):
@@ -654,6 +652,8 @@ def includeme(config):
         'permissions_for_states', reify=True)
     config.add_request_method(
         'assembl.auth.util.roles_from_request', 'roles', reify=True)
+    config.add_request_method(
+        'assembl.auth.util.request_main_target', 'main_target', reify=True)
     config.add_request_method(
         'assembl.auth.util.discussion_from_request', 'discussion', reify=True)
     config.add_request_method(

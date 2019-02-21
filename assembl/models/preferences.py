@@ -224,7 +224,7 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
 
     def validate_single_value(self, key, value, pref_data, data_type):
         # TODO: Validation for the datatypes.
-        # base_type: (bool|json|int|string|text|scalar|url|email|domain|locale|langstr|permission|role)
+        # base_type: (bool|json|int|string|text|scalar|url|email|domain|locale|langstr|permission|role|pubflow)
         # type: base_type|list_of_(type)|dict_of_(base_type)_to_(type)
         if data_type.startswith("list_of_"):
             assert isinstance(value, (list, tuple)), "Not a list"
@@ -268,6 +268,9 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
                 assert is_email(value), "Not an email"
             elif data_type == "locale":
                 pass  # TODO
+            elif data_type == "pubflow":
+                from .publication_states import PublicationFlow
+                assert PublicationFlow.getByName(value)
             elif data_type == "permission":
                 assert value in ASSEMBL_PERMISSIONS
             elif data_type == "role":
@@ -387,6 +390,19 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
             # "frontend_validator_function": func_name...?,
             # "backend_validator_function": func_name...?,
             "default": ""
+        },
+
+        # Publication flow to use for ideas
+        {
+            "id": "idea_publication_flow",
+            "name": _("Publication flow used for ideas"),
+            "value_type": "pubflow",
+            "description": _("Publication flow used for Ideas"),
+            "allow_user_override": None,
+            "modification_permission": P_ADMIN_DISC,
+            # "frontend_validator_function": func_name...?,
+            # "backend_validator_function": func_name...?,
+            "default": "basic_flow"
         },
 
         # Simple view panel order, eg NIM or NMI

@@ -46,7 +46,7 @@ def upgrade(pyramid_env):
                 nullable=False, index=True),
             sa.Column("source_id", sa.Integer, sa.ForeignKey(
                 "publication_state.id", ondelete="CASCADE", onupdate="CASCADE"),
-                nullable=False, index=True),
+                nullable=True, index=True),
             sa.Column("target_id", sa.Integer, sa.ForeignKey(
                 "publication_state.id", ondelete="CASCADE", onupdate="CASCADE"),
                 nullable=False, index=True),

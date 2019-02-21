@@ -994,6 +994,43 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
         return [wl.context_url for wl in self.widget_links
                 if isinstance(wl, GeneratedIdeaWidgetLink)]
 
+    @property
+    def pub_state_name(self):
+        return self.pub_state.name
+
+    @pub_state_name.setter
+    def pub_state_name(self, name):
+        flow = self.discussion.idea_publication_flow
+        state = PublicationState.getByName(name, parent_object=flow)
+        # assert?
+        if state:
+            old = self.pub_state
+            self.pub_state = state
+            return old
+
+    def apply_transition(self, transition_name, user_id, permissions=None):
+        flow = self.discussion.idea_publication_flow
+        transition = PublicationTransition.getByName(name, parent_object=flow)
+        assert transition, "Cannot find transition " + name
+        if not permissions:
+            from pyramid.threadlocal import get_current_request
+            request = get_current_request()
+            if request:
+                if request.main_target == this:
+                    permissions = request.permissions
+                else:
+                    permissions = list(set(request.base_permissions) + set(self.extra_permissions_for(user_id)))
+            else:
+                from assembl.auth.util import get_permissions
+                permissions = get_permissions(user_id, self.discussion_id, self)
+        if transition.req_permission_name not in permissions:
+            raise HTTPUnauthorized("You need permission %s to apply transition %s" % (
+                transition.req_permission_name, transition.label))
+        if transition.source_id and transition.source_id != this.pub_state_id:
+            raise HTTPBadRequest("Transition %s applies to state %s, not %s" %(
+                transition.label, transition.source_label, this.pub_state_name))
+        this.pub_state_id = transition.target_id
+
     def extra_permissions_for(self, user_id):
         from assembl.auth.util import get_permissions, permissions_for_state
         from pyramid.threadlocal import get_current_request
@@ -1001,7 +1038,9 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
         if request.unauthenticated_userid != user_id:
             request = None
         base_permissions = request.base_permissions if request else get_permissions(user_id, self.discussion_id)
-        if not self.local_user_roles:
+        if request and request.main_target is self:
+            permissions = request.permissions
+        elif not self.local_user_roles:
             if not self.pub_state_id:
                 return []
             if request:

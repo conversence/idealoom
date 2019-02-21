@@ -334,6 +334,7 @@
         "widget_links": "&widget_link_signatures",
         "widget_add_post_endpoint": true,
         "extra_permissions": "&extra_permissions",
+        "pub_state_name": true,
         "attachments": [":default"]
     },
     "RootIdea": {

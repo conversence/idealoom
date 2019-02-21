@@ -134,7 +134,7 @@ class PublicationTransition(ContextualNamedClassMixin, Base):
         nullable=False, index=True)
     source_id = Column(Integer, ForeignKey(
             PublicationState.id, ondelete="CASCADE", onupdate="CASCADE"),
-        nullable=False, index=True)
+        nullable=True, index=True)
     target_id = Column(Integer, ForeignKey(
             PublicationState.id, ondelete="CASCADE", onupdate="CASCADE"),
         nullable=False, index=True)
@@ -199,6 +199,17 @@ class PublicationTransition(ContextualNamedClassMixin, Base):
     @req_permission_name.setter
     def req_permission_name(self, label):
         self.requires_permission = Permission.getByName(label)
+
+    def _do_update_from_json(
+                self, json, parse_def, context,
+                duplicate_handling=None, object_importer=None):
+        target = super(PublicationTransition, self)._do_update_from_json(
+            json, parse_def, context, object_importer=object_importer,
+            duplicate_handling=duplicate_handling)
+        assert target.target.flow == target.flow
+        if target.source_id:
+            assert target.source.flow == target.flow
+        return target
 
     crud_permissions = CrudPermissions(P_READ, P_SYSADMIN)
 

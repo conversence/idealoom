@@ -48,6 +48,7 @@ from .auth import User
 from .permissions import (
     DiscussionPermission, Role, Permission, UserRole, LocalUserRole,
     UserTemplate)
+from .publication_states import PublicationFlow
 from .preferences import Preferences
 from ..semantic.namespaces import (CATALYST, ASSEMBL, DCTERMS)
 
@@ -218,6 +219,13 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
 
     def container_url(self):
         return "/data/Discussion"
+
+    @property
+    def idea_publication_flow(self):
+        preferences = self.preferences
+        idea_flow_name = preferences['idea_publication_flow']
+        if idea_flow_name:
+            return PublicationFlow.getByName(idea_flow_name)
 
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):
