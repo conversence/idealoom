@@ -23,6 +23,7 @@ from pyramid.httpexceptions import (
 from pyramid.i18n import TranslationStringFactory
 from pyramid.settings import asbool, aslist
 from social_core.exceptions import AuthMissingParameter
+from lxml import html
 
 from ..lib.json import json_renderer_factory
 from ..lib import config
@@ -164,6 +165,46 @@ def create_get_route(request, discussion=0):
             kwargs['discussion_slug'] = kwargs.get('discussion_slug', '')
             return request.route_path(name, **kwargs)
     return get_route
+
+
+_RES_FILE_CACHE = {}
+
+def get_res_file(testing):
+    global _RES_FILE_CACHE
+    use_webpack_server = asbool(config.get('use_webpack_server'))
+    if use_webpack_server:
+        # reset the cache every time
+        _RES_FILE_CACHE[testing] = None
+    if not _RES_FILE_CACHE.get(testing, None):
+        res_name = os.path.dirname(os.path.dirname(__file__)) + "/static/js/build/"
+        if use_webpack_server:
+            res_name += 'live_'
+        res_name += "test.html" if testing else "index.html"
+        _RES_FILE_CACHE[testing] = html.parse(res_name)
+    return _RES_FILE_CACHE[testing]
+
+
+def get_js_links(static_url, testing=False):
+    res_file = get_res_file(testing)
+    links = res_file.xpath("//script/@src")
+    # some webpack config issues still
+    if testing:
+        links = [l for l in links if 'main' not in l]
+    else:
+        links = [l for l in links if 'test' not in l.lower()]
+    if not asbool(config.get('use_webpack_server')):
+        links = [static_url + l for l in links]
+    links = ['<script type="text/javascript" src="%s"></script>' % l for l in links]
+    return "\n".join(links)
+
+
+def get_css_links(static_url, testing=False):
+    res_file = get_res_file(testing)
+    links = res_file.xpath("//head/link[@rel='stylesheet']/@href")
+    if not asbool(config.get('use_webpack_server')):
+        links = [static_url + l for l in links]
+    links = ['<link type="text/css" rel="stylesheet" href="%s"></link>' % l for l in links]
+    return "\n".join(links)
 
 
 def get_default_context(request, **kwargs):
@@ -322,6 +363,8 @@ def get_default_context(request, **kwargs):
         activate_tour=str(config.get('activate_tour') or False).lower(),
         providers=providers,
         providers_json=json.dumps(providers),
+        js_links=get_js_links(static_url),
+        css_links=get_css_links(static_url),
         translations=codecs.open(jedfilename, encoding='utf-8').read()
         )
 
@@ -443,6 +486,7 @@ def sanitize_next_view(next_view):
         else:
             return None
     return next_view
+
 
 
 def includeme(config):

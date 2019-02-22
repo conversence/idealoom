@@ -26,7 +26,8 @@ from ...models.auth import (
 from assembl.auth.util import user_has_permission
 from .. import (
     HTTPTemporaryRedirect, sanitize_next_view,
-    get_default_context as base_default_context)
+    get_default_context as base_default_context,
+    get_css_links, get_js_links)
 from assembl.lib.frontend_urls import FrontendUrls
 from assembl.nlp.translation_service import DummyGoogleTranslationService
 from ..auth.views import get_social_autologin
@@ -244,4 +245,7 @@ def frontend_test_view(request):
     context['translation_locale_names_json'] = locale_labels
     context['translation_service_data_json'] = '{}'
     context['preferences_json'] = json.dumps(dict(discussion.preferences))
+    static_url = context['STATIC_URL']
+    context['js_links'] = get_js_links(static_url, True)
+    context['css_links'] = get_css_links(static_url, True)
     return context

@@ -59,14 +59,6 @@
     var CKEDITOR_BASEPATH = '{{ STATIC_URL }}/node_modules/ckeditor/';
 </script>
 
-<script src="{{ STATIC_URL }}/js/build/manifest.js"></script>
-<script src="{{ STATIC_URL }}/js/build/infrastructure.js"></script>
-<script src="{{ STATIC_URL }}/js/build/testInfra.js"></script>
-
-<script> mocha.setup('bdd') </script>
-
-<script src="{{ STATIC_URL }}/js/build/tests.js"></script>
-
-<script> mocha.run() </script>
+{{js_links|safe}}
 
 {% endblock main_js %}

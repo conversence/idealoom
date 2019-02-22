@@ -2,9 +2,11 @@ var path = require('path'),
     glob = require('glob'),
     webpack = require('webpack'),
     _ = require('underscore'),
+    MiniCssExtractPlugin = require("mini-css-extract-plugin"),
+    HtmlWebpackPlugin = require('html-webpack-plugin'),
+    HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin'),
     UglifyJSPlugin = require('uglifyjs-webpack-plugin'),
-    sassStaticUrl = process.env.sassStaticUrl || '~/static/',
-    ExtractTextPlugin = require('extract-text-webpack-plugin');
+    sassStaticUrl = process.env.sassStaticUrl || '/static/';
 
 function theme_entries() {
   var entries = {},
@@ -29,58 +31,58 @@ function theme_entries() {
 module.exports = {
   entry: _.extend(theme_entries(), {
     main: './js/app/index.js',
-    infrastructure: [
-      'jquery',
-      'underscore',
-      'backbone',
-      'backbone.marionette',
-      'backbone.modal',
-      'backbone-model-file-upload',
-      'backbone.radio',
-      'bootstrap-notify',
-      'bluebird',
-      'ckeditor',
-      'd3',
-      'd3-array',
-      'd3-axis',
-      'd3-interpolate',
-      'd3-scale',
-      'd3-selection',
-      'd3-format',
-      'd3-time',
-      'hopscotch',
-      'jed',
-      'linkifyjs',
-      'moment',
-      'raven-js',
-      'sockjs-client',
-
-      // Those choke because they expect jquery in namespace.
-      'jquery.dotdotdot',
-      // 'annotator/annotator-full.js',
-      // 'Backbone.Subset',
-      'bootstrap-dropdown',
-      'bootstrap-tooltip',
-      'jquery-highlight/jquery.highlight.js',
-      'jquery-oembed-all/jquery.oembed',
-      'jquery-autosize',
-    ],
-    testInfra: [
-      'mocha',
-    ],
+//     infrastructure: [
+//       'jquery',
+//       'underscore',
+//       'backbone',
+//       'backbone.marionette',
+//       'backbone.modal',
+//       'backbone-model-file-upload',
+//       'backbone.radio',
+//       'bootstrap-notify',
+//       'bluebird',
+//       'ckeditor',
+//       'd3',
+//       'd3-array',
+//       'd3-axis',
+//       'd3-interpolate',
+//       'd3-scale',
+//       'd3-selection',
+//       'd3-format',
+//       'd3-time',
+//       'hopscotch',
+//       'jed',
+//       'linkifyjs',
+//       'moment',
+//       'raven-js',
+//       'sockjs-client',
+// 
+//       // Those choke because they expect jquery in namespace.
+//       'jquery.dotdotdot',
+//       // 'annotator/annotator-full.js',
+//       // 'Backbone.Subset',
+//       'bootstrap-dropdown',
+//       'bootstrap-tooltip',
+//       'jquery-highlight/jquery.highlight.js',
+//       'jquery-oembed-all/jquery.oembed',
+//       'jquery-autosize',
+//     ],
+//     testInfra: [
+//       'mocha',
+//       'chai',
+//       'chai-as-promised',
+//       'lolex',
+//       'sinon',
+//     ],
     tests: [
-      'chai',
-      'chai-as-promised',
-      'lolex',
-      'sinon',
       './js/app/tests.js',
     ],
     annotator_ext: './css/lib/annotator_ext.scss',
   }),
   output: {
     path: path.join(__dirname, 'js/build'),
-    filename: '[name].js',
-    sourceMapFilename: "[name].js.map",
+    filename: '[name].[hash].js',
+    sourceMapFilename: "[name].[hash].js.map",
     publicPath: '/js/build/',
   },
   resolve: {
@@ -101,12 +103,6 @@ module.exports = {
   },
   module: {
     rules: [
-      {
-        test: /\.json$/,
-        use: [{
-          loader: 'json-loader',
-        }],
-      },
       {
         test: /\.pegjs$/,
         use: [{
@@ -140,30 +136,26 @@ module.exports = {
       },
       {
         test: /\.scss$/,
-        use: ExtractTextPlugin.extract({
-          fallback: 'style-loader',
-          use: [
-            {
-              loader: 'css-loader',
+        use: [
+          MiniCssExtractPlugin.loader,
+          'css-loader',
+          {
+            loader: 'sass-loader',
+            options: {
+              includePaths: [
+                path.resolve(__dirname, 'node_modules/bourbon/app/assets/stylesheets'),
+              ],
+              data: '$static_url: "'+sassStaticUrl+'";',
             },
-            {
-              loader: 'sass-loader',
-              options: {
-                includePaths: [
-                  path.resolve(__dirname, 'node_modules/bourbon/app/assets/stylesheets'),
-                ],
-                data: '$static_url: "' + sassStaticUrl + '";',
-              },
-            },
-          ],
-        }),
+          },
+        ],
       },
       {
         test: /\.css$/,
-        use: ExtractTextPlugin.extract({
-          fallback: 'style-loader',
-          use: 'css-loader',
-        }),
+        use: [
+          MiniCssExtractPlugin.loader,
+          'css-loader',
+        ]
       },
       {
         test: /\.(jpg|png|woff|woff2|eot|ttf|svg|html)$/,
@@ -185,6 +177,37 @@ module.exports = {
     child_process: 'empty',
   },
   devtool: 'source-map',
+  optimization: {
+    // splitChunks: {
+    //   chunks: "all",
+    //   cacheGroups: {
+    //     infrastructure: {
+    //       test: "infrastructure",
+    //       name: "infrastructure",
+    //       priority: -40,
+    //       enforce: true
+    //     },
+    //     testInfra: {
+    //       test: "testInfra",
+    //       name: "testInfra",
+    //       priority: -30,
+    //       enforce: true
+    //     },
+    //     main: {
+    //       test: "main",
+    //       name: "main",
+    //       priority: -20,
+    //       enforce: true
+    //     },
+    //     tests: {
+    //       test: "tests",
+    //       name: "tests",
+    //       priority: -10,
+    //       enforce: true
+    //     },
+    //   }
+    // }
+  },
   plugins: [
     // this makes mocha choke on requiring supports-color for very obscure reasons.
     // Revisit.
@@ -193,10 +216,18 @@ module.exports = {
     //     NODE_ENV: JSON.stringify('production')
     //   }
     // }),
-    new webpack.optimize.CommonsChunkPlugin({
-      names: ['infrastructure', 'manifest'] // Specify the common bundle's name.
-    }),
     new UglifyJSPlugin({ sourceMap: true }),
-    new ExtractTextPlugin('[name].css'),
+    new MiniCssExtractPlugin({ filename: "[name].[hash].css" }),
+    new HtmlWebpackPlugin({
+      alwaysWriteToDisk: true,
+      filename: 'index.html',
+      excludeChunks: ['tests'],
+    }),
+    new HtmlWebpackPlugin({
+      alwaysWriteToDisk: true,
+      filename: 'test.html',
+      excludeChunks: ['main'],
+    }),
+    new HtmlWebpackHarddiskPlugin(),
   ],
 };

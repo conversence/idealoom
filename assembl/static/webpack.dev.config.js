@@ -1,11 +1,13 @@
-process.env.sassStaticUrl = '~/';
+process.env.sassStaticUrl = '/';
 
 var path = require('path'),
     glob = require('glob'),
     webpack = require('webpack'),
     _ = require('underscore'),
-    ExtractTextPlugin = require("extract-text-webpack-plugin"),
     base_config = require('./webpack.config.js'),
+    MiniCssExtractPlugin = require("mini-css-extract-plugin"),
+    HtmlWebpackPlugin = require('html-webpack-plugin'),
+    HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin'),
     DashboardPlugin = require('webpack-dashboard/plugin'),
     webpackHost = process.env.WEBPACK_URL.split('://')[1].split(':')[0],
     webpack_port = parseInt(process.env.WEBPACK_URL.split(':')[2]),
@@ -38,11 +40,19 @@ module.exports = _.extend(base_config, {
     disableHostCheck: disableHostCheck,
   },
   plugins: [
-      new webpack.HotModuleReplacementPlugin(),
-      new webpack.optimize.CommonsChunkPlugin({
-        names: ['infrastructure', 'manifest'] // Specify the common bundle's name.
-      }),
-      new ExtractTextPlugin('[name].css'),
-      new DashboardPlugin(),
+    new webpack.HotModuleReplacementPlugin(),
+    new MiniCssExtractPlugin({ filename: "[name].[contenthash].css" }),
+    new HtmlWebpackPlugin({
+      alwaysWriteToDisk: true,
+      filename: 'live_index.html',
+      excludeChunks: ['tests'],
+    }),
+    new HtmlWebpackPlugin({
+      alwaysWriteToDisk: true,
+      filename: 'live_test.html',
+    }),
+    new HtmlWebpackHarddiskPlugin(),
+    new DashboardPlugin(),
   ],
 });
+

@@ -122,9 +122,8 @@
     <script>
         var CKEDITOR_BASEPATH = '{{ STATIC_URL }}/node_modules/ckeditor/';
     </script>
-    <script src="{{ STATIC_URL }}/js/build/manifest.js"></script>
-    <script src="{{ STATIC_URL }}/js/build/infrastructure.js"></script>
-    <script src="{{ STATIC_URL }}/js/build/main.js"></script>
+    <!-- script src="{{ STATIC_URL }}/js/build/manifest.js"></script -->
+    {{js_links|safe}}
 {% endblock %}
 
 {% block facebook_sdk_load %}
