@@ -121,6 +121,14 @@ class ImportRecord(DiscussionBoundBase):
     def update(self, data):
         pass
 
+    @classmethod
+    def records_query(cls, target, source_id=None):
+        q = target.db.query(cls).filter_by(
+            target_id=target.id, target_table=target.base_tablename())
+        if source_id:
+            q = q.filter_by(source_id=None)
+        return q
+
 
 class CatalystIdeaSource(IdeaSource):
 

@@ -17,6 +17,7 @@ from sqlalchemy.orm import (
     column_property, with_polymorphic, remote, foreign)
 from sqlalchemy.orm.attributes import NO_VALUE
 from sqlalchemy.sql import text, column
+from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.sql.expression import union, bindparam, literal_column
 
 from sqlalchemy import (
@@ -55,6 +56,7 @@ from ..lib.sqla import CrudOperation
 from ..lib.model_watcher import get_model_watcher
 from .auth import AgentProfile
 from .publication_states import PublicationState
+from .import_records import ImportRecord
 from assembl.views.traversal import (
     AbstractCollectionDefinition, RelationCollectionDefinition,
     collection_creation_side_effects, InstanceContext)
@@ -190,13 +192,24 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
         backref=backref("idea_from_description", lazy="dynamic"),
         cascade="all")
     hidden = Column(Boolean, server_default='0')
+    # TODO: Make this autoupdate on change. see
+    # http://stackoverflow.com/questions/1035980/update-timestamp-when-row-is-updated-in-postgresql
     last_modified = Column(Timestamp)
     creator_id = Column(Integer, ForeignKey(
         AgentProfile.id, ondelete="SET NULL", onupdate="CASCADE"))
     pub_state_id = Column(Integer, ForeignKey(
         PublicationState.id, ondelete="SET NULL", onupdate="CASCADE"))
-    # TODO: Make this autoupdate on change. see
-    # http://stackoverflow.com/questions/1035980/update-timestamp-when-row-is-updated-in-postgresql
+
+    @declared_attr
+    def import_records(cls):
+        return relationship(
+            ImportRecord,
+            primaryjoin=(remote(ImportRecord.target_id)==foreign(cls.id)) &
+                        (ImportRecord.target_table == cls.__tablename__))
+
+    @property
+    def is_imported(self):
+        return self.db.query(ImportRecord.records_query(self).exists()).scalar()
 
     # temporary placeholders
     @property
