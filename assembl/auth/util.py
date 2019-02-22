@@ -17,7 +17,7 @@ from pyramid.authentication import SessionAuthenticationPolicy
 from assembl.lib.locale import _
 from ..lib.sqla import get_session_maker
 from . import (
-    R_SYSADMIN, P_READ, R_OWNER, SYSTEM_ROLES, ASSEMBL_PERMISSIONS)
+    R_SYSADMIN, P_READ, R_OWNER, P_SYSADMIN, SYSTEM_ROLES, ASSEMBL_PERMISSIONS)
 from .password import verify_data_token, Validity
 from ..models.auth import User, AgentProfile, EmailAccount
 from ..models.permissions import (
@@ -88,11 +88,11 @@ def roles_from_request(request):
 def get_permissions(user_id, discussion_id, target_instance=None):
     user_id = user_id or Everyone
     session = get_session_maker()()
+    is_sysadmin = session.query(UserRole).filter_by(profile_id=user_id
+        ).join(Role).filter_by(name=R_SYSADMIN).count()
     if not discussion_id:
         if user_id == Everyone:
             return []
-        is_sysadmin = session.query(UserRole).filter_by(profile_id=user_id
-            ).join(Role).filter_by(name=R_SYSADMIN).count()
         return ASSEMBL_PERMISSIONS if is_sysadmin else []
     roles = get_role_query(user_id, discussion_id, target_instance
         ).with_entities(Role.id)
@@ -112,7 +112,10 @@ def get_permissions(user_id, discussion_id, target_instance=None):
     permissions = session.query(Permission.name).join(
         rp_query, rp_query.c.permission_id == Permission.id).join(
         Role, (rp_query.c.role_id == Role.id) & Role.id.in_(roles))
-    return [x[0] for x in permissions.distinct()]
+    result = [x[0] for x in permissions.distinct()]
+    if is_sysadmin:
+        result.append(P_SYSADMIN)
+    return result
 
 
 def base_permissions_from_request(request):

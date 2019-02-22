@@ -67,6 +67,9 @@ var Types = {
   VOTESPECIFICATIONS: "AbstractVoteSpecification",
   TOKENVOTESPECIFICATION: "TokenVoteSpecification",
   WIDGET: "Widget",
+  PUBLICATION_FLOW: "PublicationFlow",
+  PUBLICATION_STATE: "PublicationState",
+  PUBLICATION_TRANSITION: "PublicationTransition",
 
 
 /*

@@ -35,6 +35,7 @@ import DiscussionSources from '../models/sources.js';
 import DiscussionPreference from '../models/discussionPreference.js';
 import LanguagePreference from '../models/languagePreference.js';
 import IdeaContentLink from '../models/ideaContentLink.js';
+import PublicationFlow from '../models/publicationFlow.js';
 
 /**
  * A singleton to manage lazy loading of server collections
@@ -233,6 +234,13 @@ var CollectionManager = Marionette.Object.extend({
    */
   _globalPreferences: undefined,
   _globalPreferencesPromise: undefined,
+
+  /**
+   * Collection of all publicationFlows of the system
+   * @type {DiscussionPreference.Model}
+   */
+  _allPublicationFlows: undefined,
+  _allPublicationFlowsPromise: undefined,
 
   /**
    * Dictionary of Collections of each message's idea content link
@@ -1040,6 +1048,25 @@ var CollectionManager = Marionette.Object.extend({
     var tmp = new IdeaContentLink.Collection(validIcls, {message: messageModel});
     tmp.collectionManager = this;
     return tmp;
+  },
+  /**
+   * Returns the collection of widgets
+   * @returns {BaseCollection}
+   * @function app.common.collectionManager.CollectionManager.getAllWidgetsPromise
+  **/
+  getAllPublicationFlowsPromise: function() {
+    if (this._allPublicationFlowsPromise) {
+      return this._allPublicationFlowsPromise;
+    }
+
+    this._allPublicationFlows = new PublicationFlow.publicationFlowCollection();
+    this._allPublicationFlows.collectionManager = this;
+    this._allPublicationFlowsPromise = Promise.resolve(this._allPublicationFlows.fetch())
+        .thenReturn(this._allPublicationFlows)
+        .catch(function(e) {
+          Raven.captureException(e);
+        });
+    return this._allPublicationFlowsPromise;
   },
   /**
    * Returns the collection of widgets

@@ -100,6 +100,8 @@ function getPreferenceEditView(preferenceModel, subViewKey, useKey) {
       return PermissionPreferenceView;
     case "role":
       return RolePreferenceView;
+    case "pubflow":
+      return PubFlowPreferenceView;
     case "string":
       return StringPreferenceView;
     case "scalar":
@@ -514,6 +516,37 @@ var RolePreferenceView = ScalarPreferenceView.extend({
   },
 });
 
+
+/**
+ * View to set a role value preference (chosen from the set of roles)
+ * @class app.views.preferencesView.PubFlowPreferenceView
+ * @extends app.views.preferencesView.ScalarPreferenceView
+ */
+var PubFlowPreferenceView = ScalarPreferenceView.extend({
+  constructor: function PubFlowPreferenceView() {
+    ScalarPreferenceView.apply(this, arguments);
+    this.pubFlowCollection = null;
+  },
+  initialize: function(options) {
+    ScalarPreferenceView.prototype.initialize.apply(this, arguments);
+    const collectionManager = new CollectionManager();
+    collectionManager.getAllPublicationFlowsPromise().then((pubFlowCollection) => {
+      this.pubFlowCollection = pubFlowCollection;
+      this.render();
+    })
+  },
+  serializeData: function(...args) {
+    var data = ScalarPreferenceView.prototype.serializeData.apply(this, args);
+    data.scalarOptions = {};
+    if (this.pubFlowCollection) {
+      this.pubFlowCollection.each((pubFlowModel) => {
+        const label = pubFlowModel.get('label')
+        data.scalarOptions[label] = label;
+      });
+    }
+    return data;
+  },
+});
 
 /**
  * View to set a URL value preference
