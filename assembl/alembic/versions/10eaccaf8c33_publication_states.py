@@ -99,7 +99,7 @@ def upgrade(pyramid_env):
 
         op.add_column('idea_source', sa.Column('data_filter', sa.String))
         op.add_column(
-            'idea_source', sa.Column('target_state', sa.Integer, sa.ForeignKey(
+            'idea_source', sa.Column('target_state_id', sa.Integer, sa.ForeignKey(
                 'publication_state.id', ondelete="SET NULL", onupdate="CASCADE")))
 
         op.drop_constraint('local_user_role_user_id_fkey', 'local_user_role')
@@ -132,7 +132,7 @@ def downgrade(pyramid_env):
         op.drop_column('idea', "creator_id")
         op.drop_column('idea', "pub_state_id")
         op.drop_column('idea_source', 'data_filter')
-        op.drop_column('idea_source', 'target_state')
+        op.drop_column('idea_source', 'target_state_id')
         op.drop_table("state_discussion_permission")
         op.drop_table("publication_transition")
         op.drop_table("publication_state")

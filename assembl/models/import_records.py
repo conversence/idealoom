@@ -1,3 +1,4 @@
+from abc import abstractmethod
 import logging
 
 from sqlalchemy import (
@@ -11,6 +12,7 @@ from rdflib_jsonld.context import Context
 from . import DiscussionBoundBase
 from .uriref import URIRefDb
 from .generic import ContentSource
+from .publication_states import PublicationState
 from ..lib.sqla import get_named_class, get_named_object
 from ..lib.generic_pointer import (
     UniversalTableRefColType, generic_relationship)
@@ -25,8 +27,12 @@ class IdeaSource(ContentSource):
     __tablename__ = 'idea_source'
     id = Column(Integer, ForeignKey(ContentSource.id), primary_key=True)
     uri_id = Column(Integer, ForeignKey(URIRefDb.id), nullable=False, unique=True)
+    data_filter = Column(String)  # jquery-based, assuming json data
+    target_state_id = Column(Integer, ForeignKey(
+        PublicationState.id, ondelete="SET NULL", onupdate="CASCADE"))
 
     source_uri_id = relationship(URIRefDb)
+    target_state = relationship(PublicationState)
 
     __mapper_args__ = {
         'polymorphic_identity': 'abstract_idea_source',
@@ -128,6 +134,101 @@ class ImportRecord(DiscussionBoundBase):
         if source_id:
             q = q.filter_by(source_id=None)
         return q
+
+
+class RecordIdeaSource(IdeaSource):
+    def __init__(self, *args, **kwargs):
+        super(RecordIdeaSource, self).__init__(*args, **kwargs)
+        self.instance_by_id = {}
+        self.promises_by_id = defaultdict(list)
+        # preload
+        self.import_record_by_id = {r.external_id: r for r in self.import_records}
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'idealoom',
+    }
+
+    @abstractmethod
+    def class_from_data(self, data):
+        pass
+
+    @abstractmethod
+    def id_from_data(self, data):
+        pass
+
+    def get_existing(self, identifier):
+        instance = self.instance_by_id.get(identifier, None)
+        if instance is not None:
+            return instance
+        if identifier.startswith(self.global_url):
+            identifier = "local:" + identifier[len(self.global_url):]
+        if identifier.startswith('local:'):  # Now guaranteed to be internal
+            instance = get_named_object(identifier)
+            if instance:
+                return instance
+        else:
+            record = self.import_record_by_id.get(identifier, None)
+            if record is not None:
+                return record.target
+
+    def process_data(self, data):
+        return data
+
+    def associate(self, ext_id, instance, data=None):
+        if ext_id in self.instance_by_id:
+            if self.instance_by_id[ext_id] != instance:
+                print("**** conflicting association:", ext_id, self.instance_by_id[ext_id], instance)
+        self.instance_by_id[ext_id] = instance
+        record = self.import_record_by_id.get(ext_id, None)
+        if record:
+            record.update(data)
+        else:
+            record = ImportRecord(
+                source=self, target=instance, external_id=ext_id)
+            self.db.add(record)
+            self.import_record_by_id[ext_id] = record
+        while self.promises_by_id[ext_id]:
+            promise = self.promises_by_id[ext_id].pop()
+            promise(instance)
+
+    def record_association(self, fn, ext_id):
+        if ext_id in self.instance_by_id:
+            fn(self.instance_by_id[ext_id])
+        else:
+            self.promises_by_id.append(fn)
+
+    def read_data(self, data_gen, discussion, admin_user_id, base=None):
+        instance_by_id = {}
+        data_by_id = {}
+        # preload
+        waiting_for = defaultdict(list)
+        def resolve(id, instance):
+            pass
+
+        for data in data_gen:
+            ext_id = self.id_from_data(data)
+            data_by_id[ext_id] = data
+            cls = self.class_from_data(data)
+            if not cls:
+                instance_by_id[ext_id] = None
+                continue
+            pdata = self.process_data(data)
+            instance_ctx = cls.create_from_json(
+                record, ctx, parse_def_name='cif_reverse',
+                object_importer=self)
+            self.associate(ext_id, instance_ctx._instance)
+            self.db.add(instance)
+        self.db.flush()
+        # Maybe tombstone objects that had import records and were not reimported or referred to?
+
+
+
+class IdeaLoomIdeaSource(IdeaSource):
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'idealoom',
+    }
+
 
 
 class CatalystIdeaSource(IdeaSource):
@@ -242,7 +343,7 @@ class CatalystIdeaSource(IdeaSource):
         'Usergroup': None,
     }
 
-    def class_from_json(self, json):
+    def class_from_data(self, json):
         typename = json.get('@type')
         # Look for aliased classes.
         # Maybe look in the context instead?
@@ -252,6 +353,9 @@ class CatalystIdeaSource(IdeaSource):
             # TODO: Adjust for subclasses according to json record
             # cls = cls.get_jsonld_subclass(json)
             return cls
+
+    def id_from_data(self, data):
+        return data.get('@id', None)
 
     def get_existing(self, identifier):
         instance = self.instance_by_id.get(identifier, None)
@@ -270,37 +374,40 @@ class CatalystIdeaSource(IdeaSource):
             if record is not None:
                 return record.target
 
+    def process_data(self, record):
+        record['in_conversation'] = self.discussion.uri()
+        from .idea import Idea, IdeaLink
+        from .votes import AbstractIdeaVote, AbstractVoteSpecification
+        from .widgets import MultiCriterionVotingWidget
+        cls = self.class_from_data(record)
+        if cls:
+            if issubclass(cls, IdeaLink):
+                # compensate for old bug
+                if "questioned_by_issue" in record and 'response_issue' in record:
+                    issue = record.pop('response_issue')
+                    record['applicable_issue'] = issue
+                for prop in list(record.keys()):
+                    alias = self.subProperties.get(prop, None)
+                    if alias:
+                        record[alias] = record[prop]
+            if issubclass(cls, (Idea, IdeaLink)):
+                type = record["@type"]
+                record['rdf_type'] = \
+                    self.deprecatedClassesAndProps.get(type, type)
+                record['@type'] = cls.external_typename()
+            if issubclass(cls, (AbstractIdeaVote, AbstractVoteSpecification)):
+                if 'widget' not in record:
+                    if 'dummy_vote_widget' not in self.instance_by_id:
+                        self.instance_by_id['dummy_vote_widget'] = \
+                            MultiCriterionVotingWidget(discussion=self.discussion)
+                    record['widget'] = 'dummy_vote_widget'
+        print("****** get_record: ", identifier, record)
+        return record
+
     def get_record(self, identifier):
         record = self.json_by_id.get(identifier, None)
         if record:
-            record['in_conversation'] = self.discussion.uri()
-            from .idea import Idea, IdeaLink
-            from .votes import AbstractIdeaVote, AbstractVoteSpecification
-            from .widgets import MultiCriterionVotingWidget
-            cls = self.class_from_json(record)
-            if cls:
-                if issubclass(cls, IdeaLink):
-                    # compensate for old bug
-                    if "questioned_by_issue" in record and 'response_issue' in record:
-                        issue = record.pop('response_issue')
-                        record['applicable_issue'] = issue
-                    for prop in list(record.keys()):
-                        alias = self.subProperties.get(prop, None)
-                        if alias:
-                            record[alias] = record[prop]
-                if issubclass(cls, (Idea, IdeaLink)):
-                    type = record["@type"]
-                    record['rdf_type'] = \
-                        self.deprecatedClassesAndProps.get(type, type)
-                    record['@type'] = cls.external_typename()
-                if issubclass(cls, (AbstractIdeaVote, AbstractVoteSpecification)):
-                    if 'widget' not in record:
-                        if 'dummy_vote_widget' not in self.instance_by_id:
-                            self.instance_by_id['dummy_vote_widget'] = \
-                                MultiCriterionVotingWidget(discussion=self.discussion)
-                        record['widget'] = 'dummy_vote_widget'
-            print("****** get_record: ", identifier, record)
-            return record
+            return self.process_data(record)
 
     def associate(self, target_id, instance, data=None):
         if target_id in self.instance_by_id:
@@ -317,6 +424,39 @@ class CatalystIdeaSource(IdeaSource):
             self.import_records_by_id[target_id] = record
 
     def read(self, jsonld, discussion, admin_user_id, base=None):
+        self.global_url = get_global_base_url() + "/data/"
+        if isinstance(jsonld, string_types):
+            jsonld = json.loads(jsonld)
+        c = jsonld['@context']
+        self.remote_context = Context(c)
+
+        def find_objects(j):
+            if isinstance(j, list):
+                for x in j:
+                    for obj in find_objects(x):
+                        yield obj
+            elif isinstance(j, dict):
+                jid = j.get('@id', None)
+                if jid:
+                    yield j
+                for x in j.values():
+                    for obj in find_objects(x):
+                        yield obj
+
+        self.read_data(find_objects(jsonld), discussion, admin_user_id)
+        self.db.flush()
+
+        # add links from discussion root to roots of idea subtrees
+        base_ids = self.db.query(Idea.id).outerjoin(IdeaLink, IdeaLink.target_id == Idea.id).filter(
+            IdeaLink.id == None, Idea.discussion_id==self.discussion_id).all()
+        root_id = self.discussion.root_idea.id
+        base_ids.remove((root_id,))
+        for (id,) in base_ids:
+            self.db.add(IdeaLink(source_id=root_id, target_id=id))
+        self.db.flush()
+        # Maybe tombstone objects that had import records and were not reimported or referred to?
+
+    def read_old(self, jsonld, discussion, admin_user_id, base=None):
         from .idea import Idea, IdeaLink
         self.local_context = jsonld_context()
         self.instance_by_id = {}
@@ -361,7 +501,7 @@ class CatalystIdeaSource(IdeaSource):
             if key in self.instance_by_id:
                 continue
             record = self.get_record(key)
-            cls = self.class_from_json(record)
+            cls = self.class_from_data(record)
             if not cls:
                 log.error("missing cls for : " + record['@type'])
                 continue

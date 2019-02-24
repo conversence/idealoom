@@ -447,6 +447,7 @@ class InstanceContext(TraversalContext):
 
     @property
     def __acl__(self):
+        # TODO: publication_state
         if getattr(self._instance, '__acl__', None):
             return self._instance.__acl__
         if getattr(self._instance, 'discussion', None):
