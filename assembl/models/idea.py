@@ -1009,7 +1009,7 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
 
     @property
     def pub_state_name(self):
-        return self.pub_state.name
+        return self.pub_state.name if self.pub_state else None
 
     @pub_state_name.setter
     def pub_state_name(self, name):

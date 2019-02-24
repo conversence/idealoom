@@ -218,7 +218,7 @@ def put_extract(request):
     extract = Extract.get_instance(extract_id)
     if not extract:
         raise HTTPNotFound("Extract with id '%s' not found." % extract_id)
-    permissions = get_permissions(user_id, discussion_id, extract)
+    permissions = get_permissions(user_id, discussion.id, extract)
 
     if P_EDIT_EXTRACT not in permissions:
         raise HTTPForbidden()
@@ -261,7 +261,7 @@ def delete_extract(request):
 
     extract_id = request.matchdict['id']
     extract = Extract.get_instance(extract_id)
-    permissions = get_permissions(user_id, discussion_id, extract)
+    permissions = get_permissions(user_id, discussion.id, extract)
     if P_EDIT_EXTRACT not in permissions:
         raise HTTPForbidden()
 

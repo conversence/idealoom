@@ -6,55 +6,11 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.declarative import declared_attr
-from sqlalchemy.dialects.postgresql import ENUM
 
 from . import Base, DeclarativeAbstractMeta
 from .langstrings import LangString
 from ..lib.logging import getLogger
-
-
-class UpdatablePgEnum(ENUM):
-    """A Postgres-native enum type that will add values to the native enum
-    when the Python Enum is updated."""
-    def update_type(self, bind):
-        "Update the postgres enum to match the values of the ENUM"
-        value_names = self.enums
-        db_names = [n for (n,) in bind.execute('select * from unnest(enum_range(null::%s))' % self.name)]
-        if value_names != db_names:
-            # Check no element was removed. If needed, introduce tombstones to enums.
-            removed = set(db_names) - set(value_names)
-            if removed:
-                getLogger().warn("Some enum values were removed from type %s: %s" % (
-                    self.name, ', '.join(removed)))
-                db_names = [n for n in db_names if n not in removed]
-            # Check no reordering.
-            value_names_present = [n for n in value_names if n in db_names]
-            assert db_names == value_names_present, "Do not reorder elements in an enum"
-            # add missing values
-            bind = bind.execution_options(isolation_level="AUTOCOMMIT")
-            for i, name in enumerate(value_names):
-                if i >= len(db_names) or name != db_names[i]:
-                    if i == 0:
-                        if len(db_names):
-                            bind.execute(
-                                "ALTER TYPE %s ADD VALUE '%s' BEFORE '%s'" % (
-                                    self.name, name, db_names[0]))
-                        else:
-                            bind.execute(
-                                "ALTER TYPE %s ADD VALUE '%s' " % (
-                                    self.name, name))
-                    else:
-                        bind.execute(
-                            "ALTER TYPE %s ADD VALUE '%s' AFTER '%s'" % (
-                                self.name, name, db_names[i - 1]))
-                        db_names[i:i] = name
-
-    def create(self, bind=None, checkfirst=True):
-        if bind.dialect.has_type(
-                bind, self.name, schema=self.metadata.schema):
-            self.update_type(bind)
-        else:
-            super(UpdatablePgEnum, self).create(bind, False)
+from ..lib.decl_enums import UpdatablePgEnum
 
 
 class AbstractVocabulary(Base):

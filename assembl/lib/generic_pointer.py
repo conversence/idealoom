@@ -7,6 +7,8 @@ from sqlalchemy_utils.generic import (
     TypeMapper, GenericRelationshipProperty as GenericRelationshipProperty_)
 from future.utils import string_types
 
+from .decl_enums import UpdatablePgEnum
+
 
 class BaseTableEnum(object):
     # pretends to be a pyEnum by implementing __members__
@@ -26,15 +28,11 @@ class BaseTableEnum(object):
             cls.__members__[table] = base_cls_by_table[table]
 
 
-class UniversalTableRefColType(ENUM):
+class UniversalTableRefColType(UpdatablePgEnum):
     def __init__(self, *args, **kwargs):
         kwargs['name'] = 'base_tables_enum'
         super(UniversalTableRefColType, self).__init__(
-            BaseTableEnum, *args, **kwargs)
-
-    def create(self, bind=None, checkfirst=True):
-        # Alembic uses checkfirst=False, just override
-        super(UniversalTableRefColType, self).create(bind, True)
+            BaseTableEnum, *args, ordered=False, **kwargs)
 
     def reset_enum(self):
         kw = {}
@@ -42,12 +40,14 @@ class UniversalTableRefColType(ENUM):
         self._setup_for_values(values, objects, kw)
 
 
-universalTableRefColType = UniversalTableRefColType()
-
-
-def init_data(base_class):
+def init_data(base_class, db=None):
+    from ..models.import_records import ImportRecord
+    db = db or base_class.default_db
+    bind = db.session_factory.kw['bind']
     BaseTableEnum.init_members(base_class)
-    universalTableRefColType.reset_enum()
+    type = ImportRecord.__mapper__.columns['target_table'].type
+    type.reset_enum()
+    type.update_type(bind)
 
 
 class MulticlassTableRefColType(ENUM):

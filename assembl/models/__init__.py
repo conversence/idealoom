@@ -376,9 +376,6 @@ from .import_records import (
     ImportRecord,
 )
 
-from ..lib.generic_pointer import init_data
-init_data(Base)
-
 
 def includeme(config):
     config.include('.langstrings')

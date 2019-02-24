@@ -8,7 +8,10 @@ import re
 from future.utils import string_types
 from sqlalchemy.types import SchemaType, TypeDecorator, Enum
 from sqlalchemy import __version__
+from sqlalchemy.dialects.postgresql import ENUM
 from future.utils import with_metaclass, as_native_str
+
+from .logging import getLogger
 
 if __version__ < '0.6.5':
     raise NotImplementedError("Version 0.6.5 or higher of SQLAlchemy is required.")
@@ -107,6 +110,78 @@ class DeclEnumType(SchemaType, TypeDecorator):
         if value is None:
             return None
         return self.enum.from_string(value.strip())
+
+
+class UpdatablePgEnum(ENUM):
+    """A Postgres-native enum type that will add values to the native enum
+    when the Python Enum is updated."""
+
+    def __init__(self, *enums, ordered=True, **kw):
+        self.ordered = ordered
+        super(UpdatablePgEnum, self).__init__(*enums, **kw)
+
+    def update_type(self, bind):
+        "Update the postgres enum to match the values of the ENUM"
+        value_names = self.enums
+        db_names = [n for (n,) in bind.execute('select * from unnest(enum_range(null::%s))' % self.name)]
+        if not self.ordered:
+            value_names = set(value_names)
+            db_names = set(db_names)
+        if value_names != db_names:
+            # Check no element was removed. If needed, introduce tombstones to enums.
+            removed = set(db_names) - set(value_names)
+            if removed:
+                getLogger().warn("Some enum values were removed from type %s: %s" % (
+                    self.name, ', '.join(removed)))
+                if self.ordered:
+                    db_names = [n for n in db_names if n not in removed]
+                else:
+                    db_names = db_names - removed
+            if self.ordered:
+                # Check no reordering.
+                value_names_present = [n for n in value_names if n in db_names]
+                assert db_names == value_names_present, "Do not reorder elements in an enum"
+                # add missing values
+                bind = bind.execution_options(isolation_level="AUTOCOMMIT")
+                for i, name in enumerate(value_names):
+                    if i >= len(db_names) or name != db_names[i]:
+                        if i == 0:
+                            if len(db_names):
+                                bind.execute(
+                                    "ALTER TYPE %s ADD VALUE '%s' BEFORE '%s'" % (
+                                        self.name, name, db_names[0]))
+                            else:
+                                bind.execute(
+                                    "ALTER TYPE %s ADD VALUE '%s' " % (
+                                        self.name, name))
+                        else:
+                            if len(db_names):
+                                bind.execute(
+                                    "ALTER TYPE %s ADD VALUE '%s' AFTER '%s'" % (
+                                        self.name, name, db_names[i - 1]))
+                            else:
+                                bind.execute(
+                                    "ALTER TYPE %s ADD VALUE '%s' " % (
+                                        self.name, name))
+                        db_names[i:i] = [name]
+            else:
+                bind = bind.execution_options(isolation_level="AUTOCOMMIT")
+                for name in value_names - db_names:
+                    bind.execute(
+                        "ALTER TYPE %s ADD VALUE '%s' " % (self.name, name))
+
+    def create(self, bind=None, checkfirst=True):
+        schema = self.schema or self.metadata.schema
+        if bind.dialect.has_type(
+                bind, self.name, schema=schema):
+            self.update_type(bind)
+        else:
+            super(UpdatablePgEnum, self).create(bind, False)
+
+    def _on_metadata_create(self, target, bind, checkfirst=False, **kw):
+        self.schema = target.schema
+        super(UpdatablePgEnum, self)._on_metadata_create(
+            target, bind, checkfirst=checkfirst, **kw)
 
 
 if __name__ == '__main__':

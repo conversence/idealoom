@@ -50,18 +50,20 @@ def bootstrap_db(config_uri=None, with_migration=True):
 
 
 def bootstrap_db_data(db, mark=True):
-    from assembl.lib.config import get
+    from .config import get
     if get('in_alembic'):
         return
     # import after session to delay loading of BaseOps
     from assembl.models import (
-        Permission, Role, IdentityProvider, LocaleLabel, URIRefDb)
-    from assembl.lib.database_functions import ensure_functions
+        Base, Permission, Role, IdentityProvider, LocaleLabel, URIRefDb)
+    from .generic_pointer import init_data
+    from .database_functions import ensure_functions
     session = db()
     for cls in (Permission, Role, IdentityProvider, LocaleLabel, URIRefDb):
         cls.populate_db(session)
     ensure_functions(session)
     mark |= update_indices(session)
+    init_data(Base, db)
     if mark:
         mark_changed(session)
 

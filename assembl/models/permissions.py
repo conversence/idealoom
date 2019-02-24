@@ -75,11 +75,13 @@ class UserRole(Base, PrivateObjectMixin):
     def get_user_uri(self):
         return AgentProfile.uri_generic(self.profile_id)
 
-    def get_role_name(self):
+    @property
+    def role_name(self):
         return self.role.name
 
-    def set_role_by_name(self, name):
-        self.role = Role.getRole(name)
+    @role_name.setter
+    def role_name(self, name):
+        self.role = Role.getByName(name)
 
     def container_url(self):
         return "/data/User/%d/roles" % (self.user_id)
@@ -155,7 +157,7 @@ class AbstractLocalUserRole(DiscussionBoundBase, PrivateObjectMixin):
 
     @role_name.setter
     def role_name(self, name):
-        self.role = Role.getRole(name)
+        self.role = Role.getByName(name)
 
     def get_user_uri(self):
         return AgentProfile.uri_generic(self.profile_id)
@@ -310,7 +312,7 @@ class Permission(NamedClassMixin, Base):
     """A permission that a user may have"""
     __tablename__ = 'permission'
     id = Column(Integer, primary_key=True)
-    name = Column(String(20), nullable=False)
+    name = Column(String(), nullable=False)
 
     @classmethod
     def populate_db(cls, db=None):

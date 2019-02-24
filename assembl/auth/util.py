@@ -40,12 +40,10 @@ def get_role_query(user_id, discussion_id, target_instance=None):
     session = get_session_maker()()
     if user_id == Everyone:
         if not discussion_id:
-            return []
-        roles = session.query(Role).filter(Role.name == user_id)
+            return session.query(Role).filter(Role.name == user_id)
     elif user_id == Authenticated:
         if not discussion_id:
-            return []
-        roles = session.query(Role).filter(Role.name.in_((Authenticated, Everyone)))
+            return session.query(Role).filter(Role.name.in_((Authenticated, Everyone)))
     else:
         base_roles = [Authenticated, Everyone]
         if target_instance and user_id and target_instance.is_owner(user_id):
@@ -90,12 +88,11 @@ def get_permissions(user_id, discussion_id, target_instance=None):
     session = get_session_maker()()
     is_sysadmin = session.query(UserRole).filter_by(profile_id=user_id
         ).join(Role).filter_by(name=R_SYSADMIN).count()
+    if is_sysadmin:
+        return list(ASSEMBL_PERMISSIONS)
     if not discussion_id:
-        if user_id == Everyone:
-            return []
-        return ASSEMBL_PERMISSIONS if is_sysadmin else []
-    roles = get_role_query(user_id, discussion_id, target_instance
-        ).with_entities(Role.id)
+        return []
+    roles = get_role_query(user_id, discussion_id, target_instance).with_entities(Role.id)
 
     rp_query = session.query(
             DiscussionPermission.role_id.label('role_id'),
@@ -113,8 +110,6 @@ def get_permissions(user_id, discussion_id, target_instance=None):
         rp_query, rp_query.c.permission_id == Permission.id).join(
         Role, (rp_query.c.role_id == Role.id) & Role.id.in_(roles))
     result = [x[0] for x in permissions.distinct()]
-    if is_sysadmin:
-        result.append(P_SYSADMIN)
     return result
 
 
