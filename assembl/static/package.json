@@ -85,7 +85,6 @@
     "file-loader": "~2.0",
     "fixtures": "0.0.2",
     "imports-loader": "~0.8",
-    "js-fixtures": "~1.5",
     "jsdoc-rst-template": "git+https://github.com/assembl/jsdoc-rst-template.git",
     "lebab": "^3.0",
     "lolex": "~2.3",
