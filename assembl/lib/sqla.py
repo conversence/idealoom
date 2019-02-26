@@ -223,40 +223,47 @@ class SimpleObjectImporter(object):
         self.use_local = use_local
         self.instance_by_id = {}
 
-    def __getitem__(self, id):
-        return self.instance_by_id.get(id, None)
+    def __getitem__(self, oid):
+        oid = self.normalize_id(oid)
+        return self.instance_by_id.get(oid, None)
 
-    def __contains__(self, id):
-        return id in self.instance_by_id
+    def __contains__(self, oid):
+        oid = self.normalize_id(oid)
+        return oid in self.instance_by_id
 
-    def __setitem__(self, id, instance):
-        existing = self.instance_by_id.get(id, None)
+    def __setitem__(self, oid, instance):
+        oid = self.normalize_id(oid)
+        existing = self.instance_by_id.get(oid, None)
         if existing:
             assert existing is instance, (
-                "Conflicting association:", id, self.instance_by_id[id], instance)
+                "Conflicting association:", oid, self.instance_by_id[oid], instance)
             return existing
-        self.instance_by_id[id] = instance
-        self.process_association(id, instance)
+        self.instance_by_id[oid] = instance
+        self.process_association(oid, instance)
 
-    def get(self, id, default=None):
+    def normalize_id(self, oid):
+        if isinstance(oid, dict):
+            return oid.get('@id', None)
+        return oid
+
+    def get_object(self, oid, default=None):
         # note that this is not the same as __getitem__
-        if isinstance(id, dict):
-            id = id.get('@id', None)
-        if not id:
+        oid = self.normalize_id(oid)
+        if not oid:
             return None
-        item = self.instance_by_id.get(id, default)
+        item = self.instance_by_id.get(oid, default)
         if self.use_local and not item:
-            item = get_named_object(id)
+            item = get_named_object(oid)
         return item
 
-    def process_association(self, instance):
+    def process_association(self, oid, instance):
         pass
 
     def fulfilled(self, source):
         return True
 
     def apply(self, source, target_id_or_data, promise):
-        target = self.get(target_id_or_data)
+        target = self.get_object(target_id_or_data)
         if target is not None:
             promise(target)
 
@@ -267,40 +274,32 @@ class SimpleObjectImporter(object):
 class PromiseObjectImporter(SimpleObjectImporter):
     def __init__(self, use_local=True):
         super(PromiseObjectImporter, self).__init__(use_local)
-        self.promises_by_source = defaultdict(list)
-        self.promises_by_target_id = defaultdict(set)
+        self.promises_by_source = defaultdict(set)
+        self.promises_by_target_id = defaultdict(list)
 
-    def __getitem__(self, id):
-        return self.instance_by_id.get(id, None)
-
-    def __contains__(self, id):
-        return id in self.instance_by_id
-
-    def __setitem__(self, id, instance):
-        exists = id in self.instance_by_id
-        super(PromiseObjectImporter, self).__setitem__(id, instance)
-        if exists:
-            return
-        while self.promises_by_target_id[ext_id]:
-            (source, promise) = self.promises_by_id[ext_id].pop()
+    def __setitem__(self, oid, instance):
+        exists = oid in self.instance_by_id
+        super(PromiseObjectImporter, self).__setitem__(oid, instance)
+        # if exists:
+        #     return
+        while self.promises_by_target_id[oid]:
+            (source, promise) = self.promises_by_target_id[oid].pop()
             promise(instance)
             self.promises_by_source[source].discard(promise)
+        del self.promises_by_target_id[oid]
 
     def fulfilled(self, source):
         return not (source in self.promises_by_source and
                     len(self.promises_by_source[source]))
     
     def apply(self, source, target_id_or_data, promise):
-        target = self.get(target_id_or_data)
+        target_id = self.normalize_id(target_id_or_data)
+        target = self.get_object(target_id)
         if target is not None:
             promise(target)
         else:
             # this step may not be necessary.
             # if yes, when do we treat the data?
-            if isinstance(target_id_or_data, dict):
-                target_id = target_id_or_data['@id']
-            else:
-                target_id = target_id_or_data
             self.promises_by_target_id[target_id].append((source, promise))
             self.promises_by_source[source].add(promise)
 
@@ -1130,7 +1129,7 @@ class BaseOps(object):
         target_id = json.get('@id', None)
         if target_id is not None:
             if isinstance(target_id, string_types):
-                instance = object_importer.get(target_id)
+                instance = object_importer.get_object(target_id)
         if instance is not None:
             # Interesting that it works here and not upstream
             sub_context = instance.get_instance_context(context)
@@ -1142,6 +1141,7 @@ class BaseOps(object):
             instance = instance.handle_duplication(
                 json, parse_def, sub_context,
                 DuplicateHandling.USE_ORIGINAL, object_importer)
+            instance_ctx = sub_context
         else:
             instance_ctx = target_cls._do_create_from_json(
                 json, parse_def, context,
@@ -1152,8 +1152,6 @@ class BaseOps(object):
                         dumps(json),))
             if instance_ctx._instance:
                 context.on_new_instance(instance_ctx._instance)
-        if target_id is not None and instance_ctx._instance is not None:
-            object_importer[target_id] = instance_ctx._instance
         return instance_ctx
 
     # If a duplicate is created, do we use the original? (Error otherwise)
@@ -1300,8 +1298,10 @@ class BaseOps(object):
             extra =  set(current_instances) - set(instances)
             for inst in missing:
                 accessor.add(inst)
-            for inst in extra:
-                accessor.remove(inst)
+            if extra:
+                log.error("should we eliminate missing objects from AssociationProxy?")
+                # for inst in extra:
+                #     accessor.remove(inst)
         else:
             assert False, "we should not get here"
 
@@ -1420,42 +1420,30 @@ class BaseOps(object):
                     values = value
                     instances = []
                     for value in values:
+                        existing = None
                         if isinstance(value, string_types):
                             val_id = value
                         elif isinstance(value, dict):
                             val_id = value.get('@id', None)
-                        else:
-                            raise NotImplementedError()
-                        if val_id:
-                            instance = object_importer.get(val_id)
-                            if instance:
-                                if inspect(instance).persistent and isinstance(value, dict):
-                                    # existing object, so we did not go through delayed creation
-                                    sub_i_ctx = instance.get_instance_context(c_context)
-                                    instance2 = instance._do_update_from_json(
-                                        value, s_parse_def, sub_i_ctx,
-                                        duplicate_handling, object_importer)
-                                    if instance is not instance2:
-                                        # delete instance? Or will that be implicit?
-                                        instance = instance2
-                                instances.append(instance)
-                            else:
-                                def process(instance):
-                                    # TODO: Act on the reverse accessor. What if it's a property?
+                            if val_id:
+                                if val_id in object_importer:
                                     # import pdb
                                     # pdb.set_trace()
-                                    raise NotImplementedError()
-                                    if inspect(instance).persistent and isinstance(value, dict):
-                                        # existing object, so we did not go through delayed creation
-                                        sub_i_ctx = instance.get_instance_context(c_context)
-                                        instance2 = instance._do_update_from_json(
-                                            value, s_parse_def, sub_i_ctx,
-                                            duplicate_handling, object_importer)
-                                        if instance is not instance2:
-                                            # delete instance? Or will that be implicit?
-                                            instance = instance2
-                                object_importer.apply(self, val_id, process)
+                                    log.error("this reference was present in two objects: "+val_id)
                         else:
+                            raise NotImplementedError()
+
+                        if existing and inspect(existing).persistent:
+                                    # existing object, so we did not go through delayed creation
+                                sub_i_ctx = existing.get_instance_context(c_context)
+                                existing2 = existing._do_update_from_json(
+                                    value, s_parse_def, sub_i_ctx,
+                                    duplicate_handling, object_importer)
+                                if existing is not existing2:
+                                    # delete existing? Or will that be implicit?
+                                    existing = existing2
+                                instances.append(existing)
+                        elif isinstance(value, dict):
                             # just create the subobject
                             instance_ctx = self._create_subobject_from_json(
                                 value, target_cls, parse_def,
@@ -1469,6 +1457,29 @@ class BaseOps(object):
                                 value, parse_def, context, duplicate_handling,
                                 object_importer)
                             instances.append(instance)
+                        else:
+                            def process(instance):
+                                done = False
+                                rel = self.__class__.__mapper__.relationships.get(accessor_name, None)
+                                if rel:
+                                    back_properties = list(getattr(rel, '_reverse_property', ()))
+                                    if back_properties:
+                                        back_rel = next(iter(back_properties))
+                                        setattr(instance, back_rel.key, self)
+                                        done = True
+                                if not done:
+                                    # maybe it's an association proxy?
+                                    getattr(self, accessor_name).append(instance)
+                                if inspect(instance).persistent and isinstance(value, dict):
+                                    # existing object, so we did not go through delayed creation
+                                    sub_i_ctx = instance.get_instance_context(c_context)
+                                    instance2 = instance._do_update_from_json(
+                                        value, s_parse_def, sub_i_ctx,
+                                        duplicate_handling, object_importer)
+                                    if instance is not instance2:
+                                        # delete instance? Or will that be implicit?
+                                        instance = instance2
+                            object_importer.apply(self, val_id, process)
                     self._assign_subobject_list(
                         instances, accessor, context.get_user_id(),
                         context.get_permissions())
@@ -1481,6 +1492,12 @@ class BaseOps(object):
                     val_id = value.get('@id', None)
                     from_context = side_effects.get(accessor_name, None)
                     existing = from_context or getattr(self, accessor_name, None)
+                    if not existing and val_id:
+                        existing = object_importer.get_object(val_id)
+                        if existing:
+                            # import pdb
+                            # pdb.set_trace()
+                            log.error("this reference was present in two objects: "+val_id)
                     if existing:
                         assert isinstance(existing, Base)
                         if val_id and val_id.startswith('local:') and existing.id and existing.uri() != val_id:
@@ -1499,22 +1516,6 @@ class BaseOps(object):
                             self.db.add(existing)
                         if val_id:
                             object_importer[val_id] = existing
-                    elif val_id:
-                        # reference to an object, either existing or elsewhere in the json
-                        def process(instance):
-                            self._assign_subobject(instance, accessor)
-                            if inspect(instance).persistent:
-                                # existing object, so we did not go through delayed creation
-                                sub_i_ctx = instance.get_instance_context(c_context)
-                                instance2 = instance._do_update_from_json(
-                                    value, s_parse_def, sub_i_ctx,
-                                    duplicate_handling, object_importer)
-                                if instance is not instance2:
-                                    # delete instance? Or will that be implicit?
-                                    instance = instance2
-                                    self._assign_subobject(instance, accessor)
-                                    self.db.add(instance)
-                        object_importer.apply(self, val_id, process)
                     else:
                         # just create the subobject
                         instance_ctx = self._create_subobject_from_json(
@@ -1530,12 +1531,17 @@ class BaseOps(object):
                                     value, parse_def, context, duplicate_handling,
                                     object_importer)
                                 self._assign_subobject(instance, accessor)
+                                if val_id:
+                                    object_importer[val_id] = instance
                 else:
                     # should not get here
                     import pdb
                     pdb.set_trace()
 
-        assert object_importer.fulfilled(self)
+        if not object_importer.fulfilled(self):
+            log.error("not fulfilled: "+str(self))
+            # import pdb
+            # pdb.set_trace()
         return self.handle_duplication(
             json, parse_def, context, duplicate_handling, object_importer)
 

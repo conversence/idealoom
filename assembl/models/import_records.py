@@ -1,19 +1,29 @@
 from abc import abstractmethod
 import logging
+from collections import defaultdict
+from itertools import chain
+try:
+    from urllib.parse import urljoin
+except ImportError:
+    from urlparse import urljoin
 
 from sqlalchemy import (
     Column, ForeignKey, Integer, DateTime, Table,
     UniqueConstraint, Unicode, String, Index)
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, reconstructor
 from future.utils import string_types
 import simplejson as json
 from rdflib_jsonld.context import Context
+from jsonpath_ng.ext import parse
+import requests
+from requests.cookies import RequestsCookieJar as CookieJar
 
 from . import DiscussionBoundBase
 from .uriref import URIRefDb
+from ..lib.sqla_types import URLString
 from .generic import ContentSource
 from .publication_states import PublicationState
-from ..lib.sqla import get_named_class, get_named_object
+from ..lib.sqla import get_named_class, get_named_object, PromiseObjectImporter
 from ..lib.generic_pointer import (
     UniversalTableRefColType, generic_relationship)
 from ..lib.utils import get_global_base_url
@@ -23,30 +33,31 @@ from ..semantic import jsonld_context
 log = logging.getLogger(__name__)
 
 
-class IdeaSource(ContentSource):
+class IdeaSource(ContentSource, PromiseObjectImporter):
     __tablename__ = 'idea_source'
     id = Column(Integer, ForeignKey(ContentSource.id), primary_key=True)
-    uri_id = Column(Integer, ForeignKey(URIRefDb.id), nullable=False, unique=True)
-    data_filter = Column(String)  # jquery-based, assuming json data
+    source_uri = Column(URLString, nullable=False)
+    data_filter = Column(String)  # jsonpath-based, assuming json data
     target_state_id = Column(Integer, ForeignKey(
         PublicationState.id, ondelete="SET NULL", onupdate="CASCADE"))
 
-    source_uri_id = relationship(URIRefDb)
     target_state = relationship(PublicationState)
 
     __mapper_args__ = {
         'polymorphic_identity': 'abstract_idea_source',
     }
 
-    source_uri_ = relationship(URIRefDb)
+    def __init__(self, *args, **kwargs):
+        super(IdeaSource, self).__init__(*args, **kwargs)
+        self.init_on_load()
 
-    @property
-    def source_uri(self):
-        return self.source_uri_.val
-
-    @source_uri.setter
-    def source_uri(self, val):
-        self.source_uri_ = URIRefDb.get_or_create(val, self.db)
+    @reconstructor
+    def init_on_load(self):
+        PromiseObjectImporter.__init__(self)
+        self.import_record_by_id = {r.external_id: r for r in self.import_records}
+        self.parsed_data_filter = parse(self.data_filter) if self.data_filter else None
+        self.global_url = get_global_base_url() + "/data/"
+        
 
     def external_id_to_uri(self, external_id):
         if '//' in external_id:
@@ -68,20 +79,104 @@ class IdeaSource(ContentSource):
     def generate_message_id(self, source_post_id):
         return source_post_id
 
-    def get_existing(self, identifier):
+    def id_from_data(self, data):
+        if isinstance(data, dict):
+            data = data.get('@id', None)
+        if isinstance(data, string_types):
+            return data
+        # TODO: array of ids...
+
+    def normalize_id(self, id):
+        id = self.id_from_data(id)
+        if not id:
+            return
+        id = super(IdeaSource, self).normalize_id(id)
+        if id.startswith('local:'):
+            return self.source_uri + id[6:]
+        return id
+
+    def get_object(self, id, default=None):
+        id = self.normalize_id(id)
+        instance = super(IdeaSource, self).get_object(id, default)
+        if instance:
+            return instance
         record = self.db.query(ImportRecord).filter_by(
-            source=self, external_id=identifier).first()
+            source=self, external_id=id).first()
         if record:
             return record.target
 
-    def associate(self, target_id, instance, data=None):
-        record = self.db.query(ImportRecord).filter_by(
-            source=self, target=instance).first()
-        if record:
-            record.update(data)
-        else:
-            self.db.add(ImportRecord(
-                source=self, target=instance, external_id=target_id))
+    def __setitem__(self, id, instance):
+        exists = id in self.instance_by_id
+        super(IdeaSource, self).__setitem__(id, instance)
+        if exists:
+            return
+        self.db.add(ImportRecord(
+            source=self, target=instance, external_id=id))
+
+    @abstractmethod
+    def class_from_data(self, data):
+        return Idea
+
+    def process_data(self, data):
+        return data
+
+    @abstractmethod
+    def read(self, data, admin_user_id, base=None):
+        pass
+
+    def read_data_gen(self, data_gen, admin_user_id):
+        instance_by_id = {}
+        # preload
+        waiting_for = defaultdict(list)
+        #
+        ctx = self.discussion.get_instance_context(user_id=admin_user_id)
+        def resolve(id, instance):
+            pass
+
+        for data in data_gen:
+            ext_id = self.id_from_data(data)
+            if not ext_id:
+                continue
+            if ext_id in self:
+                continue
+            cls = self.class_from_data(data)
+            if not cls:
+                instance_by_id[ext_id] = None
+                continue
+            if self.parsed_data_filter and not self.parsed_data_filter.find(data):
+                instance_by_id[ext_id] = None
+                continue
+            pdata = self.process_data(data)
+            # Don't we need a CollectionCtx?
+            instance_ctx = cls.create_from_json(
+                pdata, ctx, object_importer=self)
+            if instance_ctx:
+                instance = instance_ctx._instance
+                self[ext_id] = instance
+                if getattr(instance.__class__, 'pub_state', None):
+                    instance.pub_state = self.target_state
+                self.db.add(instance)
+        if self.pending():
+            self.resolve_pending()
+        self.db.flush()
+        # Maybe tombstone objects that had import records and were not reimported or referred to?
+
+    def resolve_pending(self):
+        """resolve any pending reference, may require queries. May fail."""
+        pass
+
+    def add_missing_links(self):
+        from .idea import Idea, IdeaLink
+        # add links from discussion root to roots of idea subtrees
+        base_ids = self.db.query(Idea.id).outerjoin(IdeaLink, IdeaLink.target_id == Idea.id).filter(
+            IdeaLink.id == None, Idea.discussion_id==self.discussion_id).all()
+        root_id = self.discussion.root_idea.id
+        base_ids.remove((root_id,))
+        for (id,) in base_ids:
+            self.db.add(IdeaLink(source_id=root_id, target_id=id))
+        self.db.flush()
+        # Maybe tombstone objects that had import records and were not reimported or referred to?
+
 
 
 class ImportRecord(DiscussionBoundBase):
@@ -136,99 +231,81 @@ class ImportRecord(DiscussionBoundBase):
         return q
 
 
-class RecordIdeaSource(IdeaSource):
-    def __init__(self, *args, **kwargs):
-        super(RecordIdeaSource, self).__init__(*args, **kwargs)
-        self.instance_by_id = {}
-        self.promises_by_id = defaultdict(list)
-        # preload
-        self.import_record_by_id = {r.external_id: r for r in self.import_records}
-
-    __mapper_args__ = {
-        'polymorphic_identity': 'idealoom',
-    }
-
-    @abstractmethod
-    def class_from_data(self, data):
-        pass
-
-    @abstractmethod
-    def id_from_data(self, data):
-        pass
-
-    def get_existing(self, identifier):
-        instance = self.instance_by_id.get(identifier, None)
-        if instance is not None:
-            return instance
-        if identifier.startswith(self.global_url):
-            identifier = "local:" + identifier[len(self.global_url):]
-        if identifier.startswith('local:'):  # Now guaranteed to be internal
-            instance = get_named_object(identifier)
-            if instance:
-                return instance
-        else:
-            record = self.import_record_by_id.get(identifier, None)
-            if record is not None:
-                return record.target
-
-    def process_data(self, data):
-        return data
-
-    def associate(self, ext_id, instance, data=None):
-        if ext_id in self.instance_by_id:
-            if self.instance_by_id[ext_id] != instance:
-                print("**** conflicting association:", ext_id, self.instance_by_id[ext_id], instance)
-        self.instance_by_id[ext_id] = instance
-        record = self.import_record_by_id.get(ext_id, None)
-        if record:
-            record.update(data)
-        else:
-            record = ImportRecord(
-                source=self, target=instance, external_id=ext_id)
-            self.db.add(record)
-            self.import_record_by_id[ext_id] = record
-        while self.promises_by_id[ext_id]:
-            promise = self.promises_by_id[ext_id].pop()
-            promise(instance)
-
-    def record_association(self, fn, ext_id):
-        if ext_id in self.instance_by_id:
-            fn(self.instance_by_id[ext_id])
-        else:
-            self.promises_by_id.append(fn)
-
-    def read_data(self, data_gen, discussion, admin_user_id, base=None):
-        instance_by_id = {}
-        data_by_id = {}
-        # preload
-        waiting_for = defaultdict(list)
-        def resolve(id, instance):
-            pass
-
-        for data in data_gen:
-            ext_id = self.id_from_data(data)
-            data_by_id[ext_id] = data
-            cls = self.class_from_data(data)
-            if not cls:
-                instance_by_id[ext_id] = None
-                continue
-            pdata = self.process_data(data)
-            instance_ctx = cls.create_from_json(
-                record, ctx, parse_def_name='cif_reverse',
-                object_importer=self)
-            self.associate(ext_id, instance_ctx._instance)
-            self.db.add(instance)
-        self.db.flush()
-        # Maybe tombstone objects that had import records and were not reimported or referred to?
-
-
-
 class IdeaLoomIdeaSource(IdeaSource):
+    __tablename__ = 'idealoom_idea_source'
+    id = Column(Integer, ForeignKey(IdeaSource.id), primary_key=True)
+    # or use a token?
+    username = Column(String())
+    password = Column(String())
+    # add credentials!
 
     __mapper_args__ = {
         'polymorphic_identity': 'idealoom',
     }
 
+    @reconstructor
+    def init_on_load(self):
+        super(IdeaLoomIdeaSource, self).init_on_load()
+        self.use_local = False
+        # TODO: find a way to reuse Users when self.source_uri.startswith(self.global_url)
+        self.cookies = CookieJar()
+
+    def class_from_data(self, json):
+        typename = json.get('@type', None)
+        if typename:
+            return get_named_class(typename)
+
+    def base_source_uri(self):
+        return urljoin(self.source_uri, '/data/')
+
+    def normalize_id(self, id):
+        id = self.id_from_data(id)
+        if not id:
+            return
+        if id.startswith('local:') and not self.use_local:
+            return self.base_source_uri() + id[6:]
+        return super(IdeaLoomIdeaSource, self).normalize_id(id)
+
+    def read(self, admin_user_id=None):
+        admin_user_id = admin_user_id or self.discussion.creator_id
+        login_url = urljoin(self.source_uri, '/login')
+        r = requests.post(login_url, cookies=self.cookies, data={
+            'identifier':self.username, 'password':self.password},
+            allow_redirects=False)
+        assert r.ok
+        assert 'login' not in r.headers['Location']
+        self.cookies.update(r.cookies)
+        r = requests.get(self.source_uri, cookies=self.cookies)
+        assert r.ok
+        ideas = r.json()
+        discussion_id = self.source_uri.split('/')[-2]
+        link_uri = urljoin(self.source_uri,
+            '/data/Conversation/%s/idea_links' % (discussion_id,))
+        r = requests.get(link_uri, cookies=self.cookies)
+        assert r.ok
+        links = r.json()
+        return self.read_json(list(chain(ideas, links)), admin_user_id)
+
+    def read_json(self, data, admin_user_id):
+        if isinstance(data, string_types):
+            data = json.loads(data)
+
+        def find_objects(j):
+            if isinstance(j, list):
+                for x in j:
+                    for obj in find_objects(x):
+                        yield obj
+            elif isinstance(j, dict):
+                jid = j.get('@id', None)
+                if jid:
+                    yield j
+                for x in j.values():
+                    for obj in find_objects(x):
+                        yield obj
+
+        self.read_data_gen(find_objects(data), admin_user_id)
+        self.db.flush()
+        self.add_missing_links()
 
 
 class CatalystIdeaSource(IdeaSource):
@@ -354,25 +431,13 @@ class CatalystIdeaSource(IdeaSource):
             # cls = cls.get_jsonld_subclass(json)
             return cls
 
-    def id_from_data(self, data):
-        return data.get('@id', None)
-
-    def get_existing(self, identifier):
-        instance = self.instance_by_id.get(identifier, None)
-        if instance is not None:
-            return instance
-        if identifier.startswith('local:'):
-            identifier = self.remote_context.expand(identifier)
-        if identifier.startswith(self.global_url):
-            identifier = "local:" + identifier[len(self.global_url):]
-        if identifier.startswith('local:'):  # Now guaranteed to be internal
-            instance = get_named_object(identifier)
-            if instance:
-                return instance
-        else:
-            record = self.import_records_by_id.get(identifier, None)
-            if record is not None:
-                return record.target
+    def normalize_id(self, id):
+        id = self.id_from_data(data)
+        if not id:
+            return
+        if id.startswith('local:'):
+            return self.remote_context.expand(id)
+        return super(CatalystIdeaSource, self).normalize_id(id)
 
     def process_data(self, record):
         record['in_conversation'] = self.discussion.uri()
@@ -404,27 +469,7 @@ class CatalystIdeaSource(IdeaSource):
         print("****** get_record: ", identifier, record)
         return record
 
-    def get_record(self, identifier):
-        record = self.json_by_id.get(identifier, None)
-        if record:
-            return self.process_data(record)
-
-    def associate(self, target_id, instance, data=None):
-        if target_id in self.instance_by_id:
-            if self.instance_by_id[target_id] != instance:
-                print("**** conflicting association:", target_id, self.instance_by_id[target_id], instance)
-        self.instance_by_id[target_id] = instance
-        record = self.import_records_by_id.get(target_id, None)
-        if record:
-            record.update(data)
-        else:
-            record = ImportRecord(
-                source=self, target=instance, external_id=target_id)
-            # self.db.add(record)
-            self.import_records_by_id[target_id] = record
-
-    def read(self, jsonld, discussion, admin_user_id, base=None):
-        self.global_url = get_global_base_url() + "/data/"
+    def read_data(self, jsonld, admin_user_id, base=None):
         if isinstance(jsonld, string_types):
             jsonld = json.loads(jsonld)
         c = jsonld['@context']
@@ -443,80 +488,6 @@ class CatalystIdeaSource(IdeaSource):
                     for obj in find_objects(x):
                         yield obj
 
-        self.read_data(find_objects(jsonld), discussion, admin_user_id)
+        self.read_data_gen(find_objects(jsonld), admin_user_id)
         self.db.flush()
-
-        # add links from discussion root to roots of idea subtrees
-        base_ids = self.db.query(Idea.id).outerjoin(IdeaLink, IdeaLink.target_id == Idea.id).filter(
-            IdeaLink.id == None, Idea.discussion_id==self.discussion_id).all()
-        root_id = self.discussion.root_idea.id
-        base_ids.remove((root_id,))
-        for (id,) in base_ids:
-            self.db.add(IdeaLink(source_id=root_id, target_id=id))
-        self.db.flush()
-        # Maybe tombstone objects that had import records and were not reimported or referred to?
-
-    def read_old(self, jsonld, discussion, admin_user_id, base=None):
-        from .idea import Idea, IdeaLink
-        self.local_context = jsonld_context()
-        self.instance_by_id = {}
-        self.json_by_id = {}
-        self.global_url = get_global_base_url() + "/data/"
-        # preload
-        self.import_records_by_id = {r.external_id: r for r in self.import_records}
-        if isinstance(jsonld, string_types):
-            jsonld = json.loads(jsonld)
-        c = jsonld['@context']
-        self.remote_context = Context(c)
-        # Avoid loading the main context.
-        # if c == context_url:
-        #     c = local_context_loc
-        # elif context_url in c:
-        #     c.remove(context_url)
-        #     c.append(local_context_loc)
-        # c = Context(c, base=base)
-        # site_iri = None
-
-        def find_objects(j):
-            if isinstance(jsonld, string_types):
-                return
-            if isinstance(j, list):
-                for x in j:
-                    find_objects(x)
-            if isinstance(j, dict):
-                jid = j.get('@id', None)
-                if jid:
-                    self.json_by_id[jid] = j
-                for x in j.values():
-                    find_objects(x)
-        find_objects(jsonld)
-        # for record in self.json_by_id.values():
-        #     if record.get('@type', None) == 'Site':
-        #         site_iri = record['@id']
-        #         break
-        # site_iri = site_iri or base
-        # assert site_iri is not None
-        ctx = discussion.get_instance_context(user_id=admin_user_id)
-        for key in self.json_by_id:
-            if key in self.instance_by_id:
-                continue
-            record = self.get_record(key)
-            cls = self.class_from_data(record)
-            if not cls:
-                log.error("missing cls for : " + record['@type'])
-                continue
-            instance_ctx = cls.create_from_json(
-                record, ctx, parse_def_name='cif_reverse',
-                object_importer=self)
-            if instance_ctx:
-                self.db.add(instance_ctx._instance)
-            self.db.flush()
-        # add links from discussion root to roots of idea subtrees
-        base_ids = self.db.query(Idea.id).outerjoin(IdeaLink, IdeaLink.target_id == Idea.id).filter(
-            IdeaLink.id == None, Idea.discussion_id==self.discussion_id).all()
-        root_id = self.discussion.root_idea.id
-        base_ids.remove((root_id,))
-        for (id,) in base_ids:
-            self.db.add(IdeaLink(source_id=root_id, target_id=id))
-        self.db.flush()
-        # Maybe tombstone objects that had import records and were not reimported or referred to?
+        self.add_missing_links()

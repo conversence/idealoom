@@ -274,7 +274,6 @@
     },
     "RootIdea": {
         "@extends": "GenericIdeaNode",
-        "root": "'true",
         "parentId": false
     },
     "DirectedIdeaRelation": {

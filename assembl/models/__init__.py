@@ -102,6 +102,17 @@ class DiscussionBoundBase(AbstractBase):
                 return '/data/Discussion/%d/%s' % (
                     self.get_discussion_id(), r.back_populates)
 
+    def _do_update_from_json(
+            self, json, parse_def, context,
+            duplicate_handling=None, object_importer=None):
+        # hard to live without a discussion.
+        if self.__class__.__mapper__.relationships.get('discussion', None):
+            self.discussion = context.get_instance_of_class(Discussion)
+        return super(DiscussionBoundBase, self)._do_update_from_json(
+            json, parse_def, context,
+            duplicate_handling=duplicate_handling,
+            object_importer=object_importer)
+
 
 class DiscussionBoundTombstone(Tombstone):
     "A :py:class:`assembl.lib.sqla.Tombstone` that is bound to a discussion"
