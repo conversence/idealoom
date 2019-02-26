@@ -60,7 +60,7 @@ from assembl.auth.util import get_permissions
 from assembl.models import (Discussion, Permission)
 from assembl.models.auth import create_default_permissions
 from ..traversal import InstanceContext, ClassContext
-from . import (JSON_HEADER, FORM_HEADER, CreationResponse)
+from . import (JSON_HEADER, FORM_HEADER, CreationResponse, instance_view)
 from ..api.discussion import etalab_discussions, API_ETALAB_DISCUSSIONS_PREFIX
 
 
@@ -208,6 +208,10 @@ def get_token(request):
              ctx_instance_class=Discussion, request_method='GET',
              accept="application/ld+json")
 def discussion_instance_view_jsonld(request):
+    if (request.accept.quality('application/json') >= request.accept.quality('application/ld+json')):
+        # not specifically asking for json-ld
+        return Response(body=json.dumps(instance_view(request)),
+            content_type='application/json', charset='utf-8')
     discussion = request.context._instance
     user_id, permissions, salt = read_user_token(request)
     if not (P_READ in permissions or P_READ_PUBLIC_CIF in permissions):
