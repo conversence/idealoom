@@ -22,7 +22,7 @@ import $ from 'jquery';
 import highlight from 'jquery-highlight';
 import dropdown from 'bootstrap-dropdown';
 import Promise from 'bluebird';
-import dotdotdot from 'jquery.dotdotdot';
+import dotdotdot from 'dotdotdot-js';
 import messageExport from './messageExportModal.js';
 import AgentViews from './agent.js';
 import Types from '../utils/types.js';

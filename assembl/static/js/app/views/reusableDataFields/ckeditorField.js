@@ -7,7 +7,7 @@ import Marionette from 'backbone.marionette';
 
 import _ from 'underscore';
 import $ from 'jquery';
-import dotdotdot from 'jquery.dotdotdot';
+import dotdotdot from 'dotdotdot-js';
 import IdeaLoom from '../../app.js';
 import Backbone from 'backbone';
 import BackboneModal from 'backbone.modal';

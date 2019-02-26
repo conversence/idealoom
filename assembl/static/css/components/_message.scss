@@ -154,6 +154,10 @@ $previewNumLines: 4;
     color: $green;
     text-decoration: none;
     font-weight: bold;
+    display: block;
+    &.hidden {
+      display: none;
+    }
     &:hover {
       text-decoration: underline;
     }
