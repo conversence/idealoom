@@ -24,6 +24,7 @@
   "dependencies": {
     "@babel/polyfill": "^7.2",
     "@babel/runtime": "^7.3",
+    "Backbone.Subset": "^0.1.1",
     "backbone": "^1.4",
     "backbone-model-file-upload": "~1.0.0",
     "backbone.marionette": "^3.5.1",
