@@ -2888,10 +2888,10 @@ circular-json@^0.3.1:
   resolved "https://registry.yarnpkg.com/circular-json/-/circular-json-0.3.3.tgz#815c99ea84f6809529d2f45791bdf82711352d66"
   integrity sha512-UZK3NBx2Mca+b5LsG7bY183pHWt5Y1xts4P3Pz7ENTwGVnJOUWbRb3ocjvX7hx9tq/yTAdclXm9sZ38gNuem4A==
 
-ckeditor@~4.10:
-  version "4.10.1"
-  resolved "https://registry.yarnpkg.com/ckeditor/-/ckeditor-4.10.1.tgz#e0230b05a5470ef070be9ab9ba444fea418ebc78"
-  integrity sha512-T6y4BH9ml+0F1cuSqjOWSZJtNuunVm/IbZl0KWNgRUsWEiwQQxhzA0mvSVLzujjsQkTMn9oTGcDd31/eozCAWg==
+ckeditor@~4.11:
+  version "4.11.3"
+  resolved "https://registry.yarnpkg.com/ckeditor/-/ckeditor-4.11.3.tgz#91f66d7ddb5bff3874514fe539779686874ed655"
+  integrity sha512-v6G+v16WAcukKuQH6m+trA9RCOQntFM2nxPO/GFiLYsdD/5IbZAZ2n7GwMxQmxDXpx4AixpnMWF+yAE1t9wq6Q==
 
 clap@^1.0.9:
   version "1.2.3"
@@ -3804,7 +3804,7 @@ dateformat@^2.0.0:
   resolved "https://registry.yarnpkg.com/dateformat/-/dateformat-2.2.0.tgz#4065e2013cf9fb916ddfd82efb506ad4c6769062"
   integrity sha1-QGXiATz5+5Ft39gu+1Bq1MZ2kGI=
 
-debug@*, debug@^4.0.1, debug@^4.1.0, debug@~4.1.0:
+debug@*, debug@^4.0.1, debug@^4.1.0, debug@~4.1, debug@~4.1.0:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/debug/-/debug-4.1.1.tgz#3b72260255109c6b589cee050f1d516139664791"
   integrity sha512-pYAIzeRo8J6KPEaJ0VWOh5Pzkbw/RetuzehGM7QRRX5he4fPHx2rdKMB256ehJCkX+XRQm16eZLqLNS8RSZXZw==
@@ -3818,7 +3818,7 @@ debug@2.6.9, debug@^2.0.0, debug@^2.1.0, debug@^2.1.2, debug@^2.2.0, debug@^2.3.
   dependencies:
     ms "2.0.0"
 
-debug@3.1.0, debug@~3.1, debug@~3.1.0:
+debug@3.1.0, debug@~3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/debug/-/debug-3.1.0.tgz#5bb5a0672628b64149566ba16819e61518c67261"
   integrity sha512-OX8XqP7/1a9cqkxYw2yXss15f26NKWBpDXQd0/uK/KPqdQhxbPa994hnzjcE2VqQpDslf55723cKPUOGSmMY3g==
@@ -6424,10 +6424,10 @@ jquery-autosize@~1.18:
   resolved "https://registry.yarnpkg.com/jquery-autosize/-/jquery-autosize-1.18.18.tgz#28fcdfd671cbf3ee661ca484c19ee7aaa65e825a"
   integrity sha1-KPzf1nHL8+5mHKSEwZ7nqqZeglo=
 
-jquery-highlight@3.4:
-  version "3.4.0"
-  resolved "https://registry.yarnpkg.com/jquery-highlight/-/jquery-highlight-3.4.0.tgz#05cc0e765477838a98c60f542e3d5dc319742f87"
-  integrity sha1-BcwOdlR3g4qYxg9ULj1dwxl0L4c=
+jquery-highlight@3.5:
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/jquery-highlight/-/jquery-highlight-3.5.0.tgz#354fb3a8b98c594525ec1ccc003fd3d1dc305815"
+  integrity sha512-5gzRomQyy3n/byb2G5zhbavdiXcPZ6rAWXtU5FgdEvguDEn90kMm9/QARY3zdKhH/+tfqqu9GNKocbMGf7ThNg==
   dependencies:
     jquery ">= 1.0.0"
 
