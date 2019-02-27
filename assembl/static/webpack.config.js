@@ -129,7 +129,7 @@ module.exports = {
         ],
       },
       {
-        test: /\/js\/app\/.*\.js$|chai-as-promised/,
+        test: /\/js\/app\/.*\.js$|chai-as-promised|d3-array/,
         use: [{
             loader: 'babel-loader',
             options: {
