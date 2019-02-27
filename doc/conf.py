@@ -66,7 +66,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Idealoom'
-copyright = u"2012-2018, Clouds Collective of skills inc., Bluenove Group inc., Imagination For People, Caravan Web Worker Cooperative inc., Technologies Coeus inc., Solutions Conversence inc."
+copyright = u"2012-2019, Clouds Collective of skills inc., Bluenove Group inc., Imagination For People, Caravan Web Worker Cooperative inc., Technologies Coeus inc., Solutions Conversence inc."
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -290,7 +290,7 @@ texinfo_documents = [
 epub_title = u'IdeaLoom'
 epub_author = u'Conversence'
 epub_publisher = u'Conversence'
-epub_copyright = u'2018, Conversence'
+epub_copyright = u'2019, Conversence'
 
 # The basename for the epub file. It defaults to the project name.
 #epub_basename = u'Assembl'
