@@ -72,6 +72,7 @@ pyzmq==16.0.4  # rq.filter: <17
 raven==6.10.0
 rdflib==4.2.2
 rdflib-jsonld==0.4.0
+redis==3.2.0
 reg==0.11
 requests-oauthlib==1.2.0
 requests==2.21.0
