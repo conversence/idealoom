@@ -77,27 +77,24 @@ fake_social_token = json.dumps({
 
 fake_social_profile = json.dumps({
     'access_token': 'some_token',
-    'displayName': p1_name,
-    'emails': [{'type': 'account', 'value': p1_email}],
-    'etag': '"etag"',
-    'expires': 3600,
-    'expires_in': 3600,
+    'profile': 'https://plus.google.com/'+p1_uid,
+    'sub': p1_uid,
+    'picture': 'https://lh5.googleusercontent.com/-ui-GqpNh5Ms/'
+                   'AAAAAAAAAAI/AAAAAAAAAZw/a7puhHMO_fg/photo.jpg',
+    'email': p1_email,
     'id': p1_uid,
     'id_token': 'some_other_token',
-    'image': {
-        'isDefault': False,
-        'url': 'https://lh4.googleusercontent.com/abcd/photo.jpg?sz=50'
-    },
-    'isPlusUser': True,
-    'kind': 'plus#person',
-    'language': 'en',
-    'name': {'familyName': 'Loon', 'givenName': 'A. Barking'},
+    'locale': 'en',
+    'family_name': 'Loon',
+    'given_name': 'A. Barking',
+    'name': p1_name,
     'objectType': 'person',
-    'verified': False})
+    'email_verified': True,
+})
 
 fake_responses = {
     "https://accounts.google.com/o/oauth2/token": fake_social_token,
-    "https://www.googleapis.com/plus/v1/people/me": fake_social_profile,
+    "https://www.googleapis.com/oauth2/v3/userinfo": fake_social_profile,
     "https://www.facebook.com/translations/FacebookLocales.xml":
         fake_facebook_locale_info
 }
@@ -137,7 +134,7 @@ def test_social_login(
         assert res2.status_code == 302
         assert mock_request.call_count > 1
         urls_called = {call[1]['url'] for call in mock_request.call_args_list}
-        assert "https://www.googleapis.com/plus/v1/people/me" in urls_called
+        assert "https://www.googleapis.com/oauth2/v3/userinfo" in urls_called
     account = test_session.query(SocialAuthAccount).filter_by(
         email=p1_email).first()
     assert account
@@ -179,7 +176,7 @@ def test_add_social_account(
         assert res2.status_code == 302
         assert mock_request.call_count > 1
         urls_called = {call[1]['url'] for call in mock_request.call_args_list}
-        assert "https://www.googleapis.com/plus/v1/people/me" in urls_called
+        assert "https://www.googleapis.com/oauth2/v3/userinfo" in urls_called
     account = test_session.query(SocialAuthAccount).filter_by(
         email=p1_email).first()
     assert account
@@ -214,7 +211,7 @@ def test_merge_social_account(
         assert res2.status_code == 302
         assert mock_request.call_count > 1
         urls_called = {call[1]['url'] for call in mock_request.call_args_list}
-        assert "https://www.googleapis.com/plus/v1/people/me" in urls_called
+        assert "https://www.googleapis.com/oauth2/v3/userinfo" in urls_called
     account = test_session.query(SocialAuthAccount).filter_by(
         email=p1_email).first()
     assert account
