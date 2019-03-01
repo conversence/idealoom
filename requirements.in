@@ -3,8 +3,6 @@
 -e git+https://github.com/dgilland/hashfs.git@master#egg=hashfs
 -e git+https://github.com/FreeDiscovery/jwzthreading.git@master#egg=jwzthreading
 -e git+https://github.com/maparent/langdetect.git@no_sample#egg=langdetect
-# Until https://github.com/SurveyMonkey/pyramid_autodoc/pull/12 is merged
--e git+https://github.com/matthewnorman/pyramid_autodoc@sphinx_161_no_domains_v2#egg=pyramid_autodoc
 -e git+https://github.com/assembl/pyramid_beaker.git@assembl#egg=pyramid_beaker
 -e git+https://github.com/maparent/sqlalchemy-utils.git@abstract_generic#egg=sqlalchemy_utils
 -e git+https://github.com/conversence/sqlalchemy-rdfbridge.git#egg=sqlalchemy-rdfbridge
@@ -22,7 +20,7 @@ colour==0.1.5
 coloredlogs==10.0
 contextlib2==0.5.5
 cornice==3.5.1
-cryptography==2.5
+cryptography==2.6.1
 enum34==1.1.6;python_version<"3"
 Fabric3==1.14.post1;python_version>="3"
 Fabric==1.14.0;python_version<"3" # rq.filter: <2
@@ -67,7 +65,7 @@ python-json-logger==0.1.10
 python-saml==2.4.2;python_version<"3"
 python3-saml==1.5.0;python_version>="3"
 pytz==2018.9
-PyYAML==5.1b1
+PyYAML==5.1b3
 pyzmq==16.0.4  # rq.filter: <17
 raven==6.10.0
 rdflib==4.2.2

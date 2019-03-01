@@ -363,7 +363,7 @@ def generate_new_requirements():
         "No usable local venv"
     with settings(host_string="localhost", venvpath=local_venv,
                   user=getuser(), projectpath=os.getcwd()):
-        venvcmd(" ".join(("pip-compile --output-file", target, env.requirement_inputs)))
+        venvcmd(" ".join(("pip-compile -U --output-file", target, env.requirement_inputs)))
 
 
 @task

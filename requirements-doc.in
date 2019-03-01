@@ -1,4 +1,5 @@
-pyramid-autodoc==1.0.0
+# Until https://github.com/SurveyMonkey/pyramid_autodoc/pull/12 is merged
+-e git+https://github.com/matthewnorman/pyramid_autodoc@sphinx_161_no_domains_v2#egg=pyramid_autodoc
 Sphinx==1.5.1
 sphinxcontrib-httpdomain==1.5.0
 sphinxcontrib-zopeext==0.2.1
