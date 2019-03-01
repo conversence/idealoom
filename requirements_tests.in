@@ -5,7 +5,7 @@ pytest-cov==2.6.1
 pytest-localserver==0.5.0
 pytest-mock==1.10.1
 pytest-splinter==2.0.1
-pytest==3.10.1  # rq.filter: <4
+pytest==4.3.0
 WebTest==2.0.33
 
 # Do I still need this?

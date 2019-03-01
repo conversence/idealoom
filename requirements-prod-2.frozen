@@ -88,7 +88,7 @@ jmespath==0.9.4           # via boto3, botocore
 jsonpath-ng==1.4.3
 kombu==4.3.0
 lingua==4.13
-lxml==4.3.1
+lxml==4.3.2
 mako==1.0.7               # via alembic, tomako
 markupsafe==1.1.1         # via jinja2, mako, pyramid-jinja2
 monotonic==1.5            # via fasteners, humanfriendly
@@ -165,7 +165,7 @@ singledispatch==3.4.0.3   # via tornado
 six==1.12.0
 smart-open==1.8.0         # via gensim
 social-auth-app-pyramid==1.0.0
-social-auth-core==2.0.0
+social-auth-core==3.1.0
 social-auth-storage-sqlalchemy==1.1.0
 soupsieve==1.8            # via beautifulsoup4
 sparqlwrapper==1.8.2

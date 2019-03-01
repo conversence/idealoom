@@ -92,7 +92,7 @@ jmespath==0.9.4           # via boto3, botocore
 jsonpath-ng==1.4.3
 kombu==4.3.0
 lingua==4.13
-lxml==4.3.1
+lxml==4.3.2
 mako==1.0.7               # via alembic, pyramid-mako, tomako
 markupsafe==1.1.1         # via jinja2, mako, pyramid-jinja2
 mock==2.0.0
@@ -154,7 +154,7 @@ pytest-cov==2.6.1
 pytest-localserver==0.5.0
 pytest-mock==1.10.1
 pytest-splinter==2.0.1
-pytest==3.10.1
+pytest==4.3.0
 python-dateutil==2.8.0
 python-editor==1.0.4      # via alembic
 python-json-logger==0.1.10
@@ -184,7 +184,7 @@ six==1.12.0
 smart-open==1.8.0         # via gensim
 snowballstemmer==1.2.1    # via sphinx
 social-auth-app-pyramid==1.0.0
-social-auth-core==2.0.0
+social-auth-core==3.1.0
 social-auth-storage-sqlalchemy==1.1.0
 soupsieve==1.8            # via beautifulsoup4
 sparqlwrapper==1.8.2
