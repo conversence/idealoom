@@ -1,7 +1,7 @@
 from abc import abstractmethod
 import logging
 from collections import defaultdict
-from itertools import chain
+from itertools import chain, groupby
 try:
     from urllib.parse import urljoin
 except ImportError:
@@ -54,10 +54,21 @@ class IdeaSource(ContentSource, PromiseObjectImporter):
     @reconstructor
     def init_on_load(self):
         PromiseObjectImporter.__init__(self)
-        self.import_record_by_id = {r.external_id: r for r in self.import_records}
         self.parsed_data_filter = parse(self.data_filter) if self.data_filter else None
         self.global_url = get_global_base_url() + "/data/"
         
+
+    def load_previous_records(self):
+        records = list(self.import_records)
+        records.sort(key=lambda r: r.target_table)
+        for (table_id, recs) in groupby(records, lambda r: r.target_table):
+            recs = list(recs)
+            cls = ImportRecord.target.property.type_mapper.value_to_class(table_id, None)
+            instances = self.db.query(cls).filter(cls.id.in_([r.target_id for r in recs]))
+            instance_by_id = {i.id: i for i in instances}
+            for r in recs:
+                eid = self.normalize_id(r.external_id)
+                self.instance_by_id[eid] = instance_by_id[r.target_id]
 
     def external_id_to_uri(self, external_id):
         if '//' in external_id:
@@ -121,8 +132,8 @@ class IdeaSource(ContentSource, PromiseObjectImporter):
         return data
 
     @abstractmethod
-    def read(self, data, admin_user_id, base=None):
-        pass
+    def read(self, admin_user_id, base=None):
+        self.load_previous_records()
 
     def read_data_gen(self, data_gen, admin_user_id):
         instance_by_id = {}
@@ -267,6 +278,7 @@ class IdeaLoomIdeaSource(IdeaSource):
         return super(IdeaLoomIdeaSource, self).normalize_id(id)
 
     def read(self, admin_user_id=None):
+        super(IdeaLoomIdeaSource, self).read(admin_user_id)
         admin_user_id = admin_user_id or self.discussion.creator_id
         login_url = urljoin(self.source_uri, '/login')
         r = requests.post(login_url, cookies=self.cookies, data={
@@ -470,6 +482,7 @@ class CatalystIdeaSource(IdeaSource):
         return record
 
     def read_data(self, jsonld, admin_user_id, base=None):
+        self.load_previous_records()
         if isinstance(jsonld, string_types):
             jsonld = json.loads(jsonld)
         c = jsonld['@context']
