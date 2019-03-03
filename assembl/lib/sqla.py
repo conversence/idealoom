@@ -21,6 +21,7 @@ from time import sleep
 from random import random
 from threading import Thread
 from itertools import chain
+from functools import partial
 
 from future.utils import string_types, as_native_str
 from past.builtins import str as past_str, unicode as past_unicode, long
@@ -1458,7 +1459,7 @@ class BaseOps(object):
                                 object_importer)
                             instances.append(instance)
                         else:
-                            def process(instance):
+                            def process(instance, accessor_name):
                                 done = False
                                 rel = self.__class__.__mapper__.relationships.get(accessor_name, None)
                                 if rel:
@@ -1479,7 +1480,7 @@ class BaseOps(object):
                                     if instance is not instance2:
                                         # delete instance? Or will that be implicit?
                                         instance = instance2
-                            object_importer.apply(self, val_id, process)
+                            object_importer.apply(self, val_id, partial(process, accessor_name=accessor_name))
                     self._assign_subobject_list(
                         instances, accessor, context.get_user_id(),
                         context.get_permissions())
@@ -1734,7 +1735,9 @@ class BaseOps(object):
                     # TODO: Keys spanning multiple columns
                     object_importer.apply(
                         self, target_id,
-                        lambda i: self._assign_subobject(i, accessor))
+                        partial(
+                            lambda i, a: self._assign_subobject(i, a),
+                            a=accessor))
                     continue
                 else:
                     # Possibly just a string

@@ -22,6 +22,7 @@ from . import DiscussionBoundBase
 from .uriref import URIRefDb
 from ..lib.sqla_types import URLString
 from .generic import ContentSource
+from .auth import AgentProfile
 from .publication_states import PublicationState
 from ..lib.sqla import get_named_class, get_named_object, PromiseObjectImporter
 from ..lib.generic_pointer import (
@@ -160,7 +161,7 @@ class IdeaSource(ContentSource, PromiseObjectImporter):
             pdata = self.process_data(data)
             # Don't we need a CollectionCtx?
             instance_ctx = cls.create_from_json(
-                pdata, ctx, object_importer=self)
+                pdata, ctx, object_importer=self, parse_def_name='import')
             if instance_ctx:
                 instance = instance_ctx._instance
                 self[ext_id] = instance
@@ -279,6 +280,7 @@ class IdeaLoomIdeaSource(IdeaSource):
 
     def read(self, admin_user_id=None):
         super(IdeaLoomIdeaSource, self).read(admin_user_id)
+        local_server = self.source_uri.startswith(urljoin(self.global_url, '/'))
         admin_user_id = admin_user_id or self.discussion.creator_id
         login_url = urljoin(self.source_uri, '/login')
         r = requests.post(login_url, cookies=self.cookies, data={
@@ -296,7 +298,21 @@ class IdeaLoomIdeaSource(IdeaSource):
         r = requests.get(link_uri, cookies=self.cookies)
         assert r.ok
         links = r.json()
-        return self.read_json(list(chain(ideas, links)), admin_user_id)
+        self.read_json(list(chain(ideas, links)), admin_user_id)
+        missing_oids = list(self.promises_by_target_id.keys())
+        missing_classes = {oid.split('/')[-2] for oid in missing_oids}
+        assert missing_classes == {'Agent'}, "Promises for unknown classes " + missing_classes
+        if local_server:
+            for oid in missing_oids:
+                loid = 'local:'+oid[len(self.global_url):]
+                self[oid] = AgentProfile.get_instance(loid)
+        else:
+            self.read_json([
+                requests.get(oid, cookies=self.cookies).json()
+                for oid in missing_oids], admin_user_id)
+
+        self.db.flush()
+        self.add_missing_links()
 
     def read_json(self, data, admin_user_id):
         if isinstance(data, string_types):
@@ -316,8 +332,6 @@ class IdeaLoomIdeaSource(IdeaSource):
                         yield obj
 
         self.read_data_gen(find_objects(data), admin_user_id)
-        self.db.flush()
-        self.add_missing_links()
 
 
 class CatalystIdeaSource(IdeaSource):

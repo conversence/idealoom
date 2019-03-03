@@ -322,6 +322,7 @@
         "definition": "description:extended",
         "original_uri": true,
         "created": "creation_date",
+        "creator": true,
         "order": "&get_order_from_first_parent",
         "discussion": false,
         "hidden": true,
