@@ -21,7 +21,7 @@ from future.utils import with_metaclass
 
 from ..lib.abc import abstractclassmethod
 from ..lib.sqla import (
-    Base, TimestampedBase, get_metadata, get_session_maker, PrivateObjectMixin,
+    Base, get_metadata, get_session_maker, PrivateObjectMixin,
     get_named_object, get_database_id, Tombstone, CrudOperation)
 from ..lib.history_mixin import (
     TombstonableMixin, HistoryMixin, OriginMixin, HistoryMixinWithOrigin,

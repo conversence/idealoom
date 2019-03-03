@@ -98,22 +98,9 @@ _TABLENAME_RE = re.compile('([A-Z]+)')
 _session_maker = None
 db_schema = None
 _metadata = None
-Base = TimestampedBase = None
-# If obsolete table names collide with new table names, alembic can't work
-obsolete = None
-ObsoleteBase = TimestampedObsolete = None
+Base = None
 class_registry = dict()
 aliased_class_registry = None
-
-
-def declarative_bases(metadata, registry=None):
-    """Return all declarative bases bound to a single metadata object."""
-    if registry is None:
-        registry = dict()
-    return (declarative_base(cls=BaseOps, metadata=metadata,
-                             class_registry=registry),
-            declarative_base(cls=Timestamped, metadata=metadata,
-                             class_registry=registry))
 
 
 def get_target_class(column):
@@ -2031,36 +2018,6 @@ class BaseOps(object):
         return self.is_owner(user_id)
 
 
-class Timestamped(BaseOps):
-    """An automatically timestamped mixin. Not used."""
-    ins_date = Column(DateTime, nullable=False, default=datetime.utcnow)
-    mod_date = Column(DateTime, nullable=False, default=datetime.utcnow)
-    _stamps = ['ins_date', 'mod_date']
-
-    def iteritems(self, include=None, exclude=None):
-        if exclude is None:
-            exclude = self._stamps
-        elif len(exclude) > 0:
-            exclude = set(exclude) | set(self._stamps)
-        return super(Timestamped, self).iteritems(exclude=exclude,
-                                                  include=include)
-
-    @classmethod
-    def validator(cls, exclude=None, **kwargs):
-        """Return a ColanderAlchemy schema mapper.
-
-        Fields targeted by the validator can be specified with include/exclude.
-
-        """
-        if exclude is None:
-            exclude = cls._stamps
-        elif len(exclude) > 0:
-            exclude = set(exclude) | set(cls._stamps)
-        kwargs['exclude'] = exclude
-        return super(Timestamped, cls) \
-            .validator(mapping_cls=TimestampedSQLAlchemySchemaNode, **kwargs)
-
-
 def make_session_maker(zope_tr=True, autoflush=True):
     return scoped_session(sessionmaker(
         autoflush=autoflush,
@@ -2209,15 +2166,14 @@ def configure_engine(settings, zope_tr=True, autoflush=True, session_maker=None,
         return engine
     engine = engine_from_config(settings, 'sqlalchemy.', **engine_kwargs)
     session_maker.configure(bind=engine)
-    global db_schema, _metadata, Base, TimestampedBase, ObsoleteBase, TimestampedObsolete
+    global db_schema, _metadata, Base, class_registry
     if settings['sqlalchemy.url'].startswith('virtuoso:'):
         db_schema = '.'.join((settings['db_schema'], settings['db_user']))
     else:
         db_schema = settings['db_schema']
     _metadata = MetaData(schema=db_schema)
-    Base, TimestampedBase = declarative_bases(_metadata, class_registry)
-    obsolete = MetaData(schema=db_schema)
-    ObsoleteBase, TimestampedObsolete = declarative_bases(obsolete)
+    Base = declarative_base(cls=BaseOps, metadata=_metadata,
+                            class_registry=class_registry)
     event.listen(Session, 'before_commit', before_commit_listener)
     event.listen(Session, 'after_commit', after_commit_listener)
     event.listen(Session, 'after_rollback', session_rollback_listener)
