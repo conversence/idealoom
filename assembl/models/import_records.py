@@ -1,7 +1,7 @@
 from abc import abstractmethod
 import logging
 from collections import defaultdict
-from itertools import chain, groupby
+from itertools import groupby
 try:
     from urllib.parse import urljoin
 except ImportError:
@@ -292,16 +292,21 @@ class IdeaLoomIdeaSource(IdeaSource):
         r = requests.get(self.source_uri, cookies=self.cookies)
         assert r.ok
         ideas = r.json()
+        self.read_json(ideas, admin_user_id)
         discussion_id = self.source_uri.split('/')[-2]
         link_uri = urljoin(self.source_uri,
             '/data/Conversation/%s/idea_links' % (discussion_id,))
         r = requests.get(link_uri, cookies=self.cookies)
         assert r.ok
         links = r.json()
-        self.read_json(list(chain(ideas, links)), admin_user_id)
+        link_subset = [l for l in links
+            if self.normalize_id(l['source']) in self.instance_by_id and
+            self.normalize_id(l['target']) in self.instance_by_id]
+        self.read_json(link_subset, admin_user_id)
         missing_oids = list(self.promises_by_target_id.keys())
         missing_classes = {oid.split('/')[-2] for oid in missing_oids}
-        assert missing_classes == {'Agent'}, "Promises for unknown classes " + missing_classes
+        missing_classes.discard('Agent')
+        assert not missing_classes, "Promises for unknown classes " + str(missing_classes)
         if local_server:
             for oid in missing_oids:
                 loid = 'local:'+oid[len(self.global_url):]

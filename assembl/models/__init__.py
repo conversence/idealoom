@@ -383,8 +383,9 @@ from .announcement import (
     IdeaAnnouncement,
 )
 from .import_records import (
-    IdeaSource,
     CatalystIdeaSource,
+    IdeaSource,
+    IdeaLoomIdeaSource,
     ImportRecord,
 )
 
