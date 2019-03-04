@@ -600,6 +600,7 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
                 ],
                 Everyone: [
                     P_READ,
+                    P_READ_IDEA,
                 ],
             },
         },

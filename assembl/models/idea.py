@@ -48,15 +48,16 @@ from .uriref import URIRefDb
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..auth import (
     CrudPermissions, P_READ, P_ADMIN_DISC, P_EDIT_IDEA,
-    P_ADD_IDEA)
-from .permissions import AbstractLocalUserRole
+    P_ADD_IDEA, P_READ_IDEA)
+from .permissions import (
+    AbstractLocalUserRole, Role, Permission, DiscussionPermission)
 from .langstrings import LangString, LangStringEntry
 from ..semantic.namespaces import (
     SIOC, IDEA, ASSEMBL, QUADNAMES, FOAF, RDF, VirtRDF)
 from ..lib.sqla import CrudOperation
 from ..lib.model_watcher import get_model_watcher
 from .auth import AgentProfile
-from .publication_states import PublicationState
+from .publication_states import PublicationState, StateDiscussionPermission
 from .import_records import ImportRecord
 from assembl.views.traversal import (
     AbstractCollectionDefinition, RelationCollectionDefinition,
@@ -388,6 +389,51 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
 
     def is_owner(self, user_id):
         return user_id == self.creator_id
+
+    @classmethod
+    def query_filter_with_permission(
+            cls, discussion, user_id, permission=P_READ_IDEA,
+            query=None, base_permissions=None, alias=None):
+        db = discussion.db
+        alias = alias or cls
+        query = query or db.query(alias).filter(alias.discussion_id==discussion.id)
+        if permission in (base_permissions or ()):
+            return query
+        idea_publication_flow = discussion.idea_publication_flow
+        roles_with_read_q = db.query(Role.id).join(
+            DiscussionPermission).join(Permission).filter(
+                (Permission.name == permission) &
+                (DiscussionPermission.discussion == discussion)
+            ).subquery()
+        if idea_publication_flow:
+            states_with_read_q = db.query(PublicationState.id).filter(
+                (PublicationState.flow_id == idea_publication_flow.id)
+                ).join(StateDiscussionPermission,
+                    (StateDiscussionPermission.pub_state_id==idea_publication_flow.id) &
+                    (StateDiscussionPermission.discussion_id==discussion.id)
+                ).join(Permission, StateDiscussionPermission.permission_id==Permission.id
+                ).filter(Permission.name==permission).subquery()
+            query = query.outerjoin(
+                IdeaLocalUserRole, (
+                    IdeaLocalUserRole.idea_id==alias.id) & (
+                    IdeaLocalUserRole.profile_id==user_id) &
+                    IdeaLocalUserRole.role_id.in_(roles_with_read_q)
+                ).filter((IdeaLocalUserRole.id != None) | alias.pub_state_id.in_(states_with_read_q))
+        else:
+            query = query.join(
+                IdeaLocalUserRole, (
+                    IdeaLocalUserRole.idea_id==alias.id) & (
+                    IdeaLocalUserRole.profile_id==user_id) &
+                    IdeaLocalUserRole.role_id.in_(roles_with_read_q)
+                )
+        return query
+
+    @classmethod
+    def query_filter_with_permission_req(
+            cls, request, permission=P_READ_IDEA, query=None, alias=None):
+        return cls.query_filter_with_permission(
+            request.discussion, request.authenticated_userid, permission,
+            query, request.base_permissions, alias)
 
     @property
     def widget_add_post_endpoint(self):
@@ -1260,8 +1306,8 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
                 for l in self.active_showing_widget_links]
 
     crud_permissions = CrudPermissions(
-        P_ADD_IDEA, P_READ, P_EDIT_IDEA, P_ADMIN_DISC, P_ADMIN_DISC,
-        P_ADMIN_DISC)
+        P_ADD_IDEA, P_READ_IDEA, P_EDIT_IDEA, P_ADMIN_DISC, P_ADMIN_DISC,
+        P_ADMIN_DISC, P_READ)
 
 LangString.setup_ownership_load_event(Idea,
     ['title', 'description', 'synthesis_title'])

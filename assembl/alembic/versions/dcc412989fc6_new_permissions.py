@@ -50,7 +50,8 @@ owner_correspondances = {
 }
 
 extra_permissions = {
-    'Content.C.Extract': ['Idea.A.Extract']
+    'Content.C.Extract': ['Idea.A.Extract'],
+    'Conversation.R': ['Idea.R']
 }
 
 def upgrade(pyramid_env):

@@ -12,6 +12,7 @@ var Permissions = {
   VOTE: 'Idea.C.Vote',
   ADD_EXTRACT: 'Content.C.Extract',
   EDIT_EXTRACT: 'Extract.U',
+  READ_IDEA: 'Idea.R',
   ADD_IDEA: 'Idea.C',
   EDIT_IDEA: 'Idea.U',
   EDIT_SYNTHESIS: 'Synthesis.U',

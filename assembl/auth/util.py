@@ -381,6 +381,13 @@ def roles_with_permission(discussion, permission=P_READ):
             DiscussionPermission.discussion == discussion))]
 
 
+def roles_ids_with_permission(discussion, permission=P_READ):
+    return [x for (x,) in discussion.db.query(Role.id).join(
+        DiscussionPermission).join(Permission).filter(and_(
+            Permission.name == permission,
+            DiscussionPermission.discussion == discussion))]
+
+
 def roles_with_permissions(discussion, *permissions):
     return [x for (x,) in discussion.db.query(Role.name).join(
         DiscussionPermission).join(Permission).filter(and_(
