@@ -9,6 +9,7 @@ from pyramid.security import authenticated_userid, Everyone
 from sqlalchemy import and_
 from sqlalchemy.orm import (joinedload, subqueryload, undefer)
 
+from assembl.lib.parsedatetime import parse_datetime
 from assembl.views.api import API_DISCUSSION_PREFIX
 from assembl.models import (
     Idea, RootIdea, IdeaLink, Discussion,
@@ -94,7 +95,8 @@ def get_idea(request):
     return idea.generic_json(view_def, user_id, permissions)
 
 
-def _get_ideas_real(request, view_def=None, ids=None, user_id=None):
+def _get_ideas_real(request, view_def=None, ids=None, user_id=None,
+                    modified_after=None):
     discussion = request.discussion
     user_id = user_id or Everyone
     # optimization: Recursive widget links.
@@ -124,6 +126,8 @@ def _get_ideas_real(request, view_def=None, ids=None, user_id=None):
     ideas = discussion.db.query(Idea).filter_by(
         discussion=discussion
     )
+    if modified_after:
+        ideas = ideas.filter(Idea.last_modified > modified_after)
 
     ideas = ideas.outerjoin(
         SubGraphIdeaAssociation,
@@ -174,8 +178,12 @@ def get_ideas(request):
     discussion = request.context
     view_def = request.GET.get('view')
     ids = request.GET.getall('ids')
-    return _get_ideas_real(request, view_def=view_def,
-                           ids=ids, user_id=user_id)
+    modified_after = request.GET.get('modified_after')
+    if modified_after:
+        modified_after = parse_datetime(modified_after, True)
+    return _get_ideas_real(
+        request, view_def=view_def, ids=ids, user_id=user_id,
+        modified_after=modified_after)
 
 
 @idea.put(permission=P_EDIT_IDEA)

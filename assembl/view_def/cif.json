@@ -166,6 +166,7 @@
         "created": "creation_date",
         "description": ":extended",
         "title": ":extended",
+        "last_modified": true,
         "in_conversation": "discussion",
         "has_container": "discussion",
         "alternative": "long_title",

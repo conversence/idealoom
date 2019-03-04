@@ -29,6 +29,7 @@
         "created": "creation_date",
         "order": "&get_order_from_first_parent",
         "discussion": false,
+        "last_modified": true,
         "hidden": true,
         "parents": "parent_uris",
         "subtype": "rdf_type",

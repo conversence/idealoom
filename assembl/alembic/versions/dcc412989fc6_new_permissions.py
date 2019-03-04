@@ -62,6 +62,9 @@ def upgrade(pyramid_env):
     db = m.get_session_maker()()
     with transaction.manager:
         role_ids = dict(list(db.execute('select name, id from role')))
+        if 'r:owner' not in role_ids:
+            db.execute("INSERT INTO role (name) VALUES ('r:owner')")
+            role_ids = dict(list(db.execute('select name, id from role')))
         permission_ids = dict(list(db.execute('select name, id from permission')))
         for before, after in owner_correspondances.items():
             db.execute("UPDATE discussion_permission SET role_id=%d, permission_id=%d WHERE permission_id=%d" % (

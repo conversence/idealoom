@@ -154,6 +154,7 @@
         "order": "&get_order_from_first_parent",
         "discussion": true,
         "most_common_words": "most_common_words_prop",
+        "last_modified": true,
         "hidden": true,
         "parents": "parent_uris",
         "parentId": "&get_first_parent_uri",

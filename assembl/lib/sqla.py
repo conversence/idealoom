@@ -31,7 +31,7 @@ from sqlalchemy import (
     DateTime, MetaData, engine_from_config, event, Column, Integer,
     inspect)
 from sqlalchemy.exc import NoInspectionAvailable, OperationalError
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.ext.associationproxy import AssociationProxy
 from sqlalchemy.orm import mapper, scoped_session, sessionmaker
 from sqlalchemy.orm.interfaces import MANYTOONE, ONETOMANY, MANYTOMANY
@@ -2018,6 +2018,15 @@ class BaseOps(object):
         return self.is_owner(user_id)
 
 
+class TimestampedMixin(object):
+    @declared_attr
+    def last_modified(cls):
+        return Column(DateTime, nullable=False, default=datetime.utcnow)
+
+    def was_changed(self):
+        return self.db.is_modified(self, False)
+
+
 def make_session_maker(zope_tr=True, autoflush=True):
     return scoped_session(sessionmaker(
         autoflush=autoflush,
@@ -2100,6 +2109,12 @@ def orm_delete_listener(mapper, connection, target):
     target.tombstone().send_to_changes(connection, CrudOperation.DELETE)
 
 
+def before_flush_listener(session, flush_context, instances):
+    for target in session.identity_map.values():
+        if isinstance(target, TimestampedMixin) and target.was_changed():
+            target.last_modified = datetime.now()
+
+
 def before_commit_listener(session):
     """Create the Json representation of changed objects which will be
     sent to the :py:mod:`assembl.tasks.changes_router`
@@ -2175,6 +2190,7 @@ def configure_engine(settings, zope_tr=True, autoflush=True, session_maker=None,
     Base = declarative_base(cls=BaseOps, metadata=_metadata,
                             class_registry=class_registry)
     event.listen(Session, 'before_commit', before_commit_listener)
+    event.listen(Session, 'before_flush', before_flush_listener)
     event.listen(Session, 'after_commit', after_commit_listener)
     event.listen(Session, 'after_rollback', session_rollback_listener)
     event.listen(engine, 'rollback', engine_rollback_listener)

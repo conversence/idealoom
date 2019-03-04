@@ -41,7 +41,8 @@ from pyramid.i18n import TranslationStringFactory
 
 from ..lib.utils import get_global_base_url
 from ..nlp.wordcounter import WordCounter
-from . import DiscussionBoundBase, HistoryMixinWithOrigin
+from . import (
+    DiscussionBoundBase, HistoryMixinWithOrigin, TimestampedMixin)
 from .discussion import Discussion
 from .uriref import URIRefDb
 from ..semantic.virtuoso_mapping import QuadMapPatternS
@@ -155,7 +156,7 @@ class WordCountVisitor(IdeaVisitor):
         return self.counter.best(num)
 
 
-class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
+class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
     """
     An idea (or concept) distilled from the conversation flux.
     """
@@ -192,9 +193,6 @@ class Idea(HistoryMixinWithOrigin, DiscussionBoundBase):
         backref=backref("idea_from_description", lazy="dynamic"),
         cascade="all")
     hidden = Column(Boolean, server_default='0')
-    # TODO: Make this autoupdate on change. see
-    # http://stackoverflow.com/questions/1035980/update-timestamp-when-row-is-updated-in-postgresql
-    last_modified = Column(Timestamp)
     creator_id = Column(Integer, ForeignKey(
         AgentProfile.id, ondelete="SET NULL", onupdate="CASCADE"))
     pub_state_id = Column(Integer, ForeignKey(

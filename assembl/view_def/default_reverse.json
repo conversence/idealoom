@@ -503,7 +503,7 @@
     },
     "Announcement": {
         "created": "creation_date",
-        "modification_date": true,
+        "last_modified": false,
         "creator": true,
         "last_updated_by": true,
         "title": true,

@@ -328,6 +328,7 @@
         "hidden": true,
         "parents": "parent_uris",
         "is_tombstone": true,
+        "last_modified": true,
         "subtype": "rdf_type",
         "parentId": "&get_first_parent_uri",
         "numChildIdea": "num_children",
@@ -682,7 +683,7 @@
     },
     "Announcement": {
         "created": "creation_date",
-        "modification_date": true,
+        "last_modified": true,
         "creator": true,
         "last_updated_by": true,
         "title": ":extended",

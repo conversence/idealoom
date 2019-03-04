@@ -16,7 +16,7 @@ from datetime import datetime
 from ..lib.sqla_types import URLString
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..semantic.namespaces import DCTERMS
-from . import DiscussionBoundBase, OriginMixin
+from . import DiscussionBoundBase, OriginMixin, TimestampedMixin
 from .idea import Idea
 from .langstrings import LangString
 from .auth import (
@@ -24,7 +24,7 @@ from .auth import (
     P_EDIT_POST, P_ADD_IDEA, P_EDIT_IDEA)
 
 
-class Announcement(DiscussionBoundBase, OriginMixin):
+class Announcement(DiscussionBoundBase, OriginMixin, TimestampedMixin):
     """
     Represents an announcement.  Similar to a message, but editable, meant to be displayed on top of the messagelist for an idea.
     """
@@ -49,7 +49,7 @@ class Announcement(DiscussionBoundBase, OriginMixin):
             cascade="all, delete-orphan"),
     )
 
-    modification_date = Column(DateTime, nullable=False, default=datetime.utcnow)
+    # modification_date = Column(DateTime, nullable=False, default=datetime.utcnow)
 
     creator_id = Column(Integer, ForeignKey('agent_profile.id'),
                         nullable=False)
