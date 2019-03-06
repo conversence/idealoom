@@ -86,10 +86,13 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
     show_help_in_debate_section = Column(Boolean, default=True)
     preferences_id = Column(Integer, ForeignKey(Preferences.id))
     creator_id = Column(Integer, ForeignKey('user.id', ondelete="SET NULL"))
+    idea_pubflow_id = Column(
+        Integer, ForeignKey(PublicationFlow.id, ondelete="SET NULL", onupdate="CASCADE"))
 
     preferences = relationship(Preferences, backref=backref(
         'discussion'), cascade="all, delete-orphan", single_parent=True)
     creator = relationship('User', backref="discussions_created")
+    idea_publication_flow = relationship(PublicationFlow)
 
     @classmethod
     def get_naming_column_name(cls):
@@ -219,13 +222,6 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
 
     def container_url(self):
         return "/data/Discussion"
-
-    @property
-    def idea_publication_flow(self):
-        preferences = self.preferences
-        idea_flow_name = preferences['idea_publication_flow']
-        if idea_flow_name:
-            return PublicationFlow.getByName(idea_flow_name)
 
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):

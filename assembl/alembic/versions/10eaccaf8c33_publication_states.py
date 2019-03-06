@@ -96,6 +96,9 @@ def upgrade(pyramid_env):
         op.add_column(
             'idea', sa.Column("pub_state_id", sa.Integer, sa.ForeignKey(
                 "publication_state.id", ondelete="SET NULL", onupdate="CASCADE")))
+        op.add_column(
+            'discussion', sa.Column('idea_pubflow_id', sa.Integer, sa.ForeignKey(
+                "publication_flow.id", ondelete="SET NULL", onupdate="CASCADE")))
 
         op.drop_constraint('local_user_role_user_id_fkey', 'local_user_role')
         op.alter_column('local_user_role', 'user_id', new_column_name='profile_id')
@@ -126,6 +129,7 @@ def downgrade(pyramid_env):
         op.drop_table('idea_user_role')
         op.drop_column('idea', "creator_id")
         op.drop_column('idea', "pub_state_id")
+        op.drop_column('discussion', 'idea_pubflow_id')
         op.drop_table("state_discussion_permission")
         op.drop_table("publication_transition")
         op.drop_table("publication_state")

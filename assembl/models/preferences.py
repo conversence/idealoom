@@ -392,19 +392,6 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
             "default": ""
         },
 
-        # Publication flow to use for ideas
-        {
-            "id": "idea_publication_flow",
-            "name": _("Publication flow used for ideas"),
-            "value_type": "pubflow",
-            "description": _("Publication flow used for Ideas"),
-            "allow_user_override": None,
-            "modification_permission": P_ADMIN_DISC,
-            # "frontend_validator_function": func_name...?,
-            # "backend_validator_function": func_name...?,
-            "default": "basic_flow"
-        },
-
         # Simple view panel order, eg NIM or NMI
         {
             "id": "simple_view_panel_order",
