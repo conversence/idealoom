@@ -208,7 +208,9 @@ def get_token(request):
              ctx_instance_class=Discussion, request_method='GET',
              accept="application/ld+json")
 def discussion_instance_view_jsonld(request):
-    if (request.accept.quality('application/json') >= request.accept.quality('application/ld+json')):
+    if (not request.path.endswith('jsonld')) and (
+            request.accept.quality('application/json') >=
+            request.accept.quality('application/ld+json')):
         # not specifically asking for json-ld
         return Response(body=json.dumps(instance_view(request)),
             content_type='application/json', charset='utf-8')
