@@ -208,7 +208,7 @@ def home_view(request):
     context['translation_locale_names_json'] = locale_labels
 
     context['preferences_json'] = json.dumps(dict(preferences))
-    role_names = [x for (x) in session.query(Role.name).all()]
+    role_names = [x for (x,) in session.query(Role.name).all()]
     context['role_names'] = json.dumps(role_names)
 
     response = render_to_response('../../templates/index.jinja2', context,

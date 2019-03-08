@@ -4,10 +4,7 @@
  */
 import Base from './base.js';
 
-import Jed from 'jed';
 import Ctx from '../common/context.js';
-import Permissions from '../utils/permissions.js';
-import i18n from '../utils/i18n.js';
 import Types from '../utils/types.js';
 
 /**
@@ -46,6 +43,7 @@ var publicationFlowModel = Base.Model.extend({
      * */
   },
 });
+
 /**
  * Discussions collection
  * @class app.models.publicationFlow.publicationFlowCollection
@@ -80,7 +78,7 @@ var publicationStateModel = Base.Model.extend({
   /**
    * @member {string} app.models.publicationStateModel.publicationStateModel.url
    */
-  url: Ctx.getApiV2DiscussionUrl(),
+  urlRoot: Ctx.getApiV2Url(Types.PUBLICATION_STATE),
   /**
    * Defaults
    * @type {Object}
@@ -122,7 +120,7 @@ var publicationStateCollection = Base.Collection.extend({
    */
   constructor: function publicationStateCollection(publicationFlowModel) {
     Base.Collection.apply(this, arguments);
-    this.url = publicationFlowModel.url+"/states"
+    this.url = publicationFlowModel.url()+"/states";
   }
 });
 
@@ -136,7 +134,7 @@ var publicationTransitionModel = Base.Model.extend({
   /**
    * @member {string} app.models.publicationTransitionModel.publicationTransitionModel.url
    */
-  url: Ctx.getApiV2DiscussionUrl(),
+  urlRoot: Ctx.getApiV2Url(Types.PUBLICATION_TRANSITION),
   /**
    * Defaults
    * @type {Object}
@@ -178,7 +176,7 @@ var publicationTransitionCollection = Base.Collection.extend({
    */
   constructor: function publicationTransitionCollection(publicationFlowModel) {
     Base.Collection.apply(this, arguments);
-    url = publicationTransitionModel.url + "/transitions"
+    this.url = publicationTransitionModel.url() + "/transitions"
   }
 });
 

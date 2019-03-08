@@ -1587,7 +1587,12 @@ class BaseOps(object):
                 if not setter:
                     raise HTTPBadRequest("No setter %s in class %s" % (
                         parse_instruction[1:], self.__class__.__name__))
-                if not (pyinspect.ismethod(setter) or pyinspect.isfunction(setter)):
+                if pyinspect.isdatadescriptor(setter):
+                    setter = setter.fset
+                    if not setter:
+                        raise HTTPBadRequest("No setter %s in class %s" % (
+                            parse_instruction[1:], self.__class__.__name__))
+                elif not (pyinspect.ismethod(setter) or pyinspect.isfunction(setter)):
                     raise HTTPBadRequest("Not a setter: %s in class %s" % (
                         parse_instruction[1:], self.__class__.__name__))
                 (args, varargs, keywords, defaults) = \
@@ -1598,6 +1603,7 @@ class BaseOps(object):
                             parse_instruction[1:], len(args),
                             self.__class__.__name__))
                 setter(self, value)
+                continue
             elif parse_instruction[0] == "'":
                 if value != parse_instruction[1:]:
                     raise HTTPBadRequest("%s should be %s'" % (

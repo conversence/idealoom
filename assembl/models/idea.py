@@ -399,17 +399,16 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
         query = query or db.query(alias).filter(alias.discussion_id==discussion.id)
         if permission in (base_permissions or ()):
             return query
-        idea_publication_flow = discussion.idea_publication_flow
         roles_with_read_q = db.query(Role.id).join(
             DiscussionPermission).join(Permission).filter(
                 (Permission.name == permission) &
                 (DiscussionPermission.discussion == discussion)
             ).subquery()
-        if idea_publication_flow:
+        if discussion.idea_pubflow_id:
             states_with_read_q = db.query(PublicationState.id).filter(
-                (PublicationState.flow_id == idea_publication_flow.id)
+                (PublicationState.flow_id == discussion.idea_pubflow_id)
                 ).join(StateDiscussionPermission,
-                    (StateDiscussionPermission.pub_state_id==idea_publication_flow.id) &
+                    (StateDiscussionPermission.pub_state_id==discussion.idea_pubflow_id) &
                     (StateDiscussionPermission.discussion_id==discussion.id)
                 ).join(Permission, StateDiscussionPermission.permission_id==Permission.id
                 ).filter(Permission.name==permission).subquery()

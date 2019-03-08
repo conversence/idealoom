@@ -12,7 +12,7 @@ import Promise from 'bluebird';
 import CollectionManager from '../../common/collectionManager.js';
 import Ctx from '../../common/context.js';
 import NotificationSubscription from '../../models/notificationSubscription.js';
-import RolesModel from '../../models/roles.js';
+import RoleModels from '../../models/roles.js';
 import i18n from '../../utils/i18n.js';
 import Roles from '../../utils/roles.js';
 import Accounts from '../../models/accounts.js';
@@ -338,7 +338,7 @@ var Subscriber = Marionette.View.extend({
 
     if (Ctx.getDiscussionId() && Ctx.getCurrentUserId()) {
 
-      var LocalRolesUser = new RolesModel.Model({
+      var LocalRolesUser = new RoleModels.localRoleModel({
         role: Roles.PARTICIPANT,
         discussion: 'local:Discussion/' + Ctx.getDiscussionId(),
         user_id: Ctx.getCurrentUserId()
@@ -381,7 +381,7 @@ var userNotificationSubscriptions = Marionette.View.extend({
 
     Promise.join(collectionManager.getNotificationsUserCollectionPromise(),
            collectionManager.getNotificationsDiscussionCollectionPromise(),
-           collectionManager.getLocalRoleCollectionPromise(),
+           collectionManager.getMyLocalRoleCollectionPromise(),
            collectionManager.getConnectedSocketPromise(),
             function(NotificationsUser, notificationTemplates, allRoles, socket) {
 

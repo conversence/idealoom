@@ -10,6 +10,9 @@
     "Permission": {
         "name": true
     },
+    "Role": {
+        "name": true
+    },
     "Locale": {
         "locale": true,
         "rtl": true
@@ -307,6 +310,7 @@
         "creator": true,
         "introduction": true,
         "introductionDetails": true,
+        "idea_publication_flow_name": true,
         "sources": [":partial"],
         "subscribe_to_notifications_on_signup": true,
         "web_analytics_piwik_id_site": true,
@@ -420,8 +424,14 @@
     },
     "DiscussionPermission": {
         "discussion": true,
-        "permission": "&permission_name",
-        "role": "&role_name"
+        "permission": "permission_name",
+        "role": "role_name"
+    },
+    "StateDiscussionPermission": {
+        "discussion": true,
+        "permission": "permission_name",
+        "role": "role_name",
+        "state": "publication_state_label"
     },
     "WidgetIdeaLink": {
         "widget": true,

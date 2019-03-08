@@ -245,8 +245,14 @@
     },
     "DiscussionPermission": {
         "discussion": true,
-        "permission": "&permission_name",
-        "role": "&role_name"
+        "permission": "permission_name",
+        "role": "role_name"
+    },
+    "StateDiscussionPermission": {
+        "discussion": true,
+        "permission": "permission_name",
+        "role": "role_name",
+        "state": "publication_state_label"
     },
     "Update": {
         "who": "actor"

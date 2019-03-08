@@ -347,11 +347,25 @@ class DiscussionPermission(DiscussionBoundBase):
         nullable=False, index=True)
     permission = relationship(Permission, lazy="joined")
 
+    @property
     def role_name(self):
         return self.role.name
 
+    @role_name.setter
+    def role_name(self, name):
+        role = Role.getByName(name)
+        assert role
+        self.role = role
+
+    @property
     def permission_name(self):
         return self.permission.name
+
+    @permission_name.setter
+    def permission_name(self, name):
+        permission = Permission.getByName(name)
+        assert permission
+        self.permission = permission
 
     def get_discussion_id(self):
         return self.discussion_id or self.discussion.id

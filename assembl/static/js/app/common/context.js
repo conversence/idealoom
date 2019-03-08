@@ -327,7 +327,7 @@ Context.prototype = {
       var CollectionManager = require('./collectionManager.js').default;
       var collectionManager = new CollectionManager();
 
-      collectionManager.getLocalRoleCollectionPromise().then(function(localRoles) {
+      collectionManager.getMyLocalRoleCollectionPromise().then(function(localRoles) {
         var logUserSubscriptionStatus = function(localRoles) {
           analytics.setCustomVariable(analytics.customVariables.IS_DISCUSSION_MEMBER, localRoles.isUserSubscribedToDiscussion());
         }

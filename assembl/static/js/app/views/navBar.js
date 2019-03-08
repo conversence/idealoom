@@ -16,7 +16,7 @@ import GroupSpec from '../models/groupSpec.js';
 import CollectionManager from '../common/collectionManager.js';
 import PanelSpecTypes from '../utils/panelSpecTypes.js';
 import viewsFactory from '../objects/viewsFactory.js';
-import RolesModel from '../models/roles.js';
+import RoleModels from '../models/roles.js';
 import Permissions from '../utils/permissions.js';
 import i18n from '../utils/i18n.js';
 import Roles from '../utils/roles.js';
@@ -121,7 +121,7 @@ var navBarRight = LoaderView.extend({
 
     if (Ctx.getDiscussionId() && Ctx.getCurrentUserId()) {
       this.setLoading(true);
-      collectionManager.getLocalRoleCollectionPromise()
+      collectionManager.getMyLocalRoleCollectionPromise()
       .then(function(localRoles) {
         that.localRoles = localRoles;
         that.isUserSubscribedToDiscussion = localRoles.isUserSubscribedToDiscussion();
@@ -292,7 +292,7 @@ var navBar = Marionette.View.extend({
 
     Promise.join(
       collectionManager.getNotificationsDiscussionCollectionPromise(),
-      collectionManager.getLocalRoleCollectionPromise(),
+      collectionManager.getMyLocalRoleCollectionPromise(),
       function(discussionNotifications, localRoles) {
               var isUserSubscribedToDiscussion = localRoles.isUserSubscribedToDiscussion();
               model.notificationsToShow = _.filter(discussionNotifications.models, function(m) {
@@ -336,7 +336,7 @@ var navBar = Marionette.View.extend({
 
                   if (Ctx.getDiscussionId() && Ctx.getCurrentUserId() && !isUserSubscribedToDiscussion) {
 
-                    var LocalRolesUser = new RolesModel.Model({
+                    var LocalRolesUser = new RoleModels.localRoleModel({
                       role: Roles.PARTICIPANT,
                       discussion: 'local:Discussion/' + Ctx.getDiscussionId()
                     });

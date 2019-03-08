@@ -24,7 +24,7 @@ import NotificationSubscription from '../models/notificationSubscription.js';
 import Storage from '../objects/storage.js';
 import Types from '../utils/types.js';
 import i18n from '../utils/i18n.js';
-import LocalRole from '../models/roles.js';
+import RoleModels from '../models/roles.js';
 import Discussion from '../models/discussion.js';
 import DiscussionSource from '../models/discussionSource.js';
 import Widget from '../models/widget.js';
@@ -36,6 +36,7 @@ import DiscussionPreference from '../models/discussionPreference.js';
 import LanguagePreference from '../models/languagePreference.js';
 import IdeaContentLink from '../models/ideaContentLink.js';
 import PublicationFlow from '../models/publicationFlow.js';
+
 
 /**
  * A singleton to manage lazy loading of server collections
@@ -160,10 +161,34 @@ var CollectionManager = Marionette.Object.extend({
   _allNotificationsUserCollectionPromise: undefined,
 
   /**
-   * Collection of user roles
+   * Collection of all possible user roles
    */
   _allLocalRoleCollection: undefined,
   _allLocalRoleCollectionPromise: undefined,
+
+  /**
+   * Collection of roles for the current user
+   */
+  _myLocalRoleCollection: undefined,
+  _myLocalRoleCollectionPromise: undefined,
+
+  /**
+   * Collection of publication states
+   */
+  _allIdeaPublicationStates: undefined,
+  _allIdeaPublicationStatesPromise: undefined,
+
+  /**
+   * Collection of local permissions (acls)
+   */
+  _allDiscussionAcls: undefined,
+  _allDiscussionAclsPromise: undefined,
+
+  /**
+   * Collection of pub state-specific permissions
+   */
+  _allPubStatePermissions: undefined,
+  _allPubStatePermissionsPromise: undefined,
 
   /**
    * Collection from discussion
@@ -885,7 +910,7 @@ var CollectionManager = Marionette.Object.extend({
     }
   },
   /**
-   * Returns the collection of roles (a set of permissions) 
+   * Returns the collection of all roles
    * @returns {BaseCollection}
    * @function app.common.collectionManager.CollectionManager.getLocalRoleCollectionPromise
   **/
@@ -894,7 +919,7 @@ var CollectionManager = Marionette.Object.extend({
       return this._allLocalRoleCollectionPromise;
     }
 
-    this._allLocalRoleCollection = new LocalRole.Collection();
+    this._allLocalRoleCollection = new RoleModels.localRoleCollection();
     this._allLocalRoleCollection.collectionManager = this;
     this._allLocalRoleCollectionPromise = Promise.resolve(this._allLocalRoleCollection.fetch())
         .thenReturn(this._allLocalRoleCollection)
@@ -904,6 +929,84 @@ var CollectionManager = Marionette.Object.extend({
 
     return this._allLocalRoleCollectionPromise;
   },
+  /**
+   * Returns the collection of roles (a set of permissions)
+   * @returns {BaseCollection}
+   * @function app.common.collectionManager.CollectionManager.getLocalRoleCollectionPromise
+  **/
+  getMyLocalRoleCollectionPromise: function() {
+    if (this._myLocalRoleCollectionPromise) {
+      return this._myLocalRoleCollectionPromise;
+    }
+
+    this._myLocalRoleCollection = new RoleModels.myLocalRoleCollection();
+    this._myLocalRoleCollection.collectionManager = this;
+    this._myLocalRoleCollectionPromise = Promise.resolve(this._myLocalRoleCollection.fetch())
+        .thenReturn(this._myLocalRoleCollection)
+            .catch(function(e) {
+              Raven.captureException(e);
+            });
+
+    return this._myLocalRoleCollectionPromise;
+  },
+
+  /**
+   * Returns the collection of publication states for ideas
+   * @returns {BaseCollection}
+   * @function app.common.collectionManager.CollectionManager.getIdeaPublicationStatesPromise
+  **/
+  getIdeaPublicationStatesPromise: function() {
+    var flow;
+    var that = this;
+    if (this._allIdeaPublicationStatesPromise) {
+      return this._allIdeaPublicationStatesPromise;
+    }
+    this._allIdeaPublicationStatesPromise = Promise.resolve(this.getDiscussionModelPromise())
+      .then((d) => {
+        flow = new PublicationFlow.publicationFlowModel({"@id": d.get('idea_publication_flow_name')})
+        return flow.fetch();
+      }).then((flow_data) => {
+        that._allIdeaPublicationStates = new PublicationFlow.publicationStateCollection(flow);
+        that._allIdeaPublicationStates.collectionManager = that;
+        return that._allIdeaPublicationStates.fetch();
+      }).then((ips_data) => that._allIdeaPublicationStates
+      ).catch(function(e) {
+        Raven.captureException(e);
+      });
+
+    return this._allIdeaPublicationStatesPromise;
+  },
+
+  getDiscussionAclPromise: function() {
+    if (this._allDiscussionAclsPromise) {
+      return this._allDiscussionAclsPromise;
+    }
+    this._allDiscussionAcls = new RoleModels.discPermCollection();
+    this._allDiscussionAcls.collectionManager = this;
+    this._allDiscussionAclsPromise = Promise.resolve(this._allDiscussionAcls.fetch())
+        .thenReturn(this._allDiscussionAcls)
+            .catch(function(e) {
+              Raven.captureException(e);
+            });
+
+    return this._allDiscussionAclsPromise;
+  },
+
+  getPubStatePermissionsPromise: function() {
+    if (this._allPubStatePermissionsPromise) {
+      return this._allPubStatePermissionsPromise;
+    }
+    this._allPubStatePermissions = new RoleModels.pubStatePermCollection();
+    this._allPubStatePermissions.collectionManager = this;
+    this._allPubStatePermissionsPromise = Promise.resolve(this._allPubStatePermissions.fetch())
+        .thenReturn(this._allPubStatePermissions)
+            .catch(function(e) {
+              Raven.captureException(e);
+            });
+
+    return this._allPubStatePermissionsPromise;
+  },
+
   /**
    * Returns the model of discussions
    * @returns {BaseModel}

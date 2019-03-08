@@ -15,7 +15,6 @@ import GroupSpec from '../../models/groupSpec.js';
 import CollectionManager from '../../common/collectionManager.js';
 import PanelSpecTypes from '../../utils/panelSpecTypes.js';
 import viewsFactory from '../../objects/viewsFactory.js';
-import RolesModel from '../../models/roles.js';
 import Permissions from '../../utils/permissions.js';
 import i18n from '../../utils/i18n.js';
 import Roles from '../../utils/roles.js';

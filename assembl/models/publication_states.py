@@ -230,7 +230,7 @@ class StateDiscussionPermission(DiscussionBoundBase):
     pub_state_id = Column(Integer, ForeignKey(
         PublicationState.id, ondelete='CASCADE', onupdate='CASCADE'),
         nullable=False, index=True)
-    discussion = relationship('Discussion')
+    discussion = relationship('Discussion', backref="publication_permissions")
     role = relationship(Role, lazy="joined")
     permission = relationship(Permission, lazy="joined")
     publication_state = relationship(PublicationState, lazy="joined")
@@ -254,6 +254,18 @@ class StateDiscussionPermission(DiscussionBoundBase):
     @property
     def publication_state_label(self):
         return self.publication_state.label
+
+    @publication_state_label.setter
+    def publication_state_label(self, name):
+        flow = None
+        if self.publication_state:
+            flow = self.publication_state.flow
+        if not flow and self.discussion:
+            flow = self.discussion.idea_publication_flow
+        assert flow, "Cannot find target flow"
+        state = [s for s in flow.states if s.label == name]
+        assert len(state), "Cannot find target state named "+name
+        self.publication_state = state[0]
 
     def get_discussion_id(self):
         return self.discussion_id or self.discussion.id

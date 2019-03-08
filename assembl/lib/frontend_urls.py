@@ -38,6 +38,7 @@ class FrontendUrls(object):
         'tos': '/user/tos',
         'about': '/about',
         'admin_discussion_preferences': '/discussion_preferences',
+        'admin_discussion_permissions': '/permissions',
         'notifications': '/notifications',
         'user_notifications': '/user/notifications',
         'profile': '/user/profile',

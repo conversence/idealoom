@@ -30,6 +30,7 @@ var Router = Marionette.AppRouter.extend({
     "timeline": "timeline",
     "about": "about",
     "discussion_preferences": "adminDiscussionPreferences",
+    "permissions": "adminDiscussionPermissions",
     "sentrytest": "sentryTest",
     "user/notifications": "userNotifications",
     "user/profile": "profile",

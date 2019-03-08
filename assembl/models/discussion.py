@@ -223,6 +223,17 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
     def container_url(self):
         return "/data/Discussion"
 
+    @property
+    def idea_publication_flow_name(self):
+        if self.idea_publication_flow:
+            return self.idea_publication_flow.label
+
+    @idea_publication_flow_name.setter
+    def idea_publication_flow_name(self, name):
+        pub_flow = PublicationFlow.getByName(name)
+        assert pub_flow, "Cannot find PublicationFlow " + name
+        self.idea_publication_flow = pub_flow
+
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):
         return (cls.id == discussion_id,)
@@ -451,7 +462,8 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
 
     @property
     def __acl__(self):
-        acls = [(Allow, dp.role.name, dp.permission.name) for dp in self.acls]
+        acls = [(Allow, dp.role.name, dp.permission.name) for dp in self.acls
+                if inspect(dp).persistent]
         acls.append((Allow, R_SYSADMIN, ALL_PERMISSIONS))
         return acls
 

@@ -33,6 +33,7 @@ import Widget from './models/widget.js';
 import AdminDiscussionSettings from './views/admin/adminDiscussionSettings.js';
 import AdminTimeline from './views/admin/adminTimelineEvents.js';
 import PreferencesView from './views/preferencesView.js';
+import PermissionsView from  './views/admin/adminPermissions.js';
 import FirstIdeaToShowVisitor from './views/visitors/firstIdeaToShowVisitor.js';
 import i18n from './utils/i18n.js';
 import Analytics from './internal_modules/analytics/dispatcher.js';
@@ -201,6 +202,14 @@ var routeManager = Marionette.Object.extend({
     if (this.userHaveAccess()) {
       var adminSetting = new AdminTimeline();
       IdeaLoom.rootView.showChildView('groupContainer', adminSetting);
+    }
+  },
+
+  adminDiscussionPermissions: function() {
+    IdeaLoom.rootView.showChildView('headerRegions', new NavBar());
+    if (this.userHaveAccess()) {
+      var page = new PermissionsView();
+      IdeaLoom.rootView.showChildView('groupContainer', page);
     }
   },
 

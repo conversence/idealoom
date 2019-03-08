@@ -17,6 +17,9 @@
   <li <% if (selectedSection == 'partners'){ %>class="active"<% } %>>
     <a href="#partners" class="menu">{{ gettext('Edit partners') }}</a>
   </li>
+  <li <% if (selectedSection == 'permissions'){ %>class="active"<% } %>>
+    <a href="#permissions" class="menu">{{ gettext('Edit permissions') }}</a>
+  </li>
   <li class="mtxl">
     <a href="{{ get_route('home') }}">{{ gettext('Return to the discussion') }}</a>
   </li>

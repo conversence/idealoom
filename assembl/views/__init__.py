@@ -464,8 +464,6 @@ def includeme(config):
     else:
         config.add_route('discussion_list', '/')
 
-    config.include(backbone_include, route_prefix='/{discussion_slug}')
-
     if asbool(config.get_settings().get('idealoom_handle_exceptions', 'true')):
         config.add_view(error_view, context=Exception)
 
@@ -488,3 +486,4 @@ def includeme(config):
     config.scan('.')
     # make sure this comes last to avoid conflicts
     config.add_route('home', '/{discussion_slug}')
+    config.include(backbone_include, route_prefix='/{discussion_slug}')

@@ -32,6 +32,7 @@ var discussionModel = Base.Model.extend({
     'introductionDetails': '',
     '@type': '',
     'widget_collection_url': '',
+    'idea_publication_flow_name': null,
     'slug': '',
     '@view': '',
     'permissions': {},

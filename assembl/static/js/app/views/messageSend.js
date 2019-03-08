@@ -371,7 +371,7 @@ var messageSendView = LoaderView.extend({
           var collectionManager = new CollectionManager();
           if (Ctx.getDiscussionId() && Ctx.getCurrentUserId()) {
 
-            Promise.join(collectionManager.getLocalRoleCollectionPromise(),
+            Promise.join(collectionManager.getMyLocalRoleCollectionPromise(),
                 collectionManager.getNotificationsUserCollectionPromise(),
                 collectionManager.getNotificationsDiscussionCollectionPromise(),
                           function(allRole, notificationsUser, notificationsDiscussion) {
