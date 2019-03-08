@@ -48,7 +48,7 @@ from .uriref import URIRefDb
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..auth import (
     CrudPermissions, P_READ, P_ADMIN_DISC, P_EDIT_IDEA,
-    P_ADD_IDEA, P_READ_IDEA)
+    P_ADD_IDEA, P_READ_IDEA, R_OWNER)
 from .permissions import (
     AbstractLocalUserRole, Role, Permission, DiscussionPermission)
 from .langstrings import LangString, LangStringEntry
@@ -393,46 +393,97 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
     @classmethod
     def query_filter_with_permission(
             cls, discussion, user_id, permission=P_READ_IDEA,
-            query=None, base_permissions=None, alias=None):
+            query=None, base_permissions=None, roles=None, ideaA=None):
+        # here are all the ways you can have a permission:
+        # 1. (global or Local)UserRole + DiscussionPermission (common)
+        # 2. (global or Local)UserRole+State+StateDiscussionPermission (factorable)
+        # 3. ownership + DiscussionPermission
+        # 4. ownership + State + StateDiscussionPermission
+        # 5. IdeaLocalUserRole + DiscussionPermission (factorable)
+        # 6. IdeaLocalUserRole + State + StateDiscussionPermission
         db = discussion.db
-        alias = alias or cls
-        query = query or db.query(alias).filter(alias.discussion_id==discussion.id)
-        if permission in (base_permissions or ()):
+        ideaA = ideaA or cls
+        ownerRole = Role.getByName(R_OWNER)
+        permissionO = Permission.getByName(permission)
+        # TODO: Add ownership!
+        owner_has_permission = db.query(DiscussionPermission
+            ).filter_by(discussion_id=discussion.id
+            ).join(Role).filter_by(name=R_OWNER
+            ).join(Permission).filter_by(name=permission).exists()
+        # AND ownership in state... sigh
+        query = query or db.query(ideaA).filter(ideaA.discussion_id==discussion.id)
+        if permission in (base_permissions or ()): # 1 shortcut
             return query
-        roles_with_read_q = db.query(Role.id).join(
+        roles_with_d_permission_q = db.query(Role.id).join(
             DiscussionPermission).join(Permission).filter(
                 (Permission.name == permission) &
                 (DiscussionPermission.discussion == discussion)
             ).subquery()
         if discussion.idea_pubflow_id:
-            states_with_read_q = db.query(PublicationState.id).filter(
-                (PublicationState.flow_id == discussion.idea_pubflow_id)
+            # TODO: Could this be simplified with a view?
+            states_with_permission_q = db.query(PublicationState.id  # 5
+                ).filter(PublicationState.flow_id == discussion.idea_pubflow_id
                 ).join(StateDiscussionPermission,
-                    (StateDiscussionPermission.pub_state_id==discussion.idea_pubflow_id) &
-                    (StateDiscussionPermission.discussion_id==discussion.id)
-                ).join(Permission, StateDiscussionPermission.permission_id==Permission.id
-                ).filter(Permission.name==permission).subquery()
+                    (StateDiscussionPermission.pub_state_id==PublicationState.id) &
+                    (StateDiscussionPermission.discussion_id==discussion.id) &
+                    (StateDiscussionPermission.permission_id==permissionO.id)
+                ).join(Role,
+                    (StateDiscussionPermission.role_id == Role.id) &
+                    Role.name.in_(roles))
+            states_with_owner_permission_q = db.query(PublicationState.id  # 4
+                ).filter(PublicationState.flow_id == discussion.idea_pubflow_id
+                ).join(StateDiscussionPermission,
+                    (StateDiscussionPermission.pub_state_id==PublicationState.id) &
+                    (StateDiscussionPermission.discussion_id==discussion.id) &
+                    (StateDiscussionPermission.permission_id==permissionO.id) &
+                    (StateDiscussionPermission.role_id==ownerRole.id))
+
+            ilur_dp = aliased(IdeaLocalUserRole)  # 5
+            ilur_ip = aliased(IdeaLocalUserRole)  # 6
+            sdp_ilocal = aliased(StateDiscussionPermission) # 6
+
             query = query.outerjoin(
-                IdeaLocalUserRole, (
-                    IdeaLocalUserRole.idea_id==alias.id) & (
-                    IdeaLocalUserRole.profile_id==user_id) &
-                    IdeaLocalUserRole.role_id.in_(roles_with_read_q)
-                ).filter((IdeaLocalUserRole.id != None) | alias.pub_state_id.in_(states_with_read_q))
-        else:
-            query = query.join(
-                IdeaLocalUserRole, (
-                    IdeaLocalUserRole.idea_id==alias.id) & (
-                    IdeaLocalUserRole.profile_id==user_id) &
-                    IdeaLocalUserRole.role_id.in_(roles_with_read_q)
+                    ilur_dp, # 5
+                    (ilur_dp.idea_id==ideaA.id) &
+                    (ilur_dp.profile_id==user_id) &
+                    ilur_dp.role_id.in_(roles_with_d_permission_q)
+                ).outerjoin(
+                    ilur_ip, # 6
+                    (ilur_ip.idea_id==ideaA.id) &
+                    (ilur_ip.profile_id==user_id)
+                ).outerjoin(
+                    sdp_ilocal, # 6
+                    (sdp_ilocal.role_id==ilur_ip.role_id) &
+                    (sdp_ilocal.pub_state_id==ideaA.pub_state_id) &
+                    (sdp_ilocal.permission_id==permissionO.id)
+                ).filter(
+                    ideaA.pub_state_id.in_(states_with_permission_q) |  # 2
+                    ((ideaA.creator_id==user_id) & owner_has_permission) |  # 3
+                    ((ideaA.creator_id==user_id) & ideaA.pub_state_id.in_(states_with_owner_permission_q)) |  # 4
+                    (ilur_dp.id != None) |  # 5
+                    ((ilur_ip.id != None) & (sdp_ilocal.id != None))  # 6
                 )
+        else:
+            ilur_dp = aliased(IdeaLocalUserRole)  # 5
+
+            query = query.outerjoin(
+                    ilur_dp, # 5
+                    (ilur_dp.idea_id==ideaA.id) &
+                    (ilur_dp.profile_id==user_id) &
+                    ilur_dp.role_id.in_(roles_with_d_permission_q)
+                ).filter(
+                    ((ideaA.creator_id==user_id) & owner_has_permission) |  # 3
+                    (ilur_dp.id != None)  # 5
+                )
+
         return query
 
     @classmethod
     def query_filter_with_permission_req(
-            cls, request, permission=P_READ_IDEA, query=None, alias=None):
+            cls, request, permission=P_READ_IDEA, query=None, ideaA=None):
         return cls.query_filter_with_permission(
             request.discussion, request.authenticated_userid, permission,
-            query, request.base_permissions, alias)
+            query, request.base_permissions, request.roles, ideaA)
 
     @property
     def widget_add_post_endpoint(self):
