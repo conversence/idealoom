@@ -99,7 +99,7 @@ class ZMQRouter(SockJSConnection):
             if self.token and self.discussion:
                 # Check if token authorizes discussion
                 r = requests.get(
-                    '%s/api/v1/discussion/%s/permissions/read/u/%s' % (
+                    '%s/api/v1/discussion/%s/permissions/Conversation.R/u/%s' % (
                         SERVER_URL, self.discussion, self.token['userId']
                         ), headers={"Accept": "application/json"})
                 log.debug(r.text)
