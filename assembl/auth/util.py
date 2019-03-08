@@ -39,30 +39,27 @@ def get_role_query(user_id, discussion_id, target_instance=None):
     user_id = user_id or Everyone
     session = get_session_maker()()
     if user_id == Everyone:
-        if not discussion_id:
-            return session.query(Role).filter(Role.name == user_id)
+        return session.query(Role).filter(Role.name == user_id)
     elif user_id == Authenticated:
-        if not discussion_id:
-            return session.query(Role).filter(Role.name.in_((Authenticated, Everyone)))
-    else:
-        base_roles = [Authenticated, Everyone]
-        if target_instance and user_id and target_instance.is_owner(user_id):
-            base_roles.append(R_OWNER)
-        clauses = []
-        roles = session.query(Role).join(UserRole).filter(
-                UserRole.profile_id == user_id)
-        if discussion_id:
-            clauses.append(session.query(Role).join(LocalUserRole).filter(and_(
-                        LocalUserRole.profile_id == user_id,
-                        LocalUserRole.requested == False,
-                        LocalUserRole.discussion_id == discussion_id)))
-        clauses.append(session.query(Role).filter(Role.name.in_(base_roles)))
-        if target_instance and hasattr(target_instance, 'local_user_roles'):
-            target_cls = target_instance.__class__.__mapper__.relationships['local_user_roles'].argument.class_
-            clauses.append(target_cls.filter_on_instance(
-                target_instance, session.query(Role).join(target_cls).filter(
-                    target_cls.profile_id==user_id)))
-        roles = roles.union(*clauses)
+        return session.query(Role).filter(Role.name.in_((Authenticated, Everyone)))
+    base_roles = [Authenticated, Everyone]
+    if target_instance and user_id and target_instance.is_owner(user_id):
+        base_roles.append(R_OWNER)
+    clauses = []
+    roles = session.query(Role).join(UserRole).filter(
+            UserRole.profile_id == user_id)
+    if discussion_id:
+        clauses.append(session.query(Role).join(LocalUserRole).filter(and_(
+                    LocalUserRole.profile_id == user_id,
+                    LocalUserRole.requested == False,
+                    LocalUserRole.discussion_id == discussion_id)))
+    clauses.append(session.query(Role).filter(Role.name.in_(base_roles)))
+    if target_instance and hasattr(target_instance, 'local_user_roles'):
+        target_cls = target_instance.__class__.__mapper__.relationships['local_user_roles'].argument.class_
+        clauses.append(target_cls.filter_on_instance(
+            target_instance, session.query(Role).join(target_cls).filter(
+                target_cls.profile_id==user_id)))
+    roles = roles.union(*clauses)
     return roles.distinct()
 
 
@@ -86,7 +83,7 @@ def roles_from_request(request):
 def get_permissions(user_id, discussion_id, target_instance=None):
     user_id = user_id or Everyone
     session = get_session_maker()()
-    is_sysadmin = session.query(UserRole).filter_by(profile_id=user_id
+    is_sysadmin = user_id != Everyone and session.query(UserRole).filter_by(profile_id=user_id
         ).join(Role).filter_by(name=R_SYSADMIN).count()
     if is_sysadmin:
         return list(ASSEMBL_PERMISSIONS)
