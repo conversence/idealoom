@@ -106,15 +106,15 @@ var IdeaPanel = BasePanel.extend({
 
         setTimeout(function(){ that.checkContentHeight(); }, timeToVisibleImage);
       });
-      this.translationDataPromise = collectionManager.getUserLanguagePreferencesPromise(Ctx);
-      // wait for translation data to display
       var model = this.model;
       this.model = null;
-      this.translationDataPromise.then(function(translationData) {
-        that.translationData = translationData;
-        if (model) {
-          that.setIdeaModel(model);
-        }
+      Promise.join(
+        collectionManager.getIdeaPublicationFlowPromise(),
+        collectionManager.getUserLanguagePreferencesPromise(Ctx)
+      ).then(([pubFlow, userLangColl]) => {
+        that.translationData = userLangColl;
+        that.ideaPubFlow = pubFlow;
+        that.setIdeaModel(model);
       });
     }
   },
@@ -131,7 +131,9 @@ var IdeaPanel = BasePanel.extend({
     'widgetsSection': '.js_ideaPanel-section-widgets',
     'adminSection': '.js_ideaPanel-section-admin',
     'attachmentButton': '.js_attachment-button',
-    'attachmentImage': '.js_idea-attachment'
+    'attachmentImage': '.js_idea-attachment',
+    'openTargetInPopOver': '.js_openTargetInPopOver',
+    'pubStateTransition': '.js_transition',
   },
   regions: {
     segmentList: ".postitlist",
@@ -165,7 +167,8 @@ var IdeaPanel = BasePanel.extend({
     'click @ui.closeExtract': 'onSegmentCloseButtonClick',
     'click @ui.clearIdea': 'onClearAllClick',
     'click @ui.deleteIdea': 'onDeleteButtonClick',
-    'click .js_openTargetInPopOver': 'openTargetInPopOver'
+    'click @ui.openTargetInPopOver': 'openTargetInPopOver',
+    'click @ui.pubStateTransition': 'pubStateTransition',
   },
 
   _calculateContentHeight: function(domObject, imageDomObject){
@@ -325,6 +328,8 @@ var IdeaPanel = BasePanel.extend({
     var possibleTypeDescriptions = {};
     var locale = Ctx.getLocale();
     var contributors = undefined;
+    var pubStateName = null;
+    var transitions = [];
 
     if (this.model) {
       subIdeas = this.model.getChildren();
@@ -352,28 +357,55 @@ var IdeaPanel = BasePanel.extend({
           {'s': Ctx.getPreferences().social_sharing }
         ]
       );
+      if (Ctx.hasIdeaPubFlow()) {
+        const stateLabel = this.model.get('pub_state_name');
+        const states = this.ideaPubFlow.get('states');
+        if (stateLabel) {
+          const state = states.findByLabel(stateLabel);
+          if (state) {
+            pubStateName = state.nameOrLabel(this.translationData);
+          } else {
+            log.error("Could not find state "+stateLabel);
+          }
+        }
+        const transitionColl = this.ideaPubFlow.get('transitions').filter((transition) => {
+          return transition.get('source_label') == stateLabel;
+        }).map((transition) => {
+          const targetLabel = transition.get('target_label'),
+                target = states.findByLabel(targetLabel),
+                targetName = (target) ? target.nameOrLabel(this.translationData) : targetLabel;
+          transitions.push({
+            name: transition.nameOrLabel(this.translationData),
+            label: transition.get('label'),
+            target_name: targetName,
+            enabled: currentUser.can(transition.get('req_permission_name')) ? '' : 'disabled=true',
+          })
+        });
+      }
     }
 
     return {
       idea: this.model,
-      subIdeas: subIdeas,
+      subIdeas,
       translationData: this.translationData,
-      canEdit: canEdit,
-      i18n: i18n,
+      canEdit,
+      i18n,
       getExtractsLabel: this.getExtractsLabel,
       getSubIdeasLabel: this.getSubIdeasLabel,
       canDelete: currentUser.can(Permissions.EDIT_IDEA),
-      canEditNextSynthesis: canEditNextSynthesis,
+      canEditNextSynthesis,
       canEditExtracts: currentUser.can(Permissions.EDIT_EXTRACT),
       canAddExtracts: currentUser.can(Permissions.EDIT_EXTRACT), //TODO: This is a bit too coarse
-      Ctx: Ctx,
-      direct_link_relative_url: direct_link_relative_url,
-      currentTypes: currentTypes,
-      possibleTypes: possibleTypes,
-      possibleTypeDescriptions: possibleTypeDescriptions,
+      Ctx,
+      pubStateName,
+      transitions,
+      direct_link_relative_url,
+      currentTypes,
+      possibleTypes,
+      possibleTypeDescriptions,
       linkTypeDescription: currentTypeDescriptions[0],
       nodeTypeDescription: currentTypeDescriptions[1],
-      share_link_url: share_link_url
+      share_link_url,
     };
   },
 
@@ -1072,7 +1104,27 @@ var IdeaPanel = BasePanel.extend({
   openTargetInPopOver: function(evt) {
     console.log("ideaPanel openTargetInPopOver(evt: ", evt);
     return Ctx.openTargetInPopOver(evt);
-  }
+  },
+  pubStateTransition: function(evt) {
+    const transition = evt.target.attributes.data.value;
+    const url = this.model.getApiV2Url() + "/do_transition";
+    const that = this;
+    $.ajax({
+      type: "POST",
+      contentType: 'application/json; charset=UTF-8',
+      url,
+      data: JSON.stringify({transition}),
+      success: function(data){
+        const state = data.pub_state_name;
+        that.model.set('pub_state_name', state);
+        that.render();
+      },
+      error: function(jqXHR, textStatus, errorThrown){
+        console.log("error! textStatus: ", textStatus, "; errorThrown: ", errorThrown);
+        // TODO: show error in the UI
+      }
+    });
+  },
 
 });
 

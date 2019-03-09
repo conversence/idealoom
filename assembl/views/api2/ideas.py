@@ -27,6 +27,28 @@ def instance_del(request):
     return {}
 
 
+
+@view_config(context=InstanceContext, request_method='POST', renderer='json',
+             ctx_instance_class=Idea, name="do_transition")
+def pub_state_transition(request):
+    ctx = request.context
+    user_id = authenticated_userid(request) or Everyone
+    idea = ctx._instance
+    discussion = idea.discussion
+    flow = discussion.idea_publication_flow
+    if not flow:
+        raise HTTPBadRequest("discussion has no flow set")
+    transition = flow.transition_by_label(request.json['transition'])
+    if not transition:
+        raise HTTPBadRequest("Cannot find this transition")
+    if transition.source_id != idea.pub_state_id:
+        raise HTTPBadRequest("Idea is not in source state")
+    if transition.requires_permission.name not in request.permissions:
+        raise HTTPUnauthorized()
+    idea.pub_state_id = transition.target_id
+    return {"pub_state_name": transition.target.label}
+
+
 @view_config(context=CollectionContext, renderer='json',
              ctx_collection_class=Idea, name='autocomplete', permission=P_READ)
 def autocomplete(request):

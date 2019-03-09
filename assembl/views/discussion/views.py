@@ -210,6 +210,12 @@ def home_view(request):
     context['preferences_json'] = json.dumps(dict(preferences))
     role_names = [x for (x,) in session.query(Role.name).all()]
     context['role_names'] = json.dumps(role_names)
+    if discussion.idea_publication_flow:
+        context['idea_publication_flow'] = json.dumps(
+            discussion.idea_publication_flow.generic_json(
+            'extended', user_id, request.permissions))
+    else:
+        context['idea_publication_flow'] = 'null'
 
     response = render_to_response('../../templates/index.jinja2', context,
                                   request=request)

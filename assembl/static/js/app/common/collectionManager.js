@@ -261,6 +261,13 @@ var CollectionManager = Marionette.Object.extend({
   _globalPreferencesPromise: undefined,
 
   /**
+   * The PublicationFlow of ideas in the current discussion
+   * @type {publicationFlow.publicationFlowModel}
+   */
+  _ideaPublicationFlow: undefined,
+  _ideaPublicationFlowPromise: undefined,
+
+  /**
    * Collection of all publicationFlows of the system
    * @type {DiscussionPreference.Model}
    */
@@ -357,6 +364,29 @@ var CollectionManager = Marionette.Object.extend({
 
     return this._allUsersCollectionPromise;
   },
+
+  /**
+   * Returns the idea publication flow.
+   * An exception, the flow is instanciated from json sent in the HTML of the frontend, not through an ajax request.
+   * @returns {PublicationFlow}
+   * @function app.common.collectionManager.CollectionManager.getAllUsersCollectionPromise
+   */
+  getIdeaPublicationFlowPromise: function() {
+    if (this._ideaPublicationFlowPromise) {
+      return this._ideaPublicationFlowPromise;
+    }
+
+    this._ideaPublicationFlow = new PublicationFlow.publicationFlowModel();
+    this._ideaPublicationFlowPromise = Promise.resolve(
+      this._ideaPublicationFlow.fetchFromScriptTag('idea-publication-flow', true)
+      ).thenReturn(this._ideaPublicationFlow
+      ).catch(function(e) {
+        Raven.captureException(e);
+      });
+
+    return this._ideaPublicationFlowPromise;
+  },
+
   /**
    * Returns the collection of message structures
    * @returns {BaseCollection}
@@ -961,16 +991,11 @@ var CollectionManager = Marionette.Object.extend({
     if (this._allIdeaPublicationStatesPromise) {
       return this._allIdeaPublicationStatesPromise;
     }
-    this._allIdeaPublicationStatesPromise = Promise.resolve(this.getDiscussionModelPromise())
-      .then((d) => {
-        flow = new PublicationFlow.publicationFlowModel({"@id": d.get('idea_publication_flow_name')})
-        return flow.fetch();
-      }).then((flow_data) => {
-        that._allIdeaPublicationStates = new PublicationFlow.publicationStateCollection(flow);
-        that._allIdeaPublicationStates.collectionManager = that;
-        return that._allIdeaPublicationStates.fetch();
-      }).then((ips_data) => that._allIdeaPublicationStates
-      ).catch(function(e) {
+    this._allIdeaPublicationStatesPromise = Promise.resolve(this.getIdeaPublicationFlowPromise()
+      ).then((flow) => {
+        that._allIdeaPublicationStates = flow.get('states');
+        return that._allIdeaPublicationStates;
+      }).catch(function(e) {
         Raven.captureException(e);
       });
 
@@ -1153,7 +1178,7 @@ var CollectionManager = Marionette.Object.extend({
     return tmp;
   },
   /**
-   * Returns the collection of widgets
+   * Returns the collection of publication flows
    * @returns {BaseCollection}
    * @function app.common.collectionManager.CollectionManager.getAllWidgetsPromise
   **/

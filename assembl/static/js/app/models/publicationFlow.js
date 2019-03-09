@@ -6,6 +6,7 @@ import Base from './base.js';
 
 import Ctx from '../common/context.js';
 import Types from '../utils/types.js';
+import LangString from './langstring.js';
 
 /**
  * PublicationFlow model
@@ -24,14 +25,22 @@ var publicationFlowModel = Base.Model.extend({
    */
   defaults: {
     label: '',
-    states: [],
-    transitions: [],
+    states: null,
+    transitions: null,
   },
   /**
    * @function app.models.publicationFlow.publicationFlowModel.constructor
    */
   constructor: function publicationFlowModel() {
     Base.Model.apply(this, arguments);
+  },
+  parse: function(rawModel, options) {
+    rawModel.states = new publicationStateCollection(rawModel.states, {parse: true, flow: this});
+    rawModel.transitions = new publicationTransitionCollection(rawModel.transitions, {parse: true, flow: this});
+    if (rawModel.name) {
+      rawModel.name = new LangString.Model(rawModel.name, {parse: true});
+    }
+    return rawModel;
   },
   /**
    * Validate the model attributes
@@ -64,7 +73,7 @@ var publicationFlowCollection = Base.Collection.extend({
    */
   constructor: function publicationFlowCollection() {
     Base.Collection.apply(this, arguments);
-  }
+  },
 });
 
 
@@ -85,8 +94,8 @@ var publicationStateModel = Base.Model.extend({
    */
   defaults: {
     label: '',
-    states: [],
-    transitions: [],
+    name: null,
+    flow: null,
   },
   /**
    * @function app.models.publicationFlow.publicationStateModel.constructor
@@ -98,10 +107,26 @@ var publicationStateModel = Base.Model.extend({
    * Validate the model attributes
    * @function app.models.publicationFlow.publicationStateModel.validate
    */
+  parse: function(rawModel, options) {
+    if (rawModel.name) {
+      rawModel.name = new LangString.Model(rawModel.name, {parse: true});
+    }
+    rawModel.flow = options.flow || rawModel.flow;
+
+    return rawModel;
+  },
   validate: function(attrs, options) {
     /**
      * check typeof variable
      * */
+  },
+  nameOrLabel(langPrefs) {
+    const name = this.get('name');
+    if (name) {
+      return name.bestValue(langPrefs);
+    } else {
+      return this.get('label');
+    }
   },
 });
 /**
@@ -118,10 +143,18 @@ var publicationStateCollection = Base.Collection.extend({
   /**
    * @function app.models.publicationFlow.publicationStateCollection.constructor
    */
-  constructor: function publicationStateCollection(publicationFlowModel) {
+  constructor: function publicationStateCollection(data, options) {
     Base.Collection.apply(this, arguments);
-    this.url = publicationFlowModel.url()+"/states";
-  }
+    this.flow = options.flow;
+    if (this.flow) {
+      this.url = this.flow.url()+"/states";
+    }
+  },
+  findByLabel: function(label) {
+    const stateA = this.filter((state) => {return state.get('label') == label});
+    if (stateA && stateA.length)
+      return stateA[0];
+  },
 });
 
 /**
@@ -141,14 +174,27 @@ var publicationTransitionModel = Base.Model.extend({
    */
   defaults: {
     label: '',
-    states: [],
-    transitions: [],
+    name: null,
+    source: null,
+    source_label: '',
+    target: null,
+    target_label: '',
+    flow: null,
+    req_permission_name: '',
   },
   /**
    * @function app.models.publicationFlow.publicationTransitionModel.constructor
    */
   constructor: function publicationTransitionModel() {
     Base.Model.apply(this, arguments);
+  },
+  parse: function(rawModel, options) {
+    if (rawModel.name) {
+      rawModel.name = new LangString.Model(rawModel.name, {parse: true});
+    }
+    rawModel.flow = options.flow || rawModel.flow;
+    
+    return rawModel;
   },
   /**
    * Validate the model attributes
@@ -158,6 +204,14 @@ var publicationTransitionModel = Base.Model.extend({
     /**
      * check typeof variable
      * */
+  },
+  nameOrLabel(langPrefs) {
+    const name = this.get('name');
+    if (name) {
+      return name.bestValue(langPrefs);
+    } else {
+      return this.get('label');
+    }
   },
 });
 /**
@@ -174,10 +228,13 @@ var publicationTransitionCollection = Base.Collection.extend({
   /**
    * @function app.models.publicationFlow.publicationTransitionCollection.constructor
    */
-  constructor: function publicationTransitionCollection(publicationFlowModel) {
+  constructor: function publicationTransitionCollection(data, options) {
     Base.Collection.apply(this, arguments);
-    this.url = publicationTransitionModel.url() + "/transitions"
-  }
+    this.flow = options.flow;
+    if (this.flow) {
+      this.url = this.flow.url()+"/transitions";
+    }
+  },
 });
 
 export default {

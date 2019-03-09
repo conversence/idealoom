@@ -1743,6 +1743,9 @@ Context.prototype = {
     this._discussionPreferences = this.getJsonFromScriptTag('preferences');
     return this._discussionPreferences;
   },
+  hasIdeaPubFlow: function() {
+    return this.getJsonFromScriptTag('idea-publication-flow') != null;
+  },
   /**
    * Returns names of roles
    * @returns {Array}

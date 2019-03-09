@@ -62,7 +62,7 @@ var BaseModel = Backbone.Model.extend({
    *
    * @param {string} id The script tag id
    */
-  fetchFromScriptTag: function(id) {
+  fetchFromScriptTag: function(id, parse) {
     var json = null;
     try {
       json = Ctx.getJsonFromScriptTag(id);
@@ -70,7 +70,11 @@ var BaseModel = Backbone.Model.extend({
       throw new Error("Invalid json. " + e.message);
     }
 
-    this.set(json);
+    if (parse) {
+      this.set(this.parse(json, {parse}));
+    } else {
+      this.set(json);
+    }
   },
 
   toScriptTag: function(id) {
@@ -226,7 +230,7 @@ var BaseCollection = Backbone.Collection.extend({
    *
    * @param {string} id The script tag id
    */
-  fetchFromScriptTag: function(id) {
+  fetchFromScriptTag: function(id, parse) {
       var that = this;
 
       return Promise.delay(1).then(function() {
@@ -242,7 +246,11 @@ var BaseCollection = Backbone.Collection.extend({
           throw new Error("Invalid json. " + e.message);
         }
 
-        that.reset(json);
+        if (parse) {
+          that.set(that.parse(json, {parse}));
+        } else {
+          that.reset(json);
+        }
         return that;
       });
     },
