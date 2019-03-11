@@ -16,7 +16,7 @@ table {
   }
 }
 
-.admin-discussion, .admin-notifications{
+.admin-panel {
   .admin-section{
     background-color:$white;
     max-width:600px;
@@ -42,11 +42,7 @@ table {
 }
 
 
-.admin-discussion,
-.admin-notifications,
-.admin-profile,
-.admin-account,
-.admin-import {
+.admin-panel {
   .sidebar-nav {
     ul > li {
       list-style: none;
