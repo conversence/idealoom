@@ -178,6 +178,20 @@
     "AnnotatorSource": {
         "@extends": "Container"
     },
+    "IdeaSource": {
+        "@extends": "Container",
+        "source_uri": true,
+        "data_filter": true,
+        "target_state_label": true
+    },
+    "IdeaLoomIdeaSource": {
+        "@extends": "IdeaSource",
+        "username": true,
+        "password": true
+    },
+    "CatalystIdeaSource": {
+        "@extends": "IdeaSource"
+    },
     "EdgeSenseDrupalSource": {
         "@extends": "PostSource",
         "node_source": true,

@@ -26,7 +26,7 @@ var Router = Marionette.AppRouter.extend({
     "edition": "edition",
     "partners": "partners",
     "notifications": "notifications",
-    "settings": "settings",
+    "import": "import",
     "timeline": "timeline",
     "about": "about",
     "discussion_preferences": "adminDiscussionPreferences",

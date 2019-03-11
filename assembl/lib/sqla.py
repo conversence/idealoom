@@ -1784,7 +1784,7 @@ class BaseOps(object):
         nullables = []
         related_objects = set()
         for reln in relations:
-            if uses_list(reln):
+            if reln.direction == ONETOMANY:
                 continue
             if reln.viewonly:
                 continue
@@ -1794,7 +1794,10 @@ class BaseOps(object):
                 related_objects.add(obj)
                 continue
             # Do not decorate nullable relations
-            if any([x.nullable for x in chain(*reln.local_remote_pairs) if x.foreign_keys]):
+            nullable_keys = [
+                local for (local, remote) in reln.local_remote_pairs
+                if local.foreign_keys and local.nullable]
+            if nullable_keys:
                 nullables.append(reln)
             else:
                 non_nullables.append(reln)

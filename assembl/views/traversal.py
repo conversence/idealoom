@@ -192,7 +192,8 @@ class AppRoot(DictContext):
             if user_id and user_id != Everyone:
                 if self._user_cache is None:
                     self._user_cache = AgentProfile.get(user_id)
-                return self._user_cache
+                if isinstance(self._user_cache, cls):
+                    return self._user_cache
 
     def get_all_instances(self):
         from assembl.models import User

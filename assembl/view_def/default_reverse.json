@@ -76,6 +76,20 @@
         "name": true,
         "created": false
     },
+    "IdeaSource": {
+        "@extends": "Container",
+        "source_uri": true,
+        "data_filter": true,
+        "target_state_label": true
+    },
+    "IdeaLoomIdeaSource": {
+        "@extends": "IdeaSource",
+        "username": true,
+        "password": true
+    },
+    "CatalystIdeaSource": {
+        "@extends": "IdeaSource"
+    },
     "PostSource": {
         "@extends": "Container",
         "number_of_imported_posts": false,

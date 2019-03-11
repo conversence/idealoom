@@ -3,9 +3,10 @@
  * @module app.views.admin.generalSource
  */
 import Marionette from 'backbone.marionette';
-
 import $ from 'jquery';
 import _ from 'underscore';
+import Moment from 'moment';
+
 import i18n from '../../utils/i18n.js';
 import Types from '../../utils/types.js';
 import Ctx from '../../common/context.js';
@@ -13,30 +14,7 @@ import Permissions from '../../utils/permissions.js';
 import Growl from '../../utils/growl.js';
 import Source from '../../models/sources.js';
 import CollectionManager from '../../common/collectionManager.js';
-import SourceViews from './sourceEditViews.js';
-import Moment from 'moment';
-import FacebookSourceEditView from '../facebookViews.js';
-
-function getSourceEditView(model_type) {
-  var form;
-  switch (model_type) {
-    case Types.IMAPMAILBOX:
-    case Types.MAILING_LIST:
-    case Types.ABSTRACT_FILESYSTEM_MAILBOX:
-      return SourceViews.EmailSource;
-    case Types.FACEBOOK_GENERIC_SOURCE:
-    case Types.FACEBOOK_GROUP_SOURCE:
-    case Types.FACEBOOK_GROUP_SOURCE_FROM_USER:
-    case Types.FACEBOOK_PAGE_POSTS_SOURCE:
-    case Types.FACEBOOK_PAGE_FEED_SOURCE:
-    case Types.FACEBOOK_SINGLE_POST_SOURCE:
-      return FacebookSourceEditView.init;
-    default:
-      console.error("Not edit view for source of type "+model_type);
-      return;
-  }
-}
-
+import getSourceEditView from './sourceEditViews.js';
 
 
 var ReadSource = Marionette.View.extend({
@@ -44,7 +22,7 @@ var ReadSource = Marionette.View.extend({
     Marionette.View.apply(this, arguments);
   },
 
-    template: '#tmpl-adminDiscussionSettingsGeneralSourceRead',
+    template: '#tmpl-adminImportSettingsGeneralSourceRead',
     ui: {
         manualStart: '.js_manualStart',
         reimport: '.js_reimport',
@@ -150,7 +128,7 @@ var SourceView = Marionette.View.extend({
   ui: {
     edit_container: '.js_source_edit_container'
   },
-  template: '#tmpl-adminDiscussionSettingsGeneralSource',
+  template: '#tmpl-adminImportSettingsGeneralSource',
   regions: {
     readOnly: '.js_source_read',
     form: '.js_source_edit'
@@ -191,6 +169,10 @@ var CreateSource = Marionette.View.extend({
     var types = [
         Types.IMAPMAILBOX,
         Types.MAILING_LIST,
+        Types.FEED_POST_SOURCE,
+        Types.LOOMIO_POST_SOURCE,
+        Types.IDEALOOM_IDEA_SOURCE,
+        Types.CATALYST_IDEA_SOURCE,
         Types.FACEBOOK_GROUP_SOURCE,
         Types.FACEBOOK_GROUP_SOURCE_FROM_USER,
         Types.FACEBOOK_PAGE_POSTS_SOURCE,

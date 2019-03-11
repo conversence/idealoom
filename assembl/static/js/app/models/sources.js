@@ -185,6 +185,94 @@ var ContentSourceId = Base.Model.extend({
   }
 });
 
+
+var FeedPostSource = Source.extend({
+  constructor: function FeedPostSource() {
+    Source.apply(this, arguments);
+  },
+  localizedName: i18n.gettext("RSS/Atom post feed"),
+  knownParsers: [
+    'assembl.models.feed_parsing.PaginatedParsedData',
+    'assembl.models.feed_parsing.ParsedData',
+  ],
+  defaults: function() {
+    return _.extend(Source.prototype.defaults, {
+      '@type': Types.FEED_POST_SOURCE,
+      "url": '',
+      "parser_full_class_name": 'assembl.models.feed_parsing.PaginatedParsedData',
+    });
+  }
+});
+
+
+var LoomioPostSource = FeedPostSource.extend({
+  constructor: function LoomioPostSource() {
+    Source.apply(this, arguments);
+  },
+  localizedName: i18n.gettext("Loomio post feed"),
+  defaults: function() {
+    return _.extend(FeedPostSource.prototype.defaults(), {
+      '@type': Types.LOOMIO_POST_SOURCE,
+    });
+  }
+});
+
+
+var AnnotatorSource = Source.extend({
+  constructor: function AnnotatorSource() {
+    Source.apply(this, arguments);
+  },
+  localizedName: i18n.gettext("Annotator extract source"),
+  defaults: function() {
+    return _.extend(Source.prototype.defaults, {
+      '@type': Types.ANNOTATOR_SOURCE,
+    });
+  },
+});
+
+
+var IdeaSource = Source.extend({
+  constructor: function IdeaSource() {
+    Source.apply(this, arguments);
+  },
+  defaults: function() {
+    return _.extend(Source.prototype.defaults, {
+      "source_uri": '',
+      "data_filter": '',
+      "target_state_label": '',
+    });
+  },
+});
+
+var IdeaLoomIdeaSource = IdeaSource.extend({
+  constructor: function IdeaLoomIdeaSource() {
+    IdeaSource.apply(this, arguments);
+  },
+  localizedName: i18n.gettext("IdeaLoom idea source"),
+  defaults: function() {
+    return _.extend(IdeaSource.prototype.defaults(), {
+      '@type': Types.IDEALOOM_IDEA_SOURCE,
+      'username': '',
+      'password': '',
+    });
+  },
+});
+
+
+var CatalystIdeaSource = IdeaSource.extend({
+  constructor: function CatalystIdeaSource() {
+    IdeaSource.apply(this, arguments);
+  },
+  localizedName: i18n.gettext("Catalyst Interchange Format idea source"),
+  defaults: function() {
+    return _.extend(IdeaSource.prototype.defaults(), {
+      '@type': Types.CATALYST_IDEA_SOURCE,
+    });
+  },
+});
+
+
+
 function getSourceClassByType(type) {
     switch (type) {
       case Types.FACEBOOK_GENERIC_SOURCE:
@@ -203,6 +291,16 @@ function getSourceClassByType(type) {
         return IMAPMailboxSource;
       case Types.MAILING_LIST:
         return MailingListSource;
+      case Types.ANNOTATOR_SOURCE:
+        return AnnotatorSource;
+      case Types.FEED_POST_SOURCE:
+        return FeedPostSource;
+      case Types.LOOMIO_POST_SOURCE:
+        return LoomioPostSource;
+      case Types.IDEALOOM_IDEA_SOURCE:
+        return IdeaLoomIdeaSource;
+      case Types.CATALYST_IDEA_SOURCE:
+        return CatalystIdeaSource;
       default:
         console.error("Unknown source type:" + type);
         return Source;

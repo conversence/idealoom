@@ -11,13 +11,13 @@ import Sources from '../../models/sources.js';
 import SourceView from './generalSource.js';
 import AdminNavigationMenu from './adminNavigationMenu.js';
 
-var AdminDiscussionSettings = Marionette.View.extend({
-  constructor: function AdminDiscussionSettings() {
+var AdminImportSettings = Marionette.View.extend({
+  constructor: function AdminImportSettings() {
     Marionette.View.apply(this, arguments);
   },
 
-  template: '#tmpl-adminDiscussionSettings',
-  className: 'admin-settings',
+  template: '#tmpl-adminImportSettings',
+  className: 'admin-import',
   ui: {
     addSource: '.js_addSource'
   },
@@ -45,7 +45,7 @@ var AdminDiscussionSettings = Marionette.View.extend({
     this.showChildView('createSource', new SourceView.CreateSource());
 
     var menu = new AdminNavigationMenu.discussionAdminNavigationMenu(
-      {selectedSection: "settings"});
+      {selectedSection: "import"});
     this.showChildView('navigationMenuHolder', menu);
   },
 
@@ -61,4 +61,4 @@ var AdminDiscussionSettings = Marionette.View.extend({
   }
 });
 
-export default AdminDiscussionSettings;
+export default AdminImportSettings;

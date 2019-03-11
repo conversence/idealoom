@@ -125,6 +125,21 @@ class IdeaSource(ContentSource, PromiseObjectImporter):
         self.db.add(ImportRecord(
             source=self, target=instance, external_id=id))
 
+    @property
+    def target_state_label(self):
+        if self.target_state:
+            return self.target_state.label
+
+    @target_state_label.setter
+    def target_state_label(self, label):
+        if not label:
+            self.target_state = None
+            return
+        assert self.discussion.idea_publication_flow
+        target_state = self.discussion.idea_publication_flow.state_by_label(label)
+        assert target_state
+        self.target_state = target_state
+
     @abstractmethod
     def class_from_data(self, data):
         return Idea

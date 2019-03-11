@@ -1,0 +1,45 @@
+<form class="core-form" id="source-settings">
+  <fieldset class="prl">
+
+    <div class="control-group">
+      <label for="name" class="control-label">{{ gettext("Name") }}</label>
+      <div class="controls">
+        <input type="text" id="name" class="input-xxlarge" value="<%= name %>">
+      </div>
+    </div>
+
+  	<div class="control-group">
+  		<label for="source_uri" class="control-label">{{ gettext("URL") }}</label>
+  		<div class="controls">
+  			<input type="text" id="source_uri" class="input-xxlarge" value="<%= source_uri %>">
+  		</div>
+  	</div>
+
+    <div class="control-group">
+      <label for="data_filter" class="control-label">{{ gettext("Filter (JSONPath)") }}</label>
+      <div class="controls">
+        <input type="text" id="data_filter" class="input-xxlarge" value="<%= data_filter %>">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label for="target_state_label" class="control-label">{{ gettext("Target state") }}</label>
+      <div class="controls">
+          <select id="target_state_label">
+            <option value=""
+            <% if (!target_state_label) { print('selected'); } %>
+            >{{ gettext("Save changes") }}</option>
+            <% pubStates.map(function(state) { %>
+              <option value="<%= state.get('label') %>"
+                <% if (state.get('label') == target_state_label) { print('selected'); } %>
+              ><%= state.nameOrLabel(langPrefs) %></option>
+            <% });%>
+          </select>
+      </div>
+    </div>
+
+  </fieldset>
+	<div class="form-actions">
+		<button class="btn btn-primary js_saveSource fr" type="submit">{{ gettext("Save changes") }}</button>
+	</div>
+</form>

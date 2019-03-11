@@ -103,6 +103,7 @@ var IdeaModel = Base.Model.extend({
     original_uri: null,
     is_tombstone: false,
     subtype: "GenericIdeaNode",
+    pub_state_name: null,
     featured: false,
     active: false,
     parentId: null,

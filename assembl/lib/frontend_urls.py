@@ -33,7 +33,7 @@ class FrontendUrls(object):
     frontend_discussion_routes = {
         'edition': '/edition',
         'partners': '/partners',
-        'settings': '/settings',
+        'import': '/import',
         'timeline': '/timeline',
         'tos': '/user/tos',
         'about': '/about',

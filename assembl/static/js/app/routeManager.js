@@ -30,7 +30,7 @@ import Permissions from './utils/permissions.js';
 import Account from './views/user/account.js';
 import UserTOS from './views/user/tos.js';
 import Widget from './models/widget.js';
-import AdminDiscussionSettings from './views/admin/adminDiscussionSettings.js';
+import AdminImportSettings from './views/admin/adminImportSettings.js';
 import AdminTimeline from './views/admin/adminTimelineEvents.js';
 import PreferencesView from './views/preferencesView.js';
 import PermissionsView from  './views/admin/adminPermissions.js';
@@ -189,10 +189,10 @@ var routeManager = Marionette.Object.extend({
     IdeaLoom.rootView.showChildView('groupContainer', tos);
   },
 
-  settings: function() {
+  import: function() {
     IdeaLoom.rootView.showChildView('headerRegions', new NavBar());
     if (this.userHaveAccess()) {
-      var adminSetting = new AdminDiscussionSettings();
+      var adminSetting = new AdminImportSettings();
       IdeaLoom.rootView.showChildView('groupContainer', adminSetting);
     }
   },
@@ -546,7 +546,7 @@ var routeManager = Marionette.Object.extend({
 
     switch (route){
       case 'edition':
-      case 'settings':
+      case 'import':
       case 'timeline':
       case 'notifications':
       case 'partners':
