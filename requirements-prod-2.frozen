@@ -33,7 +33,7 @@ botocore==1.12.105        # via boto3, s3transfer
 bz2file==0.98             # via smart-open
 cachetools==3.1.0         # via google-auth, premailer
 celery==4.2.1
-certifi==2018.11.29       # via requests, tornado
+certifi==2019.3.9         # via requests, tornado
 cffi==1.12.2              # via bcrypt, cryptography, pynacl
 chameleon==3.6            # via lingua
 chardet==3.0.4            # via requests
