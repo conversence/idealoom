@@ -19,8 +19,8 @@ from sqlalchemy import (
     UniqueConstraint,
 )
 
-from ..lib.sqla import CrudOperation, Base, DuplicateHandling
-from . import DiscussionBoundBase, NamedClassMixin, ContextualNamedClassMixin
+from ..lib.sqla import CrudOperation, DuplicateHandling
+from . import Base, DiscussionBoundBase, NamedClassMixin, ContextualNamedClassMixin
 from .langstrings import LangString
 from .permissions import Permission, Role
 from ..auth import (

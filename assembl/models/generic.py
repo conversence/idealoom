@@ -25,10 +25,10 @@ from sqlalchemy.orm import relationship, backref, aliased
 from ..lib import config
 from sqla_rdfbridge.mapping import PatternIriClass
 
-from ..lib.sqla import (CrudOperation, Base)
+from ..lib.sqla import CrudOperation
 from ..lib.model_watcher import get_model_watcher
 from ..lib.utils import get_global_base_url
-from . import DiscussionBoundBase, OriginMixin
+from . import Base, DiscussionBoundBase, OriginMixin
 from .langstrings import (LangString, LangStringEntry)
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..auth import (

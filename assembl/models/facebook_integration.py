@@ -34,10 +34,10 @@ from .social_auth import SocialAuthAccount
 
 from ..auth import (CrudPermissions, P_EXPORT_EXTERNAL_SOURCE, P_SYSADMIN)
 from ..lib.config import get_config
-from ..lib.sqla import Base
 from ..lib.sqla_types import URLString
 from ..lib.parsedatetime import parse_datetime
 from ..tasks.source_reader import PullSourceReader, ReaderStatus
+from . import Base
 from .langstrings import LangString
 from .generic import PostSource, ContentSourceIDs
 from .post import ImportedPost

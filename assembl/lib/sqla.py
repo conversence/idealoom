@@ -29,11 +29,11 @@ from enum import Enum
 from anyjson import dumps, loads
 from sqlalchemy import (
     DateTime, MetaData, engine_from_config, event, Column, Integer,
-    inspect)
+    inspect, or_)
 from sqlalchemy.exc import NoInspectionAvailable, OperationalError
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.ext.associationproxy import AssociationProxy
-from sqlalchemy.orm import mapper, scoped_session, sessionmaker
+from sqlalchemy.orm import mapper, scoped_session, sessionmaker, aliased
 from sqlalchemy.orm.interfaces import MANYTOONE, ONETOMANY, MANYTOMANY
 from sqlalchemy.orm.properties import RelationshipProperty
 from sqlalchemy.orm.util import has_identity
@@ -49,7 +49,7 @@ from .parsedatetime import parse_datetime
 from ..view_def import get_view_def
 from .zmqlib import get_pub_socket, send_changes
 from ..semantic.namespaces import QUADNAMES
-from ..auth import (Everyone, CrudPermissions, IF_OWNED, P_READ)
+from ..auth import (Everyone, CrudPermissions, IF_OWNED, P_READ, R_OWNER)
 from .decl_enums import EnumSymbol, DeclEnumType
 from .utils import get_global_base_url
 from ..lib.config import get_config
@@ -2008,6 +2008,130 @@ class BaseOps(object):
     def restrict_to_owners_condition(cls, query, user_id, alias=None, alias_maker=None):
         """filter query according to object owners"""
         return (query, None)
+
+
+    @classmethod
+    def pubflowid_from_discussion(cls, discussion):
+        return None
+
+    @classmethod
+    def local_role_class_and_fkey(cls):
+        return (None, None)
+
+    @classmethod
+    def query_filter_with_permission(
+            cls, discussion, user_id, permission=P_READ,
+            query=None, base_permissions=None, roles=None, clsAlias=None,
+            owner_permission=None):
+        from ..models.permissions import Role, Permission, DiscussionPermission
+        from ..models.publication_states import PublicationState, StateDiscussionPermission
+        # here are all the ways you can have a permission:
+        # 1. (global or Local)UserRole + DiscussionPermission (common)
+        # 2. (global or Local)UserRole+State+StateDiscussionPermission (factorable)
+        # 3. ownership + DiscussionPermission
+        # 4. ownership + State + StateDiscussionPermission
+        # 5. LocalUserRole + DiscussionPermission (factorable)
+        # 6. LocalUserRole + State + StateDiscussionPermission
+        db = discussion.db
+        assert permission, "Please specify a permission"
+        clsAlias = clsAlias or cls
+        owner_permission = owner_permission or permission
+        owner_permissions = list({permission, owner_permission})
+        pubflow_id = cls.pubflowid_from_discussion(discussion)
+        # TODO: Add ownership!
+
+        query = query or db.query(clsAlias).filter(clsAlias.discussion_id==discussion.id)
+        if permission in (base_permissions or ()): # 1 shortcut
+            return query
+        roles_with_d_permission_q = db.query(Role.id).join(
+            DiscussionPermission).join(Permission).filter(
+                (Permission.name == permission) &
+                (DiscussionPermission.discussion == discussion)
+            ).subquery()
+        local_role_class, lrc_fk = cls.local_role_class_and_fkey()
+        (query, ownership_condition) = cls.restrict_to_owners_condition(query, user_id, clsAlias)
+        conditions = []
+        if ownership_condition is not None:  # 3
+            owner_has_permission = db.query(DiscussionPermission
+                ).filter_by(discussion_id=discussion.id
+                ).join(Role).filter_by(name=R_OWNER
+                ).join(Permission).filter_by(name=owner_permission).limit(1).count()
+            if owner_has_permission:
+                conditions.append(ownership_condition)
+        if local_role_class:    # 5
+            ilur_dp = aliased(local_role_class)
+
+            query = query.outerjoin(
+                    ilur_dp,
+                    (getattr(ilur_dp, lrc_fk)==clsAlias.id) &
+                    (ilur_dp.profile_id==user_id) &
+                    ilur_dp.role_id.in_(roles_with_d_permission_q)
+                )
+            conditions.append(ilur_dp.id != None)
+
+        if pubflow_id:
+            # TODO: Could this be simplified with a view?
+            states_with_permission_q = db.query(PublicationState.id  # 2
+                ).filter(PublicationState.flow_id == pubflow_id
+                ).join(StateDiscussionPermission,
+                    (StateDiscussionPermission.pub_state_id==PublicationState.id) &
+                    (StateDiscussionPermission.discussion_id==discussion.id)
+                ).join(Role,
+                    (StateDiscussionPermission.role_id == Role.id) &
+                    Role.name.in_(roles)
+                ).join(Permission,
+                    (StateDiscussionPermission.permission_id==Permission.id) &
+                    (Permission.name == permission))
+            conditions.append(clsAlias.pub_state_id.in_(states_with_permission_q))
+            if ownership_condition is not None:  # 4
+                states_with_owner_permission_q = db.query(PublicationState.id
+                    ).filter(PublicationState.flow_id == pubflow_id
+                    ).join(StateDiscussionPermission,
+                        (StateDiscussionPermission.pub_state_id==PublicationState.id) &
+                        (StateDiscussionPermission.discussion_id==discussion.id)
+                    ).join(Permission,
+                        (StateDiscussionPermission.permission_id==Permission.id) &
+                        Permission.name.in_(owner_permissions)
+                    ).join(Role,
+                        (StateDiscussionPermission.role_id==Role.id) &
+                        (Role.name == R_OWNER))
+                conditions.append(ownership_condition & clsAlias.pub_state_id.in_(states_with_owner_permission_q))
+
+            if local_role_class:  # 6
+                ilur_ip = aliased(local_role_class)
+                sdp_ilocal = aliased(StateDiscussionPermission)
+                permissionO = Permission.getByName(permission)  # avoid an outerjoin
+
+                query = query.outerjoin(
+                        ilur_ip,
+                        (getattr(ilur_ip, lrc_fk)==clsAlias.id) &
+                        (ilur_ip.profile_id==user_id)
+                    ).outerjoin(
+                        sdp_ilocal,
+                        (sdp_ilocal.role_id==ilur_ip.role_id) &
+                        (sdp_ilocal.pub_state_id==clsAlias.pub_state_id) &
+                        (sdp_ilocal.permission_id==permissionO.id)
+                    )
+                conditions.append((ilur_ip.id != None) & (sdp_ilocal.id != None))
+        if conditions:
+            query = query.filter(or_(*conditions))
+        return query
+
+    @classmethod
+    def query_filter_with_permission_req(
+            cls, request, permission=P_READ, query=None, clsAlias=None):
+        return cls.query_filter_with_permission(
+            request.discussion, request.authenticated_userid, permission,
+            query, request.base_permissions, request.roles, clsAlias)
+
+    @classmethod
+    def query_filter_with_crud_op_req(
+            cls, request, crud_op=CrudPermissions.READ, query=None, clsAlias=None):
+        (permission, owner_permission) = cls.crud_permissions.crud_permissions(crud_op)
+        return cls.query_filter_with_permission(
+            request.discussion, request.authenticated_userid, permission,
+            query, request.base_permissions, request.roles, clsAlias, owner_permission)
+
 
     """The permissions to create, read, update, delete an object of this class.
     Also separate permissions for the owners to update or delete."""
