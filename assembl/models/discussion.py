@@ -90,7 +90,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
         Integer, ForeignKey(PublicationFlow.id, ondelete="SET NULL", onupdate="CASCADE"))
 
     preferences = relationship(Preferences, backref=backref(
-        'discussion'), cascade="all, delete-orphan", single_parent=True)
+        'discussion', uselist=False), cascade="all, delete-orphan", single_parent=True)
     creator = relationship('User', backref="discussions_created")
     idea_publication_flow = relationship(PublicationFlow)
 
@@ -205,6 +205,12 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
             "notification_subscriptions", template_ctx)
         for ns in nss:
             yield ns.get_instance_context(subs_ctx)
+        if not self.idea_publication_flow:
+            flow_name = self.preferences['default_idea_pub_flow']
+            if flow_name:
+                flow = PublicationFlow.getByName(flow_name)
+                if flow:
+                    self.idea_publication_flow = flow
 
     def unique_query(self):
         # DiscussionBoundBase is misleading here

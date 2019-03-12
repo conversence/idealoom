@@ -224,7 +224,7 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
 
     def validate_single_value(self, key, value, pref_data, data_type):
         # TODO: Validation for the datatypes.
-        # base_type: (bool|json|int|string|text|scalar|url|email|domain|locale|langstr|permission|role|pubflow)
+        # base_type: (bool|json|int|string|text|scalar|url|email|domain|locale|langstr|permission|role|pubflow|pubstate)
         # type: base_type|list_of_(type)|dict_of_(base_type)_to_(type)
         if data_type.startswith("list_of_"):
             assert isinstance(value, (list, tuple)), "Not a list"
@@ -271,6 +271,16 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
             elif data_type == "pubflow":
                 from .publication_states import PublicationFlow
                 assert PublicationFlow.getByName(value)
+            elif data_type == "pubstate":
+                discussion = self.discussion
+                if discussion:
+                    idea_pub_flow = discussion.idea_publication_flow
+                else:
+                    from .publication_states import PublicationFlow
+                    idea_pub_flow = PublicationFlow.getByName(self['default_idea_pub_flow'])
+                assert idea_pub_flow, "No flow available"
+                assert idea_pub_flow.state_by_label(value), "No state %d in flow %d" % (
+                    value, idea_pub_flow.label)
             elif data_type == "permission":
                 assert value in ASSEMBL_PERMISSIONS
             elif data_type == "role":
@@ -324,9 +334,8 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
             base = self.preference_data
         exists, patch = self._get_local("preference_data")
         if exists:
-            return merge_json(base, patch)
-        else:
-            return base
+            base = merge_json(base, patch)
+        return base
 
     def get_preference_data_list(self):
         data = self.get_preference_data()
@@ -513,6 +522,36 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
             # "frontend_validator_function": func_name...?,
             # "backend_validator_function": func_name...?,
             "default": True
+        },
+
+        # The specification of the default idea publication flow for a discussion
+        {
+            "id": "default_idea_pub_flow",
+            "name": _("Default idea publication flow"),
+            "value_type": "pubflow",
+            "show_in_preferences": False,
+            "description": _(
+                "The idea publication flow to use for a new discussion"),
+            "allow_user_override": None,
+            "modification_permission": P_SYSADMIN,
+            # "frontend_validator_function": func_name...?,
+            # "backend_validator_function": func_name...?,
+            "default": "default"
+        },
+
+        # The specification of the default idea publication flow for a discussion
+        {
+            "id": "default_idea_pub_state",
+            "name": _("Publication state of a new idea"),
+            "value_type": "pubstate",
+            "scalar_values": [],
+            "description": _(
+                "The idea publication state to use for a new ideas, taken from the discussion's flow"),
+            "allow_user_override": None,
+            "modification_permission": P_ADMIN_DISC,
+            # "frontend_validator_function": func_name...?,
+            # "backend_validator_function": func_name...?,
+            "default": "shared"
         },
 
         # The specification of the default permissions for a discussion

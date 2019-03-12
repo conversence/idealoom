@@ -3,10 +3,11 @@
  */
 
 import Marionette from 'backbone.marionette';
-
 import Backbone from 'backbone';
 import _ from 'underscore';
 import BackboneSubset from 'Backbone.Subset';
+import Promise from 'bluebird';
+
 import i18n from '../utils/i18n.js';
 import Types from '../utils/types.js';
 import Ctx from '../common/context.js';
@@ -102,6 +103,8 @@ function getPreferenceEditView(preferenceModel, subViewKey, useKey) {
       return RolePreferenceView;
     case "pubflow":
       return PubFlowPreferenceView;
+    case "pubstate":
+      return PubStatePreferenceView;
     case "string":
       return StringPreferenceView;
     case "scalar":
@@ -547,6 +550,54 @@ var PubFlowPreferenceView = ScalarPreferenceView.extend({
     return data;
   },
 });
+
+
+/**
+ * View to set a role value preference (chosen from the set of roles)
+ * @class app.views.preferencesView.PubFlowPreferenceView
+ * @extends app.views.preferencesView.ScalarPreferenceView
+ */
+var PubStatePreferenceView = ScalarPreferenceView.extend({
+  constructor: function PubStatePreferenceView() {
+    ScalarPreferenceView.apply(this, arguments);
+    this.pubStateCollection = null;
+    this.langPrefs = null;
+  },
+  initialize: function(options) {
+    ScalarPreferenceView.prototype.initialize.apply(this, arguments);
+    const collectionManager = new CollectionManager();
+    if (Ctx.getDiscussionId() != "0") {
+      collectionManager.getIdeaPublicationStatesPromise().then((pubStateCollection) => {
+        this.pubStateCollection = pubStateCollection;
+        this.render();
+      });
+      collectionManager.getUserLanguagePreferencesPromise(Ctx).then((langPrefs) => {
+        this.langPrefs = langPrefs;
+        if (this.pubStateCollection)
+          this.render();
+      }).catch((e) => {
+        e.stopPropagation();
+        e.preventDefault();
+      });
+    } else {
+      // TODO, not urgent: get the default publication states
+    }
+  },
+  serializeData: function(...args) {
+    var data = ScalarPreferenceView.prototype.serializeData.apply(this, args);
+    data.scalarOptions = {};
+    const langPrefs = this.langPrefs;
+    if (this.pubStateCollection) {
+      this.pubStateCollection.each((pubStateModel) => {
+        const label = pubStateModel.get('label');
+        const name = (langPrefs) ? pubStateModel.nameOrLabel(langPrefs) : label;
+        data.scalarOptions[label] = name;
+      });
+    }
+    return data;
+  },
+});
+
 
 /**
  * View to set a URL value preference
