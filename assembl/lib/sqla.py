@@ -2184,7 +2184,8 @@ class BaseOps(object):
         from ..models.permissions import DiscussionPermission, Permission, Role
         from ..models.publication_states import PublicationState, StateDiscussionPermission
         session = self.db
-        assert discussion, "Discussion needed"
+        if not discussion:
+            return []
         roles = self.get_role_query(user_id, discussion.id
             ).with_entities(Role.id).subquery()
         queries = []
@@ -2246,13 +2247,18 @@ class BaseOps(object):
         """Whether the user, with the given permissions,
         can perform the given Crud operation on this instance."""
         user_id = user_id or Everyone
-        perm = self.crud_permissions.can(operation, permissions)
-        if perm != IF_OWNED:
+        perm, owner_perm = self.crud_permissions.crud_permissions(operation)
+        if perm in permissions:
             return perm
-        if user_id == Everyone:
-            return False
-        return self.is_owner(user_id)
-
+        is_owner = self.is_owner(user_id)
+        if is_owner and owner_perm in permissions:
+            return owner_perm
+        local_perms = self.local_permissions(user_id)
+        if perm in local_perms:
+            return perm
+        if is_owner and owner_perm in local_perms:
+            return owner_perm
+        return False
 
 class TimestampedMixin(object):
     @declared_attr
