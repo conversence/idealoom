@@ -2260,6 +2260,10 @@ class BaseOps(object):
             return owner_perm
         return False
 
+    def user_can_req(self, operation, request):
+        return self.user_can(request.authenticated_userid, operation, request.base_permissions)
+
+
 class TimestampedMixin(object):
     @declared_attr
     def last_modified(cls):

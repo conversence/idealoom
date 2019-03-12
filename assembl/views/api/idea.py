@@ -4,7 +4,8 @@ from datetime import datetime
 
 import simplejson as json
 from cornice import Service
-from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPNoContent
+from pyramid.httpexceptions import (
+    HTTPNotFound, HTTPBadRequest, HTTPNoContent, HTTPUnauthorized)
 from pyramid.security import authenticated_userid, Everyone
 from sqlalchemy import and_
 from sqlalchemy.orm import (joinedload, subqueryload, undefer)
@@ -14,7 +15,7 @@ from assembl.views.api import API_DISCUSSION_PREFIX
 from assembl.models import (
     Idea, RootIdea, IdeaLink, Discussion,
     Extract, SubGraphIdeaAssociation, LangString)
-from assembl.auth import (P_READ, P_ADD_IDEA, P_EDIT_IDEA)
+from assembl.auth import (CrudPermissions, P_READ, P_ADD_IDEA, P_EDIT_IDEA, P_READ_IDEA)
 
 
 ideas = Service(name='ideas', path=API_DISCUSSION_PREFIX + '/ideas',
@@ -84,6 +85,8 @@ def create_idea(request):
 def get_idea(request):
     idea_id = request.matchdict['id']
     idea = Idea.get_instance(idea_id)
+    if not idea.user_can_req(CrudPermissions.READ, request):
+        raise HTTPUnauthorized()
     view_def = request.GET.get('view')
     discussion = request.context
     user_id = authenticated_userid(request) or Everyone
@@ -123,9 +126,8 @@ def _get_ideas_real(request, view_def=None, ids=None, user_id=None,
                     'widget': Widget.uri_generic(wlink.widget_id)})
 
     next_synthesis_id = discussion.get_next_synthesis_id()
-    ideas = discussion.db.query(Idea).filter_by(
-        discussion=discussion
-    )
+    ideas = Idea.query_filter_with_crud_op_req(request).filter(
+        Idea.discussion==discussion)
     if modified_after:
         ideas = ideas.filter(Idea.last_modified > modified_after)
 

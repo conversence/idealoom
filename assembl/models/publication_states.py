@@ -79,7 +79,7 @@ class PublicationFlow(NamedClassMixin, Base):
             transition.update_from_json(transitionJ, context=ctx)
         return target
 
-    crud_permissions = CrudPermissions(P_READ, P_SYSADMIN)
+    crud_permissions = CrudPermissions(P_SYSADMIN, P_READ, P_SYSADMIN)
 
 
 class PublicationState(ContextualNamedClassMixin, Base):
@@ -118,7 +118,7 @@ class PublicationState(ContextualNamedClassMixin, Base):
         query, _ = super(PublicationState, self).unique_query()
         return query.filter_by(label=self.label, flow=self.flow), True
 
-    crud_permissions = CrudPermissions(P_READ, P_SYSADMIN)
+    crud_permissions = CrudPermissions(P_SYSADMIN, P_READ, P_SYSADMIN)
 
 
 class PublicationTransition(ContextualNamedClassMixin, Base):
@@ -211,7 +211,7 @@ class PublicationTransition(ContextualNamedClassMixin, Base):
             assert target.source.flow == target.flow
         return target
 
-    crud_permissions = CrudPermissions(P_READ, P_SYSADMIN)
+    crud_permissions = CrudPermissions(P_SYSADMIN, P_READ, P_SYSADMIN)
 
 
 class StateDiscussionPermission(DiscussionBoundBase):
@@ -274,4 +274,4 @@ class StateDiscussionPermission(DiscussionBoundBase):
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):
         return (cls.discussion_id == discussion_id, )
 
-    crud_permissions = CrudPermissions(P_READ, P_ADMIN_DISC)
+    crud_permissions = CrudPermissions(P_ADMIN_DISC, P_READ, P_ADMIN_DISC)
