@@ -234,6 +234,40 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
         assert pub_flow, "Cannot find PublicationFlow " + name
         self.idea_publication_flow = pub_flow
 
+    def bulk_apply_idea_transition(self, transition_name, user_id, permissions=None):
+        flow = self.idea_publication_flow
+        transition = flow.transition_by_label(transition_name)
+        assert transition, "Cannot find transition " + name
+        if not permissions:
+            from pyramid.threadlocal import get_current_request
+            request = get_current_request()
+            if request:
+                permissions = request.base_permissions
+            else:
+                from assembl.auth.util import get_permissions
+                permissions = get_permissions(user_id, self.discussion_id)
+        if transition.req_permission_name not in permissions:
+            raise HTTPUnauthorized("You need permission %s to apply transition %s" % (
+                transition.req_permission_name, transition.label))
+        for idea in self.ideas:
+            if idea.pub_state_id == transition.source_id:
+                idea.pub_state_id = transition.target_id
+
+    def reset_idea_publication_flow(self, new_flow_name, default_state_name, correspondances=None):
+        correspondances = correspondances or {}
+        new_flow = PublicationFlow.getByName(new_flow_name)
+        assert new_flow, "No publication flow named " + new_flow_name
+        old_flow = self.idea_publication_flow
+        assert default_state, "Please specify default state"
+        for idea in self.ideas:
+            source_name = idea.pub_state_name
+            target_name = correspondances.get(source_name, default_state_name)
+            target_state = new_flow.state_by_label(target_name)
+            assert target_state, "Could not find target state %s in flow %s" % (
+                target_name, new_flow_name)
+            idea.publication_state = target_state
+        self.idea_publication_flow = new_flow
+
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):
         return (cls.id == discussion_id,)
