@@ -103,8 +103,13 @@ class Action(TombstonableMixin, OriginMixin, DiscussionBoundBase):
             'actions', request=request, user_id=user_id)
 
     @classmethod
-    def restrict_to_owners(cls, q, user_id):
-        return q.filter(cls.actor_id == user_id)
+    def restrict_to_owners_condition(cls, query, user_id, alias=None, alias_maker=None):
+        if not alias:
+            if alias_maker:
+                alias = alias_maker.alias_from_class(cls)
+            else:
+                alias = cls
+        return (query, alias.actor_id == user_id)
 
     crud_permissions = CrudPermissions(
         P_READ, P_SYSADMIN, P_SYSADMIN, P_SYSADMIN, P_READ, P_READ, P_READ)

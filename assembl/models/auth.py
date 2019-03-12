@@ -516,9 +516,13 @@ class AbstractAgentAccount(Base):
         return self.profile_id == user_id
 
     @classmethod
-    def restrict_to_owners(cls, query, user_id):
-        "filter query according to object owners"
-        return query.filter(cls.profile_id == user_id)
+    def restrict_to_owners_condition(cls, query, user_id, alias=None, alias_maker=None):
+        if not alias:
+            if alias_maker:
+                alias = alias_maker.alias_from_class(cls)
+            else:
+                alias = cls
+        return (query, alias.profile_id == user_id)
 
     __mapper_args__ = {
         'polymorphic_identity': 'abstract_agent_account',

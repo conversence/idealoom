@@ -90,9 +90,13 @@ class UserRole(Base, PrivateObjectMixin):
         return self.profile_id == user_id
 
     @classmethod
-    def restrict_to_owners(cls, query, user_id):
-        "filter query according to object owners"
-        return query.filter(cls.profile_id == user_id)
+    def restrict_to_owners_condition(cls, query, user_id, alias=None, alias_maker=None):
+        if not alias:
+            if alias_maker:
+                alias = alias_maker.alias_from_class(cls)
+            else:
+                alias = cls
+        return (query, alias.profile_id == user_id)
 
     def get_default_parent_context(self, request=None, user_id=None):
         return self.user.get_collection_context(
@@ -170,9 +174,13 @@ class AbstractLocalUserRole(DiscussionBoundBase, PrivateObjectMixin):
         return self.profile_id == user_id
 
     @classmethod
-    def restrict_to_owners(cls, query, user_id):
-        "filter query according to object owners"
-        return query.filter(cls.profile_id == user_id)
+    def restrict_to_owners_condition(cls, query, user_id, alias=None, alias_maker=None):
+        if not alias:
+            if alias_maker:
+                alias = alias_maker.alias_from_class(cls)
+            else:
+                alias = cls
+        return (query, alias.profile_id == user_id)
 
 
 class LocalUserRole(AbstractLocalUserRole):
@@ -282,7 +290,7 @@ class LocalUserRole(AbstractLocalUserRole):
 
     crud_permissions = CrudPermissions(
         P_SELF_REGISTER, P_READ, P_ADMIN_DISC, P_ADMIN_DISC,
-        P_SELF_REGISTER, P_SELF_REGISTER, P_READ)
+        P_SELF_REGISTER, P_SELF_REGISTER)
 
     @classmethod
     def user_can_cls(cls, user_id, operation, permissions):

@@ -155,8 +155,7 @@ class Document(DiscussionBoundBase, OriginMixin):
     # Same crud permissions as a post. Issue with idea edition,
     # but that is usually more restricted than post permission.
     crud_permissions = CrudPermissions(
-            P_ADD_POST, P_READ, P_EDIT_POST, P_ADMIN_DISC,
-            P_EDIT_POST, P_ADMIN_DISC)
+            P_ADD_POST, P_READ, P_EDIT_POST, P_ADMIN_DISC)
 
 
 class File(Document):
@@ -370,8 +369,7 @@ class PostAttachment(Attachment):
 
     # Same crud permissions as a post
     crud_permissions = CrudPermissions(
-            P_ADD_POST, P_READ, P_EDIT_POST, P_ADMIN_DISC,
-            P_EDIT_POST, P_ADMIN_DISC)
+            P_ADD_POST, P_READ, P_EDIT_POST, P_ADMIN_DISC)
 
 
 @event.listens_for(PostAttachment.post, 'set',
@@ -419,5 +417,4 @@ class IdeaAttachment(Attachment):
 
     # Same crud permissions as a idea
     crud_permissions = CrudPermissions(
-        P_ADD_IDEA, P_READ, P_EDIT_IDEA, P_ADMIN_DISC, P_ADMIN_DISC,
-        P_ADMIN_DISC)
+        P_ADD_IDEA, P_READ, P_EDIT_IDEA, P_ADMIN_DISC)

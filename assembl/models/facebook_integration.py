@@ -1247,10 +1247,14 @@ class FacebookAccessToken(Base):
         return self.expiration.isoformat()
 
     @classmethod
-    def restrict_to_owners(cls, query, user_id):
-        "filter query according to object owners"
-        return query.join(cls.user).\
-            filter(SocialAuthAccount.profile_id == user_id)
+    def restrict_to_owners_condition(cls, query, user_id, alias=None, alias_maker=None):
+        if not alias:
+            if alias_maker:
+                alias = alias_maker.alias_from_class(cls)
+            else:
+                alias = cls
+        query = query.join(alias.user)
+        return (query, SocialAuthAccount.profile_id == user_id)
 
     crud_permissions = CrudPermissions(P_EXPORT_EXTERNAL_SOURCE, P_SYSADMIN,
                                        read_owned=P_EXPORT_EXTERNAL_SOURCE)

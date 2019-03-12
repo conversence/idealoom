@@ -573,8 +573,7 @@ class Content(TombstonableOriginMixin, DiscussionBoundBase):
         return [Idea.uri_generic(wil.idea_id) for wil in self.widget_idea_links]
 
     crud_permissions = CrudPermissions(
-            P_ADD_POST, P_READ, P_EDIT_POST, P_ADMIN_DISC,
-            P_EDIT_POST, P_ADMIN_DISC)
+            P_ADD_POST, P_READ, P_EDIT_POST, P_ADMIN_DISC)
 
 
 LangString.setup_ownership_load_event(Content, ['subject', 'body'])

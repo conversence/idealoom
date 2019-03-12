@@ -351,23 +351,26 @@ class NotificationSubscription(DiscussionBoundBase, OriginMixin):
             ).update(status=status)
 
     @classmethod
-    def restrict_to_owners(cls, query, user_id):
+    def restrict_to_owners_condition(cls, query, user_id, alias=None, alias_maker=None):
         """Filter query according to object owners.
         Also allow to read subscriptions of templates."""
+        if not alias:
+            if alias_maker:
+                alias = alias_maker.alias_from_class(cls)
+            else:
+                for aipaths in query._joinpath.keys():
+                    for ainsp in aipaths:
+                        if getattr(ainsp, '_target', None) == cls:
+                            alias = ainsp.entity
+                            break
+                    if alias:
+                        break
+                if not alias:
+                    alias = cls
         # optimize the join on a single table
         utt = inspect(UserTemplate).tables[0]
-        # Find the alias for this class with black magic
-        alias = None
-        for aipaths in query._joinpath.keys():
-            for ainsp in aipaths:
-                if getattr(ainsp, '_target', None) == cls:
-                    alias = ainsp.entity
-                    break
-            if alias:
-                break
-        assert alias
-        return query.outerjoin(utt, alias.user_id == utt.c.id).filter(
-            (cls.user_id == user_id) | (utt.c.id != None))
+        query = query.outerjoin(utt, alias.user_id == utt.c.id)
+        return (query, (alias.user_id == user_id) | (utt.c.id != None))
 
     def user_can(self, user_id, operation, permissions):
         # special case: If you can read the discussion, you can read

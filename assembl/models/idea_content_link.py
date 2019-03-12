@@ -113,8 +113,7 @@ class IdeaContentLink(DiscussionBoundBase, OriginMixin):
                 (idea.tombstone_date == None))
 
     crud_permissions = CrudPermissions(
-            P_ADD_IDEA, P_READ, P_EDIT_IDEA, P_EDIT_IDEA,
-            P_EDIT_IDEA, P_EDIT_IDEA)
+            P_ADD_IDEA, P_READ, P_EDIT_IDEA, P_EDIT_IDEA)
 
 @event.listens_for(IdeaContentLink.idea, 'set', propagate=True, active_history=True)
 def idea_content_link_idea_set_listener(target, value, oldvalue, initiator):
@@ -447,9 +446,13 @@ class Extract(IdeaContentPositiveLink):
         return ()
 
     @classmethod
-    def restrict_to_owners(cls, query, user_id):
-        "filter query according to object owners"
-        return query.filter(cls.owner_id == user_id)
+    def restrict_to_owners_condition(cls, query, user_id, alias=None, alias_maker=None):
+        if not alias:
+            if alias_maker:
+                alias = alias_maker.alias_from_class(cls)
+            else:
+                alias = cls
+        return (query, alias.owner_id == user_id)
 
     crud_permissions = CrudPermissions(
             P_ADD_EXTRACT, P_READ, P_EDIT_EXTRACT, P_EDIT_EXTRACT)

@@ -786,9 +786,13 @@ class AbstractIdeaVote(HistoryMixinWithOrigin, DiscussionBoundBase):
         return self.voter_id == user_id
 
     @classmethod
-    def restrict_to_owners(cls, query, user_id):
-        "filter query according to object owners"
-        return query.filter(cls.voter_id == user_id)
+    def restrict_to_owners_condition(cls, query, user_id, alias=None, alias_maker=None):
+        if not alias:
+            if alias_maker:
+                alias = alias_maker.alias_from_class(cls)
+            else:
+                alias = cls
+        return (query, alias.voter_id == user_id)
 
     # Do we still need this? Can access through vote_spec
     widget_id = Column(

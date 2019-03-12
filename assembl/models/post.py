@@ -582,9 +582,13 @@ class Post(Content):
         return (IdeaContentLinkCollection(cls),)
 
     @classmethod
-    def restrict_to_owners(cls, query, user_id):
-        "filter query according to object owners"
-        return query.filter(cls.creator_id == user_id)
+    def restrict_to_owners_condition(cls, query, user_id, alias=None, alias_maker=None):
+        if not alias:
+            if alias_maker:
+                alias = alias_maker.alias_from_class(cls)
+            else:
+                alias = cls
+        return (query, alias.creator_id == user_id)
 
 
 def orm_insert_listener(mapper, connection, target):

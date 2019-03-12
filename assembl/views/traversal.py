@@ -533,6 +533,25 @@ class InstanceContextPredicate(object):
             isinstance(context._instance, self.val)
 
 
+class LocalPermissionPredicate(object):
+    """A `view predicate factory`_ that checks that a given traversal context
+    is an :py:class:`InstanceContext` and the user has a certain local permission on it
+
+    .. _`view predicate factory`: http://docs.pylonsproject.org/projects/pyramid/en/latest/narr/hooks.html#view-and-route-predicates
+    """
+    def __init__(self, permission, config):
+        self.permission = permission
+
+    def text(self):
+        return 'local_permission = %s' % (', '.join(self.permission))
+
+    phash = text
+
+    def __call__(self, context, request):
+        return isinstance(context, InstanceContext) and get_permissions(
+            request.authenticated_userid, request.discussion_id(), context._instance)
+
+
 class InstanceContextPredicateWithExceptions(object):
     """A `view predicate factory`_ that checks that a given traversal context
     is a :py:class:`InstanceContext`, and that the instance is of the given
@@ -1259,3 +1278,4 @@ def includeme(config):
     config.add_view_predicate('ctx_collection_class',
                               CollectionContextClassPredicate,
                               weighs_less_than='ctx_named_collection')
+    config.add_view_predicate('local_permission', LocalPermissionPredicate)

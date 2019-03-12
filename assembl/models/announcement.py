@@ -144,8 +144,7 @@ class IdeaAnnouncement(Announcement):
 
     # Same crud permissions as a idea
     crud_permissions = CrudPermissions(
-        P_ADD_IDEA, P_READ, P_EDIT_IDEA, P_ADMIN_DISC, P_ADMIN_DISC,
-        P_ADMIN_DISC)
+        P_ADD_IDEA, P_READ, P_EDIT_IDEA, P_ADMIN_DISC)
 
 
 @event.listens_for(IdeaAnnouncement.idea, 'set',

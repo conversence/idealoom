@@ -1999,7 +1999,15 @@ class BaseOps(object):
     @classmethod
     def restrict_to_owners(cls, query, user_id):
         """filter query according to object owners"""
+        (query, condition) = cls.restrict_to_owners_condition(query, user_id)
+        if condition is not None:
+            query = query.filter(condition)
         return query
+
+    @classmethod
+    def restrict_to_owners_condition(cls, query, user_id, alias=None, alias_maker=None):
+        """filter query according to object owners"""
+        return (query, None)
 
     """The permissions to create, read, update, delete an object of this class.
     Also separate permissions for the owners to update or delete."""
