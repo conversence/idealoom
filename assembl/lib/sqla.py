@@ -29,7 +29,7 @@ from enum import Enum
 from anyjson import dumps, loads
 from sqlalchemy import (
     DateTime, MetaData, engine_from_config, event, Column, Integer,
-    inspect, or_)
+    inspect, or_, and_)
 from sqlalchemy.exc import NoInspectionAvailable, OperationalError
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.ext.associationproxy import AssociationProxy
@@ -49,7 +49,8 @@ from .parsedatetime import parse_datetime
 from ..view_def import get_view_def
 from .zmqlib import get_pub_socket, send_changes
 from ..semantic.namespaces import QUADNAMES
-from ..auth import (Everyone, CrudPermissions, IF_OWNED, P_READ, R_OWNER)
+from ..auth import (
+    Everyone, Authenticated, CrudPermissions, IF_OWNED, P_READ, R_OWNER)
 from .decl_enums import EnumSymbol, DeclEnumType
 from .utils import get_global_base_url
 from ..lib.config import get_config
@@ -2132,6 +2133,100 @@ class BaseOps(object):
             request.discussion, request.authenticated_userid, permission,
             query, request.base_permissions, request.roles, clsAlias, owner_permission)
 
+    def local_roles(self, user_id):
+        from ..models.permissions import Role
+        roles = []
+        if self.is_owner(user_id):
+            roles.append(R_OWNER)
+        (local_role_class, fkey) = self.local_role_class_and_fkey()
+        if local_role_class:
+            query = self.db.query(Role.name).join(local_role_class).filter(
+                getattr(local_role_class, fkey)==user_id)
+            roles.extend((x for (x,) in query))
+        return roles
+
+    def get_role_query(self, user_id, discussion_id=None):
+        from ..models.permissions import Role, LocalUserRole, UserRole
+        user_id = user_id or Everyone
+        session = self.db
+        if user_id == Everyone:
+            return session.query(Role).filter(Role.name == user_id)
+        elif user_id == Authenticated:
+            return session.query(Role).filter(Role.name.in_((Authenticated, Everyone)))
+        base_roles = [Authenticated, Everyone]
+        if user_id and self.is_owner(user_id):
+            base_roles.append(R_OWNER)
+        clauses = []
+        roles = session.query(Role).join(UserRole).filter(
+                UserRole.profile_id == user_id)
+        if discussion_id:
+            clauses.append(session.query(Role).join(LocalUserRole).filter(and_(
+                        LocalUserRole.profile_id == user_id,
+                        LocalUserRole.requested == False,
+                        LocalUserRole.discussion_id == discussion_id)))
+        clauses.append(session.query(Role).filter(Role.name.in_(base_roles)))
+        (local_role_class, fkey) = self.local_role_class_and_fkey()
+        if local_role_class:
+            clauses.append(session.query(Role).join(local_role_class).filter(
+                getattr(local_role_class, fkey)==self.id,
+                local_role_class.profile_id==user_id))
+        roles = roles.union(*clauses)
+        return roles.distinct()
+
+    def local_permissions(self, user_id, discussion=None, include_global=False):
+        # here are all the ways you can have a permission:
+        # 1. (global or Local)UserRole + DiscussionPermission (common, ignore here)
+        # 2. (global or Local)UserRole+State+StateDiscussionPermission (factorable)
+        # 3. ownership + DiscussionPermission
+        # 4. ownership + State + StateDiscussionPermission
+        # 5. LocalUserRole + DiscussionPermission (factorable)
+        # 6. LocalUserRole + State + StateDiscussionPermission
+        from ..models.permissions import DiscussionPermission, Permission, Role
+        from ..models.publication_states import PublicationState, StateDiscussionPermission
+        session = self.db
+        assert discussion, "Discussion needed"
+        roles = self.get_role_query(user_id, discussion.id
+            ).with_entities(Role.id).subquery()
+        queries = []
+        if include_global:
+            queries.append(
+                session.query(Permission.name).join(
+                    DiscussionPermission
+                ).join(Role
+                ).filter(Role.id.in_(roles)))
+        elif self.is_owner(user_id):
+            queries.append(
+                session.query(Permission.name).join(
+                    DiscussionPermission
+                ).join(Role
+                ).filter(Role.name == R_OWNER))
+        pub_state_id = getattr(self, 'pub_state_id', None)
+        if pub_state_id:
+            queries.append(
+                session.query(Permission.name).join(
+                    StateDiscussionPermission,
+                    (Permission.id==StateDiscussionPermission.permission_id) &
+                    (StateDiscussionPermission.pub_state_id==pub_state_id) &
+                    (StateDiscussionPermission.discussion_id==discussion.id) &
+                    StateDiscussionPermission.role_id.in_(roles)
+                )
+            )
+        if not len(queries):
+            return []
+        query = queries.pop(0)
+        if queries:
+            query = query.union(*queries)
+        return [x for (x,) in query.distinct()]
+
+    def local_permissions_req(self, request, include_global=False):
+        from ..models import Discussion
+        discussion_id = request.discussion_id
+        if not discussion_id:
+            return []
+        discussion = Discussion.get(discussion_id)
+        if not discussion:
+            return []
+        return self.local_permissions(discussion, request.authenticated_userid, include_global)
 
     """The permissions to create, read, update, delete an object of this class.
     Also separate permissions for the owners to update or delete."""

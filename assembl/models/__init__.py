@@ -62,6 +62,10 @@ class DiscussionBoundBase(AbstractBase):
         from .discussion import Discussion
         return Discussion.get(self.get_discussion_id())
 
+    def local_permissions(self, user_id, discussion=None, include_global=False):
+        return super(DiscussionBoundBase, self).local_permissions(
+            user_id, discussion or self.get_discussion(), include_global)
+
     def send_to_changes(self, connection=None, operation=CrudOperation.UPDATE,
                         discussion_id=None, view_def="changes"):
         if not connection:
