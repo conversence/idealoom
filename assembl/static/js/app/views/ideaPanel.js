@@ -3,8 +3,14 @@
  * @module app.views.ideaPanel
  */
 
-import IdeaLoom from '../app.js';
+import $ from 'jquery';
+import _ from 'underscore';
+import highlight from 'jquery-highlight';
+import BackboneSubset from 'Backbone.Subset';
+import Promise from 'bluebird';
+import Marionette from 'backbone.marionette';
 
+import IdeaLoom from '../app.js';
 import Ctx from '../common/context.js';
 import i18n from '../utils/i18n.js';
 import EditableLSField from './reusableDataFields/editableLSField.js';
@@ -20,32 +26,76 @@ import WidgetLinks from './widgetLinks.js';
 import WidgetButtons from './widgetButtons.js';
 import CollectionManager from '../common/collectionManager.js';
 import BasePanel from './basePanel.js';
-import Marionette from 'backbone.marionette';
 import AttachmentViews from './attachments.js';
 import ConfirmModal from './confirmModal.js';
 import AttachmentModels from '../models/attachments.js';
 import Loader from './loader.js';
-import $ from 'jquery';
-import _ from 'underscore';
-import highlight from 'jquery-highlight';
-import BackboneSubset from 'Backbone.Subset';
-import Promise from 'bluebird';
 
-var IdeaPanel = BasePanel.extend({
-  constructor: function IdeaPanel() {
-    BasePanel.apply(this, arguments);
-  },
 
+class IdeaPanel extends BasePanel.extend({
   template: '#tmpl-ideaPanel',
-  panelType: PanelSpecTypes.IDEA_PANEL,
   className: 'ideaPanel',
   minimizeable: true,
   closeable: false,
   gridSize: BasePanel.prototype.IDEA_PANEL_GRID_SIZE,
   minWidth: 295,
   ideaPanelOpensAutomatically: true,
+  tooltip: i18n.gettext('Detailled information about the currently selected idea in the Table of ideas'),
+  panelType: PanelSpecTypes.IDEA_PANEL,
+  ui: {
+    'postIt': '.postitlist',
+    'type_selection': '.js_type_selection',
+    'definition': '.js_editDefinitionRegion',
+    'longTitle': '.js_editLongTitleRegion',
+    'deleteIdea': '.js_ideaPanel-deleteBtn',
+    'clearIdea': '.js_ideaPanel-clearBtn',
+    'closeExtract': '.js_closeExtract',
+    'contributorsSection': '.ideaPanel-section-contributors',
+    'announcement': '.ideaPanel-announcement-region',
+    'widgetsSection': '.js_ideaPanel-section-widgets',
+    'adminSection': '.js_ideaPanel-section-admin',
+    'attachmentButton': '.js_attachment-button',
+    'attachmentImage': '.js_idea-attachment',
+    'openTargetInPopOver': '.js_openTargetInPopOver',
+    'pubStateTransition': '.js_transition',
+  },
+  regions: {
+    segmentList: ".postitlist",
+    contributors: ".contributors",
+    widgetsInteractionRegion: ".js_ideaPanel-section-access-widgets-region",
+    widgetsConfigurationInteraction: ".ideaPanel-section-conf-widgets",
+    widgetsCreationInteraction: ".ideaPanel-section-create-widgets",
+    widgetsSeeResultsInteraction: ".ideaPanel-section-see-results",
+    announcementRegion: "@ui.announcement",
+    regionLongTitle: '@ui.longTitle',
+    regionDescription: '@ui.definition',
+    attachmentButton: '@ui.attachmentButton',
+    attachment: '@ui.attachmentImage'
+  },
 
-  initialize: function(options) {
+  modelEvents: {
+    //Do NOT listen to change here
+    //'replacedBy': 'onReplaced',
+    'change': 'requestRender'
+  },
+ 
+  events: {
+    'dragstart @ui.postIt': 'onDragStart', //Fired on the element that is the origin of the drag, so when the user starts dragging one of the extracts CURRENTLY listed in the idea
+    'dragend @ui.postIt': 'onDragEnd',  //Fired on the element that is the origin of the drag
+    
+    'dragenter': 'onDragEnter', //Fired on drop targets. So when the user is dragging something from anywhere and moving the mouse towards this panel
+    'dragover': 'onDragOver', //Fired on drop targets.  Formerly these events were limited to  @ui.postIt, but that resulted in terrible UX.  Let's make the entire idea panel a drop zone
+    'dragleave': 'onDragLeave', //Fired on drop targets.
+    'drop': 'onDrop', //Fired on drop targets.
+    'change @ui.type_selection': 'onTypeSelectionChange',
+    'click @ui.closeExtract': 'onSegmentCloseButtonClick',
+    'click @ui.clearIdea': 'onClearAllClick',
+    'click @ui.deleteIdea': 'onDeleteButtonClick',
+    'click @ui.openTargetInPopOver': 'openTargetInPopOver',
+    'click @ui.pubStateTransition': 'pubStateTransition',
+  },
+}) {
+  initialize(options) {
     BasePanel.prototype.initialize.apply(this, arguments);
     this.setLoading(true);
     var that = this;
@@ -117,61 +167,9 @@ var IdeaPanel = BasePanel.extend({
         that.setIdeaModel(model);
       });
     }
-  },
-  ui: {
-    'postIt': '.postitlist',
-    'type_selection': '.js_type_selection',
-    'definition': '.js_editDefinitionRegion',
-    'longTitle': '.js_editLongTitleRegion',
-    'deleteIdea': '.js_ideaPanel-deleteBtn',
-    'clearIdea': '.js_ideaPanel-clearBtn',
-    'closeExtract': '.js_closeExtract',
-    'contributorsSection': '.ideaPanel-section-contributors',
-    'announcement': '.ideaPanel-announcement-region',
-    'widgetsSection': '.js_ideaPanel-section-widgets',
-    'adminSection': '.js_ideaPanel-section-admin',
-    'attachmentButton': '.js_attachment-button',
-    'attachmentImage': '.js_idea-attachment',
-    'openTargetInPopOver': '.js_openTargetInPopOver',
-    'pubStateTransition': '.js_transition',
-  },
-  regions: {
-    segmentList: ".postitlist",
-    contributors: ".contributors",
-    widgetsInteractionRegion: ".js_ideaPanel-section-access-widgets-region",
-    widgetsConfigurationInteraction: ".ideaPanel-section-conf-widgets",
-    widgetsCreationInteraction: ".ideaPanel-section-create-widgets",
-    widgetsSeeResultsInteraction: ".ideaPanel-section-see-results",
-    announcementRegion: "@ui.announcement",
-    regionLongTitle: '@ui.longTitle',
-    regionDescription: '@ui.definition',
-    attachmentButton: '@ui.attachmentButton',
-    attachment: '@ui.attachmentImage'
-  },
+  }
 
-  modelEvents: {
-    //Do NOT listen to change here
-    //'replacedBy': 'onReplaced',
-    'change': 'requestRender'
-  },
-
-  events: {
-    'dragstart @ui.postIt': 'onDragStart', //Fired on the element that is the origin of the drag, so when the user starts dragging one of the extracts CURRENTLY listed in the idea
-    'dragend @ui.postIt': 'onDragEnd',  //Fired on the element that is the origin of the drag
-    
-    'dragenter': 'onDragEnter', //Fired on drop targets. So when the user is dragging something from anywhere and moving the mouse towards this panel
-    'dragover': 'onDragOver', //Fired on drop targets.  Formerly these events were limited to  @ui.postIt, but that resulted in terrible UX.  Let's make the entire idea panel a drop zone
-    'dragleave': 'onDragLeave', //Fired on drop targets.
-    'drop': 'onDrop', //Fired on drop targets.
-    'change @ui.type_selection': 'onTypeSelectionChange',
-    'click @ui.closeExtract': 'onSegmentCloseButtonClick',
-    'click @ui.clearIdea': 'onClearAllClick',
-    'click @ui.deleteIdea': 'onDeleteButtonClick',
-    'click @ui.openTargetInPopOver': 'openTargetInPopOver',
-    'click @ui.pubStateTransition': 'pubStateTransition',
-  },
-
-  _calculateContentHeight: function(domObject, imageDomObject){
+  _calculateContentHeight(domObject, imageDomObject){
     var contentPanelPosition = $(window).height() / 3;
     var imgHeight = imageDomObject.height();
     if(imgHeight > contentPanelPosition){
@@ -180,12 +178,12 @@ var IdeaPanel = BasePanel.extend({
     else{
       domObject.css('top', imgHeight);
     }
-  },
+  }
   /*
     Manages the spacing at the top of the ideaPanel, depending on the panel having an
     attachment or not.
    */
-  checkContentHeight: function(){
+  checkContentHeight(){
     var domObject = this.$(".content-ideapanel");
     var that = this;
     if (this.model !== null && this.model.get('attachments') && (this.model.get('attachments').length > 0)){
@@ -203,9 +201,9 @@ var IdeaPanel = BasePanel.extend({
     else {
       domObject.css('top', '0px');
     }
-  },
+  }
 
-  requestRender: function() {
+  requestRender() {
     var that = this;
 
     setTimeout(function(){
@@ -214,36 +212,34 @@ var IdeaPanel = BasePanel.extend({
         that.render();
       }
     }, 1);
-  },
+  }
 
-  getTitle: function() {
+  getTitle() {
     return i18n.gettext('Idea');
-  },
-
-  tooltip: i18n.gettext('Detailled information about the currently selected idea in the Table of ideas'),
+  }
 
   /**
    * This is not inside the template because babel wouldn't extract it in
    * the pot file
    */
-  getSubIdeasLabel: function(subIdeas) {
+  getSubIdeasLabel(subIdeas) {
     if (subIdeas.length == 0) {
       return i18n.gettext('This idea has no sub-ideas');
     }
     else {
       return i18n.sprintf(i18n.ngettext('This idea has %d sub-idea', 'This idea has %d sub-ideas', subIdeas.length), subIdeas.length);
     }
-  },
+  }
 
-  getAttachmentCollection: function(){
+  getAttachmentCollection(){
     return this.model ? this.model.get('attachments') : null;
-  },
+  }
 
   /**
    * This is not inside the template because babel wouldn't extract it in
    * the pot file
    */
-  getExtractsLabel: function() {
+  getExtractsLabel() {
     var len = 0;
 
     if (this.extractListSubset) {
@@ -266,14 +262,14 @@ var IdeaPanel = BasePanel.extend({
         return i18n.sprintf(i18n.ngettext('%d important nugget was harvested', '%d important nuggets were harvested', len), len);
       }
     }
-  },
+  }
 
-  renderTemplateGetExtractsLabel: function() {
+  renderTemplateGetExtractsLabel() {
     this.$('.js_extractsSummary').html(
         this.getExtractsLabel());
-  },
+  }
 
-  renderAttachmentButton: function(){
+  renderAttachmentButton(){
     var collection = this.getAttachmentCollection();
     if (collection.length > 0 ) {
       this.getRegion('attachmentButton').empty();
@@ -286,9 +282,9 @@ var IdeaPanel = BasePanel.extend({
       });
       this.showChildView('attachmentButton', buttonView);
     }
-  },
+  }
 
-  renderAttachments: function(){
+  renderAttachments(){
     var collection = this.getAttachmentCollection();
     var user = Ctx.getCurrentUser();
     if (user.can(Permissions.EDIT_IDEA)){
@@ -308,9 +304,9 @@ var IdeaPanel = BasePanel.extend({
       });
       this.showChildView('attachment', attachmentView);
     }
-  },
+  }
 
-  serializeData: function() {
+  serializeData() {
     if (Ctx.debugRender) {
       console.log("ideaPanel::serializeData()");
     }
@@ -407,9 +403,9 @@ var IdeaPanel = BasePanel.extend({
       nodeTypeDescription: currentTypeDescriptions[1],
       share_link_url,
     };
-  },
+  }
 
-  onRender: function() {
+  onRender() {
     var that = this;
     var collectionManager = new CollectionManager();
     var currentUser = Ctx.getCurrentUser();
@@ -485,17 +481,17 @@ var IdeaPanel = BasePanel.extend({
     } else {
       this.lastRenderHadModel = false;
     }
-  },
+  }
 
-  onAttach: function() {
+  onAttach() {
     if ( !this.isDestroyed() ) {
       if ( !this.ideaPanelOpensAutomatically ){
         this.panelWrapper.minimizePanel(); // even if there is a this.model
       }
     }
-  },
+  }
 
-  getExtractslist: function() {
+  getExtractslist() {
     var that = this;
     var collectionManager = new CollectionManager();
 
@@ -517,9 +513,9 @@ var IdeaPanel = BasePanel.extend({
     } else {
       this.renderTemplateGetExtractsLabel();
     }
-  },
+  }
 
-  renderContributors: function() {
+  renderContributors() {
     var that = this;
     var collectionManager = new CollectionManager();
 
@@ -568,9 +564,9 @@ var IdeaPanel = BasePanel.extend({
         that.ui.contributorsSection.removeClass('hidden');
       }
     });
-  },
+  }
 
-  renderShortTitle: function() {
+  renderShortTitle() {
     var currentUser = Ctx.getCurrentUser();
     var canEdit = currentUser.can(Permissions.EDIT_IDEA) || false;
     var modelId = this.model.id;
@@ -587,13 +583,13 @@ var IdeaPanel = BasePanel.extend({
       'focus': this.focusShortTitle
     });
     shortTitleField.renderTo(this.$('.ideaPanel-shorttitle'));
-  },
+  }
 
   /**
    * Add a segment
    * @param  {Segment} segment
    */
-  addSegment: function(segment) {
+  addSegment(segment) {
     delete segment.attributes.highlights;
 
     var id = this.model.getId();
@@ -607,13 +603,13 @@ var IdeaPanel = BasePanel.extend({
         console.error('ERROR: addSegment', resp);
       }
     });
-  },
+  }
 
   /**
    * Shows the given segment with an small fx
    * @param {Segment} segment
    */
-  showSegment: function(segment) {
+  showSegment(segment) {
     var that = this;
     var selector = Ctx.format('.box[data-segmentid={0}]', segment.cid);
     var idIdea = segment.get('idIdea');
@@ -643,21 +639,21 @@ var IdeaPanel = BasePanel.extend({
             }
 
         );
-  },
+  }
 
-  onReplaced: function(newObject) {
+  onReplaced(newObject) {
     if (this.model !== null) {
       this.stopListening(this.model, 'replacedBy acquiredId');
     }
 
     this.setIdeaModel(newObject);
-  },
+  }
 
   /**
    * Set the given idea as the current one
    * @param  {Idea|null} idea
    */
-  setIdeaModel: function(idea, reason) {
+  setIdeaModel(idea, reason) {
       var that = this;
       if (reason === "created") {
         this.focusShortTitle = true;
@@ -736,9 +732,9 @@ var IdeaPanel = BasePanel.extend({
           this.render();
         }
       }
-    },
+  }
 
-  fetchModelAndRender: function() {
+  fetchModelAndRender() {
     var that = this;
     var collectionManager = new CollectionManager();
     var fetchPromise = this.model.fetch({ data: $.param({ view: 'contributors'}) });
@@ -762,18 +758,18 @@ var IdeaPanel = BasePanel.extend({
         }
 
     );
-  },
+  }
 
-  onTypeSelectionChange: function(ev) {
+  onTypeSelectionChange(ev) {
     var vals = ev.target.selectedOptions[0].value.split(/;/, 2);
     this.model.set('subtype', vals[1]);
     this.parentLink.set('subtype', vals[0]);
     // trick: how to make the save atomic?
     this.model.save();
     this.parentLink.save();
-  },
+  }
 
-  deleteCurrentIdea: function() {
+  deleteCurrentIdea() {
     // to be deleted, an idea cannot have any children nor segments
     var that = this;
 
@@ -835,11 +831,11 @@ var IdeaPanel = BasePanel.extend({
                 IdeaLoom.rootView.showChildView('slider', confirmModal);
               }
             });
-  },
+  }
 
   // when the user starts dragging one of the extracts listed in the idea
   // no need for any ev.preventDefault() here
-  onDragStart: function(ev) {
+  onDragStart(ev) {
     //console.log("ideaPanel::onDragStart() ev: ", ev);
 
     var that = this;
@@ -865,10 +861,10 @@ var IdeaPanel = BasePanel.extend({
               console.log("promise error: ", error);
             });
     }
-  },
+  }
 
   // "The dragend event is fired when a drag operation is being ended (by releasing a mouse button or hitting the escape key)." quote https://developer.mozilla.org/en-US/docs/Web/Events/dragend
-  onDragEnd: function(ev) {
+  onDragEnd(ev) {
     //console.log("ideaPanel::onDragEnd() ev: ", ev);
 
     this.$el.removeClass('is-dragover');
@@ -877,13 +873,13 @@ var IdeaPanel = BasePanel.extend({
     }
     Ctx.setDraggedAnnotation(null);
     Ctx.setDraggedSegment(null);
-  },
+  }
 
 
   // The dragenter event is fired when the mouse enters a drop target while dragging something
   // We have to define dragenter and dragover event listeners which both call ev.preventDefault() in order to be sure that subsequent drop event will fire => http://stackoverflow.com/questions/21339924/drop-event-not-firing-in-chrome
   // "Calling the preventDefault method during both a dragenter and dragover event will indicate that a drop is allowed at that location." quote https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Drag_operations#droptargets
-  onDragEnter: function(ev) {
+  onDragEnter(ev) {
     //console.log("ideaPanel::onDragEnter() ev: ", ev);
     if (ev) {
       ev.preventDefault();
@@ -896,12 +892,12 @@ var IdeaPanel = BasePanel.extend({
       {
       console.log("segment or annotation is null");
       }
-  },
+  }
 
   // The dragover event is fired when an element or text selection is being dragged over a valid drop target (every few hundred milliseconds).
   // We have to define dragenter and dragover event listeners which both call ev.preventDefault() in order to be sure that subsequent drop event will fire => http://stackoverflow.com/questions/21339924/drop-event-not-firing-in-chrome
   // "Calling the preventDefault method during both a dragenter and dragover event will indicate that a drop is allowed at that location." quote https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Drag_operations#droptargets
-  onDragOver: function(ev) {
+  onDragOver(ev) {
     //console.log("ideaPanel::onDragOver() ev: ", ev);
     if (Ctx.debugAnnotator) {
       console.log("ideaPanel:onDragOver() fired", Ctx.getDraggedSegment(), Ctx.getDraggedAnnotation());
@@ -935,17 +931,17 @@ var IdeaPanel = BasePanel.extend({
         this.$el.addClass("is-dragover");
       }
     }
-  },
+  }
 
   // "Finally, the dragleave event will fire at an element when the drag leaves the element. This is the time when you should remove any insertion markers or highlighting. You do not need to cancel this event. [...] The dragleave event will always fire, even if the drag is cancelled, so you can always ensure that any insertion point cleanup can be done during this event." quote https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Drag_operations
-  onDragLeave: function(ev) {
+  onDragLeave(ev) {
     //console.log("ideaPanel::onDragLeave() ev: ", ev);
     ev.stopPropagation();
     ev.preventDefault();
     if(ev.currentTarget == ev.target) {
     this.$el.removeClass('is-dragover');
     }
-  },
+  }
 
   // /!\ The browser will not fire the drop event if, at the end of the last call of the dragenter or dragover event listener (right before the user releases the mouse button), one of these conditions is met:
   // * one of ev.dataTransfer.dropEffect or ev.dataTransfer.effectAllowed is "none"
@@ -953,7 +949,7 @@ var IdeaPanel = BasePanel.extend({
   // "If you don't change the effectAllowed property, then any operation is allowed, just like with the 'all' value. So you don't need to adjust this property unless you want to exclude specific types." quote https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Drag_operations
   // "During a drag operation, a listener for the dragenter or dragover events can check the effectAllowed property to see which operations are permitted. A related property, dropEffect, should be set within one of these events to specify which single operation should be performed. Valid values for the dropEffect are none, copy, move, or link." quote https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer
   // ev.preventDefault() is also needed here in order to prevent default action (open as link for some elements)
-  onDrop: function(ev) {
+  onDrop(ev) {
     //console.log("ideaPanel::onDrop() ev: ", ev);
     if (Ctx.debugAnnotator) {
       console.log("ideaPanel:onDrop() fired");
@@ -988,9 +984,9 @@ var IdeaPanel = BasePanel.extend({
     }
     this.extractListView.render();
     return;
-  },
+  }
 
-  onSegmentCloseButtonClick: function(ev) {
+  onSegmentCloseButtonClick(ev) {
     var cid = ev.currentTarget.getAttribute('data-segmentid');
     var collectionManager = new CollectionManager();
     collectionManager.getAllExtractsCollectionPromise().done(
@@ -1001,9 +997,9 @@ var IdeaPanel = BasePanel.extend({
                 segment.save('idIdea', null);
               }
             });
-  },
+  }
 
-  onClearAllClick: function(ev) {
+  onClearAllClick(ev) {
     var ok = confirm(i18n.gettext('Confirm that you want to send all extracts back to the clipboard.'));
     if (ok) {
       // Clone first, because the operation removes extracts from the subset.
@@ -1015,13 +1011,13 @@ var IdeaPanel = BasePanel.extend({
         extract.save();
       });
     }
-  },
+  }
 
-  onDeleteButtonClick: function() {
+  onDeleteButtonClick() {
     this.deleteCurrentIdea();
-  },
+  }
 
-  renderAnnouncement:  function() {
+  renderAnnouncement() {
     var that = this;
     var collectionManager = new CollectionManager();
 
@@ -1060,9 +1056,9 @@ var IdeaPanel = BasePanel.extend({
             that.showChildView('announcementRegion', editableAnnouncementView);
           });
     }
-  },
+  }
 
-  renderCKEditorDescription: function() {
+  renderCKEditorDescription() {
     var that = this;
 
     var model = this.model.getDefinitionDisplayText(this.translationData);
@@ -1081,9 +1077,9 @@ var IdeaPanel = BasePanel.extend({
     });
 
     this.showChildView('regionDescription', description);
-  },
+  }
 
-  renderCKEditorLongTitle: function() {
+  renderCKEditorLongTitle() {
     var that = this;
 
     var model = this.model.getLongTitleDisplayText(this.translationData);
@@ -1099,13 +1095,13 @@ var IdeaPanel = BasePanel.extend({
     });
 
     this.showChildView('regionLongTitle', ckeditor);
-  },
+  }
 
-  openTargetInPopOver: function(evt) {
+  openTargetInPopOver(evt) {
     console.log("ideaPanel openTargetInPopOver(evt: ", evt);
     return Ctx.openTargetInPopOver(evt);
-  },
-  pubStateTransition: function(evt) {
+  }
+  pubStateTransition(evt) {
     const transition = evt.target.attributes.data.value;
     const url = this.model.getApiV2Url() + "/do_transition";
     const that = this;
@@ -1124,8 +1120,7 @@ var IdeaPanel = BasePanel.extend({
         // TODO: show error in the UI
       }
     });
-  },
-
-});
+  }
+}
 
 export default IdeaPanel;
