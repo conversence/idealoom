@@ -12,7 +12,7 @@ import simplejson as json
 
 from assembl.views.api import API_DISCUSSION_PREFIX
 from assembl.auth import (
-    P_READ, P_ADD_EXTRACT, P_EDIT_EXTRACT)
+    P_READ, P_ADD_EXTRACT, P_EDIT_EXTRACT, P_ASSOCIATE_EXTRACT)
 from assembl.auth.util import get_permissions
 from assembl.models import (
     AgentProfile, Extract, TextFragmentIdentifier,
@@ -168,6 +168,8 @@ def post_extract(request):
         if(idea.discussion.id != discussion.id):
             raise HTTPBadRequest(
                 "Extract from discussion %s cannot be associated with an idea from a different discussion." % extract.get_discussion_id())
+        if not idea.has_permission_req(P_ASSOCIATE_EXTRACT):
+            raise HTTPForbidden("Cannot associate extact with this idea")
     else:
         idea = None
 
@@ -234,6 +236,8 @@ def put_extract(request):
         if(idea.discussion != extract.discussion):
             raise HTTPBadRequest(
                 "Extract from discussion %s cannot be associated with an idea from a different discussion." % extract.get_discussion_id())
+        if not idea.has_permission_req(P_ASSOCIATE_EXTRACT):
+            raise HTTPForbidden("Cannot associate extact with this idea")
         extract.idea = idea
     else:
         extract.idea = None
