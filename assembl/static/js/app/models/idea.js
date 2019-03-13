@@ -343,16 +343,18 @@ var IdeaModel = Base.Model.extend({
     } else if (preferences && preferences.idea_typology.ideas) {
       var preferences = Ctx.getPreferences();
       var parent =  this.collection.findWhere({ '@id': parentLink.get('source') });
-      var parentSubtype = parent.get('subtype');
-      var typologyParentInfo = preferences.idea_typology.ideas[parentSubtype];
-      if (typologyParentInfo && typologyParentInfo.rules) {
-        var result = [];
-        _.mapObject(typologyParentInfo.rules, function(objectTypes, linkType) {
-          _.map(objectTypes, function(objectType) {
-            result.push(linkType + ';' + objectType);
+      if (parent) {
+        var parentSubtype = parent.get('subtype');
+        var typologyParentInfo = preferences.idea_typology.ideas[parentSubtype];
+        if (typologyParentInfo && typologyParentInfo.rules) {
+          var result = [];
+          _.mapObject(typologyParentInfo.rules, function(objectTypes, linkType) {
+            _.map(objectTypes, function(objectType) {
+              result.push(linkType + ';' + objectType);
+            });
           });
-        });
-        return result;
+          return result;
+        }
       }
     }
     return ['InclusionRelation;GenericIdeaNode'];

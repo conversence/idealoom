@@ -50,7 +50,7 @@ from ..view_def import get_view_def
 from .zmqlib import get_pub_socket, send_changes
 from ..semantic.namespaces import QUADNAMES
 from ..auth import (
-    Everyone, Authenticated, CrudPermissions, IF_OWNED, P_READ, R_OWNER)
+    Everyone, Authenticated, CrudPermissions, IF_OWNED, P_READ, R_OWNER, P_SYSADMIN)
 from .decl_enums import EnumSymbol, DeclEnumType
 from .utils import get_global_base_url
 from ..lib.config import get_config
@@ -2041,8 +2041,9 @@ class BaseOps(object):
         pubflow_id = cls.pubflowid_from_discussion(discussion)
         # TODO: Add ownership!
 
-        query = query or db.query(clsAlias).filter(clsAlias.discussion_id==discussion.id)
-        if permission in (base_permissions or ()): # 1 shortcut
+        query = query or db.query(clsAlias)
+        base_permissions = base_permissions or ()
+        if permission in base_permissions or P_SYSADMIN in base_permissions: # 1 shortcut
             return query
         roles_with_d_permission_q = db.query(Role.id).join(
             DiscussionPermission).join(Permission).filter(
@@ -2219,8 +2220,12 @@ class BaseOps(object):
             query = query.union(*queries)
         return [x for (x,) in query.distinct()]
 
-    def local_permissions_req(self, request, include_global=False):
+    def local_permissions_req(self, request=None, include_global=False):
+        # TODO: Cache in request
         from ..models import Discussion
+        from pyramid.threadlocal import get_current_request
+        request = request or get_current_request()
+        assert request
         discussion_id = request.discussion_id
         if not discussion_id:
             return []
@@ -2228,6 +2233,16 @@ class BaseOps(object):
         if not discussion:
             return []
         return self.local_permissions(discussion, request.authenticated_userid, include_global)
+
+    def has_permission_req(self, permission, request=None):
+        from pyramid.threadlocal import get_current_request
+        request = request or get_current_request()
+        assert request
+        if permission in request.base_permissions:
+            return True
+        if P_SYSADMIN in request.base_permissions:
+            return True
+        return permission in self.local_permissions_req(request)
 
     """The permissions to create, read, update, delete an object of this class.
     Also separate permissions for the owners to update or delete."""
@@ -2250,6 +2265,8 @@ class BaseOps(object):
         perm, owner_perm = self.crud_permissions.crud_permissions(operation)
         if perm in permissions:
             return perm
+        if P_SYSADMIN in permissions:
+            return True
         is_owner = self.is_owner(user_id)
         if is_owner and owner_perm in permissions:
             return owner_perm
@@ -2260,7 +2277,10 @@ class BaseOps(object):
             return owner_perm
         return False
 
-    def user_can_req(self, operation, request):
+    def user_can_req(self, operation, request=None):
+        from pyramid.threadlocal import get_current_request
+        request = request or get_current_request()
+        assert request
         return self.user_can(request.authenticated_userid, operation, request.base_permissions)
 
 

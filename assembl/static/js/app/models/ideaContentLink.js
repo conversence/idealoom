@@ -3,12 +3,13 @@
  * @module app.models.ideaContentLink
  */
 import Marionette from 'backbone.marionette';
-
 import Backbone from 'backbone';
 import _ from 'underscore';
 import $ from 'jquery';
 import Promise from 'bluebird';
 import Moment from 'moment';
+
+import i18n from '../utils/i18n.js';
 import Types from '../utils/types.js';
 import Base from './base.js';
 import Ctx from '../common/context.js';
@@ -249,8 +250,7 @@ var Collection = Base.Collection.extend({
                     var idIdea = ideaContentLink.get('idIdea');
                     var ideaModel = ideas.get(idIdea);
                     if (!ideaModel){
-                        throw new Error("Idea " + idIdea + " on " + ideaContentLink.id + 
-                                        " is NOT part of the ideas collection!");
+                      return i18n.gettext("(hidden idea)");
                     }
                     return ideaModel.getShortTitleDisplayText(userPrefs);
                 });

@@ -1,6 +1,7 @@
 """Cornice API for ideas"""
 from collections import defaultdict
 from datetime import datetime
+from functools import partial
 
 import simplejson as json
 from cornice import Service
@@ -11,11 +12,14 @@ from sqlalchemy import and_
 from sqlalchemy.orm import (joinedload, subqueryload, undefer)
 
 from assembl.lib.parsedatetime import parse_datetime
-from assembl.views.api import API_DISCUSSION_PREFIX
 from assembl.models import (
     Idea, RootIdea, IdeaLink, Discussion,
     Extract, SubGraphIdeaAssociation, LangString)
-from assembl.auth import (CrudPermissions, P_READ, P_ADD_IDEA, P_EDIT_IDEA, P_READ_IDEA)
+from assembl.auth import (
+    CrudPermissions, P_READ, P_ADD_IDEA, P_EDIT_IDEA, P_READ_IDEA)
+from . import (
+    API_DISCUSSION_PREFIX, instance_check_op, instance_check_permission,
+    instance_check_permission_id)
 
 
 ideas = Service(name='ideas', path=API_DISCUSSION_PREFIX + '/ideas',
@@ -38,14 +42,37 @@ langstring_fields = {
 }
 
 
+def idea_check_permission(request, permission=P_READ_IDEA, **kwargs):
+    return instance_check_permission(request, permission, Idea)
+
+
+def idea_check_op(request, op=CrudPermissions.READ, **kwargs):
+    return instance_check_op(request, op, Idea)
+
+
+def check_add_on_parent(request, **kwargs):
+    idea_data = request.json_body or {}
+    parent_id = idea_data.get('parentId', None)
+    if parent_id:
+        return instance_check_permission_id(
+            request, P_ADD_IDEA, Idea, parent_id)
+    elif P_ADD_IDEA in request.base_permissions:
+        return True
+    else:
+        request.errors.add("querystring", 'permissions', "Cannot add idea")
+        request.errors.status = 403
+        return False
+    return True
+
+
 # Create
-@ideas.post(permission=P_ADD_IDEA)
+@ideas.post(validators=check_add_on_parent)
 def create_idea(request):
     discussion = request.context
     session = discussion.db
     user_id = authenticated_userid(request)
     permissions = request.permissions
-    idea_data = json.loads(request.body)
+    idea_data = request.json_body
     now = datetime.utcnow()
 
     kwargs = {
@@ -81,12 +108,10 @@ def create_idea(request):
     return {'ok': True, '@id': new_idea.uri()}
 
 
-@idea.get(permission=P_READ)
+@idea.get(validators=idea_check_op)
 def get_idea(request):
     idea_id = request.matchdict['id']
     idea = Idea.get_instance(idea_id)
-    if not idea.user_can_req(CrudPermissions.READ, request):
-        raise HTTPUnauthorized()
     view_def = request.GET.get('view')
     discussion = request.context
     user_id = authenticated_userid(request) or Everyone
@@ -188,7 +213,7 @@ def get_ideas(request):
         modified_after=modified_after)
 
 
-@idea.put(permission=P_EDIT_IDEA)
+@idea.put(validators=partial(idea_check_op, op=CrudPermissions.UPDATE))
 def save_idea(request):
     """Update this idea.
 
@@ -205,6 +230,7 @@ def save_idea(request):
         return {'ok': False, 'id': Idea.uri_generic(idea_id)}
 
     idea = Idea.get_instance(idea_id)
+    db = idea.db
     if not idea:
         raise HTTPNotFound("No such idea: %s" % (idea_id))
     if isinstance(idea, RootIdea):
@@ -233,37 +259,53 @@ def save_idea(request):
 
     if 'parentId' in idea_data and idea_data['parentId'] is not None:
         # TODO: Make sure this is sent as a list!
-        parent = Idea.get_instance(idea_data['parentId'])
-        # calculate it early to maximize contention.
-        prev_ancestors = parent.get_all_ancestors()
+        # Actually, use embedded links to do this properly...
+        new_parent_ids = set((idea_data['parentId'],))
+        old_parent_ids = {Idea.uri_generic(l.source_id) for l in idea.source_links}
+        added_parent_ids = new_parent_ids - old_parent_ids
+        removed_parent_ids = old_parent_ids - new_parent_ids
+        added_parents = [Idea.get_instance(id) for id in added_parent_ids]
+        current_parents = idea.get_parents()
+        removed_parents = [p for p in current_parents 
+            if p.uri() in removed_parent_ids]
+        if None in added_parents:
+            missing = [id for id in added_parent_ids if not Idea.get_instance(id)]
+            raise HTTPNotFound("Missing parentId %s" % (','.join(missing)))
+        for parent in added_parents + removed_parents:
+            if not parent.has_permission_req(P_EDIT_IDEA):
+                # TODO: Introduce Idea.A.Idea as a separate permission?
+                raise HTTPUnauthorized("Cannot edit parent idea "+idea.uri())
+        old_ancestors = set()
         new_ancestors = set()
-
+        for parent in current_parents:
+            old_ancestors.add(parent)
+            old_ancestors.update(parent.get_all_ancestors())
+        kill_links = {l for l in idea.source_links
+            if Idea.uri_generic(l.source_id) in removed_parent_ids}
         order = idea_data.get('order', 0.0)
-        if not parent:
-            raise HTTPNotFound("Missing parentId %s" % (idea_data['parentId']))
-
-        for parent_link in idea.source_links:
-            # still assuming there's only one.
-            pl_parent = parent_link.source
-            pl_ancestors = pl_parent.get_all_ancestors()
-            new_ancestors.update(pl_ancestors)
-            if parent_link.source != parent:
-                parent_link.copy(True)
-                parent_link.source = parent
-                parent.db.expire(parent, ['target_links'])
-                parent.db.expire(pl_parent, ['target_links'])
-                for ancestor in pl_ancestors:
-                    if ancestor in prev_ancestors:
-                        break
-                    ancestor.send_to_changes()
-                for ancestor in prev_ancestors:
-                    if ancestor in new_ancestors:
-                        break
-                    ancestor.send_to_changes()
-            parent_link.order = order
-            parent_link.db.expire(parent_link.source, ['target_links'])
-            parent_link.source.send_to_changes()
-            parent_link.db.flush()
+        for parent in added_parents:
+            if kill_links:
+                link = kill_links.pop()
+                db.expire(link.source, ['target_links'])
+                link.copy(True)
+                link.order = order
+                link.source = parent
+            else:
+                link = IdeaLink(source=source, target=idea, order=order)
+                db.add(link)
+            db.expire(parent, ['target_links'])
+            order += 1.0
+        for link in kill_links:
+            db.expire(link.source, ['target_links'])
+            kill_links.is_tombstone = True
+        db.expire(idea, ['source_links'])
+        db.flush()
+        for parent in idea.get_parents():
+            new_ancestors.add(parent)
+            new_ancestors.update(parent.get_all_ancestors())
+        print("resending: "+",".join([str(x.id) for x in new_ancestors ^ old_ancestors]))
+        for ancestor in new_ancestors ^ old_ancestors:
+            ancestor.send_to_changes()
 
     if 'subtype' in idea_data:
         idea.rdf_type = idea_data['subtype']
@@ -272,7 +314,7 @@ def save_idea(request):
     return {'ok': True, 'id': idea.uri()}
 
 
-@idea.delete(permission=P_EDIT_IDEA)
+@idea.delete(validators=partial(idea_check_op, op=CrudPermissions.DELETE))
 def delete_idea(request):
     idea_id = request.matchdict['id']
     idea = Idea.get_instance(idea_id)
@@ -295,7 +337,7 @@ def delete_idea(request):
     return HTTPNoContent()
 
 
-@idea_extracts.get(permission=P_READ)
+@idea_extracts.get(validators=idea_check_op)
 def get_idea_extracts(request):
     discussion = request.context
     idea_id = request.matchdict['id']
