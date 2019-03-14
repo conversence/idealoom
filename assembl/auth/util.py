@@ -7,6 +7,7 @@ from itertools import groupby
 from collections import defaultdict
 
 from future.utils import string_types
+from sqlalchemy import inspect
 from sqlalchemy.sql.expression import and_
 from pyramid.security import (Everyone, Authenticated, forget)
 from pyramid.httpexceptions import HTTPNotFound
@@ -30,9 +31,16 @@ _ = TranslationStringFactory('assembl')
 
 
 def get_user(request):
-    logged_in = request.unauthenticated_userid
-    if logged_in:
-        return User.get(logged_in)
+    user = getattr(request, '_user', 0)
+    if user and not inspect(user).persistent:
+        user = 0
+    if user is 0:
+        logged_in = request.unauthenticated_userid
+        if logged_in:
+            request._user = User.get(logged_in)
+        else:
+            request._user = None
+    return request._user
 
 
 def get_role_query(user_id, discussion_id, target_instance=None):
