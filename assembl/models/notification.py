@@ -358,15 +358,7 @@ class NotificationSubscription(DiscussionBoundBase, OriginMixin):
             if alias_maker:
                 alias = alias_maker.alias_from_class(cls)
             else:
-                for aipaths in query._joinpath.keys():
-                    for ainsp in aipaths:
-                        if getattr(ainsp, '_target', None) == cls:
-                            alias = ainsp.entity
-                            break
-                    if alias:
-                        break
-                if not alias:
-                    alias = cls
+                alias = cls
         # optimize the join on a single table
         utt = inspect(UserTemplate).tables[0]
         query = query.outerjoin(utt, alias.user_id == utt.c.id)

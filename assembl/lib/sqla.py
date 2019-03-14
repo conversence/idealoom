@@ -1998,9 +1998,9 @@ class BaseOps(object):
         return False
 
     @classmethod
-    def restrict_to_owners(cls, query, user_id):
+    def restrict_to_owners(cls, query, user_id, alias=None):
         """filter query according to object owners"""
-        (query, condition) = cls.restrict_to_owners_condition(query, user_id)
+        (query, condition) = cls.restrict_to_owners_condition(query, user_id, alias)
         if condition is not None:
             query = query.filter(condition)
         return query

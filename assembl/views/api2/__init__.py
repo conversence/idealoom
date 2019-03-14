@@ -103,7 +103,7 @@ def class_view(request):
     if check == IF_OWNED:
         if user_id == Everyone:
             raise HTTPUnauthorized()
-        q = ctx.get_target_class().restrict_to_owners(q, user_id)
+        q = ctx.get_target_class().restrict_to_owners(q, user_id, ctx.get_target_alias())
     if view == 'id_only':
         return [ctx._class.uri_generic(x) for (x,) in q.all()]
     else:
@@ -176,7 +176,7 @@ def collection_view(request, default_view='default'):
     if check == IF_OWNED:
         if user_id == Everyone:
             raise HTTPUnauthorized()
-        q = ctx.get_target_class().restrict_to_owners(q, user_id)
+        q = ctx.get_target_class().restrict_to_owners(q, user_id, ctx.get_target_alias())
     if view == 'id_only':
         return [ctx.collection_class.uri_generic(x) for (x,) in q.all()]
     else:
