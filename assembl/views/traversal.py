@@ -369,6 +369,8 @@ class ClassContext(TraversalContext):
         # TODO: Distinguish tombstone condition from other base_conditions
         if issubclass(cls, TombstonableMixin) and not tombstones:
             query = query.filter(and_(*cls.base_conditions(alias)))
+        query = cls.query_filter_with_crud_op_req(
+            self.get_request(), query=query, clsAlias=alias)
         return query
 
     def get_class(self, typename=None):
@@ -645,6 +647,8 @@ class CollectionContext(TraversalContext):
             query, self.__parent__.get_target_alias(),
             self.get_target_alias(), self.parent_instance, ctx)
         cls = self.collection_class
+        query = cls.query_filter_with_crud_op_req(
+            self.get_request(), query=query, clsAlias=self.class_alias)
         if issubclass(cls, TombstonableMixin) and not tombstones:
             query = query.filter(cls.tombstone_condition(self.class_alias))
         return super(CollectionContext, self).decorate_query(

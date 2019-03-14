@@ -54,7 +54,7 @@ from assembl.lib.sqla import ObjectNotUniqueError
 from ..traversal import (
     InstanceContext, CollectionContext, ClassContext, Api2Context)
 from assembl.auth import (
-    P_READ, P_SYSADMIN, IF_OWNED, CrudPermissions)
+    P_READ, P_SYSADMIN, CrudPermissions)
 from assembl.semantic.virtuoso_mapping import get_virtuoso
 from assembl.models import (
     User, Discussion, TombstonableMixin)
@@ -75,7 +75,7 @@ def check_permissions(
     cls = cls or ctx.get_target_class()
     permissions = ctx.get_permissions()
     allowed = cls.user_can_cls(user_id, operation, permissions)
-    if not allowed or (allowed == IF_OWNED and user_id == Everyone):
+    if not allowed:
         raise HTTPUnauthorized()
     return allowed
 
@@ -100,10 +100,6 @@ def class_view(request):
     view = request.GET.get('view', None) or ctx.get_default_view() or 'id_only'
     tombstones = asbool(request.GET.get('tombstones', False))
     q = ctx.create_query(view == 'id_only', tombstones)
-    if check == IF_OWNED:
-        if user_id == Everyone:
-            raise HTTPUnauthorized()
-        q = ctx.get_target_class().restrict_to_owners(q, user_id, ctx.get_target_alias())
     if view == 'id_only':
         return [ctx._class.uri_generic(x) for (x,) in q.all()]
     else:
@@ -173,10 +169,6 @@ def collection_view(request, default_view='default'):
     view = request.GET.get('view', None) or ctx.get_default_view() or default_view
     tombstones = asbool(request.GET.get('tombstones', False))
     q = ctx.create_query(view == 'id_only', tombstones)
-    if check == IF_OWNED:
-        if user_id == Everyone:
-            raise HTTPUnauthorized()
-        q = ctx.get_target_class().restrict_to_owners(q, user_id, ctx.get_target_alias())
     if view == 'id_only':
         return [ctx.collection_class.uri_generic(x) for (x,) in q.all()]
     else:

@@ -22,7 +22,7 @@ from . import (
              Widget, (VotingWidget,)),
              permission=P_READ, accept="application/json")
 def widget_view(request):
-    # IF_OWNED not applicable for widgets... so far
+    # owrenship not applicable for widgets... so far
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
     permissions = ctx.get_permissions()
@@ -51,7 +51,7 @@ def widget_view(request):
 @view_config(context=InstanceContext, request_method='PUT', header=FORM_HEADER,
              ctx_instance_class=Widget, accept="application/json")
 def widget_instance_put(request):
-    # IF_OWNED not applicable for widgets... so far
+    # ownership not applicable for widgets... so far
     ctx = request.context
     user_id = authenticated_userid(request)
     if not user_id:

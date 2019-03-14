@@ -44,7 +44,7 @@ P_DISC_STATS = 'Conversation.U.stats'
 P_OVERRIDE_SOCIAL_AUTOLOGIN = 'Conversation.A.User.override_autologin'
 P_ASSOCIATE_EXTRACT = 'Idea.A.Extract'
 
-IF_OWNED = "IF_OWNED"
+MAYBE = "MAYBE"
 
 ASSEMBL_PERMISSIONS = set((
     P_READ, P_ADD_POST, P_EDIT_POST, P_DELETE_POST, P_VOTE, P_ADD_EXTRACT,
@@ -65,7 +65,7 @@ class CrudPermissions(object):
     Special permissions can be defined if you *own* this
     instance, according to :py:meth:`assembl.lib.sqla.BaseOps.is_owned`"""
     __slots__ = ('create', 'read', 'update', 'delete',
-                 'read_owned', 'update_owned', 'delete_owned')
+                 'read_owned', 'update_owned', 'delete_owned', 'variable')
 
     CREATE = 1
     READ = 2
@@ -73,7 +73,8 @@ class CrudPermissions(object):
     DELETE = 4
 
     def __init__(self, create=None, read=None, update=None, delete=None,
-                 update_owned=None, delete_owned=None, read_owned=None):
+                 update_owned=None, delete_owned=None, read_owned=None,
+                 variable=False):
         self.create = create or P_SYSADMIN
         self.read = read or P_READ
         self.update = update or create or P_SYSADMIN
@@ -81,6 +82,7 @@ class CrudPermissions(object):
         self.read_owned = read_owned or self.read
         self.update_owned = update_owned or self.update
         self.delete_owned = delete_owned or self.delete
+        self.variable = variable
 
     def can(self, operation, permissions):
         if P_SYSADMIN in permissions:
@@ -89,8 +91,8 @@ class CrudPermissions(object):
         if needed in permissions:
             return True
         elif needed_owned in permissions:
-            return IF_OWNED
-        return False
+            return MAYBE
+        return self.variable
 
     def crud_permissions(self, operation):
         if operation == self.CREATE:

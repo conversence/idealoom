@@ -5,7 +5,7 @@ from pyramid.httpexceptions import (HTTPNotFound, HTTPBadRequest)
 from pyramid.response import Response
 
 from assembl.auth import (
-    P_READ, IF_OWNED, Everyone, CrudPermissions)
+    P_READ, Everyone, CrudPermissions)
 from assembl.models.user_key_values import *
 from . import JSON_HEADER
 from ..traversal import (

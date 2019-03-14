@@ -50,7 +50,7 @@ from ..view_def import get_view_def
 from .zmqlib import get_pub_socket, send_changes
 from ..semantic.namespaces import QUADNAMES
 from ..auth import (
-    Everyone, Authenticated, CrudPermissions, IF_OWNED, P_READ, R_OWNER, P_SYSADMIN)
+    Everyone, Authenticated, CrudPermissions, MAYBE, P_READ, R_OWNER, P_SYSADMIN)
 from .decl_enums import EnumSymbol, DeclEnumType
 from .utils import get_global_base_url
 from ..lib.config import get_config
@@ -2033,6 +2033,9 @@ class BaseOps(object):
         # 4. ownership + State + StateDiscussionPermission
         # 5. LocalUserRole + DiscussionPermission (factorable)
         # 6. LocalUserRole + State + StateDiscussionPermission
+        if not discussion:
+            # TODO
+            return query
         db = discussion.db
         assert permission, "Please specify a permission"
         clsAlias = clsAlias or cls
@@ -2254,7 +2257,7 @@ class BaseOps(object):
         can perform the given Crud operation on instances of this class."""
         perm = cls.crud_permissions.can(operation, permissions)
         user_id = user_id or Everyone
-        if perm == IF_OWNED and user_id == Everyone:
+        if perm == MAYBE and user_id == Everyone:
             return False
         return perm
 

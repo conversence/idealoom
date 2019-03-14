@@ -538,7 +538,7 @@ class AbstractAgentAccount(Base):
     def user_can_cls(cls, user_id, operation, permissions):
         s = super(AbstractAgentAccount, cls).user_can_cls(
             user_id, operation, permissions)
-        return IF_OWNED if s is False else s
+        return MAYBE if s is False else s
 
     def user_can(self, user_id, operation, permissions):
         # bypass for permission-less new users

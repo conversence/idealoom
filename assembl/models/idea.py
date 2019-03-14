@@ -10,7 +10,6 @@ from datetime import datetime
 import threading
 
 from future.utils import as_native_str
-from ..lib.clean_input import sanitize_text
 from rdflib import URIRef
 from sqlalchemy.orm import (
     relationship, backref, aliased, contains_eager, joinedload, deferred,
@@ -39,6 +38,7 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from sqla_rdfbridge.mapping import IriClass, PatternIriClass
 from pyramid.i18n import TranslationStringFactory
 
+from ..lib.clean_input import sanitize_text
 from ..lib.utils import get_global_base_url
 from ..nlp.wordcounter import WordCounter
 from . import (
@@ -48,7 +48,7 @@ from .uriref import URIRefDb
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..auth import (
     CrudPermissions, P_READ, P_ADMIN_DISC, P_EDIT_IDEA,
-    P_ADD_IDEA, P_READ_IDEA, R_OWNER)
+    P_ADD_IDEA, P_READ_IDEA, R_OWNER, MAYBE)
 from .permissions import (
     AbstractLocalUserRole, Role, Permission)
 from .langstrings import LangString, LangStringEntry
@@ -1285,7 +1285,7 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
                 for l in self.active_showing_widget_links]
 
     crud_permissions = CrudPermissions(
-        P_ADD_IDEA, P_READ_IDEA, P_EDIT_IDEA, P_ADMIN_DISC)
+        P_ADD_IDEA, P_READ_IDEA, P_EDIT_IDEA, P_ADMIN_DISC, variable=MAYBE)
 
 LangString.setup_ownership_load_event(Idea,
     ['title', 'description', 'synthesis_title'])
