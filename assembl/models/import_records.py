@@ -152,7 +152,6 @@ class IdeaSource(ContentSource, PromiseObjectImporter):
         self.load_previous_records()
 
     def read_data_gen(self, data_gen, admin_user_id):
-        instance_by_id = {}
         # preload
         waiting_for = defaultdict(list)
         #
@@ -168,12 +167,14 @@ class IdeaSource(ContentSource, PromiseObjectImporter):
                 continue
             cls = self.class_from_data(data)
             if not cls:
-                instance_by_id[ext_id] = None
+                self[ext_id] = None
                 continue
             if self.parsed_data_filter and not self.parsed_data_filter.find(data):
-                instance_by_id[ext_id] = None
+                self[ext_id] = None
                 continue
             pdata = self.process_data(data)
+            if not pdata:
+                continue
             # Don't we need a CollectionCtx?
             instance_ctx = cls.create_from_json(
                 pdata, ctx, object_importer=self, parse_def_name='import')
@@ -284,6 +285,12 @@ class IdeaLoomIdeaSource(IdeaSource):
 
     def base_source_uri(self):
         return urljoin(self.source_uri, '/data/')
+
+    def process_data(self, data):
+        if data['@type'] == 'RootIdea':
+            self[data['@id']] = self.discussion.root_idea
+            return None
+        return data
 
     def normalize_id(self, id):
         id = self.id_from_data(id)
