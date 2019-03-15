@@ -81,7 +81,9 @@ module.exports = {
   }),
   output: {
     path: path.join(__dirname, 'js/build'),
-    filename: '[name].[hash].js',
+    filename: (chunkData) => {
+      return chunkData.chunk.name === 'annotator_ext' ? '[name].js': '[name].[hash].js';
+    },
     sourceMapFilename: "[name].[hash].js.map",
     publicPath: '/js/build/',
   },
@@ -217,16 +219,20 @@ module.exports = {
     //   }
     // }),
     new UglifyJSPlugin({ sourceMap: true }),
-    new MiniCssExtractPlugin({ filename: "[name].[hash].css" }),
+    // temporary: No caching because it breaks annotator_ext. Wait for
+    // https://github.com/webpack-contrib/mini-css-extract-plugin/pull/225
+    new MiniCssExtractPlugin({
+      filename: '[name].css'
+    }),
     new HtmlWebpackPlugin({
       alwaysWriteToDisk: true,
       filename: 'index.html',
-      excludeChunks: ['tests'],
+      excludeChunks: ['tests', 'annotator_ext'],
     }),
     new HtmlWebpackPlugin({
       alwaysWriteToDisk: true,
       filename: 'test.html',
-      excludeChunks: ['main'],
+      excludeChunks: ['main', 'annotator_ext'],
     }),
     new HtmlWebpackHarddiskPlugin(),
   ],

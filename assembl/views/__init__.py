@@ -187,11 +187,12 @@ def get_res_file(testing):
 def get_js_links(static_url, testing=False):
     res_file = get_res_file(testing)
     links = res_file.xpath("//script/@src")
-    # some webpack config issues still
+    # excludeChunks fails in webpack server?
     if testing:
         links = [l for l in links if 'main' not in l]
     else:
         links = [l for l in links if 'test' not in l.lower()]
+    links = [l for l in links if 'notification' not in l and 'annotator_ext' not in l]
     if not asbool(config.get('use_webpack_server')):
         links = [static_url + l for l in links]
     links = ['<script type="text/javascript" src="%s"></script>' % l for l in links]
@@ -201,6 +202,7 @@ def get_js_links(static_url, testing=False):
 def get_css_links(static_url, testing=False):
     res_file = get_res_file(testing)
     links = res_file.xpath("//head/link[@rel='stylesheet']/@href")
+    links = [l for l in links if 'notification' not in l and 'annotator_ext' not in l]
     if not asbool(config.get('use_webpack_server')):
         links = [static_url + l for l in links]
     links = ['<link type="text/css" rel="stylesheet" href="%s"></link>' % l for l in links]
