@@ -48,7 +48,7 @@ from .uriref import URIRefDb
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..auth import (
     CrudPermissions, P_READ, P_ADMIN_DISC, P_EDIT_IDEA,
-    P_ADD_IDEA, P_READ_IDEA, R_OWNER, MAYBE)
+    P_ADD_IDEA, P_ASSOCIATE_IDEA, P_READ_IDEA, R_OWNER, MAYBE)
 from .permissions import (
     AbstractLocalUserRole, Role, Permission)
 from .langstrings import LangString, LangStringEntry
@@ -1542,7 +1542,7 @@ class IdeaLink(HistoryMixinWithOrigin, DiscussionBoundBase):
                 (source_idea.discussion_id == discussion_id))
 
     crud_permissions = CrudPermissions(
-        P_ADD_IDEA, P_READ, P_EDIT_IDEA, P_EDIT_IDEA)
+        P_ADD_IDEA, P_READ, P_ASSOCIATE_IDEA, P_ASSOCIATE_IDEA)
 
     # discussion = relationship(
     #     Discussion, viewonly=True, uselist=False, backref="idea_links",

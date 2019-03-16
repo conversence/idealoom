@@ -138,7 +138,6 @@ var IdeaInIdeaListView = Marionette.View.extend({
     var data = this.model.toJSON();
     var model_type = this.model.get('@type');
     _.extend(data, render_data);
-
     data.shortTitle = this.model.getShortTitleDisplayText(this.translationData);
     if (data.longTitle) {
       data.longTitle = ' - ' + data.longTitle.bestValue(this.translationData).substr(0, 50);
@@ -151,9 +150,6 @@ var IdeaInIdeaListView = Marionette.View.extend({
       var render_data = visitorData[this.model.getId()];
       if (this.synthesis != undefined) {
         data.inNextSynthesis = this.synthesis.getIdeasCollection().get(this.model.id) !== undefined;
-      } else {
-        // will get re-rendered
-        data.inNextSynthesis = false;
       }
       data.linkType = render_data.last_link.get('subtype');
       _.extend(data, render_data);
@@ -346,7 +342,6 @@ var IdeaInIdeaListView = Marionette.View.extend({
   onUnreadCountClick: function(e) {
     this._onTitleClick(e, true);
   },
-
   /**
    * @event
    * when the user starts dragging this idea
@@ -358,7 +353,7 @@ var IdeaInIdeaListView = Marionette.View.extend({
       IdeaLoom.idea_vent.trigger('idea:dragStart', this.model);
     }
 
-    if (Ctx.getCurrentUser().can(Permissions.EDIT_IDEA)) {
+    if (this.model.userCan(Permissions.ASSOCIATE_IDEA)) {
       ev.currentTarget.style.opacity = 0.4;
       ev.originalEvent.dataTransfer.effectAllowed = 'move';
       ev.originalEvent.dataTransfer.dropEffect = 'move';
@@ -422,6 +417,11 @@ var IdeaInIdeaListView = Marionette.View.extend({
         return;
       }
 
+      if (!this.model.userCan(Permissions.ASSOCIATE_IDEA)) {
+        ev.dataTransfer.dropEffect = 'none';
+        return;
+      }
+
       if (ev.target.classList.contains('idealist-abovedropzone')) {
         this.$el.addClass('is-dragover-above');
       } else if (ev.target.classList.contains('idealist-dropzone')) {
@@ -429,8 +429,21 @@ var IdeaInIdeaListView = Marionette.View.extend({
       } else {
         this.$el.addClass('is-dragover');
       }
-    } else {
+    } else if (Ctx.getDraggedSegment() !== null || Ctx.getDraggedAnnotation() !== null) {
       // extract
+      if (!this.model.userCan(Permissions.ASSOCIATE_EXTRACT)) {
+        ev.dataTransfer.dropEffect = 'none';
+        return;
+      }
+      if (ev.target.classList.contains('idealist-dropzone')) {
+        if (!this.model.can(Permissions.ADD_IDEA)) {
+          ev.dataTransfer.dropEffect = 'none';
+          return;
+        }
+        this.$el.addClass('is-dragover-below');
+      } else {
+        this.$el.addClass('is-dragover');
+      }
       if (ev.dataTransfer.effectAllowed == 'link') {
         ev.dataTransfer.dropEffect = 'link';
       } else {
@@ -438,13 +451,6 @@ var IdeaInIdeaListView = Marionette.View.extend({
       }
     }
 
-    if (Ctx.getDraggedSegment() !== null || Ctx.getDraggedAnnotation() !== null) {
-      if (ev.target.classList.contains('idealist-dropzone')) {
-        this.$el.addClass('is-dragover-below');
-      } else {
-        this.$el.addClass('is-dragover');
-      }
-    }
 
     //We should user a _.debounce instead for performance reasons benoitg 2014-04-13
     this.dragOverCounter += 1;

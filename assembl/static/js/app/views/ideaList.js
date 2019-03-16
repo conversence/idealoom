@@ -3,15 +3,19 @@
  * @module app.views.ideaList
  */
 
-import AllMessagesInIdeaListView from './allMessagesInIdeaList.js';
+import $ from 'jquery';
+import Promise from 'bluebird';
+import _ from 'underscore';
+import Backbone from 'backbone';
+import Marionette from 'backbone.marionette';
 
+import AllMessagesInIdeaListView from './allMessagesInIdeaList.js';
 import OrphanMessagesInIdeaListView from './orphanMessagesInIdeaList.js';
 import SynthesisInIdeaListView from './synthesisInIdeaList.js';
 import Loader from './loader.js';
 import Permissions from '../utils/permissions.js';
 import IdeaRenderVisitor from './visitors/ideaRenderVisitor.js';
 import IdeaSiblingChainVisitor from './visitors/ideaSiblingChainVisitor';
-import Backbone from 'backbone';
 import IdeaLoom from '../app.js';
 import Ctx from '../common/context.js';
 import Idea from '../models/idea.js';
@@ -20,16 +24,44 @@ import ideaInIdeaList from './ideaInIdeaList.js';
 import PanelSpecTypes from '../utils/panelSpecTypes.js';
 import scrollUtils from '../utils/scrollUtils.js';
 import BasePanel from './basePanel.js';
-import _ from 'underscore';
 import CollectionManager from '../common/collectionManager.js';
 import i18n from '../utils/i18n.js';
 import OtherInIdeaListView from './otherInIdeaList.js';
-import $ from 'jquery';
-import Promise from 'bluebird';
 import Analytics from '../internal_modules/analytics/dispatcher.js';
 import DiscussionPreference from '../models/discussionPreference.js';
+
+
 var FEATURED = 'featured';
 var IN_SYNTHESIS = 'inNextSynthesis';
+
+
+class AddIdeaButton extends Marionette.View.extend({
+  template: _.template('<% if (mayAdd) { %><a href="#" class="js_ideaList-addbutton btn btn-default btn-sm '
+    + '<% if (!canAddHere) { print("is-disabled") } %>"><i class="icon-add-2"></i>'
+    + i18n.gettext('Add idea') + '</a> &nbsp;&nbsp;<% } %>'),
+  ui: {
+    addIdeaButton: '.js_ideaList-addbutton',
+  },
+  events: {
+    'click @ui.addIdeaButton': 'onClick',
+  }
+}) {
+  serializeData() {
+    const ideaList = this.options.ideaList;
+    const allIdeasCollection = ideaList.allIdeasCollection;
+    const user = Ctx.getCurrentUser();
+    const currentIdea = ideaList.getGroupState().get('currentIdea') || (allIdeasCollection ? allIdeasCollection.getRootIdea() : null);
+    return {
+      canAddHere: currentIdea && currentIdea.userCan(Permissions.ADD_IDEA),
+      mayAdd: user.can(Permissions.ADD_IDEA) || (
+        allIdeasCollection && allIdeasCollection.allExtraUserPermissions()[Permissions.ADD_IDEA]),
+    }
+  }
+  onClick(ev) {
+    this.options.ideaList.addChildToSelected(ev);
+  }
+}
+
 
 var IdeaList = BasePanel.extend({
   constructor: function IdeaList() {
@@ -41,6 +73,7 @@ var IdeaList = BasePanel.extend({
   className: 'ideaList',
   regions: {
     ideaView: '.ideaView',
+    addIdeaButton: '.idealist-add-idea-button',
     otherView: '.otherView',
     synthesisView: '.synthesisView',
     orphanView: '.orphanView',
@@ -141,14 +174,6 @@ var IdeaList = BasePanel.extend({
       }
     );
 
-    collectionManager.getAllExtractsCollectionPromise()
-            .then(function(allExtractsCollection) {
-              // Benoitg - 2014-05-05:  There is no need for this, if an idealink
-              // is associated with the idea, the idea itself will receive a change event
-              // on the socket (unless it causes problem with local additions?)
-              //that.listenTo(allExtractsCollection, 'add change reset', that.render);
-            });
-
     if(!this.isDestroyed()) {
       //Yes, it IS possible the view is already destroyed in initialize, so we check
       this.listenTo(IdeaLoom.idea_vent, 'ideaList:removeIdea', function(idea) {
@@ -220,6 +245,7 @@ var IdeaList = BasePanel.extend({
         //console.log("ideaList heard a change:currentIdea event");
         if (currentIdea && !that.isDestroyed()) {
           that.onScrollToIdea(currentIdea);
+          that.getRegion('addIdeaButton').currentView.render();
         }
       });
 
@@ -229,29 +255,49 @@ var IdeaList = BasePanel.extend({
     }
   },
 
-  'events': {
-    'click .panel-body': 'onPanelBodyClick',
+  ui: {
+    panelBody: '.panel-body',
+    collapseButton: '#ideaList-collapseButton',
+    closeButton: '#ideaList-closeButton',
+    filterByFeatured: '#ideaList-filterByFeatured',
+    filterByInNextSynthesis: '#ideaList-filterByInNextSynthesis',
+    filterByToc: '#ideaList-filterByToc',
+    decreaseRowHeight: '.js_decreaseRowHeight',
+    increaseRowHeight: '.js_increaseRowHeight',
+    toggleDecreasingFontSizeWithDepth: '.js_toggleDecreasingFontSizeWithDepth',
+    saveIdeasStateAsDefault: '.js_saveIdeasStateAsDefault',
+    restoreIdeasState: '.js_restoreIdeasState',
+    expandAllIdeas: '.js_expandAllIdeas',
+    collapseAllIdeas: '.js_collapseAllIdeas',
+  },
 
-    'click .js_ideaList-addbutton': 'addChildToSelected',
-    'click #ideaList-collapseButton': 'toggleIdeas',
-    'click #ideaList-closeButton': 'closePanel',
+  events: {
+    'click @ui.panelBody': 'onPanelBodyClick',
 
-    'click #ideaList-filterByFeatured': 'filterByFeatured',
-    'click #ideaList-filterByInNextSynthesis': 'filterByInNextSynthesis',
-    'click #ideaList-filterByToc': 'clearFilter',
+    'click @ui.collapseButton': 'toggleIdeas',
+    'click @ui.closeButton': 'closePanel',
 
-    'click .js_decreaseRowHeight': 'decreaseRowHeight',
-    'click .js_increaseRowHeight': 'increaseRowHeight',
-    'click .js_toggleDecreasingFontSizeWithDepth': 'toggleDecreasingFontSizeWithDepth',
-    'click .js_saveIdeasStateAsDefault': 'saveIdeasStateAsDefault',
-    'click .js_restoreIdeasState': 'restoreIdeasState',
-    'click .js_expandAllIdeas': 'expandAllIdeas',
-    'click .js_collapseAllIdeas': 'collapseAllIdeas'
+    'click @ui.filterByFeatured': 'filterByFeatured',
+    'click @ui.filterByInNextSynthesis': 'filterByInNextSynthesis',
+    'click @ui.filterByToc': 'clearFilter',
+
+    'click @ui.decreaseRowHeight': 'decreaseRowHeight',
+    'click @ui.increaseRowHeight': 'increaseRowHeight',
+    'click @ui.toggleDecreasingFontSizeWithDepth': 'toggleDecreasingFontSizeWithDepth',
+    'click @ui.saveIdeasStateAsDefault': 'saveIdeasStateAsDefault',
+    'click @ui.restoreIdeasState': 'restoreIdeasState',
+    'click @ui.expandAllIdeas': 'expandAllIdeas',
+    'click @ui.collapseAllIdeas': 'collapseAllIdeas'
   },
 
   serializeData: function() {
+    const user = Ctx.getCurrentUser();
+    const currentIdea = this.getGroupState().get('currentIdea') || (this.allIdeasCollection ? this.allIdeasCollection.getRootIdea() : null);
     return {
-      canAdd: Ctx.getCurrentUser().can(Permissions.ADD_IDEA)
+      canAdd: currentIdea && currentIdea.userCan(Permissions.ADD_IDEA),
+      canAdmin: user.can(Permissions.ADMIN_DISCUSSION),
+      maybeCanAdd: user.can(Permissions.ADD_IDEA) || (
+        this.allIdeasCollection && this.allIdeasCollection.allExtraUserPermissions()[Permissions.ADD_IDEA]),
     }
   },
 
@@ -352,6 +398,7 @@ var IdeaList = BasePanel.extend({
 
 
       that.showChildView('ideaView', new Loader());
+      that.showChildView('addIdeaButton', new AddIdeaButton({ideaList: that}))
 
       //console.log("About to set ideas on ideaList",that.cid, "with panelWrapper",that.getPanelWrapper().cid, "with group",that.getContainingGroup().cid);
 

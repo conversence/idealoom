@@ -139,8 +139,8 @@ var IdeaInSynthesisView = LoaderView.extend({
   },
 
   canEdit: function() {
-      return Ctx.getCurrentUser().can(Permissions.EDIT_IDEA) && this.synthesis.get("published_in_post") === null;
-    },
+    return this.model.userCan(Permissions.EDIT_IDEA) && this.synthesis.get("published_in_post") === null;
+  },
 
   serializeData: function() {
     //As all ideas in a previously posted synthesis are tombstoned, the original idea is 

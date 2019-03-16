@@ -13,11 +13,13 @@
   <div id="tour_step_idealist" class="idealist-header pvxs">
     <span class="idealist-header-title pls ">{{ gettext('Table of ideas') }}</span>
     <div class="idealist-actions">
-      <% if (canAdd) { %>
-        <a href="#" class="js_ideaList-addbutton" class="btn btn-default btn-sm">
+      <div class="idealist-add-idea-button">
+      <% if (maybeCanAdd) { %>
+        <a href="#" class="js_ideaList-addbutton" class="btn btn-default btn-sm <% if (!canAdd) { print('is-disabled') } %>">
             <i class="icon-add-2"></i> {{ gettext('Add idea') }}
         </a> &nbsp;&nbsp;
       <% } %>
+      </div>
       <div class="dropdown">
         <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false" title="{{ gettext('Options') }}"><i class="icon-options"></i></a>
         <ul class="dropdown-menu">
@@ -26,7 +28,7 @@
           <li><a href="#" class="js_toggleDecreasingFontSizeWithDepth">{{ gettext('Toggle decreasing font size with depth') }}</a></li>
           <li><a href="#" class="js_expandAllIdeas">{{ gettext('Expand all ideas') }}</a></li>
           <li><a href="#" class="js_collapseAllIdeas">{{ gettext('Collapse all ideas') }}</a></li>
-          <% if (canAdd) { %>
+          <% if (canAdmin) { %>
             <li><a href="#" class="js_saveIdeasStateAsDefault" title="{{ gettext('Save the current expanded/collapsed state as default for users') }}">{{ gettext('Save the current expanded/collapsed state as default for users') }}</a></li>
           <% } %>
           <li><a href="#" class="js_restoreIdeasState">{{ gettext('Restore default expanded/collapsed state') }}</a></li>

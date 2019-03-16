@@ -242,12 +242,15 @@ class IdeaPanel extends BasePanel.extend({
   getExtractsLabel() {
     var len = 0;
 
+    if (!this.model)
+      return "";
+
     if (this.extractListSubset) {
       len = this.extractListSubset.models.length;
     }
 
     if (len == 0) {
-      if (Ctx.getCurrentUser().can(Permissions.ADD_EXTRACT)) {
+      if (this.model.userCan(Permissions.ADD_EXTRACT)) {
         return i18n.gettext('No extract was harvested');
       }
       else {
@@ -255,7 +258,7 @@ class IdeaPanel extends BasePanel.extend({
       }
     }
     else {
-      if (Ctx.getCurrentUser().can(Permissions.ADD_EXTRACT)) {
+      if (this.model.userCan(Permissions.ADD_EXTRACT)) {
         return i18n.sprintf(i18n.ngettext('%d extract was harvested', '%d extracts were harvested', len), len);
       }
       else {
@@ -314,7 +317,9 @@ class IdeaPanel extends BasePanel.extend({
     var subIdeas = {};
     var that = this;
     var currentUser = Ctx.getCurrentUser();
-    var canEdit = currentUser.can(Permissions.EDIT_IDEA) || false;
+    var canEdit = false;
+    var canDelete = false;
+    var canAddExtracts = false;
     var canEditNextSynthesis = currentUser.can(Permissions.EDIT_SYNTHESIS);
     var direct_link_relative_url = null;
     var share_link_url = null;
@@ -329,6 +334,9 @@ class IdeaPanel extends BasePanel.extend({
 
     if (this.model) {
       subIdeas = this.model.getChildren();
+      canEdit = this.model.userCan(Permissions.EDIT_IDEA) || false;
+      canDelete = this.model.userCan(Permissions.EDIT_IDEA);
+      canAddExtracts = this.model.userCan(Permissions.ASSOCIATE_EXTRACT); //TODO: This is a bit too coarse
       if (this.parentLink != undefined) {
         currentTypes = this.model.getCombinedSubtypes(this.parentLink);
         possibleTypes = this.model.getPossibleCombinedSubtypes(this.parentLink);
@@ -374,7 +382,7 @@ class IdeaPanel extends BasePanel.extend({
             name: transition.nameOrLabel(this.translationData),
             label: transition.get('label'),
             target_name: targetName,
-            enabled: currentUser.can(transition.get('req_permission_name')) ? '' : 'disabled=true',
+            enabled: this.model.userCan(transition.get('req_permission_name')) ? '' : 'disabled=true',
           })
         });
       }
@@ -388,10 +396,10 @@ class IdeaPanel extends BasePanel.extend({
       i18n,
       getExtractsLabel: this.getExtractsLabel,
       getSubIdeasLabel: this.getSubIdeasLabel,
-      canDelete: currentUser.can(Permissions.EDIT_IDEA),
+      canDelete,
       canEditNextSynthesis,
       canEditExtracts: currentUser.can(Permissions.EDIT_EXTRACT),
-      canAddExtracts: currentUser.can(Permissions.EDIT_EXTRACT), //TODO: This is a bit too coarse
+      canAddExtracts,
       Ctx,
       pubStateName,
       transitions,
@@ -422,7 +430,7 @@ class IdeaPanel extends BasePanel.extend({
       //Only fetch extracts if idea already has an id.
       //console.log(this.extractListSubset);
       // display only important extract for simple user
-      if (!Ctx.getCurrentUser().can(Permissions.ADD_EXTRACT)) {
+      if (!this.model.userCan(Permissions.ADD_EXTRACT)) {
         this.extractListSubset.models = _.filter(this.extractListSubset.models, function(model) {
           return model.get('important');
         });
@@ -446,7 +454,7 @@ class IdeaPanel extends BasePanel.extend({
 
       this.renderContributors();
 
-      if( currentUser.can(Permissions.EDIT_IDEA) || currentUser.can(Permissions.EDIT_SYNTHESIS) ) {
+      if(this.model.userCan(Permissions.EDIT_IDEA) || currentUser.can(Permissions.EDIT_SYNTHESIS) ) {
         this.ui.adminSection.removeClass("hidden");
       }
 
@@ -568,7 +576,7 @@ class IdeaPanel extends BasePanel.extend({
 
   renderShortTitle() {
     var currentUser = Ctx.getCurrentUser();
-    var canEdit = currentUser.can(Permissions.EDIT_IDEA) || false;
+    var canEdit = this.model && this.model.userCan(Permissions.EDIT_IDEA) || false;
     var modelId = this.model.id;
     var partialMessage = MessagesInProgress.getMessage(modelId);
 
@@ -707,6 +715,9 @@ class IdeaPanel extends BasePanel.extend({
                   that.model = null;
                   that.setIdeaModel(model, reason);
                 }
+              });
+              this.listenTo(this.model, 'change:extra_permissions', function(model, value, options){
+                that.render();
               });
             }
             else {

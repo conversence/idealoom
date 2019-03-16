@@ -187,6 +187,8 @@
         "shortTitle": "title:extended",
         "definition": "description:extended",
         "created": "creation_date",
+        "creator": true,
+        "pub_state_name": true,
         "order": "&get_order_from_first_parent",
         "discussion": false,
         "hidden": true,

@@ -76,9 +76,16 @@ def create_idea(request):
     idea_data = request.json_body
     now = datetime.utcnow()
 
+    pub_state = None
+    pub_flow = discussion.idea_publication_flow
+    if pub_flow:
+        pub_state_name = discussion.preferences['default_idea_pub_state']
+        pub_state = pub_flow.state_by_label(pub_state_name)
     kwargs = {
         "discussion": discussion,
         "creation_date": now,
+        "pub_state": pub_state,
+        "creator_id": user_id,
     }
 
     new_idea = Idea(**kwargs)

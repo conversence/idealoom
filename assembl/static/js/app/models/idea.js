@@ -3,8 +3,8 @@
  * @module app.models.idea
  */
 import _ from 'underscore';
-
 import Promise from 'bluebird';
+
 import Base from './base.js';
 import Ctx from '../common/context.js';
 import i18n from '../utils/i18n.js';
@@ -12,6 +12,7 @@ import Types from '../utils/types.js';
 import LangString from './langstring.js';
 import Attachment from './attachments.js';
 import Permissions from '../utils/permissions.js';
+
 /**
  * Idea model
  * Frontend model for :py:class:`assembl.models.idea.Idea`
@@ -108,6 +109,9 @@ var IdeaModel = Base.Model.extend({
     active: false,
     parentId: null,
     widget_links: [],
+    level: 0,
+    inNextSynthesis: false,
+    extra_permissions: [],
     order: 1,
     created: null
   },
@@ -243,6 +247,12 @@ var IdeaModel = Base.Model.extend({
               }
             });
   },
+
+  userCan: function(permission) {
+    return Ctx.getCurrentUser().can(permission) ||
+      _.contains(this.get('extra_permissions'), permission);
+  },
+
   /**
    * Adds an idea as sibling above
    * @param {Idea} idea
@@ -723,6 +733,38 @@ var IdeaCollection = Base.Collection.extend({
         that.visitBreadthFirst(idea_links, visitor, child_link, include_ts, ancestry, includeHidden);
       });
       return visitor.post_visit(idea, results);
+    }
+  },
+  allExtraUserPermissions: function() {
+    // TODO: Make this adjust to changes
+    if (!this._extraUserPermissions) {
+      const extraUserPermissions = {};
+      this.each(idea => {
+        _.each(idea.get('extra_permissions'), p => {
+          extraUserPermissions[p] = true;
+        })
+      });
+      this._extraUserPermissions = extraUserPermissions;
+    }
+    return this._extraUserPermissions;
+  },
+  updateFromSocket: function(item) {
+    const that = this;
+    const id = item['@id'];
+    const tombstone = item['@tombstone'];
+    var model = tombstone ? null : this.get(id);
+    Base.Collection.prototype.updateFromSocket.apply(this, arguments);
+    if (!tombstone && !model) {
+      // new model: refetch to get updated permissions, which cannot go on socket
+      model = this.get(id);
+      model.fetch({
+        success: ()=>{
+          const newModel = that.get(id);
+          if (newModel != model) {
+            newModel.fetch();
+          }
+        }
+      });
     }
   },
 });

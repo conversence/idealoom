@@ -106,7 +106,7 @@ var localRoleModel = Base.Model.extend({
     Base.Model.apply(this, arguments);
   },
 
-  urlRoot: Ctx.getApiV2Url(Types.LOCAL_ROLE),
+  urlRoot: Ctx.getApiV2DiscussionUrl('local_user_roles'),
 
   defaults: {
     'requested': false,
@@ -135,7 +135,7 @@ var localRoleCollection = Base.Collection.extend({
   constructor: function myLocalRoleCollection() {
     Base.Collection.apply(this, arguments);
   },
-  url: Ctx.getApiV2Url(Types.LOCAL_ROLE),
+  url: Ctx.getApiV2DiscussionUrl('local_user_roles'),
   model: localRoleModel,
 })
 

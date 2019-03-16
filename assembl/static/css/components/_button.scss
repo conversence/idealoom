@@ -135,6 +135,12 @@
 
 /************************/
 
+.btn[disabled],
+.btn.is-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .btn-cancel {
   color: $theme_btn_cancel_text_color;
   background-color: transparent;

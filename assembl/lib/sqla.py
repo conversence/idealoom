@@ -50,7 +50,8 @@ from ..view_def import get_view_def
 from .zmqlib import get_pub_socket, send_changes
 from ..semantic.namespaces import QUADNAMES
 from ..auth import (
-    Everyone, Authenticated, CrudPermissions, MAYBE, P_READ, R_OWNER, P_SYSADMIN)
+    Everyone, Authenticated, CrudPermissions, MAYBE, P_READ, R_OWNER,
+    P_SYSADMIN, P_READ_IDEA)
 from .decl_enums import EnumSymbol, DeclEnumType
 from .utils import get_global_base_url
 from ..lib.config import get_config
@@ -803,7 +804,7 @@ class BaseOps(object):
 
     def generic_json(
             self, view_def_name='default', user_id=None,
-            permissions=(P_READ, ), base_uri='local:'):
+            permissions=(P_READ, P_READ_IDEA), base_uri='local:'):
         """Return a representation of this object as a JSON object,
         according to the given view_def and access control."""
         user_id = user_id or Everyone
@@ -2229,13 +2230,10 @@ class BaseOps(object):
         from pyramid.threadlocal import get_current_request
         request = request or get_current_request()
         assert request
-        discussion_id = request.discussion_id
-        if not discussion_id:
-            return []
-        discussion = Discussion.get(discussion_id)
+        discussion = request.discussion
         if not discussion:
             return []
-        return self.local_permissions(discussion, request.authenticated_userid, include_global)
+        return self.local_permissions(request.authenticated_userid, discussion, include_global)
 
     def has_permission_req(self, permission, request=None):
         from pyramid.threadlocal import get_current_request
