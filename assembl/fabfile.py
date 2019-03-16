@@ -983,6 +983,7 @@ def app_compile_noupdate():
 def app_compile_nodbupdate():
     """Separated mostly for tests, which need to run alembic manually"""
     execute(app_setup)
+    execute(update_npm_requirements)
     execute(compile_stylesheets_and_js)
     execute(compile_widget_stylesheets)
     execute(compile_messages)
