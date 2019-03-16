@@ -26,6 +26,7 @@ var Permissions = {
   DISC_STATS: 'Conversation.U.stats',
   OVERRIDE_SOCIAL_AUTOLOGIN: 'Conversation.A.User.override_autologin',
   ASSOCIATE_EXTRACT: 'Idea.A.Extract',
+  ASSOCIATE_IDEA: 'Idea.A.Idea',
 };
 
 export default Permissions;

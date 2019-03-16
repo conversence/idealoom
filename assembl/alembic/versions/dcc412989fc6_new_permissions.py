@@ -51,6 +51,7 @@ owner_correspondances = {
 
 extra_permissions = {
     'Content.C.Extract': ['Idea.A.Extract'],
+    'Idea.U': ['Idea.A.Idea'],
     'Conversation.R': ['Idea.R']
 }
 

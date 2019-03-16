@@ -16,7 +16,8 @@ from assembl.models import (
     Idea, RootIdea, IdeaLink, Discussion,
     Extract, SubGraphIdeaAssociation, LangString)
 from assembl.auth import (
-    CrudPermissions, P_READ, P_ADD_IDEA, P_EDIT_IDEA, P_READ_IDEA)
+    CrudPermissions, P_READ, P_ADD_IDEA, P_EDIT_IDEA, P_READ_IDEA,
+    P_ASSOCIATE_IDEA)
 from . import (
     API_DISCUSSION_PREFIX, instance_check_op, instance_check_permission,
     instance_check_permission_id)
@@ -262,50 +263,51 @@ def save_idea(request):
         # Actually, use embedded links to do this properly...
         new_parent_ids = set((idea_data['parentId'],))
         old_parent_ids = {Idea.uri_generic(l.source_id) for l in idea.source_links}
-        added_parent_ids = new_parent_ids - old_parent_ids
-        removed_parent_ids = old_parent_ids - new_parent_ids
-        added_parents = [Idea.get_instance(id) for id in added_parent_ids]
-        current_parents = idea.get_parents()
-        removed_parents = [p for p in current_parents 
-            if p.uri() in removed_parent_ids]
-        if None in added_parents:
-            missing = [id for id in added_parent_ids if not Idea.get_instance(id)]
-            raise HTTPNotFound("Missing parentId %s" % (','.join(missing)))
-        for parent in added_parents + removed_parents:
-            if not parent.has_permission_req(P_EDIT_IDEA):
-                # TODO: Introduce Idea.A.Idea as a separate permission?
-                raise HTTPUnauthorized("Cannot edit parent idea "+idea.uri())
-        old_ancestors = set()
-        new_ancestors = set()
-        for parent in current_parents:
-            old_ancestors.add(parent)
-            old_ancestors.update(parent.get_all_ancestors())
-        kill_links = {l for l in idea.source_links
-            if Idea.uri_generic(l.source_id) in removed_parent_ids}
-        order = idea_data.get('order', 0.0)
-        for parent in added_parents:
-            if kill_links:
-                link = kill_links.pop()
+        if new_parent_ids != old_parent_ids:
+            added_parent_ids = new_parent_ids - old_parent_ids
+            removed_parent_ids = old_parent_ids - new_parent_ids
+            added_parents = [Idea.get_instance(id) for id in added_parent_ids]
+            current_parents = idea.get_parents()
+            removed_parents = [p for p in current_parents 
+                if p.uri() in removed_parent_ids]
+            if None in added_parents:
+                missing = [id for id in added_parent_ids if not Idea.get_instance(id)]
+                raise HTTPNotFound("Missing parentId %s" % (','.join(missing)))
+            if not idea.has_permission_req(P_ASSOCIATE_IDEA):
+                raise HTTPUnauthorized("Cannot associate idea "+idea.uri())
+            for parent in added_parents + removed_parents:
+                if not parent.has_permission_req(P_ASSOCIATE_IDEA):
+                    raise HTTPUnauthorized("Cannot associate parent idea "+idea.uri())
+            old_ancestors = set()
+            new_ancestors = set()
+            for parent in current_parents:
+                old_ancestors.add(parent)
+                old_ancestors.update(parent.get_all_ancestors())
+            kill_links = {l for l in idea.source_links
+                if Idea.uri_generic(l.source_id) in removed_parent_ids}
+            order = idea_data.get('order', 0.0)
+            for parent in added_parents:
+                if kill_links:
+                    link = kill_links.pop()
+                    db.expire(link.source, ['target_links'])
+                    link.copy(True)
+                    link.order = order
+                    link.source = parent
+                else:
+                    link = IdeaLink(source=source, target=idea, order=order)
+                    db.add(link)
+                db.expire(parent, ['target_links'])
+                order += 1.0
+            for link in kill_links:
                 db.expire(link.source, ['target_links'])
-                link.copy(True)
-                link.order = order
-                link.source = parent
-            else:
-                link = IdeaLink(source=source, target=idea, order=order)
-                db.add(link)
-            db.expire(parent, ['target_links'])
-            order += 1.0
-        for link in kill_links:
-            db.expire(link.source, ['target_links'])
-            kill_links.is_tombstone = True
-        db.expire(idea, ['source_links'])
-        db.flush()
-        for parent in idea.get_parents():
-            new_ancestors.add(parent)
-            new_ancestors.update(parent.get_all_ancestors())
-        print("resending: "+",".join([str(x.id) for x in new_ancestors ^ old_ancestors]))
-        for ancestor in new_ancestors ^ old_ancestors:
-            ancestor.send_to_changes()
+                kill_links.is_tombstone = True
+            db.expire(idea, ['source_links'])
+            db.flush()
+            for parent in idea.get_parents():
+                new_ancestors.add(parent)
+                new_ancestors.update(parent.get_all_ancestors())
+            for ancestor in new_ancestors ^ old_ancestors:
+                ancestor.send_to_changes()
 
     if 'subtype' in idea_data:
         idea.rdf_type = idea_data['subtype']
