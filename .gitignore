@@ -13,6 +13,7 @@ assembl/locale/*/LC_MESSAGES/*.jed.json
 *.egg
 *.egg-info
 /.coverage
+/.bundle
 .DS_Store
 .directory
 .idea
@@ -21,6 +22,8 @@ assembl/locale/*/LC_MESSAGES/*.jed.json
 .env
 .env.fish
 .venv
+build
+dist
 
 # buildout
 /.installed.cfg
@@ -33,7 +36,7 @@ assembl/locale/*/LC_MESSAGES/*.jed.json
 /venv
 /src
 /virtuoso
-/assembl_dumps
+/idealoom_dumps
 
 # local
 /local.ini
@@ -59,7 +62,14 @@ assembl/locale/*/LC_MESSAGES/*.jed.json
 .sass-cache
 assembl/static/css/*.css
 /var/dogpile_cache.*
+/var/log
+/var/uploads
+/var/nlp
+/doc/.doctrees
+/docker/build
 /.anaconda
+/wheelhouse
+/personal
 
 # node
 /assembl/static/node_modules/
