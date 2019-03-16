@@ -1,0 +1,32 @@
+<div class="grid-pad">
+  <div class="admin-permissions admin-panel">
+    <div class="col-3-12 navigation-menu-holder"></div>
+    <div class="col-9-12 admin-section">
+      <section class="section">
+        <div class="admin-title">
+          <h3 class="h3">{{ gettext('Permissions') }}</h3>
+        </div>
+        <div id="content-container" class="content-container">
+          <div>
+            <h4 class="h4">{{ gettext('Permissions according to Role') }}</h4>
+            <form class="core-form form-horizontal">
+              <table id="role-permissions" class="table">
+                <thead id="roles-header"></thead>
+                <tbody id="role-permissions-body">
+                  <tr id="delete-role-row"></tr>
+                </tbody>
+                
+              </table>
+            </form>
+          </div>
+          <div>
+            <h4 class="h4">{{ gettext('Additional Permissions for Roles according to Idea Publication State') }}</h4>
+            <form class="core-form form-horizontal">
+              <div id="pubstate-permissions"></div>
+            </form>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
