@@ -35,10 +35,12 @@ var publicationFlowModel = Base.Model.extend({
     Base.Model.apply(this, arguments);
   },
   parse: function(rawModel, options) {
-    rawModel.states = new publicationStateCollection(rawModel.states, {parse: true, flow: this});
-    rawModel.transitions = new publicationTransitionCollection(rawModel.transitions, {parse: true, flow: this});
-    if (rawModel.name) {
-      rawModel.name = new LangString.Model(rawModel.name, {parse: true});
+    if (rawModel) {
+      rawModel.states = new publicationStateCollection(rawModel.states, {parse: true, flow: this});
+      rawModel.transitions = new publicationTransitionCollection(rawModel.transitions, {parse: true, flow: this});
+      if (rawModel.name) {
+        rawModel.name = new LangString.Model(rawModel.name, {parse: true});
+      }
     }
     return rawModel;
   },
