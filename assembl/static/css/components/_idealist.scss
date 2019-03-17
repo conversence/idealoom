@@ -17,6 +17,10 @@
   position: absolute;
   right: 6px;
 
+  .idealist-add-idea-button {
+    display: inline-block;
+  }
+
   .dropdown.is-open .dropdown-menu {
     max-width: 50vw;
     li a {
