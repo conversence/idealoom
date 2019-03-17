@@ -36,9 +36,18 @@ from assembl.lib.model_watcher import configure_model_watcher
 from assembl.lib.raven_client import setup_raven, capture_exception
 
 
-def find_or_create_object_by_keys(db, keys, obj, columns=None):
+def find_or_create_object_by_keys(db, keys, obj, columns=None, joins=None):
     args = {key: getattr(obj, key) for key in keys}
-    eq = db.query(obj.__class__).filter_by(**args).first()
+    eq = db.query(obj.__class__).filter_by(**args)
+    if joins:
+        for rel_name in joins:
+            joined_obj = getattr(obj, rel_name)
+            assert joined_obj
+            corresponding = find_or_create_object(joined_obj)
+            assert corresponding
+            eq = eq.filter_by(rel_name=corresponding)
+            args[rel_name] = corresponding
+    eq = eq.first()
     if eq is None:
         if columns is not None:
             args.update({key: getattr(obj, key) for key in columns})
@@ -61,7 +70,9 @@ def init_key_for_classes(db):
     from assembl.models import (
         AgentProfile, User, Permission, Role, Webpage, Action, LocalUserRole,
         IdentityProvider, EmailAccount, WebLinkAccount, Preferences, URIRefDb,
-        NotificationSubscription, DiscussionPerUserNamespacedKeyValue)
+        NotificationSubscription, DiscussionPerUserNamespacedKeyValue,
+        IdeaLocalUserRole, PublicationFlow, PublicationState,
+        PublicationTransition)
     fn_for_classes = {
         AgentProfile: partial(find_or_create_agent_profile, db),
         User: partial(find_or_create_agent_profile, db),
@@ -70,6 +81,9 @@ def init_key_for_classes(db):
         Permission: partial(find_or_create_object_by_keys, db, ['name']),
         Preferences: partial(find_or_create_object_by_keys, db, ['name']),
         Role: partial(find_or_create_object_by_keys, db, ['name']),
+        PublicationFlow: partial(find_or_create_object_by_keys, db, ['name']),
+        PublicationState: partial(find_or_create_object_by_keys, db, ['name'], joins=['flow']),
+        PublicationTransition: partial(find_or_create_object_by_keys, db, ['name'], joins=['flow']),
         # SocialAuthAccount: partial(find_or_create_object_by_keys, db, ['provider_id', 'uid']),
         IdentityProvider: partial(find_or_create_object_by_keys, db, ['provider_type', 'name']),
         # email_ci?
@@ -81,6 +95,7 @@ def init_key_for_classes(db):
         Action: 'actor',
         NotificationSubscription: 'user',
         LocalUserRole: 'user',
+        IdeaLocalUserRole: 'user',
         DiscussionPerUserNamespacedKeyValue: 'user',
     }
     special_extra_tests = {
@@ -232,7 +247,8 @@ def get_mapper_info(mapper):
         pk_keys_cols = set([c for c in mapper.primary_key])
         direct_reln = {r for r in mapper.relationships
                        if r.direction.name == 'MANYTOONE'
-                       and r.viewonly == False}
+                       and r.viewonly == False
+                       and not r.local_remote_pairs[0][0].primary_key}
         direct_reln_cols = set(itertools.chain(
             *[r.local_columns for r in direct_reln]))
         avoid_columns = pk_keys_cols.union(direct_reln_cols)
