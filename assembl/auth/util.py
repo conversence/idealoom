@@ -85,7 +85,19 @@ def request_main_target(request):
 
 def roles_from_request(request):
     return get_roles(
-        request.unauthenticated_userid, request.discussion_id(), request.main_target)
+        request.unauthenticated_userid, request.discussion_id, request.main_target)
+
+
+def roles_from_request_reified(request):
+    if getattr(request, "_roles", -1) is not -1:
+        return request._roles
+    discussion_id = request.discussion_id
+    roles = get_roles(
+        request.unauthenticated_userid, discussion_id, request.main_target)
+    if discussion_id:
+        # only reify if discussion available
+        request._roles = roles
+    return roles
 
 
 def get_permissions(user_id, discussion_id, target_instance=None):
@@ -120,12 +132,12 @@ def get_permissions(user_id, discussion_id, target_instance=None):
 
 def base_permissions_from_request(request):
     return get_permissions(
-        request.authenticated_userid, request.discussion_id())
+        request.authenticated_userid, request.discussion_id)
 
 
 def permissions_from_request(request):
     return get_permissions(
-        request.authenticated_userid, request.discussion_id(), request.main_target)
+        request.authenticated_userid, request.discussion_id, request.main_target)
 
 
 def permissions_for_states(discussion_id):
@@ -151,7 +163,7 @@ def permissions_for_state(discussion_id, state_id):
 
 
 def permissions_for_states_from_req(request):
-    return permissions_for_states(request.discussion_id())
+    return permissions_for_states(request.discussion_id)
 
 
 def discussion_id_from_request(request):
@@ -323,7 +335,7 @@ def authentication_callback(user_id, request):
     "This is how pyramid knows the user's permissions"
     connection = User.default_db.connection()
     connection.info['userid'] = user_id
-    discussion_id = request.discussion_id()
+    discussion_id = request.discussion_id
     # this is a good time to tell raven about the user
     from ..lib.raven_client import Raven
     if Raven:
@@ -661,11 +673,11 @@ def includeme(config):
         'assembl.auth.util.permissions_for_states_from_req',
         'permissions_for_states', reify=True)
     config.add_request_method(
-        'assembl.auth.util.roles_from_request', 'roles', property=True) # damn! called before discussion is set.
+        'assembl.auth.util.roles_from_request_reified', 'roles', property=True)
     config.add_request_method(
         'assembl.auth.util.request_main_target', 'main_target', reify=True)
     config.add_request_method(
         'assembl.auth.util.discussion_from_request', 'discussion', reify=True)
     config.add_request_method(
         'assembl.auth.util.discussion_id_from_request_reified',
-        'discussion_id', reify=False)
+        'discussion_id', property=True)

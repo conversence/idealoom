@@ -921,7 +921,7 @@ class User(NamedClassMixin, OriginMixin, AgentProfile):
         from .discussion import Discussion
         from pyramid.threadlocal import get_current_request
         request = get_current_request()
-        discussion_id = request.discussion_id()
+        discussion_id = request.discussion_id
         if discussion_id:
             return {Discussion.uri_generic(discussion_id):
                     request.permissions}

@@ -551,7 +551,7 @@ class LocalPermissionPredicate(object):
 
     def __call__(self, context, request):
         return isinstance(context, InstanceContext) and get_permissions(
-            request.authenticated_userid, request.discussion_id(), context._instance)
+            request.authenticated_userid, request.discussion_id, context._instance)
 
 
 class InstanceContextPredicateWithExceptions(object):
