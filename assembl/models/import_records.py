@@ -155,6 +155,15 @@ class IdeaSource(ContentSource, PromiseObjectImporter):
 
     def read_data_gen(self, data_gen, admin_user_id):
         ctx = self.discussion.get_instance_context(user_id=admin_user_id)
+        if self.parsed_data_filter:
+            data_gen = list(data_gen)
+            filtered = self.parsed_data_filter.find(data_gen)
+            filtered_ids = {self.id_from_data(data) for data in filtered}
+            for data in data_gen:
+                ext_id = self.id_from_data(data)
+                if ext_id not in filtered_ids:
+                    self[ext_id] = None
+            data_gen = filtered
         for data in data_gen:
             ext_id = self.id_from_data(data)
             if not ext_id:
@@ -163,9 +172,6 @@ class IdeaSource(ContentSource, PromiseObjectImporter):
                 continue
             cls = self.class_from_data(data)
             if not cls:
-                self[ext_id] = None
-                continue
-            if self.parsed_data_filter and not self.parsed_data_filter.find(data):
                 self[ext_id] = None
                 continue
             pdata = self.process_data(data)
@@ -296,17 +302,25 @@ class IdeaLoomIdeaSource(IdeaSource):
             return self.base_source_uri() + id[6:]
         return super(IdeaLoomIdeaSource, self).normalize_id(id)
 
-    def read(self, admin_user_id=None):
-        super(IdeaLoomIdeaSource, self).read(admin_user_id)
-        local_server = self.source_uri.startswith(urljoin(self.global_url, '/'))
-        admin_user_id = admin_user_id or self.discussion.creator_id
+    def login(self, admin_user_id=None):
         login_url = urljoin(self.source_uri, '/login')
         r = requests.post(login_url, cookies=self.cookies, data={
             'identifier':self.username, 'password':self.password},
             allow_redirects=False)
         assert r.ok
-        assert 'login' not in r.headers['Location']
+        if 'login' in r.headers['Location']:
+            return False
         self.cookies.update(r.cookies)
+        self._last_login = datetime.now()
+        return True
+
+    def read(self, admin_user_id=None):
+        local_server = self.source_uri.startswith(urljoin(self.global_url, '/'))
+        admin_user_id = admin_user_id or self.discussion.creator_id
+        super(IdeaLoomIdeaSource, self).read(admin_user_id)
+        last_login = getattr(self, '_last_login', None)
+        if not last_login or datetime.now() - last_login > timedelta(days=1):
+            assert self.login(admin_user_id)
         r = requests.get(self.source_uri, cookies=self.cookies)
         assert r.ok
         ideas = r.json()
@@ -355,6 +369,34 @@ class IdeaLoomIdeaSource(IdeaSource):
                         yield obj
 
         self.read_data_gen(find_objects(data), admin_user_id)
+            
+
+    def make_reader(self):
+        return SimpleIdealoomReader(self.id)
+
+
+class SimpleIdealoomReader(PullSourceReader):
+
+    def __init__(self, source_id):
+        super(SimpleIdealoomReader, self).__init__(source_id)
+
+    def login(self):
+        try:
+            login = self.source.login()
+            if not login:
+                raise IrrecoverableError("could not login")
+        except AssertionError:
+            raise ClientError("login connection error")
+
+    def do_read(self):
+        sess = self.source.db
+        try:
+            self.source.read()
+            sess.commit()
+        except Exception as e:
+            print(e)
+            import pdb
+            pdb.post_mortem()
 
 
 class CatalystIdeaSource(IdeaSource):
