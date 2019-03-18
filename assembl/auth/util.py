@@ -661,7 +661,7 @@ def includeme(config):
         'assembl.auth.util.permissions_for_states_from_req',
         'permissions_for_states', reify=True)
     config.add_request_method(
-        'assembl.auth.util.roles_from_request', 'roles', reify=True)
+        'assembl.auth.util.roles_from_request', 'roles', property=True) # damn! called before discussion is set.
     config.add_request_method(
         'assembl.auth.util.request_main_target', 'main_target', reify=True)
     config.add_request_method(
