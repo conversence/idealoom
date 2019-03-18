@@ -292,6 +292,8 @@ class IdeaLoomIdeaSource(IdeaSource):
         if data['@type'] == 'RootIdea':
             self[data['@id']] = self.discussion.root_idea
             return None
+        if data['@type'] == 'Idea':
+            data['pub_state_name'] = self.target_state.name
         return data
 
     def normalize_id(self, id):
