@@ -26,20 +26,64 @@ import CKEditorField from './reusableDataFields/ckeditorField.js';
 import CollectionManager from '../common/collectionManager.js';
 import Promise from 'bluebird';
 
-var SynthesisPanel = BasePanel.extend({
-  constructor: function SynthesisPanel() {
-    BasePanel.apply(this, arguments);
-  },
-
+class SynthesisPanel extends BasePanel.extend({
   template: '#tmpl-synthesisPanel',
   panelType: PanelSpecTypes.SYNTHESIS_EDITOR,
   className: 'synthesisPanel',
   gridSize: BasePanel.prototype.SYNTHESIS_PANEL_GRID_SIZE,
+
+  regions: {
+    ideas: ".synthesisPanel-ideas",
+    title: ".synthesisPanel-title",
+    introduction: ".synthesisPanel-introduction",
+    conclusion: ".synthesisPanel-conclusion"
+  },
+
+  events: {
+    'click .synthesisPanel-publishButton': 'publish'
+  },
+
+  modelEvents:{
+      'reset change':'render'
+    },
+
+  /**
+   * The model
+   * @type {Synthesis}
+   */
+  model: null,
+
+  /**
+   * The ideas collection
+   * @type {Ideas.Collection}
+   */
+  ideas: null,
+
+  /**
+   * The synthesis ideas collection (owned by the synthesis)
+   * @type {Ideas.Collection}
+   */
+  synthesisIdeas: null,
+
+  /**
+   * The synthesis root ideas collection (local)
+   * @type {Ideas.Collection}
+   */
+  synthesisIdeaRoots: null,
+
+  /**
+   * Flag
+   * @type {boolean}
+   */
+  collapsed: false,
+
+  showAsMessage: false
+}) {
   /**
    * @init
    */
-  initialize: function(obj) {
-    BasePanel.prototype.initialize.apply(this, arguments);
+  initialize(obj) {
+    super.initialize(...arguments);
     var that = this;
     var collectionManager = new CollectionManager();
 
@@ -89,60 +133,13 @@ var SynthesisPanel = BasePanel.extend({
     //IdeaLoom.commands.setHandler('synthesisPanel:render', this.render);
 
     this.propagateVisibility(true);
-  },
+  }
 
-  regions: {
-    ideas: ".synthesisPanel-ideas",
-    title: ".synthesisPanel-title",
-    introduction: ".synthesisPanel-introduction",
-    conclusion: ".synthesisPanel-conclusion"
-  },
-
-  events: {
-    'click .synthesisPanel-publishButton': 'publish'
-  },
-
-  modelEvents:{
-      'reset change':'render'
-    },
-
-  getTitle: function() {
+  getTitle() {
     return i18n.gettext('Synthesis');
-  },
+  }
 
-  /**
-   * The model
-   * @type {Synthesis}
-   */
-  model: null,
-
-  /**
-   * The ideas collection
-   * @type {Ideas.Collection}
-   */
-  ideas: null,
-
-  /**
-   * The synthesis ideas collection (owned by the synthesis)
-   * @type {Ideas.Collection}
-   */
-  synthesisIdeas: null,
-
-  /**
-   * The synthesis root ideas collection (local)
-   * @type {Ideas.Collection}
-   */
-  synthesisIdeaRoots: null,
-
-  /**
-   * Flag
-   * @type {boolean}
-   */
-  collapsed: false,
-
-  showAsMessage: false,
-
-  serializeData: function() {
+  serializeData() {
     var currentUser = Ctx.getCurrentUser();
     var canSend = currentUser.can(Permissions.SEND_SYNTHESIS);
     var canEdit = currentUser.can(Permissions.EDIT_SYNTHESIS);
@@ -157,13 +154,13 @@ var SynthesisPanel = BasePanel.extend({
         data = _.extend(this.model.toJSON(), data);
 
     return data;
-  },
+  }
 
   /**
    * The render
    * @returns {SynthesisPanel}
    */
-  onRender: function() {
+  onRender() {
     if (Ctx.debugRender) {
       console.log("synthesisPanel:onRender() is firing");
     }
@@ -276,10 +273,10 @@ var SynthesisPanel = BasePanel.extend({
     }
 
     return this;
-  },
+  }
 
   /* This will show/hide the checkboxes next to each idea of the tables of ideas when a synthesis creation panel is present/absent. */
-  propagateVisibility: function(isVisible) {
+  propagateVisibility(isVisible) {
     if ( this.showAsMessage ){
       return;
     }
@@ -297,26 +294,26 @@ var SynthesisPanel = BasePanel.extend({
         }
       }
     }
-  },
+  }
 
-  onBeforeDestroy: function(){
+  onBeforeDestroy() {
     this.propagateVisibility(false);
-  },
+  }
 
   /**
    * Publish the synthesis
    */
-  publish: function() {
+  publish() {
     var ok = confirm(i18n.gettext("Are you sure you want to publish the synthesis? You will not be able to delete it afterwards, and participants who subscribed to notifications related to the synthesis will receive a notification by email."));
     if (ok) {
       this._publish();
     }
-  },
+  }
 
   /**
    * Publishes the synthesis
    */
-  _publish: function() {
+  _publish() {
     this.blockPanel();
 
     var publishes_synthesis_id = this.model.id;
@@ -344,8 +341,7 @@ var SynthesisPanel = BasePanel.extend({
       }
     });
   }
-
-});
+}
 
 export default SynthesisPanel;
 

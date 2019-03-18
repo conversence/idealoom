@@ -640,13 +640,13 @@ Context.prototype = {
     if (!resizable)
         className += " popin-fixed-size";
 
-    var Modal = Backbone.Modal.extend({
+    class Modal extends Backbone.Modal.extend({
       template: Ctx.loadTemplate('modalWithIframe'),
       className: className,
       cancelEl: '.close',
       keyControl: false,
       model: model
-    });
+    }) {}
 
     window.modal_instance = new Modal();
     if (onDestroyCallback)
@@ -1241,7 +1241,6 @@ Context.prototype = {
    * @function app.common.context.Context.onAjaxError
    */
   onAjaxError: function(ev, jqxhr, settings, exception) {
-
     if (jqxhr.handled)
         return;
 
@@ -1267,30 +1266,31 @@ Context.prototype = {
       status: jqxhr.status
     });
 
-    var Modal = Backbone.Modal.extend({
+    class Modal extends Backbone.Modal.extend({
       template: _.template($('#tmpl-ajaxError').html()),
       className: 'group-modal popin-wrapper modal-ajaxError',
       cancelEl: '.close, .js_close',
       model: model,
-      initialize: function() {
-        this.$('.bbm-modal').addClass('popin');
-      },
+
       events: {
         'click .js_reload': 'reload'
-      },
+      }
+    }) {
+      initialize() {
+        this.$('.bbm-modal').addClass('popin');
+      }
 
-      onRender: function() {
+      onRender() {
         Raven.captureMessage('Reload popup presented to the user', {tags: {
           url: this.model.get("url"),
           return_code: this.model.get("status")
           }});
-      },
-
-      reload: function() {
-        window.location.reload()
       }
 
-    });
+      reload() {
+        window.location.reload()
+      }
+    }
 
     var modal = new Modal();
 

@@ -16,18 +16,17 @@ import CollectionManager from '../common/collectionManager.js';
  *
  * @param {function} options.serializerFunc  The serializer function taking the passed model and returning a template string
  */
-var BreadcrumbItemView = Marionette.View.extend({
-  constructor: function BreadcrumbItemView() {
-    Marionette.View.apply(this, arguments);
-  },
+class BreadcrumbItemView extends Marionette.View.extend({
+  template: _.template("<%= entity %>"),
+  className: 'breadcrumb'
+}) {
+  // from http://jsfiddle.net/zaSvT/
 
-// from http://jsfiddle.net/zaSvT/
-  
-  initialize: function(options){
+  initialize(options) {
     this.serializerFunc = options.serializerFunc;
-  },
+  }
 
-  renderData: function(serialzedModel){
+  renderData(serialzedModel) {
     if (!serialzedModel) { return ""; }
 
     if (this.serializerFunc) {
@@ -37,39 +36,30 @@ var BreadcrumbItemView = Marionette.View.extend({
     else {
       return serialzedModel;
     }
-  },
+  }
 
-  template: _.template("<%= entity %>"),
-
-  serializeData: function(){
+  serializeData() {
     return {
       entity: this.renderData(this.model)
     }
-  },
-  
-  className: 'breadcrumb'
-});
+  }
+}
 
-var BreadcrumbCollectionView = Marionette.CollectionView.extend({
-  constructor: function BreadcrumbCollectionView() {
-    Marionette.CollectionView.apply(this, arguments);
-  },
-
-  
-  initialize: function(options){
+class BreadcrumbCollectionView extends Marionette.CollectionView.extend({
+  childView: BreadcrumbItemView
+}) {
+  initialize(options) {
     this.serializerFunc = options.serializerFunc || null;
     this.listenTo(this.collection, 'change', this.render );
     // this.render();
-  },
+  }
 
-  childView: BreadcrumbItemView,
-
-  childViewOptions: function(){
+  childViewOptions() {
     return {
       serializerFunc: this.serializerFunc
     }
   }
-});
+}
 
 export default {
   BreadcrumbItemView: BreadcrumbItemView,

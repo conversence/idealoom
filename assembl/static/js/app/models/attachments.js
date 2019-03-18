@@ -50,21 +50,7 @@ if (!String.prototype.includes) {
  * @class app.models.attachments.AttachmentModel
  * @extends app.models.base.BaseModel
  */
-var AttachmentModel = Base.Model.extend({
-  /**
-   * @function app.models.attachments.AttachmentModel.constructor
-   */
-  constructor: function AttachmentModel() {
-    Base.Model.apply(this, arguments);
-  },
-  /**
-   * Returns api url dedicated to attachments
-   * @returns {String}
-   * @function app.models.attachments.AttachmentModel.urlRoot
-   */
-  urlRoot: function() {
-    return this.get('objectAttachedToModel').getApiV2Url() + '/attachments';
-  },
+class AttachmentModel extends Base.Model.extend({
   /**
    * Defaults
    * @type {Object}
@@ -83,13 +69,23 @@ var AttachmentModel = Base.Model.extend({
     attachmentPurpose: attachmentPurposeTypes.EMBED_ATTACHMENT.id,
     external_url: undefined,
     created: new Moment().utc()
-  },
+  }
+}) {
+  /**
+   * Returns api url dedicated to attachments
+   * @returns {String}
+   * @function app.models.attachments.AttachmentModel.urlRoot
+   */
+  urlRoot() {
+    return this.get('objectAttachedToModel').getApiV2Url() + '/attachments';
+  }
+
   /**
    * Returns the model of the attachment according to its type (document or file)
    * @returns {BaseModel}
    * @function app.models.attachments.AttachmentModel.parse
    */
-  parse: function(rawModel) {
+  parse(rawModel) {
     switch (rawModel.document['@type']){
       case Types.DOCUMENT:
         rawModel.document = new Document.DocumentModel(rawModel.document, {parse: true});
@@ -101,7 +97,8 @@ var AttachmentModel = Base.Model.extend({
         return new Error("The document model does not have a @type associated!" + rawModel.document);
     }
     return rawModel;
-  },
+  }
+
   /**
    * Set the id of the model attachment and save the model into database  
    * @param {Object} attrs
@@ -109,11 +106,12 @@ var AttachmentModel = Base.Model.extend({
    * @returns {jqXHR}
    * @function app.models.attachments.AttachmentModel._saveMe
    */
-  _saveMe: function(attrs, options){
+  _saveMe(attrs, options) {
     var d = this.getDocument();
     this.set('idAttachedDocument', d.id);
     return Backbone.Model.prototype.save.call(this, attrs, options); 
-  },
+  }
+
   /**
    * Save the attachment
    *
@@ -127,7 +125,7 @@ var AttachmentModel = Base.Model.extend({
    * @param {Object} options
    * @function app.models.attachments.AttachmentModel.save
    */
-  save: function(attrs, options) {
+  save(attrs, options) {
     if (this.isFailed()){
       //Don't know how good that is.
       return;
@@ -148,7 +146,8 @@ var AttachmentModel = Base.Model.extend({
         return this._saveMe(attrs, options);
       }
     }
-  },
+  }
+
   /**
    * This method uses a switch according to a CRUD operation
    * Default: Used to persist the state of the model to the server.
@@ -159,7 +158,7 @@ var AttachmentModel = Base.Model.extend({
    * @param {Object} options - It fires success or error message
    * @function app.models.attachments.AttachmentModel.sync
    */
-  sync: function(method, model, options) {
+  sync(method, model, options) {
     switch(method) {
       case 'update':
       case 'create':
@@ -180,13 +179,14 @@ var AttachmentModel = Base.Model.extend({
       default:
         return Backbone.sync(method, model, options);
     }
-  },
+  }
+
   /**
    * Returns an error message if one of those attributes (objectAttachedToModel, document, idCreator) is missing
    * @returns {String}
    * @function app.models.attachments.AttachmentModel.validate
    */
-  validate: function() {
+  validate() {
     if(!this.get('objectAttachedToModel')) {
       return "Object attached to is missing";
     }
@@ -196,32 +196,35 @@ var AttachmentModel = Base.Model.extend({
     if(!this.get('idCreator')) {
       return "Creator is missing";
     }
-  },
+  }
+
   /**
    * Returns the document attributes from the model
    * @returns {Object}
    * @function app.models.attachments.AttachmentModel.getDocument
    */
-  getDocument: function() {
+  getDocument() {
     return this.get('document');
-  },
+  }
+
   /**
    * Returns the creation date of the attachment
    * @returns {Moment}
    * @function app.models.attachments.AttachmentModel.getCreationDate
    */
-  getCreationDate: function(){
+  getCreationDate() {
     var date = this.get('created');
     if ( (date) && (typeof date === 'string') ){
       date = new Moment(date);
     }
     return date;
-  },
+  }
+
   /**
    * Destroys or removes the document from the server by using the Backbone.sync method which delegates the HTTP "delete" request.
    * @function app.models.attachments.AttachmentModel.destroy
    */
-  destroy: function(options){
+  destroy(options) {
     var d = this.getDocument();
     var that = this;
     return d.destroy({
@@ -234,7 +237,8 @@ var AttachmentModel = Base.Model.extend({
         return Base.Model.prototype.destroy.call(that); 
       }
     });
-  },
+  }
+
   /**
    * Return a copy of the model's attributes for JSON stringification.
    * Override toJSON of the attachment model in order to ensure that backbone does NOT try to parse the an object that causes recursive read, as there is a message object which contains the attachment model.
@@ -242,65 +246,63 @@ var AttachmentModel = Base.Model.extend({
    * @returns {Object}
    * @function app.models.attachments.AttachmentModel.toJSON
    */
-  toJSON: function(options){
+  toJSON(options) {
     var old = Base.Model.prototype.toJSON.call(this, options);
     //Remove the message attribute, as there is a circular dependency
     delete old['objectAttachedToModel'];
     return old;
-  },
+  }
+
   /**
    * Utility function. Makes the model unsavable.
    * @function app.models.attachments.AttachmentModel.setFailed
    */
-  setFailed: function(){
+  setFailed() {
     this.setFailed = true;
-  },
+  }
+
   /**
    * Returns if the model is unsavable.
    * @returns {Boolean}
    * @function app.models.attachments.AttachmentModel.isFailed
    */
-  isFailed: function(){
+  isFailed() {
     return this.setFailed === true;
   }
-});
+}
+
 /**
  * Attachements collection
  * @class app.models.attachments.AttachmentCollection
  * @extends app.models.base.BaseCollection
  */
-var AttachmentCollection = Base.Collection.extend({
-  /**
-   * @function app.models.attachments.AttachmentCollection.constructor
-   */
-  constructor: function AttachmentCollection() {
-    Base.Collection.apply(this, arguments);
-  },
+class AttachmentCollection extends Base.Collection {
   /**
    * Returns api url dedicated to attachments
    * @returns {String}
    * @function app.models.attachments.AttachmentCollection.url
    */
-  url: function() {
+  url() {
     return this.objectAttachedToModel.urlRoot() + '/' + this.objectAttachedToModel.getNumericId() + '/attachments';
-  },
+  }
+
   /**
    * The model
    * @type {PartnerOrganizationModel}
    */
-  model: function(attrs, options){
+  model(attrs, options) {
     //Add parse so that the document model is also parsed in an attachment
     if (!options){
       options = {};
     }
     options.parse = true;
     return new AttachmentModel(attrs, options);
-  },
+  }
 
   /**
    * @function app.models.attachments.AttachmentCollection.initialize
    */
-  initialize: function(models, options) {
+  initialize(models, options) {
     if (!options.objectAttachedToModel) {
       throw new Error("objectAttachedToModel must be provided to calculate url");
     }
@@ -316,13 +318,14 @@ var AttachmentCollection = Base.Collection.extend({
       save to the database
      */
     this.isFailed = options.failed || false;
-  },
+  }
+
   /**
    * Compares dates between 2 documents
    * @returns {Number}
    * @function app.models.attachments.AttachmentCollection.comparator
    */
-  comparator: function(one, two){
+  comparator(one, two) {
     var d1 = one.getDocument();
     var d2 = two.getDocument();
     var cmp = function (a, b){
@@ -346,8 +349,8 @@ var AttachmentCollection = Base.Collection.extend({
       return 1;
     }
     else { return 0; }
-  },
-  
+  }
+
   /**
    * Helper method to destroy the models in a collection
    * @param  {Array|Backbone.Model} models    Model or Array of models  
@@ -355,7 +358,7 @@ var AttachmentCollection = Base.Collection.extend({
    * @returns {Promse} if model was persisted, returns jqXhr else false
    * @function app.models.attachments.AttachmentCollection.destroy
    */
-  destroy: function(models, options){
+  destroy(models, options) {
     if (!models){
       return Promise.resolve(false);
     }
@@ -365,15 +368,16 @@ var AttachmentCollection = Base.Collection.extend({
     return Promise.each(models, function(model){
       model.destroy(options);
     });
-  },
+  }
+
   /**
   * Save models into database
   * @param {Object} models
   * @param {Object} options
   * @returns {Promise}
   * @function app.models.attachments.AttachmentCollection.save
-  */ 
-  save: function(models, options){
+  */
+  save(models, options) {
     if (!models){
       return Promise.resolve(false);
     }
@@ -383,42 +387,42 @@ var AttachmentCollection = Base.Collection.extend({
     return Promise.each(models, function(model){
       model.save(options);
     });
-  },
+  }
+
   /**
   * Destroy the collection
   * @param {Object} options
   * @returns {jqXHR}
   * @function app.models.attachments.AttachmentCollection.destroyAll
-  */ 
-  destroyAll: function(options){
+  */
+  destroyAll(options) {
     return this.destroy(this.models, options);
-  },
+  }
+
   /**
   * Save models into database
   * @param {Object} options
   * @returns {jqXHR}
   * @function app.models.attachments.AttachmentCollection.saveAll
-  */ 
-  saveAll: function(options){
+  */
+  saveAll(options) {
     return this.save(this.models, options);
   }
-});
+}
 
 /*
   An attachment collection that allows for validation
  */
-var ValidationAttachmentCollection = AttachmentCollection.extend({
-
-
-  initialize: function(models, options){
+class ValidationAttachmentCollection extends AttachmentCollection {
+  initialize(models, options) {
     this.limits = options.limits || {};
-    AttachmentCollection.prototype.initialize.apply(this, arguments);
-  },
+    super.initialize(...arguments);
+  }
 
   /*
     takes an array of models and makes validation check
    */
-  addValidation: function(models){
+  addValidation(models) {
     //If there is a count limit, override the old data (remove them first, though)
     //The removal is done in a FIFO format
 
@@ -462,16 +466,16 @@ var ValidationAttachmentCollection = AttachmentCollection.extend({
     });
     //If it passes both checks, return it
     return models;
-  },
+  }
 
   /*
     Override the add operation to set limits, if any exists
    */
-  add: function(models){
+  add(models) {
 
     if (!this.limits || this.isFailed){
       //If this is a failed collection, do not do any validation
-      return AttachmentCollection.prototype.add.apply(this, arguments);
+      return super.add(...arguments);
     }
 
     if (!(_.isArray(models))){
@@ -485,9 +489,9 @@ var ValidationAttachmentCollection = AttachmentCollection.extend({
     }
 
     return AttachmentCollection.prototype.add.call(this, models);
-  },
+  }
 
-  isTypeLimitCorrect: function(model){
+  isTypeLimitCorrect(model) {
     if (model === undefined || (_.isArray(model) && _.isEmpty(model))){
       //Not relevant
       return true;
@@ -507,9 +511,9 @@ var ValidationAttachmentCollection = AttachmentCollection.extend({
       }
     }
     return true;
-  },
+  }
 
-  isCountLimitCorrect: function(models){
+  isCountLimitCorrect(models) {
     if (models === undefined || (_.isArray(models) && _.isEmpty(models))){
       //Not relevant
       return true;
@@ -526,9 +530,9 @@ var ValidationAttachmentCollection = AttachmentCollection.extend({
       }
     }
     return true;
-  },
+  }
 
-  getCorrectCountedCollection: function(models){
+  getCorrectCountedCollection(models) {
     var that = this;
     if (_.isArray(models)){
       if (models.length > this.limits.count){
@@ -544,8 +548,7 @@ var ValidationAttachmentCollection = AttachmentCollection.extend({
       count: 1
     }
   }
-
-});
+}
 
 export default {
   attachmentPurposeTypes: attachmentPurposeTypes,

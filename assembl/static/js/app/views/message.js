@@ -48,11 +48,7 @@ var IDEA_CLASSIFICATION_LENGTH = 3;
  * @class app.views.message.IdeaClassificationNameListView
  * Classification view that is shown in the underneath each message
  */
-var IdeaClassificationNameListView = LoaderView.extend({
-  constructor: function IdeaClassificationNameListView() {
-    LoaderView.apply(this, arguments);
-  },
-
+class IdeaClassificationNameListView extends LoaderView.extend({
   template: '#tmpl-ideaClassificationInMessage',
 
   ui: {
@@ -61,10 +57,9 @@ var IdeaClassificationNameListView = LoaderView.extend({
 
   events: {
     "click @ui.idea": "onIdeaClick"
-  },
-
-
-  initialize: function(options){
+  }
+}) {
+  initialize(options) {
     this.setLoading(true);
     var cm = new CollectionManager();
     var that = this;
@@ -149,9 +144,9 @@ var IdeaClassificationNameListView = LoaderView.extend({
           console.error(e.statusText);
         });
     }
-  },
+  }
 
-  serializeData: function(){
+  serializeData() {
     if (this.isLoading()){
       return {};
     }
@@ -186,9 +181,9 @@ var IdeaClassificationNameListView = LoaderView.extend({
             rest.length),
         rest.length)
     };
-  },
+  }
 
-  onIdeaClick: function(e){
+  onIdeaClick(e) {
     var that = this;
     var analytics = Analytics.getInstance();
 
@@ -204,19 +199,15 @@ var IdeaClassificationNameListView = LoaderView.extend({
     Ctx.setCurrentModalView(modalView);
     IdeaLoom.rootView.showChildView('slider', modalView);
   }
-});
-
+}
 
 /**
  * @class app.views.message.MessageView
  */
-var MessageView = LoaderView.extend({
-  constructor: function MessageView() {
-    LoaderView.apply(this, arguments);
-  },
-
+class MessageView extends LoaderView.extend({
   template: '#tmpl-message',
   availableMessageViewStyles: Ctx.AVAILABLE_MESSAGE_VIEW_STYLES,
+
   /**
    * @type {string}
    */
@@ -266,11 +257,103 @@ var MessageView = LoaderView.extend({
    */
   messageModerationOptionsView: null,
 
+  modelEvents: {
+      'replacedBy':'onReplaced',
+      'change:like_count':'renderLikeCount',
+      'change':'guardedRender',
+      'openWithFullBodyView': 'onOpenWithFullBodyView'
+  },
+
+  ui: {
+      jumpToParentButton: ".js_message-jumptoparentbtn",
+      jumpToMessageInThreadButton: ".js_message-jump-to-message-in-thread",
+      jumpToMessageInReverseChronologicalButton: ".js_message-jump-to-message-in-reverse-chronological",
+      showAllMessagesByThisAuthorButton: ".js_message-show-all-by-this-author",
+      toggleExtracts: ".js_message-toggle-extracts",
+      moderationOptionsButton: ".js_message-moderation-options",
+      deleteMessageButton: ".js_message-delete",
+      messageReplyBox: ".js_messageReplyBoxRegion",
+      likeLink: ".js_likeButton",
+      shareLink: ".js_shareButton",
+      likeCounter: ".js_likeCount",
+      avatar: ".js_avatarContainer",
+      name: ".js_nameContainer",
+      translation: ".js_regionMessageTranslationQuestions",
+      attachments: ".js_regionMessageAttachments",
+      moderationOptions: ".js_regionMessageModerationOptions",
+      showTranslationPref: ".js_show-translation-preferences",
+      showMoreDropDown: ".dropdown-toggle", //Used for show/hiding translation view
+      showOriginal: '.js_translation_show_original', //Show original region
+      showOriginalString: '.js_trans_show_origin',
+      showTranslatedString: '.js_trans_show_translated',
+      ideaClassificationRegion: '.js_idea-classification-region',
+      messageBodyAnnotatorAllowed: '.js_messageBodyAnnotatorSelectionAllowed'
+
+    },
+
+  regions: {
+    avatar: "@ui.avatar",
+    name: "@ui.name",
+    translationRegion: "@ui.translation",
+    attachmentsRegion: "@ui.attachments",
+    moderationOptionsRegion: "@ui.moderationOptions",
+    messageReplyBoxRegion: "@ui.messageReplyBox",
+    ideaClassification: "@ui.ideaClassificationRegion"
+  },
+
+  /**
+   * @event
+   */
+  events: {
+
+    'click .js_messageHeader': 'onMessageTitleClick',
+    'click .js_messageTitle': 'onMessageTitleClick',
+    'click .js_readMore': 'onMessageTitleClick',
+    'click .js_readLess': 'onMessageTitleClick',
+    'click .message-hoistbtn': 'onMessageHoistClick',
+    'click @ui.likeLink': 'onClickLike',
+    'click @ui.shareLink': 'onClickShare',
+    'click @ui.jumpToParentButton': 'onMessageJumpToParentClick',
+    'click @ui.jumpToMessageInThreadButton': 'onMessageJumpToMessageInThreadClick',
+    'click @ui.jumpToMessageInReverseChronologicalButton': 'onMessageJumpToMessageInReverseChronologicalClick',
+    'click @ui.showAllMessagesByThisAuthorButton': 'onShowAllMessagesByThisAuthorClick',
+    'click .js_showModeratedMessage': 'onShowModeratedMessageClick',
+    'click @ui.toggleExtracts' : 'onToggleExtractsClick',
+    'click @ui.moderationOptionsButton' : 'onModerationOptionsClick',
+    'click @ui.deleteMessageButton' : 'onDeleteMessageClick',
+    "click @ui.showTranslationPref" : "onShowTranslationClick",
+
+    //
+    'click .js_messageReplyBtn': 'onMessageReplyBtnClick',
+    'click .messageSend-cancelbtn': 'onReplyBoxCancelBtnClick',
+
+    'click @ui.showOriginalString': 'onShowOriginalClick',
+    'click @ui.showTranslatedString': 'onShowTranslatedClick',
+
+    //These two are from messageSend.js, do NOT use @ui
+    'focus .js_messageSend-body': 'onReplyBoxFocus',
+    'blur .js_messageSend-body': 'onReplyBoxBlur',
+
+    //
+    'mousedown  @ui.messageBodyAnnotatorAllowed': 'startAnnotatorTextSelection',
+    'mousemove  @ui.messageBodyAnnotatorAllowed': 'updateAnnotatorTextSelection',
+    'mouseleave @ui.messageBodyAnnotatorAllowed': 'onMouseLeaveMessageBodyAnnotatorSelectionAllowed',
+    'mouseenter @ui.messageBodyAnnotatorAllowed': 'updateAnnotatorTextSelection',
+
+    // menu
+    'click .js_message-markasunread': 'markAsUnread',
+    'click .js_message-markasread': 'markAsRead',
+
+    'click .js_message-export-facebook': 'exportToFacebook',
+
+    'click .js_openTargetInPopOver': 'openTargetInPopOver'
+  }
+}) {
   /**
    * @init
    * @param {MessageModel} obj: the model
    */
-  initialize: function(options) {
+  initialize(options) {
     this.setLoading(true);
     var that = this;
 
@@ -367,10 +450,10 @@ var MessageView = LoaderView.extend({
 
     this.isCompleteDataLoaded();
 
-  },
+  }
 
   /** IMPORTANT NOTE:  If this returns false, if WILL initiate a data fetch */
-  isCompleteDataLoaded: function(){
+  isCompleteDataLoaded() {
     var that = this;
 
     if (!this.isLoading() && this.model.get('@view') ===  'default') {
@@ -398,16 +481,9 @@ var MessageView = LoaderView.extend({
         });
       return false;
     }
-  },
+  }
 
-  modelEvents: {
-      'replacedBy':'onReplaced',
-      'change:like_count':'renderLikeCount',
-      'change':'guardedRender',
-      'openWithFullBodyView': 'onOpenWithFullBodyView'
-  },
-
-  guardedRender: function(){
+  guardedRender() {
     if (Ctx.debugRender) {
       console.log("MessageView modelEvents change fired from", this.model);
     }
@@ -416,111 +492,26 @@ var MessageView = LoaderView.extend({
         this.render();
       }
     }
-  },
-
-  ui: {
-      jumpToParentButton: ".js_message-jumptoparentbtn",
-      jumpToMessageInThreadButton: ".js_message-jump-to-message-in-thread",
-      jumpToMessageInReverseChronologicalButton: ".js_message-jump-to-message-in-reverse-chronological",
-      showAllMessagesByThisAuthorButton: ".js_message-show-all-by-this-author",
-      toggleExtracts: ".js_message-toggle-extracts",
-      moderationOptionsButton: ".js_message-moderation-options",
-      deleteMessageButton: ".js_message-delete",
-      messageReplyBox: ".js_messageReplyBoxRegion",
-      likeLink: ".js_likeButton",
-      shareLink: ".js_shareButton",
-      likeCounter: ".js_likeCount",
-      avatar: ".js_avatarContainer",
-      name: ".js_nameContainer",
-      translation: ".js_regionMessageTranslationQuestions",
-      attachments: ".js_regionMessageAttachments",
-      moderationOptions: ".js_regionMessageModerationOptions",
-      showTranslationPref: ".js_show-translation-preferences",
-      showMoreDropDown: ".dropdown-toggle", //Used for show/hiding translation view
-      showOriginal: '.js_translation_show_original', //Show original region
-      showOriginalString: '.js_trans_show_origin',
-      showTranslatedString: '.js_trans_show_translated',
-      ideaClassificationRegion: '.js_idea-classification-region',
-      messageBodyAnnotatorAllowed: '.js_messageBodyAnnotatorSelectionAllowed'
-
-    },
-
-    regions: {
-      avatar: "@ui.avatar",
-      name: "@ui.name",
-      translationRegion: "@ui.translation",
-      attachmentsRegion: "@ui.attachments",
-      moderationOptionsRegion: "@ui.moderationOptions",
-      messageReplyBoxRegion: "@ui.messageReplyBox",
-      ideaClassification: "@ui.ideaClassificationRegion"
-    },
-
-  /**
-   * @event
-   */
-  events: {
-
-    'click .js_messageHeader': 'onMessageTitleClick',
-    'click .js_messageTitle': 'onMessageTitleClick',
-    'click .js_readMore': 'onMessageTitleClick',
-    'click .js_readLess': 'onMessageTitleClick',
-    'click .message-hoistbtn': 'onMessageHoistClick',
-    'click @ui.likeLink': 'onClickLike',
-    'click @ui.shareLink': 'onClickShare',
-    'click @ui.jumpToParentButton': 'onMessageJumpToParentClick',
-    'click @ui.jumpToMessageInThreadButton': 'onMessageJumpToMessageInThreadClick',
-    'click @ui.jumpToMessageInReverseChronologicalButton': 'onMessageJumpToMessageInReverseChronologicalClick',
-    'click @ui.showAllMessagesByThisAuthorButton': 'onShowAllMessagesByThisAuthorClick',
-    'click .js_showModeratedMessage': 'onShowModeratedMessageClick',
-    'click @ui.toggleExtracts' : 'onToggleExtractsClick',
-    'click @ui.moderationOptionsButton' : 'onModerationOptionsClick',
-    'click @ui.deleteMessageButton' : 'onDeleteMessageClick',
-    "click @ui.showTranslationPref" : "onShowTranslationClick",
-
-    //
-    'click .js_messageReplyBtn': 'onMessageReplyBtnClick',
-    'click .messageSend-cancelbtn': 'onReplyBoxCancelBtnClick',
-
-    'click @ui.showOriginalString': 'onShowOriginalClick',
-    'click @ui.showTranslatedString': 'onShowTranslatedClick',
-
-    //These two are from messageSend.js, do NOT use @ui
-    'focus .js_messageSend-body': 'onReplyBoxFocus',
-    'blur .js_messageSend-body': 'onReplyBoxBlur',
-
-    //
-    'mousedown  @ui.messageBodyAnnotatorAllowed': 'startAnnotatorTextSelection',
-    'mousemove  @ui.messageBodyAnnotatorAllowed': 'updateAnnotatorTextSelection',
-    'mouseleave @ui.messageBodyAnnotatorAllowed': 'onMouseLeaveMessageBodyAnnotatorSelectionAllowed',
-    'mouseenter @ui.messageBodyAnnotatorAllowed': 'updateAnnotatorTextSelection',
-
-    // menu
-    'click .js_message-markasunread': 'markAsUnread',
-    'click .js_message-markasread': 'markAsRead',
-
-    'click .js_message-export-facebook': 'exportToFacebook',
-
-    'click .js_openTargetInPopOver': 'openTargetInPopOver'
-  },
+  }
 
   /**
    * @param {string} htmlOrText: p and br tags are replaced with
    * spaces, and all html is stripped
    * @returns string
    */
-  generateBodyPreview: function(htmlOrText) {
+  generateBodyPreview(htmlOrText) {
       // The div is just there in case there actually isn't any html
       // in which case jquery would crash without it
       var bodyWithoutNewLine = $("<div>" + String(htmlOrText) + "</div>");
       bodyWithoutNewLine.find("p").after(" ");
       bodyWithoutNewLine.find("br").replaceWith(" ");
       return bodyWithoutNewLine.text().replace(/\s{2,}/g, ' ');
-    },
+    }
 
   /**
    * @returns langstring
    */
-  generateSafeBody: function() {
+  generateSafeBody() {
     var body = this.model.get('body') || LangString.Model.empty;
 
     if (this.model.get('bodyMimeType') !== 'text/html') {
@@ -529,21 +520,21 @@ var MessageView = LoaderView.extend({
       body = body.applyFunction(Ctx.stripHtml);
     }
     return body;
-  },
+  }
 
   /**
    * @returns string
    */
-  generateSafeOriginalBody: function() {
+  generateSafeOriginalBody() {
     var body = this.model.get('body') || LangString.Model.empty;
     var bodyText = body.originalValue();
     if(this.model.get('bodyMimeType') !== "text/html") {
         bodyText = Ctx.stripHtml(bodyText);
     }
     return bodyText;
-  },
+  }
 
-  processContent: function() {
+  processContent() {
     var body = this.model.get('body') || LangString.Model.empty;
     var subject = this.model.get('subject') || LangString.Model.empty;
 
@@ -585,9 +576,9 @@ var MessageView = LoaderView.extend({
       this._subject = subject.original();
       this.isMessageTranslated = false;
     }
-  },
+  }
 
-  serializeData: function() {
+  serializeData() {
     if (this.isLoading()) {
         return {};
     }
@@ -698,9 +689,9 @@ var MessageView = LoaderView.extend({
       showOriginalUrl: LangString.LocaleUtils.getServiceShowOriginalUrl(),
       isModerated: this.moderationOptions.isModerated
     };
-  },
+  }
 
-  renderLikeCount: function() {
+  renderLikeCount() {
       // specialized render because we do not want a full render.
       // it may kill a message being written.
       if (Ctx.debugRender) {
@@ -718,9 +709,9 @@ var MessageView = LoaderView.extend({
           this.ui.likeCounter.hide();
         }
       }
-    },
+    }
 
-  changeIsPartialRender: function() {
+  changeIsPartialRender() {
     var likeFound = false;
     var changedAttributes = this.model.changedAttributes();
     for (var propName in changedAttributes) {
@@ -742,9 +733,9 @@ var MessageView = LoaderView.extend({
     }
 
     return likeFound;
-  },
+  }
 
-  onBeforeRender: function(){
+  onBeforeRender() {
     this.isCompleteDataLoaded();
     //Check if the message is moderated
     var publication_state = this.model.get('publication_state');
@@ -753,13 +744,13 @@ var MessageView = LoaderView.extend({
       this.moderationOptions.isModerated = true;
       this.moderationOptions.purpose = this.model.get('publication_state');
     }
-  },
+  }
 
   /**
    * The render
    * @returns {MessageView}
    */
-  onRender: function() {
+  onRender() {
     if (this.isLoading()) {
         return {};
     }
@@ -1017,9 +1008,9 @@ var MessageView = LoaderView.extend({
     }
 
 
-  },
+  }
 
-  renderAuthor: function() {
+  renderAuthor() {
     var agentAvatarView = new AgentViews.AgentAvatarView({
       model: this.creator
     });
@@ -1028,25 +1019,25 @@ var MessageView = LoaderView.extend({
       model: this.creator
     });
     this.showChildView('name', agentNameView);
-  },
+  }
 
   /**
    * Meant for derived classes to override
    * @type {}
    */
-  transformDataBeforeRender: function(data) {
+  transformDataBeforeRender(data) {
     return data;
-  },
+  }
 
   /**
    * Meant for derived classes to override
    * @type {}
    */
-  postRender: function() {
+  postRender() {
     return;
-  },
+  }
 
-  onClickLike: function(e) {
+  onClickLike(e) {
     var that = this;
     var liked_uri = this.model.get('liked');
     var analytics = Analytics.getInstance();
@@ -1077,24 +1068,24 @@ var MessageView = LoaderView.extend({
     }
 
     return false;
-  },
+  }
 
-  onClickShare: function(e) {
+  onClickShare(e) {
       var analytics = Analytics.getInstance();
       analytics.trackEvent(analytics.events.MESSAGE_SHARE_BTN_CLICKED);
-    },
+    }
 
   /**
    * Should be called each render
    */
-  clearAnnotationsToLoadCache: function() {
+  clearAnnotationsToLoadCache() {
     this.annotationsToLoad = undefined;
-  },
+  }
 
   /**
    * Get the list of annotations to render in the message body
    */
-  getAnnotationsToLoadPromise: function() {
+  getAnnotationsToLoadPromise() {
     var that = this;
 
     var //TODO:  This is fairly CPU intensive, and may be worth caching.
@@ -1127,13 +1118,13 @@ var MessageView = LoaderView.extend({
 
       return that.annotationsToLoad;
     });
-  },
+  }
 
   /**
    * Render annotator's annotations in the message body
    * Safe to call multiple times, will not double load annotations.
    */
-  loadAnnotations: function() {
+  loadAnnotations() {
     var that = this;
 
     if (this.annotator && this.showAnnotations && (this.viewStyle == this.availableMessageViewStyles.FULL_BODY)) {
@@ -1160,13 +1151,13 @@ var MessageView = LoaderView.extend({
       });
 
     }
-  },
+  }
 
   /**
     * @function app.views.message.MessageView.removeAnnotations
     * Seperating the logic of toggling annotations into seperate functions
     */
-  removeAnnotations: function(){
+  removeAnnotations() {
     if (this.showAnnotations) {
       this.showAnnotations = false;
       if (this.annotator && this.loadedAnnotations){
@@ -1175,47 +1166,47 @@ var MessageView = LoaderView.extend({
         }
       }
     }
-  },
+  }
 
   /*
     Seperating the logic of toggling annotations into seperate functions
     Horrible name. @TODO: Think of better name. Conflicts with flag showAnnotations
    */
-  addAnnotations: function(){
+  addAnnotations() {
     if (!this.showAnnotations){
       this.showAnnotations = true;
       this.loadAnnotations();
     }
-  },
+  }
 
   /**
    * @function app.views.message.MessageView.showSegmentByAnnotation
    * Shows the related extract from the given annotation
    * @param  {annotation} annotation
    */
-  showSegmentByAnnotation: function(annotation) {
+  showSegmentByAnnotation(annotation) {
     var that = this;
     var currentIdea = this.messageListView.getGroupState().get('currentIdea');
     var collectionManager = new CollectionManager();
     if (annotation.idIdea == null || (
         currentIdea != null && currentIdea.id == annotation.idIdea))
       return;
-    var Modal = Backbone.Modal.extend({
-  constructor: function Modal() {
-    Backbone.Modal.apply(this, arguments);
-  },
 
+    class Modal extends Backbone.Modal.extend({
       template: _.template($('#tmpl-showSegmentByAnnotation').html()),
       className: 'generic-modal popin-wrapper modal-showSegment',
       cancelEl: '.js_close',
       keyControl: false,
-      initialize: function() {
-        this.$('.bbm-modal').addClass('popin');
-      },
+
       events: {
               'click .js_redirectIdea': 'redirectToIdea',
-            },
-      redirectToIdea: function() {
+            }
+    }) {
+      initialize() {
+        this.$('.bbm-modal').addClass('popin');
+      }
+
+      redirectToIdea() {
         var self = this;
 
         Promise.join(collectionManager.getAllExtractsCollectionPromise(),
@@ -1252,18 +1243,17 @@ var MessageView = LoaderView.extend({
                       self.destroy();
                     });
       }
-
-    });
+    }
 
     var modal = new Modal();
 
     $('#slider').html(modal.render().el);
-  },
+  }
 
   /**
    * Render annotator's annotations in the message body
    */
-  renderAnnotations: function(annotations) {
+  renderAnnotations(annotations) {
     var that = this;
 
     if(!this.isDestroyed()) {
@@ -1277,9 +1267,9 @@ var MessageView = LoaderView.extend({
         });
       });
     }
-  },
+  }
 
-  renderIdeaClassification: function(){
+  renderIdeaClassification() {
     if (!this.model.hasIdeaContentLinks() ){
       //console.log('message ' + this.model.id + " does not have idea content links");
       return;
@@ -1294,13 +1284,13 @@ var MessageView = LoaderView.extend({
       this.showChildView('ideaClassification', view);  
     }
     
-  },
+  }
 
-  removeIdeaClassificationView: function(){
+  removeIdeaClassificationView() {
     this.getRegion('ideaClassification').empty();
-  },
+  }
 
-  renderAttachments: function(){
+  renderAttachments() {
 
     this.attachmentsCollectionView = new AttachmentViews.AttachmentCollectionView({
       collection: this.model.get('attachments')
@@ -1309,36 +1299,36 @@ var MessageView = LoaderView.extend({
     if (this.canShowAttachments()){
       this.showChildView('attachmentsRegion', this.attachmentsCollectionView);
     }
-  },
+  }
 
   /**
    * @event
    * param Annotator object
    */
-  onAnnotatorInitComplete: function(annotator) {
+  onAnnotatorInitComplete(annotator) {
     this.annotator = annotator;
 
     //Normally render has been called by this point, no need for a full render
     this.loadAnnotations();
-  },
+  }
 
   /**
    * @event
    */
-  onAnnotatorDestroy: function(annotator) {
+  onAnnotatorDestroy(annotator) {
     this.annotator = null;
 
     // Resets loaded annotations to initial
     this.loadedAnnotations = {};
-  },
+  }
 
   /**
    * Hide the annotator selection tooltip displayed during the selection,
    * before it completes
    */
-  hideAnnotatorSelectionTooltip: function() {
+  hideAnnotatorSelectionTooltip() {
     Ctx.annotatorSelectionTooltip.hide();
-  },
+  }
 
   /**
    * Show/update the annotator selection tooltip displayed during the selection,
@@ -1347,7 +1337,7 @@ var MessageView = LoaderView.extend({
    * @param  {number} y
    * @param  {string} text
    */
-  showAnnotatorSelectionTooltip: function(x, y, text) {
+  showAnnotatorSelectionTooltip(x, y, text) {
     var marginLeft = Ctx.annotatorSelectionTooltip.width() / -2;
     var segment = text;
 
@@ -1358,14 +1348,14 @@ var MessageView = LoaderView.extend({
         .attr('data-segment', segment)
         .text(text)
         .css({ top: y, left: x, 'margin-left': marginLeft });
-  },
+  }
 
   /**
    * Shows the save options to the selected text once the selection is complete
    * @param  {number} x
    * @param  {number} y
    */
-  showAnnotatorSelectionSaveOptions: function(x, y) {
+  showAnnotatorSelectionSaveOptions(x, y) {
     this.hideAnnotatorSelectionTooltip();
 
     var annotator = this.$el.closest('.messageList-list').data('annotator');
@@ -1391,9 +1381,9 @@ var MessageView = LoaderView.extend({
       });
     }
 
-  },
+  }
 
-  onMessageReplyBtnClick: function(e) {
+  onMessageReplyBtnClick(e) {
     var analytics = Analytics.getInstance();
     e.preventDefault();
     //So it is saved if the view refreshes
@@ -1407,12 +1397,12 @@ var MessageView = LoaderView.extend({
       //console.log("Message already open, focusing on reply box");
       this.focusReplyBox();
     }
-  },
+  }
 
   /**
    *  Focus on the reply box, and open the message if closed
    **/
-  focusReplyBox: function() {
+  focusReplyBox() {
     var that = this;
 
     if (!this.isMessageOpened()) {
@@ -1469,45 +1459,45 @@ var MessageView = LoaderView.extend({
     else {
       console.error("Tried to focus on the reply box of a message, but reply box isn't onscreen.  This should not happen!");
     }
-  },
+  }
 
-  onReplyBoxCancelBtnClick: function(e) {
+  onReplyBoxCancelBtnClick(e) {
       this.replyBoxShown = false;
       this.render();
-  },
+  }
 
-  onShowOriginalClick: function(e) {
+  onShowOriginalClick(e) {
       this.useOriginalContent = true;
       this.forceTranslationQuestion = false;
       this.hideTranslationQuestion = true;
       this.render();
-  },
+  }
 
-  onShowTranslatedClick: function(e) {
+  onShowTranslatedClick(e) {
       this.useOriginalContent = false;
       this.forceTranslationQuestion = false;
       this.hideTranslationQuestion = false;
       this.render();
-  },
+  }
 
-  onMessageHoistClick: function(ev) {
+  onMessageHoistClick(ev) {
     // we will hoist the post, or un-hoist it if it is already hoisted
     this.isHoisted = this.messageListView.toggleFilterByPostId(this.model.getId());
     this.render(); // so that the isHoisted property will now be considered
-  },
+  }
 
-  onMessageJumpToParentClick: function(ev) {
+  onMessageJumpToParentClick(ev) {
       this.messageListView.showMessageById(this.model.get('parentId'));
-    },
+    }
 
-  onMessageJumpToMessageInThreadClick: function(ev) {
+  onMessageJumpToMessageInThreadClick(ev) {
       this.messageListView.currentQuery.clearAllFilters();
       this.messageListView.setViewStyle(this.messageListView.ViewStyles.NEW_MESSAGES);
       this.messageListView.render();
       this.messageListView.showMessageById(this.model.id);
-    },
+    }
 
-  onToggleExtractsClick: function(ev) {
+  onToggleExtractsClick(ev) {
     if ( this.showAnnotations === true ){
       this.showAnnotations = false;
       if ( this.annotator && this.loadedAnnotations ){
@@ -1519,9 +1509,9 @@ var MessageView = LoaderView.extend({
       this.showAnnotations = true;
       this.loadAnnotations();
     }
-  },
+  }
 
-  onModerationOptionsClick: function(ev) {
+  onModerationOptionsClick(ev) {
     console.log("message::onModerationOptionsClick()");
     if ( this.messageModerationOptionsView ){
       // this.destroyMessageModerationOptionsView(); // uncomment to toggle
@@ -1537,14 +1527,16 @@ var MessageView = LoaderView.extend({
     this.showChildView('moderationOptionsRegion', this.messageModerationOptionsView);
     this.listenToOnce(this.messageModerationOptionsView, 'moderationOptionsSaveAndClose', this.onModerationOptionsSaveAndClose);
     this.listenToOnce(this.messageModerationOptionsView, 'moderationOptionsClose', this.onModerationOptionsClose);
-  },
-  fetchIdeasCollection:function(){
+  }
+
+  fetchIdeasCollection() {
     var cm = new CollectionManager();
     return cm.getAllIdeasCollectionPromise().then(function(ideasCollection){
       ideasCollection.fetch();
     });
-  },
-  onDeleteMessageClick: function(ev){
+  }
+
+  onDeleteMessageClick(ev) {
     var that = this;
     
     // We could try to minimize context switching for the user, by scrolling the viewport to the message the user wants to delete, as soon as the confirmation popin opens, using this line of code:
@@ -1587,63 +1579,63 @@ var MessageView = LoaderView.extend({
       onSubmit: onSubmit,
     });
     IdeaLoom.rootView.showChildView('slider', confirm);
-  },
+  }
 
-  onShowTranslationClick: function(ev){
+  onShowTranslationClick(ev) {
     this.forceTranslationQuestion = true;
     this.hideTranslationQuestion = false;
     this.render();
-  },
+  }
 
-  onHideQuestionClick: function(e) {
+  onHideQuestionClick(e) {
     this.forceTranslationQuestion = false;
     this.hideTranslationQuestion = true;
     this.render();
-  },
+  }
 
-  destroyMessageModerationOptionsView: function(){
+  destroyMessageModerationOptionsView() {
     console.log("message::destroyMessageModerationOptionsView()");
     if ( this.messageModerationOptionsView ){
       console.log("destroying");
       this.messageModerationOptionsView.destroy();
       this.messageModerationOptionsView = null;
     }
-  },
+  }
 
-  onModerationOptionsSaveAndClose: function(){
+  onModerationOptionsSaveAndClose() {
     console.log("message:onModerationOptionsSaveAndClose()");
     this.destroyMessageModerationOptionsView();
     this.render();
-  },
+  }
 
-  onModerationOptionsClose: function(){
+  onModerationOptionsClose() {
     console.log("message:onModerationOptionsClose()");
     this.destroyMessageModerationOptionsView();
-  },
+  }
 
-  onMessageJumpToMessageInReverseChronologicalClick: function(ev) {
+  onMessageJumpToMessageInReverseChronologicalClick(ev) {
       this.messageListView.currentQuery.clearAllFilters();
       this.messageListView.setViewStyle(this.messageListView.ViewStyles.REVERSE_CHRONOLOGICAL);
       this.messageListView.render();
       this.messageListView.showMessageById(this.model.id);
-    },
+    }
 
-  onShowAllMessagesByThisAuthorClick: function(ev) {
+  onShowAllMessagesByThisAuthorClick(ev) {
       this.messageListView.currentQuery.clearAllFilters();
       this.messageListView.currentQuery.addFilter(this.messageListView.currentQuery.availableFilters.POST_IS_FROM, this.model.get('idCreator'));
       this.messageListView.render();
       this.messageListView.showMessageById(this.model.id);
-    },
+    }
 
-  onShowModeratedMessageClick: function(ev) {
+  onShowModeratedMessageClick(ev) {
     var message_number = ev.target.attributes["data"].value;
     this.$("#js_moderated_message_" + message_number).toggleClass('hidden');
-  },
+  }
 
   /**
    * You need to re-render after this
    */
-  setViewStyle: function(style) {
+  setViewStyle(style) {
     if (style === this.availableMessageViewStyles.TITLE_ONLY) {
       this.$el.removeClass(this.availableMessageViewStyles.FULL_BODY.id);
       this.$el.removeClass(this.availableMessageViewStyles.PREVIEW.id);
@@ -1666,12 +1658,12 @@ var MessageView = LoaderView.extend({
     else {
       console.log("unsupported view style :" + style);
     }
-  },
+  }
 
   /**
    * Is the message currently in it's "opened" state?
    */
-  isMessageOpened: function() {
+  isMessageOpened() {
       if (this.viewStyle === this.availableMessageViewStyles.FULL_BODY &&
          this.replyBoxShown === true) {
         return true;
@@ -1679,13 +1671,13 @@ var MessageView = LoaderView.extend({
       else {
         return false;
       }
-    },
+    }
 
   /**
    * move the message to it's "opened" state (FULL_BODY, reply box shown
    * etc.
    */
-  doOpenMessage: function() {
+  doOpenMessage() {
       var shouldReRender = false;
       if (!this.isMessageOpened()) {
         this.setViewStyle(this.availableMessageViewStyles.FULL_BODY);
@@ -1703,32 +1695,32 @@ var MessageView = LoaderView.extend({
       if ( shouldReRender ){
         this.render();
       }
-    },
+    }
 
   /**
    * move the message to it's "closed" state, which is dependent on the
    * view
    */
-  doCloseMessage: function() {
+  doCloseMessage() {
       if (this.isMessageOpened()) {
         this.setViewStyle(this.messageListView.getTargetMessageViewStyleFromMessageListConfig(this));
         this.replyBoxShown = false;
         this.render();
       }
-    },
+    }
 
   /**
    * Change the message view Style and re-render.
    * In most cases will switch between FULL_BODY and another view
    */
-  toggleViewStyle: function() {
+  toggleViewStyle() {
       this.isMessageOpened() ? this.doCloseMessage() : this.doOpenMessage();
-    },
+    }
 
   /**
    * @event
    */
-  onMessageTitleClick: function(e) {
+  onMessageTitleClick(e) {
     if (e) {
       var target = $(e.target);
       if (target.is('a') && !(
@@ -1741,29 +1733,29 @@ var MessageView = LoaderView.extend({
     }
 
     this.doProcessMessageTitleClick();
-  },
+  }
 
   /**
    */
-  doProcessMessageTitleClick: function() {
+  doProcessMessageTitleClick() {
     this.toggleViewStyle();
-  },
+  }
 
   /**
    * This il only called by messageList::showMessageById
    */
-  onOpenWithFullBodyView: function(e) {
+  onOpenWithFullBodyView(e) {
       //console.log("onOpenWithFullBodyView()");
       if (!this.isMessageOpened()) {
         this.doOpenMessage();
       }
-    },
+    }
 
   /**
    * @event
    * Starts annotator text selection process
    */
-  startAnnotatorTextSelection: function() {
+  startAnnotatorTextSelection() {
       if (Ctx.debugAnnotator) {
         console.log("startAnnotatorTextSelection called");
       }
@@ -1781,13 +1773,13 @@ var MessageView = LoaderView.extend({
       $(document).one('mouseup', function(ev) {
         that.finishAnnotatorTextSelection(ev);
       });
-    },
+    }
 
   /**
    * @event
    * Does the selection
    */
-  updateAnnotatorTextSelection: function(ev) {
+  updateAnnotatorTextSelection(ev) {
     if (Ctx.debugAnnotator) {
       console.log("updateAnnotatorTextSelection called");
     }
@@ -1820,12 +1812,12 @@ var MessageView = LoaderView.extend({
     else {
       this.hideAnnotatorSelectionTooltip();
     }
-  },
+  }
 
   /**
    * @event
    */
-  onMouseLeaveMessageBodyAnnotatorSelectionAllowed: function() {
+  onMouseLeaveMessageBodyAnnotatorSelectionAllowed() {
       if (Ctx.debugAnnotator) {
         console.log("onMouseLeaveMessageBodyAnnotatorSelectionAllowed called");
       }
@@ -1853,14 +1845,14 @@ var MessageView = LoaderView.extend({
         })();
       }
 
-    },
+    }
 
   /**
    * Return the selected text on the document (DOM Selection, nothing
    * annotator specific)
    * @returns {Selection}
    */
-  getSelectedText: function() {
+  getSelectedText() {
       if (Ctx.debugAnnotator) {
         console.log("getSelectedText called");
       }
@@ -1873,13 +1865,13 @@ var MessageView = LoaderView.extend({
         var selection = document.selection && document.selection.createRange();
         return selection.text ? selection.text : false;
       }
-    },
+    }
 
   /**
    * Finish processing the annotator text selection
    * @event
    */
-  finishAnnotatorTextSelection: function(ev) {
+  finishAnnotatorTextSelection(ev) {
     var isInsideAMessage = false;
     var selectedText = this.getSelectedText();
     var user = Ctx.getCurrentUser();
@@ -1906,23 +1898,23 @@ var MessageView = LoaderView.extend({
 
     this.isSelecting = false;
     this.$el.removeClass('is-selecting');
-  },
+  }
 
   /**
    * @event
    */
-  onReplaced: function(newObject) {
+  onReplaced(newObject) {
     this.setElement(newObject);
 
     // TODO André: also look at this one, please!
     // It will not be triggered for a while, though.
     this.render();
-  },
+  }
 
   /**
    * Mark the current message as unread
    */
-  markAsUnread: function(ev) {
+  markAsUnread(ev) {
     var target = this.$('.readUnreadIndicator');
     var analytics = Analytics.getInstance();
 
@@ -1930,12 +1922,12 @@ var MessageView = LoaderView.extend({
     ev.stopPropagation();
     Ctx.removeCurrentlyDisplayedTooltips(this.$el);
     this.model.setRead(false, target);
-  },
+  }
 
   /**
    * Mark the current message as read
    */
-  markAsRead: function(ev) {
+  markAsRead(ev) {
     var target = this.$('.readUnreadIndicator');
     var analytics = Analytics.getInstance();
 
@@ -1943,33 +1935,33 @@ var MessageView = LoaderView.extend({
     ev.stopPropagation();
     Ctx.removeCurrentlyDisplayedTooltips(this.$el);
     this.model.setRead(true, target);
-  },
+  }
 
-  onReplyBoxFocus: function(e) {
+  onReplyBoxFocus(e) {
       this.replyBoxHasFocus = true;
       if (!this.model.get('read')) {
         this.model.setRead(true); // we do not call markAsRead on purpose
       }
 
       IdeaLoom.message_vent.trigger('messageList:replyBoxFocus');
-    },
+    }
 
-  onReplyBoxBlur: function(e) {
+  onReplyBoxBlur(e) {
       this.replyBoxHasFocus = false;
       IdeaLoom.message_vent.trigger('messageList:replyBoxBlur');
-    },
+    }
 
   /**
    * Show the read less link
    * */
-  showReadLess: function() {
+  showReadLess() {
     this.$('.readLess').removeClass('hidden');
-  },
+  }
 
-  openTargetInPopOver: function(evt) {
+  openTargetInPopOver(evt) {
     console.log("message openTargetInPopOver(evt: ", evt);
     return Ctx.openTargetInPopOver(evt);
-  },
+  }
 
   /**
    * [exportToFacebook global function that
@@ -1978,19 +1970,19 @@ var MessageView = LoaderView.extend({
    * @param event
    * @returns {null}
    */
-  exportToFacebook: function(event) {
+  exportToFacebook(event) {
       var modal = new messageExport({
         exportedMessage: this.model,
         messageView: this
       });
       $('#slider').html(modal.render().el);
-  },
+  }
 
   /**
    * Method that will close the translation region by using a genie effect
    * @param  {Function}  cb:  A parameterless callback 
    */
-  closeTranslationView: function(cb){
+  closeTranslationView(cb) {
     var $source = this.$(this.ui.translation);
     var $target = this.$(this.ui.showMoreDropDown);
     var that = this;
@@ -2004,9 +1996,9 @@ var MessageView = LoaderView.extend({
           cb();
         }
       });
-  },
+  }
 
-  canShowAnnotations: function(){
+  canShowAnnotations() {
     var c = Ctx.getCurrentUser().can(Permissions.ADD_EXTRACT);
 
     if (this.isMessageTranslated){
@@ -2014,13 +2006,13 @@ var MessageView = LoaderView.extend({
     }
 
     return c;
-  },
+  }
 
   /*
     Utility method to initialize the state of translation for proper view rendering for translations
     @param {Object}  preference:   The UserLanguagePreference Collection 
    */
-  initiateTranslationState: function(preferences){
+  initiateTranslationState(preferences) {
     //console.log("vody:", this.model.get("body"));
     var translationData = preferences.getTranslationData();
     var body = this.model.get("body");
@@ -2050,21 +2042,21 @@ var MessageView = LoaderView.extend({
     else {
       this.hasTranslatorService = Ctx.hasTranslationService();
     }
-  },
+  }
 
   /*
     Logic check that the translation view should be shown
    */
-  canShowTranslation: function(){
+  canShowTranslation() {
     return (Ctx.isUserConnected() && this.hasTranslatorService
         && this.model.getBEType() != Types.SYNTHESIS_POST);
-  },
+  }
 
   /*
     ~ Deprecated ~
     Utility method to reset the state variables required by the translation view logic
    */
-  resetTranslationState: function(){
+  resetTranslationState() {
     this.unknownPreference = false;
     this.forceTranslationQuestion = false;
     this.hideTranslationQuestion = false;
@@ -2072,9 +2064,9 @@ var MessageView = LoaderView.extend({
     this.showAnnotations = this.canShowAnnotations();
     // this.bodyTranslationError = false;  //This could be wrong. Perhaps, should call processContent
     this.processContent();
-  },
+  }
 
-  canShowAttachments: function(){
+  canShowAttachments() {
     if (this.moderationOptions.isModerated){
       if (this.moderationOptions.purpose === 'MODERATED_TEXT_NEVER_AVAILABLE'){
         return false;
@@ -2083,8 +2075,7 @@ var MessageView = LoaderView.extend({
     }
     return true;
   }
-
-});
+}
 
 export default MessageView;
 

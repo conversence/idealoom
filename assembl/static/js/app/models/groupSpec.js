@@ -7,35 +7,31 @@ import Base from './base.js';
 import panelSpec from './panelSpec.js';
 import PanelSpecTypes from '../utils/panelSpecTypes.js';
 import groupState from './groupState.js';
+
 /**
  * Group specifications model
  * @class app.models.groupSpec.GroupSpecModel
  * @extends app.models.base.BaseModel
  */
-var GroupSpecModel = Base.Model.extend({
-  /**
-   * @function app.models.groupSpec.GroupSpecModel.constructor
-   */
-  constructor: function GroupSpecModel() {
-    Base.Model.apply(this, arguments);
-  },
+class GroupSpecModel extends Base.Model {
   /**
    * Set panelSpec and groupState in model attributes
    * @returns {Object}
    * @function app.models.groupSpec.GroupSpecModel.defaults
    */
-  defaults: function() {
+  defaults() {
     return {
       "panels": new panelSpec.Collection(),
       "states": new groupState.Collection([new groupState.Model()])
     };
-  },
+  }
+
   /**
    * @param {Object} model
    * @returns {Object}
    * @function app.models.groupSpec.GroupSpecModel.parse
    */
-  parse: function(model) {
+  parse(model) {
     model.panels = new panelSpec.Collection(model.panels, {parse: true});
     if (model.states && model.states.length > 0) {
       model.states = new groupState.Collection(model.states, {parse: true});
@@ -44,12 +40,13 @@ var GroupSpecModel = Base.Model.extend({
       model.states = this.defaults().states;
     }
     return model;
-  },
+  }
+
   /**
    * Remove panel specs from model
    * @function app.models.groupSpec.GroupSpecModel.removePanels
    */
-  removePanels: function() {
+  removePanels() {
     var args = Array.prototype.slice.call(arguments);
     var panels = this.get('panels');
     var panelsToRemove = _.filter(panels.models, function(el) {
@@ -58,44 +55,48 @@ var GroupSpecModel = Base.Model.extend({
     _.each(panelsToRemove, function(el) {
       panels.remove(el);
     });
-  },
+  }
+
   /**
    * Remove panel specs from model
    * @param {aPanelSpec} aPanelSpec
    * @function app.models.groupSpec.GroupSpecModel.removePanelByModel
    */
-  removePanelByModel: function(aPanelSpec) {
+  removePanelByModel(aPanelSpec) {
     this.get('panels').remove(aPanelSpec);
-  },
+  }
+
   /**
    * Returns the part of the groupSpec that contains the navigation panel (if any).
    * That is, any panel in the first position that has the capacity to alter the global group state
    * @returns {Object}
    * @function app.models.groupSpec.GroupSpecModel.findNavigationPanelSpec
    */
-  findNavigationPanelSpec: function() {
+  findNavigationPanelSpec() {
     var navigationTypes = PanelSpecTypes.getNavigationPanelTypes();
     var panelAtFirstPositionTypeId = this.get('panels').at(0).get('type');
 
     var panelSpecType = _.find(navigationTypes, function(navigationType) { return navigationType.id === panelAtFirstPositionTypeId; });
 
     return panelSpecType;
-  },
+  }
+
   /**
    * Returns the part of the groupSpec that contains the simple interface navigation panel (if any)
    * @returns {Object}
    * @function app.models.groupSpec.GroupSpecModel.findNavigationSidebarPanelSpec
    */
-  findNavigationSidebarPanelSpec: function() {
+  findNavigationSidebarPanelSpec() {
     return this.get('panels').findWhere({type: PanelSpecTypes.NAV_SIDEBAR.id});
-  },
+  }
+
   /**
    * Add panel specs to model
    * @param {Object} options
    * @param {Int} position
    * @function app.models.groupSpec.GroupSpecModel.addPanel
    */
-  addPanel: function(options, position) {
+  addPanel(options, position) {
     var aPanelSpec = new panelSpec.Model(options);
     if (!aPanelSpec.isValid()) {
       throw new Error("Can't add an invalid panelSpec, error was: " + aPanelSpec.validationError);
@@ -106,13 +107,14 @@ var GroupSpecModel = Base.Model.extend({
     } else {
       panels.add(aPanelSpec, {at: position});
     }
-  },
+  }
+
   /**
    * Returns panel sepcs by type
    * @param {Object} panelSpecType
    * @function app.models.groupSpec.GroupSpecModel.getPanelSpecByType
    */
-  getPanelSpecByType: function(panelSpecType) {
+  getPanelSpecByType(panelSpecType) {
     var validPanelSpecType = PanelSpecTypes.validate(panelSpecType);
     if (validPanelSpecType === undefined) {
       throw new Error("invalid panelSpecType");
@@ -120,7 +122,8 @@ var GroupSpecModel = Base.Model.extend({
     return _.find(this.get('panels').models, function(el) {
       return el.getPanelSpecType() === validPanelSpecType;
     });
-  },
+  }
+
   /**
    * Find or create panels at a given position
    * Note that despite the name, this function does NOT check that if the panel exists, it exists at the right position.
@@ -129,7 +132,7 @@ var GroupSpecModel = Base.Model.extend({
    * @param {Int} position - int order of first panel listed in sequence of panels
    * @function app.models.groupSpec.GroupSpecModel.ensurePanelsAt
    */
-  ensurePanelsAt: function(list_of_options, position) {
+  ensurePanelsAt(list_of_options, position) {
     var that = this;
     if (!Array.isArray(list_of_options)) {
       list_of_options = [list_of_options];
@@ -146,12 +149,13 @@ var GroupSpecModel = Base.Model.extend({
       }
       position++;
     });
-  },
+  }
+
   /**
    * Validate the model attributes
    * @function app.models.groupSpec.GroupSpecModel.validate
    */
-  validate: function() {
+  validate() {
     var navstate = this.get('navigationState');
     //Migrate old data
     if (navstate == 'home') {
@@ -161,29 +165,25 @@ var GroupSpecModel = Base.Model.extend({
     var panels = this.get('panels');
     return panels.validate();
   }
-});
+}
+
 /**
  * Group specifications collection
  * @class app.models.groupSpec.GroupSpecs
  * @extends app.models.base.BaseCollection
  */
-var GroupSpecs = Base.Collection.extend({
-  /**
-   * @function app.models.groupSpec.GroupSpecs.constructor
-   */
-  constructor: function GroupSpecs() {
-    Base.Collection.apply(this, arguments);
-  },
+class GroupSpecs extends Base.Collection.extend({
   /**
    * The model
    * @type {GroupSpecModel}
    */
-  model: GroupSpecModel,
+  model: GroupSpecModel
+}) {
   /**
    * Validate the model attributes
    * @function app.models.groupSpec.GroupSpecs.validate
    */
-  validate: function() {
+  validate() {
     var invalid = [];
     this.each(function(groupSpec) {
       if (!groupSpec.validate()) {
@@ -197,7 +197,7 @@ var GroupSpecs = Base.Collection.extend({
     }
     return (this.length > 0);
   }
-});
+}
 
 export default {
   Model: GroupSpecModel,

@@ -22,22 +22,9 @@ import TrueFalseField from './reusableDataFields/trueFalseField.js';
 
 /** 
  */
-var AbstractAnnouncementView = LoaderView.extend({
-  constructor: function AbstractAnnouncementView() {
-    LoaderView.apply(this, arguments);
-  },
-
-
-  initialize: function(options) {
-  },
-
+class AbstractAnnouncementView extends LoaderView.extend({
   events: {
 
-  },
-
-  onRender: function() {
-    Ctx.removeCurrentlyDisplayedTooltips(this.$el);
-    Ctx.initTooltips(this.$el);
   },
 
   regions: {
@@ -49,26 +36,23 @@ var AbstractAnnouncementView = LoaderView.extend({
   modelEvents: {
     'change': 'render'
   }
-});
+}) {
+  initialize(options) {
+  }
 
+  onRender() {
+    Ctx.removeCurrentlyDisplayedTooltips(this.$el);
+    Ctx.initTooltips(this.$el);
+  }
+}
 
-var AnnouncementView = AbstractAnnouncementView.extend({
-  constructor: function AnnouncementView() {
-    AbstractAnnouncementView.apply(this, arguments);
-  },
-
+class AnnouncementView extends AbstractAnnouncementView.extend({
   template: '#tmpl-announcement',
-
   className: 'attachment'
-});
+}) {}
 
-var AnnouncementMessageView = AbstractAnnouncementView.extend({
-  constructor: function AnnouncementMessageView() {
-    AbstractAnnouncementView.apply(this, arguments);
-  },
-
+class AnnouncementMessageView extends AbstractAnnouncementView.extend({
   template: '#tmpl-announcementMessage',
-
 
   attributes: {
     "class": "announcementMessage bx"
@@ -81,9 +65,9 @@ var AnnouncementMessageView = AbstractAnnouncementView.extend({
 
   modelEvents: {
     'change':'render'
-  },
-
-  serializeData: function() {
+  }
+}) {
+  serializeData() {
     if (this.isLoading()) {
       return {}
     }
@@ -98,9 +82,9 @@ var AnnouncementMessageView = AbstractAnnouncementView.extend({
       retval.title = retval.title.bestValue(this.translationData);
     }
     return retval;
-  },
+  }
 
-  initialize: function(options) {
+  initialize(options) {
     var that = this;
     var collectionManager = new CollectionManager();
     this.setLoading(true);
@@ -117,16 +101,16 @@ var AnnouncementMessageView = AbstractAnnouncementView.extend({
           that.render();
         }
     });
-  },
+  }
 
-  onRender: function() {
+  onRender() {
     AbstractAnnouncementView.prototype.onRender.call(this);
     if (!this.hideCreator && !this.isLoading()) {
       this.renderCreator();
     }
-  },
+  }
 
-  renderCreator: function() {
+  renderCreator() {
     var agentAvatarView = new AgentViews.AgentAvatarView({
       model: this.creator,
       avatarSize: 50
@@ -136,23 +120,18 @@ var AnnouncementMessageView = AbstractAnnouncementView.extend({
       model: this.creator
     });
     this.showChildView('authorNameRegion', agentNameView);
-  },
-});
+  }
+}
 
-var AnnouncementEditableView = AbstractAnnouncementView.extend({
-  constructor: function AnnouncementEditableView() {
-    AbstractAnnouncementView.apply(this, arguments);
-  },
-
+class AnnouncementEditableView extends AbstractAnnouncementView.extend({
   template: '#tmpl-announcementEditable',
-
   className: 'announcementEditable',
 
   events:_.extend({}, AbstractAnnouncementView.prototype.events, {
     'click .js_announcement_delete': 'onDeleteButtonClick' //Dynamically rendered, do NOT use @ui
-  }),
-
-  initialize: function(options) {
+  })
+}) {
+  initialize(options) {
     var that = this;
     var collectionManager = new CollectionManager();
     this.setLoading(true);
@@ -163,9 +142,9 @@ var AnnouncementEditableView = AbstractAnnouncementView.extend({
           that.render();
         }
     });
-  },
+  }
 
-  onRender: function() {
+  onRender() {
     if (this.isLoading()) {
       return;
     }
@@ -193,31 +172,31 @@ var AnnouncementEditableView = AbstractAnnouncementView.extend({
     });
     this.showChildView('region_shouldPropagateDown', shouldPropagateDownView);
     
-  },
+  }
 
-  onDeleteButtonClick: function(ev) {
+  onDeleteButtonClick(ev) {
     this.model.destroy();
-  },
-});
+  }
+}
 
-var AnnouncementListEmptyEditableView = Marionette.View.extend({
-  constructor: function AnnouncementListEmptyEditableView() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class AnnouncementListEmptyEditableView extends Marionette.View.extend({
   template: "#tmpl-announcementListEmptyEditable",
+
   ui: {
     'addAnnouncementButton': '.js_announcementAddButton'
   },
+
   events: {
     'click @ui.addAnnouncementButton': 'onAddAnnouncementButtonClick',
-  },
-  initialize: function(options) {
+  }
+}) {
+  initialize(options) {
     //console.log(options);
     this.objectAttachedTo = options.objectAttachedTo;
     this.collection = options.collection;
-  },
-  onAddAnnouncementButtonClick: function(ev) {
+  }
+
+  onAddAnnouncementButtonClick(ev) {
     var announcement = new Announcement.Model({
       '@type': Types.IDEA_ANNOUNCEMENT,
       creator: Ctx.getCurrentUser().id,
@@ -228,26 +207,24 @@ var AnnouncementListEmptyEditableView = Marionette.View.extend({
     );
     this.collection.add(announcement);
     announcement.save();
-  },
-});
+  }
+}
 
-var AnnouncementEditableCollectionView = Marionette.CollectionView.extend({
-  constructor: function AnnouncementEditableCollectionView() {
-    Marionette.CollectionView.apply(this, arguments);
-  },
-
-  initialize: function(options) {
-    this.objectAttachedTo = options.objectAttachedTo;
-  },
+class AnnouncementEditableCollectionView extends Marionette.CollectionView.extend({
   childView: AnnouncementEditableView,
-  emptyView: AnnouncementListEmptyEditableView,
-  childViewOptions:  function(model) {
+  emptyView: AnnouncementListEmptyEditableView
+}) {
+  initialize(options) {
+    this.objectAttachedTo = options.objectAttachedTo;
+  }
+
+  childViewOptions(model) {
     return {
       objectAttachedTo: this.objectAttachedTo,
       collection: this.collection
     }
   }
-});
+}
 
 export default {
     AnnouncementEditableView: AnnouncementEditableView,

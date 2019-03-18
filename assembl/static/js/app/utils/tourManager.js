@@ -15,12 +15,13 @@ import hopscotch from 'hopscotch';
 import Raven from 'raven-js';
 
 
-var TourManager = Marionette.Object.extend({
+class TourManager extends Marionette.Object.extend({
   channelName: 'tour',
   nextTours: [],
   tourModel: undefined,
   currentTour: undefined,
   firstTourStarted: false,
+
   hopscotch_i18n: {
           nextBtn: i18n.gettext('Next'),
           prevBtn: i18n.gettext('Back'),
@@ -31,9 +32,9 @@ var TourManager = Marionette.Object.extend({
 
   radioEvents: {
     'requestTour': 'requestTour',
-  },
-
-  initialize: function() {
+  }
+}) {
+  initialize() {
     if (Ctx.isAdminApp()) {
       return;
     }
@@ -64,8 +65,9 @@ var TourManager = Marionette.Object.extend({
     } else {
       this.initialize2();
     }
-  },
-  initialize2: function() {
+  }
+
+  initialize2() {
     var that = this;
     var toursById = {};
     for (var i in AppTours) {
@@ -91,18 +93,18 @@ var TourManager = Marionette.Object.extend({
         }
       }, 4000);
     }
-  },
+  }
 
-  isTourSeen: function(tourName) {
+  isTourSeen(tourName) {
       if (this.tourModel === undefined) {
         var seen = JSON.parse(window.localStorage.getItem('toursSeen') || "{}");
         return seen[tourName];
       } else {
           return this.tourModel.get(tourName);
       }
-  },
+  }
 
-  tourIsSeen: function(tourName) {
+  tourIsSeen(tourName) {
       if (this.tourModel === undefined) {
         var seen = {};
         try {
@@ -115,9 +117,9 @@ var TourManager = Marionette.Object.extend({
       } else {
           this.tourModel.isSeen(tourName);
       }
-  },
+  }
 
-  getNextTour: function(remove) {
+  getNextTour(remove) {
     while (this.nextTours.length > 0) {
       var tour = this.nextTours[0];
       if (tour.condition !== undefined) {
@@ -133,9 +135,9 @@ var TourManager = Marionette.Object.extend({
       }
     }
     return undefined;
-  },
+  }
 
-  requestTour: function(tourName) {
+  requestTour(tourName) {
     if (tourName === undefined) {
       console.error("undefined tour name");
       return;
@@ -177,9 +179,9 @@ var TourManager = Marionette.Object.extend({
     // TODO: Scroll to show ID?
     this.currentTour = tour;
     this.startCurrentTour();
-  },
+  }
 
-  onShow: function() {
+  onShow() {
     if (this.currentTour === undefined) {
       Raven.captureMessage("onShow came after tour was cleared");
       this.currentTour = this.toursById[hopscotch.getCurrTour().name];
@@ -193,9 +195,9 @@ var TourManager = Marionette.Object.extend({
       step.stepOnShow();
     }
     //that.$(".panel-body").scroll(that, that.scrollLogger);
-  },
+  }
 
-  checkForLastStep: function() {
+  checkForLastStep() {
     var stepNum = hopscotch.getCurrStepNum();
     var step = this.currentTour.tour.steps[stepNum];
     if (stepNum + 1 == this.currentTour.tour.steps.length) {
@@ -205,9 +207,9 @@ var TourManager = Marionette.Object.extend({
         nextButton.text(i18n.gettext("Next"));
       }
     }
-  },
+  }
 
-  afterLastStep: function() {
+  afterLastStep() {
     if (this.currentTour === undefined) {
       Raven.captureMessage("afterLastStep came after tour was cleared");
       this.currentTour = this.toursById[hopscotch.getCurrTour().name];
@@ -220,13 +222,13 @@ var TourManager = Marionette.Object.extend({
     if (this.currentTour !== undefined) {
       this.startCurrentTour();
     }
-  },
+  }
 
-  stopTours: function() {
+  stopTours() {
     this.nextTours = [];
-  },
+  }
 
-  startCurrentTour: function() {
+  startCurrentTour() {
     var that = this;
     var tour = this.currentTour;
     // We may be within the end signal, so make it asynchronous.
@@ -251,6 +253,6 @@ var TourManager = Marionette.Object.extend({
       }, 1000);
     }, 0);
   }
-});
+}
 
 export default TourManager;

@@ -10,19 +10,15 @@ import CollectionManager from '../../common/collectionManager.js';
 import AdminNavigationMenu from './adminNavigationMenu.js';
 import RoleModels from '../../models/roles.js';
 
-const RoleHeaderCell = Marionette.View.extend({
-  constructor: function RoleHeaderCell() {
-    Marionette.View.apply(this, arguments);
-  },
+class RoleHeaderCell extends Marionette.View.extend({
   tagName: 'th',
-  template: _.template("<%= name %>"),
-});
+  template: _.template("<%= name %>")
+}) {}
 
-
-const RoleHeaderRow = Marionette.CollectionView.extend({
-  constructor: function RoleHeaderRow() {
-    Marionette.CollectionView.apply(this, arguments);
-  },
+class RoleHeaderRow extends Marionette.CollectionView.extend({
+  childView: RoleHeaderCell,
+  tagName: 'thead'
+}) {
   _createBuffer() {
     // copied from Marionette... will be hard to keep up to date.
     // But I need the way to prefix an element in-place.
@@ -32,28 +28,28 @@ const RoleHeaderRow = Marionette.CollectionView.extend({
       this.Dom.appendContents(elBuffer, b.el, {_$contents: b.$el});
     });
     return elBuffer;
-  },
-  childViewOptions: function(model) {
+  }
+
+  childViewOptions(model) {
     return {
       parentView: this
     };
-  },
-  childView: RoleHeaderCell,
-  tagName: 'thead',
-});
+  }
+}
 
-
-const RolePermissionCell = LoaderView.extend({
-  constructor: function RolePermissionCell() {
-    LoaderView.apply(this, arguments);
-  },
+class RolePermissionCell extends LoaderView.extend({
   ui: {
     input: ".in",
   },
+
   events: {
     "click @ui.input": "onClick",
   },
-  onClick: function(ev) {
+
+  tagName: "td",
+  template: _.template("<input class='in' type='checkbox' <%= checked %> <%= disabled %>/>")
+}) {
+  onClick(ev) {
     this.setLoading(true);
     this.render();
     if (ev.currentTarget.checked) {
@@ -61,8 +57,9 @@ const RolePermissionCell = LoaderView.extend({
     } else {
       this.removePermission();
     }
-  },
-  addPermission: function() {
+  }
+
+  addPermission() {
     const permission = new RoleModels.discPermModel({
       permission: this.options.permissionName,
       role: this.options.roleName,
@@ -81,8 +78,9 @@ const RolePermissionCell = LoaderView.extend({
         this.render();
       }
     });
-  },
-  removePermission: function() {
+  }
+
+  removePermission() {
     this.options.localPermission.destroy({
       success: ()=>{
         this.options.localPermission = null;
@@ -95,29 +93,25 @@ const RolePermissionCell = LoaderView.extend({
         this.render();
       },
     });
-  },
-  serializeData: function() {
+  }
+
+  serializeData() {
     return {
         checked: (this.options.localPermission) ? "checked='checked'" : '',
         disabled: '',
     }
-  },
-  tagName: "td",
-  template: _.template("<input class='in' type='checkbox' <%= checked %> <%= disabled %>/>"),
-});
+  }
+}
 
-
-const StateRolePermissionCell = RolePermissionCell.extend({
-  constructor: function StateRolePermissionCell() {
-    RolePermissionCell.apply(this, arguments);
-  },
-  serializeData: function() {
+class StateRolePermissionCell extends RolePermissionCell {
+  serializeData() {
     return {
         checked: (this.options.statePermission || this.options.localPermission) ? "checked='checked'" : '',
         disabled: (this.options.localPermission) ? "disabled='disabled'" : '',
     }
-  },
-  addPermission: function() {
+  }
+
+  addPermission() {
     const permission = new RoleModels.pubStatePermModel({
       permission: this.options.permissionName,
       role: this.options.roleName,
@@ -137,8 +131,9 @@ const StateRolePermissionCell = RolePermissionCell.extend({
         this.render();
       }
     });
-  },
-  removePermission: function() {
+  }
+
+  removePermission() {
     this.options.statePermission.destroy({
       success: ()=>{
         this.options.statePermission = null;
@@ -151,16 +146,14 @@ const StateRolePermissionCell = RolePermissionCell.extend({
         this.render();
       },
     });
-  },
-});
+  }
+}
 
-
-
-const RolePermissionRow = Marionette.CollectionView.extend({
-  constructor: function RolePermissionRow() {
-    Marionette.CollectionView.apply(this, arguments);
-  },
-  childViewOptions: function(model) {
+class RolePermissionRow extends Marionette.CollectionView.extend({
+  childView: RolePermissionCell,
+  tagName: 'tr'
+}) {
+  childViewOptions(model) {
     const options = this.options;
     const roleName = model.get('name');
     const permissionName = options.model.get('name');
@@ -175,7 +168,8 @@ const RolePermissionRow = Marionette.CollectionView.extend({
       permissionsView: options.permissionsView,
       localPermission: localPermission,
     };
-  },
+  }
+
   _createBuffer() {
     const elBuffer = this.Dom.createBuffer();
     this.Dom.appendContents(elBuffer, "<th>"+this.model.get('name')+"</th>");
@@ -183,19 +177,15 @@ const RolePermissionRow = Marionette.CollectionView.extend({
       this.Dom.appendContents(elBuffer, b.el, {_$contents: b.$el});
     });
     return elBuffer;
-  },
-  childView: RolePermissionCell,
-  tagName: 'tr',
-});
+  }
+}
 
-
-const StateRolePermissionRow = RolePermissionRow.extend({
-  constructor: function StateRolePermissionRow() {
-    RolePermissionRow.apply(this, arguments);
-  },
-  childViewOptions: function(model) {
+class StateRolePermissionRow extends RolePermissionRow.extend({
+  childView: StateRolePermissionCell
+}) {
+  childViewOptions(model) {
     const options = this.options;
-    const base = RolePermissionRow.prototype.childViewOptions.apply(this, arguments);
+    const base = super.childViewOptions(...arguments);
     const roleName = model.get('name');
     const permissionName = options.model.get('name');
     const statePermission = options.statePermissions.find((lp) => {
@@ -207,23 +197,16 @@ const StateRolePermissionRow = RolePermissionRow.extend({
       statePermissions: options.statePermissions,
       statePermission: statePermission,
     });
-  },
-  childView: StateRolePermissionCell,
-});
+  }
+}
 
+class DeleteRoleRow extends RolePermissionRow {}
 
-const DeleteRoleRow = RolePermissionRow.extend({
-  constructor: function DeleteRoleRow() {
-    RolePermissionRow.apply(this, arguments);
-  },
-});
-
-
-const RolePermissionTable = Marionette.CollectionView.extend({
-  constructor: function RolePermissionTable() {
-    Marionette.CollectionView.apply(this, arguments);
-  },
-  childViewOptions: function(model) {
+class RolePermissionTable extends Marionette.CollectionView.extend({
+  childView: RolePermissionRow,
+  tagName: 'tbody'
+}) {
+  childViewOptions(model) {
     const options = this.options;
     return {
       parentView: this,
@@ -231,34 +214,27 @@ const RolePermissionTable = Marionette.CollectionView.extend({
       localPermissions: options.localPermissions,
       permissionsView: options.permissionsView,
     };
-  },
-  childView: RolePermissionRow,
-  tagName: 'tbody',
-});
+  }
+}
 
-
-const StateRolePermissionTable = RolePermissionTable.extend({
-  constructor: function StateRolePermissionTable() {
-    RolePermissionTable.apply(this, arguments);
-  },
-  childViewOptions: function(model) {
+class StateRolePermissionTable extends RolePermissionTable.extend({
+  childView: StateRolePermissionRow
+}) {
+  childViewOptions(model) {
     const options = this.options;
-    const base = RolePermissionTable.prototype.childViewOptions.apply(this, arguments);
+    const base = super.childViewOptions(...arguments);
     return _.extend(base, {
       statePermissions: options.statePermissions,
       stateLabel: options.stateLabel,
     });
-  },
-  childView: StateRolePermissionRow,
-  filter: function (child, index, collection) {
-    return child.get('name').indexOf("Idea")>=0;
-  },
-});
+  }
 
-const StateForm = Marionette.View.extend({
-  constructor: function StateForm() {
-    Marionette.View.apply(this, arguments);
-  },
+  filter(child, index, collection) {
+    return child.get('name').indexOf("Idea")>=0;
+  }
+}
+
+class StateForm extends Marionette.View.extend({
   regions: {
     header: {
       el: ".theader",
@@ -269,7 +245,10 @@ const StateForm = Marionette.View.extend({
       replaceElement: true,
     },
   },
-  onRender: function() {
+
+  template: _.template('<hr/><h4>State: <%= label %></h4>\n<table class="table"><thead class="theader"></thead><tbody class="state-table"></tbody></table>')
+}) {
+  onRender() {
     const options = this.options;
     const roleHeader = new RoleHeaderRow({
         collection: this.options.permissionsView.roleCollection,
@@ -285,16 +264,13 @@ const StateForm = Marionette.View.extend({
       parentView: this,
     });
     this.showChildView("stateTable", table);
-  },
-  template: _.template('<hr/><h4>State: <%= label %></h4>\n<table class="table"><thead class="theader"></thead><tbody class="state-table"></tbody></table>'),
-});
+  }
+}
 
-
-const StateList = Marionette.CollectionView.extend({
-  constructor: function StateList() {
-    Marionette.CollectionView.apply(this, arguments);
-  },
-  childViewOptions: function(model) {
+class StateList extends Marionette.CollectionView.extend({
+  childView: StateForm
+}) {
+  childViewOptions(model) {
     const options = this.options;
     return {
       parentView: this,
@@ -302,20 +278,16 @@ const StateList = Marionette.CollectionView.extend({
       statePermissions: options.statePermissions,
       localPermissions: options.localPermissions,
     };
-  },
-  childView: StateForm,
-});
-
+  }
+}
 
 /**
  * The new permissions window
  * @class app.views.admin.adminPermissions.PermissionsView
  */
-const PermissionsView = LoaderView.extend({
-  constructor: function PermissionsView() {
-    LoaderView.apply(this, arguments);
-  },
+class PermissionsView extends LoaderView.extend({
   template: "#tmpl-permissionsPanel",
+
   regions: {
     stateOptions: "#pub-state-options",
     header: {
@@ -329,8 +301,9 @@ const PermissionsView = LoaderView.extend({
     //deleteRoleRow: '#delete-role-row',
     navigationMenuHolder: ".navigation-menu-holder",
     statesView: "#pubstate-permissions",
-  },
-  initialize: function() {
+  }
+}) {
+  initialize() {
     this.setLoading(true);
     const that = this;
     const collectionManager = new CollectionManager();
@@ -347,8 +320,9 @@ const PermissionsView = LoaderView.extend({
         this.setLoading(false);
         this.render();
     });
-  },
-  onRender: function() {
+  }
+
+  onRender() {
     if (this.isLoading()) {
         return;
     }
@@ -373,16 +347,18 @@ const PermissionsView = LoaderView.extend({
     });
     this.showChildView("statesView", stateListView);
     
-  },
-  canSavePermission: function(id) {
+  }
+
+  canSavePermission(id) {
     var prefData = this.preferenceData[id];
     var neededPerm = prefData.modification_permission || Permissions.ADMIN_DISCUSSION;
     return Ctx.getCurrentUser().can(neededPerm);
-  },
-  getNavigationMenu: function() {
+  }
+
+  getNavigationMenu() {
     return new AdminNavigationMenu.discussionAdminNavigationMenu(
       {selectedSection: "permissions"});
   }
-});
+}
 
 export default PermissionsView;

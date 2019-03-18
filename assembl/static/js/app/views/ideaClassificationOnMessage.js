@@ -28,11 +28,7 @@ import Analytics from '../internal_modules/analytics/dispatcher.js';
 /**
  * Abstract Class of Idea Classification Views
  */
-var IdeaClassificationView = LoaderView.extend({
-  constructor: function IdeaClassificationView() {
-    LoaderView.apply(this, arguments);
-  },
-
+class IdeaClassificationView extends LoaderView.extend({
   template: false,
 
   ui: {
@@ -46,13 +42,13 @@ var IdeaClassificationView = LoaderView.extend({
 
   regions:{
     breadcrumb: "@ui.breadcrumbs"
-  },
-
+  }
+}) {
   /*
     Must pass the IdeaContentLink model as model to the view (done by Marionette)
     along with the groupContent
    */
-  initialize: function(options){
+  initialize(options) {
     this.setLoading(true);
     this._groupContent = options.groupContent;
     this.messageView = options.messageView;
@@ -90,32 +86,32 @@ var IdeaClassificationView = LoaderView.extend({
         //THIS IS HACKY
         that.model.failedToLoad = true;
       });
-  },
+  }
 
   /*
     Override in child class in order to add logic once the promises are
     completed in initialization
    */
-  onEndInitialization: function(){
-  },
+  onEndInitialization() {
+  }
 
   /*
     Override in child class in order to add logic at the end of onRender
    */
-  postRender: function(){},
+  postRender() {}
 
   /*
     The function used by the template to render itself, given it's model
     @returns Function  The function that will be returned with parameter for model
    */
-  serializerFunc: function() {
+  serializerFunc() {
     var langPrefs = this.langPrefs;
     return function(model) {
       return model ? model.getShortTitleDisplayText(langPrefs) : "";
     };
-  },
+  }
 
-  onRender: function(){
+  onRender() {
     if (this.canRender) {
 
       if (! this.ideaAncestry) {
@@ -130,12 +126,12 @@ var IdeaClassificationView = LoaderView.extend({
       this.showChildView('breadcrumb', IdeaBreadcrumbView);
       this.postRender();
     }
-  },
+  }
 
   /*
     Generates a collection containing the same idea models used in the CollectionManager
    */
-  createIdeaNameCollection: function(ideaArray){
+  createIdeaNameCollection(ideaArray) {
 
     //Create an empty collection and populate it with the models in the Array
     //Shallow copy of the models. Hence, Idea changes should trigger change events on this collection
@@ -146,17 +142,16 @@ var IdeaClassificationView = LoaderView.extend({
     });
 
     return col;
-  }, 
-  
+  }
 
-  templateContext: function(){
+  templateContext() {
     return {
       i18n: i18n,
       viewIdea: i18n.gettext("Go to this idea")
     };
-  },
+  }
 
-  onSeeIdeaClick: function(){
+  onSeeIdeaClick() {
     var analytics = Analytics.getInstance();
     analytics.trackEvent(analytics.events.NAVIGATE_TO_IDEA_IN_IDEA_CLASSIFICATION);
 
@@ -164,22 +159,17 @@ var IdeaClassificationView = LoaderView.extend({
     Ctx.clearModal();
     openIdeaInModal(panel, this.idea, true, this.langPrefs);
   }
+}
 
-});
-
-var DirectMessageView = IdeaClassificationView.extend({
-  constructor: function DirectMessageView() {
-    IdeaClassificationView.apply(this, arguments);
-  },
-
-  template: '#tmpl-ideaClassification_directMessage',
-
-  onEndInitialization: function(){
+class DirectMessageView extends IdeaClassificationView.extend({
+  template: '#tmpl-ideaClassification_directMessage'
+}) {
+  onEndInitialization() {
     this.setLoading(false);
     this.render();
-  },
+  }
 
-  serializeData: function(){
+  serializeData() {
     if (!this.canRender) {
       return {};
     }
@@ -188,21 +178,17 @@ var DirectMessageView = IdeaClassificationView.extend({
       author: this.user.get('name')
     }
   }
-});
+}
 
-var DirectExtractView = IdeaClassificationView.extend({
-  constructor: function DirectExtractView() {
-    IdeaClassificationView.apply(this, arguments);
-  },
-
-  template: '#tmpl-ideaClassification_directExtract',
-
-  onEndInitialization: function(){
+class DirectExtractView extends IdeaClassificationView.extend({
+  template: '#tmpl-ideaClassification_directExtract'
+}) {
+  onEndInitialization() {
     this.setLoading(false);
     this.render();
-  },
+  }
 
-  serializeData: function(){
+  serializeData() {
     if (!this.canRender) {
       return {};
     }
@@ -213,21 +199,17 @@ var DirectExtractView = IdeaClassificationView.extend({
       postAuthor: this.postCreator.get('name')
     }
   }
-});
+}
 
-var IndirectMessageView = IdeaClassificationView.extend({
-  constructor: function IndirectMessageView() {
-    IdeaClassificationView.apply(this, arguments);
-  },
-
-  template: '#tmpl-ideaClassification_indirectMessage',
-
-  onEndInitialization: function(){
+class IndirectMessageView extends IdeaClassificationView.extend({
+  template: '#tmpl-ideaClassification_indirectMessage'
+}) {
+  onEndInitialization() {
     this.setLoading(false);
     this.render();
-  },
+  }
 
-  serializeData: function(){
+  serializeData() {
     if (!this.canRender){
       return {};
     }
@@ -236,21 +218,17 @@ var IndirectMessageView = IdeaClassificationView.extend({
       author: this.user.get('name')
     }
   }
-});
+}
 
-var IndirectExtractView = IdeaClassificationView.extend({
-  constructor: function IndirectExtractView() {
-    IdeaClassificationView.apply(this, arguments);
-  },
-
-  template: '#tmpl-ideaClassification_indirectExtract',
-
-  onEndInitialization: function(){
+class IndirectExtractView extends IdeaClassificationView.extend({
+  template: '#tmpl-ideaClassification_indirectExtract'
+}) {
+  onEndInitialization() {
     this.setLoading(false);
     this.render();
-  },
+  }
 
-  serializeData: function() {
+  serializeData() {
     if (!this.canRender){
       return {};
     }
@@ -261,47 +239,38 @@ var IndirectExtractView = IdeaClassificationView.extend({
       postAuthor: this.postCreator.get('name')
     }
   }
-});
+}
 
-
-var ErrorView = Marionette.View.extend({
-  constructor: function ErrorView() {
-    Marionette.View.apply(this, arguments);
-  },
-
-  template: _.template("<div><%= i18n.gettext(\"Something went wrong in getting the contents of this idea. We are looking into it. Thank you for your patience.\") %></div>"),
-
-  initialize: function(options){
+class ErrorView extends Marionette.View.extend({
+  template: _.template("<div><%= i18n.gettext(\"Something went wrong in getting the contents of this idea. We are looking into it. Thank you for your patience.\") %></div>")
+}) {
+  initialize(options) {
     console.error("[IdeaClassificationModal] An error view was created on the idea content link", this.model.id);
-  },
+  }
 
-  serializeData: function(){
+  serializeData() {
     return {
       i18n: i18n
     };
   }
-});
+}
 
-var IdeaShowingMessageCollectionViewBody = Marionette.CollectionView.extend({
-  constructor: function IdeaShowingMessageCollectionViewBody() {
-    Marionette.CollectionView.apply(this, arguments);
-  },
-
-  className: 'items',
-
-  initialize: function(options){
+class IdeaShowingMessageCollectionViewBody extends Marionette.CollectionView.extend({
+  className: 'items'
+}) {
+  initialize(options) {
     this._groupContent = options.groupContent;
     this.messageView = options.messageView;
-  },
+  }
 
-  childViewOptions: function(){
+  childViewOptions() {
     return {
       groupContent: this._groupContent,
       messageView: this.messageView
     }
-  },
+  }
 
-  childView: function(item){
+  childView(item) {
 
     //In the scenario that the View failed to initialize the models necessary
     //to parse this. An Error view should be made.
@@ -335,14 +304,9 @@ var IdeaShowingMessageCollectionViewBody = Marionette.CollectionView.extend({
       }
     }
   }
-});
+}
 
-
-var IdeaShowingMessageCollectionView = Marionette.View.extend({
-  constructor: function IdeaShowingMessageCollectionView() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class IdeaShowingMessageCollectionView extends Marionette.View.extend({
   template: '#tmpl-ideaClassification_collection',
 
   regions: {
@@ -350,39 +314,35 @@ var IdeaShowingMessageCollectionView = Marionette.View.extend({
       el: '.items',
       replaceElement: true,
     }
-  },
-  initialize: function(options){
+  }
+}) {
+  initialize(options) {
     this._groupContent = options.groupContent;
     this.messageView = options.messageView;
-  },
-  onRender: function() {
+  }
+
+  onRender() {
     this.showChildView('items', new IdeaShowingMessageCollectionViewBody({
       collection: this.collection,
       groupContent: this._groupContent,
       messageView: this.messageView,
     }));
-  },
-});
+  }
+}
 
-
-var IdeasShowingMessageModal = Backbone.Modal.extend({
-  constructor: function IdeasShowingMessageModal() {
-    Backbone.Modal.apply(this, arguments);
-  },
-
-
+class IdeasShowingMessageModal extends Backbone.Modal.extend({
   template: '#tmpl-ideaClassification_modal',
   className: 'modal-ideas-showing-message popin-wrapper',
-  cancelEl: '.close, .js_close',
-
-  initialize: function(options) {
+  cancelEl: '.close, .js_close'
+}) {
+  initialize(options) {
     this.messageView = options.messageView;
     this.messageModel = options.messageModel, 
     this.ideaContentLinks = options.ideaContentLinks;
     this._groupContent = options.groupContent;
-  },
+  }
 
-  serializeData: function() {
+  serializeData() {
     var number_of_ideas = this.ideaContentLinks.length;
     return {
       visible_because_msg: i18n.sprintf(
@@ -395,9 +355,9 @@ var IdeasShowingMessageModal = Backbone.Modal.extend({
         "Link between this message and the idea",
         "Links between this message and ideas", number_of_ideas)
     };
-  },
+  }
 
-  onRender: function(){
+  onRender() {
     var IdeaClassificationCollectionView = new IdeaShowingMessageCollectionView({
       collection: this.ideaContentLinks,
       messageView: this.messageView,
@@ -406,6 +366,6 @@ var IdeasShowingMessageModal = Backbone.Modal.extend({
 
     this.$(".ideas-reasons-collection").html(IdeaClassificationCollectionView.render().el);
   }
-});
+}
 
 export default IdeasShowingMessageModal;

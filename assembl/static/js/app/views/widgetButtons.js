@@ -14,24 +14,24 @@ import Ctx from '../common/context.js';
 import Permissions from '../utils/permissions.js';
 
 
-var WidgetButtonView = Marionette.View.extend({
-  constructor: function WidgetButtonView() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class WidgetButtonView extends Marionette.View.extend({
   template: "#tmpl-widgetButton",
-  initialize: function(options) {
-    this.options = options;
-  },
+
   ui: {
     button: ".btn",
   },
+
   events: {
     // "click @ui.button": "onButtonClick",
     'click .js_widget-vote': "onButtonClick",
     'click .js_widget-vote-result': "onResultButtonClick"
-  },
-  onButtonClick: function(evt) {
+  }
+}) {
+  initialize(options) {
+    this.options = options;
+  }
+
+  onButtonClick(evt) {
     console.log("WidgetButtonView::onButtonClick()");
     var context = this.options.context;
     var idea = this.options.idea;
@@ -49,12 +49,14 @@ var WidgetButtonView = Marionette.View.extend({
       this.model.trigger("buttonClick", evt);
     }
     return false;
-  },
-  onResultButtonClick: function(ev){
+  }
+
+  onResultButtonClick(ev) {
     console.log("triggering 'showResult' event on model", this.model);
     this.model.trigger('showResult', ev);
-  },
-  serializeData: function() {
+  }
+
+  serializeData() {
     var endDate = this.model.get("end_date");
     
     return {
@@ -66,16 +68,12 @@ var WidgetButtonView = Marionette.View.extend({
       canSeeResults: Ctx.getCurrentUser().can(Permissions.ADMIN_DISCUSSION)
     };
   }
-});
+}
 
-var WidgetButtonListView = Marionette.CollectionView.extend({
-  constructor: function WidgetButtonListView() {
-    Marionette.CollectionView.apply(this, arguments);
-  },
-
-  childView: WidgetButtonView,
-
-  initialize: function(options) {
+class WidgetButtonListView extends Marionette.CollectionView.extend({
+  childView: WidgetButtonView
+}) {
+  initialize(options) {
     this.childViewOptions = {
       context: options.context || options.collection.context,
       idea: options.idea || options.collection.idea,
@@ -85,7 +83,7 @@ var WidgetButtonListView = Marionette.CollectionView.extend({
       console.error("Undefined context in WidgetButtonListView");
     }
   }
-});
+}
 
 
 export default {

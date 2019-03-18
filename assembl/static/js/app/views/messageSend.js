@@ -71,14 +71,104 @@ const linkify = require('linkifyjs');
  *
  */
 
-var messageSendView = LoaderView.extend({
-  constructor: function messageSendView() {
-    LoaderView.apply(this, arguments);
-  },
-
+class messageSendView extends LoaderView.extend({
   template: '#tmpl-messageSend',
   className: 'messageSend',
-  initialize: function(options) {
+
+  ui: {
+    sendButton: '.messageSend-sendbtn',
+    cancelButton: '.messageSend-cancelbtn',
+    messageBody: '.js_messageSend-body',
+    messageSubject: '.messageSend-subject',
+    topicSubject: '.topic-subject .formfield',
+    permissionDeniedWarningMessage: '.js_warning-message-for-message-post',
+    uploadButton: '.js_upload-button',
+    attachments: '.js_attachment-edit-region'
+  },
+
+  regions: {
+    uploadButton: '@ui.uploadButton',
+    attachments: '@ui.attachments'
+  },
+
+  events: {
+    'click @ui.sendButton': 'onSendMessageButtonClick',
+    'click @ui.cancelButton': 'onCancelMessageButtonClick',
+    'blur @ui.messageBody': 'onBlurMessage',
+    'focus @ui.messageBody': 'onFocusMessage',
+    'keyup @ui.messageBody': 'onChangeBody'
+  },
+
+  _processHyperlinks: _.throttle(function() {
+    var that = this;
+    var messageText = this.ui.messageBody.val()||'';
+    var links = linkify.find(messageText);
+    var missingLinks = [];
+    var goneModels = [];
+    //console.log("_processHyperlinks called");
+    //console.log(links);
+    //console.log(this.attachmentsCollection);
+
+    // this.attachmentsCollection.comparator = function (attachmentModel) {
+    //   var index = _.findIndex(links, function(link) {
+    //     //console.log(attachmentModel.getDocument().get('uri'), link.href);
+    //     return attachmentModel.getDocument().get('uri') === link.href;
+    //   })
+    //   //console.log("attachmentsCollection comparator returning: ", index);
+    //   return index;
+    // };
+    goneModels = that.attachmentsCollection.filter(function(attachment) {
+      var document = attachment.getDocument();
+
+      if (document.isFileType()){
+        return false;
+      }
+      //console.log("filtering for goneModels checking document:", document);
+      var found = _.find(links, function(link) {
+        //console.log("filtering for goneModels comparing:", document.get('uri'), link.href);
+        return document.get('uri') === link.href; 
+      });
+      return found === undefined;
+    });
+    //console.log("goneModels: ", goneModels);
+
+    that.attachmentsCollection.destroy(goneModels);
+
+    missingLinks = _.filter(links, function(link) {
+      var retval;
+      //console.log("Checking link", link.href)
+      retval = that.attachmentsCollection.filter(function(attachment) {
+        var document = attachment.getDocument();
+        //console.log("filtering for missingLinks comparing:", document.get('uri'), link.href, document.get('uri') === link.href);
+        return (document.get('uri') === link.href)?true:false;
+      }).length === 0;
+      //console.log("Checking link", link.href, "returned", retval)
+      return retval;
+    });
+    //console.log("missingLinks: ", missingLinks);
+
+    _.each(missingLinks, function(link) {
+      if(link.type !== 'url') {
+        console.warn("unknown link type: ", link.type);
+        return;
+      }
+
+      var document = new Documents.DocumentModel({
+                                  uri: link.href});
+
+      var attachment = new Attachments.Model({
+        document: document,
+        objectAttachedToModel: that.model,
+        idCreator: Ctx.getCurrentUser().id
+      });
+
+      //console.log("Adding missing url", document);
+      that.attachmentsCollection.add(attachment);
+    });
+    //console.log("Attachments after _processHyperlinks:", this.attachmentsCollection);
+  }, 500)
+}) {
+  initialize(options) {
     //console.log("options given to the constructor of messageSend: ", options);
     this.options = options;
     var that = this;
@@ -136,33 +226,9 @@ var messageSendView = LoaderView.extend({
     // this.documentsView = new AttachmentEditableCollectionView({
     //   collection: this.attachmentsCollection
     // });
-  },
+  }
 
-  ui: {
-    sendButton: '.messageSend-sendbtn',
-    cancelButton: '.messageSend-cancelbtn',
-    messageBody: '.js_messageSend-body',
-    messageSubject: '.messageSend-subject',
-    topicSubject: '.topic-subject .formfield',
-    permissionDeniedWarningMessage: '.js_warning-message-for-message-post',
-    uploadButton: '.js_upload-button',
-    attachments: '.js_attachment-edit-region'
-  },
-
-  regions: {
-    uploadButton: '@ui.uploadButton',
-    attachments: '@ui.attachments'
-  },
-
-  events: {
-    'click @ui.sendButton': 'onSendMessageButtonClick',
-    'click @ui.cancelButton': 'onCancelMessageButtonClick',
-    'blur @ui.messageBody': 'onBlurMessage',
-    'focus @ui.messageBody': 'onFocusMessage',
-    'keyup @ui.messageBody': 'onChangeBody'
-  },
-
-  serializeData: function() {
+  serializeData() {
     if (this.isLoading()) {
       return {};
     }
@@ -194,9 +260,9 @@ var messageSendView = LoaderView.extend({
       show_target_context_with_choice: show_target_context_with_choice,
       enable_button: this.options.enable_button
     }
-  },
+  }
 
-  onRender: function() {
+  onRender() {
     if (Ctx.debugRender) {
       console.log("messageSend:render() is firing");
     }
@@ -257,13 +323,13 @@ var messageSendView = LoaderView.extend({
       this.showChildView('attachments', documentView);
       this.showChildView('uploadButton', uploadButtonView);
     }
-  },
+  }
 
-  onAttach: function() {
+  onAttach() {
     this.ui.messageBody.autosize();
-  },
+  }
 
-  onSendMessageButtonClick: function(ev) {
+  onSendMessageButtonClick(ev) {
     var btn = $(ev.currentTarget);
     var that = this;
     var btn_original_text = btn.text();
@@ -460,14 +526,14 @@ var messageSendView = LoaderView.extend({
               console.error('ERROR: onSendMessageButtonClick', model, resp);
             }
     })
-  },
+  }
 
-  onCancelMessageButtonClick: function() {
+  onCancelMessageButtonClick() {
     this.clearPartialMessage();
     this.model.destroy({errorCollection: this.errorCollection});
-  },
+  }
 
-  onBlurMessage: function(ev) {
+  onBlurMessage(ev) {
     var analytics = Analytics.getInstance();
     var messageWasSaved = this.savePartialMessage();
 
@@ -486,9 +552,9 @@ var messageSendView = LoaderView.extend({
     else {
       analytics.trackEvent(analytics.events['LEAVE_EMPTY_MESSAGE_WRITING_AREA_ON_'+this.analytics_context]);
     }
-  },
+  }
 
-  onFocusMessage: function() {
+  onFocusMessage() {
     var analytics = Analytics.getInstance();
     var message_body = this.ui.messageBody;
     var message_title = this.ui.messageSubject;
@@ -507,12 +573,12 @@ var messageSendView = LoaderView.extend({
     } else {
       analytics.trackEvent(analytics.events['ENTER_EMPTY_MESSAGE_WRITING_AREA_ON_'+this.analytics_context]);
     }
-  },
+  }
 
   /**
    * @returns true if there was a message to save
    */
-  savePartialMessage: function() {
+  savePartialMessage() {
     if(this.isRenderedAndNotYetDestroyed()) {
       var message_body = this.ui.messageBody;
       var message_title = this.ui.messageSubject;
@@ -527,13 +593,13 @@ var messageSendView = LoaderView.extend({
         return false;
       }
     }
-  },
+  }
 
-  onBeforeDestroy: function() {
+  onBeforeDestroy() {
     this.savePartialMessage();
-  },
+  }
 
-  clearPartialMessage: function() {
+  clearPartialMessage() {
     if (this.ui.messageBody.length > 0)
       this.ui.messageBody.val('');
     if (this.ui.messageSubject.length > 0)
@@ -547,91 +613,21 @@ var messageSendView = LoaderView.extend({
       panelWrapper.autoUnlockPanel("USER_WAS_WRITING_A_MESSAGE");
     }
     */
-  },
-
-  _processHyperlinks: _.throttle(function() {
-    var that = this;
-    var messageText = this.ui.messageBody.val()||'';
-    var links = linkify.find(messageText);
-    var missingLinks = [];
-    var goneModels = [];
-    //console.log("_processHyperlinks called");
-    //console.log(links);
-    //console.log(this.attachmentsCollection);
-
-    // this.attachmentsCollection.comparator = function (attachmentModel) {
-    //   var index = _.findIndex(links, function(link) {
-    //     //console.log(attachmentModel.getDocument().get('uri'), link.href);
-    //     return attachmentModel.getDocument().get('uri') === link.href;
-    //   })
-    //   //console.log("attachmentsCollection comparator returning: ", index);
-    //   return index;
-    // };
-    goneModels = that.attachmentsCollection.filter(function(attachment) {
-      var document = attachment.getDocument();
-
-      if (document.isFileType()){
-        return false;
-      }
-      //console.log("filtering for goneModels checking document:", document);
-      var found = _.find(links, function(link) {
-        //console.log("filtering for goneModels comparing:", document.get('uri'), link.href);
-        return document.get('uri') === link.href; 
-      });
-      return found === undefined;
-    });
-    //console.log("goneModels: ", goneModels);
-
-    that.attachmentsCollection.destroy(goneModels);
-
-    missingLinks = _.filter(links, function(link) {
-      var retval;
-      //console.log("Checking link", link.href)
-      retval = that.attachmentsCollection.filter(function(attachment) {
-        var document = attachment.getDocument();
-        //console.log("filtering for missingLinks comparing:", document.get('uri'), link.href, document.get('uri') === link.href);
-        return (document.get('uri') === link.href)?true:false;
-      }).length === 0;
-      //console.log("Checking link", link.href, "returned", retval)
-      return retval;
-    });
-    //console.log("missingLinks: ", missingLinks);
-
-    _.each(missingLinks, function(link) {
-      if(link.type !== 'url') {
-        console.warn("unknown link type: ", link.type);
-        return;
-      }
-
-      var document = new Documents.DocumentModel({
-                                  uri: link.href});
-
-      var attachment = new Attachments.Model({
-        document: document,
-        objectAttachedToModel: that.model,
-        idCreator: Ctx.getCurrentUser().id
-      });
-
-      //console.log("Adding missing url", document);
-      that.attachmentsCollection.add(attachment);
-    });
-    //console.log("Attachments after _processHyperlinks:", this.attachmentsCollection);
-  }, 500),
-
-  processHyperlinks: function() {
-    var that = this;
-    this._processHyperlinks();
-  },
-  
-  onChangeBody: function() {
-    this.ui.messageBody.autosize();
-    this.processHyperlinks();
-  },
-
-  showPopInFirstPost: function() {
-    IdeaLoom.other_vent.trigger('navBar:subscribeOnFirstPost');
   }
 
-});
+  processHyperlinks() {
+    var that = this;
+    this._processHyperlinks();
+  }
+
+  onChangeBody() {
+    this.ui.messageBody.autosize();
+    this.processHyperlinks();
+  }
+
+  showPopInFirstPost() {
+    IdeaLoom.other_vent.trigger('navBar:subscribeOnFirstPost');
+  }
+}
 
 export default messageSendView;

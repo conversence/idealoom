@@ -8,11 +8,7 @@ import ideaInIdeaList from './ideaInIdeaList.js';
 import Ctx from '../common/context.js';
 import PanelSpecTypes from '../utils/panelSpecTypes.js';
 
-var AllMessagesInIdeaListView = ideaInIdeaList.IdeaView.extend({
-  constructor: function AllMessagesInIdeaListView() {
-    ideaInIdeaList.IdeaView.apply(this, arguments);
-  },
-
+class AllMessagesInIdeaListView extends ideaInIdeaList.IdeaView.extend({
   /**
    * The template
    * @type {template}
@@ -20,9 +16,16 @@ var AllMessagesInIdeaListView = ideaInIdeaList.IdeaView.extend({
   template: Ctx.loadTemplate('allMessagesInIdeaList'),
 
   /**
+   * @events
+   */
+  events: {
+    'click .idealist-title': 'onTitleClick'
+  }
+}) {
+  /**
    * The render
    */
-  onRender: function() {
+  onRender() {
     Ctx.removeCurrentlyDisplayedTooltips(this.$el);
     var data = this.model.toJSON();
 
@@ -39,19 +42,12 @@ var AllMessagesInIdeaListView = ideaInIdeaList.IdeaView.extend({
     this.$el.html(this.template(data));
     Ctx.initTooltips(this.$el);
     return this;
-  },
-
-  /**
-   * @events
-   */
-  events: {
-    'click .idealist-title': 'onTitleClick'
-  },
+  }
 
   /**
    * @event
    */
-  onTitleClick: function() {
+  onTitleClick() {
     $('.idealist-item').removeClass('is-selected');
 
     this._groupContent.setCurrentIdea(null);
@@ -67,6 +63,6 @@ var AllMessagesInIdeaListView = ideaInIdeaList.IdeaView.extend({
 
     this.$el.addClass('is-selected');
   }
-});
+}
 
 export default AllMessagesInIdeaListView;

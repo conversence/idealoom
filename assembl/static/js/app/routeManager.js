@@ -138,9 +138,8 @@ var trackAnalyticsWithQueryString = function(qs, context){
  * @class app.routeManager.RouteManager
  */
 
-var routeManager = Marionette.Object.extend({
-
-  initialize: function() {
+class routeManager extends Marionette.Object {
+  initialize() {
     window.assembl = {};
 
     this.collectionManager = new CollectionManager();
@@ -149,119 +148,119 @@ var routeManager = Marionette.Object.extend({
      * fulfill app.currentUser
      */
     this.loadCurrentUser();
-  },
+  }
 
-  defaults: function() {
+  defaults() {
     Backbone.history.navigate('', true);
-  },
+  }
 
-  home: function() {
+  home() {
     this.restoreViews(true);
-  },
+  }
 
-  edition: function() {
+  edition() {
     IdeaLoom.rootView.showChildView('headerRegions', new NavBar());
     if (this.userHaveAccess()) {
       var edition = new AdminDiscussion();
       IdeaLoom.rootView.showChildView('groupContainer', edition);
     }
-  },
+  }
 
-  partners: function() {
+  partners() {
     IdeaLoom.rootView.showChildView('headerRegions', new NavBar());
     if (this.userHaveAccess()) {
       var partners = new AdminPartners();
       IdeaLoom.rootView.showChildView('groupContainer', partners);
     }
-  },
+  }
 
-  notifications: function() {
+  notifications() {
     IdeaLoom.rootView.showChildView('headerRegions', new NavBar());
     if (this.userHaveAccess()) {
       var notifications = new AdminNotificationSubscriptions();
       IdeaLoom.rootView.showChildView('groupContainer', notifications);
     }
-  },
+  }
 
-  tos: function() {
+  tos() {
     IdeaLoom.rootView.showChildView('headerRegions', new NavBar());
     var tos = new UserTOS();
     IdeaLoom.rootView.showChildView('groupContainer', tos);
-  },
+  }
 
-  import: function() {
+  import() {
     IdeaLoom.rootView.showChildView('headerRegions', new NavBar());
     if (this.userHaveAccess()) {
       var adminSetting = new AdminImportSettings();
       IdeaLoom.rootView.showChildView('groupContainer', adminSetting);
     }
-  },
+  }
 
-  timeline: function() {
+  timeline() {
     IdeaLoom.rootView.showChildView('headerRegions', new NavBar());
     if (this.userHaveAccess()) {
       var adminSetting = new AdminTimeline();
       IdeaLoom.rootView.showChildView('groupContainer', adminSetting);
     }
-  },
+  }
 
-  adminDiscussionPermissions: function() {
+  adminDiscussionPermissions() {
     IdeaLoom.rootView.showChildView('headerRegions', new NavBar());
     if (this.userHaveAccess()) {
       var page = new PermissionsView();
       IdeaLoom.rootView.showChildView('groupContainer', page);
     }
-  },
+  }
 
-  adminDiscussionPreferences: function() {
+  adminDiscussionPreferences() {
     IdeaLoom.rootView.showChildView('headerRegions', new NavBar());
     if (this.userHaveAccess()) {
       var page = new PreferencesView.DiscussionPreferencesView();
       IdeaLoom.rootView.showChildView('groupContainer', page);
     }
-  },
+  }
 
-  adminGlobalPreferences: function() {
+  adminGlobalPreferences() {
     IdeaLoom.rootView.showChildView('headerRegions', new NavBar());
     if (this.userHaveAccess()) {
       var page = new PreferencesView.GlobalPreferencesView();
       IdeaLoom.rootView.showChildView('groupContainer', page);
     }
-  },
+  }
 
-  userNotifications: function() {
+  userNotifications() {
     IdeaLoom.rootView.showChildView('headerRegions', new NavBar());
     if (this.userHaveAccess()) {
       var user = new UserNotificationSubscriptions();
       IdeaLoom.rootView.showChildView('groupContainer', user);
     }
-  },
+  }
 
-  profile: function() {
+  profile() {
     IdeaLoom.rootView.showChildView('headerRegions', new NavBar());
     if (this.userHaveAccess()) {
       var profile = new Profile();
       IdeaLoom.rootView.showChildView('groupContainer', profile);
     }
-  },
+  }
 
-  userDiscussionPreferences: function() {
+  userDiscussionPreferences() {
     IdeaLoom.rootView.showChildView('headerRegions', new NavBar());
     if (this.userHaveAccess()) {
       var page = new PreferencesView.UserPreferencesView();
       IdeaLoom.rootView.showChildView('groupContainer', page);
     }
-  },
+  }
 
-  account: function() {
+  account() {
     IdeaLoom.rootView.showChildView('headerRegions', new NavBar());
     if (this.userHaveAccess()) {
       var account = new Account();
       IdeaLoom.rootView.showChildView('groupContainer', account);
     }
-  },
+  }
 
-  post: function(id, qs) {
+  post(id, qs) {
       //TODO: add new behavior to show messageList Panel
       // We are skiping restoring the group state
 
@@ -293,9 +292,9 @@ var routeManager = Marionette.Object.extend({
 
         Backbone.history.navigate('/', {replace: true});
       });
-    },
+    }
 
-  idea: function(id, qs) {
+  idea(id, qs) {
     //TODO: add new behavior to show messageList Panel
 
     trackAnalyticsWithQueryString(qs, 'idea');
@@ -313,9 +312,9 @@ var routeManager = Marionette.Object.extend({
     //showMessageById over and over.
     //window.history.pushState('object or string', 'Title', '../');
     Backbone.history.navigate('/', {replace: true});
-  },
+  }
 
-  user: function(id, qs) {
+  user(id, qs) {
     this.restoreViews().then(function() {
       var collectionManager = CollectionManager();
       collectionManager.getAllUsersCollectionPromise().then(
@@ -333,26 +332,26 @@ var routeManager = Marionette.Object.extend({
           });
     });
     Backbone.history.navigate('/', {replace: true});
-  },
+  }
 
   /*
     Utilized for Angular based widgets loaded into IdeaLoom
     in an iframe wrapped in a Backbone.Modal.
    */
-  openExternalWidget: function(widget){
+  openExternalWidget(widget) {
     var options = {
       "target_url": widget.getUrlForUser(),
       "modal_title": widget.getLinkText(Widget.Model.prototype.INFO_BAR)
     };
     Ctx.openTargetInModal(null, null, options);
-  },
+  }
 
   /*
     Utilized for Marionette based widgets loaded into
     IdeaLoom by instantiating the view onto the IdeaLoom
     modal region
    */
-  openLocalWidget: function(widget, arg){
+  openLocalWidget(widget, arg) {
     var View;
     //Add more conditions to the switch statement
     //in order to cover different conditions
@@ -371,10 +370,10 @@ var routeManager = Marionette.Object.extend({
     };
     Ctx.setCurrentModalView(View);
     IdeaLoom.rootView.showChildView('slider', new View({model: widget}));
-  },
+  }
 
   // example: http://localhost:6543/jacklayton/widget/local%3AWidget%2F64/result
-  widgetInModal: function(id, arg) {
+  widgetInModal(id, arg) {
     var that = this;
     this.restoreViews().then(function(groups) {
       var collectionManager = CollectionManager();
@@ -401,9 +400,9 @@ var routeManager = Marionette.Object.extend({
       });
       Backbone.history.navigate('/', {replace: true});
     });
-  },
+  }
 
-  about: function() {
+  about() {
       this.restoreViews(undefined, undefined, true).then(function(groups) {
         var firstGroup = groups.children.first();
         if (firstGroup.isSimpleInterface()) {
@@ -413,16 +412,16 @@ var routeManager = Marionette.Object.extend({
         }
         Backbone.history.navigate('/', {replace: true});
       });
-    },
+    }
 
-  sentryTest: function() {
+  sentryTest() {
     var Raven = require('raven-js').default;
     Raven.captureMessage("This is a test, an uncaught non existent function call will follow.");
     //This crashes on purpose
     crashme();
-  },
+  }
 
-  loadCurrentUser: function() {
+  loadCurrentUser() {
     var user = null;
     if (Ctx.getCurrentUserId()) {
       user = new Agents.Model();
@@ -435,9 +434,9 @@ var routeManager = Marionette.Object.extend({
     user.fetchPermissionsFromScriptTag();
     Ctx.setCurrentUser(user);
     Ctx.loadCsrfToken(true);
-  },
+  }
 
-  groupSpec: function(path) {
+  groupSpec(path) {
     console.log(path);
     try {
       var structure = UrlParser.parse("/" + path);
@@ -447,13 +446,13 @@ var routeManager = Marionette.Object.extend({
       Raven.captureException(e);
       this.restoreViews(true);
     }
-  },
+  }
 
   /**
    * @param from_home -  If true, the function was called from the home view
    * @returns promise to a GroupContainer
    */
-  restoreViews: function(from_home, url_structure, skip_group_state) {
+  restoreViews(from_home, url_structure, skip_group_state) {
     var collectionManager = CollectionManager();
     IdeaLoom.rootView.showChildView('headerRegions', new NavBar());
     //On small screen (mobile) don't instantiate the infobar
@@ -524,9 +523,9 @@ var routeManager = Marionette.Object.extend({
 
       return Promise.resolve(groupsView);
     });
-  },
+  }
 
-  userHaveAccess: function() {
+  userHaveAccess() {
     /**
      * TODO: backend api know private discussion and can redirect to login
      * add this method to home page route
@@ -568,7 +567,6 @@ var routeManager = Marionette.Object.extend({
 
     return access;
   }
-
-});
+}
 
 export default new routeManager();

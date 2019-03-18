@@ -12,16 +12,17 @@ import _ from 'underscore';
 import Source from '../models/sources.js';
 import FacebookViews from './facebookViews.js';
 
-var Modal = Backbone.Modal.extend({
-  constructor: function Modal() {
-    Backbone.Modal.apply(this, arguments);
-  },
-
+class Modal extends Backbone.Modal.extend({
   template: '#tmpl-loader',
   className: 'group-modal popin-wrapper',
   cancelEl: '.js_close',
   keyControl: false,
-  initialize: function(options) {
+
+  events: {
+      'change .js_export_supportedList': 'generateView'
+    }
+}) {
+  initialize(options) {
       console.log('initializing Modal');
       this.$('.bbm-modal').addClass('popin');
       this.$('.js_export_error_message').empty(); //Clear any error message that may have been put there
@@ -38,18 +39,17 @@ var Modal = Backbone.Modal.extend({
         that.template = '#tmpl-exportPostModal';
         that.render();
       });
-    },
-  events: {
-      'change .js_export_supportedList': 'generateView'
-    },
-  serializeData: function() {
+    }
+
+  serializeData() {
       if (this.messageCreator) {
         return {
           creator: this.messageCreator.get('name')
         }
       }
-    },
-  loadFbView: function() {
+    }
+
+  loadFbView() {
       var fbView = new FacebookViews.init({
         exportedMessage: this.exportedMessage,
         model: new Source.Model.FacebookSinglePostSource()
@@ -58,8 +58,9 @@ var Modal = Backbone.Modal.extend({
       this.$('.js_source-specific-form').html(fbView.render().el);
       //Because we are not yet using marionette's version of Backbone.modal.
       fbView.onRender();
-  },
-  generateView: function(event) {
+  }
+
+  generateView(event) {
       //Whilst checking for accessTokens, make the region where
       //facebook will be rendered a loader
 
@@ -82,6 +83,6 @@ var Modal = Backbone.Modal.extend({
           break;
       }
     }
-});
+}
 
 export default Modal;

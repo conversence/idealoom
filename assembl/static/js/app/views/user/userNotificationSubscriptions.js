@@ -23,15 +23,20 @@ import Analytics from '../../internal_modules/analytics/dispatcher.js';
 /**
  * User notification
  * */
-var Notification = Marionette.View.extend({
-  constructor: function Notification() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class Notification extends Marionette.View.extend({
   template:'#tmpl-userSubscriptions',
   tagName:'label',
   className:'checkbox dispb',
-  initialize: function(options) {
+
+  ui: {
+      currentSubscribeCheckbox: ".js_userNotification"
+    },
+
+  events: {
+      'click @ui.currentSubscribeCheckbox': 'userNotification'
+    }
+}) {
+  initialize(options) {
       this.role = options.role;
       this.roles = options.roles;
 
@@ -43,21 +48,17 @@ var Notification = Marionette.View.extend({
       if (this.model === 'undefined') {
         this.setLoading(true);
       }
-    },
-  ui: {
-      currentSubscribeCheckbox: ".js_userNotification"
-    },
-  events: {
-      'click @ui.currentSubscribeCheckbox': 'userNotification'
-    },
-  serializeData: function() {
+    }
+
+  serializeData() {
     return {
       subscription: this.model,
       role: this.role,
       i18n: i18n
     }
-  },
-  userNotification: function(e) {
+  }
+
+  userNotification(e) {
     var elm = $(e.target);
     var status = elm.is(':checked') ? 'ACTIVE' : 'UNSUBSCRIBED';
 
@@ -70,49 +71,54 @@ var Notification = Marionette.View.extend({
         console.error('ERROR: userNotification', resp)
       }
     });
-  },
-  updateRole: function(role) {
+  }
+
+  updateRole(role) {
     this.role = role;
     this.render();
-  },
-});
+  }
+}
 
-var Notifications = Marionette.CollectionView.extend({
-  constructor: function Notifications() {
-    Marionette.CollectionView.apply(this, arguments);
-  },
-
+class Notifications extends Marionette.CollectionView.extend({
   childView: Notification,
-  initialize: function(options) {
+
+  collectionEvents: {
+    'reset': 'render'
+  }
+}) {
+  initialize(options) {
     this.collection = options.notificationsUser;
     this.childViewOptions = {
          role: options.role,
          roles: options.roles
        }
-  },
-  collectionEvents: {
-    'reset': 'render'
-  },
-  updateRole: function(role) {
+  }
+
+  updateRole(role) {
     this.childViewOptions.role = role;
     this.children.each(function(child) {
       child.updateRole(role);
     });
-  },
-});
+  }
+}
 
 /**
  * Notification template
  * */
-var TemplateSubscription = Marionette.View.extend({
-  constructor: function TemplateSubscription() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class TemplateSubscription extends Marionette.View.extend({
   template: '#tmpl-templateSubscription',
   tagName:'label',
   className:'checkbox dispb',
-  initialize: function(options) {
+
+  ui: {
+      newSubscribeCheckbox: ".js_userNewNotification"
+    },
+
+  events: {
+      'click @ui.newSubscribeCheckbox': 'userNewSubscription'
+    }
+}) {
+  initialize(options) {
       this.role = options.role;
       this.roles = options.roles;
       this.notificationsUser = options.notificationsUser;
@@ -123,21 +129,17 @@ var TemplateSubscription = Marionette.View.extend({
         this.render();
       });
 
-    },
-  ui: {
-      newSubscribeCheckbox: ".js_userNewNotification"
-    },
-  events: {
-      'click @ui.newSubscribeCheckbox': 'userNewSubscription'
-    },
-  serializeData: function() {
+    }
+
+  serializeData() {
       return {
         subscription: this.model,
         role: this.role,
         i18n: i18n
       }
-    },
-  userNewSubscription: function(e) {
+    }
+
+  userNewSubscription(e) {
     var elm = $(e.target);
     var that = this;
     var status = elm.is(':checked') ? 'ACTIVE' : 'UNSUBSCRIBED';
@@ -166,20 +168,22 @@ var TemplateSubscription = Marionette.View.extend({
         console.error('ERROR: userNewSubscription', resp)
       }
     })
-  },
-  updateRole: function(role) {
+  }
+
+  updateRole(role) {
     this.role = role;
     this.render();
-  },
-});
+  }
+}
 
-var TemplateSubscriptions = Marionette.CollectionView.extend({
-  constructor: function TemplateSubscriptions() {
-    Marionette.CollectionView.apply(this, arguments);
-  },
-
+class TemplateSubscriptions extends Marionette.CollectionView.extend({
   childView: TemplateSubscription,
-  initialize: function(options) {
+
+  collectionEvents: {
+    'reset': 'render'
+  }
+}) {
+  initialize(options) {
     var addableGlobalSubscriptions = new Backbone.Collection();
     this.notificationTemplates = options.notificationTemplates;
 
@@ -206,41 +210,39 @@ var TemplateSubscriptions = Marionette.CollectionView.extend({
       notificationTemplates: addableGlobalSubscriptions
     }
 
-  },
-  collectionEvents: {
-    'reset': 'render'
-  },
-  updateRole: function(role) {
+  }
+
+  updateRole(role) {
     this.childViewOptions.role = role;
     this.children.each(function(child) {
       child.updateRole(role);
     });
-  },
-});
+  }
+}
 
 /**
  *  Choose an email to notify user
  * */
-var NotificationByEmail = Marionette.View.extend({
-  constructor: function NotificationByEmail() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class NotificationByEmail extends Marionette.View.extend({
   template: '#tmpl-notificationByEmail',
   tagName: 'label',
   className: 'radio',
+
   ui: {
       preferredEmail: '.js_preferred'
     },
+
   events: {
       'click @ui.preferredEmail': 'preferredEmail'
-    },
-  serializeData: function() {
+    }
+}) {
+  serializeData() {
     return {
       account: this.model
     }
-  },
-  preferredEmail: function() {
+  }
+
+  preferredEmail() {
 
     var preferred = (this.$('input[name="email_account"]:checked').val()) ? true : false;
 
@@ -256,54 +258,45 @@ var NotificationByEmail = Marionette.View.extend({
     })
 
   }
+}
 
-});
+class NotificationByEmailsList extends Marionette.CollectionView.extend({
+  childView: NotificationByEmail
+}) {}
 
-var NotificationByEmailsList = Marionette.CollectionView.extend({
-  constructor: function NotificationByEmailsList() {
-    Marionette.CollectionView.apply(this, arguments);
-  },
-
-  childView: NotificationByEmail,
-});
-
-
-var NotificationByEmails = Marionette.View.extend({
-  constructor: function NotificationByEmails() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class NotificationByEmails extends Marionette.View.extend({
   template: '#tmpl-notificationByEmails',
+
   regions: {
     list: '.controls',
-  },
-  onRender: function() {
+  }
+}) {
+  onRender() {
     this.showChildView('list', new NotificationByEmailsList({
       collection: this.collection,
     }));
-  },
-});
+  }
+}
 
 /**
  * Subscripbe / Unsubscribe action
  * */
-var Subscriber = Marionette.View.extend({
-  constructor: function Subscriber() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class Subscriber extends Marionette.View.extend({
   template:'#tmpl-userSubscriber',
+
   ui: {
     unSubscription: ".js_unSubscription",
     subscription: ".js_subscription",
     btnSubscription:'.btnSubscription',
     btnUnsubscription:'.btnUnsubscription'
   },
+
   events: {
     'click @ui.unSubscription': 'unSubscription',
     'click @ui.subscription': 'subscription'
-  },
-  initialize: function(options) {
+  }
+}) {
+  initialize(options) {
     this.roles = options.roles;
     this.role = options.role;
     this.parent = options.parent;
@@ -315,23 +308,24 @@ var Subscriber = Marionette.View.extend({
       this.role = (_.size(this.roles)) ? model : undefined;
       this.render();
     });
-  },
-  serializeData: function() {
+  }
+
+  serializeData() {
     return {
       role: this.role
     }
-  },
+  }
 
-  unSubscription: function() {
+  unSubscription() {
     var that = this;
 
     if (this.role) {
       this.roles.UnsubscribeUserFromDiscussion();
       this.parent.updateRole(null);
     }
-  },
+  }
 
-  subscription: function() {
+  subscription() {
     var that = this;
     var analytics = Analytics.getInstance();
     analytics.trackEvent(analytics.events.JOIN_DISCUSSION_CLICK);
@@ -355,24 +349,21 @@ var Subscriber = Marionette.View.extend({
                 }});
     }
   }
+}
 
-});
-
-var userNotificationSubscriptions = Marionette.View.extend({
-  constructor: function userNotificationSubscriptions() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class userNotificationSubscriptions extends Marionette.View.extend({
   template: '#tmpl-userNotificationSubscriptions',
   className: 'admin-notifications',
+
   regions: {
     navigationMenuHolder: '.navigation-menu-holder',
     userNotifications:'#userNotifications',
     templateSubscription: '#templateSubscriptions',
     userSubscriber: '#subscriber',
     notifByEmail: '#notifByEmail'
-  },
-  onRender: function() {
+  }
+}) {
+  onRender() {
     var menu = new UserNavigationMenu({selectedSection: "notifications"});
     this.showChildView('navigationMenuHolder', menu);
 
@@ -416,9 +407,9 @@ var userNotificationSubscriptions = Marionette.View.extend({
     emailAccount.fetch();
 
     this.showChildView('notifByEmail', notificationByEmails);
-  },
+  }
 
-  updateRole: function(role) {
+  updateRole(role) {
     var that = this;
     var allRoles = this.userNotification.childViewOptions.roles;
     var notificationTemplates = this.templateSubscriptions.notificationTemplates;
@@ -446,14 +437,13 @@ var userNotificationSubscriptions = Marionette.View.extend({
         that.showChildView('templateSubscription', that.templateSubscriptions);
       });
     }
-  },
+  }
 
-  serializeData: function() {
+  serializeData() {
     return {
       i18n: i18n
     }
   }
-
-});
+}
 
 export default userNotificationSubscriptions;

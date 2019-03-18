@@ -23,15 +23,31 @@ const Annotator = AnnotatorF.Annotator;
  * @extends app.models.base.BaseModel
  */
 
-var SegmentModel = Base.Model.extend({
-  constructor: function SegmentModel() {
-    Base.Model.apply(this, arguments);
-  },
+class SegmentModel extends Base.Model.extend({
+  /**
+   * @type {string}
+   */
+  urlRoot: Ctx.getApiUrl("extracts"),
 
+  /**
+   * @type {Object}
+   */
+  defaults: {
+    text: '',
+    quote: '',
+    idPost: null,
+    idIdea: null,
+    created: null,
+    idCreator: null,
+    important: false,
+    ranges: [],
+    target: null
+  }
+}) {
   /**
    * @init
    */
-  initialize: function() {
+  initialize() {
     if (this.attributes.created) {
       this.attributes.created = this.attributes.created;
     }
@@ -84,32 +100,12 @@ var SegmentModel = Base.Model.extend({
 
     // cleaning
     delete this.attributes.highlights;
-  },
-
-  /**
-   * @type {string}
-   */
-  urlRoot: Ctx.getApiUrl("extracts"),
-
-  /**
-   * @type {Object}
-   */
-  defaults: {
-    text: '',
-    quote: '',
-    idPost: null,
-    idIdea: null,
-    created: null,
-    idCreator: null,
-    important: false,
-    ranges: [],
-    target: null
-  },
+  }
 
   /**
    * Validation
    */
-  validate: function(attrs, options) {
+  validate(attrs, options) {
     var currentUser = Ctx.getCurrentUser();
     var id = currentUser.getId();
 
@@ -141,12 +137,12 @@ var SegmentModel = Base.Model.extend({
     if (attrs.idCreator === null || typeof attrs.idCreator !== 'string') {
       return i18n.gettext('invalid idCreator: ') + attrs.idCreator;
     }
-  },
+  }
 
   /** Return a promise for the Post the segments is associated to, if any
    * @returns {$.Defered.Promise}
    */
-  getAssociatedIdeaPromise: function() {
+  getAssociatedIdeaPromise() {
     var that = this;
     var idIdea = this.get('idIdea');
     if (idIdea) {
@@ -157,20 +153,20 @@ var SegmentModel = Base.Model.extend({
     else {
       return Promise.resolve(null);
     }
-  },
+  }
 
   /** Return a promise for the Post the segments is associated to, if any
    * @returns {$.Defered.Promise}
    */
-  getAssociatedPostPromise: function() {
+  getAssociatedPostPromise() {
     return this.collection.collectionManager.getMessageFullModelPromise(this.get('idPost'));
-  },
+  }
 
   /**
    * Return the html markup to the icon
    * @returns {string}
    */
-  getTypeIcon: function() {
+  getTypeIcon() {
     var cls = 'icon-';
     var target = this.get('target');
     var idPost = this.idPost;
@@ -197,14 +193,14 @@ var SegmentModel = Base.Model.extend({
     }
 
     return Ctx.format("<i class='{0}'></i>", cls);
-  },
+  }
 
   /**
    * Returns the extract's creator from a collection provided
    * @param {Collection} The collection to get the user models from
    * @returns {User}
    */
-  getCreatorFromUsersCollection: function(usersCollection) {
+  getCreatorFromUsersCollection(usersCollection) {
     var creatorId = this.get('idCreator');
     var creator = usersCollection.getById(creatorId);
     if (!creatorId) {
@@ -212,24 +208,24 @@ var SegmentModel = Base.Model.extend({
     }
 
     return creator;
-  },
+  }
 
   /**
    * Alias for `.get('quote') || .get('text')`
    * @returns {string}
    */
-  getQuote: function() {
+  getQuote() {
     return this.get('quote') || this.get('text');
-  },
+  }
 
-  getCreatedTime: function() {
+  getCreatedTime() {
     if (!this.createdTime) {
       this.createdTime = (new Date(this.get('created'))).getTime();
     }
 
     return this.createdTime;
   }
-});
+}
 
 /**
  * Segment collection
@@ -237,11 +233,7 @@ var SegmentModel = Base.Model.extend({
  * @extends app.models.base.BaseCollection
  */
 
-var SegmentCollection = Base.Collection.extend({
-  constructor: function SegmentCollection() {
-    Base.Collection.apply(this, arguments);
-  },
-
+class SegmentCollection extends Base.Collection.extend({
   /**
    * @type {string}
    */
@@ -250,23 +242,23 @@ var SegmentCollection = Base.Collection.extend({
   /**
    * @type {IdeaModel}
    */
-  model: SegmentModel,
-
+  model: SegmentModel
+}) {
   /**
    * @init
    */
-  initialize: function() {
+  initialize() {
 
-  },
+  }
 
   /**
    * Returns the segment related to the annotation
    * @param  {annotation} annotation
    * @returns {Segment}
    */
-  getByAnnotation: function(annotation) {
+  getByAnnotation(annotation) {
     return this.get(annotation['@id']);
-  },
+  }
 
   /**
    * Transform an annotator annotation as an extract.
@@ -275,7 +267,7 @@ var SegmentCollection = Base.Collection.extend({
    * @param {number} [idIdea=null]
    * @returns {Segment}
    */
-  addAnnotationAsExtract: function(annotation, idIdea) {
+  addAnnotationAsExtract(annotation, idIdea) {
     var that = this;
     var idPost = Ctx.getPostIdFromAnnotation(annotation);
 
@@ -301,8 +293,7 @@ var SegmentCollection = Base.Collection.extend({
 
     return segment;
   }
-
-});
+}
 
 export default {
   Model: SegmentModel,

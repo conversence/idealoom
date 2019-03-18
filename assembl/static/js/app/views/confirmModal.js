@@ -16,40 +16,35 @@ import i18n from '../utils/i18n.js';
 
 
 
-var ConfirmModal = Backbone.Modal.extend({
-  constructor: function ConfirmModal() {
-    Backbone.Modal.apply(this, arguments);
-  },
-
-
+class ConfirmModal extends Backbone.Modal.extend({
   template: '#tmpl-confirmModal',
   className: 'generic-modal popin-wrapper modal-joinDiscussion',
   cancelEl: '.close, .js_close',
-  submitEl: '.js_confirm',
-
-  initialize: function(options) {
+  submitEl: '.js_confirm'
+}) {
+  initialize(options) {
     this.icon = "icon" in options ? options.icon : "icon-discuss";
     this.contentText = "contentText" in options ? options.contentText : "";
     this.onSubmit = "onSubmit" in options ? options.onSubmit : null;
     this.cancelText = "cancelText" in options ? options.cancelText : i18n.gettext('Cancel');
     this.submitText = "submitText" in options ? options.submitText : i18n.gettext('OK');
-  },
+  }
 
-  serializeData: function() {
+  serializeData() {
     return {
       icon: this.icon,
       contentText: this.contentText,
       cancelText: this.cancelText,
       submitText: this.submitText
     };
-  },
+  }
 
   // called by Backbone.Modal when users clicks on submitEl
-  submit: function(ev) {
+  submit(ev) {
     if ( _.isFunction(this.onSubmit) ){
       this.onSubmit(ev);
     }
   }
-});
+}
 
 export default ConfirmModal;

@@ -21,69 +21,68 @@ import Statistics from './statistics.js';
 import Types from '../utils/types.js';
 import Promise from 'bluebird';
 
-var Partner = Marionette.View.extend({
-  constructor: function Partner() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class Partner extends Marionette.View.extend({
   template: '#tmpl-partnerItem',
-  className: 'gu gu-2of7 partnersItem mrl',
-  serializeData: function() {
+  className: 'gu gu-2of7 partnersItem mrl'
+}) {
+  serializeData() {
     return {
       organization: this.model
     }
-  },
-  templateContext: function() {
+  }
+
+  templateContext() {
     return {
       htmlEntities: function(str) {
         return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
       }
     };
   }
-});
+}
 
-var PartnerListBody = Marionette.CollectionView.extend({
-  constructor: function PartnerListBody() {
-    Marionette.CollectionView.apply(this, arguments);
-  },
-  childView: Partner,
-});
+class PartnerListBody extends Marionette.CollectionView.extend({
+  childView: Partner
+}) {}
 
-var PartnerList = Marionette.View.extend({
-  constructor: function PartnerList() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class PartnerList extends Marionette.View.extend({
   template: '#tmpl-partnerList',
   className:'gr mvxl',
-  initialize: function(options) {
-    this.nbOrganisations = options.nbOrganisations;
-  },
+
   regions: {
     partnerListBody: 'div.partnersList',
-  },
-  onRender: function() {
+  }
+}) {
+  initialize(options) {
+    this.nbOrganisations = options.nbOrganisations;
+  }
+
+  onRender() {
     this.showChildView('partnerListBody', new PartnerListBody({
       collection: this.collection,
     }));
-  },
-  serializeData: function() {
+  }
+
+  serializeData() {
     return {
       userCanEditDiscussion: Ctx.getCurrentUser().can(Permissions.ADMIN_DISCUSSION),
       nbOrganisations: this.nbOrganisations,
       urlEdit: '/' + Ctx.getDiscussionSlug() + '/partners'
     }
   }
+}
 
-});
+class Synthesis extends Marionette.View.extend({
+  template: '#tmpl-synthesisContext',
 
-var Synthesis = Marionette.View.extend({
-  constructor: function Synthesis() {
-    Marionette.View.apply(this, arguments);
+  events: {
+    'click .js_readSynthesis': 'readSynthesis'
   },
 
-  template: '#tmpl-synthesisContext',
-  initialize: function(options) {
+  modelEvents: {
+    'change': 'render'
+  }
+}) {
+  initialize(options) {
       var that = this;
 
       this.model = new Backbone.Model();
@@ -102,37 +101,22 @@ var Synthesis = Marionette.View.extend({
           empty: i18n.gettext("No synthesis of the discussion has been published yet")
         });
       }
-    },
+    }
 
-  events: {
-    'click .js_readSynthesis': 'readSynthesis'
-  },
-
-  modelEvents: {
-    'change': 'render'
-  },
-
-  serializeData: function() {
+  serializeData() {
     return {
       synthesis: this.model,
       ctx: Ctx
     }
-  },
-
-  readSynthesis: function() {
-    IdeaLoom.other_vent.trigger("DEPRECATEDnavigation:selected", "synthesis");
   }
 
-});
+  readSynthesis() {
+    IdeaLoom.other_vent.trigger("DEPRECATEDnavigation:selected", "synthesis");
+  }
+}
 
-var Instigator = Marionette.View.extend({
-  constructor: function Instigator() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class Instigator extends Marionette.View.extend({
   template: '#tmpl-instigator',
-  initialize: function() {
-  },
 
   ui: {
       instigatorDescriptionRegion: '.js_region-instigator-editor'
@@ -143,21 +127,24 @@ var Instigator = Marionette.View.extend({
   },
 
   events: {
-  },
+  }
+}) {
+  initialize() {
+  }
 
-  serializeData: function() {
+  serializeData() {
     return {
       instigator: this.model,
       Ctx: Ctx,
       userCanEditDiscussion: Ctx.getCurrentUser().can(Permissions.ADMIN_DISCUSSION)
     }
-  },
+  }
 
-  onRender: function() {
+  onRender() {
     this.renderCKEditorInstigator();
-  },
+  }
 
-  renderCKEditorInstigator: function() {
+  renderCKEditorInstigator() {
 
     var uri = this.model.id.split('/')[1];
     this.model.url = Ctx.getApiV2DiscussionUrl('partner_organizations/') + uri;
@@ -170,28 +157,19 @@ var Instigator = Marionette.View.extend({
 
     this.showChildView('regionInstigatorDescription', instigator);
 
-  },
+  }
 
-  templateContext: function() {
+  templateContext() {
     return {
       editInstigatorUrl: function() {
               return '/' + Ctx.getDiscussionSlug() + '/partners';
             }
     }
   }
+}
 
-});
-
-var Introduction = Marionette.View.extend({
-  constructor: function Introduction() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class Introduction extends Marionette.View.extend({
   template: '#tmpl-introductions',
-  initialize: function() {
-    this.editingIntroduction = false;
-    this.editingObjective = false;
-  },
 
   ui: {
     introduction: '.js_editIntroduction',
@@ -201,7 +179,7 @@ var Introduction = Marionette.View.extend({
     introductionEditor: '.context-introduction-editor',
     objectiveEditor: '.context-objective-editor'
   },
-  
+
   regions: {
     objectiveEditorRegion: "@ui.objectiveEditor",
     introductionEditorRegion: "@ui.introductionEditor"
@@ -212,35 +190,40 @@ var Introduction = Marionette.View.extend({
     'click @ui.seeMoreObjectives': 'seeMore',
     'click @ui.introduction': 'editIntroduction',
     'click @ui.objective':'editObjective'
-  },
+  }
+}) {
+  initialize() {
+    this.editingIntroduction = false;
+    this.editingObjective = false;
+  }
 
-  serializeData: function() {
+  serializeData() {
     return {
       context: this.model,
       editingIntroduction: this.editingIntroduction,
       editingObjective: this.editingObjective,
       userCanEditDiscussion: Ctx.getCurrentUser().can(Permissions.ADMIN_DISCUSSION)
     }
-  },
+  }
 
-  onRender: function() {
+  onRender() {
     this.renderCKEditorIntroduction();
     this.renderCKEditorObjective();
-  },
+  }
 
-  editIntroduction: function() {
+  editIntroduction() {
     if (Ctx.getCurrentUser().can(Permissions.ADMIN_DISCUSSION)) {
       this._introductionEditor.changeToEditMode();
     }
-  },
+  }
 
-  editObjective: function() {
+  editObjective() {
     if (Ctx.getCurrentUser().can(Permissions.ADMIN_DISCUSSION)) {
       this._objectiveEditor.changeToEditMode();
     }
-  },
+  }
 
-  renderCKEditorIntroduction: function() {
+  renderCKEditorIntroduction() {
     var that = this;
     var area = this.$('.context-introduction-editor');
 
@@ -252,9 +235,9 @@ var Introduction = Marionette.View.extend({
 
     this.showChildView('introductionEditorRegion', introduction);
     this._introductionEditor = introduction;
-  },
+  }
 
-  renderCKEditorObjective: function() {
+  renderCKEditorObjective() {
     var that = this;
     var area = this.$('.context-objective-editor');
 
@@ -267,22 +250,14 @@ var Introduction = Marionette.View.extend({
     this.showChildView('objectiveEditorRegion', objective);
     this._objectiveEditor = objective;
   }
+}
 
-});
-
-var ContextPage = Marionette.View.extend({
-  constructor: function ContextPage() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class ContextPage extends Marionette.View.extend({
   template: '#tmpl-contextPage',
   panelType: PanelSpecTypes.DISCUSSION_CONTEXT,
   className: 'contextPanel',
   gridSize: BasePanel.prototype.CONTEXT_PANEL_GRID_SIZE,
   hideHeader: true,
-  getTitle: function() {
-    return i18n.gettext('Home'); // unused
-  },
 
   regions: {
     organizations: '#context-partners',
@@ -290,9 +265,13 @@ var ContextPage = Marionette.View.extend({
     statistics: '#context-statistics',
     instigator: '#context-instigator',
     introductions: '#context-introduction'
-  },
+  }
+}) {
+  getTitle() {
+    return i18n.gettext('Home'); // unused
+  }
 
-  onRender: function() {
+  onRender() {
     var that = this;
     var collectionManager = new CollectionManager();
 
@@ -345,26 +324,21 @@ var ContextPage = Marionette.View.extend({
                 });
                 that.showChildView('synthesis', synthesis);
 
-                var NonInstigatorSubset = Backbone.Subset.extend({
-                  constructor: function NonInstigatorSubset() {
-                    Backbone.Subset.apply(this, arguments);
-                  },
-
-                  sieve: function(partner) {
+                class NonInstigatorSubset extends Backbone.Subset {
+                  sieve(partner) {
                     return partner !== partnerInstigator;
                   }
-                });
+                }
 
                 var nonInstigatorSubset = new NonInstigatorSubset([], {
                   parent: AllPartner
                 });
-                
+
                 var partners = new PartnerList({
                   nbOrganisations: nonInstigatorSubset.length,
                   collection: nonInstigatorSubset
                 });
                 that.showChildView('organizations', partners);
-
               } } catch (e) {
                 console.log("Aborting rendering of ContextPanel's regions, probably because the view was replaced since.");
 
@@ -375,7 +349,6 @@ var ContextPage = Marionette.View.extend({
 
         );
   }
-
-});
+}
 
 export default ContextPage;

@@ -9,13 +9,15 @@ import _ from 'underscore';
 import IdeaLoom from '../../app.js';
 import Ctx from '../../common/context.js';
 
-var EditableField = Marionette.View.extend({
-  constructor: function EditableField() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class EditableField extends Marionette.View.extend({
   template: _.template(""),
-  initialize: function(options) {
+
+  events: {
+    'blur': 'onBlur',
+    'keydown': 'onKeyDown'
+  }
+}) {
+  initialize(options) {
     this.view = this;
 
     this.canEdit = (_.has(options, 'canEdit')) ? options.canEdit : true;
@@ -28,27 +30,22 @@ var EditableField = Marionette.View.extend({
     }
 
     this.listenTo(this.view, 'EditableField:render', this.render);
-  },
+  }
 
-  events: {
-    'blur': 'onBlur',
-    'keydown': 'onKeyDown'
-  },
-
-  getTextValue: function() {
+  getTextValue() {
     return this.model.get(this.modelProp);
-  },
+  }
 
-  setTextValue: function(text) {
+  setTextValue(text) {
     this.model.save(this.modelProp, text, {
       success: function(model, resp) {},
       error: function(model, resp) {
         console.error('ERROR: saveEdition', resp.responseJSON);
       }
     });
-  },
+  }
 
-  onRender: function() {
+  onRender() {
     if (this.canEdit) {
       if (!(this.$el.attr('contenteditable'))) {
         this.$el.attr('contenteditable', true);
@@ -65,18 +62,18 @@ var EditableField = Marionette.View.extend({
 
     var text = this.getTextValue();
     this.el.innerHTML = text || this.placeholder;
-  },
+  }
 
   /**
    * Renders inside the given jquery or HTML elemenent given
    * @param {jQuery|HTMLElement|string} el
    */
-  renderTo: function(el) {
+  renderTo(el) {
     $(el).append(this.$el);
     this.view.trigger('EditableField:render');
-  },
+  }
 
-  onBlur: function(ev) {
+  onBlur(ev) {
     if (this.canEdit) {
       this.focus = false;
       var data = Ctx.stripHtml(ev.currentTarget.textContent);
@@ -92,16 +89,15 @@ var EditableField = Marionette.View.extend({
         }
       }
     }
-  },
+  }
 
-  onKeyDown: function(ev) {
+  onKeyDown(ev) {
     if (ev.which === 13 || ev.which === 27) {
       ev.preventDefault();
       $(ev.currentTarget).trigger('blur');
       return false;
     }
   }
-
-});
+}
 
 export default EditableField;

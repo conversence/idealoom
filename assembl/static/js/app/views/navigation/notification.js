@@ -5,12 +5,8 @@
 
 import Marionette from 'marionette.js';
 
-var sidebarNotification = Marionette.View.extend({
-  constructor: function sidebarNotification() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class sidebarNotification extends Marionette.View.extend({
   template: '#tmpl-sidebar-notification'
-});
+}) {}
 
 export default sidebarNotification;

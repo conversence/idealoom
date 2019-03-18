@@ -13,20 +13,20 @@ import Types from './utils/types.js';
 import _ from 'underscore';
 
 
-var RootView = Marionette.View.extend({
+class RootView extends Marionette.View.extend({
   el: 'body',
+
   regions: {
     headerRegions: '#header',
     infobarRegion: '#infobars',
     groupContainer: '#groupContainer',
     contentContainer: '#content-container',
     slider: '#slider',
-  },
-});
+  }
+}) {}
 
-
-var AppClass = Marionette.Application.extend({
-  onStart: function() {
+class AppClass extends Marionette.Application {
+  onStart() {
     var that = this;
     this.rootView = new RootView();
     this.socket_vent = Radio.channel('socket');
@@ -99,8 +99,8 @@ var AppClass = Marionette.Application.extend({
     link.rel = 'shortcut icon';
     link.href = static_url + '/img/icon/infinite-1.png';
     document.getElementsByTagName('head')[0].appendChild(link);
-  },
-});
+  }
+}
 
 
 _.extend(Backbone.Marionette.View.prototype, {

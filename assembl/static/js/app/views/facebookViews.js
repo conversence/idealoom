@@ -534,13 +534,18 @@ var checkState = function(renderView) {
       });
 };
 
-var errorView = Marionette.View.extend({
-  constructor: function errorView() {
-    Marionette.View.apply(this, arguments);
+class errorView extends Marionette.View.extend({
+  template: '#tmpl-exportPostModal-fb-token-error',
+
+  ui: {
+    login: ".js_fb-create-action"
   },
 
-  template: '#tmpl-exportPostModal-fb-token-error',
-  initialize: function(options) {
+  events: {
+    'click @ui.login': "checkAndLoginUser"
+  }
+}) {
+  initialize(options) {
     this.vent = options.vent; //Event Aggregator
     if (options.ready === false) {
       if (options.errorState === 'permissions') {
@@ -559,20 +564,16 @@ var errorView = Marionette.View.extend({
         this.state = options.errorState;
       }
     }
-  },
-  serializeData: function() {
+  }
+
+  serializeData() {
     return {
       message: this.msg,
       subMessage: this.subMsg
     }
-  },
-  ui: {
-    login: ".js_fb-create-action"
-  },
-  events: {
-    'click @ui.login': "checkAndLoginUser"
-  },
-  checkAndLoginUser: function(event) {
+  }
+
+  checkAndLoginUser(event) {
     if (this.state === 'permissions') {
       var that = this;
       loginUser(function() {
@@ -585,16 +586,16 @@ var errorView = Marionette.View.extend({
       Ctx.clearModal();
     }
   }
-});
+}
 
-var groupView = LoaderView.extend({
-  constructor: function groupView() {
-    LoaderView.apply(this, arguments);
-  },
-
+class groupView extends LoaderView.extend({
   template: "#tmpl-exportPostModal-fb-group",
 
-  initialize: function(options) {
+  events: {
+      'change .js_fb-group-id': 'updateEndpoint'
+    }
+}) {
+  initialize(options) {
       this.setLoading(true);
       this.bundle = options.bundle;
       this.vent = options.vent;
@@ -612,11 +613,9 @@ var groupView = LoaderView.extend({
         that.vent.trigger('clearError');
         that.render();
       });
-    },
-  events: {
-      'change .js_fb-group-id': 'updateEndpoint'
-    },
-  updateEndpoint: function(e) {
+    }
+
+  updateEndpoint(e) {
       var value = $(e.currentTarget)
                   .find('option:selected')
                   .val();
@@ -632,8 +631,9 @@ var groupView = LoaderView.extend({
         });
       }
       this.vent.trigger('clearError');
-    },
-  serializeData: function() {
+    }
+
+  serializeData() {
       // var tmp = [
       //   {value: 'null', description: ''},
       //   {value: 'self', description: 'Yourself'}
@@ -645,15 +645,17 @@ var groupView = LoaderView.extend({
 
       return { groups: tmp.concat(m) }
     }
-});
+}
 
-var pageView = LoaderView.extend({
-  constructor: function pageView() {
-    LoaderView.apply(this, arguments);
-  },
-
+class pageView extends LoaderView.extend({
   template: '#tmpl-exportPostModal-fb-page',
-  initialize: function(options) {
+
+  events: {
+      'change .js_fb-page-voice': 'updateSender',
+      'change .js_fb-page-id': 'updateEndpoint'
+    }
+}) {
+  initialize(options) {
       this.setLoading(true);
       this.bundle = options.bundle;
       this.vent = options.vent;
@@ -683,12 +685,9 @@ var pageView = LoaderView.extend({
         });
       });
 
-    },
-  events: {
-      'change .js_fb-page-voice': 'updateSender',
-      'change .js_fb-page-id': 'updateEndpoint'
-    },
-  updateEndpoint: function(e) {
+    }
+
+  updateEndpoint(e) {
       var value = this.$(e.currentTarget)
                       .find('option:selected')
                       .val();
@@ -703,8 +702,9 @@ var pageView = LoaderView.extend({
         });
       }
       this.vent.trigger('clearError');
-    },
-  updateSender: function(e) {
+    }
+
+  updateSender(e) {
       var value = this.$(e.currentTarget)
                       .find('option:selected')
                       .val();
@@ -719,8 +719,9 @@ var pageView = LoaderView.extend({
           credentials: window.FB_TOKEN.getPageToken(value)
         });
       }
-    },
-  serializeData: function() {
+    }
+
+  serializeData() {
       var adminTmp = [
           {value: 'null', description: ''},
           {value: 'self', description: 'Yourself'}
@@ -746,15 +747,11 @@ var pageView = LoaderView.extend({
         pages: pageTmp.concat(pages)
       };
     }
+}
 
-});
-
-var exportPostForm = Marionette.View.extend({
-  constructor: function exportPostForm() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class exportPostForm extends Marionette.View.extend({
   template: "#tmpl-exportPostModal-fb",
+
   regions: {
     subform: '.fb-targeted-form'
   },
@@ -769,8 +766,9 @@ var exportPostForm = Marionette.View.extend({
   events: {
     'change @ui.supportedList': 'defineView',
     'click @ui.test': 'test'
-  },
-  initialize: function(options) {
+  }
+}) {
+  initialize(options) {
     this.setLoading(true);
     // this.token = options.token;
     this.exportedMessage = options.exportedMessage;
@@ -800,9 +798,9 @@ var exportPostForm = Marionette.View.extend({
         that.render();
         that.vent.trigger('clearError');
       });
-  },
+  }
 
-  serializeData: function() {
+  serializeData() {
     if (this.isLoading()) {
         return {};
     }
@@ -815,15 +813,17 @@ var exportPostForm = Marionette.View.extend({
       suggestedHeader: messageDefaults.header(this.messageCreator),
       messageFooter: messageDefaults.footer(this.exportedMessage)
     }
-  },
-  test: function(e) {
+  }
+
+  test(e) {
     var v1 = _composeMessageBody(this.exportedMessage, this.messageCreator, null, null);
     var v2 = _composeMessageBody(this.exportedMessage, this.messageCreator, "A random header", "Extra information here...");
 
     console.log('Null header, null extra', v1);
     console.log('Header, Extra', v2);
-  },
-  defineView: function(event) {
+  }
+
+  defineView(event) {
     var value = this.$(event.currentTarget)
     .find('option:selected')
     .val();
@@ -859,8 +859,9 @@ var exportPostForm = Marionette.View.extend({
       break;
     }
 
-  },
-  saveModel: function(success, error) {
+  }
+
+  saveModel(success, error) {
     var that = this;
     var errorMsg = i18n.gettext("Facebook was unable to create the post. Close the box and try again.");
     var getLink = function() {
@@ -1015,32 +1016,30 @@ var exportPostForm = Marionette.View.extend({
       }
     });
   }
+}
 
-
-});
-
-var FacebookSourceForm = Marionette.View.extend({
-  constructor: function FacebookSourceForm() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class FacebookSourceForm extends Marionette.View.extend({
   template: '#tmpl-facebookSourceForm',
+
   regions: {
     'sourcePicker': ".source_picker"
   },
+
   ui: {
     lower_bound: ".js_lower_bound",
     upper_bound: ".js_upper_bound"
-  },
-  initialize: function(options) {
+  }
+}) {
+  initialize(options) {
     this.token = options.token;
     this.vent = options.vent; //Event Aggregator
     this.bundle = {
         endpoint: null,
         credentials: window.FB_TOKEN.getUserToken()
     };
-  },
-  getModelData: function(sender) {
+  }
+
+  getModelData(sender) {
     var result = {
       creator_id: sender.get("@id"),
       endpoint: this.bundle.endpoint,
@@ -1055,8 +1054,9 @@ var FacebookSourceForm = Marionette.View.extend({
       result.upper_bound = limit;
     }
     return result;
-  },
-  saveModel: function(success, error) {
+  }
+
+  saveModel(success, error) {
     var that = this;
     var cm = new CollectionManager();
     cm.getAllUserAccountsPromise().then(function(accounts) {
@@ -1096,91 +1096,80 @@ var FacebookSourceForm = Marionette.View.extend({
       }
     });
   }
-});
+}
 
-var publicGroupSourceForm = FacebookSourceForm.extend({
-  constructor: function publicGroupSourceForm() {
-    FacebookSourceForm.apply(this, arguments);
-  },
+class publicGroupSourceForm extends FacebookSourceForm {}
 
-  // TODO (with URL interpretation)
-});
-
-var privateGroupSourceForm = FacebookSourceForm.extend({
-  constructor: function privateGroupSourceForm() {
-    FacebookSourceForm.apply(this, arguments);
-  },
-
-  onRender: function() {
+class privateGroupSourceForm extends FacebookSourceForm {
+  onRender() {
     this.groupView = new groupView({
           token: this.token,
           bundle: this.bundle,
           vent: this.vent
         });
     this.showChildView('sourcePicker', this.groupView);
-  },
-  getModelData: function(sender) {
+  }
+
+  getModelData(sender) {
     if (this.bundle.endpoint) {
       var endpoint = this.bundle.endpoint;
       var groupId = endpoint.substr(0, endpoint.length - 5);
-      var modelData = FacebookSourceForm.prototype.getModelData.apply(this, arguments);
+      var modelData = super.getModelData(...arguments);
       modelData.fb_source_id = groupId;
       return modelData;
     }
   }
-});
+}
 
-var pageSourceForm = FacebookSourceForm.extend({
-  constructor: function pageSourceForm() {
-    FacebookSourceForm.apply(this, arguments);
-  },
-
-  onRender: function() {
+class pageSourceForm extends FacebookSourceForm {
+  onRender() {
     this.pageView = new pageView({
           token: this.token,
           bundle: this.bundle,
           vent: this.vent
         });
     this.showChildView('sourcePicker', this.pageView);
-  },
-  getModelData: function(sender) {
+  }
+
+  getModelData(sender) {
     if (this.bundle.endpoint) {
       var endpoint = this.bundle.endpoint;
       var pageId = endpoint.substr(0, endpoint.length - 5);
-      var modelData = FacebookSourceForm.prototype.getModelData.apply(this, arguments);
+      var modelData = super.getModelData(...arguments);
       modelData.fb_source_id = pageId;
       return modelData;
     }
   }
-});
+}
 
-var basefbView = Marionette.View.extend({
-  constructor: function basefbView() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class basefbView extends Marionette.View.extend({
   template: '#tmpl-sourceFacebook',
+
   ui: {
     root: '.js_facebook_view'
-  }, 
+  },
+
   regions: {
     subForm: '@ui.root'
   },
+
   events: {
     'click .js_ok_submit': 'submitForm'
   },
+
   modelEvents: {
     "change": "render"
-  },
-  initialize: function(options){
+  }
+}) {
+  initialize(options) {
     this.vent = _.extend({}, Backbone.Events);
     this.model = options.model;
     this.exportedMessage = options.exportedMessage;
 
     this.vent.on("reloadBase", this.onRender, this);
-  },
+  }
 
-  onRender: function(){
+  onRender() {
     var that = this;
     checkState(function(fbState) {
       console.log('The state of the checkState function', fbState);
@@ -1240,13 +1229,15 @@ var basefbView = Marionette.View.extend({
       }
     });
 
-  },
-  submitForm: function(e) {
+  }
+
+  submitForm(e) {
     console.log('submitting form');
     e.preventDefault();
     this.saveModel();
-  },
-  saveModel: function() {
+  }
+
+  saveModel() {
     // FIXME: @benoitg Where is formType supposed to come from?
     // Nowhere in the code
     if (false && !this.formType) {
@@ -1267,13 +1258,12 @@ var basefbView = Marionette.View.extend({
         console.error('Could not save model in basefbView');
       });
     }
-  },
-
-  onDestroy: function(){
-    this.vent.off("reloadBase");
   }
 
-});
+  onDestroy() {
+    this.vent.off("reloadBase");
+  }
+}
 
 export default {
   init: basefbView

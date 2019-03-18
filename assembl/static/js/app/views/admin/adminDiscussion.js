@@ -16,26 +16,26 @@ import DiscussionSource from '../../models/discussionSource.js';
 import i18n from '../../utils/i18n.js';
 import AdminNavigationMenu from './adminNavigationMenu.js';
 
-var adminDiscussion = Marionette.View.extend({
-  constructor: function adminDiscussion() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class adminDiscussion extends Marionette.View.extend({
   template: '#tmpl-adminDiscussion',
   className: 'admin-discussion',
+
   ui: {
     discussion: '.js_saveDiscussion',
     logo: '#logo_url',
     logo_thumbnail: '#logo_thumbnail'
   },
+
   regions: {
     'navigationMenuHolder': '.navigation-menu-holder'
   },
+
   events: {
     'click @ui.discussion': 'saveDiscussion',
     'blur @ui.logo': 'renderLogoThumbnail'
-  },
-  initialize: function() {
+  }
+}) {
+  initialize() {
     var that = this;
     var collectionManager = new CollectionManager();
 
@@ -46,9 +46,9 @@ var adminDiscussion = Marionette.View.extend({
               that.model =  Discussion;
               that.render();
             });
-  },
+  }
 
-  onRender: function() {
+  onRender() {
     // this is in onRender instead of onBeforeShow because of the re-render in initialize()
     var menu = new AdminNavigationMenu.discussionAdminNavigationMenu(
       {selectedSection: "edition"});
@@ -56,16 +56,16 @@ var adminDiscussion = Marionette.View.extend({
 
     this.$('#introduction').autosize();
     this.renderLogoThumbnail();
-  },
+  }
 
-  serializeData: function() {
+  serializeData() {
     return {
       discussion: this.model,
       Ctx: Ctx
     }
-  },
+  }
 
-  saveDiscussion: function(e) {
+  saveDiscussion(e) {
     e.preventDefault();
 
     var introduction = this.$('textarea[name=introduction]').val();
@@ -99,9 +99,9 @@ var adminDiscussion = Marionette.View.extend({
         resp.handled = true; //In order to avoid IdeaLoom crashing completely!
       }
     })
-  },
+  }
 
-  renderLogoThumbnail: function(){
+  renderLogoThumbnail() {
     console.log("renderLogoThumbnail()");
     this.ui.logo_thumbnail.empty();
     var logo_url = this.ui.logo ? this.ui.logo.val() : null;
@@ -121,7 +121,6 @@ var adminDiscussion = Marionette.View.extend({
     }
     
   }
-
-});
+}
 
 export default adminDiscussion;

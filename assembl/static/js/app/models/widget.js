@@ -23,11 +23,7 @@ import TokenVoteSessionView from '../views/tokenVoteSession.js';
  * @class app.models.widget.WidgetModel`
  * @extends app.models.base.BaseModel
  */
-var WidgetModel = Base.Model.extend({
-  constructor: function WidgetModel() {
-    Base.Model.apply(this, arguments);
-  },
-
+class WidgetModel extends Base.Model.extend({
   urlRoot: Ctx.getApiV2DiscussionUrl("/widgets"),
 
   defaults: {
@@ -45,14 +41,8 @@ var WidgetModel = Base.Model.extend({
     "@view": null
   },
 
-  validate: function(attrs, options) {
-    /**
-     * check typeof variable
-     * */
-     
-  },
-
-  onButtonClick: null, // this is a callback function which if set will replace the link (when the user clicks on the button)
+  // this is a callback function which if set will replace the link (when the user clicks on the button)
+  onButtonClick: null,
 
   MESSAGE_LIST_INSPIREME_CTX: 1,
   IDEA_PANEL_ACCESS_CTX: 2,
@@ -63,13 +53,20 @@ var WidgetModel = Base.Model.extend({
   VOTE_REPORTS: 7,
   TABLE_OF_IDEA_MARKERS: 8,
   INFO_BAR: 9,
-  UNTIL_TEXT: 10,
+  UNTIL_TEXT: 10
+}) {
+  validate(attrs, options) {
+    /**
+     * check typeof variable
+     * */
+     
+  }
 
-  isRelevantForLink: function(linkType, context, idea) {
+  isRelevantForLink(linkType, context, idea) {
     return false;
-  },
+  }
 
-  findLink: function(idea) {
+  findLink(idea) {
     var id = this.getId();
     var links = idea.get("widget_links");
     links = _.filter(links, function(link) {
@@ -78,9 +75,9 @@ var WidgetModel = Base.Model.extend({
     if (links.length > 0) {
       return links[0]["@type"];
     }
-  },
+  }
 
-  isRelevantFor: function(context, idea) {
+  isRelevantFor(context, idea) {
     if (idea === null) {
       return this.isRelevantForLink(null, context, null);
     }
@@ -96,7 +93,7 @@ var WidgetModel = Base.Model.extend({
              that.isRelevantForLink(link["@type"], context, idea);
     });
     return widgetLinks.length > 0;
-  },
+  }
 
   /*
   getBaseUriFor: function(widgetType) {
@@ -121,17 +118,17 @@ var WidgetModel = Base.Model.extend({
    * representation. TODO: move to Ctx?
    * @param  {dict} params parameters for the URL GET
    */
-  getObjectShareUrl: function(params) {
+  getObjectShareUrl(params) {
     return Ctx.appendExtraURLParams(widget_url + "/share/index.html", params);
-  },
+  }
 
-  getCreationUrl: function(ideaId, locale) {
+  getCreationUrl(ideaId, locale) {
     console.error("Widget.getCreationUrl: wrong type");
-  },
+  }
 
-  getConfigurationUrl: function(targetIdeaId) {
+  getConfigurationUrl(targetIdeaId) {
     console.error("Widget.getConfigurationUrl: unknown type");
-  },
+  }
 
   /**
    * @function app.model.widgets.Widget.getUrlForUser
@@ -139,29 +136,29 @@ var WidgetModel = Base.Model.extend({
    * @param  {string} targetIdeaId Id of an idea on which the widget was launched
    * @return {string}              URL
    */
-  getUrlForUser: function(targetIdeaId, page) {
+  getUrlForUser(targetIdeaId, page) {
     // Is it the same as widget.get("ui_endpoint")?
     console.error("Widget.getUrlForUser: wrong type");
-  },
+  }
 
-  getCssClasses: function(context, idea) {
+  getCssClasses(context, idea) {
     return "";
-  },
+  }
 
-  getLinkText: function(context, idea) {
+  getLinkText(context, idea) {
     return "";
-  },
+  }
 
-  getDescriptionText: function(context, idea, translationData) {
+  getDescriptionText(context, idea, translationData) {
     return "";
-  },
+  }
 
   // TODO?: Use context and targetIdeaId. But we don't need it yet.
-  getShareUrl: function(context, targetIdeaId) {
+  getShareUrl(context, targetIdeaId) {
     return Ctx.getAbsoluteURLFromDiscussionRelativeURL("widget/"+encodeURIComponent(this.getId()));
-  },
+  }
 
-  getUrl: function(context, targetIdeaId, page) {
+  getUrl(context, targetIdeaId, page) {
     switch (context) {
       case this.DISCUSSION_MENU_CREATE_CTX:
       case this.IDEA_PANEL_CREATE_CTX:
@@ -182,7 +179,7 @@ var WidgetModel = Base.Model.extend({
       default:
         console.error("Widget.getUrlForUser: wrong context");
     }
-  },
+  }
 
   /**
    * Describes whether the widget model is internal to IdeaLoom
@@ -190,14 +187,14 @@ var WidgetModel = Base.Model.extend({
    * Override in child classes]
    * @returns {boolean}
    */
-  isIndependentModalType: function(){
-    return true;
-  },
-
-  showsButton: function(context, idea){
+  isIndependentModalType() {
     return true;
   }
-});
+
+  showsButton(context, idea) {
+    return true;
+  }
+}
 
 /**
  * This represents a voting widget
@@ -205,25 +202,26 @@ var WidgetModel = Base.Model.extend({
  * @class app.models.widget.VotingWidgetModel`
  * @extends app.models.widget.WidgetModel
  */
-var VotingWidgetModel = WidgetModel.extend({
-  constructor: function VotingWidgetModel() {
-    WidgetModel.apply(this, arguments);
-  },
-
+class VotingWidgetModel extends WidgetModel.extend({
   baseUri: widget_url + "/vote/",
+
   defaults: {
     '@type': 'MultiCriterionVotingWidget'
   },
 
-  getCreationUrl: function(ideaId, locale) {
+  VOTE_STATUS_NONE: 0,
+  VOTE_STATUS_INCOMPLETE: 1,
+  VOTE_STATUS_COMPLETE: 2
+}) {
+  getCreationUrl(ideaId, locale) {
     if (locale === undefined) {
       locale = Ctx.getLocale();
     }
     return this.baseUri + "?admin=1&locale=" + locale + "#/admin/create_from_idea?idea="
       + encodeURIComponent(ideaId + "?view=creativity_widget");
-  },
+  }
 
-  getConfigurationUrl: function(targetIdeaId) {
+  getConfigurationUrl(targetIdeaId) {
     var base = this.baseUri;
     var uri = this.getId();
     var locale = Ctx.getLocale();
@@ -232,9 +230,9 @@ var VotingWidgetModel = WidgetModel.extend({
       base += "&target=" + encodeURIComponent(targetIdeaId);
     }
     return base;
-  },
+  }
 
-  getUrlForUser: function(targetIdeaId, page) {
+  getUrlForUser(targetIdeaId, page) {
     var uri = this.getId();
     var locale = Ctx.getLocale();
     var currentUser = Ctx.getCurrentUser();
@@ -250,13 +248,9 @@ var VotingWidgetModel = WidgetModel.extend({
       base += "#/results"; // was "&page=results";
     }
     return base;
-  },
+  }
 
-  VOTE_STATUS_NONE: 0,
-  VOTE_STATUS_INCOMPLETE: 1,
-  VOTE_STATUS_COMPLETE: 2,
-
-  voteStatus: function() {
+  voteStatus() {
     var voteSpecs = this.get("vote_specifications");
     var voteCounts = _.map(voteSpecs, function(vs) {
       return (vs.my_votes || []).length;
@@ -270,9 +264,9 @@ var VotingWidgetModel = WidgetModel.extend({
       return this.VOTE_STATUS_COMPLETE;
     }
     return this.VOTE_STATUS_INCOMPLETE;
-  },
+  }
 
-  getLinkText: function(context, idea) {
+  getLinkText(context, idea) {
     var locale = Ctx.getLocale();
     var activityState = this.get("activity_state");
     var endDate = this.get("end_date");
@@ -310,9 +304,9 @@ var VotingWidgetModel = WidgetModel.extend({
           }
     }
     return "";
-  },
+  }
 
-  getCssClasses: function(context, idea) {
+  getCssClasses(context, idea) {
     var currentUser = Ctx.getCurrentUser();
     if ( currentUser.isUnknownUser() ){
         return "";
@@ -329,18 +323,18 @@ var VotingWidgetModel = WidgetModel.extend({
         }
     }
     return "";
-  },
+  }
 
-  showsButton: function(context, idea){
+  showsButton(context, idea) {
     switch(context){
       case this.INFO_BAR:
         var currentUser = Ctx.getCurrentUser();
         return currentUser.can(Permissions.VOTE);
     }
     return true;
-  },
+  }
 
-  getDescriptionText: function(context, idea, translationData) {
+  getDescriptionText(context, idea, translationData) {
     var locale = Ctx.getLocale();
     var currentUser = Ctx.getCurrentUser();
     var activityState = this.get("activity_state");
@@ -394,9 +388,9 @@ var VotingWidgetModel = WidgetModel.extend({
         break;
     }
     return "";
-  },
+  }
 
-  isRelevantForLink: function(linkType, context, idea) {
+  isRelevantForLink(linkType, context, idea) {
     // TODO: This should depend on widget configuration.
     var activityState = this.get("activity_state");
 
@@ -426,8 +420,7 @@ var VotingWidgetModel = WidgetModel.extend({
         return false;
     }
   }
-});
-
+}
 
 /**
  * This represents a multi-criterion voting widget
@@ -435,25 +428,20 @@ var VotingWidgetModel = WidgetModel.extend({
  * @class app.models.widget.MultiCriterionVotingWidgetModel`
  * @extends app.models.widget.VotingWidgetModel
  */
-var MultiCriterionVotingWidgetModel = VotingWidgetModel.extend({
-  constructor: function MultiCriterionVotingWidgetModel() {
-    VotingWidgetModel.apply(this, arguments);
-  },
-
+class MultiCriterionVotingWidgetModel extends VotingWidgetModel.extend({
   defaults: {
     '@type': 'MultiCriterionVotingWidget'
-  },
-
-  getLinkText: function(context, idea) {
+  }
+}) {
+  getLinkText(context, idea) {
     switch (context) {
       case this.IDEA_PANEL_CREATE_CTX:
         return i18n.gettext("Create a multi-criterion voting session on this idea");
       default:
-        return VotingWidgetModel.prototype.getLinkText.apply(this, arguments);
+        return super.getLinkText(...arguments);
     }
   }
-});
-
+}
 
 /**
  * This represents a token voting voting widget
@@ -461,26 +449,26 @@ var MultiCriterionVotingWidgetModel = VotingWidgetModel.extend({
  * @class app.models.widget.TokenVotingWidgetModel`
  * @extends app.models.widget.VotingWidgetModel
  */
-var TokenVotingWidgetModel = VotingWidgetModel.extend({
-  constructor: function TokenVotingWidgetModel() {
-    VotingWidgetModel.apply(this, arguments);
-    this.on("buttonClick", this.onButtonClick);
-    this.on('showResult', this.onShowResult);
-  },
-
+class TokenVotingWidgetModel extends VotingWidgetModel.extend({
   defaults: {
     '@type': 'TokenVotingWidget'
-  },
+  }
+}) {
+  constructor() {
+    super(...arguments);
+    this.on("buttonClick", this.onButtonClick);
+    this.on('showResult', this.onShowResult);
+  }
 
-  getCreationUrl: function(ideaId, locale) {
+  getCreationUrl(ideaId, locale) {
     if (locale === undefined) {
       locale = Ctx.getLocale();
     }
     return this.baseUri + "?admin=1&locale=" + locale + "#/admin/create_from_idea?idea="
       + encodeURIComponent(ideaId + "?view=creativity_widget") + "&widget_type=TokenVotingWidget";
-  },
+  }
 
-  getLinkText: function(context, idea) {
+  getLinkText(context, idea) {
     switch (context) {
       case this.IDEA_PANEL_CREATE_CTX:
         return i18n.gettext("Create a token voting session on this idea");
@@ -493,11 +481,11 @@ var TokenVotingWidgetModel = VotingWidgetModel.extend({
         }
         break;
       default:
-        return VotingWidgetModel.prototype.getLinkText.apply(this, arguments);
+        return super.getLinkText(...arguments);
     }
-  },
+  }
 
-  getUrlForUser: function(targetIdeaId, page) {
+  getUrlForUser(targetIdeaId, page) {
     //var uri = this.getId();
     //var locale = Ctx.getLocale();
     var currentUser = Ctx.getCurrentUser();
@@ -511,10 +499,10 @@ var TokenVotingWidgetModel = VotingWidgetModel.extend({
       base += "/results";
     }
     return base;
-  },
+  }
 
   // FIXME: Having view code in a model is probably not a good idea. How could we do better?
-  onButtonClick: function(evt){
+  onButtonClick(evt) {
     console.log("TokenVotingWidgetModel::onButtonClick() evt: ", evt);
     if ( evt && _.isFunction(evt.preventDefault) ){
       evt.preventDefault();
@@ -537,18 +525,18 @@ var TokenVotingWidgetModel = VotingWidgetModel.extend({
         that.onShowResult();
       break;
     }    
-  },
+  }
 
   /*
     For debugging results view purposes
    */
-  onShowResult: function(evt){
+  onShowResult(evt) {
     var modalView = new TokenVoteSessionView.TokenVoteSessionResultModal({model: this});
     Ctx.setCurrentModalView(modalView);
     IdeaLoom.rootView.showChildView('slider', modalView);
-  },
+  }
 
-  getCssClasses: function(context, idea) {
+  getCssClasses(context, idea) {
     var currentUser = Ctx.getCurrentUser();
     if ( currentUser.isUnknownUser() ){
         return "";
@@ -577,16 +565,16 @@ var TokenVotingWidgetModel = VotingWidgetModel.extend({
       break;
     }
     return "";
-  },
+  }
 
-  isIndependentModalType: function(){
+  isIndependentModalType() {
     return false;
-  },
+  }
 
   /**
    * @returns {Model|null} Returns a new VoteSpec Model (if present) or null
    */
-  getVoteSpecificationModel: function(){
+  getVoteSpecificationModel() {
     var specs = this.get('vote_specifications');
     if (specs && specs.length > 0) {
 
@@ -598,9 +586,9 @@ var TokenVotingWidgetModel = VotingWidgetModel.extend({
       else return null;
     }
     else return null;
-  },
+  }
 
-  voteStatus: function() {
+  voteStatus() {
     // Should we also consider probably badly configured widgets? For example a widget where the user cannot allocate all his tokens? (this is a widget where a category matches this condition: votable_ideas.length * category.max_per_idea < category.total_number)
     var voteSpecs = _.where(this.get("vote_specifications"), {"@type": "TokenVoteSpecification"});
     var status = this.VOTE_STATUS_INCOMPLETE;
@@ -640,8 +628,7 @@ var TokenVotingWidgetModel = VotingWidgetModel.extend({
     }
     return this.VOTE_STATUS_COMPLETE;
   }
-});
-
+}
 
 /**
  * The specifications describing how a vote should happen
@@ -649,34 +636,30 @@ var TokenVotingWidgetModel = VotingWidgetModel.extend({
  * @class app.models.widget.TokenVoteSpecificationModel
  * @extends app.models.base.BaseModel
  */
-var TokenVoteSpecificationModel = Base.Model.extend({
-  constructor: function TokenVoteSpecificationModel(){
-    Base.Model.apply(this, arguments);
-  },
-
+class TokenVoteSpecificationModel extends Base.Model.extend({
   defaults: {
     "@type": Types.TOKENVOTESPECIFICATION,
     'token_categories': [],
     'exclusive_categories': null,
     'settings': null,
     'results_url': null
-  },
-
-  getVoteResultUrl: function(){
+  }
+}) {
+  getVoteResultUrl() {
     var url = this.get('results_url');
     if (url){
       // var trim = /(?:^\w+:Discussion\/\d+)(.+)/.exec(url)[1];
       return Ctx.getUrlFromUri(url);
     }
-  },
+  }
 
-  parse: function(raw, options){
+  parse(raw, options) {
     if (_.has(raw, 'token_categories') && _.isArray(raw['token_categories'])){
       raw.token_categories = new TokenCategorySpecificationCollection(raw.token_categories, {parse: true});
     }
     return raw;
   }
-});
+}
 
 /**
  * The specifications describing a token category
@@ -684,10 +667,7 @@ var TokenVoteSpecificationModel = Base.Model.extend({
  * @class app.models.widget.TokenCategorySpecificationModel
  * @extends app.models.base.BaseModel
  */
-var TokenCategorySpecificationModel = Base.Model.extend({
-  constructor: function TokenCategorySpecificationModel() {
-    Base.Model.apply(this, arguments);
-  },
+class TokenCategorySpecificationModel extends Base.Model.extend({
   defaults: {
     "name": null, // (LangString) the display/translated name of the token category. Example: "Positive"
     "typename": null, // (string) identifier name of the token category. Categories with the same name can be compared.
@@ -699,32 +679,28 @@ var TokenCategorySpecificationModel = Base.Model.extend({
     "color": null,
     "@type": "TokenCategorySpecification",
     "@view": "voting_widget"
-  },
-
-  parse: function(rawModel, options){
+  }
+}) {
+  parse(rawModel, options) {
     rawModel.name = new LangString.Model(rawModel.name, {parse: true});
     return rawModel;
   }
-});
+}
 
-var TokenCategorySpecificationCollection = Base.Collection.extend({
-  constructor: function TokenCategorySpecificationCollection() {
-    Base.Collection.apply(this, arguments);
-  },
-  model: TokenCategorySpecificationModel,
-  
+class TokenCategorySpecificationCollection extends Base.Collection.extend({
+  model: TokenCategorySpecificationModel
+}) {
   /*
     The URL is rarely used to get this collection. It's taken from the Token Specification Model
    */
-  url: function(){
+  url() {
     return Ctx.getApiV2DiscussionUrl('widgets/' + this.widgetModel.id + '/vote_specifications');
-  },
+  }
 
-  initialize: function(options){
+  initialize(options) {
     this.widgetModel = options.widgetModel;
   }
-});
-
+}
 
 /*
   This model represents global voting results, as generated by
@@ -736,11 +712,7 @@ var TokenCategorySpecificationCollection = Base.Collection.extend({
  * @class app.models.widget.VoteResultModel
  * @extends app.models.base.BaseModel
  */
-var VoteResultModel = Base.Model.extend({
-  constructor: function VoteResultModel(){
-    Base.Model.apply(this, arguments);
-  },
-
+class VoteResultModel extends Base.Model.extend({
   defaults: {
     'nums': null,
     'sums': null,
@@ -749,49 +721,49 @@ var VoteResultModel = Base.Model.extend({
     'objectConnectedTo': null,
     'objectDescription': null,
     'n_voters': null
-  },
-
-  getNumberOfVoters: function(){
+  }
+}) {
+  getNumberOfVoters() {
     return this.get('n_voters');
-  },
+  }
 
   /**
    * @param  {string} category      [The category typename]
    * @returns {Number|null}
    */
-  getTotalVotesForCategory: function(category){
+  getTotalVotesForCategory(category) {
     var sums = this.get('sums');
     if (_.has(sums, category)){
       return sums[category];
     }
     else return null;
   }
-});
+}
 
-var VoteResultCollection = Base.Collection.extend({
-  model: VoteResultModel,
-
-  url: function(){
+class VoteResultCollection extends Base.Collection.extend({
+  model: VoteResultModel
+}) {
+  url() {
     return this.tokenSpecModel.getVoteResultUrl();
-  },
+  }
 
-  initialize: function(options){
+  initialize(options) {
     this.widgetModel = options.widgetModel;
     this.tokenSpecModel = this.widgetModel.getVoteSpecificationModel();
     this.sortAscending = false;
     this.sortSpecName =  this.tokenSpecModel.get("token_categories").models[0].get("typename");
-  },
+  }
 
-  comparator: function(model) {
+  comparator(model) {
     var sums = model.get("sums") || {};
     return (this.sortAscending?1:-1) * (sums[this.sortSpecName] || 0);
-  },
+  }
 
   /*
     The returned data from the API is a key-value dict of idea_id: results,
     must convert to an Array of objects.
    */
-  parse: function(rawModel){
+  parse(rawModel) {
     return _.chain(rawModel)
             .keys(rawModel)
             .filter(function(key){
@@ -805,59 +777,59 @@ var VoteResultCollection = Base.Collection.extend({
               return newObj;
             })
             .value(); 
-  },
+  }
 
   /**
    * Method that associates the idea Model to the appropriate 
    * @param  {Object} objectCollection  Ideas Collection
    * @returns {undefined}
    */
-  associateIdeaModelToObject: function(objectCollection){
+  associateIdeaModelToObject(objectCollection) {
     //Add checks to ensure that the idea is not removed!
     this.each(function(result){
       var ideaModel = objectCollection.findWhere( {'@id': result.get('idea_id')} );
       result.set('objectConnectedTo', ideaModel);
     });
-  },
+  }
 
   /**
    * Associates the Token Specification Category Collection to each result model
    * @param  {Object} categoryCollection  Collection of Token Specification Category Collection
    * @returns {undefined}
    */
-  associateCategoryModelToObject: function(categoryCollection){
+  associateCategoryModelToObject(categoryCollection) {
     //Add checks to ensure that the category collection is removed
     this.each(function(result){
       result.set('objectDescription', categoryCollection);
     });
-  },
+  }
 
-  associateTo: function(ideaCollection, specificationModel){
+  associateTo(ideaCollection, specificationModel) {
     this.associateIdeaModelToObject(ideaCollection);
     this.associateCategoryModelToObject(specificationModel.get('token_categories'));
-  },
+  }
 
-  getNumberOfVoters: function(){
+  getNumberOfVoters() {
     return this.at(0).getNumberOfVoters();
-  },
+  }
 
   /**
    * @param  {string} category  [The category typename]
    * @returns {Number|null}
    */
-  getTotalVotesForCategory: function(category){
+  getTotalVotesForCategory(category) {
     return this.reduce(function(memo, model, index){
       var val = model.getTotalVotesForCategory(category);
       return val !== null ? memo + val : memo
     }, 0);
-  },
+  }
 
   /**
    * Method that returns a key:value object that describes
    * the total number of votes per category, keyed by category typename
    * @returns {Object}
    */
-  getTotalVotesByCategories: function(){
+  getTotalVotesByCategories() {
     //First, get the list of categories, which is found in every model (yes, poor design, I know...)
     var categories = this.at(0).get('objectDescription').map(function(categoryModel){
       return categoryModel.get('typename');
@@ -872,7 +844,7 @@ var VoteResultCollection = Base.Collection.extend({
     });
 
     return _.object(_.zip(categories, sumTokens));
-  },
+  }
 
   /**
    * [Returns the following statistics regarding the results collection
@@ -886,7 +858,7 @@ var VoteResultCollection = Base.Collection.extend({
    * ]
    * @returns {Object}
    */
-  getStatistics: function(){
+  getStatistics() {
     //First, get the list of categories, which is found in every model (yes, poor design, I know...)
     var categories = this.at(0);
     if (categories){
@@ -933,9 +905,7 @@ var VoteResultCollection = Base.Collection.extend({
       numVoters: numVoters
     }
   }
-
-});
-
+}
 
 /**
  * This model represents a single vote of a user on an idea.
@@ -943,15 +913,11 @@ var VoteResultCollection = Base.Collection.extend({
  * @class app.models.widget.IdeaVoteModel
  * @extends app.models.base.BaseModel
  */
-var IdeaVoteModel = Base.Model.extend({
-  constructor: function IdeaVoteModel(){
-    Base.Model.apply(this, arguments);
-  },
+class IdeaVoteModel extends Base.Model.extend({
   defaults: {
     "token_category": null
   }
-});
-
+}) {}
 
 /**
  * This model represents a single token vote of a user on an idea.
@@ -959,10 +925,7 @@ var IdeaVoteModel = Base.Model.extend({
  * @class app.models.widget.TokenIdeaVoteModel
  * @extends app.models.widget.IdeaVoteModel
  */
-var TokenIdeaVoteModel = IdeaVoteModel.extend({
-  constructor: function TokenIdeaVoteModel(){
-    Base.Model.apply(this, arguments);
-  },
+class TokenIdeaVoteModel extends IdeaVoteModel.extend({
   defaults: {
     "idea": null,
     "criterion": null,
@@ -972,15 +935,12 @@ var TokenIdeaVoteModel = IdeaVoteModel.extend({
     "vote_spec": null,
     "voter": null
   }
-});
+}) {}
 
-
-var TokenIdeaVoteCollection = Base.Collection.extend({
-  constructor: function TokenIdeaVoteCollection() {
-    Base.Collection.apply(this, arguments);
-  },
-  model: TokenIdeaVoteModel,
-  getTokenBagDataForCategory: function(tokenCategory){
+class TokenIdeaVoteCollection extends Base.Collection.extend({
+  model: TokenIdeaVoteModel
+}) {
+  getTokenBagDataForCategory(tokenCategory) {
     // TODO: cache results until collection content changes
     var myVotesCollection = this;
     var myVotesInThisCategory = myVotesCollection.where({token_category: tokenCategory.get("@id")});
@@ -993,8 +953,7 @@ var TokenIdeaVoteCollection = Base.Collection.extend({
       "remaining_tokens": total - myVotesCount
     };
   }
-});
-
+}
 
 /**
  * Represents a Creativity Session Widget
@@ -1002,32 +961,30 @@ var TokenIdeaVoteCollection = Base.Collection.extend({
  * @class app.models.widget.CreativitySessionWidgetModel`
  * @extends app.models.widget.WidgetModel
  */
-var CreativitySessionWidgetModel = WidgetModel.extend({
-  constructor: function CreativitySessionWidgetModel() {
-    WidgetModel.apply(this, arguments);
-  },
+class CreativitySessionWidgetModel extends WidgetModel.extend({
   baseUri: widget_url + "/session/",
+
   defaults: {
     "@type": "CreativitySessionWidget",
     "num_posts_by_current_user": 0
-  },
-
-  getCreationUrl: function(ideaId, locale) {
+  }
+}) {
+  getCreationUrl(ideaId, locale) {
     if (locale === undefined) {
       locale = Ctx.getLocale();
     }
     return this.baseUri + "#/admin/create_from_idea?admin=1&locale=" + locale + "&idea="
       + encodeURIComponent(ideaId) + "&view=creativity_widget";
-  },
+  }
 
-  getConfigurationUrl: function(targetIdeaId) {
+  getConfigurationUrl(targetIdeaId) {
     var base = this.baseUri;
     var uri = this.getId();
     var locale = Ctx.getLocale();
     return base + "?locale=" + locale + "#/home?admin=1&config=" + uri;
-  },
+  }
 
-  getUrlForUser: function(targetIdeaId, page) {
+  getUrlForUser(targetIdeaId, page) {
     var base = this.baseUri;
     var uri = this.getId();
     var locale = Ctx.getLocale();
@@ -1042,9 +999,9 @@ var CreativitySessionWidgetModel = WidgetModel.extend({
 
     return base + "?locale=" + locale + "#/home?config=" + encodeURIComponent(uri)
       + "&target="+encodeURIComponent(targetIdeaId);
-  },
+  }
 
-  getLinkText: function(context, idea) {
+  getLinkText(context, idea) {
     var locale = Ctx.getLocale();
     var activityState = this.get("activity_state");
     switch (context) {
@@ -1072,9 +1029,9 @@ var CreativitySessionWidgetModel = WidgetModel.extend({
         }
     }
     return "";
-  },
+  }
 
-  getCssClasses: function(context, idea) {
+  getCssClasses(context, idea) {
     switch (context) {
       case this.INFO_BAR:
         return "js_openTargetInModal";
@@ -1087,9 +1044,9 @@ var CreativitySessionWidgetModel = WidgetModel.extend({
         }
     }
     return "";
-  },
+  }
 
-  getDescriptionText: function(context, idea, translationData) {
+  getDescriptionText(context, idea, translationData) {
     var locale = Ctx.getLocale();
     var activityState = this.get("activity_state");
     var endDate = this.get("end_date");
@@ -1119,9 +1076,9 @@ var CreativitySessionWidgetModel = WidgetModel.extend({
         }
     }
     return "";
-  },
+  }
 
-  isRelevantForLink: function(linkType, context, idea) {
+  isRelevantForLink(linkType, context, idea) {
     // TODO: This should depend on widget configuration.
     var activityState = this.get("activity_state");
 
@@ -1149,26 +1106,24 @@ var CreativitySessionWidgetModel = WidgetModel.extend({
         return false;
     }
   }
-});
+}
 
-var InspirationWidgetModel = WidgetModel.extend({
-  constructor: function InspirationWidgetModel() {
-    WidgetModel.apply(this, arguments);
-  },
+class InspirationWidgetModel extends WidgetModel.extend({
   baseUri: widget_url + "/creativity/",
+
   defaults: {
     '@type': 'InspirationWidget'
-  },
-
-  getCreationUrl: function(ideaId, locale) {
+  }
+}) {
+  getCreationUrl(ideaId, locale) {
     if (locale === undefined) {
       locale = Ctx.getLocale();
     }
     return this.baseUri + "?admin=1&locale=" + locale + "#/admin/create_from_idea?idea="
       + encodeURIComponent(ideaId + "?view=creativity_widget");
-  },
+  }
 
-  getConfigurationUrl: function(targetIdeaId) {
+  getConfigurationUrl(targetIdeaId) {
     var base = this.baseUri;
     var uri = this.getId();
     var locale = Ctx.getLocale();
@@ -1178,9 +1133,9 @@ var InspirationWidgetModel = WidgetModel.extend({
       base += "&target=" + encodeURIComponent(targetIdeaId);
     }
     return base;
-  },
+  }
 
-  getUrlForUser: function(targetIdeaId, page) {
+  getUrlForUser(targetIdeaId, page) {
     var id = this.getId();
     var locale = Ctx.getLocale();
     var url = this.baseUri + "?config=" + encodeURIComponent(Ctx.getUrlFromUri(id)) + "&locale=" + locale;
@@ -1188,9 +1143,9 @@ var InspirationWidgetModel = WidgetModel.extend({
       url += "&target=" + encodeURIComponent(targetIdeaId);
     }
     return url;
-  },
+  }
 
-  getLinkText: function(context, idea) {
+  getLinkText(context, idea) {
     var locale = Ctx.getLocale();
     var activityState = this.get("activity_state");
     switch (context) {
@@ -1210,9 +1165,9 @@ var InspirationWidgetModel = WidgetModel.extend({
         }
     }
     return "";
-  },
+  }
 
-  isRelevantForLink: function(linkType, context, idea) {
+  isRelevantForLink(linkType, context, idea) {
     // TODO: This should depend on widget configuration.
     // Put in subclasses?
     var activityState = this.get("activity_state");
@@ -1233,7 +1188,7 @@ var InspirationWidgetModel = WidgetModel.extend({
         return false;
     }
   }
-});
+}
 
 
 var localWidgetClassCollection = new Base.Collection([
@@ -1262,23 +1217,21 @@ var WidgetFactory = function(attrs, options) {
   }
 };
 WidgetFactory.prototype.idAttribute = Base.Model.prototype.idAttribute;
+
 // end see https://github.com/jashkenas/backbone/commit/d1de6e89117f02adfa0f4ba05b9cf6ba3f2ecfb7
 
 
-var WidgetCollection = Base.Collection.extend({
-  constructor: function WidgetCollection() {
-    Base.Collection.apply(this, arguments);
-  },
+class WidgetCollection extends Base.Collection.extend({
   url: Ctx.getApiV2DiscussionUrl("/widgets"),
-  model: WidgetFactory,
-
-  relevantWidgetsFor: function(idea, context) {
+  model: WidgetFactory
+}) {
+  relevantWidgetsFor(idea, context) {
       return this.filter(function(widget) {
         return widget.isRelevantFor(context, idea);
       });
-  },
+  }
 
-  getCreationUrlForClass: function(cls, ideaId, locale) {
+  getCreationUrlForClass(cls, ideaId, locale) {
     if (locale === undefined) {
       locale = Ctx.getLocale();
     }
@@ -1294,9 +1247,9 @@ var WidgetCollection = Base.Collection.extend({
       default:
         console.error("WidgetCollection.getCreationUrlForClass: wrong widget class");
     }
-  },
+  }
 
-  configurableWidgetsUris: function(context) {
+  configurableWidgetsUris(context) {
    switch (context) {
     case WidgetModel.DISCUSSION_MENU_CONFIGURE_CTX:
       return [this.getCreationUrlForClass("InspirationWidget")];
@@ -1309,9 +1262,9 @@ var WidgetCollection = Base.Collection.extend({
     default:
         console.error("WidgetCollection.configurableWidgetsUris: wrong context");
    }
-  },
+  }
 
-  relevantUrlsFor: function(idea, context) {
+  relevantUrlsFor(idea, context) {
     // Also give strings...
     // Careful about permissions!
     var widgets = this.relevantWidgetsFor(idea, context);
@@ -1320,40 +1273,31 @@ var WidgetCollection = Base.Collection.extend({
     return _.map(widgets, function(w) {
       return w.getUrl(context, ideaId); });
   }
-});
+}
 
-
-var ActiveWidgetCollection = WidgetCollection.extend({
-  constructor: function ActiveWidgetCollection() {
-    WidgetCollection.apply(this, arguments);
-  },
+class ActiveWidgetCollection extends WidgetCollection.extend({
   url: Ctx.getApiV2DiscussionUrl("/active_widgets")
-});
-
+}) {}
 
 /**
  * A subset of the widgets relevant to a widget context
  * @class app.models.widget.WidgetSubset
  */
-var WidgetSubset = Backbone.Subset.extend({
-  constructor: function WidgetSubset() {
-    Backbone.Subset.apply(this, arguments);
-  },
-
-  beforeInitialize: function(models, options) {
+class WidgetSubset extends Backbone.Subset {
+  beforeInitialize(models, options) {
     this.context = options.context;
     this.idea = options.idea;
     this.liveupdate_keys = options.liveupdate_keys;
-  },
+  }
 
-  sieve: function(widget) {
+  sieve(widget) {
     return widget.isRelevantFor(this.context, this.idea);
-  },
+  }
 
-  comparator: function(widget) {
+  comparator(widget) {
     return widget.get("end_date");
   }
-});
+}
 
 
 export default {

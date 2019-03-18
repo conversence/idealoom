@@ -19,74 +19,12 @@ import Permissions from '../utils/permissions.js';
  * @class app.models.idea.IdeaModel
  * @extends app.models.base.BaseModel
  */
-var IdeaModel = Base.Model.extend({
-  /**
-   * @function app.models.idea.IdeaModel.constructor
-   */
-  constructor: function IdeaModel() {
-    Base.Model.apply(this, arguments);
-  },
-  /**
-   * @function app.models.idea.IdeaModel.initialize
-   */
-  initialize: function(obj) {
-    obj = obj || {};
-    var that = this;
-    obj.created = obj.created || Ctx.getCurrentTime();
-    this.set('created', obj.created);
-    this.set('hasCheckbox', Ctx.getCurrentUser().can(Permissions.EDIT_SYNTHESIS));
-    this.adjust_num_read_posts(obj);
-  },
-  /**
-   * Set the number of read posts
-   * @function app.models.idea.IdeaModel.adjust_num_read_posts
-   */
-  adjust_num_read_posts: function(resp) {
-    if (resp.num_total_and_read_posts !== undefined) {
-      this.set('num_posts', resp.num_total_and_read_posts[0]);
-      this.set('num_contributors', resp.num_total_and_read_posts[1]);
-      this.set('num_read_posts', resp.num_total_and_read_posts[2]);
-    }
-  },
-  /**
-   * Returns the attributes hash to be set on the model
-   * @function app.models.idea.IdeaModel.parse
-   */
-  parse: function(resp, options) {
-    var that = this;
-    if (resp.ok !== true) {
-      this.adjust_num_read_posts(resp);
-      if (resp.shortTitle !== undefined) {
-        resp.shortTitle = new LangString.Model(resp.shortTitle, {parse: true});
-      }
-      if (resp.longTitle !== undefined) {
-        resp.longTitle = new LangString.Model(resp.longTitle, {parse: true});
-      }
-      if (resp.definition !== undefined) {
-        resp.definition = new LangString.Model(resp.definition, {parse: true});
-      }
-      if (resp.attachments !== undefined){
-        resp.attachments = new Attachment.ValidationAttachmentCollection(resp.attachments, {
-          parse: true,
-          objectAttachedToModel: that,
-          limits: {
-            count: 1,
-            type: 'image'
-          }
-        })
-      }
-    }
-    return Base.Model.prototype.parse.apply(this, arguments);
-  },
-
-  getApiV2Url: function() {
-    return Ctx.getApiV2DiscussionUrl('/ideas/'+this.getNumericId());
-  },
-
+class IdeaModel extends Base.Model.extend({
   /**
    * @member {string} app.models.idea.IdeaModel.urlRoot
    */
   urlRoot: Ctx.getApiUrl("ideas"),
+
   /**
    * Defaults
    * @type {Object}
@@ -114,7 +52,67 @@ var IdeaModel = Base.Model.extend({
     extra_permissions: [],
     order: 1,
     created: null
-  },
+  }
+}) {
+  /**
+   * @function app.models.idea.IdeaModel.initialize
+   */
+  initialize(obj) {
+    obj = obj || {};
+    var that = this;
+    obj.created = obj.created || Ctx.getCurrentTime();
+    this.set('created', obj.created);
+    this.set('hasCheckbox', Ctx.getCurrentUser().can(Permissions.EDIT_SYNTHESIS));
+    this.adjust_num_read_posts(obj);
+  }
+
+  /**
+   * Set the number of read posts
+   * @function app.models.idea.IdeaModel.adjust_num_read_posts
+   */
+  adjust_num_read_posts(resp) {
+    if (resp.num_total_and_read_posts !== undefined) {
+      this.set('num_posts', resp.num_total_and_read_posts[0]);
+      this.set('num_contributors', resp.num_total_and_read_posts[1]);
+      this.set('num_read_posts', resp.num_total_and_read_posts[2]);
+    }
+  }
+
+  /**
+   * Returns the attributes hash to be set on the model
+   * @function app.models.idea.IdeaModel.parse
+   */
+  parse(resp, options) {
+    var that = this;
+    if (resp.ok !== true) {
+      this.adjust_num_read_posts(resp);
+      if (resp.shortTitle !== undefined) {
+        resp.shortTitle = new LangString.Model(resp.shortTitle, {parse: true});
+      }
+      if (resp.longTitle !== undefined) {
+        resp.longTitle = new LangString.Model(resp.longTitle, {parse: true});
+      }
+      if (resp.definition !== undefined) {
+        resp.definition = new LangString.Model(resp.definition, {parse: true});
+      }
+      if (resp.attachments !== undefined){
+        resp.attachments = new Attachment.ValidationAttachmentCollection(resp.attachments, {
+          parse: true,
+          objectAttachedToModel: that,
+          limits: {
+            count: 1,
+            type: 'image'
+          }
+        })
+      }
+    }
+    return super.parse(...arguments);
+  }
+
+  getApiV2Url() {
+    return Ctx.getApiV2DiscussionUrl('/ideas/'+this.getNumericId());
+  }
+
   //The following should be mostly in view code, but currently the longTitle editor code isn't common in ideaPanel and synthesisView. At least this is mostly DRY.
   /**
    * Returns the display text for a idea definition.
@@ -122,7 +120,7 @@ var IdeaModel = Base.Model.extend({
    * @returns {string}
    * @function app.models.idea.IdeaModel.getDefinitionDisplayText
    */
-  getDefinitionDisplayText: function(langPrefs) {
+  getDefinitionDisplayText(langPrefs) {
     if (this.get('root') === true) {
       return i18n.gettext('The root idea will not be in the synthesis');
     }
@@ -145,13 +143,14 @@ var IdeaModel = Base.Model.extend({
         return i18n.gettext('Add a description of this idea');
     else
         return "";
-  },
+  }
+
   /**
    * Returns the display text for a idea synthesis expression. Will return the first non-empty from: longTitle, shortTitle, i18n.gettext('Add and expression for the next synthesis')
    * @returns {string}
    * @function app.models.idea.IdeaModel.getLongTitleDisplayText
    */
-  getLongTitleDisplayText: function(langPrefs) {
+  getLongTitleDisplayText(langPrefs) {
     if (this.get('root') === true) {
       return i18n.gettext('The root idea will never be in the synthesis');
     }
@@ -178,14 +177,14 @@ var IdeaModel = Base.Model.extend({
       }
     }
     return i18n.gettext('You can add an expression for the next synthesis');
-  },
+  }
 
   /**
    * HTML Striping if necessary is the responsability of the caller.
    * @returns {string} The short Title to be displayed
    * @function app.models.idea.IdeaModel.getShortTitleDisplayText
    */
-  getShortTitleDisplayText: function(langPrefs) {
+  getShortTitleDisplayText(langPrefs) {
     if (this.isRootIdea()) {
       return i18n.gettext('All posts');
     }
@@ -212,27 +211,28 @@ var IdeaModel = Base.Model.extend({
       }
     }
     return i18n.gettext('New idea');
-  },
+  }
 
-  getShortTitleSafe: function(langPrefs) {
+  getShortTitleSafe(langPrefs) {
     var ls = this.get('shortTitle');
     return ls ? (ls.bestValue(langPrefs) || '') : '';
-  },
+  }
 
   /**
    * Returns true if the current idea is the root idea
    * @returns {boolean}
    * @function app.models.idea.IdeaModel.isRootIdea
    */
-  isRootIdea: function() {
+  isRootIdea() {
     return this.get('@type') === Types.ROOT_IDEA;
-  },
+  }
+
   /**
    * Adds an idea as child
    * @param  {Idea} idea
    * @function app.models.idea.IdeaModel.addChild
    */
-  addChild: function(idea) {
+  addChild(idea) {
     this.collection.add(idea);
     if (this.isDescendantOf(idea)) {
       this.save('parentId', null);
@@ -246,19 +246,19 @@ var IdeaModel = Base.Model.extend({
                 console.error('ERROR: addChild', resp);
               }
             });
-  },
+  }
 
-  userCan: function(permission) {
+  userCan(permission) {
     return Ctx.getCurrentUser().can(permission) ||
       _.contains(this.get('extra_permissions'), permission);
-  },
+  }
 
   /**
    * Adds an idea as sibling above
    * @param {Idea} idea
    * @function app.models.idea.IdeaModel.addSiblingAbove
    */
-  addSiblingAbove: function(idea) {
+  addSiblingAbove(idea) {
     var parent = this.getParent();
     var parentId = parent ? parent.getId() : null;
     var index = this.collection.indexOf(this);
@@ -272,13 +272,14 @@ var IdeaModel = Base.Model.extend({
     } else {
       this.collection.updateRootIdeasOrder();
     }
-  },
+  }
+
   /**
    * Adds an idea as sibling below
    * @param {Idea} idea
    * @function app.models.idea.IdeaModel.addSiblingBelow
    */
-  addSiblingBelow: function(idea) {
+  addSiblingBelow(idea) {
     var parent = this.getParent();
     var parentId = parent ? parent.getId() : null;
     var index = this.collection.indexOf(this) + 1;
@@ -292,42 +293,46 @@ var IdeaModel = Base.Model.extend({
     } else {
       this.collection.updateRootIdeasOrder();
     }
-  },
+  }
+
   /**
    * Return all children's idea
    * @returns {Array}
    * @function app.models.idea.IdeaModel.getChildren
    */
-  getChildren: function() {
+  getChildren() {
     return this.collection.where({ parentId: this.getId() });
-  },
+  }
+
   /**
    * Return the parent idea
    * @returns {Object} or undefined
    * @function app.models.idea.IdeaModel.getParent
    */
-  getParent: function() {
+  getParent() {
     return this.collection.findWhere({ '@id': this.get('parentId') });
-  },
+  }
+
   /**
    * Return if the idea is descendant of the given idea
    * @param {Object} idea
    * @returns {boolean}
    * @function app.models.idea.IdeaModel.isDescendantOf
    */
-  isDescendantOf: function(idea) {
+  isDescendantOf(idea) {
     var parentId = this.get('parentId');
     if (parentId === idea.getId()) {
       return true;
     }
     return parentId === null ? false : this.getParent().isDescendantOf(idea);
-  },
+  }
+
   /**
    * Returns an array of Idea models in order of ancestry From current idea -> parent idea, including the current idea itself.
    * @returns {Array}
    * @function app.models.idea.IdeaModel.getAncestry
    */
-  getAncestry: function(){
+  getAncestry() {
     var ideas = [];
     function rec(idea){
       if (idea) {
@@ -341,12 +346,12 @@ var IdeaModel = Base.Model.extend({
     };
     rec(this);
     return ideas.reverse();
-  },
+  }
 
   /**
    * Returns an array of possible linktype;nodetype from a given parent.
    */
-  getPossibleCombinedSubtypes: function(parentLink) {
+  getPossibleCombinedSubtypes(parentLink) {
     var preferences = Ctx.getPreferences();
     if (parentLink.get('target') != this.id) {
       console.error("this is not my link");
@@ -368,13 +373,13 @@ var IdeaModel = Base.Model.extend({
       }
     }
     return ['InclusionRelation;GenericIdeaNode'];
-  },
+  }
 
-  getCombinedSubtypes: function(parentLink) {
+  getCombinedSubtypes(parentLink) {
     return parentLink.get('subtype') + ';' + this.get('subtype');
-  },
+  }
 
-  combinedTypeNamesOf: function(combined, lang) {
+  combinedTypeNamesOf(combined, lang) {
     var preferences = Ctx.getPreferences();
     var LNTypes = combined.split(/;/, 2);
     var linkName = LNTypes[0];
@@ -397,26 +402,27 @@ var IdeaModel = Base.Model.extend({
       nodeName = info.ideas[nodeName].title[lang];
     } catch (Exception) {}
     return [linkName, nodeName];
-  },
+  }
 
-  combinedTypeNames: function(parentLink, lang) {
+  combinedTypeNames(parentLink, lang) {
     return this.combinedPresentationOf(
       this.getCombinedSubtypes(parentLink), lang);
-  },
+  }
 
   /**
    * Returns the order number for a new child
    * @returns {number}
    * @function app.models.idea.IdeaModel.getOrderForNewChild
    */
-  getOrderForNewChild: function() {
+  getOrderForNewChild() {
     return this.getChildren().length + 1;
-  },
+  }
+
   /** Return a promise for all Extracts models for this idea
    * @returns {Promise}
    * @function app.models.idea.IdeaModel.getExtractsPromise
    */
-  getExtractsPromise: function() {
+  getExtractsPromise() {
     var that = this;
     return this.collection.collectionManager.getAllExtractsCollectionPromise()
             .then(function(allExtractsCollection) {
@@ -426,13 +432,14 @@ var IdeaModel = Base.Model.extend({
                     });
             }
         );
-  },
+  }
+
   /**
    * Returns a promise for the announcement to be displayed in the message-list, if any
    * @returns {Promise}
    * @function app.models.idea.IdeaModel.getApplicableAnnouncementPromise
    */
-  getApplicableAnnouncementPromise: function() {
+  getApplicableAnnouncementPromise() {
     var that = this;
     return this.collection.collectionManager.getAllAnnouncementCollectionPromise()
             .then(function(allAnnouncementCollection) {
@@ -460,13 +467,14 @@ var IdeaModel = Base.Model.extend({
       return Promise.resolve(announcement);
     }
         );
-  },
+  }
+
   /**
    * Adds a segment
    * @param  {Object} segment
    * @function app.models.idea.IdeaModel.addSegment
    */
-  addSegment: function(segment) {
+  addSegment(segment) {
     segment.save('idIdea', this.getId(), {
       success: function(model, resp) {
             },
@@ -474,14 +482,15 @@ var IdeaModel = Base.Model.extend({
         console.error('ERROR: addSegment', resp);
       }
     });
-  },
+  }
+
   /**
    * Creates a new instance of a segment as a child within the collection and returns the newly created idea.
    * @param {Segment} segment, possibly unsaved.
    * @returns {Object}
    * @function app.models.idea.IdeaModel.addSegmentAsChild
    */
-  addSegmentAsChild: function(segment) {
+  addSegmentAsChild(segment) {
     delete segment.attributes.highlights;
     var data = {
       shortTitle: segment.getQuote().substr(0, 50),
@@ -493,12 +502,13 @@ var IdeaModel = Base.Model.extend({
       idea.addSegment(segment);
     };
     return this.collection.create(data, { success: onSuccess });
-  },
+  }
+
   /**
    * Updates the order in all children
    * @function app.models.idea.IdeaModel.updateChildrenOrder
    */
-  updateChildrenOrder: function() {
+  updateChildrenOrder() {
     var children = _.sortBy(this.getChildren(), function(child) {
       return child.get('order');
     });
@@ -514,7 +524,8 @@ var IdeaModel = Base.Model.extend({
       });
       currentOrder += 1;
     });
-  },
+  }
+
   /**
    * Set a hash of attributes on the model.
    * @param {String} key
@@ -523,7 +534,7 @@ var IdeaModel = Base.Model.extend({
    * @returns {Object}
    * @function app.models.idea.IdeaModel.set
    */
-  set: function(key, val, options) {
+  set(key, val, options) {
     if (typeof key === 'object') {
       var attrs = key;
       options = val;
@@ -541,12 +552,13 @@ var IdeaModel = Base.Model.extend({
     } else {
       return Backbone.Model.prototype.set.call(this, key, val, options);
     }
-  },
+  }
+
   /**
    * Validate the model attributes
    * @function app.models.idea.IdeaModel.validate
    */
-  validate: function(attributes, options) {
+  validate(attributes, options) {
     /**
      * check typeof variable
      * */
@@ -555,34 +567,31 @@ var IdeaModel = Base.Model.extend({
      
 
   }
-});
+}
+
 /**
  * Ideas collection
  * @class app.models.idea.IdeaCollection
  * @extends app.models.base.BaseCollection
  */
-var IdeaCollection = Base.Collection.extend({
-  /**
-   * @function app.models.idea.IdeaCollection.constructor
-   */
-  constructor: function IdeaCollection() {
-    Base.Collection.apply(this, arguments);
-  },
+class IdeaCollection extends Base.Collection.extend({
   /**
    * @member {string} app.models.idea.IdeaCollection.url
    */
   url: Ctx.getApiUrl("ideas"),
+
   /**
    * The model
    * @type {IdeaModel}
    */
-  model: IdeaModel,
+  model: IdeaModel
+}) {
   /**
    * Returns the root idea
    * @returns {Object}
    * @function app.models.idea.IdeaCollection.getRootIdea
    */
-  getRootIdea: function() {
+  getRootIdea() {
     var retval = this.findWhere({ '@type': Types.ROOT_IDEA });
     if (!retval) {
       _.forEach(this.models, function(model) {
@@ -591,21 +600,23 @@ var IdeaCollection = Base.Collection.extend({
       console.error("getRootIdea() failed!");
     }
     return retval;
-  },
+  }
+
   /**
    * Returns the order number for a new root idea
    * @returns {Number}
    * @function app.models.idea.IdeaCollection.getOrderForNewRootIdea
    */
-  getOrderForNewRootIdea: function() {
+  getOrderForNewRootIdea() {
     var lastIdea = this.last();
     return lastIdea ? lastIdea.get('order') + 1 : 0;
-  },
+  }
+
   /**
    * Updates the order in the idea list
    * @function app.models.idea.IdeaCollection.updateRootIdeasOrder
    */
-  updateRootIdeasOrder: function() {
+  updateRootIdeasOrder() {
     var children = this.where({ parentId: null });
     var currentOrder = 1;
     _.each(children, function(child) {
@@ -618,7 +629,8 @@ var IdeaCollection = Base.Collection.extend({
       });
       currentOrder += 1;
     });
-  },
+  }
+
   /**
    * @param {Object} idea_links - The collection of idea_links to navigate
    * @param {Object} visitor - Visitor function
@@ -626,7 +638,7 @@ var IdeaCollection = Base.Collection.extend({
    * @param {Object} ancestry - Internal recursion parameter, do not set or use
    * @function app.models.idea.IdeaCollection.visitDepthFirst
    */
-  visitDepthFirst: function(idea_links, visitor, origin_link, include_ts, ancestry, includeHidden) {
+  visitDepthFirst(idea_links, visitor, origin_link, include_ts, ancestry, includeHidden) {
     if (ancestry === undefined) {
       ancestry = [];
     }
@@ -670,7 +682,8 @@ var IdeaCollection = Base.Collection.extend({
       });
       return visitor.post_visit(idea, results);
     }
-  },
+  }
+
   /**
    * @param {Object} idea_links - The collection of idea_links to navigate
    * @param {Object} visitor - Visitor function
@@ -678,7 +691,7 @@ var IdeaCollection = Base.Collection.extend({
    * @param {Object} ancestry - Internal recursion parameter, do not set or use
    * @function app.models.idea.IdeaCollection.visitBreadthFirst
    */
-  visitBreadthFirst: function(idea_links, visitor, origin_link, include_ts, ancestry, includeHidden) {
+  visitBreadthFirst(idea_links, visitor, origin_link, include_ts, ancestry, includeHidden) {
     var that = this;
     var continue_visit = true;
     var origin_id;
@@ -734,8 +747,9 @@ var IdeaCollection = Base.Collection.extend({
       });
       return visitor.post_visit(idea, results);
     }
-  },
-  allExtraUserPermissions: function() {
+  }
+
+  allExtraUserPermissions() {
     // TODO: Make this adjust to changes
     if (!this._extraUserPermissions) {
       const extraUserPermissions = {};
@@ -747,13 +761,14 @@ var IdeaCollection = Base.Collection.extend({
       this._extraUserPermissions = extraUserPermissions;
     }
     return this._extraUserPermissions;
-  },
-  updateFromSocket: function(item) {
+  }
+
+  updateFromSocket(item) {
     const that = this;
     const id = item['@id'];
     const tombstone = item['@tombstone'];
     var model = tombstone ? null : this.get(id);
-    Base.Collection.prototype.updateFromSocket.apply(this, arguments);
+    super.updateFromSocket(...arguments);
     if (!tombstone && !model) {
       // new model: refetch to get updated permissions, which cannot go on socket
       model = this.get(id);
@@ -766,8 +781,8 @@ var IdeaCollection = Base.Collection.extend({
         }
       });
     }
-  },
-});
+  }
+}
 
 export default {
   Model: IdeaModel,

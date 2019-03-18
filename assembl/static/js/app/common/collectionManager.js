@@ -42,7 +42,7 @@ import PublicationFlow from '../models/publicationFlow.js';
  * A singleton to manage lazy loading of server collections
  * @class app.common.collectionManager.CollectionManager
  */
-var CollectionManager = Marionette.Object.extend({
+class CollectionManager extends Marionette.Object.extend({
   channelName: 'socket',
 
   radioEvents: {
@@ -132,6 +132,7 @@ var CollectionManager = Marionette.Object.extend({
    * @type {PartnerOrganizationCollection}
    */
   _allPartnerOrganizationCollection: undefined,
+
   _allPartnerOrganizationCollectionPromise: undefined,
 
   /**
@@ -140,67 +141,80 @@ var CollectionManager = Marionette.Object.extend({
    * @type {TimelineEventCollection}
    */
   _allTimelineEventCollection: undefined,
+
   _allTimelineEventCollectionPromise: undefined,
 
   /**
    * Collection with idea announcments for the messageList.
    */
   _allAnnouncementCollection: undefined,
+
   _allAnnouncementCollectionPromise: undefined,
 
   /**
    * Collection from discussion notifications.
    */
   _allNotificationsDiscussionCollection: undefined,
+
   _allNotificationsDiscussionCollectionPromise: undefined,
 
   /**
    * Collection from user notifications
    */
   _allNotificationsUserCollection: undefined,
+
   _allNotificationsUserCollectionPromise: undefined,
 
   /**
    * Collection of all possible user roles
    */
   _allLocalRoleCollection: undefined,
+
   _allLocalRoleCollectionPromise: undefined,
 
   /**
    * Collection of roles for the current user
    */
   _myLocalRoleCollection: undefined,
+
   _myLocalRoleCollectionPromise: undefined,
 
   /**
    * Collection of publication states
    */
   _allIdeaPublicationStates: undefined,
+
   _allIdeaPublicationStatesPromise: undefined,
 
   /**
    * Collection of local permissions (acls)
    */
   _allDiscussionAcls: undefined,
+
   _allDiscussionAclsPromise: undefined,
 
   /**
    * Collection of pub state-specific permissions
    */
   _allPubStatePermissions: undefined,
+
   _allPubStatePermissionsPromise: undefined,
 
   /**
    * Collection from discussion
    */
   _allDiscussionModel: undefined,
+
   _allDiscussionModelPromise: undefined,
 
   //Deprecated -> This is the old way. Will be deleted soon
   _allDiscussionSourceCollection: undefined,
+
   _allDiscussionSourceCollectionPromise: undefined,
+
   //
   _currentUserModel: undefined,
+
   _currentUserModelPromise: undefined,
 
   /**
@@ -208,12 +222,14 @@ var CollectionManager = Marionette.Object.extend({
    * view
    */
   _allFacebookAccessTokens: undefined,
+
   _allFacebookAccessTokensPromise: undefined,
 
   /**
    * The super collection of all types of sources that the front end supports
    */
   _allDiscussionSourceCollection2: undefined,
+
   _allDiscussionSourceCollection2Promise: undefined,
 
   /**
@@ -222,6 +238,7 @@ var CollectionManager = Marionette.Object.extend({
    * @type {Account}
    */
   _allUserAccounts: undefined,
+
   _allUserAccountsPromise: undefined,
 
   /**
@@ -230,6 +247,7 @@ var CollectionManager = Marionette.Object.extend({
    * @type {Widget}
    */
   _allWidgets: undefined,
+
   _allWidgetsPromise: undefined,
 
   /**
@@ -237,6 +255,7 @@ var CollectionManager = Marionette.Object.extend({
    * @type {UserLanguagePreference}
    */
   _allUserLanguagePreferences: undefined,
+
   _allUserLanguagePreferencesPromise: undefined,
 
   /**
@@ -244,6 +263,7 @@ var CollectionManager = Marionette.Object.extend({
    * @type {DiscussionPreference.Model}
    */
   _allUserPreferences: undefined,
+
   _allUserPreferencesPromise: undefined,
 
   /**
@@ -251,6 +271,7 @@ var CollectionManager = Marionette.Object.extend({
    * @type {DiscussionPreference.Model}
    */
   _allDiscussionPreferences: undefined,
+
   _allDiscussionPreferencesPromise: undefined,
 
   /**
@@ -258,6 +279,7 @@ var CollectionManager = Marionette.Object.extend({
    * @type {DiscussionPreference.Model}
    */
   _globalPreferences: undefined,
+
   _globalPreferencesPromise: undefined,
 
   /**
@@ -265,6 +287,7 @@ var CollectionManager = Marionette.Object.extend({
    * @type {publicationFlow.publicationFlowModel}
    */
   _ideaPublicationFlow: undefined,
+
   _ideaPublicationFlowPromise: undefined,
 
   /**
@@ -272,6 +295,7 @@ var CollectionManager = Marionette.Object.extend({
    * @type {DiscussionPreference.Model}
    */
   _allPublicationFlows: undefined,
+
   _allPublicationFlowsPromise: undefined,
 
   /**
@@ -287,6 +311,9 @@ var CollectionManager = Marionette.Object.extend({
    */
   _connectedSocketPromise: undefined,
 
+  _waitingWorker: undefined,
+  _messageFullModelRequests: {}
+}) {
   /**
    * Returns the owning collection for the raw json of an object that 
    * doesn't have a model yet.  Primarily used when receiving an object on
@@ -302,7 +329,7 @@ var CollectionManager = Marionette.Object.extend({
    * @returns {BaseCollection}
    * @function app.common.collectionManager.CollectionManager.getCollectionPromiseByType
    */
-  getCollectionPromiseByType: function(item) {
+  getCollectionPromiseByType(item) {
     var type = Types.getBaseType(item['@type']);
 
     switch (type) {
@@ -339,17 +366,18 @@ var CollectionManager = Marionette.Object.extend({
     }
 
     return null;
-  },
-  
-  initialize: function(options){
-  },
+  }
+
+  initialize(options) {
+  }
+
   /** 
    * Returns the collection of users and agents
    * An exception, the collection is instanciated from json sent in the HTML of the frontend, not through an ajax request.
    * @returns {BaseCollection}
    * @function app.common.collectionManager.CollectionManager.getAllUsersCollectionPromise
    */
-  getAllUsersCollectionPromise: function() {
+  getAllUsersCollectionPromise() {
     if (this._allUsersCollectionPromise) {
       return this._allUsersCollectionPromise;
     }
@@ -363,7 +391,7 @@ var CollectionManager = Marionette.Object.extend({
             });
 
     return this._allUsersCollectionPromise;
-  },
+  }
 
   /**
    * Returns the idea publication flow.
@@ -371,7 +399,7 @@ var CollectionManager = Marionette.Object.extend({
    * @returns {PublicationFlow}
    * @function app.common.collectionManager.CollectionManager.getAllUsersCollectionPromise
    */
-  getIdeaPublicationFlowPromise: function() {
+  getIdeaPublicationFlowPromise() {
     if (this._ideaPublicationFlowPromise) {
       return this._ideaPublicationFlowPromise;
     }
@@ -385,14 +413,14 @@ var CollectionManager = Marionette.Object.extend({
       });
 
     return this._ideaPublicationFlowPromise;
-  },
+  }
 
   /**
    * Returns the collection of message structures
    * @returns {BaseCollection}
    * @function app.common.collectionManager.CollectionManager.getAllMessageStructureCollectionPromise
   **/
-  getAllMessageStructureCollectionPromise: function() {
+  getAllMessageStructureCollectionPromise() {
     var that = this;
 
     if (this._allMessageStructureCollectionPromise) {
@@ -409,9 +437,9 @@ var CollectionManager = Marionette.Object.extend({
         Raven.captureException(e);
       });
     return this._allMessageStructureCollectionPromise;
-  },
+  }
 
-  refetchAllMessageStructureCollection: function() {
+  refetchAllMessageStructureCollection() {
     if (this._allMessageStructureCollectionPromise !== undefined
       && this._allMessageStructureCollectionPromise.isFulfilled()) {
       //Yes, I want that in sentry for now
@@ -427,11 +455,8 @@ var CollectionManager = Marionette.Object.extend({
       reliable modification date */
       this._allMessageStructureCollection.fetch();
     }
-  },
+  }
 
-  _waitingWorker: undefined,
-
-  _messageFullModelRequests: {},
   /**
    * This class is essentially a subprocess that receives requests for specific models and a specific viewdef and:
    * - Combines them together to avoid swarming the server
@@ -442,7 +467,7 @@ var CollectionManager = Marionette.Object.extend({
    * @returns {Promise}
    * @function app.common.collectionManager.CollectionManager.getMessageFullModelRequestWorker
   */
-  getMessageFullModelRequestWorker: function(collectionManager, messagesStructureCollectionPromise) {
+  getMessageFullModelRequestWorker(collectionManager, messagesStructureCollectionPromise) {
       this.collectionManager = collectionManager,
       this.requests = this.collectionManager._messageFullModelRequests,
 
@@ -582,7 +607,8 @@ var CollectionManager = Marionette.Object.extend({
 
         that.executeRequest();
       }, collectionManager.FETCH_WORKERS_LIFETIME);
-    },
+    }
+
   /**
    * This returns a promise to a SINGLE model.
    * In practice, this model is a member of the proper collection, and requests to the server are optimised and batched together.
@@ -592,7 +618,7 @@ var CollectionManager = Marionette.Object.extend({
    * @returns {Promise}
    * @function app.common.collectionManager.CollectionManager.getMessageFullModelPromise
    */
-  getMessageFullModelPromise: function(id, messagesStructureCollectionPromise) {
+  getMessageFullModelPromise(id, messagesStructureCollectionPromise) {
     var that = this;
     if ( typeof messagesStructureCollectionPromise === "undefined" ){
       messagesStructureCollectionPromise = this.getAllMessageStructureCollectionPromise();
@@ -633,7 +659,8 @@ var CollectionManager = Marionette.Object.extend({
       }
     });
 
-  },
+  }
+
   /**
    * TODO: This method seems to not be used anywhere in the code. Remove it or use it. If we use it, add a second parameter messagesStructureCollectionPromise like in getMessageFullModelPromise().
    * Retrieve fully populated models for the list of id's given
@@ -641,7 +668,7 @@ var CollectionManager = Marionette.Object.extend({
    * @returns {MessageModel}
    * @function app.common.collectionManager.CollectionManager.getMessageFullModelsPromise
    */
-  getMessageFullModelsPromise: function(ids) {
+  getMessageFullModelsPromise(ids) {
     var that = this;
     var returnedModelsPromises = [];
 
@@ -659,13 +686,14 @@ var CollectionManager = Marionette.Object.extend({
       console.error("getMessageFullModelsPromise: One or more of the id's couldn't be retrieved: ", e);
       return Promise.reject(e);
     });
-  },
+  }
+
   /**
    * Returns the collection of synthesis
    * @returns {BaseCollection}
    * @function app.common.collectionManager.CollectionManager.getAllSynthesisCollectionPromise
   **/
-  getAllSynthesisCollectionPromise: function() {
+  getAllSynthesisCollectionPromise() {
     if (this._allSynthesisCollectionPromise) {
       return this._allSynthesisCollectionPromise;
     }
@@ -679,13 +707,14 @@ var CollectionManager = Marionette.Object.extend({
             });
 
     return this._allSynthesisCollectionPromise;
-  },
+  }
+
   /**
    * Returns the collection of ideas
    * @returns {BaseCollection}
    * @function app.common.collectionManager.CollectionManager.getAllIdeasCollectionPromise
   **/
-  getAllIdeasCollectionPromise: function() {
+  getAllIdeasCollectionPromise() {
     var that = this;
     if (this._allIdeasCollectionPromise) {
       return this._allIdeasCollectionPromise;
@@ -700,9 +729,9 @@ var CollectionManager = Marionette.Object.extend({
             });
 
     return this._allIdeasCollectionPromise;
-  },
+  }
 
-  ideasCollectionUpdateHandler: function(ideas) {
+  ideasCollectionUpdateHandler(ideas) {
     if (this._allIdeasCollection !== undefined) {
       if (Ctx.debugRender) {
         console.log("ideaList: triggering render because app.on('ideas:update') was triggered");
@@ -710,15 +739,14 @@ var CollectionManager = Marionette.Object.extend({
 
       this._allIdeasCollection.add(ideas, {merge: true});
     }
-  },
-
+  }
 
   /**
    * Returns the collection of idea links
    * @returns {BaseCollection}
    * @function app.common.collectionManager.CollectionManager.getAllIdeaLinksCollectionPromise
   **/
-  getAllIdeaLinksCollectionPromise: function() {
+  getAllIdeaLinksCollectionPromise() {
     if (this._allIdeaLinksCollectionPromise) {
       return this._allIdeaLinksCollectionPromise;
     }
@@ -732,13 +760,14 @@ var CollectionManager = Marionette.Object.extend({
             });
 
     return this._allIdeaLinksCollectionPromise;
-  },
+  }
+
   /**
    * Returns the collection of extracts
    * @returns {BaseCollection}
    * @function app.common.collectionManager.CollectionManager.getAllExtractsCollectionPromise
   **/
-  getAllExtractsCollectionPromise: function() {
+  getAllExtractsCollectionPromise() {
     if (this._allExtractsCollectionPromise) {
       return this._allExtractsCollectionPromise;
     }
@@ -752,13 +781,14 @@ var CollectionManager = Marionette.Object.extend({
             });
 
     return this._allExtractsCollectionPromise;
-  },
+  }
+
   /**
    * Returns the collection of partners
    * @returns {BaseCollection}
    * @function app.common.collectionManager.CollectionManager.getAllPartnerOrganizationCollectionPromise
   **/
-  getAllPartnerOrganizationCollectionPromise: function() {
+  getAllPartnerOrganizationCollectionPromise() {
     if (this._allPartnerOrganizationCollectionPromise) {
       return this._allPartnerOrganizationCollectionPromise;
     }
@@ -772,14 +802,14 @@ var CollectionManager = Marionette.Object.extend({
             });
 
     return this._allPartnerOrganizationCollectionPromise;
-  },
+  }
 
   /**
    * Returns the collection of partners
    * @returns {BaseCollection}
    * @function app.common.collectionManager.CollectionManager.getAllPartnerOrganizationCollectionPromise
   **/
-  getAllTimelineEventCollectionPromise: function() {
+  getAllTimelineEventCollectionPromise() {
     if (this._allTimelineEventCollectionPromise) {
       return this._allTimelineEventCollectionPromise;
     }
@@ -793,13 +823,14 @@ var CollectionManager = Marionette.Object.extend({
             });
 
     return this._allTimelineEventCollectionPromise;
-  },
+  }
+
   /**
    * Returns the collection of annoucements
    * @returns {BaseCollection}
    * @function app.common.collectionManager.CollectionManager.getAllAnnouncementCollectionPromise
   **/
-  getAllAnnouncementCollectionPromise: function() {
+  getAllAnnouncementCollectionPromise() {
     if (this._allAnnouncementCollectionPromise) {
       return this._allAnnouncementCollectionPromise;
     }
@@ -813,13 +844,14 @@ var CollectionManager = Marionette.Object.extend({
             });
 
     return this._allAnnouncementCollectionPromise;
-  },
+  }
+
   /**
    * Returns the collection of discussion notifications
    * @returns {BaseCollection}
    * @function app.common.collectionManager.CollectionManager.getNotificationsDiscussionCollectionPromise
   **/
-  getNotificationsDiscussionCollectionPromise: function() {
+  getNotificationsDiscussionCollectionPromise() {
     if (this._allNotificationsDiscussionCollectionPromise) {
       return this._allNotificationsDiscussionCollectionPromise;
     }
@@ -834,14 +866,15 @@ var CollectionManager = Marionette.Object.extend({
             })
 
     return this._allNotificationsDiscussionCollectionPromise;
-  },
+  }
+
   /**
    * @param {Object} models
    * @param {Object} allIdeasCollection
    * @returns {Object} models
    * @function app.common.collectionManager.CollectionManager._parseGroupStates
   **/
-  _parseGroupStates: function(models, allIdeasCollection) {
+  _parseGroupStates(models, allIdeasCollection) {
     var that = this;
     _.each(models, function(model) {
       _.each(model.states, function(state) {
@@ -852,7 +885,8 @@ var CollectionManager = Marionette.Object.extend({
       });
     });
     return models;
-  },
+  }
+
   /**
    * Returns the stored configuration of groups and panels
    * @param {Object} viewsFactory
@@ -861,7 +895,7 @@ var CollectionManager = Marionette.Object.extend({
    * @returns {BaseCollection}
    * @function app.common.collectionManager.CollectionManager.getGroupSpecsCollectionPromise
   **/
-  getGroupSpecsCollectionPromise: function(viewsFactory, url_structure_promise, skip_group_state) {
+  getGroupSpecsCollectionPromise(viewsFactory, url_structure_promise, skip_group_state) {
     var that = this;
 
     if (skip_group_state === undefined) {
@@ -938,13 +972,14 @@ var CollectionManager = Marionette.Object.extend({
     else {
       return this._allGroupSpecsCollectionPromise;
     }
-  },
+  }
+
   /**
    * Returns the collection of all roles
    * @returns {BaseCollection}
    * @function app.common.collectionManager.CollectionManager.getLocalRoleCollectionPromise
   **/
-  getLocalRoleCollectionPromise: function() {
+  getLocalRoleCollectionPromise() {
     if (this._allLocalRoleCollectionPromise) {
       return this._allLocalRoleCollectionPromise;
     }
@@ -958,13 +993,14 @@ var CollectionManager = Marionette.Object.extend({
             });
 
     return this._allLocalRoleCollectionPromise;
-  },
+  }
+
   /**
    * Returns the collection of roles (a set of permissions)
    * @returns {BaseCollection}
    * @function app.common.collectionManager.CollectionManager.getLocalRoleCollectionPromise
   **/
-  getMyLocalRoleCollectionPromise: function() {
+  getMyLocalRoleCollectionPromise() {
     if (this._myLocalRoleCollectionPromise) {
       return this._myLocalRoleCollectionPromise;
     }
@@ -978,14 +1014,14 @@ var CollectionManager = Marionette.Object.extend({
             });
 
     return this._myLocalRoleCollectionPromise;
-  },
+  }
 
   /**
    * Returns the collection of publication states for ideas
    * @returns {BaseCollection}
    * @function app.common.collectionManager.CollectionManager.getIdeaPublicationStatesPromise
   **/
-  getIdeaPublicationStatesPromise: function() {
+  getIdeaPublicationStatesPromise() {
     var flow;
     var that = this;
     if (this._allIdeaPublicationStatesPromise) {
@@ -1000,9 +1036,9 @@ var CollectionManager = Marionette.Object.extend({
       });
 
     return this._allIdeaPublicationStatesPromise;
-  },
+  }
 
-  getDiscussionAclPromise: function() {
+  getDiscussionAclPromise() {
     if (this._allDiscussionAclsPromise) {
       return this._allDiscussionAclsPromise;
     }
@@ -1015,9 +1051,9 @@ var CollectionManager = Marionette.Object.extend({
             });
 
     return this._allDiscussionAclsPromise;
-  },
+  }
 
-  getPubStatePermissionsPromise: function() {
+  getPubStatePermissionsPromise() {
     if (this._allPubStatePermissionsPromise) {
       return this._allPubStatePermissionsPromise;
     }
@@ -1030,14 +1066,14 @@ var CollectionManager = Marionette.Object.extend({
             });
 
     return this._allPubStatePermissionsPromise;
-  },
+  }
 
   /**
    * Returns the model of discussions
    * @returns {BaseModel}
    * @function app.common.collectionManager.CollectionManager.getDiscussionModelPromise
   **/
-  getDiscussionModelPromise: function() {
+  getDiscussionModelPromise() {
     if (this._allDiscussionModelPromise) {
       return this._allDiscussionModelPromise;
     }
@@ -1051,13 +1087,14 @@ var CollectionManager = Marionette.Object.extend({
             });
 
     return this._allDiscussionModelPromise;
-  },
+  }
+
   /**
    * Returns the collection of external sources for discussions
    * @returns {BaseCollection}
    * @function app.common.collectionManager.CollectionManager.getDiscussionSourceCollectionPromise
   **/
-  getDiscussionSourceCollectionPromise: function() {
+  getDiscussionSourceCollectionPromise() {
     if (this._allDiscussionSourceCollectionPromise) {
       return this._allDiscussionSourceCollectionPromise;
     }
@@ -1071,13 +1108,14 @@ var CollectionManager = Marionette.Object.extend({
             });
 
     return this._allDiscussionSourceCollectionPromise;
-  },
+  }
+
   /**
    * Returns the collection of external sources for discussions
    * @returns {BaseCollection}
    * @function app.common.collectionManager.CollectionManager.getDiscussionSourceCollectionPromise2
   **/
-  getDiscussionSourceCollectionPromise2: function() {
+  getDiscussionSourceCollectionPromise2() {
     if (this._allDiscussionSourceCollection2Promise) {
       return this._allDiscussionSourceCollection2Promise;
     }
@@ -1091,13 +1129,14 @@ var CollectionManager = Marionette.Object.extend({
             });
 
     return this._allDiscussionSourceCollection2Promise;
-  },
+  }
+
   /**
    * Returns the collection of tokens to access Facebook accounts
    * @returns {BaseCollection}
    * @function app.common.collectionManager.CollectionManager.getFacebookAccessTokensPromise
   **/
-  getFacebookAccessTokensPromise: function() {
+  getFacebookAccessTokensPromise() {
     if (this._allFacebookAccessTokensPromise) {
       return this._allFacebookAccessTokensPromise;
     }
@@ -1110,13 +1149,14 @@ var CollectionManager = Marionette.Object.extend({
           Raven.captureException(e);
         });
     return this._allFacebookAccessTokensPromise;
-  },
+  }
+
   /**
    * Returns the collection of user accounts
    * @returns {BaseCollection}
    * @function app.common.collectionManager.CollectionManager.getAllUserAccountsPromise
   **/
-  getAllUserAccountsPromise: function() {
+  getAllUserAccountsPromise() {
     if (this._allUserAccountsPromise) {
       return this._allUserAccountsPromise;
     }
@@ -1129,13 +1169,14 @@ var CollectionManager = Marionette.Object.extend({
           Raven.captureException(e);
         });
     return this._allUserAccountsPromise;
-  },
+  }
+
   /**
    * Returns the collection of language preferences
    * @returns {BaseCollection}
    * @function app.common.collectionManager.CollectionManager.getUserLanguagePreferencesPromise
   **/
-  getUserLanguagePreferencesPromise: function(Ctx){
+  getUserLanguagePreferencesPromise(Ctx) {
     if (this._allUserLanguagePreferencesPromise) {
       return this._allUserLanguagePreferencesPromise;
     }
@@ -1153,14 +1194,15 @@ var CollectionManager = Marionette.Object.extend({
       this._allUserLanguagePreferencesPromise = Promise.resolve(this._allUserLanguagePreferences);
     }
     return this._allUserLanguagePreferencesPromise;
-  },
+  }
+
   /**
    * Creates a collection of IdeaContentLink for a message
    * @param   {Object}  messageModel      The Backbone model of the message
    * @returns {BaseCollection}            The collection of ideaContentLinks
    * @function app.common.collectionManager.CollectionManager.getIdeaContentLinkCollectionOnMessage
   **/
-  getIdeaContentLinkCollectionOnMessage: function(messageModel){
+  getIdeaContentLinkCollectionOnMessage(messageModel) {
     /*
       @TODO: Add efficient Collection management and caching
      */
@@ -1176,13 +1218,14 @@ var CollectionManager = Marionette.Object.extend({
     var tmp = new IdeaContentLink.Collection(validIcls, {message: messageModel});
     tmp.collectionManager = this;
     return tmp;
-  },
+  }
+
   /**
    * Returns the collection of publication flows
    * @returns {BaseCollection}
    * @function app.common.collectionManager.CollectionManager.getAllWidgetsPromise
   **/
-  getAllPublicationFlowsPromise: function() {
+  getAllPublicationFlowsPromise() {
     if (this._allPublicationFlowsPromise) {
       return this._allPublicationFlowsPromise;
     }
@@ -1195,13 +1238,14 @@ var CollectionManager = Marionette.Object.extend({
           Raven.captureException(e);
         });
     return this._allPublicationFlowsPromise;
-  },
+  }
+
   /**
    * Returns the collection of widgets
    * @returns {BaseCollection}
    * @function app.common.collectionManager.CollectionManager.getAllWidgetsPromise
   **/
-  getAllWidgetsPromise: function() {
+  getAllWidgetsPromise() {
     if (this._allWidgetsPromise) {
       return this._allWidgetsPromise;
     }
@@ -1214,7 +1258,8 @@ var CollectionManager = Marionette.Object.extend({
           Raven.captureException(e);
         });
     return this._allWidgetsPromise;
-  },
+  }
+
   /**
    * Returns a subset of widgets according to the context and the idea
    * @param {Number} context
@@ -1223,7 +1268,7 @@ var CollectionManager = Marionette.Object.extend({
    * @returns {BackboneSubset}
    * @function app.common.collectionManager.CollectionManager.getWidgetsForContextPromise
   **/
-  getWidgetsForContextPromise: function(context, idea, liveupdate_keys) {
+  getWidgetsForContextPromise(context, idea, liveupdate_keys) {
     return this.getAllWidgetsPromise().then(function(widgets) {
       // TODO: Convert widgets into Infobar items, and use that as model.
       // Also add other sources for infobar items.
@@ -1233,13 +1278,14 @@ var CollectionManager = Marionette.Object.extend({
         idea: idea,
         liveupdate_keys: liveupdate_keys});
     });
-  },
+  }
+
   /**
    * Returns the connected socket
    * @returns {Socket}
    * @function app.common.collectionManager.CollectionManager.getWidgetsForContextPromise
   **/
-  getConnectedSocketPromise: function() {
+  getConnectedSocketPromise() {
     if (this._connectedSocketPromise) {
       return this._connectedSocketPromise;
     }
@@ -1252,13 +1298,14 @@ var CollectionManager = Marionette.Object.extend({
       function(resolve) {
         socket = new Socket(resolve, that);
       });
-  },
+  }
+
   /**
    * Returns the collection of preferences for this discussion
    * @returns {BaseCollection}
    * @function app.common.collectionManager.CollectionManager.getDiscussionPreferencePromise
   **/
-  getDiscussionPreferencePromise: function() {
+  getDiscussionPreferencePromise() {
     if (this._allDiscussionPreferencesPromise) {
       return this._allDiscussionPreferencesPromise;
     }
@@ -1271,13 +1318,14 @@ var CollectionManager = Marionette.Object.extend({
         Raven.captureException(e);
       });
     return this._allDiscussionPreferencesPromise;
-  },
+  }
+
   /**
    * Returns the collection of preferences for all discussions
    * @returns {BaseCollection}
    * @function app.common.collectionManager.CollectionManager.getGlobalPreferencePromise
   **/
-  getGlobalPreferencePromise: function() {
+  getGlobalPreferencePromise() {
     if (this._globalPreferencesPromise) {
       return this._globalPreferencesPromise;
     }
@@ -1290,13 +1338,14 @@ var CollectionManager = Marionette.Object.extend({
         Raven.captureException(e);
       });
     return this._globalPreferencesPromise;
-  },
+  }
+
   /**
    * Returns the collection of preferences for all users 
    * @returns {BaseCollection}
    * @function app.common.collectionManager.CollectionManager.getUserPreferencePromise
   **/
-  getUserPreferencePromise: function() {
+  getUserPreferencePromise() {
     if (this._allUserPreferencesPromise) {
       return this._allUserPreferencesPromise;
     }
@@ -1311,8 +1360,9 @@ var CollectionManager = Marionette.Object.extend({
         Raven.captureException(e);
       });
     return this._allUserPreferencesPromise;
-  },
-  getNotificationsUserCollectionPromise: function(reset) {
+  }
+
+  getNotificationsUserCollectionPromise(reset) {
     if (this._allNotificationsUserCollectionPromise && !reset) {
       return this._allNotificationsUserCollectionPromise;
     }
@@ -1326,7 +1376,7 @@ var CollectionManager = Marionette.Object.extend({
     });
     return this._allNotificationsUserCollectionPromise;
   }
-});
+}
 
 var _instance;
 
@@ -1336,4 +1386,4 @@ export default function() {
   }
 
   return _instance;
-};
+}

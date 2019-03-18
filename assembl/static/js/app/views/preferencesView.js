@@ -128,24 +128,25 @@ function getPreferenceEditView(preferenceModel, subViewKey, useKey) {
  * A single preference item
  * @class app.views.preferencesView.PreferencesItemView
  */
-var PreferencesItemView = Marionette.View.extend({
-  constructor: function PreferencesItemView() {
-    Marionette.View.apply(this, arguments);
-  },
+class PreferencesItemView extends Marionette.View.extend({
   regions: {
     subview: ".js_prefItemSubview"
   },
+
   ui: {
     resetButton: ".js_reset",
     errorMessage: ".control-error",
     controlGroup: ".control-group"
   },
+
   events: {
     "click @ui.resetButton": "resetPreference",
   },
+
   template: "#tmpl-preferenceItemView",
-  isKeyView: false,
-  resetPreference: function() {
+  isKeyView: false
+}) {
+  resetPreference() {
     var that = this;
     var model = this.model;
     model.sync("delete", this.model, {
@@ -173,8 +174,9 @@ var PreferencesItemView = Marionette.View.extend({
       }
     });
     return false;
-  },
-  initialize: function(options) {
+  }
+
+  initialize(options) {
     this.mainPrefWindow = options.mainPrefWindow;
     this.preferences = options.mainPrefWindow.preferences;
     this.key = options.key || this.model.id;
@@ -190,8 +192,9 @@ var PreferencesItemView = Marionette.View.extend({
         preferenceItemView: this,
         preference: this.model.get("value"),
     };
-  },
-  serializeData: function() {
+  }
+
+  serializeData() {
     var model = this.model;
     if (this.listKey !== undefined) {
       var listKey = String(this.listKey).split("_");
@@ -206,75 +209,77 @@ var PreferencesItemView = Marionette.View.extend({
       listKey: this.listKey,
       inList: this.listKey !== undefined
     };
-  },
-  onRender: function() {
+  }
+
+  onRender() {
     var subview = getPreferenceEditView(this.preferenceData, this.listKey);
     if (subview) {
         this.showChildView('subview', new subview(this.childViewOptions));
     } else {
         console.error("Missing preference subview for ", this.preferenceData);
     }
-  },
-  showError: function(error) {
+  }
+
+  showError(error) {
     this.ui.errorMessage.text(error);
     this.ui.errorMessage.removeClass("hidden");
     this.ui.controlGroup.addClass("error");
-  },
-  hideError: function(error) {
+  }
+
+  hideError(error) {
     this.ui.errorMessage.addClass("hidden");
     this.ui.errorMessage.text();
     this.ui.controlGroup.removeClass("error");
   }
-});
-
+}
 
 /**
  * A single preference item in a ListPreferenceView
  * @class app.views.preferencesView.ListPreferencesItemView
  * @extends app.views.preferencesView.PreferencesItemView
  */
-var ListPreferencesItemView = PreferencesItemView.extend({
-  constructor: function ListPreferencesItemView() {
-    PreferencesItemView.apply(this, arguments);
-  },
+class ListPreferencesItemView extends PreferencesItemView.extend({
   ui: {
     deleteButton: ".js_delete",
     errorMessage: ".control-error",
     controlGroup: ".control-group"
   },
+
   events: {
     "click @ui.deleteButton": "deleteItem"
   },
-  template: "#tmpl-listPreferenceItemView",
-  deleteItem: function(event) {
+
+  template: "#tmpl-listPreferenceItemView"
+}) {
+  deleteItem(event) {
     this.model.collection.remove(this.model);
     this.listCollectionView.render();
     return false;
-  },
-});
-
+  }
+}
 
 /**
  * Abstract class for preference views
  * @class app.views.preferencesView.BasePreferenceView
  */
-var BasePreferenceView = Marionette.View.extend({
-  constructor: function BasePreferenceView() {
-    Marionette.View.apply(this, arguments);
-  },
+class BasePreferenceView extends Marionette.View.extend({
   ui: {
     prefValue: ".pref_value"
   },
+
   events: {
     "change @ui.prefValue": "prefChanged"
   },
+
   template: "#tmpl-basePreferenceView",
-  tagName: "span",
+  tagName: "span"
+}) {
   // isKeyView: false,
-  valueModelKey: function() {
+  valueModelKey() {
     return (this.isKeyView)?"key":"value";
-  },
-  initialize: function(options) {
+  }
+
+  initialize(options) {
     this.mainPrefWindow = options.mainPrefWindow;
     this.preferences = options.mainPrefWindow.preferences;
     this.key = options.key;
@@ -282,8 +287,9 @@ var BasePreferenceView = Marionette.View.extend({
     this.listKey = options.listKey;
     this.preferenceItemView = options.preferenceItemView;
     this.isKeyView = options.isKeyView;
-  },
-  prefChanged: function() {
+  }
+
+  prefChanged() {
     var value = this.getValue();
     try {
         value = this.processValue(value);
@@ -292,11 +298,13 @@ var BasePreferenceView = Marionette.View.extend({
     } catch (err) {
         this.preferenceItemView.showError(err);
     }
-  },
-  getValue: function() {
+  }
+
+  getValue() {
     return this.ui.prefValue.val();
-  },
-  serializeData: function() {
+  }
+
+  serializeData() {
     var preferenceValue = this.model.get(this.valueModelKey());
     return {
       i18n: i18n,
@@ -305,89 +313,73 @@ var BasePreferenceView = Marionette.View.extend({
       canModify: this.mainPrefWindow.canSavePreference(this.key),
       inList: this.listKey !== undefined
     };
-  },
-  processValue: function(value) {
+  }
+
+  processValue(value) {
     return value;
   }
-});
+}
 
 /**
  * View to set a Boolean preference
  * @class app.views.preferencesView.BoolPreferenceView
  * @extends app.views.preferencesView.BasePreferenceView
  */
-var BoolPreferenceView = BasePreferenceView.extend({
-  constructor: function BoolPreferenceView() {
-    BasePreferenceView.apply(this, arguments);
-  },
-  template: '#tmpl-boolPreferenceView',
-  getValue: function() {
+class BoolPreferenceView extends BasePreferenceView.extend({
+  template: '#tmpl-boolPreferenceView'
+}) {
+  getValue() {
     return this.ui.prefValue.filter(":checked").val() !== undefined;
   }
-});
-
+}
 
 /**
  * View to set a text preference
  * @class app.views.preferencesView.TextPreferenceView
  * @extends app.views.preferencesView.BasePreferenceView
  */
-var TextPreferenceView = BasePreferenceView.extend({
-  constructor: function TextPreferenceView() {
-    BasePreferenceView.apply(this, arguments);
-  },
+class TextPreferenceView extends BasePreferenceView.extend({
   template: '#tmpl-textPreferenceView'
-});
-
+}) {}
 
 /**
  * View to set a JSON value preference
  * @class app.views.preferencesView.JsonPreferenceView
  * @extends app.views.preferencesView.TextPreferenceView
  */
-var JsonPreferenceView = TextPreferenceView.extend({
-  constructor: function JsonPreferenceView() {
-    TextPreferenceView.apply(this, arguments);
-  },
-  template: '#tmpl-jsonPreferenceView',
-  processValue: function(value) {
+class JsonPreferenceView extends TextPreferenceView.extend({
+  template: '#tmpl-jsonPreferenceView'
+}) {
+  processValue(value) {
     try {
         return JSON.parse(value);
     } catch (err) {
         throw i18n.gettext("This is not valid JSON: ") + err.message;
     }
   }
-});
-
+}
 
 /**
  * View to set a string value preference
  * @class app.views.preferencesView.StringPreferenceView
  * @extends app.views.preferencesView.BasePreferenceView
  */
-var StringPreferenceView = BasePreferenceView.extend({
-  constructor: function StringPreferenceView() {
-    BasePreferenceView.apply(this, arguments);
-  },
+class StringPreferenceView extends BasePreferenceView.extend({
   template: '#tmpl-stringPreferenceView'
-});
-
-
+}) {}
 
 /**
  * A single preference item in a DictPreferenceView
  * @class app.views.preferencesView.DictPreferencesItemView
  * @extends app.views.preferencesView.PreferencesItemView
  */
-var DictPreferencesItemView = PreferencesItemView.extend({
-  constructor: function DictPreferencesItemView() {
-    PreferencesItemView.apply(this, arguments);
-  },
+class DictPreferencesItemView extends PreferencesItemView.extend({
   ui: {
     deleteButton: ".js_delete",
     errorMessage: ".control-error",
     controlGroup: ".control-group"
   },
+
   regions: {
     key_subview: ".js_prefKeySubview",
     val_subview: ".js_prefValueSubview",
@@ -396,14 +388,17 @@ var DictPreferencesItemView = PreferencesItemView.extend({
   events: {
     "click @ui.deleteButton": "deleteItem"
   },
+
   template: "#tmpl-dictPreferenceItemView",
-  deleteItem: function(event) {
+  keySubview: StringPreferenceView
+}) {
+  deleteItem(event) {
     this.model.collection.remove(this.model);
     this.listCollectionView.render();
     return false;
-  },
-  keySubview: StringPreferenceView,
-  onRender: function() {
+  }
+
+  onRender() {
     var key_subview = getPreferenceEditView(this.preferenceData, this.listKey, true);
     var val_subview = getPreferenceEditView(this.preferenceData, this.listKey);
     var key_options = _.clone(this.childViewOptions);
@@ -414,132 +409,112 @@ var DictPreferencesItemView = PreferencesItemView.extend({
     } else {
         console.error("Missing preference subview for ", this.preferenceData);
     }
-  },
-
-});
-
-
+  }
+}
 
 /**
  * View to set an integer value preference
  * @class app.views.preferencesView.IntPreferenceView
  * @extends app.views.preferencesView.StringPreferenceView
  */
-var IntPreferenceView = StringPreferenceView.extend({
-  constructor: function IntPreferenceView() {
-    StringPreferenceView.apply(this, arguments);
-  },
-  processValue: function(value) {
+class IntPreferenceView extends StringPreferenceView {
+  processValue(value) {
     try {
         return Number.parseInt(value);
     } catch (err) {
         throw i18n.gettext("Please enter a number");
     }
   }
-});
-
-
+}
 
 /**
  * View to set a scalar value preference (chosen from a set)
  * @class app.views.preferencesView.ScalarPreferenceView
  * @extends app.views.preferencesView.BasePreferenceView
  */
-var ScalarPreferenceView = BasePreferenceView.extend({
-  constructor: function ScalarPreferenceView() {
-    BasePreferenceView.apply(this, arguments);
-  },
-  template: '#tmpl-scalarPreferenceView',
-  serializeData: function(...args) {
-    var data = BasePreferenceView.prototype.serializeData.apply(this, args);
+class ScalarPreferenceView extends BasePreferenceView.extend({
+  template: '#tmpl-scalarPreferenceView'
+}) {
+  serializeData(...args) {
+    var data = super.serializeData(args);
     // Note: This is unsorted. Maybe should by value?
     data.scalarOptions = data.preferenceData.scalar_values;
     return data;
   }
-});
-
+}
 
 /**
  * View to set a locale value preference (chosen from the set of locales)
  * @class app.views.preferencesView.LocalePreferenceView
  * @extends app.views.preferencesView.ScalarPreferenceView
  */
-var LocalePreferenceView = ScalarPreferenceView.extend({
-  constructor: function LocalePreferenceView() {
-    ScalarPreferenceView.apply(this, arguments);
-  },
-  serializeData: function(...args) {
-    var data = ScalarPreferenceView.prototype.serializeData.apply(this, args);
+class LocalePreferenceView extends ScalarPreferenceView {
+  serializeData(...args) {
+    var data = super.serializeData(args);
     data.scalarOptions = Ctx.getLocaleToLanguageNameCache();
     return data;
-  },
-});
-
+  }
+}
 
 /**
  * View to set a permission value preference (chosen from the set of permissions)
  * @class app.views.preferencesView.PermissionPreferenceView
  * @extends app.views.preferencesView.ScalarPreferenceView
  */
-var PermissionPreferenceView = ScalarPreferenceView.extend({
-  constructor: function PermissionPreferenceView() {
-    ScalarPreferenceView.apply(this, arguments);
-  },
-  serializeData: function(...args) {
-    var data = ScalarPreferenceView.prototype.serializeData.apply(this, args);
+class PermissionPreferenceView extends ScalarPreferenceView {
+  serializeData(...args) {
+    var data = super.serializeData(args);
     data.scalarOptions = {};
     _.each(Permissions, function(key) {
       data.scalarOptions[key] = key;
     });
     return data;
-  },
-});
-
+  }
+}
 
 /**
  * View to set a role value preference (chosen from the set of roles)
  * @class app.views.preferencesView.RolePreferenceView
  * @extends app.views.preferencesView.ScalarPreferenceView
  */
-var RolePreferenceView = ScalarPreferenceView.extend({
-  constructor: function RolePreferenceView() {
-    ScalarPreferenceView.apply(this, arguments);
-  },
-  initialize: function(options) {
-    ScalarPreferenceView.prototype.initialize.apply(this, arguments);
+class RolePreferenceView extends ScalarPreferenceView {
+  initialize(options) {
+    super.initialize(...arguments);
     this.roles = Ctx.getRoleNames();
-  },
-  serializeData: function(...args) {
-    var data = ScalarPreferenceView.prototype.serializeData.apply(this, args);
+  }
+
+  serializeData(...args) {
+    var data = super.serializeData(args);
     data.scalarOptions = {};
     _.each(this.roles, function(key) {
       data.scalarOptions[key] = key;
     });
     return data;
-  },
-});
-
+  }
+}
 
 /**
  * View to set a role value preference (chosen from the set of roles)
  * @class app.views.preferencesView.PubFlowPreferenceView
  * @extends app.views.preferencesView.ScalarPreferenceView
  */
-var PubFlowPreferenceView = ScalarPreferenceView.extend({
-  constructor: function PubFlowPreferenceView() {
-    ScalarPreferenceView.apply(this, arguments);
+class PubFlowPreferenceView extends ScalarPreferenceView {
+  constructor() {
+    super(...arguments);
     this.pubFlowCollection = null;
-  },
-  initialize: function(options) {
-    ScalarPreferenceView.prototype.initialize.apply(this, arguments);
+  }
+
+  initialize(options) {
+    super.initialize(...arguments);
     const collectionManager = new CollectionManager();
     collectionManager.getAllPublicationFlowsPromise().then((pubFlowCollection) => {
       this.pubFlowCollection = pubFlowCollection;
       this.render();
     })
-  },
-  serializeData: function(...args) {
-    var data = ScalarPreferenceView.prototype.serializeData.apply(this, args);
+  }
+
+  serializeData(...args) {
+    var data = super.serializeData(args);
     data.scalarOptions = {};
     if (this.pubFlowCollection) {
       this.pubFlowCollection.each((pubFlowModel) => {
@@ -548,23 +523,23 @@ var PubFlowPreferenceView = ScalarPreferenceView.extend({
       });
     }
     return data;
-  },
-});
-
+  }
+}
 
 /**
  * View to set a role value preference (chosen from the set of roles)
  * @class app.views.preferencesView.PubFlowPreferenceView
  * @extends app.views.preferencesView.ScalarPreferenceView
  */
-var PubStatePreferenceView = ScalarPreferenceView.extend({
-  constructor: function PubStatePreferenceView() {
-    ScalarPreferenceView.apply(this, arguments);
+class PubStatePreferenceView extends ScalarPreferenceView {
+  constructor() {
+    super(...arguments);
     this.pubStateCollection = null;
     this.langPrefs = null;
-  },
-  initialize: function(options) {
-    ScalarPreferenceView.prototype.initialize.apply(this, arguments);
+  }
+
+  initialize(options) {
+    super.initialize(...arguments);
     const collectionManager = new CollectionManager();
     if (Ctx.getDiscussionId() != "0") {
       collectionManager.getIdeaPublicationStatesPromise().then((pubStateCollection) => {
@@ -582,9 +557,10 @@ var PubStatePreferenceView = ScalarPreferenceView.extend({
     } else {
       // TODO, not urgent: get the default publication states
     }
-  },
-  serializeData: function(...args) {
-    var data = ScalarPreferenceView.prototype.serializeData.apply(this, args);
+  }
+
+  serializeData(...args) {
+    var data = super.serializeData(args);
     data.scalarOptions = {};
     const langPrefs = this.langPrefs;
     if (this.pubStateCollection) {
@@ -595,85 +571,75 @@ var PubStatePreferenceView = ScalarPreferenceView.extend({
       });
     }
     return data;
-  },
-});
-
+  }
+}
 
 /**
  * View to set a URL value preference
  * @class app.views.preferencesView.UrlPreferenceView
  * @extends app.views.preferencesView.StringPreferenceView
  */
-var UrlPreferenceView = StringPreferenceView.extend({
-  constructor: function UrlPreferenceView() {
-    StringPreferenceView.apply(this, arguments);
-  },
-  regexp: new RegExp('^(?:(?:http|https|ftp)://)(?:\\S+(?::\\S*)?@)?(?:(?:(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}(?:\\.(?:[0-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))|(?:(?:[a-z\\u00a1-\\uffff0-9]+-?)*[a-z\\u00a1-\\uffff0-9]+)(?:\\.(?:[a-z\\u00a1-\\uffff0-9]+-?)*[a-z\\u00a1-\\uffff0-9]+)*(?:\\.(?:[a-z\\u00a1-\\uffff]{2,})))|localhost)(?::\\d{2,5})?(?:(/|\\?|#)[^\\s]*)?$', 'i'),
-  processValue: function(value) {
+class UrlPreferenceView extends StringPreferenceView.extend({
+  regexp: new RegExp('^(?:(?:http|https|ftp)://)(?:\\S+(?::\\S*)?@)?(?:(?:(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}(?:\\.(?:[0-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))|(?:(?:[a-z\\u00a1-\\uffff0-9]+-?)*[a-z\\u00a1-\\uffff0-9]+)(?:\\.(?:[a-z\\u00a1-\\uffff0-9]+-?)*[a-z\\u00a1-\\uffff0-9]+)*(?:\\.(?:[a-z\\u00a1-\\uffff]{2,})))|localhost)(?::\\d{2,5})?(?:(/|\\?|#)[^\\s]*)?$', 'i')
+}) {
+  processValue(value) {
     if (!this.regexp.test(value)) {
         throw i18n.gettext("This does not appear to be a URL");
     }
     return value;
   }
-});
-
+}
 
 /**
  * View to set an email value preference
  * @class app.views.preferencesView.EmailPreferenceView
  * @extends app.views.preferencesView.StringPreferenceView
  */
-var EmailPreferenceView = StringPreferenceView.extend({
-  constructor: function EmailPreferenceView() {
-    StringPreferenceView.apply(this, arguments);
-  },
-  regexp: new RegExp("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$"),
-  processValue: function(value) {
+class EmailPreferenceView extends StringPreferenceView.extend({
+  regexp: new RegExp("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$")
+}) {
+  processValue(value) {
     if (!this.regexp.test(value)) {
         throw i18n.gettext("This does not appear to be an email");
     }
     return value;
   }
-});
-
+}
 
 /**
  * View to set a domain (DNS name) value preference
  * @class app.views.preferencesView.DomainPreferenceView
  * @extends app.views.preferencesView.StringPreferenceView
  */
-var DomainPreferenceView = StringPreferenceView.extend({
-  constructor: function DomainPreferenceView() {
-    StringPreferenceView.apply(this, arguments);
-  },
+class DomainPreferenceView extends StringPreferenceView.extend({
   // too lenient: accepts single element ("com")
-  regexp: new RegExp("^[a-zA-Z0-9][a-zA-Z0-9-_]{0,61}[a-zA-Z0-9]{0,1}\.([a-zA-Z]{1,6}|[a-zA-Z0-9-]{1,30}\.[a-zA-Z]{2,3})$"),
-  processValue: function(value) {
+  regexp: new RegExp("^[a-zA-Z0-9][a-zA-Z0-9-_]{0,61}[a-zA-Z0-9]{0,1}\.([a-zA-Z]{1,6}|[a-zA-Z0-9-]{1,30}\.[a-zA-Z]{2,3})$")
+}) {
+  processValue(value) {
     if (!this.regexp.test(value)) {
         throw i18n.gettext("This does not appear to be a domain");
     }
     return value.toLowerCase();
   }
-});
-
+}
 
 /**
  * The collection view for the items in a preference-as-list
  * @class app.views.preferencesView.ListSubviewCollectionView
  */
-var ListSubviewCollectionView = Marionette.CollectionView.extend({
-  constructor: function ListSubviewCollectionView() {
-    Marionette.CollectionView.apply(this, arguments);
-  },
-  initialize: function(options) {
+class ListSubviewCollectionView extends Marionette.CollectionView.extend({
+  childView: ListPreferencesItemView
+}) {
+  initialize(options) {
     this.mainPrefWindow = options.mainPrefWindow;
     this.preferences = options.preferences;
     this.key = options.key;
     this.listKey = options.listKey;
     this.listView = options.listView;
     this.preferenceData = options.preferenceData;
-  },
-  childViewOptions: function(model) {
+  }
+
+  childViewOptions(model) {
     // This is bizarrely called before initialize;
     // then we have the options in the object
     var options = this.options;
@@ -696,28 +662,26 @@ var ListSubviewCollectionView = Marionette.CollectionView.extend({
       // model: this.collection.models[index],
       listKey: index
     };
-  },
-  childView: ListPreferencesItemView
-});
-
+  }
+}
 
 /**
  * The collection view for the items in a preference-as-dict
  * @class app.views.preferencesView.DictSubviewCollectionView
  */
-var DictSubviewCollectionView = Marionette.CollectionView.extend({
-  constructor: function DictSubviewCollectionView() {
-    Marionette.CollectionView.apply(this, arguments);
-  },
-  initialize: function(options) {
+class DictSubviewCollectionView extends Marionette.CollectionView.extend({
+  childView: DictPreferencesItemView
+}) {
+  initialize(options) {
     this.mainPrefWindow = options.mainPrefWindow;
     this.preferences = options.preferences;
     this.key = options.key;
     this.listKey = options.listKey;
     this.listView = options.listView;
     this.preferenceData = options.preferenceData;
-  },
-  childViewOptions: function(model) {
+  }
+
+  childViewOptions(model) {
     // This is bizarrely called before initialize;
     // then we have the options in the object
     var options = this.options;
@@ -739,36 +703,36 @@ var DictSubviewCollectionView = Marionette.CollectionView.extend({
       // model: this.collection.models[index],
       listKey: index
     };
-  },
-  childView: DictPreferencesItemView,
-});
-
+  }
+}
 
 /**
  * A single preference which is a list
  * @class app.views.preferencesView.ListPreferenceView
  * @extends app.views.preferencesView.BasePreferenceView
  */
-var ListPreferenceView = BasePreferenceView.extend({
-  constructor: function ListPreferenceView() {
-    BasePreferenceView.apply(this, arguments);
-  },
-  initialize: function(options) {
-    BasePreferenceView.prototype.initialize.apply(this, arguments);
-    this.submodels = this.model.valueAsCollection(this.preferenceData, true);
-  },
+class ListPreferenceView extends BasePreferenceView.extend({
   ui: {
     addToList: ".js_add_to_listpref"
   },
+
   regions: {
     listPreference: ".js_listPreference"
   },
+
   events: {
     "click @ui.addToList": "addToList"
   },
+
   template: "#tmpl-listPreferenceView",
-  subviewClass: ListSubviewCollectionView,
-  onRender: function() {
+  subviewClass: ListSubviewCollectionView
+}) {
+  initialize(options) {
+    super.initialize(...arguments);
+    this.submodels = this.model.valueAsCollection(this.preferenceData, true);
+  }
+
+  onRender() {
     var subview = new this.subviewClass({
       collection: this.submodels,
       mainPrefWindow: this.mainPrefWindow,
@@ -779,8 +743,9 @@ var ListPreferenceView = BasePreferenceView.extend({
       preferenceData: this.preferenceData,
     });
     this.showChildView("listPreference", subview);
-  },
-  extractDefaultVal: function(defaultVal, listKey) {
+  }
+
+  extractDefaultVal(defaultVal, listKey) {
     var i = 0;
     if (listKey !== undefined) {
       i = String(listKey).split('_').length;
@@ -804,37 +769,37 @@ var ListPreferenceView = BasePreferenceView.extend({
       defaultVal = _.clone(defaultVal);
     }
     return defaultVal;
-  },
-  asModel: function(val) {
+  }
+
+  asModel(val) {
     return new DiscussionPreference.Model(
       { value: val }, { parse: false });
-  },
-  addToList: function() {
+  }
+
+  addToList() {
     var defaultVal = this.extractDefaultVal(this.preferenceData.item_default, this.listKey);
     var model = this.asModel(defaultVal);
     this.submodels.add([model]);
     this.render();
     return false;
-  },
-});
-
+  }
+}
 
 /**
  * A single preference which is a dict
  * @class app.views.preferencesView.DictPreferenceView
  * @extends app.views.preferencesView.ListPreferenceView
  */
-var DictPreferenceView = ListPreferenceView.extend({
-  constructor: function DictPreferenceView() {
-    ListPreferenceView.apply(this, arguments);
-  },
-  initialize: function(options) {
+class DictPreferenceView extends ListPreferenceView.extend({
+  subviewClass: DictSubviewCollectionView
+}) {
+  initialize(options) {
     // skip ListPreferenceView
-    BasePreferenceView.prototype.initialize.apply(this, arguments);
+    super.initialize(...arguments);
     this.submodels = this.model.valueAsCollection(this.preferenceData, false);
-  },
-  subviewClass: DictSubviewCollectionView,
-  asModel: function(value) {
+  }
+
+  asModel(value) {
     var key;
     var val;
     // only use one
@@ -844,37 +809,30 @@ var DictPreferenceView = ListPreferenceView.extend({
     });
     return new DiscussionPreference.Model(
       { key: key, value: val }, { parse: false });
-  },
-});
-
+  }
+}
 
 /**
  * The list of all preferences
  * @class app.views.preferencesView.PreferencesCollectionView
  */
-var PreferencesCollectionView = Marionette.CollectionView.extend({
-  constructor: function PreferencesCollectionView() {
-    Marionette.CollectionView.apply(this, arguments);
-  },
-  initialize: function(options) {
+class PreferencesCollectionView extends Marionette.CollectionView.extend({
+  childView: PreferencesItemView
+}) {
+  initialize(options) {
     this.mainPrefWindow = options.mainPrefWindow;
     this.childViewOptions = {
         mainPrefWindow: options.mainPrefWindow
     };
-  },
-  childView: PreferencesItemView,
-});
-
+  }
+}
 
 /**
  * Which preferences will we show?
  * @class app.views.preferencesView.PreferenceCollectionSubset
  */
-var PreferenceCollectionSubset = Backbone.Subset.extend({
-  constructor: function PreferenceCollectionSubset() {
-    Backbone.Subset.apply(this, arguments);
-  },
-  beforeInitialize: function(models, options) {
+class PreferenceCollectionSubset extends Backbone.Subset {
+  beforeInitialize(models, options) {
     var preferenceData = options.parent.get("preference_data");
     var modifiable = _.filter(preferenceData.get("value"), this.prefDataSieve);
     var keys = {};
@@ -882,84 +840,76 @@ var PreferenceCollectionSubset = Backbone.Subset.extend({
       keys[pd.id] = true;
     });
     this.keys = keys;
-  },
-  prefDataSieve: function(pd) {
+  }
+
+  prefDataSieve(pd) {
     return true;
-  },
-  sieve: function(preference) {
+  }
+
+  sieve(preference) {
     return this.keys[preference.id];
   }
-});
-
+}
 
 /**
  * The subset of preferences which allow a per-user override
  * @class app.views.preferencesView.UserPreferenceCollectionSubset
  * @extends app.views.preferencesView.PreferenceCollectionSubset
  */
-var UserPreferenceCollectionSubset = PreferenceCollectionSubset.extend({
-  constructor: function UserPreferenceCollectionSubset() {
-    PreferenceCollectionSubset.apply(this, arguments);
-  },
-  prefDataSieve: function(pd) {
+class UserPreferenceCollectionSubset extends PreferenceCollectionSubset {
+  prefDataSieve(pd) {
     return pd.allow_user_override !== undefined && Ctx.getCurrentUser().can(pd.allow_user_override);
   }
-});
-
+}
 
 /**
  * The subset of preferences which allow a per-discussion override
  * @class app.views.preferencesView.DiscussionPreferenceCollectionSubset
  * @extends app.views.preferencesView.PreferenceCollectionSubset
  */
-var DiscussionPreferenceCollectionSubset = PreferenceCollectionSubset.extend({
-  constructor: function DiscussionPreferenceCollectionSubset() {
-    PreferenceCollectionSubset.apply(this, arguments);
-  },
-  prefDataSieve: function(pd) {
+class DiscussionPreferenceCollectionSubset extends PreferenceCollectionSubset {
+  prefDataSieve(pd) {
     return pd.show_in_preferences !== false;
   }
-});
-
+}
 
 /**
  * The subset of preferences which allow a per-discussion override
  * @class app.views.preferencesView.GlobalPreferenceCollectionSubset
  * @extends app.views.preferencesView.PreferenceCollectionSubset
  */
-var GlobalPreferenceCollectionSubset = PreferenceCollectionSubset.extend({
-  constructor: function GlobalPreferenceCollectionSubset() {
-    PreferenceCollectionSubset.apply(this, arguments);
-  },
-  prefDataSieve: function(pd) {
+class GlobalPreferenceCollectionSubset extends PreferenceCollectionSubset {
+  prefDataSieve(pd) {
     // TODO
     return true;
-  },
-});
+  }
+}
 
 /**
  * The preferences window
  * @class app.views.preferencesView.PreferencesView
  */
-var PreferencesView = LoaderView.extend({
-  constructor: function PreferencesView() {
-    LoaderView.apply(this, arguments);
-  },
+class PreferencesView extends LoaderView.extend({
   template: "#tmpl-preferenceView",
+
   ui: {
       saveButton: "#js_savePreferences"
   },
+
   events: {
       "click @ui.saveButton": "save"
   },
+
   regions: {
     preferenceCollView: "#js_preferences",
     navigationMenuHolder: '.navigation-menu-holder'
-  },
-  initialize: function() {
+  }
+}) {
+  initialize() {
     this.setLoading(true);
-  },
-  onRender: function() {
+  }
+
+  onRender() {
     if (this.isLoading()) {
         return;
     }
@@ -968,8 +918,9 @@ var PreferencesView = LoaderView.extend({
         mainPrefWindow: this});
     this.showChildView("preferenceCollView", prefList);
     this.showChildView("navigationMenuHolder", this.getNavigationMenu());
-  },
-  storePreferences: function(prefs) {
+  }
+
+  storePreferences(prefs) {
     var prefDataArray = prefs.get("preference_data").get("value");
     var prefData = {};
     _.map(prefDataArray, function(pref) {
@@ -979,8 +930,9 @@ var PreferencesView = LoaderView.extend({
     this.preferenceData = prefData;
     this.setLoading(false);
     this.render();
-  },
-  save: function() {
+  }
+
+  save() {
     var that = this;
     var errors = [];
     var complete = 0;
@@ -1023,19 +975,15 @@ var PreferencesView = LoaderView.extend({
     }
     return false;
   }
-});
-
+}
 
 /**
  * The discussion preferences window
  * @class app.views.preferencesView.DiscussionPreferencesView
  * @extends app.views.preferencesView.PreferencesView
  */
-var DiscussionPreferencesView = PreferencesView.extend({
-  constructor: function DiscussionPreferencesView() {
-    PreferencesView.apply(this, arguments);
-  },
-  initialize: function() {
+class DiscussionPreferencesView extends PreferencesView {
+  initialize() {
     this.setLoading(true);
     var that = this;
     var collectionManager = new CollectionManager();
@@ -1043,56 +991,57 @@ var DiscussionPreferencesView = PreferencesView.extend({
         that.preferences = new DiscussionPreferenceCollectionSubset([], {parent: prefs});
         that.storePreferences(prefs);
     });
-  },
-  canSavePreference: function(id) {
+  }
+
+  canSavePreference(id) {
     var prefData = this.preferenceData[id];
     var neededPerm = prefData.modification_permission || Permissions.ADMIN_DISCUSSION;
     return Ctx.getCurrentUser().can(neededPerm);
-  },
-  getNavigationMenu: function() {
+  }
+
+  getNavigationMenu() {
     return new AdminNavigationMenu.discussionAdminNavigationMenu(
       {selectedSection: "discussion_preferences"});
   }
-});
+}
 
 /**
  * The preferences window for global (instance-level) preferences
  * @class app.views.preferencesView.GlobalPreferencesView
  * @extends app.views.preferencesView.PreferencesView
  */
-var GlobalPreferencesView = PreferencesView.extend({
-  constructor: function GlobalPreferencesView() {
+class GlobalPreferencesView extends PreferencesView {
+  constructor() {
+    super(...arguments);
     this.setLoading(true);
-    PreferencesView.apply(this, arguments);
-  },
-  initialize: function() {
+  }
+
+  initialize() {
     var that = this;
     var collectionManager = new CollectionManager();
     collectionManager.getGlobalPreferencePromise().then(function(prefs) {
         that.preferences = new GlobalPreferenceCollectionSubset([], {parent: prefs});
         that.storePreferences(prefs);
     });
-  },
-  canSavePreference: function(id) {
+  }
+
+  canSavePreference(id) {
     return Ctx.getCurrentUser().can(Permissions.SYSADMIN);
-  },
-  getNavigationMenu: function() {
+  }
+
+  getNavigationMenu() {
     return new AdminNavigationMenu.globalAdminNavigationMenu(
       {selectedSection: "global_preferences"});
   }
-});
-
+}
 
 /**
  * The user preferences window
  * @class app.views.preferencesView.UserPreferencesView
  * @extends app.views.preferencesView.PreferencesView
  */
-var UserPreferencesView = PreferencesView.extend({
-  constructor: function UserPreferencesView() {
-    PreferencesView.apply(this, arguments);
-  },
-  initialize: function() {
+class UserPreferencesView extends PreferencesView {
+  initialize() {
     this.setLoading(true);
     var that = this;
     var collectionManager = new CollectionManager();
@@ -1100,19 +1049,21 @@ var UserPreferencesView = PreferencesView.extend({
         that.preferences = new UserPreferenceCollectionSubset([], {parent: prefs});
         that.storePreferences(prefs);
     });
-  },
-  canSavePreference: function(id) {
+  }
+
+  canSavePreference(id) {
     var prefData = this.preferenceData[id];
     var neededPerm = prefData.allow_user_override;
     if (neededPerm === undefined) {  // vs null
        neededPerm = Permissions.P_READ;
     }
     return Ctx.getCurrentUser().can(neededPerm);
-  },
-  getNavigationMenu: function() {
+  }
+
+  getNavigationMenu() {
     return new UserNavigationMenu({selectedSection: "discussion_preferences"});
   }
-});
+}
 
 
 export default {

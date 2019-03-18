@@ -47,19 +47,12 @@ DeletedPublicationStates[PublicationStates.DELETED_BY_ADMIN] = PublicationStates
  * @extends app.models.base.BaseModel
  */
 
-var MessageModel = Base.Model.extend({
-  constructor: function MessageModel() {
-    Base.Model.apply(this, arguments);
-  },
+class MessageModel extends Base.Model.extend({
   /**
    * The url
    * @type {string}
    */
   urlRoot: Ctx.getApiUrl('posts'),
-
-  getApiV2Url: function() {
-    return Ctx.getApiV2DiscussionUrl('/posts/'+this.getNumericId());
-  },
 
   /**
    * Default values
@@ -88,9 +81,13 @@ var MessageModel = Base.Model.extend({
     moderation_text: null,
     moderated_on: null,
     moderator_comment: null
-  },
+  }
+}) {
+  getApiV2Url() {
+    return Ctx.getApiV2DiscussionUrl('/posts/'+this.getNumericId());
+  }
 
-  parse: function(rawModel) {
+  parse(rawModel) {
     if(rawModel.attachments !== undefined) {
       rawModel.attachments = new Attachment.Collection(rawModel.attachments,
           {parse: true,
@@ -105,12 +102,12 @@ var MessageModel = Base.Model.extend({
     }
     //console.log("Message Model parse() called, returning:", rawModel);
     return rawModel;
-  },
+  }
 
   /**
    * @returns {string} the subject, with any re: stripped
    */
-  getSubjectNoRe: function() {
+  getSubjectNoRe() {
     var subject = this.get('subject');
     var subjectText = subject ? subject.originalValue() : '';
     if (subjectText) {
@@ -119,29 +116,29 @@ var MessageModel = Base.Model.extend({
     else {
       return subjectText;
     }
-  },
+  }
 
   /**
    * @returns Array  Json objects representing idea_content_links
    */
-  getIdeaContentLinks: function(){
+  getIdeaContentLinks() {
     var idl = this.get('indirect_idea_content_links');
     if (!idl) {
       return [];
     }
 
     return idl;
-  },
+  }
 
-  hasIdeaContentLinks: function(){
+  hasIdeaContentLinks() {
     var idls = this.getIdeaContentLinks();
     return idls.length > 0;
-  },
+  }
 
   /**
    * @returns {number} the quantity of all descendants
    */
-  getDescendantsCount: function() {
+  getDescendantsCount() {
     var children = this.getChildren();
     var count = children.length;
 
@@ -150,36 +147,36 @@ var MessageModel = Base.Model.extend({
     });
 
     return count;
-  },
+  }
 
-  visitDepthFirst: function(visitor, includeHidden) {
+  visitDepthFirst(visitor, includeHidden) {
     var ancestry = [this.getId()];
     this.collection.visitDepthFirst(visitor, this, ancestry, includeHidden);
-  },
+  }
 
   /**
    * Return all direct children
    * @returns {MessageModel[]}
    */
-  getChildren: function() {
+  getChildren() {
     return this.collection.where({ parentId: this.getId() });
-  },
+  }
 
   /**
    * Return a promise to the parent message (if any)
    * Else a promise to null
    * @returns {Promise}
    */
-  getParentPromise: function() {
+  getParentPromise() {
       if (this.get('parentId')) {
         return this.collection.collectionManager.getMessageFullModelPromise(this.get('parentId'));
       }
       else {
         return Promise.resolve(null);
       }
-    },
+    }
 
-  getAncestorCount: function() {
+  getAncestorCount() {
       var parents = this.collection.where({ parentId: this.getId() });
       if (parents.length) {
         return parents[0].getAncestorCount() + 1
@@ -187,17 +184,17 @@ var MessageModel = Base.Model.extend({
       else {
         return 0;
       }
-    },
+    }
 
-  getParent: function(){
+  getParent() {
     return this.collection.where({parentId: this.get('parentId')});
-  },
+  }
 
   /**
    * Returns a promise to all segments in the annotator format
    * @returns {Object[]}
    */
-  getAnnotationsPromise: function() {
+  getAnnotationsPromise() {
     var that = this;
     return this.getExtractsPromise()
             .then(function(extracts) {
@@ -213,13 +210,13 @@ var MessageModel = Base.Model.extend({
             }
 
         );
-  },
+  }
 
   /**
    * Return all segments in the annotator format
    * @returns {Object[]}
    */
-  getExtractsPromise: function() {
+  getExtractsPromise() {
     var that = this;
     return this.collection.collectionManager.getAllExtractsCollectionPromise()
             .then(function(allExtractsCollection) {
@@ -230,12 +227,12 @@ var MessageModel = Base.Model.extend({
             }
 
         );
-  },
+  }
 
   /** 
    * Return a promise for the post's creator
    */
-  getCreatorPromise: function() {
+  getCreatorPromise() {
     var that = this;
 
     return this.collection.collectionManager.getAllUsersCollectionPromise()
@@ -245,12 +242,12 @@ var MessageModel = Base.Model.extend({
             console.error(e.statusText);
           });
       });
-  },
+  }
 
   /**
    * Return a promise for the post's moderator
    */
-  getModeratorPromise: function() {
+  getModeratorPromise() {
     var that = this;
 
     return this.collection.collectionManager.getAllUsersCollectionPromise()
@@ -260,12 +257,12 @@ var MessageModel = Base.Model.extend({
             console.error(e.statusText);
           });
       });
-  },
+  }
 
   /**
    * @event
    */
-  onAttrChange: function() {
+  onAttrChange() {
     this.save(null, {
       success: function(model, resp) {
             },
@@ -273,14 +270,14 @@ var MessageModel = Base.Model.extend({
         console.error('ERROR: onAttrChange', resp);
       }
     });
-  },
+  }
 
   /**
    * Set the `read` property
    * @param {boolean} value
    * @param jquery element
    */
-  setRead: function(value, target) {
+  setRead(value, target) {
     if(target) {
       target.removeClass('readUnreadIndicator').addClass('is-loading');
     }
@@ -312,16 +309,16 @@ var MessageModel = Base.Model.extend({
       },
       error: function(model, resp) {}
     });
-  },
+  }
 
-  validate: function(attrs, options) {
+  validate(attrs, options) {
     /**
      * check typeof variable
      * */
      
-  },
+  }
 
-  sync: function(method, model, options) {
+  sync(method, model, options) {
     console.log("message::sync() ", method, model, options);
     if ( method == "patch" ){ // for REST calls of type PATCH, we use APIv2 instead of APIv1
       console.log("we are in patch case");
@@ -330,9 +327,9 @@ var MessageModel = Base.Model.extend({
       return Backbone.sync(method, model, options2);
     }
     return Backbone.sync(method, model, options);
-  },
+  }
 
-  destroy: function(options){
+  destroy(options) {
     var errorCollection = options.errorCollection;
     if (errorCollection){
       //These models are never saved to the backend, and should never be deleted either
@@ -344,7 +341,7 @@ var MessageModel = Base.Model.extend({
       .then(function(){
         return Base.Model.prototype.destroy.call(that, options);
       });
-  },
+  }
 
   /*
     Override toJSON of the message model in order to ensure that
@@ -352,13 +349,13 @@ var MessageModel = Base.Model.extend({
     recursive read, as there is an attachment object which contains
     the message model.
    */
-  toJSON: function(options){
+  toJSON(options) {
     var old = Base.Model.prototype.toJSON.call(this, options);
     //Remove the attachments attribute, as there is a circular dependency
     delete old['attachments'];
     return old;
   }
-});
+}
 
 /**
  * Messages collection
@@ -366,10 +363,7 @@ var MessageModel = Base.Model.extend({
  * @extends app.models.base.BaseCollection
  */
 
-var MessageCollection = Base.Collection.extend({
-  constructor: function MessageCollection() {
-    Base.Collection.apply(this, arguments);
-  },
+class MessageCollection extends Base.Collection.extend({
   /**
    * The url
    * @type {string}
@@ -380,10 +374,10 @@ var MessageCollection = Base.Collection.extend({
    * The model
    * @type {MessageModel}
    */
-  model: MessageModel,
-
+  model: MessageModel
+}) {
   /** Our data is inside the posts array */
-  parse: function(response) {
+  parse(response) {
     if(response.posts !== undefined) {
       //APIV1
       return response.posts;
@@ -392,12 +386,12 @@ var MessageCollection = Base.Collection.extend({
       //APIV2 and socket
       return response;
     }
-  },
+  }
 
   /** Get the last synthesis
    * @returns Message.Model or null
    */
-  getLastSynthesisPost: function() {
+  getLastSynthesisPost() {
     var lastSynthesisPost = null;
     var synthesisMessages = this.where({'@type': Types.SYNTHESIS_POST});
     if (synthesisMessages.length > 0) {
@@ -408,14 +402,14 @@ var MessageCollection = Base.Collection.extend({
     }
 
     return lastSynthesisPost;
-  },
+  }
 
   /**
    * Traversal function.
    * @param visitor visitor function.  If visitor returns true, traversal continues
    * @returns {Object[]}
    */
-  visitDepthFirst: function(visitor, message, ancestry, includeHidden) {
+  visitDepthFirst(visitor, message, ancestry, includeHidden) {
     var that = this;
     if (ancestry === undefined) {
       ancestry = [];
@@ -450,8 +444,7 @@ var MessageCollection = Base.Collection.extend({
       return undefined;
     }
   }
-
-});
+}
 
 export default {
   Model: MessageModel,

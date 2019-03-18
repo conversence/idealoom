@@ -11,28 +11,32 @@ import _ from 'underscore';
 import Permissions from '../../utils/permissions.js';
 import Ctx from '../../common/context.js';
 
-var StatsModal = Backbone.Modal.extend({
-  constructor: function StatsModal() {
-    Backbone.Modal.apply(this, arguments);
-  },
-
+class StatsModal extends Backbone.Modal.extend({
   template: '#tmpl-discussionStatisticsModal',
   className: 'group-modal popin-wrapper',
   cancelEl: '.js_close',
   keyControl: false,
+
   events: {
     'click #get_stats': 'getStats',
     'click #get_participant_stats': 'getParticipantStats',
   },
-  initialize: function(options) {
+
+  participantFields: [
+    'posts', 'cumulative_posts', 'liking', 'cumulative_liking', 'liked', 'cumulative_liked',
+    'replies_received', 'cumulative_replies_received', 'active']
+}) {
+  initialize(options) {
     Ctx.setCurrentModalView(this);
-  },
-  serializeData: function() {
+  }
+
+  serializeData() {
     return {
       isDiscussionAdmin: Ctx.getCurrentUser().can(Permissions.ADMIN_DISCUSSION),
     };
-  },
-  doDownload: function(url, filename) {
+  }
+
+  doDownload(url, filename) {
     // TODO: This will probably fail in IE, see
     // http://stackoverflow.com/questions/13405129/javascript-create-and-save-file
     var el = this.$el;
@@ -47,8 +51,9 @@ var StatsModal = Backbone.Modal.extend({
     setTimeout(function() {
       el.find('#hidden_href').remove();
     }, 0);
-  },
-  addCommonStats: function(url) {
+  }
+
+  addCommonStats(url) {
     var separator = "?";
     var fields = this.$el.find('fieldset');
     var val = fields.children('#start_date').val();
@@ -72,8 +77,9 @@ var StatsModal = Backbone.Modal.extend({
       separator = "&";
     }
     return url;
-  },
-  checkDates: function() {
+  }
+
+  checkDates() {
     var fields = this.$el.find('fieldset');
     var startDate = fields.children('#start_date').val();
     var endDate = fields.children('#end_date').val();
@@ -81,8 +87,9 @@ var StatsModal = Backbone.Modal.extend({
       alert(_("The end date should be later than the start date"));
     }
     return (endDate > startDate);
-  },
-  getStats: function(ev) {
+  }
+
+  getStats(ev) {
     if (!this.checkDates()) {
       ev.preventDefault();
       return;
@@ -96,11 +103,9 @@ var StatsModal = Backbone.Modal.extend({
       alert(e);
     }
     ev.preventDefault();
-  },
-  participantFields: [
-    'posts', 'cumulative_posts', 'liking', 'cumulative_liking', 'liked', 'cumulative_liked',
-    'replies_received', 'cumulative_replies_received', 'active'],
-  getParticipantStats: function(ev) {
+  }
+
+  getParticipantStats(ev) {
     if (!this.checkDates()) {
       ev.preventDefault();
       return;
@@ -138,7 +143,7 @@ var StatsModal = Backbone.Modal.extend({
       alert(e);
     }
     ev.preventDefault();
-  },
-});
+  }
+}
 
 export default StatsModal;

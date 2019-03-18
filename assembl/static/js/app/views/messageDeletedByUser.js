@@ -17,12 +17,8 @@ import AgentViews from './agent.js';
 /**
  * @class app.views.message.MessageDeletedByUserView
  */
-var MessageDeletedByUserView = LoaderView.extend({
-  constructor: function MessageDeletedByUserView() {
-    LoaderView.apply(this, arguments);
-  },
+class MessageDeletedByUserView extends LoaderView.extend({
   className: 'message message-deleted',
-
   template: "#tmpl-messageDeletedByUser",
 
   ui: {
@@ -36,9 +32,9 @@ var MessageDeletedByUserView = LoaderView.extend({
   },
 
   subject: "",
-  body: i18n.gettext("This message has been deleted by its author."),
-
-  initialize: function(options) {
+  body: i18n.gettext("This message has been deleted by its author.")
+}) {
+  initialize(options) {
     var that = this;
     this.setLoading(true);
 
@@ -62,9 +58,9 @@ var MessageDeletedByUserView = LoaderView.extend({
         that.render();
       }
     });
-  },
+  }
 
-  renderAuthor: function() {
+  renderAuthor() {
     var agentAvatarView = new AgentViews.AgentAvatarView({
       model: this.creator
     });
@@ -73,15 +69,15 @@ var MessageDeletedByUserView = LoaderView.extend({
       model: this.creator
     });
     this.showChildView('name', agentNameView);
-  },
+  }
 
-  guardedRender: function(){
+  guardedRender() {
     if(!this.isDestroyed()) {
       this.render();
     }
-  },
+  }
 
-  onRender: function(){
+  onRender() {
     this.$el.attr("id", "message-" + this.model.get('@id'));
     
     if (this.isLoading()) {
@@ -95,13 +91,13 @@ var MessageDeletedByUserView = LoaderView.extend({
     this.$el.removeClass('unread').addClass('read');
 
     this.$(".message-subject").addClass('hidden');
-  },
+  }
 
-  loadAnnotations: function(){
+  loadAnnotations() {
     // empty, needed because called by messageList
-  },
+  }
 
-  serializeData: function() {
+  serializeData() {
     return {
       message: this.model,
       messageListView: this.messageListView,
@@ -119,8 +115,8 @@ var MessageDeletedByUserView = LoaderView.extend({
       user_is_connected: !Ctx.getCurrentUser().isUnknownUser(),
       read: true // we could use this.model.get('read') but read/unread status is not very important for deleted messages and we don't want to emphasize on this message if it's unread
     };
-  },
-});
+  }
+}
 
 export default MessageDeletedByUserView;
 

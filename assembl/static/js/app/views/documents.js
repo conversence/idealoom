@@ -15,22 +15,18 @@ import i18n from '../utils/i18n.js';
 import Raven from 'raven-js';
 
 
-var AbstractDocumentView = Marionette.View.extend({
-  constructor: function AbstractDocumentView(){
-    Marionette.View.apply(this, arguments);
-  },
-
-  className: 'embeddedFile',
-
-  initialize: function(options){
+class AbstractDocumentView extends Marionette.View.extend({
+  className: 'embeddedFile'
+}) {
+  initialize(options) {
     if (!this.model) {
       throw new Error('file needs a model');
     }
     this.errorState = false;
     this.uri = this.model.get('external_url') ? this.model.get('external_url') : this.model.get('uri');
-  },
+  }
 
-  doOembed: function() {
+  doOembed() {
     //console.log (this.model.get('external_url'));
     var that = this;
     this.$el.oembed(this.uri, {
@@ -70,9 +66,9 @@ var AbstractDocumentView = Marionette.View.extend({
       },
       timeout: 5000
     });
-  },
+  }
 
-  doLocalEmbed: function(){
+  doLocalEmbed() {
     if (this.model.isImageType()){
       //Before the model is saved, this.uri is not updated. So update everytime that there is a render!
       this.uri = this.model.get('external_url');
@@ -88,23 +84,23 @@ var AbstractDocumentView = Marionette.View.extend({
     else {
       this.onRenderOembedFail();
     }
-  },
+  }
 
-  processEmbedType: function(){
+  processEmbedType() {
     if (this.model.isFileType()){
       this.doLocalEmbed();
     }
     else {
       this.doOembed();
     }
-  },
+  }
 
-  processErrorView: function(){
+  processErrorView() {
     var errorMessage = i18n.sprintf(i18n.gettext("Sorry, we have failed to upload your file \"%s\". Please try again."), this._getName());
     this.$el.html("<span class='error-message'>"+ errorMessage +"</span>");
-  },
+  }
 
-  onRender: function() {
+  onRender() {
     if (this.errorState){
       this.processErrorView();
     }
@@ -112,19 +108,19 @@ var AbstractDocumentView = Marionette.View.extend({
       this.processEmbedType();
     }
 
-  },
+  }
 
   /**
    * Override to alter the Oembed failure condition
    */
-  onRenderOembedFail: function(){
+  onRenderOembedFail() {
     this.$el.html("<a href="+ this.uri + " target='_blank'>"+ this._getName() + "</a>");
-  },
+  }
 
   /**
    * @param {boolean} sendError: Send a Raven report or not
    */
-  _getName: function(sendError){
+  _getName(sendError) {
     if (this.model.isFileType()){
       var fileName = this.model.get('title');
       if (!fileName){
@@ -142,28 +138,22 @@ var AbstractDocumentView = Marionette.View.extend({
       return this.uri;
     }
   }
+}
 
-});
-
-
-var DocumentView = AbstractDocumentView.extend({
-  constructor: function DocumentView() {
-    AbstractDocumentView.apply(this, arguments);
-  },
-
-  template: '#tmpl-fileEmbed',
-
-  initialize: function(options){
+class DocumentView extends AbstractDocumentView.extend({
+  template: '#tmpl-fileEmbed'
+}) {
+  initialize(options) {
     AbstractDocumentView.prototype.initialize.call(this, options);
-  },
+  }
 
-  serializeData: function() {
+  serializeData() {
     return {
       url: this.uri
     }
-  },
+  }
 
-  onRender: function(){
+  onRender() {
     if (Ctx.debugOembed){ console.log("[doingOembed] uri:", this.uri); }
     if (!this.uri){
       console.error("[DocumentView Failed] uri does not exist for model id " + this.model.id +
@@ -171,29 +161,24 @@ var DocumentView = AbstractDocumentView.extend({
     }
     AbstractDocumentView.prototype.onRender.call(this);
   }
-});
+}
 
-
-var FileView = AbstractDocumentView.extend({
-  constructor: function FileView(){
-    AbstractDocumentView.apply(this, arguments);
-  },
-
-  template: "#tmpl-fileUploadEmbed",
-
-  initialize: function(options){
+class FileView extends AbstractDocumentView.extend({
+  template: "#tmpl-fileUploadEmbed"
+}) {
+  initialize(options) {
     AbstractDocumentView.prototype.initialize.call(this, options);
-  },
+  }
 
-  serializeData: function(){
+  serializeData() {
     return {
       name: this.model.get('title'),
       url: this.uri,
       percent: null
     }
-  },
+  }
 
-  onRender: function(){
+  onRender() {
     if (Ctx.debugOembed){ console.log("[doingOembed] uri:", this.uri); }
     if (!this.uri){
       console.error("[FileView Failed] uri does not exist for model id " + this.model.id +
@@ -201,21 +186,16 @@ var FileView = AbstractDocumentView.extend({
     }
     AbstractDocumentView.prototype.onRender.call(this);
   }
-});
+}
 
-
-var AbstractEditView =  AbstractDocumentView.extend({
-  constructor: function AbstractEditView(){
-    AbstractDocumentView.apply(this, arguments);
-  },
-
+class AbstractEditView extends AbstractDocumentView.extend({
   template: "#tmpl-loader",
 
   modelEvents: {
     'progress': 'onShowProgress'
-  },
-
-  initialize: function(options){
+  }
+}) {
+  initialize(options) {
     
     AbstractDocumentView.prototype.initialize.call(this, options);
     this.showProgress = false;
@@ -272,92 +252,83 @@ var AbstractEditView =  AbstractDocumentView.extend({
         that.initalizeCallback();
       }
     }
-  },
+  }
 
-  initalizeCallback: function(model){
+  initalizeCallback(model) {
     /*
       Override in subclasses to override what the view will initalize after
       saving its model to the backend.
      */
     // this.$(window).on("beforeunload", function(ev){this.onBeforeUnload(ev)});
     throw new Error("Cannot instantiate an AbstractDocumentEditView");
-  },
+  }
 
   /**
    * Override in child classes 
    */
-  onShowProgress: function(ev){
+  onShowProgress(ev) {
     if (this.showProgress) {
       // console.log("Show the progress of the file upload in view with event", ev);
     }
   }
-});
+}
 
-var DocumentEditView = AbstractEditView.extend({
-  constructor: function DocumentEditView(){
-    AbstractEditView.apply(this, arguments);
-  },
-
-  template: "#tmpl-fileEmbed",
-
-  initialize: function(options){
+class DocumentEditView extends AbstractEditView.extend({
+  template: "#tmpl-fileEmbed"
+}) {
+  initialize(options) {
     AbstractEditView.prototype.initialize.call(this, options);
-  },
+  }
 
-  initalizeCallback: function(){
+  initalizeCallback() {
     if (!this.isDestroyed()){
       this.render();
     }
-  },
+  }
 
-  serializeData: function(){
+  serializeData() {
     return {
       url: this.uri
     }
   }
+}
 
-});
-
-var FileEditView = AbstractEditView.extend({
-  constructor: function FileEditView(){
-    AbstractEditView.apply(this, arguments);
-  },
-
-  template: "#tmpl-fileUploadEmbed",
-
-  initalize: function(options){
+class FileEditView extends AbstractEditView.extend({
+  template: "#tmpl-fileUploadEmbed"
+}) {
+  initalize(options) {
     AbstractEditView.prototype.initalize.call(this, options);
-  },
+  }
 
-  initalizeCallback: function(){
+  initalizeCallback() {
     this.uploadComplete = true;
     this.uri = this.model.get('external_url');
     if (!this.isDestroyed()){
       this.render();
     }
-  },
+  }
 
-  serializeData: function(){
+  serializeData() {
     return {
       name: this.model.get('title'),
       url: this.uploadComplete ? this.uri : "javascript:void(0)",
       percent: this.percentComplete
     }
-  },
+  }
 
-  onShowProgress: function(ev){
+  onShowProgress(ev) {
     // console.log("FileEditView progress bar has been made!", ev);
     this.percentComplete = ~~(ev * 100); //float -> integer
     if (!this.isDestroyed()){
       this.render();
     }
-  },
+  }
 
   /*
     This is poorly done. It overrides the current template. Want to be using
     the template logic here to maintain flexibility and keeping DRY
    */
-  onRenderOembedFail: function(){
+  onRenderOembedFail() {
     var string = "<a href="+ this.uri + " target='_blank'>"+ this._getName() + "</a>";
     if (this.percentComplete){
       this.$el.html(string + " (100%)");
@@ -365,9 +336,9 @@ var FileEditView = AbstractEditView.extend({
     else { 
       this.$el.html(string);
     }
-  },
+  }
 
-  doLocalEmbed: function(){
+  doLocalEmbed() {
     if (this.model.isImageType()){
       //Before the model is saved, this.uri is not updated. So update everytime that there is a render!
       this.uri = this.model.get('external_url');
@@ -380,9 +351,8 @@ var FileEditView = AbstractEditView.extend({
     else {
       this.onRenderOembedFail();
     }
-  },
-
-});
+  }
+}
 
 
 export default {

@@ -16,17 +16,13 @@ import Ctx from '../../common/context.js';
 
 
 
-var cKEditorLSField = CKEditorField.extend({
-  constructor: function cKEditorLSField() {
-    CKEditorField.apply(this, arguments);
-  },
-
+class cKEditorLSField extends CKEditorField {
   /**
    * CkLSeditor default configuration
    * @type {object}
    */
 
-  initialize: function(options) {
+  initialize(options) {
     if (this.model === null) {
       throw new Error('EditableField needs a model');
     }
@@ -35,10 +31,10 @@ var cKEditorLSField = CKEditorField.extend({
       throw new Error('EditableField needs translationData');
     }
     this.translationData = options.translationData;
-    CKEditorField.prototype.initialize.apply(this, arguments)
-  },
+    super.initialize(...arguments);
+  }
 
-  getTextValue: function() {
+  getTextValue() {
     var ls = this.model.get(this.modelProp);
     if (!ls) {
       return '';
@@ -48,9 +44,9 @@ var cKEditorLSField = CKEditorField.extend({
       return ls.forInterfaceValue() || '';
     }
     return ls.bestValue(this.translationData);
-  },
+  }
 
-  setTextValue: function(text) {
+  setTextValue(text) {
     var lse;
     var attrs = {};
     var ls = this.model.get(this.modelProp);
@@ -75,32 +71,32 @@ var cKEditorLSField = CKEditorField.extend({
         console.error('ERROR: saveEdition', resp.responseJSON);
       },
     });
-  },
-  createModal: function() {
-    return new CkeditorLSFieldInModal({model:this.model, modelProp:this.modelProp, canEdit:this.canEdit, translationData: this.translationData});
-  },
-});
+  }
 
-var CkeditorLSFieldInModal = CKEditorField.modalClass.extend({
-  constructor: function CkeditorLSFieldInModal(){
-    CKEditorField.modalClass.apply(this, arguments);
-  },
-  initialize: function(options) {
+  createModal() {
+    return new CkeditorLSFieldInModal({model:this.model, modelProp:this.modelProp, canEdit:this.canEdit, translationData: this.translationData});
+  }
+}
+
+class CkeditorLSFieldInModal extends CKEditorField.modalClass {
+  initialize(options) {
     this.model = options.model;
     this.modelProp = options.modelProp;
     this.canEdit = options.canEdit;
     this.autosave = options.autosave;
     this.translationData = options.translationData;
-  },
-  serializeData: function() {
+  }
+
+  serializeData() {
     // this assumes the model is an idea, which should now be another case.
     // Probably used for other objects like announcements.
     // REVISIT. Probably use a substring of getTextValue.
     return {
       modal_title: this.model.getShortTitleSafe(this.translationData),
     };
-  },
-  onRender: function(){
+  }
+
+  onRender() {
     var ckeditorField = new cKEditorLSField({
       model: this.model,
       modelProp: this.modelProp,
@@ -111,7 +107,7 @@ var CkeditorLSFieldInModal = CKEditorField.modalClass.extend({
     });
     this.$(this.ui.body).html(ckeditorField.render().el);
   }
-});
+}
 
 
 export default cKEditorLSField;

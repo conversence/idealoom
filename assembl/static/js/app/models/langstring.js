@@ -93,19 +93,14 @@ var LocaleUtils = {
     return this.translatorInfo["translation_notice_url"] || "";
   },
 };
+
 /**
  * Lang string entry Model. A string in a given language. Many of those form a LangString
  * Frontend model for :py:class:`assembl.models.langstrings.LangStringEntry`
  * @class app.models.langstring.LangStringEntry
  * @extends app.models.base.BaseModel
  */
-var LangStringEntry = Base.Model.extend({
-  /**
-   * @function app.models.langstrings.LangStringEntry.constructor
-   */
-  constructor: function LangStringEntry() {
-    Base.Model.apply(this, arguments);
-  },
+class LangStringEntry extends Base.Model.extend({
   /**
    * Defaults
    * @type {Object}
@@ -116,142 +111,152 @@ var LangStringEntry = Base.Model.extend({
     "error_count": 0,
     "error_code": undefined,
     "value": ""
-  },
+  }
+}) {
   /**
    * @function app.models.langstrings.LangStringEntry.isMachineTranslation
    */
-  isMachineTranslation: function() {
+  isMachineTranslation() {
     return this.get("@language").indexOf("-x-mtfrom-") > 0;
-  },
+  }
+
   /**
    * @function app.models.langstrings.LangStringEntry.original
    */
-  original: function() {
+  original() {
     // shortcut for original
     if (this.collection !== undefined && this.collection.langstring !== undefined) {
         return this.collection.langstring.original();
     }
     // WHY do we get here?
     return this;
-  },
+  }
+
   /**
    * @function app.models.langstrings.LangStringEntry.langstring
    */
-  langstring: function() {
+  langstring() {
     return this.collection.langstring;
-  },
+  }
+
   /**
    * @function app.models.langstrings.LangStringEntry.value
    */
-  value: function() {
+  value() {
     return this.get("value");
-  },
+  }
+
   /**
    * @function app.models.langstrings.LangStringEntry.getLocaleValue
    */
-  getLocaleValue: function() {
+  getLocaleValue() {
     return this.get('@language');
-  },
+  }
+
   /**
    * @function app.models.langstrings.LangStringEntry.getBaseLocale
    */
-  getBaseLocale: function() {
+  getBaseLocale() {
     var locale = this.get('@language');
     return locale.split("-x-mtfrom-")[0];
-  },
+  }
+
   /**
    * @function app.models.langstrings.LangStringEntry.getBaseLocale
    */
-  getTranslatedFromLocale: function() {
+  getTranslatedFromLocale() {
     if (this.isMachineTranslation()) {
       var locale = this.get('@language');
       return locale.split("-x-mtfrom-")[1];
     }
-  },
+  }
+
   /**
    * @function app.models.langstrings.LangStringEntry.getOriginalLocale
    */
-  getOriginalLocale: function() {
+  getOriginalLocale() {
     if (this.isMachineTranslation()) {
       var locale = this.get('@language');
       return locale.split("-x-mtfrom-")[1];
     } else {
         return this.getBaseLocale();
     }
-  },
+  }
+
   /**
    * @function app.models.langstrings.LangStringEntry.localeForService
    */
-  localeForService: function() {
+  localeForService() {
     return LocaleUtils.localeAsTranslationService(this.get("@language"));
-  },
+  }
+
   /**
    * @function app.models.langstrings.LangStringEntry.applyFunction
    */
-  applyFunction: function(func) {
+  applyFunction(func) {
     return new LangStringEntry({
       value: func(this.get("value")),
       "@language": this.get("@language")
     });
-  },
+  }
 
-  isEmptyStripped: function () {
+  isEmptyStripped() {
     var value = this.get("value");
     if (!value) {
       return false;
     }
     value = Ctx.stripHtml(value);
     return !value;
-  },
+  }
+}
 
-});
 /**
  * Lang string entry collection
  * @class app.models.langstring.LangStringEntryCollection
  * @extends app.models.base.BaseCollection
  */
-var LangStringEntryCollection = Base.Collection.extend({
-  /**
-   * @function app.models.langstrings.LangStringEntryCollection.constructor
-   */
-  constructor: function LangStringEntryCollection() {
-    Base.Collection.apply(this, arguments);
-  },
-  /**
-   * @member {string} app.models.langstrings.LangStringEntryCollection.url
-   */
-  url: function() {
-    return this.langstring.url() + "/entries";
-  },
+class LangStringEntryCollection extends Base.Collection.extend({
   /**
    * The model
    * @type {Account}
    */
-  model: LangStringEntry,
+  model: LangStringEntry
+}) {
+  /**
+   * @member {string} app.models.langstrings.LangStringEntryCollection.url
+   */
+  url() {
+    return this.langstring.url() + "/entries";
+  }
+
   /**
    * @function app.models.langstrings.LangStringEntryCollection.initialize
    */
-  initialize: function(models, options) {
+  initialize(models, options) {
     this.langstring = options ? options.langstring : null;
   }
-});
+}
+
 /**
  * Lang string model. A multilingual string, composed of many LangStringEntry
  * Frontend model for :py:class:`assembl.models.langstrings.LangString`
  * @class app.models.langstring.LangString
  * @extends app.models.base.BaseModel
  */
-var LangString = Base.Model.extend({
+class LangString extends Base.Model.extend({
   /**
-   * @function app.models.langstrings.LangString.constructor
+   * Defaults
+   * @type {Object}
    */
-  constructor: function LangString() {
-    Base.Model.apply(this, arguments);
-  },
+  defaults: {
+    "@type": Types.LANGSTRING,
+    entries: []
+  }
+}) {
   /**
    * @function app.models.langstrings.LangString.parse
    */
-  parse: function(rawModel, options) {
+  parse(rawModel, options) {
     if ( _.isString(rawModel) ){
       var s = rawModel;
       rawModel = new LangString({
@@ -270,35 +275,28 @@ var LangString = Base.Model.extend({
       rawModel.entries = new LangStringEntryCollection(rawModel.entries, {parse: true});
     }
     return rawModel;
-  },
+  }
 
   /**
    * @member {string} app.models.langstrings.LangString.url
    */
-  url: function() {
+  url() {
     return Ctx.getApiV2Url("LangString") + "/" + this.getNumericId();
-  },
+  }
 
   /**
    * @function app.models.langstrings.LangString.initialize
    */
-  initialize: function(attributes, options) {
+  initialize(attributes, options) {
     if (attributes && attributes.entries !== undefined) {
       attributes.entries.langstring = this;
     }
-  },
-  /**
-   * Defaults
-   * @type {Object}
-   */
-  defaults: {
-    "@type": Types.LANGSTRING,
-    entries: []
-  },
+  }
+
   /**
    * @function app.models.langstrings.LangString.original
    */
-  original: function() {
+  original() {
     var originals = this.get("entries").filter(function(e) {return !e.isMachineTranslation();});
     if ( originals.length === 1 ){
       return originals[0];
@@ -315,7 +313,8 @@ var LangString = Base.Model.extend({
         "@language": "zxx"
       });
     }
-  },
+  }
+
   /**
    * Determines the best body string to use according to various settings
    * Get the best langStringEntry among those available using user prefs.
@@ -330,7 +329,7 @@ var LangString = Base.Model.extend({
    * @param  {boolean}                          for_interface   To be used in interface, prefer discussion to user.
    * @returns {LangStringEntry}
    */
-  bestOf: function(available, langPrefs, filter_errors, for_interface) {
+  bestOf(available, langPrefs, filter_errors, for_interface) {
     var i;
     var entry;
     var commonLenF;
@@ -392,62 +391,68 @@ var LangString = Base.Model.extend({
     }
     // or first entry
     return available[0];
-  },
+  }
+
   /**
    * @function app.models.langstrings.LangString.best
    */
-  best: function(langPrefs) {
+  best(langPrefs) {
     return this.bestOf(this.get("entries").models, langPrefs);
-  },
+  }
+
   /**
    * @function app.models.langstrings.LangString.bestValue
    */
-  bestValue: function(langPrefs) {
+  bestValue(langPrefs) {
     return this.best(langPrefs).get("value");
-  },
+  }
+
   /**
    * Determines the best value, favouring interface over user prefs.
    * @function app.models.langstrings.LangString.bestValueInterface
    */
-  bestValueInterface: function(langPrefs) {
+  bestValueInterface(langPrefs) {
     return this.bestOf(this.get("entries").models, langPrefs, false, true).get("value");
-  },
+  }
+
   /**
    * Find the langstringEntry for a given language
    * @function app.models.langstrings.LangString.forLanguage
    */
-  forLanguage: function(lang) {
+  forLanguage(lang) {
     return this.get("entries").models.find(function (lse) {
       return lse.get("@language") == lang;
     });
-  },
-  /**
-   * Find the langstringEntry for the current interface, irrespective of user prefs
-   * @function app.models.langstrings.LangString.forInterface
-   */
-  forInterface: function() {
-    return this.forLanguage(Ctx.getLocale());
-  },
+  }
 
   /**
    * Find the langstringEntry for the current interface, irrespective of user prefs
    * @function app.models.langstrings.LangString.forInterface
    */
-  forInterfaceValue: function() {
+  forInterface() {
+    return this.forLanguage(Ctx.getLocale());
+  }
+
+  /**
+   * Find the langstringEntry for the current interface, irrespective of user prefs
+   * @function app.models.langstrings.LangString.forInterface
+   */
+  forInterfaceValue() {
     var lse = this.forInterface();
     return lse? lse.get('value') : null;
-  },
+  }
 
   /**
    * @function app.models.langstrings.LangString.originalValue
    */
-  originalValue: function() {
+  originalValue() {
     return this.original().get("value");
-  },
+  }
+
   /**
    * @function app.models.langstrings.LangString.bestWithErrors
    */
-  bestWithErrors: function(langPrefs, filter_errors) {
+  bestWithErrors(langPrefs, filter_errors) {
     if (!langPrefs) {
       return {
         entry: this.original(),
@@ -463,11 +468,12 @@ var LangString = Base.Model.extend({
       entry: entry,
       error: error_code
     };
-  },
+  }
+
   /**
    * @function app.models.langstrings.LangString.applyFunction
    */
-  applyFunction: function(func) {
+  applyFunction(func) {
     var newEntries = this.get("entries").map(function(lse) {
       return lse.applyFunction(func);
     });
@@ -475,19 +481,19 @@ var LangString = Base.Model.extend({
       "@id": this.id,
       entries: new LangStringEntryCollection(newEntries)
     });
-  },
+  }
 
-  isEmptyStripped: function(langPrefs) {
+  isEmptyStripped(langPrefs) {
     var best = this.best(langPrefs);
     return !best || best.isEmptyStripped();
-  },
+  }
 
   /**
    * Class method (call on prototype)
    * Initialize a langstring from a {locale: string} dictionary
    * @function app.models.langstrings.LangString.initFromDict
    */
-  initFromDict: function(strdict) {
+  initFromDict(strdict) {
     var entries = this.get('entries');
     if (_.isArray(entries) || !_.isObject(entries)) {
       entries = new LangStringEntryCollection(entries, {parse: true});
@@ -501,9 +507,8 @@ var LangString = Base.Model.extend({
         }));
       });
     }
-  },
-
-});
+  }
+}
 
 LangStringEntry.empty = new LangStringEntry({
   value: '',
@@ -519,33 +524,29 @@ LangString.empty = new LangString({
  * @class app.models.langstring.LangStringCollection
  * @extends app.models.base.BaseCollection
  */
-var LangStringCollection = Base.Collection.extend({
-  /**
-   * @function app.models.langstrings.LangStringCollection.constructor
-   */
-  constructor: function LangStringCollection() {
-    Base.Collection.apply(this, arguments);
-  },
-  /**
-   * @function app.models.langstrings.LangStringCollection.parse
-   */
-  parse: function(rawModel, options) {
-    rawModel.entries = new LangStringEntryCollection(rawModel.entries, {
-        parse: true,
-        langstring: this
-    });
-    return rawModel;
-  },
+class LangStringCollection extends Base.Collection.extend({
   /**
    * The model
    * @type {LangString}
    */
   model: LangString,
+
   /**
    * @member {string} app.models.langstrings.LangStringCollection.url
    */
-  url: Ctx.getApiV2Url("LangString"),
-});
+  url: Ctx.getApiV2Url("LangString")
+}) {
+  /**
+   * @function app.models.langstrings.LangStringCollection.parse
+   */
+  parse(rawModel, options) {
+    rawModel.entries = new LangStringEntryCollection(rawModel.entries, {
+        parse: true,
+        langstring: this
+    });
+    return rawModel;
+  }
+}
 
 export default {
   Model: LangString,

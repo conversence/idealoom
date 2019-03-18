@@ -8,11 +8,10 @@ import Marionette from 'backbone.marionette';
 import groupSpec from '../models/groupSpec.js';
 import Ctx from '../common/context.js';
 
-var storage = Marionette.Object.extend({
-
-  _store: window.localStorage,
-
-  getStoragePrefix: function() {
+class storage extends Marionette.Object.extend({
+  _store: window.localStorage
+}) {
+  getStoragePrefix() {
     var interfaceType = Ctx.getCurrentInterfaceType();
     var storagePrefix;
     if (interfaceType === Ctx.InterfaceTypes.SIMPLE) {
@@ -26,9 +25,9 @@ var storage = Marionette.Object.extend({
     }
 
     return storagePrefix;
-  },
+  }
 
-  bindGroupSpecs: function(groupSpecs) {
+  bindGroupSpecs(groupSpecs) {
     var that = this;
     this.groupSpecs = groupSpecs;
     this.listenTo(groupSpecs, 'add', this.addGroupSpec);
@@ -38,37 +37,36 @@ var storage = Marionette.Object.extend({
       that.listenTo(m.attributes.panels, 'add remove reset change', that.saveGroupSpecs);
       that.listenTo(m.attributes.states, 'add remove reset change', that.saveGroupSpecs);
     });
-  },
+  }
 
-  addGroupSpec: function(groupSpec, groupSpecs) {
+  addGroupSpec(groupSpec, groupSpecs) {
     this.listenTo(groupSpec.attributes.panels, 'add remove reset change', this.saveGroupSpecs);
     this.saveGroupSpecs();
-  },
+  }
 
-  removeGroupSpec: function(groupSpec, groupSpecs) {
+  removeGroupSpec(groupSpec, groupSpecs) {
     this.stopListening(groupSpec);
     this.saveGroupSpecs();
-  },
+  }
 
-  saveGroupSpecs: function() {
+  saveGroupSpecs() {
     //console.log("saveGroupSpecs:", JSON.stringify(this.groupSpecs));
     this._store.setItem(this.getStoragePrefix() + 'groupItems', JSON.stringify(this.groupSpecs));
     this._store.setItem(this.getStoragePrefix() + 'lastViewSave', Date.now());
-  },
+  }
 
-  getDateOfLastViewSave: function() {
+  getDateOfLastViewSave() {
     var lastSave = this._store.getItem(this.getStoragePrefix() + 'lastViewSave');
     if (lastSave) {
       return new Date(parseInt(lastSave));
     }
-  },
+  }
 
-  getStorageGroupItem: function() {
+  getStorageGroupItem() {
     if (this._store.getItem(this.getStoragePrefix() + 'groupItems')) {
       return JSON.parse(this._store.getItem(this.getStoragePrefix() + 'groupItems'));
     }
   }
-
-})
+}
 
 export default new storage();

@@ -15,33 +15,29 @@ import Ctx from '../common/context.js';
  * So put it in "value" attribute of this model.
  * @class app.models.discussionPreference.DiscussionIndividualPreferenceModel
  */
-var DiscussionIndividualPreferenceModel = Backbone.Model.extend({
-  /**
-   * @function app.models.discussionPreference.DiscussionIndividualPreferenceModel.constructor
-   */
-  constructor: function DiscussionIndividualPreferenceModel() {
-    Backbone.Model.apply(this, arguments);
-  },
+class DiscussionIndividualPreferenceModel extends Backbone.Model {
   /**
    * @function app.models.discussionPreference.DiscussionIndividualPreferenceModel.parse
    */
-  parse: function(resp, options) {
+  parse(resp, options) {
     this._subcollectionCache = undefined;
     if (resp.value !== undefined && resp.id !== undefined)
       return resp;
     return {value: resp};
-  },
+  }
+
   /**
    * @function app.models.discussionPreference.DiscussionIndividualPreferenceModel.toJSON
    */
-  toJSON: function(options) {
+  toJSON(options) {
     return _.clone(this.get("value"));
-  },
+  }
+
   /**
    * @function app.models.discussionPreference.DiscussionIndividualPreferenceModel.valueAsCollection
    * The preference is a list or dict of something. Return a collection of that something, or dict items.
    */
-  valueAsCollection: function(preferenceData, as_list) {
+  valueAsCollection(preferenceData, as_list) {
     // MISSING: Better handling of default_item_X and default_Key...
     if (this._subcollectionCache === undefined) {
       var collection;
@@ -87,32 +83,26 @@ var DiscussionIndividualPreferenceModel = Backbone.Model.extend({
       this._subcollectionCache = collection;
     }
     return this._subcollectionCache;
-  },
-});
-
+  }
+}
 
 /**
  * Subcase: pref is a dictionary, so we can use normal backbone
  * @class app.models.discussionPreference.DiscussionPreferenceDictionaryModel
  */
-var DiscussionPreferenceDictionaryModel = Backbone.Model.extend({
-  /**
-   * @function app.models.discussionPreference.DiscussionPreferenceDictionaryModel.constructor
-   */
-  constructor: function DiscussionPreferenceDictionaryModel() {
-    Backbone.Model.apply(this, arguments);
-  },
+class DiscussionPreferenceDictionaryModel extends Backbone.Model {
   /**
    * @function app.models.discussionPreference.DiscussionPreferenceDictionaryModel.url
    */
-  url: function() {
+  url() {
     return Ctx.getApiV2DiscussionUrl("settings/"+this.id);
-  },
+  }
+
   /**
    * @function app.models.discussionPreference.DiscussionIndividualPreferenceModel.valueAsCollection
    * The preference is a list of something. Return a collection of that something.
    */
-  valueAsCollection: function() {
+  valueAsCollection() {
     if (this._subcollectionCache !== undefined) {
       return this._subcollectionCache;
     }
@@ -134,102 +124,69 @@ var DiscussionPreferenceDictionaryModel = Backbone.Model.extend({
     });
     this._subcollectionCache = collection;
     return collection;
-  },
-});
-
+  }
+}
 
 /**
  * @class app.models.discussionPreference.DiscussionPreferenceSubCollection
  */
-var DiscussionPreferenceSubCollection = Backbone.Collection.extend({
-  /**
-   * @function app.models.discussionPreference.DiscussionPreferenceSubCollection.constructor
-   */
-  constructor: function DiscussionPreferenceSubCollection() {
-    Backbone.Collection.apply(this, arguments);
-  },
+class DiscussionPreferenceSubCollection extends Backbone.Collection.extend({
   model: DiscussionIndividualPreferenceModel
-});
-
+}) {}
 
 /**
  * @class app.models.discussionPreference.PreferenceCollection
  */
-var PreferenceCollection = Backbone.Collection.extend({
-  /**
-   * @function app.models.discussionPreference.DiscussionPreferenceCollection.constructor
-   */
-  constructor: function DiscussionPreferenceCollection() {
-    Backbone.Collection.apply(this, arguments);
-  },
-  model: DiscussionIndividualPreferenceModel,
+class PreferenceCollection extends Backbone.Collection.extend({
+  model: DiscussionIndividualPreferenceModel
+}) {
   /**
    * @function app.models.discussionPreference.DiscussionPreferenceCollection.parse
    */
-  parse: function(resp, options) {
+  parse(resp, options) {
     // does this go through model.parse afterwards? That would be trouble.
     var preference_data = resp.preference_data;
     return _.map(preference_data, function(pref_data) {
       var id = pref_data.id;
       return {id: id, value: resp[id]};
     });
-  },
+  }
+
   /**
    * @function app.models.discussionPreference.DiscussionPreferenceCollection.toJSON
    */
-  toJSON: function(options) {
+  toJSON(options) {
     var prefs = {};
     this.models.map(function(m) {
       prefs[m.id] = m.toJson(options);
     });
     return prefs;
-  },
-});
+  }
+}
 
 /**
  * @class app.models.discussionPreference.DiscussionPreferenceCollection
  * @extends app.models.discussionPreference.PreferenceCollection
  */
-var DiscussionPreferenceCollection = PreferenceCollection.extend({
-  /**
-   * @function app.models.discussionPreference.DiscussionPreferenceCollection.constructor
-   */
-  constructor: function DiscussionPreferenceCollection() {
-    PreferenceCollection.apply(this, arguments);
-  },
-  url: Ctx.getApiV2DiscussionUrl("settings"),
-});
-
+class DiscussionPreferenceCollection extends PreferenceCollection.extend({
+  url: Ctx.getApiV2DiscussionUrl("settings")
+}) {}
 
 /**
  * @class app.models.discussionPreference.DiscussionPreferenceCollection
  * @extends app.models.discussionPreference.PreferenceCollection
  */
-var GlobalPreferenceCollection = PreferenceCollection.extend({
-  /**
-   * @function app.models.discussionPreference.DiscussionPreferenceCollection.constructor
-   */
-  constructor: function GlobalPreferenceCollection() {
-    PreferenceCollection.apply(this, arguments);
-  },
-  url: Ctx.getApiV2Url(Types.PREFERENCES + "/default"),
-});
-
+class GlobalPreferenceCollection extends PreferenceCollection.extend({
+  url: Ctx.getApiV2Url(Types.PREFERENCES + "/default")
+}) {}
 
 /**
  * @class app.models.discussionPreference.UserPreferenceRawCollection
  * @extends app.models.discussionPreference.PreferenceCollection
  */
-var UserPreferenceRawCollection = PreferenceCollection.extend({
-  // TODO: Subset of editable? Assume viewable already filtered by backend.
-  /**
-   * @function app.models.discussionPreference.UserPreferenceRawCollection.constructor
-   */
-  constructor: function UserPreferenceRawCollection() {
-    PreferenceCollection.apply(this, arguments);
-  },
-  url: Ctx.getApiV2DiscussionUrl("all_users/current/preferences"),
-});
+class UserPreferenceRawCollection extends PreferenceCollection.extend({
+  url: Ctx.getApiV2DiscussionUrl("all_users/current/preferences")
+}) {}
 
 
 export default {

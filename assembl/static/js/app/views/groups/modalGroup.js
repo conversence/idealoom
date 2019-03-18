@@ -21,25 +21,21 @@ import viewsFactory from '../../objects/viewsFactory';
 /**
  * @class app.views.groups.modalGroup.ModalGroupView
  */
-var ModalGroupView = Backbone.Modal.extend({
-  constructor: function ModalGroupView() {
-    Backbone.Modal.apply(this, arguments);
-  },
-
+class ModalGroupView extends Backbone.Modal.extend({
   template: _.template($('#tmpl-groupModal').html()),
-
   className: 'panelGroups-modal popin-wrapper',
-
   cancelEl: '.close, .js_close',
-
   keyControl: false,
-
   title: null,
 
+  events: {
+    'submit #partner-form':'validatePartner'
+  }
+}) {
   /**
    * A modal group has only a single group
    */
-  getGroup: function() {
+  getGroup() {
     if (!this.groupsView.isRendered() && !this.groupsView.isDestroyed()) {
       //so children will work
       this.groupsView.render();
@@ -52,12 +48,12 @@ var ModalGroupView = Backbone.Modal.extend({
     }
 
     return firstGroup;
-  },
+  }
 
   /** Takes a groupSpec as model
    * 
    */
-  initialize: function(options) {
+  initialize(options) {
     if (options && "title" in options)
       this.title = options.title;
     this.$('.bbm-modal').addClass('popin');
@@ -65,13 +61,9 @@ var ModalGroupView = Backbone.Modal.extend({
     this.groupsView = new GroupContainer({
       collection: groupSpecCollection
     });
-  },
+  }
 
-  events: {
-    'submit #partner-form':'validatePartner'
-  },
-
-  onRender: function() {
+  onRender() {
     if (!this.groupsView.isDestroyed()) {
       if (!this.groupsView.isRendered()) {
         this.groupsView.render();
@@ -79,21 +71,21 @@ var ModalGroupView = Backbone.Modal.extend({
 
       this.$('.popin-body').html(this.groupsView.el);
     }
-  },
+  }
 
-  serializeData: function() {
+  serializeData() {
     return {
       "title": this.title
     };
-  },
+  }
 
-  getGroupContentView: function() {
+  getGroupContentView() {
     console.log("Looking for model:", this.model, "in:", _.clone(this.groupsView.children.indexByModel));
     console.log("Result: ", this.groupsView.children.findByModel(this.groupSpecModel))
     return this.groupsView.children.findByModel(this.groupSpecModel);
   }
+}
 
-});
 /**
  * @param title:  title of the modal
  * @param filters: an array of objects:

@@ -18,11 +18,7 @@ import scrollUtils from '../utils/scrollUtils.js';
 import Marionette from 'backbone.marionette';
 import Analytics from '../internal_modules/analytics/dispatcher.js';
 
-var IdeaInIdeaListView = Marionette.View.extend({
-  constructor: function IdeaInIdeaListView() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class IdeaInIdeaListView extends Marionette.View.extend({
   /**
    * Tag name
    * @type {string}
@@ -60,12 +56,32 @@ var IdeaInIdeaListView = Marionette.View.extend({
   },
 
   /**
+   * The events
+   * @type {Object}
+   */
+  events: {
+    'change input[type="checkbox"]': 'onCheckboxChange',
+    'click .idealist-title': 'onTitleClick',
+    'click .idealist-abovedropzone': 'onTitleClick',
+    'click .idealist-dropzone': 'onTitleClick',
+    'click .js_idealist-title-unread-count': 'onUnreadCountClick',
+    'click .idealist-arrow': 'toggle',
+    'dragstart .idealist-body': 'onDragStart', // when the user starts dragging this idea
+    'dragend .idealist-body': 'onDragEnd',
+    'dragover .idealist-body': 'onDragOver',
+    'dragleave .idealist-body': 'onDragLeave',
+    'drop .idealist-body': 'onDrop',
+    'mouseleave > .idealist-body > .idealist-title': 'onMouseLeave',
+    'mouseenter > .idealist-body > .idealist-title': 'onMouseEnter'
+  }
+}) {
+  /**
    * @init
    * @param {dict} options:
    *   visitorData: data from the render visitor
    *   are the last child of their respective parents.
    */
-  initialize: function(options) {
+  initialize(options) {
     var that = this;
     this.visitorData = options.visitorData;
     this.parentPanel = options.parentPanel;
@@ -112,29 +128,9 @@ var IdeaInIdeaListView = Marionette.View.extend({
         // FIXME: for now, event does not seem to be triggered when I make changes, so I have to call explicitly a render() of the table of ideas 
       }
     }
-  },
+  }
 
-  /**
-   * The events
-   * @type {Object}
-   */
-  events: {
-    'change input[type="checkbox"]': 'onCheckboxChange',
-    'click .idealist-title': 'onTitleClick',
-    'click .idealist-abovedropzone': 'onTitleClick',
-    'click .idealist-dropzone': 'onTitleClick',
-    'click .js_idealist-title-unread-count': 'onUnreadCountClick',
-    'click .idealist-arrow': 'toggle',
-    'dragstart .idealist-body': 'onDragStart', // when the user starts dragging this idea
-    'dragend .idealist-body': 'onDragEnd',
-    'dragover .idealist-body': 'onDragOver',
-    'dragleave .idealist-body': 'onDragLeave',
-    'drop .idealist-body': 'onDrop',
-    'mouseleave > .idealist-body > .idealist-title': 'onMouseLeave',
-    'mouseenter > .idealist-body > .idealist-title': 'onMouseEnter'
-  },
-
-  serializeData: function() {
+  serializeData() {
     var data = this.model.toJSON();
     var model_type = this.model.get('@type');
     _.extend(data, render_data);
@@ -155,13 +151,13 @@ var IdeaInIdeaListView = Marionette.View.extend({
       _.extend(data, render_data);
     }
     return data;
-  },
+  }
 
   /**
    * The render
    * @returns {IdeaView}
    */
-  onRender: function() {
+  onRender() {
     var that = this;
     var visitorData = this.visitorData;
     var idea_render_data = visitorData[this.model.getId()];
@@ -192,71 +188,71 @@ var IdeaInIdeaListView = Marionette.View.extend({
         scrollUtils.scrollToNextPanel('.groupsContainer',100,screenSize);
       });
     }
-  },
+  }
 
   /**
    * Show the childen
    */
-  open: function() {
+  open() {
     this.$el.addClass('is-open');
-  },
+  }
 
   /**
    * Hide the childen
    */
-  close: function() {
+  close() {
     this.$el.removeClass('is-open');
-  },
+  }
 
-  getIsCollapsedState: function() {
+  getIsCollapsedState() {
     return !(this.$el.hasClass('is-open'));
-  },
+  }
 
-  saveCollapsedState: function(isCollapsed) {
+  saveCollapsedState(isCollapsed) {
     this.parentPanel.saveIdeaCollapsedState(this.model, isCollapsed);
-  },
+  }
 
   /**
    * @event
    */
-  onIsSelectedChange: function(idea) {
+  onIsSelectedChange(idea) {
     //console.log("IdeaView:onIsSelectedChange(): new: ", idea, "current: ", this.model, this);
     if (idea === this.model) {
       this.$el.addClass('is-selected');
     } else {
       this.$el.removeClass('is-selected');
     }
-  },
+  }
 
   /**
    * @event
    */
-  onMouseEnter: function(idea) {
+  onMouseEnter(idea) {
       this.$('> .idealist-body').addClass('is-hovered');
-  },
+  }
 
   /**
    * @event
    */
-  onMouseLeave: function(idea) {
+  onMouseLeave(idea) {
       this.$('> .idealist-body').removeClass('is-hovered');
-  },
+  }
 
   /**
    * @event
    */
-  onReplaced: function(newObject) {
+  onReplaced(newObject) {
     this.model = newObject;
-  },
+  }
 
-  getContainingGroup: function() {
+  getContainingGroup() {
     return this._groupContent;
-  },
+  }
 
   /**
    * @event
    */
-  onCheckboxChange: function(ev) {
+  onCheckboxChange(ev) {
     var that = this;
     var checked = ev.currentTarget.checked;
 
@@ -271,7 +267,7 @@ var IdeaInIdeaListView = Marionette.View.extend({
         }
       }
     });
-  },
+  }
 
   /**
    * @param is_unread:  Filter on the unread status of messages 
@@ -279,7 +275,7 @@ var IdeaInIdeaListView = Marionette.View.extend({
    *                      true: only unread messages
    *                      null: don't filter
    */
-  doIdeaChange: function(is_unread) {
+  doIdeaChange(is_unread) {
     var analytics = Analytics.getInstance();
     //console.log('Tracking event on idea ', this.model.getShortTitleDisplayText(this.translationData))
     if(!is_unread) {
@@ -296,13 +292,13 @@ var IdeaInIdeaListView = Marionette.View.extend({
       messageListView.triggerMethod('messageList:clearAllFilters');
       messageListView.trigger('messageList:addFilterIsRelatedToIdea', this.model, is_unread);
     }
-  },
+  }
 
   /**
    * @event
    * Select this idea as the current idea
    */
-  _onTitleClick: function(e, is_unread) {
+  _onTitleClick(e, is_unread) {
     e.stopPropagation();
     this.doIdeaChange(is_unread);
 
@@ -325,28 +321,29 @@ var IdeaInIdeaListView = Marionette.View.extend({
       //If it's a small screen detected => scroll to the right by clicking on an idea
       scrollUtils.scrollToNextPanel('.groupsContainer',1500, screenSize);
     }
-  },
+  }
 
   /**
    * @event
    * Select this idea as the current idea
    */
-  onTitleClick: function(e) {
+  onTitleClick(e) {
       this._onTitleClick(e, null);
-    },
-    
+    }
+
   /**
    * @event
    * Select this idea as the current idea, and show only unread messages of this idea
    */
-  onUnreadCountClick: function(e) {
+  onUnreadCountClick(e) {
     this._onTitleClick(e, true);
-  },
+  }
+
   /**
    * @event
    * when the user starts dragging this idea
    */
-  onDragStart: function(ev) {
+  onDragStart(ev) {
     //console.log("ideaInIdeaList::onDragStart() ev: ", ev);
     if (ev) {
       ev.stopPropagation();
@@ -361,12 +358,12 @@ var IdeaInIdeaListView = Marionette.View.extend({
       Ctx.showDragbox(ev, this.model.getShortTitleSafe(this.translationData));
       Ctx.draggedIdea = this.model;
     }
-  },
+  }
 
   /**
    * @event
    */
-  onDragEnd: function(ev) {
+  onDragEnd(ev) {
     //console.log("ideaInIdeaList::onDragEnd() ev: ", ev);
     if (ev) {
       ev.preventDefault();
@@ -378,12 +375,12 @@ var IdeaInIdeaListView = Marionette.View.extend({
     Ctx.setDraggedAnnotation(null);
     Ctx.setDraggedSegment(null);
     Ctx.draggedIdea = null;
-  },
+  }
 
   /**
    * @event
    */
-  onDragOver: function(ev) {
+  onDragOver(ev) {
     //console.log("ideaInIdeaList::onDragOver() ev: ", ev);
     if (ev) {
       ev.preventDefault();
@@ -454,18 +451,18 @@ var IdeaInIdeaListView = Marionette.View.extend({
 
     //We should user a _.debounce instead for performance reasons benoitg 2014-04-13
     this.dragOverCounter += 1;
-  },
+  }
 
   /**
    * @event
    * "Finally, the dragleave event will fire at an element when the drag leaves the element. This is the time when you should remove any insertion markers or highlighting. You do not need to cancel this event. [...] The dragleave event will always fire, even if the drag is cancelled, so you can always ensure that any insertion point cleanup can be done during this event." quote https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Drag_operations
    */
-  onDragLeave: function(ev) {
+  onDragLeave(ev) {
     //console.log("ideaInIdeaList::onDragLeave() ev: ", ev);
 
     this.dragOverCounter = 0;
     this.$el.removeClass('is-dragover is-dragover-above is-dragover-below');
-  },
+  }
 
   // /!\ The browser will not fire the drop event if, at the end of the last call of the dragenter or dragover event listener (right before the user releases the mouse button), one of these conditions is met:
   // * one of ev.dataTransfer.dropEffect or ev.dataTransfer.effectAllowed is "none"
@@ -473,7 +470,7 @@ var IdeaInIdeaListView = Marionette.View.extend({
   // "If you don't change the effectAllowed property, then any operation is allowed, just like with the 'all' value. So you don't need to adjust this property unless you want to exclude specific types." quote https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Drag_operations
   // "During a drag operation, a listener for the dragenter or dragover events can check the effectAllowed property to see which operations are permitted. A related property, dropEffect, should be set within one of these events to specify which single operation should be performed. Valid values for the dropEffect are none, copy, move, or link." quote https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer
   // ev.preventDefault() is also needed here in order to prevent default action (open as link for some elements)
-  onDrop: function(ev) {
+  onDrop(ev) {
     //console.log("ideaInIdeaList::onDrop() ev: ", ev);
     if (Ctx.debugAnnotator) {
       console.log("ideaInIdeaList:onDrop() fired", Ctx.getDraggedSegment(), Ctx.getDraggedAnnotation());
@@ -540,14 +537,14 @@ var IdeaInIdeaListView = Marionette.View.extend({
         }
       }
     }
-  },
+  }
 
   /**
    * Toggle show/hide an item
    * @event
    * @param  {Event} ev
    */
-  toggle: function(ev) {
+  toggle(ev) {
     //console.log("ideaInIdeaList::toggle()");
     if (ev) {
       ev.preventDefault();
@@ -564,16 +561,16 @@ var IdeaInIdeaListView = Marionette.View.extend({
     }
     // we have just changed the collapsed state by calling open() or close()
     this.saveCollapsedState(this.getIsCollapsedState());
-  },
+  }
 
-  onIdeaCollaspedStateChange: function(ev) {
+  onIdeaCollaspedStateChange(ev) {
     //console.log("ideaInIdeaList::onIdeaCollaspedStateChange() ev: ", ev, " this:", this);
     if(!this.isDestroyed()) {
       this.applyCustomCollapsedState();
     }
-  },
+  }
 
-  getCustomCollapsedState: function() {
+  getCustomCollapsedState() {
     var isCollapsed = undefined;
     if ( this.model ){
       var id = this.model.getNumericId();
@@ -594,9 +591,9 @@ var IdeaInIdeaListView = Marionette.View.extend({
     }
 
     return isCollapsed;
-  },
+  }
 
-  applyCustomCollapsedState: function() {
+  applyCustomCollapsedState() {
     var isCollapsed = this.getCustomCollapsedState();
     // console.log("ideaInIdeaList::applyCustomCollapsedState() idea: ", this.model.getNumericId(), " isCollapsed: ", isCollapsed);
     if ( isCollapsed === undefined ){
@@ -609,18 +606,14 @@ var IdeaInIdeaListView = Marionette.View.extend({
       this.open();
     }
   }
+}
 
-});
-var ideaListIdeaFamilyCollectionView = Marionette.CollectionView.extend({
-  constructor: function ideaListIdeaFamilyCollectionView() {
-    Marionette.CollectionView.apply(this, arguments);
-  },
-
+class ideaListIdeaFamilyCollectionView extends Marionette.CollectionView.extend({
   childView: IdeaInIdeaListView
   /*collectionEvents: {
     'add sync':'render'
   }*/
-});
+}) {}
 
 export default {
     IdeaFamilyCollectionView: ideaListIdeaFamilyCollectionView,

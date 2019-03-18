@@ -17,42 +17,41 @@ import CollectionManager from '../common/collectionManager.js';
 import $ from 'jquery';
 import i18n from '../utils/i18n.js';
 
-var CookieInfobarItemView = Marionette.View.extend({
-  constructor: function CookiebarItem() {
-    Marionette.View.apply(this, arguments);
-  },
+class CookieInfobarItemView extends Marionette.View.extend({
   template: '#tmpl-cookieBanner',
+
   ui:{
     acceptCookiesBtn:"#js_accept-cookie-btn",
     refuseCookiesBtn:"#js_refuse-cookie-btn"
   },
+
   events:{
     "click @ui.refuseCookiesBtn":"openCookiesSettings",
     "click @ui.acceptCookiesBtn":"closeInfobar"
-  },
-  openCookiesSettings:function(){
+  }
+}) {
+  openCookiesSettings() {
     var piwikIframe = new PiwikIframeModal();
     IdeaLoom.rootView.showChildView('slider', piwikIframe); 
     this.closeInfobar();
-  },
-  closeInfobar: function() {
+  }
+
+  closeInfobar() {
     CookiesManager.setUserCookiesAuthorization();
     this.destroy();
     this.model.set("closeInfobar", true);
     IdeaLoom.other_vent.trigger('infobar:closeItem');
   }
-});
+}
 
-
-var TosInfobarItemView = Marionette.View.extend({
-  constructor: function TosInfobarItemView() {
-    Marionette.View.apply(this, arguments);
-  },
+class TosInfobarItemView extends Marionette.View.extend({
   template: '#tmpl-tos_infobar',
+
   events:{
     'click .js_closeInfobar': 'closeInfobar',
-  },
-  serializeModel: function() {
+  }
+}) {
+  serializeModel() {
     var model = this.model.get('widget');
     return {
       model: model,
@@ -61,21 +60,22 @@ var TosInfobarItemView = Marionette.View.extend({
         Ctx.getDiscussionSlug()),
       locale: Ctx.getLocale(),
     };
-  },
-  closeInfobar: function() {
+  }
+
+  closeInfobar() {
     this.destroy();
     this.model.set("closeInfobar", true);
     IdeaLoom.other_vent.trigger('infobar:closeItem');
   }
-});
+}
 
-
-var PiwikIframeModal = Backbone.Modal.extend({
-  constructor: function PiwikIframeModal(){
-    Backbone.Modal.apply(this, arguments);
-  },
-
-  getStatsUrl: function(){
+class PiwikIframeModal extends Backbone.Modal.extend({
+  template: '#tmpl-piwikIframeModal',
+  className: 'modal-ckeditorfield popin-wrapper',
+  keyControl:false,
+  cancelEl: '.close'
+}) {
+  getStatsUrl() {
     // var url = "//piwik.coeus.ca/index.php?module=CoreAdminHome&action=optOut&language=fr";
     var url = analyticsUrl;
     if (! (url[url.length-1] === '/')) {
@@ -86,36 +86,31 @@ var PiwikIframeModal = Backbone.Modal.extend({
     url = url + locale;
     // console.log("URL of statistics on Inforbar.js", url);
     return url;
-  },
+  }
 
-  serializeData: function(){
+  serializeData() {
     return {
       statsUrl: this.getStatsUrl()
     };
-  },
+  }
+}
 
-  template: '#tmpl-piwikIframeModal',
-  className: 'modal-ckeditorfield popin-wrapper',
-  keyControl:false,
-  cancelEl: '.close'
-});
-
-var WidgetInfobarItemView = LoaderView.extend({
-  constructor: function InfobarItem() {
-    LoaderView.apply(this, arguments);
-  },
+class WidgetInfobarItemView extends LoaderView.extend({
   template: '#tmpl-widget_infobar',
   className: 'content-infobar',
+
   ui: {
     button: ".btn"
   },
+
   events: {
     "click @ui.button": "onButtonClick",
     'click .js_closeInfobar': 'closeInfobar',
     'click .js_openSession': 'openSession',
     'click .js_openTargetInModal': 'openTargetInModal'
-  },
-  initialize: function() {
+  }
+}) {
+  initialize() {
     var that = this;
     var collectionManager = new CollectionManager();
     this.setLoading(true);
@@ -124,8 +119,9 @@ var WidgetInfobarItemView = LoaderView.extend({
       that.setLoading(false);
       that.render();
     });
-  },
-  onButtonClick: function(evt) {
+  }
+
+  onButtonClick(evt) {
     if ( evt && _.isFunction(evt.preventDefault) ){
       evt.preventDefault();
     }
@@ -142,8 +138,9 @@ var WidgetInfobarItemView = LoaderView.extend({
       this.model.trigger("buttonClick", context);
     }
     return false;
-  },
-  serializeModel: function() {
+  }
+
+  serializeModel() {
     var model = this.model.get('widget');
     return {
       model: model,
@@ -155,19 +152,21 @@ var WidgetInfobarItemView = LoaderView.extend({
       locale: Ctx.getLocale(),
       shows_button: model.showsButton(Widget.Model.prototype.INFO_BAR)
     };
-  },
-  closeInfobar: function() {
+  }
+
+  closeInfobar() {
     this.destroy();
     this.model.set("closeInfobar", true);
     IdeaLoom.other_vent.trigger('infobar:closeItem');
   }
-});
+}
 
-var InfobarsView = Marionette.CollectionView.extend({
-  constructor: function Infobars() {
-    Marionette.CollectionView.apply(this, arguments);
-  },
-  childView:function(item) {
+class InfobarsView extends Marionette.CollectionView.extend({
+  collectionEvents: {
+    "add remove reset change": "adjustInfobarSize"
+  }
+}) {
+  childView(item) {
     switch (item.view_name) {
         case InfobarsCollection.prototype.view_names.WIDGET:
             return WidgetInfobarItemView;
@@ -178,18 +177,17 @@ var InfobarsView = Marionette.CollectionView.extend({
         default:
             console.error("Unknown item view_name", item.view_name);
     }
-  },
-  initialize: function(options) {
+  }
+
+  initialize(options) {
     this.childViewOptions = {
       parentPanel: this
     };
     this.adjustInfobarSize();
-  },
-  collectionEvents: {
-    "add remove reset change": "adjustInfobarSize"
-  },
+  }
+
   //TO DO: refactor because should not be necessary to set the top of 'groupContainer' in js file
-  adjustInfobarSize: function(evt) {
+  adjustInfobarSize(evt) {
     var el = IdeaLoom.rootView.getRegion('groupContainer').$el;
     var n = this.collection.length;
     this.collection.each(function(itemView){
@@ -205,7 +203,7 @@ var InfobarsView = Marionette.CollectionView.extend({
       }
     }
   }
-});
+}
 
 export default {
   InfobarsView: InfobarsView

@@ -7,13 +7,12 @@ import Marionette from 'backbone.marionette';
 
 import Ctx from '../common/context.js';
 
-var messagesInProgress = Marionette.Object.extend({
-
+class messagesInProgress extends Marionette.Object.extend({
   _store: window.localStorage,
   _key: "composing_messages",
-  _messages: null,
-
-  getMessages: function() {
+  _messages: null
+}) {
+  getMessages() {
     if (this._messages !== null) {
       return this._messages;
     }
@@ -29,9 +28,9 @@ var messagesInProgress = Marionette.Object.extend({
 
     this._messages = messages;
     return messages;
-  },
+  }
 
-  saveMessage: function(context, body, title) {
+  saveMessage(context, body, title) {
     /**
      * Gaby Hourlier 03-20-2014 : I don't really understand
      * why we have to get the previous messages saved instead of delete them
@@ -55,9 +54,9 @@ var messagesInProgress = Marionette.Object.extend({
     }
 
     window.localStorage.setItem(this._key, JSON.stringify(messages));
-  },
+  }
 
-  getMessage: function(context) {
+  getMessage(context) {
     var messages = this.getMessages();
     if (messages[context] && messages[context]['body'] === "[object Object]") {
       console.warn("savePartialMessage() Fixing corrupted data in message storage (a past bug causes text representation of objects to be stored in local storage)")
@@ -66,14 +65,13 @@ var messagesInProgress = Marionette.Object.extend({
     }
 
     return messages[context] || {};
-  },
+  }
 
-  clearMessage: function(context) {
+  clearMessage(context) {
     var messages = this.getMessages();
     delete messages[context];
     window.localStorage.setItem(this._key, JSON.stringify(messages));
   }
-
-})
+}
 
 export default new messagesInProgress();

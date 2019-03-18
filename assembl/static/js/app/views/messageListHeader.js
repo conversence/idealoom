@@ -28,14 +28,19 @@ var DEFAULT_MESSAGE_VIEW_LI_ID_PREFIX = "js_defaultMessageView-";
 
 var MESSAGE_LIST_VIEW_STYLES_CLASS_PREFIX = "js_messageList-view-";
 
-var MessageListHeader = Marionette.View.extend({
-  constructor: function MessageListHeader() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class MessageListHeader extends Marionette.View.extend({
   template: '#tmpl-messageListHeader',
   className: 'messageListHeaderItsMe',
-  initialize: function(options) {
+
+  ui: {
+    queryInfo: ".messageList-query-info",
+    expertViewToggleButton: '.show-expert-mode-toggle-button',
+    viewStyleDropdown: ".js_messageListViewStyle-dropdown",
+    defaultMessageViewDropdown: ".js_defaultMessageView-dropdown",
+    filtersDropdown: '.js_filters-dropdown'
+  }
+}) {
+  initialize(options) {
     //console.log("MessageListHeader::initialize(options)", options);
     var that = this;
 
@@ -59,17 +64,9 @@ var MessageListHeader = Marionette.View.extend({
     });
     
     this.delegateEvents(this._generateEvents());
-  },
+  }
 
-  ui: {
-    queryInfo: ".messageList-query-info",
-    expertViewToggleButton: '.show-expert-mode-toggle-button',
-    viewStyleDropdown: ".js_messageListViewStyle-dropdown",
-    defaultMessageViewDropdown: ".js_defaultMessageView-dropdown",
-    filtersDropdown: '.js_filters-dropdown'
-  },
-
-  _generateEvents: function() {
+  _generateEvents() {
     var that = this;
     var data = {
         //'click @ui.expertViewToggleButton': 'toggleExpertView' // handled by change:isOn model event instead
@@ -96,9 +93,9 @@ var MessageListHeader = Marionette.View.extend({
 
     //console.log(data);
     return data;
-  },
+  }
 
-  serializeData: function() {
+  serializeData() {
     return {
       expertViewIsAvailable: this.expertViewIsAvailable,
       isUsingExpertView: this.isUsingExpertView,
@@ -106,9 +103,9 @@ var MessageListHeader = Marionette.View.extend({
       Ctx: Ctx,
       currentViewStyle: this.currentViewStyle
     };
-  },
+  }
 
-  onRender: function() {
+  onRender() {
     this.renderMessageListViewStyleDropdown();
     this.renderDefaultMessageViewDropdown();
     this.renderMessageListFiltersDropdown();
@@ -121,9 +118,9 @@ var MessageListHeader = Marionette.View.extend({
     this.renderQueryInfo();
     Ctx.initTooltips(this.$el);
     IdeaLoom.tour_vent.trigger("requestTour", "message_list_options");
-  },
+  }
 
-  renderToggleButton: function() {
+  renderToggleButton() {
     //console.log("messageListHeader::renderToggleButton()");
     // check that ui is here (it may not be, for example if logged out). I could not use a region here because the region would not always have been present in DOM, which is not possible
     var el = this.ui.expertViewToggleButton;
@@ -131,9 +128,9 @@ var MessageListHeader = Marionette.View.extend({
       var v = new FlipSwitchButtonView({model: this.toggleButtonModelInstance});
       el.html(v.render().el);
     }
-  },
+  }
 
-  toggleExpertView: function() {
+  toggleExpertView() {
     //console.log("messageListHeader::toggleExpertView()");
     this.isUsingExpertView = !this.isUsingExpertView;
     this.messageList.triggerMethod("setIsUsingExpertView", this.isUsingExpertView);
@@ -143,12 +140,12 @@ var MessageListHeader = Marionette.View.extend({
     setTimeout(function() {
       that.render();
     }, 500);
-  },
+  }
 
   /**
    * Renders the messagelist view style dropdown button
    */
-  renderMessageListViewStyleDropdown: function() {
+  renderMessageListViewStyleDropdown() {
     var that = this;
     var html = "";
 
@@ -161,12 +158,12 @@ var MessageListHeader = Marionette.View.extend({
     });
     html += '</ul>';
     this.ui.viewStyleDropdown.html(html);
-  },
+  }
 
   /**
    * Renders the messagelist view style dropdown button
    */
-  renderMessageListFiltersDropdown: function() {
+  renderMessageListFiltersDropdown() {
     var that = this;
     var filtersPromises = [];
 
@@ -198,44 +195,44 @@ var MessageListHeader = Marionette.View.extend({
           that.ui.filtersDropdown.html(html);
           Ctx.initTooltips(that.$el);
         })
-  },
+  }
 
   /**
    * get a view style css_class
    * @param messageViewStyle
    * @returns {string}
    */
-  getMessageViewStyleCssClass: function(messageViewStyle) {
+  getMessageViewStyleCssClass(messageViewStyle) {
     return DEFAULT_MESSAGE_VIEW_LI_ID_PREFIX + messageViewStyle.id;
-  },
+  }
 
   /**
    * get a view style definition by id
    * @param {messageViewStyle.id} messageListViewStyleClass
    * @returns {messageViewStyle | undefined}
    */
-  getMessageListViewStyleDefByCssClass: function(messageListViewStyleClass) {
+  getMessageListViewStyleDefByCssClass(messageListViewStyleClass) {
     return _.find(this.ViewStyles, function(viewStyle) {
       return viewStyle.css_class == messageListViewStyleClass;
     });
-  },
+  }
 
   /**
    * get a view style definition by id
    * @param {messageViewStyle.id} messageViewStyleClass
    * @returns {messageViewStyle | undefined}
    */
-  getMessageViewStyleDefByCssClass: function(messageViewStyleClass) {
+  getMessageViewStyleDefByCssClass(messageViewStyleClass) {
     var that = this;
     return _.find(Ctx.AVAILABLE_MESSAGE_VIEW_STYLES, function(messageViewStyle) {
       return that.getMessageViewStyleCssClass(messageViewStyle) == messageViewStyleClass;
     });
-  },
+  }
 
   /**
    * @event
    */
-  onSelectMessageListViewStyle: function(e) {
+  onSelectMessageListViewStyle(e) {
     //console.log("messageListHeader::onSelectMessageListViewStyle()");
     var messageListViewStyleClass;
 
@@ -248,12 +245,12 @@ var MessageListHeader = Marionette.View.extend({
 
     this.messageList.setViewStyle(messageListViewStyleSelected);
     this.messageList.render();
-  },
+  }
 
   /**
    * @event
    */
-  onSelectDefaultMessageViewStyle: function(e) {
+  onSelectDefaultMessageViewStyle(e) {
     var classes = $(e.currentTarget).attr('class').split(" ");
     var defaultMessageListViewStyleClass;
     defaultMessageListViewStyleClass = _.find(classes, function(cls) {
@@ -268,12 +265,12 @@ var MessageListHeader = Marionette.View.extend({
     this.messageList.triggerMethod("setIndividualMessageViewStyleForMessageListViewStyle", messageViewStyleSelected);
 
     this.renderDefaultMessageViewDropdown();
-  },
+  }
 
   /**
    * @event
    */
-  onAddFilter: function(ev) {
+  onAddFilter(ev) {
     var that = this;
     var filterId = ev.currentTarget.getAttribute('data-filterid');
     var filterDef = this.messageList.currentQuery.getFilterDefById(filterId);
@@ -302,25 +299,24 @@ var MessageListHeader = Marionette.View.extend({
         execute(implicitValue);
       });
     }
-  },
-
+  }
 
   /**
    * @event
    */
-  onFilterDeleteClick: function(ev) {
+  onFilterDeleteClick(ev) {
     //console.log("MessageListHeader:onFilterDeleteClick(ev)", ev);
     var valueIndex = ev.currentTarget.getAttribute('data-value-index');
     var filterid = ev.currentTarget.getAttribute('data-filterid');
     var filter = this.currentQuery.getFilterDefById(filterid);
     this.currentQuery.clearFilter(filter, valueIndex);
     this.messageList.render();
-  },
+  }
 
   /**
    * Renders the default message view style dropdown button
    */
-  renderDefaultMessageViewDropdown: function() {
+  renderDefaultMessageViewDropdown() {
     var that = this;
     var html = "";
 
@@ -333,12 +329,12 @@ var MessageListHeader = Marionette.View.extend({
     });
     html += '</ul>';
     this.ui.defaultMessageViewDropdown.html(html);
-  },
+  }
 
   /**
    * Renders the search result information
    */
-  renderUserViewButtons: function() {
+  renderUserViewButtons() {
     var that = this;
     var resultNumTotal;
     var resultNumUnread;
@@ -361,18 +357,18 @@ var MessageListHeader = Marionette.View.extend({
     this.$("."+this.ViewStyles.NEW_MESSAGES.css_class).html(this.ViewStyles.NEW_MESSAGES.label);
     this.$("."+this.ViewStyles.REVERSE_CHRONOLOGICAL.css_class).html(this.ViewStyles.REVERSE_CHRONOLOGICAL.label);
     this.$("."+this.ViewStyles.POPULARITY.css_class).html(this.ViewStyles.POPULARITY.label);
-  },
+  }
 
   /**
    * Renders the search result information
    */
-  renderQueryInfo: function() {
+  renderQueryInfo() {
       var that = this;
       this.currentQuery.getHtmlDescriptionPromise().then(function(htmlDescription) {
         that.ui.queryInfo.html(htmlDescription);
       })
 
     }
-});
+}
 
 export default MessageListHeader;

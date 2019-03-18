@@ -63,14 +63,11 @@ class AddIdeaButton extends Marionette.View.extend({
 }
 
 
-var IdeaList = BasePanel.extend({
-  constructor: function IdeaList() {
-    BasePanel.apply(this, arguments);
-  },
-
+class IdeaList extends BasePanel.extend({
   template: '#tmpl-ideaList',
   panelType: PanelSpecTypes.TABLE_OF_IDEAS,
   className: 'ideaList',
+
   regions: {
     ideaView: '.ideaView',
     addIdeaButton: '.idealist-add-idea-button',
@@ -79,10 +76,12 @@ var IdeaList = BasePanel.extend({
     orphanView: '.orphanView',
     allMessagesView: '.allMessagesView'
   },
+
   /**
    * .panel-body
    */
   body: null,
+
   mouseRelativeY: null,
   mouseIsOutside: null,
   scrollableElement: null,
@@ -90,9 +89,13 @@ var IdeaList = BasePanel.extend({
   lastScrollTime: null,
   scrollInterval: null,
   scrollLastSpeed: null,
-  tableOfIdeasRowHeight: 36, // must match $tableOfIdeasRowHeight in _variables.scss
-  tableOfIdeasFontSizeDecreasingWithDepth: true, // must match the presence of .idealist-children { font-size: 98.5%; } in _variables.scss
-  
+
+  // must match $tableOfIdeasRowHeight in _variables.scss
+  tableOfIdeasRowHeight: 36,
+
+  // must match the presence of .idealist-children { font-size: 98.5%; } in _variables.scss
+  tableOfIdeasFontSizeDecreasingWithDepth: true,
+
   /**
    * Stores (in UserCustomData per-discussion key/value store) the collapsed state of each idea, as saved by user when he expands or collapses an idea. Model is in the following form: {42: true, 623: false} where each key is the numeric id of an idea 
    * @type {UserCustomData.Model}
@@ -110,21 +113,57 @@ var IdeaList = BasePanel.extend({
    * @type {boolean}
    */
   show_graph: false,
+
   minWidth: 320,
   gridSize: BasePanel.prototype.NAVIGATION_PANEL_GRID_SIZE,
 
+  ui: {
+    panelBody: '.panel-body',
+    collapseButton: '#ideaList-collapseButton',
+    closeButton: '#ideaList-closeButton',
+    filterByFeatured: '#ideaList-filterByFeatured',
+    filterByInNextSynthesis: '#ideaList-filterByInNextSynthesis',
+    filterByToc: '#ideaList-filterByToc',
+    decreaseRowHeight: '.js_decreaseRowHeight',
+    increaseRowHeight: '.js_increaseRowHeight',
+    toggleDecreasingFontSizeWithDepth: '.js_toggleDecreasingFontSizeWithDepth',
+    saveIdeasStateAsDefault: '.js_saveIdeasStateAsDefault',
+    restoreIdeasState: '.js_restoreIdeasState',
+    expandAllIdeas: '.js_expandAllIdeas',
+    collapseAllIdeas: '.js_collapseAllIdeas',
+  },
+
+  events: {
+    'click @ui.panelBody': 'onPanelBodyClick',
+
+    'click @ui.collapseButton': 'toggleIdeas',
+    'click @ui.closeButton': 'closePanel',
+
+    'click @ui.filterByFeatured': 'filterByFeatured',
+    'click @ui.filterByInNextSynthesis': 'filterByInNextSynthesis',
+    'click @ui.filterByToc': 'clearFilter',
+
+    'click @ui.decreaseRowHeight': 'decreaseRowHeight',
+    'click @ui.increaseRowHeight': 'increaseRowHeight',
+    'click @ui.toggleDecreasingFontSizeWithDepth': 'toggleDecreasingFontSizeWithDepth',
+    'click @ui.saveIdeasStateAsDefault': 'saveIdeasStateAsDefault',
+    'click @ui.restoreIdeasState': 'restoreIdeasState',
+    'click @ui.expandAllIdeas': 'expandAllIdeas',
+    'click @ui.collapseAllIdeas': 'collapseAllIdeas'
+  }
+}) {
   /**
    * Is this panel the primary navigation panel for it's group?
    * @returns true or false
    */
-  isPrimaryNavigationPanel: function() {
+  isPrimaryNavigationPanel() {
     //TODO:  This overrides parent class, but will not always be true
     return true;
-  },
+  }
 
-  initialize: function(options) {
+  initialize(options) {
     this.setLoading(true);
-    BasePanel.prototype.initialize.apply(this, arguments);
+    super.initialize(...arguments);
     var that = this;
     var collectionManager = new CollectionManager();
 
@@ -253,44 +292,9 @@ var IdeaList = BasePanel.extend({
         that.onDocumentDragOver(e);
       });
     }
-  },
+  }
 
-  ui: {
-    panelBody: '.panel-body',
-    collapseButton: '#ideaList-collapseButton',
-    closeButton: '#ideaList-closeButton',
-    filterByFeatured: '#ideaList-filterByFeatured',
-    filterByInNextSynthesis: '#ideaList-filterByInNextSynthesis',
-    filterByToc: '#ideaList-filterByToc',
-    decreaseRowHeight: '.js_decreaseRowHeight',
-    increaseRowHeight: '.js_increaseRowHeight',
-    toggleDecreasingFontSizeWithDepth: '.js_toggleDecreasingFontSizeWithDepth',
-    saveIdeasStateAsDefault: '.js_saveIdeasStateAsDefault',
-    restoreIdeasState: '.js_restoreIdeasState',
-    expandAllIdeas: '.js_expandAllIdeas',
-    collapseAllIdeas: '.js_collapseAllIdeas',
-  },
-
-  events: {
-    'click @ui.panelBody': 'onPanelBodyClick',
-
-    'click @ui.collapseButton': 'toggleIdeas',
-    'click @ui.closeButton': 'closePanel',
-
-    'click @ui.filterByFeatured': 'filterByFeatured',
-    'click @ui.filterByInNextSynthesis': 'filterByInNextSynthesis',
-    'click @ui.filterByToc': 'clearFilter',
-
-    'click @ui.decreaseRowHeight': 'decreaseRowHeight',
-    'click @ui.increaseRowHeight': 'increaseRowHeight',
-    'click @ui.toggleDecreasingFontSizeWithDepth': 'toggleDecreasingFontSizeWithDepth',
-    'click @ui.saveIdeasStateAsDefault': 'saveIdeasStateAsDefault',
-    'click @ui.restoreIdeasState': 'restoreIdeasState',
-    'click @ui.expandAllIdeas': 'expandAllIdeas',
-    'click @ui.collapseAllIdeas': 'collapseAllIdeas'
-  },
-
-  serializeData: function() {
+  serializeData() {
     const user = Ctx.getCurrentUser();
     const currentIdea = this.getGroupState().get('currentIdea') || (this.allIdeasCollection ? this.allIdeasCollection.getRootIdea() : null);
     return {
@@ -299,21 +303,21 @@ var IdeaList = BasePanel.extend({
       maybeCanAdd: user.can(Permissions.ADD_IDEA) || (
         this.allIdeasCollection && this.allIdeasCollection.allExtraUserPermissions()[Permissions.ADD_IDEA]),
     }
-  },
+  }
 
-  getTitle: function() {
+  getTitle() {
     return i18n.gettext('Table of ideas');
-  },
+  }
 
-  getTableOfIdeasCollapsedState: function(){
+  getTableOfIdeasCollapsedState() {
     return this.tableOfIdeasCollapsedState;
-  },
+  }
 
-  getDefaultTableOfIdeasCollapsedState: function(){
+  getDefaultTableOfIdeasCollapsedState() {
     return this.defaultTableOfIdeasCollapsedState;
-  },
+  }
 
-  render: function(...args) {
+  render(...args) {
     //Overriding render because getting the scrollTop position of the ideaList body container
     //is lost upon re-rendering. BeforeRender and onRender are too late.
     if (Ctx.debugRender) {
@@ -332,10 +336,10 @@ var IdeaList = BasePanel.extend({
         console.log("before scrollTop:"+this.bodyTopPosition);
       }
     }
-    Object.getPrototypeOf(Object.getPrototypeOf(this)).render.apply(this, args);
-  },
+    super.render(args);
+  }
 
-  onRender: function() {
+  onRender() {
     if (Ctx.debugRender) {
       console.log("ideaList:render() is firing");
     }
@@ -461,14 +465,14 @@ var IdeaList = BasePanel.extend({
       that.showChildView('allMessagesView', allMessagesInIdeaListView);
       IdeaLoom.tour_vent.trigger("requestTour", "idea_list");
     }
-  },
+  }
 
   /**
    * Add a "new" label to most recent ideas
    * @param ideas: collection of ideas. For example: this.allIdeasCollection
    * @param view_data: object which will be modified during the traversal
    */
-  addLabelToMostRecentIdeas: function(ideas, view_data){
+  addLabelToMostRecentIdeas(ideas, view_data) {
     var maximum_ratio_of_highlighted_ideas = 1.0; // this is a float and should be in [0;1]. was 0.2
     var should_be_newer_than = null;
 
@@ -558,9 +562,9 @@ var IdeaList = BasePanel.extend({
       }
     });
     // console.log("view_data: ", view_data);
-  },
+  }
 
-  onScrollToIdea: function(ideaModel, retry) {
+  onScrollToIdea(ideaModel, retry) {
     if (Ctx.debugRender) {
       console.log("ideaList::onScrollToIdea()");
     }
@@ -589,13 +593,13 @@ var IdeaList = BasePanel.extend({
         });
       }
     }
-  },
+  }
 
   /**
    * Remove the given idea
    * @param  {Idea} idea
    */
-  removeIdea: function(idea) {
+  removeIdea(idea) {
     var parent = idea.get('parent');
 
     if (parent) {
@@ -603,12 +607,12 @@ var IdeaList = BasePanel.extend({
     } else {
       console.error(" This shouldn't happen, only th root idea has no parent");
     }
-  },
+  }
 
   /**
    * Collapse ALL ideas
    */
-  collapseIdeas: function() {
+  collapseIdeas() {
     var collectionManager = new CollectionManager();
     var that = this;
     this.collapsed = true;
@@ -619,12 +623,12 @@ var IdeaList = BasePanel.extend({
               });
               that.render();
             });
-  },
+  }
 
   /**
    * Expand ALL ideas
    */
-  expandIdeas: function() {
+  expandIdeas() {
     this.collapsed = false;
     var that = this;
     collectionManager.getAllIdeasCollectionPromise()
@@ -634,49 +638,49 @@ var IdeaList = BasePanel.extend({
               });
               that.render();
             });
-  },
+  }
 
   /**
    * Filter the current idea list by featured
    */
-  filterByFeatured: function() {
+  filterByFeatured() {
     this.filter = FEATURED;
     this.render();
-  },
+  }
 
   /**
    * Filter the current idea list by inNextSynthesis
    */
-  filterByInNextSynthesis: function() {
+  filterByInNextSynthesis() {
     this.filter = IN_SYNTHESIS;
     this.render();
-  },
+  }
 
   /**
    * Clear the filter applied to the idea list
    */
-  clearFilter: function() {
+  clearFilter() {
     this.filter = '';
     this.render();
-  },
+  }
 
   /**
    * @event
    */
-  onPanelBodyClick: function(ev) {
+  onPanelBodyClick(ev) {
     if ($(ev.target).hasClass('panel-body')) {
       // We want to avoid the "All messages" state,
       // unless the user clicks explicitly on "All messages".
       // TODO benoitg: Review this decision.
       //this.getContainingGroup().setCurrentIdea(null);
     }
-  },
+  }
 
   /**
    * Add a new child to the current selected.
    * If no idea is selected, add it at the root level ( no parent )
    */
-  addChildToSelected: function() {
+  addChildToSelected() {
     var currentIdea = this.getGroupState().get('currentIdea');
     var newIdea = new Idea.Model();
     var that = this;
@@ -705,29 +709,29 @@ var IdeaList = BasePanel.extend({
 
               that.getContainingGroup().setCurrentIdea(newIdea, false, "created");
             });
-  },
+  }
 
   /**
    * Collapse or expand the ideas
    */
-  toggleIdeas: function() {
+  toggleIdeas() {
     if (this.collapsed) {
       this.expandIdeas();
     } else {
       this.collapseIdeas();
     }
-  },
+  }
 
   /**
    * Closes the panel
    */
-  closePanel: function() {
+  closePanel() {
     if (this.button) {
       this.button.trigger('click');
     }
-  },
+  }
 
-  onDocumentDragOver: function(e) {
+  onDocumentDragOver(e) {
     //console.log("onDocumentDragOver");
     if (!Ctx.draggedIdea || !this.scrollableElement)
         return;
@@ -744,9 +748,9 @@ var IdeaList = BasePanel.extend({
 
       //console.log("isOutside: ", this.mouseIsOutside);
     }
-  },
+  }
 
-  scrollTowardsMouseIfNecessary: function() {
+  scrollTowardsMouseIfNecessary() {
     //console.log("scrollTowardsMouseIfNecessary");
     if (!Ctx.draggedIdea || !this.scrollableElement)
         return;
@@ -784,26 +788,26 @@ var IdeaList = BasePanel.extend({
     this.scrollLastSpeed = speed;
     //WTF: The parameters of this next line make no sense.
     this.scrollableElement.scrollTop(this.scrollableElement.scrollTop() + (speed * deltaTime));
-  },
+  }
 
-  increaseRowHeight: function() {
+  increaseRowHeight() {
     this.tableOfIdeasRowHeight += 2;
     this.tableOfIdeasRowHeight = Math.min (40, Math.max(12, this.tableOfIdeasRowHeight));
     this.updateUserCustomStylesheet();
-  },
+  }
 
-  decreaseRowHeight: function() {
+  decreaseRowHeight() {
     this.tableOfIdeasRowHeight -= 2;
     this.tableOfIdeasRowHeight = Math.min (40, Math.max(12, this.tableOfIdeasRowHeight));
     this.updateUserCustomStylesheet();
-  },
+  }
 
-  toggleDecreasingFontSizeWithDepth: function() {
+  toggleDecreasingFontSizeWithDepth() {
     this.tableOfIdeasFontSizeDecreasingWithDepth = !this.tableOfIdeasFontSizeDecreasingWithDepth;
     this.updateUserCustomStylesheet();
-  },
+  }
 
-  updateUserCustomStylesheet: function() {
+  updateUserCustomStylesheet() {
     var sheetId = 'userCustomStylesheet';
     var rowHeight = this.tableOfIdeasRowHeight + 'px';
     var rowHeightSmaller = (this.tableOfIdeasRowHeight - 2) + 'px';
@@ -834,10 +838,10 @@ var IdeaList = BasePanel.extend({
 
     sheet.innerHTML = str;
     document.body.appendChild(sheet);
-  },
+  }
 
   // called by ideaInIdeaList::saveCollapsedState()
-  saveIdeaCollapsedState: function(ideaModel, isCollapsed){
+  saveIdeaCollapsedState(ideaModel, isCollapsed) {
     if ( !Ctx.isUserConnected() || !this.tableOfIdeasCollapsedState ){
       return;
     }
@@ -846,9 +850,9 @@ var IdeaList = BasePanel.extend({
     var o = {};
     o[idea_numeric_id] = value;
     this.tableOfIdeasCollapsedState.save(o, {patch: true});
-  },
+  }
 
-  saveIdeasStateAsDefault: function(){
+  saveIdeasStateAsDefault() {
     // check first on the front-end that the user has the permission to do this (in order to avoid future failure during API calls)
     if ( !Ctx.isUserConnected() || !Ctx.getCurrentUser().can(Permissions.ADD_IDEA) || !this.defaultTableOfIdeasCollapsedState ){
       alert(i18n.gettext('You don\'t have the permission to do this.'));
@@ -876,9 +880,9 @@ var IdeaList = BasePanel.extend({
         }
       }
     );
-  },
+  }
 
-  restoreIdeasState: function(){
+  restoreIdeasState() {
     var id = this.tableOfIdeasCollapsedState.get('id');
     this.tableOfIdeasCollapsedState.clear();
     this.tableOfIdeasCollapsedState.set('id', id);
@@ -892,20 +896,20 @@ var IdeaList = BasePanel.extend({
     }
     this.render();
     // FIXME: for now, event does not seem to be triggered when I make changes, so I have to call explicitly a render() of the table of ideas 
-  },
+  }
 
-  expandAllIdeas: function(){
+  expandAllIdeas() {
     this.expandOrCollapseAllIdeas(false);
-  },
+  }
 
-  collapseAllIdeas: function(){
+  collapseAllIdeas() {
     this.expandOrCollapseAllIdeas(true);
-  },
+  }
 
   /**
    * @param {boolean} collapse: set to true if you want to collapse all ideas, false otherwise
    */
-  expandOrCollapseAllIdeas: function(collapse){
+  expandOrCollapseAllIdeas(collapse) {
     var that = this;
     new CollectionManager().getAllIdeasCollectionPromise().done(function(ideas){
       ideas.each(function(idea) {
@@ -917,7 +921,6 @@ var IdeaList = BasePanel.extend({
       that.render();
     });
   }
-
-});
+}
 
 export default IdeaList;

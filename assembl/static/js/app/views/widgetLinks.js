@@ -11,23 +11,23 @@ import $ from 'jquery';
 import Widget from '../models/widget.js';
 
 
-var WidgetLinkView = Marionette.View.extend({
-  constructor: function WidgetLinkView() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class WidgetLinkView extends Marionette.View.extend({
   template: "#tmpl-widgetLink",
   tagName: 'li',
-  initialize: function(options) {
-    this.options = options;
-  },
+
   ui: {
     anchor: ".js_widgetLinkAnchor"
   },
+
   events: {
     "click @ui.anchor": "onAnchorClick"
-  },
-  onAnchorClick: function(evt) {
+  }
+}) {
+  initialize(options) {
+    this.options = options;
+  }
+
+  onAnchorClick(evt) {
     var that = this;
 
     var onDestroyCallback = function() {
@@ -47,23 +47,20 @@ var WidgetLinkView = Marionette.View.extend({
     } else {
       return Ctx.openTargetInModal(evt, null, options);
     }
-  },
-  serializeData: function() {
+  }
+
+  serializeData() {
     return {
       link: this.model.getUrl(this.options.context, this.options.idea.getId()),
       text: this.model.getLinkText(this.options.context, this.options.idea)
     };
   }
-});
+}
 
-var WidgetLinkListView = Marionette.CollectionView.extend({
-  constructor: function WidgetLinkListView() {
-    Marionette.CollectionView.apply(this, arguments);
-  },
-
-  childView: WidgetLinkView,
-
-  initialize: function(options) {
+class WidgetLinkListView extends Marionette.CollectionView.extend({
+  childView: WidgetLinkView
+}) {
+  initialize(options) {
     this.childViewOptions = {
       context: options.context || options.collection.context,
       idea: options.idea || options.collection.idea
@@ -72,7 +69,7 @@ var WidgetLinkListView = Marionette.CollectionView.extend({
       console.error("Undefined context in WidgetLinkListView");
     }
   }
-});
+}
 
 
 export default {

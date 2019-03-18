@@ -54,11 +54,7 @@ var processConfirmLanguagePreferences = function(messageView){
     }
 };
 
-var LanguageSelectionView = Marionette.View.extend({
-  constructor: function LanguageSelectionView() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class LanguageSelectionView extends Marionette.View.extend({
     template: '#tmpl-message_translation_question_selection',
 
     ui: {
@@ -70,9 +66,9 @@ var LanguageSelectionView = Marionette.View.extend({
     events: {
         "click @ui.confirm": "onConfirmClick",
         "click @ui.cancel": "onCancelClick"
-    },
-
-    initialize: function(options){
+    }
+}) {
+    initialize(options) {
         this.parentView = options.questionView,
         this.messageView = this.parentView.messageView;
         this.languagePreferences = this.parentView.languagePreferences;
@@ -80,18 +76,18 @@ var LanguageSelectionView = Marionette.View.extend({
         this.translatedFrom = this.parentView.translatedFrom;
         this.originalLocale = this.parentView.originalLocale;
         this.langCache = this.parentView.langCache;
-    },
+    }
 
-    nameOfLocale: function(locale) {
+    nameOfLocale(locale) {
         var name = this.langCache[locale];
         if (name === undefined) {
             console.error("The language " + locale + " is not a part of the locale cache!");
             return locale;
         }
         return name;
-    },
+    }
 
-    onConfirmClick: function(e){
+    onConfirmClick(e) {
         var that = this; //Will return Array
         var user = Ctx.getCurrentUser();
         var preferredLanguageTo = $(this.ui.selectedLanguage).val();
@@ -116,13 +112,13 @@ var LanguageSelectionView = Marionette.View.extend({
             this.parentView.preferredTarget = preferredLanguageTo[0];
             this.parentView.updateLanguagePreference(userTranslationStates.CONFIRM);
         }
-    },
+    }
 
-    onCancelClick: function(ev){
+    onCancelClick(ev) {
         this.parentView.onLanguageSelectedCancelClick();
-    },
+    }
 
-    serializeData: function(){
+    serializeData() {
         return {
             supportedLanguages: Ctx.localesAsSortedList(),
             translatedTo: this.translatedTo,
@@ -132,13 +128,9 @@ var LanguageSelectionView = Marionette.View.extend({
             translatedFrom: this.translatedFrom
         };
     }
-});
+}
 
-var TranslationView = LoaderView.extend({
-  constructor: function TranslationView() {
-    LoaderView.apply(this, arguments);
-  },
-
+class TranslationView extends LoaderView.extend({
     template: '#tmpl-message_translation_question',
 
     ui: {
@@ -160,9 +152,9 @@ var TranslationView = LoaderView.extend({
 
     regions: {
         selectLanguage: ".js_translation-reveal-more"
-    },
-
-    initialize: function(options){
+    }
+}) {
+    initialize(options) {
         this.setLoading(true);
         this.message = options.messageModel;
         this.messageView = options.messageView;
@@ -198,18 +190,18 @@ var TranslationView = LoaderView.extend({
                     that.render();
                 }
             });
-    },
+    }
 
-    nameOfLocale: function(locale) {
+    nameOfLocale(locale) {
         var name = this.langCache[locale];
         if (name === undefined) {
             console.error("The language " + locale + " is not a part of the locale cache!");
             return locale;
         }
         return name;
-    },
+    }
 
-    updateLanguagePreference: function(state){
+    updateLanguagePreference(state) {
         var user = Ctx.getCurrentUser();
         var that = this;
         if (state === userTranslationStates.CONFIRM) {
@@ -237,17 +229,17 @@ var TranslationView = LoaderView.extend({
                 }
             );
         }
-    },
+    }
 
-    updateLanguagePreferenceConfirm: function(e){
+    updateLanguagePreferenceConfirm(e) {
         this.updateLanguagePreference(userTranslationStates.CONFIRM);
-    },
+    }
 
-    updateLanguagePreferenceDeny: function(e) {
+    updateLanguagePreferenceDeny(e) {
         this.updateLanguagePreference(userTranslationStates.DENY);
-    },
+    }
 
-    onLanguageRevealClick: function(ev){
+    onLanguageRevealClick(ev) {
         if (!this.moreLanguagesViewShown) {
             this.showChildView('selectLanguage', new LanguageSelectionView({
                 messageModel: this.message,
@@ -258,30 +250,30 @@ var TranslationView = LoaderView.extend({
         else {
             this.onLanguageSelectedCancelClick();
         }
-    },
+    }
 
     /*
         Called by child class to destroy itself
         Since parent has to be passed through to child view,
         fuck using events to trigger this. Child explicitly calls this.
      */
-    onLanguageSelectedCancelClick: function(){
+    onLanguageSelectedCancelClick() {
         this.getRegion('selectLanguage').empty();
         this.moreLanguagesViewShown = false;
-    },
+    }
 
     /*
         Hides the translation view into another element of the message
         Currently, that is the "Show More" dropdown
      */
-    onHideQuestionClick: function(e) {
+    onHideQuestionClick(e) {
         var that = this;
         this.messageView.closeTranslationView(function(){
             console.log("The message is hidden by now");
         });
-    },
+    }
 
-    serializeData: function(){
+    serializeData() {
         if (this.isLoading()) {
             var translationQuestion;
             var noAnswer;
@@ -322,6 +314,6 @@ var TranslationView = LoaderView.extend({
             };
         }
     }
-});
+}
 
 export default TranslationView;

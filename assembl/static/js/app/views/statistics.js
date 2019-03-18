@@ -17,13 +17,20 @@ import i18n from '../utils/i18n.js';
 import Moment from 'moment';
 import Promise from 'bluebird';
 
-var Statistics = Marionette.View.extend({
-  constructor: function Statistics() {
-    Marionette.View.apply(this, arguments);
+class Statistics extends Marionette.View.extend({
+  template: '#tmpl-statistics',
+
+  ui: {
+    statistics: '.statistics',
+    chart: '.chart'
   },
 
-  template: '#tmpl-statistics',
-  initialize: function() {
+  lineChartIsCumulative: true,
+  lineChartShowPoints: false,
+  pieChartShowMessages: false,
+  pie_chart_data: undefined
+}) {
+  initialize() {
     var that = this;
     var collectionManager = new CollectionManager();
     Promise.join(collectionManager.getAllUsersCollectionPromise(),
@@ -33,27 +40,18 @@ var Statistics = Marionette.View.extend({
         that.allMessagesCollection = allMessagesCollection;
         that.render();
       });
-  },
-  ui: {
-    statistics: '.statistics',
-    chart: '.chart'
-  },
+  }
 
-  lineChartIsCumulative: true,
-  lineChartShowPoints: false,
-  pieChartShowMessages: false,
-  pie_chart_data: undefined,
-
-  onBeforeRender: function() {
+  onBeforeRender() {
     this.computeStatistics();
-  },
+  }
 
-  onRender: function() {
+  onRender() {
     this.draw();
-  },
+  }
 
   // this has been implemented for analysis only (this should not be called in production)
-  messagesPerDayToCsv: function() {
+  messagesPerDayToCsv() {
     if (!this.messages_per_day_for_line_graph || !this.messages_per_day_for_line_graph.length) {
       console.log("no data");
       return;
@@ -66,9 +64,9 @@ var Statistics = Marionette.View.extend({
       s += "\n" + date_s + "," + el.value;
     });
     return s;
-  },
+  }
 
-  draw: function() {
+  draw() {
     // -----
     // show results
     // -----
@@ -90,9 +88,9 @@ var Statistics = Marionette.View.extend({
     this.drawLineGraph(this.messages_per_day_for_line_graph);
 
     this.drawPieChart(this.pie_chart_data, this.pie_chart_default_legend_data, this.legend_squares_data);
-  },
+  }
 
-  drawLineGraph: function(data) {
+  drawLineGraph(data) {
     var w = 450;
     var h = 250;
     var that = this;
@@ -430,9 +428,9 @@ var Statistics = Marionette.View.extend({
     }
 
     draw();
-  },
+  }
 
-  drawPieChart: function(pie_chart_data, default_legend_data, legend_squares_data) {
+  drawPieChart(pie_chart_data, default_legend_data, legend_squares_data) {
     /*
      taken from:
      http://bl.ocks.org/adewes/4710330/94a7c0aeb6f09d681dbfdd0e5150578e4935c6ae
@@ -778,9 +776,9 @@ var Statistics = Marionette.View.extend({
     //window.onload = init_plots;
     //window.onresize = init_plots;
     init_plots();
-  },
+  }
 
-  computeStatistics: function() {
+  computeStatistics() {
     var allUsersCollection = this.allUsersCollection;
     var allMessagesCollection = this.allMessagesCollection;
     if (allUsersCollection !== undefined && allMessagesCollection !== undefined) {
@@ -1098,14 +1096,14 @@ var Statistics = Marionette.View.extend({
               this.legend_squares_data = legend_squares_data;
 
     }
-  },
+  }
 
   /*
    * @param messages: [{'day': '2012-01-01', 'value': 1},...] sorted by date ascending
    * @param threshold: Number
    * @returns a period object {'period_type': 'last 2 weeks', 'date_min': Date, 'date_max': Date }
    */
-  deduceGoodPeriod: function(messages, threshold) {
+  deduceGoodPeriod(messages, threshold) {
     var count = 0;
     var sz = messages.length;
     var date_threshold_min = messages[0].date;
@@ -1190,7 +1188,6 @@ var Statistics = Marionette.View.extend({
       "threshold_value": count
     };
   }
-
-});
+}
 
 export default Statistics;

@@ -20,34 +20,30 @@ import FacebookSourceEditView from '../facebookViews.js';
  * to use for the editing of each source in a source list
  * view.
  */
-const SourceViewBase = LoaderView.extend({
-  constructor: function SourceViewBase() {
-    LoaderView.apply(this, arguments);
-  },
-
+class SourceViewBase extends LoaderView.extend({
   ui: {
     submit: '.js_saveSource',
   },
 
   events: {
     'click @ui.submit': 'submitForm'
-  },
-
-  submitForm: function(e) {
+  }
+}) {
+  submitForm(e) {
     e.preventDefault();
     this.saveModel();
-  },
+  }
 
   /**
    * A function to override by sub-class to get the
    * model changed values
    * @returns Object of values for the model to change
    */
-  fetchValues: function(){
+  fetchValues() {
     throw new Error("Cannot call fetchValues on an abstract class!");
-  },
+  }
 
-  saveModel: function(){
+  saveModel() {
     var values = this.fetchValues();
     this.model.set(values);
     this.model.save(null, {
@@ -60,17 +56,12 @@ const SourceViewBase = LoaderView.extend({
       }
     });
   }
-});
+}
 
-
-const EmailSourceEditView = SourceViewBase.extend({
-  constructor: function EmailSourceEditView() {
-    SourceViewBase.apply(this, arguments);
-  },
-
-  template: '#tmpl-emailSource',
-
-  fetchValues: function(){
+class EmailSourceEditView extends SourceViewBase.extend({
+  template: '#tmpl-emailSource'
+}) {
+  fetchValues() {
     return {
       name: this.$('#name').val(),
       admin_sender: this.$('#admin_sender').val(),
@@ -82,23 +73,15 @@ const EmailSourceEditView = SourceViewBase.extend({
       username: this.$('#username').val(),
       password: this.$('#password').val()
     }
-  },
-});
+  }
+}
 
+class AnnotatorSourceEditView extends SourceViewBase {}
 
-const AnnotatorSourceEditView = SourceViewBase.extend({
-  constructor: function AnnotatorSourceEditView() {
-    SourceViewBase.apply(this, arguments);
-  },
-});
-
-
-const IdeaSourceEditView = SourceViewBase.extend({
-  template: '#tmpl-IdeaSource',
-  constructor: function IdeaSourceEditView() {
-    SourceViewBase.apply(this, arguments);
-  },
-  initialize: function(options) {
+class IdeaSourceEditView extends SourceViewBase.extend({
+  template: '#tmpl-IdeaSource'
+}) {
+  initialize(options) {
     const that = this;
     const collectionManager = new CollectionManager();
     this.setLoading(true);
@@ -111,58 +94,56 @@ const IdeaSourceEditView = SourceViewBase.extend({
       that.setLoading(false);
       that.render();
     });
-  },
-  serializeData: function() {
+  }
+
+  serializeData() {
     if (this.isLoading())
       return {};
     return _.extend(this.model.toJSON(), {
       langPrefs: this.langPrefs,
       pubStates: this.pubStates,
     });
-  },
-  fetchValues: function() {
+  }
+
+  fetchValues() {
     return {
       name: this.$('#name').val(),
       source_uri: this.$('#source_uri').val(),
       data_filter: this.$('#data_filter').val(),
       target_state_label: this.$('#target_state_label').val(),
     }
-  },
-});
+  }
+}
 
-
-const IdeaLoomIdeaSourceEditView = IdeaSourceEditView.extend({
-  template: '#tmpl-IdeaLoomIdeaSource',
-  constructor: function IdeaLoomIdeaSourceEditView() {
-    IdeaSourceEditView.apply(this, arguments);
-  },
-  fetchValues: function() {
-    const base = IdeaSourceEditView.prototype.fetchValues.apply(this, arguments);
+class IdeaLoomIdeaSourceEditView extends IdeaSourceEditView.extend({
+  template: '#tmpl-IdeaLoomIdeaSource'
+}) {
+  fetchValues() {
+    const base = super.fetchValues(...arguments);
     return _.extend(base, {
       username: this.$('#username').val(),
       password: this.$('#password').val(),
     });
-  },
-});
+  }
+}
 
-const FeedPostSourceEditView = SourceViewBase.extend({
-  template: '#tmpl-FeedPostSource',
-  constructor: function FeedPostSourceEditView() {
-    SourceViewBase.apply(this, arguments);
-  },
-  serializeData: function() {
+class FeedPostSourceEditView extends SourceViewBase.extend({
+  template: '#tmpl-FeedPostSource'
+}) {
+  serializeData() {
     return _.extend(this.model.toJSON(), {
       parserClasses: this.model.knownParsers,
     });
-  },
-  fetchValues: function() {
+  }
+
+  fetchValues() {
     return {
       name: this.$('#name').val(),
       url: this.$('#url').val(),
       parser_full_class_name: this.$('#parser_full_class_name').val(),
     }
-  },
-});
+  }
+}
 
 
 function getSourceEditView(model_type) {

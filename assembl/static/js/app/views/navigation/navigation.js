@@ -21,11 +21,7 @@ import PanelSpecTypes from '../../utils/panelSpecTypes.js';
 import CollectionManager from '../../common/collectionManager.js';
 import Analytics from '../../internal_modules/analytics/dispatcher.js';
 
-var NavigationView = BasePanel.extend({
-  constructor: function NavigationView() {
-    BasePanel.apply(this, arguments);
-  },
-
+class NavigationView extends BasePanel.extend({
   template: "#tmpl-navigation",
   panelType: PanelSpecTypes.NAV_SIDEBAR,
   className: "navSidebar",
@@ -35,11 +31,10 @@ var NavigationView = BasePanel.extend({
 
   //This MUST match the variables in _variables.scss
   group_header_height: 0,
+
   group_editable_header_height: 25,
   li_height: 40,
-  getTitle: function() {
-    return 'Navigation'; // unused
-  },
+
   regions: {
     about: '.about',
     debate: '.debate',
@@ -47,6 +42,7 @@ var NavigationView = BasePanel.extend({
     notification: '.navNotification',
     visualizationList: '.visualization-list'
   },
+
   ui: {
     navigation: '.js_navigation',
     ideaFromIdealist: '.js_addIdeaFromIdeaList',
@@ -55,12 +51,18 @@ var NavigationView = BasePanel.extend({
     synthesis_tab: '.js_synthesis_tab',
     discussion_tab_minimize_icon: '.js_discussion_tab .js_minimizePanel'
   },
+
   events: {
     'click @ui.navigation': '_toggleMenuByEvent',
     'click @ui.ideaFromIdealist': 'addIdeaFromIdeaList',
-  },
-  initialize: function(options) {
-    BasePanel.prototype.initialize.apply(this, arguments);
+  }
+}) {
+  getTitle() {
+    return 'Navigation'; // unused
+  }
+
+  initialize(options) {
+    super.initialize(...arguments);
 
     this._accordionContentHeight = null;
     this._accordionHeightTries = 0;
@@ -69,8 +71,9 @@ var NavigationView = BasePanel.extend({
 
     this.listenTo(IdeaLoom.other_vent, 'DEPRECATEDnavigation:selected', this.setViewByName);
     this.listenTo(IdeaLoom.other_vent, 'infobar:closeItem', this.setSideBarHeight);
-  },
-  onAttach:function() {
+  }
+
+  onAttach() {
     var that = this;
     var collectionManager = new CollectionManager();
 
@@ -119,16 +122,16 @@ var NavigationView = BasePanel.extend({
       that.listenTo(allMessageStructureCollection, 'add', messageArrivedCallback);
 
     }).delay(500).then(function() {that.setSideBarHeight();});
-  },
+  }
 
-  onDestroy:function() {
+  onDestroy() {
     $(window).off('resize', this.setSideBarHeight);
-  },
+  }
 
   /**
    * @param origin - Analytics context where the event was fired
    */
-  setViewByName: function(itemName, origin) {
+  setViewByName(itemName, origin) {
     if (origin === undefined) {
       origin = '-';
     }
@@ -144,14 +147,14 @@ var NavigationView = BasePanel.extend({
       this._toggleMenuByName(itemName);
       this._loadView(itemName, origin);
     }
-  },
+  }
 
-  _toggleMenuByName: function(itemName, options) {
+  _toggleMenuByName(itemName, options) {
     var elm = this.$('.nav[data-view=' + itemName + ']');
     this._toggleMenuByElement(elm, options);
-  },
+  }
 
-  _toggleMenuByEvent: function(evt) {
+  _toggleMenuByEvent(evt) {
     if ($(evt.target).hasClass("js_minimizePanel"))
         return;
 
@@ -160,13 +163,13 @@ var NavigationView = BasePanel.extend({
 
     var view = elm.attr('data-view');
     IdeaLoom.other_vent.trigger("DEPRECATEDnavigation:selected", view, 'NAVIGATION');
-  },
+  }
 
   /**
    * Toggle a navigation accordion item
    * @param  {jQuery} elm
    */
-  _toggleMenuByElement: function(elm, options) {
+  _toggleMenuByElement(elm, options) {
     this.setSideBarHeight();
     var view = elm.attr('data-view');
 
@@ -176,9 +179,9 @@ var NavigationView = BasePanel.extend({
       elm.addClass('active');
       elm.next('div.second-level').slideDown();
     }
-  },
+  }
 
-  setSideBarHeight: function() {
+  setSideBarHeight() {
     var that = this;
     var debouncedFunction = _.debounce(function() {
       if(that.isRenderedAndNotYetDestroyed()) {
@@ -187,9 +190,9 @@ var NavigationView = BasePanel.extend({
       }
     }, 1000, true);
     debouncedFunction();
-  },
+  }
 
-  _loadView: function(view, origin) {
+  _loadView(view, origin) {
       // clear aspects of current state
       switch (this.getContainingGroup().model.get('navigationState')) {
         case 'synthesis':
@@ -259,10 +262,10 @@ var NavigationView = BasePanel.extend({
         default:
           break;
       }
-    },
+    }
 
   // This method needs the DOM elements of the View to be rendered. So it should not be called in onRender(), but rather in onShow() or onDomRefresh()
-  initVar: function() {
+  initVar() {
     // check wether DOM elements are already rendered
     var marginHeightLi = 0;
     if(Ctx.isSmallScreen()){
@@ -291,20 +294,19 @@ var NavigationView = BasePanel.extend({
         }, 100);
       }
     }
-  },
+  }
 
-  serializeData: function() {
+  serializeData() {
     return {
       Ctx: Ctx,
       hasMinimize: true, // minimization of the navigation panel is now allowed to everyone. Before, it was: (Ctx.getCurrentInterfaceType() === Ctx.InterfaceTypes.EXPERT),
       canAdd: Ctx.getCurrentUser().can(Permissions.ADD_IDEA)
     }
-  },
-
-  addIdeaFromIdeaList: function() {
-    IdeaLoom.idea_vent.trigger('ideaList:addChildToSelected');
   }
 
-});
+  addIdeaFromIdeaList() {
+    IdeaLoom.idea_vent.trigger('ideaList:addChildToSelected');
+  }
+}
 
 export default NavigationView;

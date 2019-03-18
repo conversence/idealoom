@@ -8,11 +8,7 @@ import Backbone from 'backbone';
 import _ from 'underscore';
 import Ctx from '../common/context.js';
 
-var IdeaFamilyView = Backbone.View.extend({
-  constructor: function IdeaFamilyView() {
-    Backbone.View.apply(this, arguments);
-  },
-
+class IdeaFamilyView extends Backbone.View.extend({
   /**
    * Tag name
    * @type {string}
@@ -33,23 +29,23 @@ var IdeaFamilyView = Backbone.View.extend({
    * The template
    * @type {template}
    */
-  template: Ctx.loadTemplate('ideaFamily'),
-
+  template: Ctx.loadTemplate('ideaFamily')
+}) {
   /**
    * @init
    */
-  initialize: function(obj) {
+  initialize(obj) {
     this.view_data = obj.view_data
     this.isOpen = true;
     this.innerViewClass = obj.innerViewClass;
     this.innerViewClassInitializeParams = obj.innerViewClassInitializeParams;
-  },
+  }
 
   /**
    * The render
    * @returns {IdeaInSynthesisView}
    */
-  render: function() {
+  render() {
     var that = this;
     var data = this.model.toJSON();
     var authors = [];
@@ -105,7 +101,6 @@ var IdeaFamilyView = Backbone.View.extend({
 
     return this;
   }
-
-});
+}
 
 export default IdeaFamilyView;

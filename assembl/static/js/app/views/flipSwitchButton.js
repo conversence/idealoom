@@ -5,11 +5,7 @@
 
 import Marionette from 'backbone.marionette';
 
-var FlipSwitchButton = Marionette.View.extend({
-  constructor: function FlipSwitchButton() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class FlipSwitchButton extends Marionette.View.extend({
   template: '#tmpl-flipSwitchButton',
   className: 'flipSwitchButton',
 
@@ -23,18 +19,18 @@ var FlipSwitchButton = Marionette.View.extend({
 
   modelEvents: {
     'change:isOn': 'updateState' // this is the same as writing this.listenTo(this.model, 'change:isOn', this.updateState); in the initialize() method
-  },
-
+  }
+}) {
   // the serializeData() method is not needed because model attributes are sent automatically to the template
 
-  onToggle: function() {
+  onToggle() {
     this.model.set('isOn', !this.model.get('isOn'));
 
     //this.updateState(); // will be done automatically thanks to modelEvents
-  },
+  }
 
   // does a smooth re-render (so that CSS animations are shown)
-  updateState: function() {
+  updateState() {
     console.log("flipSwitchButton::updateState()");
     if (this.model.get('isOn'))
     {
@@ -46,7 +42,6 @@ var FlipSwitchButton = Marionette.View.extend({
       this.ui.toggleButton.addClass("flipswitch-no");
     }
   }
-
-});
+}
 
 export default FlipSwitchButton;

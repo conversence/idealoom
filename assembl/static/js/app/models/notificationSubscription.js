@@ -14,11 +14,7 @@ import Ctx from '../common/context.js';
  * @extends app.models.base.BaseModel
  */
 
-var notificationsSubscriptionModel = Base.Model.extend({
-  constructor: function notificationsSubscriptionModel() {
-    Base.Model.apply(this, arguments);
-  },
-
+class notificationsSubscriptionModel extends Base.Model.extend({
   defaults: {
     '@id': null,
     '@type': null,
@@ -31,15 +27,15 @@ var notificationsSubscriptionModel = Base.Model.extend({
     creation_origin: null,
     human_readable_description: null,
     user: null
-  },
-
-  validate: function(attrs, options) {
+  }
+}) {
+  validate(attrs, options) {
     /**
      * check typeof variable
      * */
      
   }
-});
+}
 
 /**
  * Notifications subscription collection
@@ -47,28 +43,24 @@ var notificationsSubscriptionModel = Base.Model.extend({
  * @extends app.models.base.BaseCollection
  */
 
-var notificationsSubscriptionCollection = Base.Collection.extend({
-  constructor: function notificationsSubscriptionCollection() {
-    Base.Collection.apply(this, arguments);
-  },
-
-  model: notificationsSubscriptionModel,
-
+class notificationsSubscriptionCollection extends Base.Collection.extend({
+  model: notificationsSubscriptionModel
+}) {
   /**
    * Set the collection url for a specific user subscription
    */
-  setUrlToUserSubscription: function() {
+  setUrlToUserSubscription() {
     var root = 'Discussion/' + Ctx.getDiscussionId() + '/all_users/' + Ctx.getCurrentUserId() + '/notification_subscriptions';
     this.url = Ctx.getApiV2Url(root);
-  },
+  }
 
   /**
    * Set the collection url for global discussion template subscription
    */
-  setUrlToDiscussionTemplateSubscriptions: function() {
+  setUrlToDiscussionTemplateSubscriptions() {
     this.url = Ctx.getApiV2DiscussionUrl("user_templates/-/notification_subscriptions");
   }
-});
+}
 
 export default {
   Model: notificationsSubscriptionModel,

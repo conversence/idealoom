@@ -9,11 +9,7 @@ import IdeaLoom from '../app.js';
 import PanelSpecTypes from '../utils/panelSpecTypes.js';
 import ideaInIdeaList from './ideaInIdeaList.js';
 
-var SynthesisIdeaView = ideaInIdeaList.IdeaView.extend({
-  constructor: function SynthesisIdeaView() {
-    ideaInIdeaList.IdeaView.apply(this, arguments);
-  },
-
+class SynthesisIdeaView extends ideaInIdeaList.IdeaView.extend({
   /**
    * The template
    * @type {template}
@@ -21,9 +17,16 @@ var SynthesisIdeaView = ideaInIdeaList.IdeaView.extend({
   template: Ctx.loadTemplate('synthesisInIdeaList'),
 
   /**
+   * @events
+   */
+  events: {
+    'click .idealist-title': 'onTitleClick'
+  }
+}) {
+  /**
    * The render
    */
-  onRender: function() {
+  onRender() {
     Ctx.removeCurrentlyDisplayedTooltips(this.$el);
 
     var data = this.model.toJSON();
@@ -39,19 +42,12 @@ var SynthesisIdeaView = ideaInIdeaList.IdeaView.extend({
     this.$el.html(this.template(data));
     Ctx.initTooltips(this.$el);
     return this;
-  },
-
-  /**
-   * @events
-   */
-  events: {
-    'click .idealist-title': 'onTitleClick'
-  },
+  }
 
   /**
    * @event
    */
-  onTitleClick: function() {
+  onTitleClick() {
     $('.idealist-item').removeClass('is-selected');
 
     var messageListView = this.getContainingGroup().findViewByType(PanelSpecTypes.MESSAGE_LIST);
@@ -62,6 +58,6 @@ var SynthesisIdeaView = ideaInIdeaList.IdeaView.extend({
 
     this.$el.addClass('is-selected');
   }
-});
+}
 
 export default SynthesisIdeaView;

@@ -16,20 +16,18 @@ import i18n from '../utils/i18n.js';
  * @extends app.models.idea.IdeaCollection
  */
 
-var SynthesisIdeaCollection = Idea.Collection.extend({
-  constructor: function SynthesisIdeaCollection() {
-    Idea.Collection.apply(this, arguments);
-  },
+class SynthesisIdeaCollection extends Idea.Collection.extend({
+  // Here I actually need double inheritance; cheating with function references.
+  add: Base.RelationsCollection.prototype.add,
 
-  initialize: function(models, options) {
+  remove: Base.RelationsCollection.prototype.remove
+}) {
+  initialize(models, options) {
     var synthesis = options.synthesis;
     var id = synthesis.getNumericId();
     this.url = Ctx.getApiV2DiscussionUrl("/syntheses/" + id + "/ideas");
-  },
-  // Here I actually need double inheritance; cheating with function references.
-  add: Base.RelationsCollection.prototype.add,
-  remove: Base.RelationsCollection.prototype.remove
-});
+  }
+}
 
 /**
  * Synthesis model
@@ -38,20 +36,7 @@ var SynthesisIdeaCollection = Idea.Collection.extend({
  * @extends app.models.base.BaseModel
  */
 
-var SynthesisModel = Base.Model.extend({
-  constructor: function SynthesisModel() {
-    Base.Model.apply(this, arguments);
-  },
-
-
-  /**
-   * @init
-   */
-  initialize: function() {
-    //What was this?  Benoitg - 2014-05-13
-    //this.on('change', this.onAttrChange, this);
-  },
-
+class SynthesisModel extends Base.Model.extend({
   /**
    * The urlRoot endpoint
    * @type {string}
@@ -68,21 +53,31 @@ var SynthesisModel = Base.Model.extend({
     conclusion: i18n.gettext('Add a conclusion'),
     ideas: [],
     published_in_post: null
-  },
+  }
+}) {
+  /**
+   * @init
+   */
+  initialize() {
+    //What was this?  Benoitg - 2014-05-13
+    //this.on('change', this.onAttrChange, this);
+  }
 
-  validate: function(attrs, options) {
+  validate(attrs, options) {
     /**
      * check typeof variable
      * */
-  },
-  set: function(key, val, options) {
-    var ob = Base.Model.prototype.set.apply(this, arguments);
+  }
+
+  set(key, val, options) {
+    var ob = super.set(...arguments);
     if ((key == "ideas" || key.ideas !== undefined) && this.ideasCollection !== undefined) {
         this.ideasCollection.reset(this.get("ideas"), {parse: true});
     }
     return ob;
-  },
-  getIdeasCollection: function() {
+  }
+
+  getIdeasCollection() {
     if (this.ideasCollection === undefined) {
         // cache since it is the result of parsing.
         this.ideasCollection = new SynthesisIdeaCollection(
@@ -91,7 +86,7 @@ var SynthesisModel = Base.Model.extend({
     }
     return this.ideasCollection;
   }
-});
+}
 
 /**
  * Synthesis collection
@@ -99,11 +94,7 @@ var SynthesisModel = Base.Model.extend({
  * @extends app.models.base.BaseCollection
  */
 
-var SynthesisCollection = Base.Collection.extend({
-  constructor: function SynthesisCollection() {
-    Base.Collection.apply(this, arguments);
-  },
-
+class SynthesisCollection extends Base.Collection.extend({
   /**
    * Url
    * @type {string}
@@ -114,16 +105,16 @@ var SynthesisCollection = Base.Collection.extend({
    * The model
    * @type {SynthesisModel}
    */
-  model: SynthesisModel,
-
-  getPublishedSyntheses: function() {
+  model: SynthesisModel
+}) {
+  getPublishedSyntheses() {
       return this.filter(function(model) { return model.get('published_in_post') != null; });
-    },
+    }
 
   /** Get the last published synthesis
    * @returns Message.Model or null
    */
-  getLastPublisedSynthesis: function() {
+  getLastPublisedSynthesis() {
     var publishedSyntheses = this.getPublishedSyntheses();
     var lastSynthesis = null;
     if (publishedSyntheses.length > 0) {
@@ -135,7 +126,7 @@ var SynthesisCollection = Base.Collection.extend({
 
     return lastSynthesis;
   }
-});
+}
 
 export default {
   Model: SynthesisModel,

@@ -14,25 +14,25 @@ import UserNavigationMenu from './userNavigationMenu.js';
 import i18n from '../../utils/i18n.js';
 import Growl from '../../utils/growl.js';
 
-var email = Marionette.View.extend({
-  constructor: function email() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class email extends Marionette.View.extend({
   template:'#tmpl-associateAccount',
   className:'associate-email mbs',
+
   ui: {
       verifyEmail: '.js_verifyEmail'
     },
+
   events: {
       'click @ui.verifyEmail': 'verifyEmail'
-    },
-  serializeData: function() {
+    }
+}) {
+  serializeData() {
     return {
           email: this.model
         }
-  },
-  verifyEmail: function() {
+  }
+
+  verifyEmail() {
     var urlRoot = this.model.urlRoot + '/' + this.model.get('@id').split('/')[1] + '/verify';
 
     var verify = new Backbone.Model();
@@ -51,63 +51,60 @@ var email = Marionette.View.extend({
       }
     })
   }
-});
+}
 
-var emailListBody = Marionette.CollectionView.extend({
-  constructor: function emailListBody() {
-    Marionette.CollectionView.apply(this, arguments);
-  },
+class emailListBody extends Marionette.CollectionView.extend({
+  childView: email
+}) {}
 
-  childView: email,
-});
-
-var emailList = Marionette.View.extend({
-  constructor: function emailList() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class emailList extends Marionette.View.extend({
   template: '#tmpl-associateAccounts',
+
   regions: {
     body: '.controls',
-  },
-  onRender: function() {
+  }
+}) {
+  onRender() {
     this.showChildView('body', new emailListBody({
       collection: this.collection,
     }));
-  },
-});
+  }
+}
 
-var socialProvidersList = Marionette.View.extend({
-  constructor: function socialProvidersList() {
-    Marionette.View.apply(this, arguments);
-  },
-
-  template: '#tmpl-socialProviders',
-  initialize: function(options) {
+class socialProvidersList extends Marionette.View.extend({
+  template: '#tmpl-socialProviders'
+}) {
+  initialize(options) {
     this.providers = options.providers;
-  },
-  serializeData: function() {
+  }
+
+  serializeData() {
     return {i18n: i18n, providers: this.providers};
   }
-});
+}
 
-var userAccount =  Marionette.View.extend({
+class userAccount extends Marionette.View.extend({
   template: '#tmpl-userAccountForm',
+
   ui: {
       'account': '.js_saveAccount'
     },
+
   events: {
     'click @ui.account': 'saveAccount'
   },
+
   modelEvents:{
       'add change':'render'
-    },
-  serializeData: function() {
+    }
+}) {
+  serializeData() {
     return {
       user: this.model
     }
-  },
-  saveAccount: function(e) {
+  }
+
+  saveAccount(e) {
     e.preventDefault();
 
     var pass1 = this.$('input[name="new_password"]');
@@ -144,34 +141,35 @@ var userAccount =  Marionette.View.extend({
       }
     });
   }
-});
+}
 
-var account = Marionette.View.extend({
-  constructor: function account() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class account extends Marionette.View.extend({
   template: '#tmpl-userAccount',
   className: 'admin-account',
+
   regions: {
     'navigationMenuHolder': '.navigation-menu-holder',
     'accounts':'#associate_accounts',
     'social_accounts':'#associate_social_accounts',
     'accountForm': '#userAccountForm'
   },
+
   ui: {
     'addEmail': '.js_addEmail'
   },
-  initialize: function() {
+
+  events: {
+    'click @ui.addEmail': 'addEmail'
+  }
+}) {
+  initialize() {
     this.emailCollection = new Accounts.Collection();
     this.userAcount = new Agents.Model({'@id': Ctx.getCurrentUserId()});
     this.userAcount.fetch();
     this.providers = Ctx.getJsonFromScriptTag('login-providers');
-  },
-  events: {
-    'click @ui.addEmail': 'addEmail'
-  },
-  onRender: function() {
+  }
+
+  onRender() {
     var menu = new UserNavigationMenu({selectedSection: "account"});
     this.showChildView('navigationMenuHolder', menu);
     var email_domain_constraints = Ctx.getPreferences().require_email_domain;
@@ -194,9 +192,9 @@ var account = Marionette.View.extend({
       model: this.userAcount
     });
     this.showChildView('accountForm', userAccountForm);
-  },
+  }
 
-  addEmail: function(e) {
+  addEmail(e) {
     e.preventDefault();
 
     var that = this;
@@ -233,7 +231,6 @@ var account = Marionette.View.extend({
       }
     })
   }
-
-});
+}
 
 export default account;

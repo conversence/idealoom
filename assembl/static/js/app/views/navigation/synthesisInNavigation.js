@@ -19,13 +19,14 @@ import scrollUtils from '../../utils/scrollUtils.js';
 import LoaderView from '../loaderView.js';
 import Analytics from '../../internal_modules/analytics/dispatcher.js';
 
-var SynthesisItem = LoaderView.extend({
-  constructor: function SynthesisItem() {
-    LoaderView.apply(this, arguments);
-  },
-
+class SynthesisItem extends LoaderView.extend({
   template: '#tmpl-synthesisItemInNavigation',
-  initialize: function(options) {
+
+  events: {
+    'click .js_synthesisList': 'onSelectedSynthesis'
+  }
+}) {
+  initialize(options) {
     var that = this;
     this.setLoading(true);
     this.panel = options.panel;
@@ -34,11 +35,9 @@ var SynthesisItem = LoaderView.extend({
         that.setLoading(false);
         that.render();
     });
-  },
-  events: {
-    'click .js_synthesisList': 'onSelectedSynthesis'
-  },
-  serializeData: function() {
+  }
+
+  serializeData() {
     if (this.isLoading()) {
         return {};
     }
@@ -47,9 +46,9 @@ var SynthesisItem = LoaderView.extend({
       subject: this.model.get('subject'),
       date: Ctx.formatDate(this.model.get('created'))
     };
-  },
+  }
 
-  onSelectedSynthesis: function(e) {
+  onSelectedSynthesis(e) {
     var messageId =  $(e.currentTarget).attr('data-message-id');
     this.panel.displaySynthesis(messageId);
     //If it's a small screen detected => scroll to the right
@@ -58,16 +57,12 @@ var SynthesisItem = LoaderView.extend({
       scrollUtils.scrollToNextPanel('.groupsContainer',100,screenSize);
     }
   }
+}
 
-});
-
-var SynthesisList = Marionette.CollectionView.extend({
-  constructor: function SynthesisList() {
-    Marionette.CollectionView.apply(this, arguments);
-  },
-
-  childView: SynthesisItem,
-  initialize: function(options) {
+class SynthesisList extends Marionette.CollectionView.extend({
+  childView: SynthesisItem
+}) {
+  initialize(options) {
 
     var publishedSyntheses = this.collection.getPublishedSyntheses();
 
@@ -82,26 +77,23 @@ var SynthesisList = Marionette.CollectionView.extend({
       panel: options.panel
     }
   }
+}
 
-});
-
-var SynthesisInNavigationPanel = BasePanel.extend({
-  constructor: function SynthesisInNavigationPanel() {
-    BasePanel.apply(this, arguments);
-  },
-
+class SynthesisInNavigationPanel extends BasePanel.extend({
   template: '#tmpl-synthesisInNavigationPanel',
   panelType: PanelSpecTypes.NAVIGATION_PANEL_SYNTHESIS_SECTION,
   className: 'synthesisNavPanel',
+
   ui: {
     synthesisListHeader: ".synthesisListHeader"
   },
+
   regions:{
     synthesisContainer: '.synthesisList'
-  },
-
-  initialize: function(options) {
-    BasePanel.prototype.initialize.apply(this, arguments);
+  }
+}) {
+  initialize(options) {
+    super.initialize(...arguments);
     var that = this;
     var collectionManager = new CollectionManager();
     this.setLoading(true);
@@ -116,14 +108,14 @@ var SynthesisInNavigationPanel = BasePanel.extend({
         that.render();
       }
     });
-  },
+  }
 
-  selectSynthesisInMenu: function(messageId) {
+  selectSynthesisInMenu(messageId) {
       $(".synthesisItem").closest('li').removeClass("selected");
       this.$(".synthesisItem[data-message-id=\"" + messageId + "\"]").addClass("selected");
-    },
+    }
 
-  displaySynthesis: function(messageId) {
+  displaySynthesis(messageId) {
     var analytics = Analytics.getInstance();
 
     analytics.trackEvent(analytics.events.NAVIGATION_OPEN_SPECIFIC_SYNTHESIS);
@@ -143,9 +135,9 @@ var SynthesisInNavigationPanel = BasePanel.extend({
 
     // Show that entry is selected
     this.selectSynthesisInMenu(messageId);
-  },
+  }
 
-  displaySynthesisList: function(allMessageStructureCollection, allSynthesisCollection) {
+  displaySynthesisList(allMessageStructureCollection, allSynthesisCollection) {
       var lastPublisedSynthesis = allSynthesisCollection.getLastPublisedSynthesis();
 
       if (lastPublisedSynthesis) {
@@ -161,9 +153,9 @@ var SynthesisInNavigationPanel = BasePanel.extend({
       else {
         this.ui.synthesisListHeader.html(i18n.gettext("No synthesis of the discussion has been published yet"));
       }
-    },
+    }
 
-  onRender: function() {
+  onRender() {
     var that = this;
     var collectionManager = new CollectionManager();
 
@@ -176,8 +168,7 @@ var SynthesisInNavigationPanel = BasePanel.extend({
         // that.getRegion('synthesisContainer').$el.find(".synthesisItem:first")[0].id = "tour_step_synthesis_item1";
         // IdeaLoom.tour_vent.trigger("requestTour", "synthesis_item1");
     }
-  },
-
-});
+  }
+}
 
 export default SynthesisInNavigationPanel;

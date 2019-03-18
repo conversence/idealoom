@@ -25,10 +25,7 @@ import Promise from 'bluebird';
 /**
  * @class  app.views.admin.adminTimelineEvents.AdminTimelineEventPanel
  */
-var AdminTimelineEventPanel = LoaderView.extend({
-  constructor: function AdminTimelineEventPanel() {
-    LoaderView.apply(this, arguments);
-  },
+class AdminTimelineEventPanel extends LoaderView.extend({
   template: '#tmpl-adminTimelineEvents',
 
   ui: {
@@ -45,9 +42,9 @@ var AdminTimelineEventPanel = LoaderView.extend({
 
   events: {
     'click @ui.addTimelineEvent': 'addTimelineEvent',
-  },
-
-  initialize: function(options) {
+  }
+}) {
+  initialize(options) {
     var that = this;
     var collectionManager = new CollectionManager();
     this.timelineEventCollection = null;
@@ -60,9 +57,9 @@ var AdminTimelineEventPanel = LoaderView.extend({
       that.setLoading(false);
       that.render();
     })
-  },
+  }
 
-  addTimelineEvent: function(ev) {
+  addTimelineEvent(ev) {
     var eventCollection = this.timelineEventCollection;
     var lastEventId;
     var event;
@@ -93,14 +90,14 @@ var AdminTimelineEventPanel = LoaderView.extend({
         eventCollection.render();
       }});
     ev.preventDefault();
-  },
+  }
 
-  serializeData: function() {
+  serializeData() {
     return {
     };
-  },
+  }
 
-  onRender: function() {
+  onRender() {
     if (this.isDestroyed() || this.isLoading()) {
       return;
     }
@@ -115,18 +112,15 @@ var AdminTimelineEventPanel = LoaderView.extend({
     var menu = new AdminNavigationMenu.discussionAdminNavigationMenu(
       {selectedSection: "timeline"});
     this.getRegion('navigationMenuHolder').show(menu);
-  },
-});
-
+  }
+}
 
 /**
  * @class  app.views.admin.adminTimelineEvents.TimelineEventView
  */
-var TimelineEventView = Marionette.View.extend({
-  constructor: function TimelineEventView() {
-    Marionette.View.apply(this, arguments);
-  },
+class TimelineEventView extends Marionette.View.extend({
   template: '#tmpl-adminTimelineEvent',
+
   ui: {
     eventTitle: '.js_timeline_title',
     eventDescription: '.js_timeline_description',
@@ -138,10 +132,12 @@ var TimelineEventView = Marionette.View.extend({
     eventDown: '.js_timeline_down',
     eventDelete: '.js_timeline_delete',
   },
+
   regions: {
     eventTitle: '@ui.eventTitle',
     eventDescription: '@ui.eventDescription',
   },
+
   events: {
     'click @ui.eventUp': 'reorderColumnUp',
     'click @ui.eventDown': 'reorderColumnDown',
@@ -150,18 +146,21 @@ var TimelineEventView = Marionette.View.extend({
     'change @ui.eventIdentifier': 'changeIdentifier',
     'change @ui.eventStartDate': 'changeStartDate',
     'change @ui.eventEndDate': 'changeEndDate',
-  },
-  getIndex: function() {
+  }
+}) {
+  getIndex() {
     return _.indexOf(this.model.collection.models, this.model);
-  },
-  serializeData: function() {
+  }
+
+  serializeData() {
     return {
       event: this.model,
       index: this.getIndex(),
       collsize: this.model.collection.length,
     };
-  },
-  onRender: function() {
+  }
+
+  onRender() {
     this.showChildView(
       "eventTitle",
       new SimpleLangStringEditPanel({
@@ -174,8 +173,9 @@ var TimelineEventView = Marionette.View.extend({
         model: this.model.get('description'),
         owner_relative_url: this.model.url() + '/description',
       }));
-  },
-  reorderColumnDown: function(ev) {
+  }
+
+  reorderColumnDown(ev) {
     var index = this.getIndex();
     var nextModel = this.model.collection.at(index + 1);
     Promise.resolve($.ajax(nextModel.url() + "/reorder_up", {
@@ -187,8 +187,9 @@ var TimelineEventView = Marionette.View.extend({
         });
     });
     ev.preventDefault();
-  },
-  reorderColumnUp: function(ev) {
+  }
+
+  reorderColumnUp(ev) {
     var model = this.model;
     Promise.resolve($.ajax(model.url() + "/reorder_up", {
         method: "POST"})).then(function(data) {
@@ -199,8 +200,9 @@ var TimelineEventView = Marionette.View.extend({
         });
     });
     ev.preventDefault();
-  },
-  deleteColumn: function(ev) {
+  }
+
+  deleteColumn(ev) {
     var nextModel = null;
     var prevColumn = this.model.get('previous_event');
     var index = this.getIndex();
@@ -216,24 +218,28 @@ var TimelineEventView = Marionette.View.extend({
       },
     });
     ev.preventDefault();
-  },
-  changeImageUrl: function(ev) {
+  }
+
+  changeImageUrl(ev) {
     this.model.set('image_url', ev.currentTarget.value);
     this.model.save();
     ev.preventDefault();
-  },
-  changeIdentifier: function(ev) {
+  }
+
+  changeIdentifier(ev) {
     this.model.set('identifier', ev.currentTarget.value);
     this.model.save();
     ev.preventDefault();
-  },
-  checkDate: function(date) {
+  }
+
+  checkDate(date) {
     var date = Moment(date);
     if (date.isValid()) {
       return date.utc().format();
     }
-  },
-  changeStartDate: function(ev) {
+  }
+
+  changeStartDate(ev) {
     var date = this.checkDate(ev.currentTarget.value);
     if (date != undefined) {
       this.model.set('start', date);
@@ -242,8 +248,9 @@ var TimelineEventView = Marionette.View.extend({
       Growl.showBottomGrowl(Growl.GrowlReason.ERROR, i18n.gettext("Invalid date and time"));
     }
     ev.preventDefault();
-  },
-  changeEndDate: function(ev) {
+  }
+
+  changeEndDate(ev) {
     var date = this.checkDate(ev.currentTarget.value);
     if (date != undefined) {
       this.model.set('end', date);
@@ -252,23 +259,20 @@ var TimelineEventView = Marionette.View.extend({
       Growl.showBottomGrowl(Growl.GrowlReason.ERROR, i18n.gettext("Invalid date and time"));
     }
     ev.preventDefault();
-  },
-});
-
+  }
+}
 
 /**
  * The collections of events to be seen on this idea
  * @class app.views.adminTimelineEvents.TimelineEventsList
  */
-var TimelineEventsList = Marionette.CollectionView.extend({
-  constructor: function TimelineEventsList() {
-    Marionette.CollectionView.apply(this, arguments);
-  },
-  initialize: function(options) {
+class TimelineEventsList extends Marionette.CollectionView.extend({
+  childView: TimelineEventView
+}) {
+  initialize(options) {
     this.options = options;
-  },
-  childView: TimelineEventView,
-});
+  }
+}
 
 
 

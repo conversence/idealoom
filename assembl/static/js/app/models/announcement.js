@@ -9,13 +9,14 @@ import i18n from '../utils/i18n.js';
 import Ctx from '../common/context.js';
 import LangString from './langstring.js';
 import Types from '../utils/types.js';
+
 /**
  * Annoucement model
  * Frontend model for :py:class:`assembl.models.announcement.Announcement`
  * @class app.models.announcement.AnnouncementModel
  * @extends app.models.base.BaseModel
  */
-var AnnouncementModel = Base.Model.extend({
+class AnnouncementModel extends Base.Model.extend({
   /**
    * Defaults
    * @type {Object}
@@ -28,29 +29,24 @@ var AnnouncementModel = Base.Model.extend({
     "idObjectAttachedTo": undefined,
     //Only for idea announcements
     "should_propagate_down": undefined
-  },
-  /**
-   * @function app.models.announcement.AnnouncementModel.constructor
-   */
-  constructor: function AnnouncementModel() {
-    Base.Model.apply(this, arguments);
-  },
+  }
+}) {
   /** 
    * Returns an error message if the model format is invalid with th associated id
    * @returns {String}
    * @function app.models.announcement.AnnouncementModel.initialize
    */
-  initialize: function(options) {
+  initialize(options) {
     this.on("invalid", function(model, error) {
       console.log(model.id + " " + error);
     });
-  },
+  }
 
   /**
    * Returns the attributes hash to be set on the model
    * @function app.models.announcement.AnnouncementModel.parse
    */
-  parse: function(resp, options) {
+  parse(resp, options) {
     var that = this;
     if (resp.title !== undefined) {
       resp.title = new LangString.Model(resp.title, {parse: true});
@@ -58,14 +54,15 @@ var AnnouncementModel = Base.Model.extend({
     if (resp.body !== undefined) {
       resp.body = new LangString.Model(resp.body, {parse: true});
     }
-    return Base.Model.prototype.parse.apply(this, arguments);
-  },
+    return super.parse(...arguments);
+  }
+
   /** 
    * Returns an error message if one of those attributes (idObjectAttachedTo, last_updated_by, creator) is missing
    * @returns {String}
    * @function app.models.announcement.AnnouncementModel.validate
    */
-  validate: function(attrs, options) {
+  validate(attrs, options) {
     if(!this.get('idObjectAttachedTo')) {
       return "Object attached to is missing";
     }
@@ -75,13 +72,14 @@ var AnnouncementModel = Base.Model.extend({
     if(!this.get('creator')) {
       return "Creator is missing";
     }
-  },
+  }
+
   /** 
    * Returns a promise for the post's creator
    * @returns {Promise}
    * @function app.models.announcement.AnnouncementModel.getCreatorPromise
    */
-  getCreatorPromise: function() {
+  getCreatorPromise() {
     var that = this;
     return this.collection.collectionManager.getAllUsersCollectionPromise()
       .then(function(allUsersCollection) {
@@ -94,29 +92,25 @@ var AnnouncementModel = Base.Model.extend({
         }
       });
   }
-});
+}
+
 /**
  * Annoucements collection
  * @class app.models.announcement.AnnouncementCollection
  * @extends app.models.base.BaseCollection
  */
-var AnnouncementCollection = Base.Collection.extend({
-  /**
-   * @function app.models.announcement.AnnouncementCollection.constructor
-   */
-  constructor: function AnnouncementCollection() {
-    Base.Collection.apply(this, arguments);
-  },
+class AnnouncementCollection extends Base.Collection.extend({
   /**
    * @type {string}
    */
   url: Ctx.getApiV2DiscussionUrl('announcements'),
+
   /**
    * The model
    * @type {AnnouncementModel}
    */
   model: AnnouncementModel
-});
+}) {}
 
 export default {
   Model: AnnouncementModel,

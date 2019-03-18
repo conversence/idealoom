@@ -9,13 +9,10 @@ import ideaInIdeaList from './ideaInIdeaList.js';
 import IdeaView from './ideaInIdeaList.js';
 import _ from 'underscore';
 
-var otherInIdeaList = ideaInIdeaList.IdeaView.extend({
-  constructor: function otherInIdeaList() {
-    ideaInIdeaList.IdeaView.apply(this, arguments);
-  },
-
-  template: Ctx.loadTemplate('otherInIdeaList'),
-  onRender: function() {
+class otherInIdeaList extends ideaInIdeaList.IdeaView.extend({
+  template: Ctx.loadTemplate('otherInIdeaList')
+}) {
+  onRender() {
     Ctx.removeCurrentlyDisplayedTooltips(this.$el);
 
     var hasOrphanPosts = this.model.get('num_orphan_posts');
@@ -35,6 +32,6 @@ var otherInIdeaList = ideaInIdeaList.IdeaView.extend({
     this.$el.html(this.template);
     Ctx.initTooltips(this.$el);
   }
-});
+}
 
 export default otherInIdeaList;

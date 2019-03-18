@@ -15,14 +15,7 @@ import Ctx from '../common/context.js';
  * @class app.models.timeline.TimelineEventModel
  * @extends app.models.base.BaseModel
  */
-var TimelineEventModel = Base.Model.extend({
-  /**
-   * @function app.models.timeline.TimelineEventModel.initialize
-   */
-  initialize: function(obj) {
-    obj = obj || {};
-    var that = this;
-  },
+class TimelineEventModel extends Base.Model.extend({
   /**
    * Defaults
    * @type {Object}
@@ -37,8 +30,17 @@ var TimelineEventModel = Base.Model.extend({
     'image_url': null,
     'start': null,
     'end': null,
-  },
-  parse: function(rawModel) {
+  }
+}) {
+  /**
+   * @function app.models.timeline.TimelineEventModel.initialize
+   */
+  initialize(obj) {
+    obj = obj || {};
+    var that = this;
+  }
+
+  parse(rawModel) {
     if (rawModel.title !== undefined) {
       rawModel.title = new LangString.Model(rawModel.title, {parse: true});
     }
@@ -46,49 +48,51 @@ var TimelineEventModel = Base.Model.extend({
       rawModel.description = new LangString.Model(rawModel.description, {parse: true});
     }
     return rawModel;
-  },
+  }
 
-  asLocalTime: function(time) {
+  asLocalTime(time) {
       time = Moment.utc(time);
       time.utcOffset(Moment().utcOffset());
       return time.format().substring(0, 19);
-  },
+  }
 
-  getStartNoTZ: function() {
+  getStartNoTZ() {
     var start = this.get('start');
     if (start !== null) {
       return this.asLocalTime(start);
     }
     return start;
-  },
-  getEndNoTZ: function() {
+  }
+
+  getEndNoTZ() {
     var end = this.get('end');
     if (end !== null) {
       return this.asLocalTime(end);
     }
     return end;
-  },
-});
+  }
+}
 
 /**
  * The collection of categories of classified messages under an idea
  * @class app.models.timeline.TimelineEventCollection
  * @extends app.models.base.BaseCollection
  */
-var TimelineEventCollection = Base.Collection.extend({
+class TimelineEventCollection extends Base.Collection.extend({
   /**
    * The model
    * @type {TimelineEventModel}
    */
-  model: TimelineEventModel,
+  model: TimelineEventModel
+}) {
   /**
    * @member {string} app.models.timeline.TimelineEventCollection.url
    */
-  url: function() {
+  url() {
     return Ctx.getApiV2DiscussionUrl() + 'timeline_events';
-  },
+  }
 
-  comparator: function(e1, e2) {
+  comparator(e1, e2) {
     // Sorting a chained list.
     // in theory, this can fail if links of the chain are missing.
     // in practice, the collections are tiny, and this should not be an issue.
@@ -115,9 +119,8 @@ var TimelineEventCollection = Base.Collection.extend({
       }
       return undefined;
     }
-  },
-
-});
+  }
+}
 
 export default {
   Model: TimelineEventModel,

@@ -12,25 +12,18 @@ import UserNavigationMenu from './userNavigationMenu.js';
 import Ctx from '../../common/context.js';
 import Growl from '../../utils/growl.js';
 
-var profile = Marionette.View.extend({
-  constructor: function profile() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class profile extends Marionette.View.extend({
   template: '#tmpl-userProfile',
   className: 'admin-profile',
+
   ui: {
     close: '.bx-alert-success .bx-close',
     profile: '.js_saveProfile',
     form: '.core-form .form-horizontal'
   },
+
   regions: {
     navigationMenuHolder: '.navigation-menu-holder'
-  },
-
-  initialize: function() {
-    this.model = new Agents.Model({'@id': Ctx.getCurrentUserId()});
-    this.model.fetch();
   },
 
   modelEvents: {
@@ -40,21 +33,26 @@ var profile = Marionette.View.extend({
   events: {
     'click @ui.profile': 'saveProfile',
     'click @ui.close': 'close'
-  },
+  }
+}) {
+  initialize() {
+    this.model = new Agents.Model({'@id': Ctx.getCurrentUserId()});
+    this.model.fetch();
+  }
 
-  serializeData: function() {
+  serializeData() {
     return {
       profile: this.model
     }
-  },
+  }
 
-  onRender: function() {
+  onRender() {
     // this is in onRender instead of onBeforeRender because of the modelEvents
     var menu = new UserNavigationMenu({selectedSection: "profile"});
     this.showChildView('navigationMenuHolder', menu);
-  },
+  }
 
-  saveProfile: function(e) {
+  saveProfile(e) {
     e.preventDefault();
 
     var real_name = this.$('input[name="real_name"]').val();
@@ -69,7 +67,7 @@ var profile = Marionette.View.extend({
         Growl.showBottomGrowl(Growl.GrowlReason.ERROR, i18n.gettext('Your settings failed to update.'));
       }
     })
-  },
-});
+  }
+}
 
 export default profile;

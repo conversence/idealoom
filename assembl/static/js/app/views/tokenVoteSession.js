@@ -182,15 +182,14 @@ var transitionAnimation = function(el, el2, duration){
 
 
 // This view shows at the top of the popin the bag of remaining tokens the user has
-var TokenBagsView = Marionette.View.extend({
-  constructor: function TokenBagsView(){
-    Marionette.View.apply(this, arguments);
-  },
+class TokenBagsView extends Marionette.View.extend({
   template: '#tmpl-tokenBags',
+
   regions: {
     "tokenBags": ".token-bags-content"
-  },
-  initialize: function(options){
+  }
+}) {
+  initialize(options) {
     if ( !("voteSpecification" in this.options)){
       console.error("option voteSpecification is mandatory");
       return;
@@ -211,8 +210,9 @@ var TokenBagsView = Marionette.View.extend({
     this.myVotesCollection = this.options.myVotesCollection;
     this.tokenSize = this.options.tokenSize;
     this.userLanguagePreferences = this.options.userLanguagePreferences;
-  },
-  onRender: function(){
+  }
+
+  onRender() {
     var that = this;
 
     var bags = new RemainingTokenCategoriesCollectionView({
@@ -223,16 +223,14 @@ var TokenBagsView = Marionette.View.extend({
     });
     that.showChildView('tokenBags', bags);
   }
-});
+}
 
 // This view shows the remaining tokens the user has, of a given category
 // This view's model is a token category (an instance of Widget.TokenCategorySpecificationModel)
-var RemainingCategoryTokensView = Marionette.View.extend({
-  constructor: function RemainingCategoryTokensView() {
-    Marionette.View.apply(this, arguments);
-  },
-  template: false,
-  initialize: function(options){
+class RemainingCategoryTokensView extends Marionette.View.extend({
+  template: false
+}) {
+  initialize(options) {
     if ( !("myVotesCollection" in this.options)){
       console.error("option myVotesCollection is mandatory");
       return;
@@ -242,8 +240,9 @@ var RemainingCategoryTokensView = Marionette.View.extend({
     this.listenTo(this.myVotesCollection, "change:category:"+this.model.getId(), this.render); // this is a category-level refresh, to refresh only the ones which have changed (avoids animation glitches triggered by allocation clicks on exclusive categories icons)
     this.tokenSize = options.tokenSize;
     this.userLanguagePreferences = options.userLanguagePreferences;
-  },
-  onRender: function(){
+  }
+
+  onRender() {
     console.log("RemainingCategoryTokensView::onRender()");
     var that = this;
     var categoryContainer = this.$el;
@@ -317,23 +316,20 @@ var RemainingCategoryTokensView = Marionette.View.extend({
       }
     });
   }
-});
+}
 
-
-
-var RemainingTokenCategoriesCollectionView = Marionette.CollectionView.extend({
-  constructor: function RemainingTokenCategoriesCollectionView() {
-    Marionette.CollectionView.apply(this, arguments);
-  },
+class RemainingTokenCategoriesCollectionView extends Marionette.CollectionView.extend({
   template: false,
-  childView: RemainingCategoryTokensView,
-  initialize: function(options) {
+  childView: RemainingCategoryTokensView
+}) {
+  initialize(options) {
     console.log("RemainingTokenCategoriesCollectionView::initialize()");
     this.myVotesCollection = options.myVotesCollection;
     this.tokenSize = options.tokenSize;
     this.userLanguagePreferences = options.userLanguagePreferences;
-  },
-  childViewOptions: function(){
+  }
+
+  childViewOptions() {
     var that = this;
     return {
       myVotesCollection: that.myVotesCollection,
@@ -341,19 +337,15 @@ var RemainingTokenCategoriesCollectionView = Marionette.CollectionView.extend({
       userLanguagePreferences: that.userLanguagePreferences
     };
   }
-});
-
-
+}
 
 // This view shows (in the block of an idea) the clickable tokens (of one given category of tokens) a user can allocate (and has allocated) on this idea
 // This view's model is a token category
-var TokenCategoryAllocationView = Marionette.View.extend({
-  constructor: function TokenCategoryAllocationView() {
-    Marionette.View.apply(this, arguments);
-  },
+class TokenCategoryAllocationView extends Marionette.View.extend({
   template: '#tmpl-tokenIdeaAllocation',
-  className: "token-category-allocation",
-  initialize: function(options){
+  className: "token-category-allocation"
+}) {
+  initialize(options) {
     this.collectionView = options.collectionView;
     this.voteItemView = options.voteItemView;
     if ( !("voteSpecification" in this.options)){
@@ -429,11 +421,13 @@ var TokenCategoryAllocationView = Marionette.View.extend({
     this.customEmptyTokenImagePromise = this.customEmptyTokenImageURL ? getSVGElementByURLPromise(this.customEmptyTokenImageURL) : $.Deferred().resolve();
 
     this.customColor = this.model.get("color");
-  },
-  setForceUnselectZero: function(val){
+  }
+
+  setForceUnselectZero(val) {
     this.forceUnselectZero = val;
-  },
-  onRender: function(){
+  }
+
+  onRender() {
     var that = this;
 
     var customToken = null;
@@ -595,25 +589,25 @@ var TokenCategoryAllocationView = Marionette.View.extend({
       }
       renderAllTokenIcons();
     });
-  },
+  }
 
-  serializeData: function(){
+  serializeData() {
     return {
       "maximum_per_idea": this.maximum_per_idea
     };
-  },
+  }
 
-  getCurrentValue: function(){
+  getCurrentValue() {
     return this.currentValue;
-  },
+  }
 
-  getTokenIconForValue: function(number_of_tokens_represented_by_this_icon){
+  getTokenIconForValue(number_of_tokens_represented_by_this_icon) {
     return this.$(".token-icon").eq(number_of_tokens_represented_by_this_icon);
-  },
+  }
 
   // this function needs the following variables: number_of_tokens_represented_by_this_icon, that, that.currentValue, that.model, tokenContainer, that.postData, that.idea, that.myVotesCollection, tokenIconElement, container
   // TODO: refactor
-  onTokenIconClick: function(number_of_tokens_represented_by_this_icon){
+  onTokenIconClick(number_of_tokens_represented_by_this_icon) {
     var that = this;
 
     var tokenContainer = that.getTokenIconForValue(number_of_tokens_represented_by_this_icon);
@@ -722,23 +716,22 @@ var TokenCategoryAllocationView = Marionette.View.extend({
       that.render(); // show immediately the icon it its correct state, without having to wait for collection update
     }, animation_duration*0.9);
   }
-});
+}
 
 // The collection parameter has to be a collection of token categories
-var TokenCategoryAllocationCollectionView = Marionette.CollectionView.extend({
-  constructor: function TokenCategoryAllocationCollectionView() {
-    Marionette.CollectionView.apply(this, arguments);
-  },
+class TokenCategoryAllocationCollectionView extends Marionette.CollectionView.extend({
   template: '#tmpl-tokenCategoryAllocationCollection',
-  childView: TokenCategoryAllocationView,
-  initialize: function(options) {
+  childView: TokenCategoryAllocationView
+}) {
+  initialize(options) {
     this.idea = options.idea;
     this.myVotesCollection = options.myVotesCollection;
     this.voteSpecification = options.voteSpecification;
     this.parent = options.parent;
     this.tokenSize = options.tokenSize;
-  },
-  childViewOptions: function(){
+  }
+
+  childViewOptions() {
     var that = this;
     return {
       idea: that.idea,
@@ -749,26 +742,25 @@ var TokenCategoryAllocationCollectionView = Marionette.CollectionView.extend({
       tokenSize: that.tokenSize
     };
   }
-});
+}
 
-
-var TokenCategoryExclusivePairCollectionView = Marionette.View.extend({
-  constructor: function TokenCategoryExclusivePairCollectionView() {
-    Marionette.View.apply(this, arguments);
-  },
+class TokenCategoryExclusivePairCollectionView extends Marionette.View.extend({
   template: '#tmpl-tokenCategoryExclusivePairCollection',
+
   regions: {
     negativeTokens: ".negative-tokens",
     positiveTokens: ".positive-tokens"
-  },
-  initialize: function(options) {
+  }
+}) {
+  initialize(options) {
     this.idea = options.idea;
     this.myVotesCollection = options.myVotesCollection;
     this.voteSpecification = options.voteSpecification;
     this.parent = options.parent;
     this.tokenSize = options.tokenSize;
-  },
-  onRender: function() {
+  }
+
+  onRender() {
     // placeholder for better code. TODO: We need to choose positive/negative
     // according to typename.
     var negativeTokens = this.collection.at(0);
@@ -834,31 +826,29 @@ var TokenCategoryExclusivePairCollectionView = Marionette.View.extend({
       }
     });
   }
-});
-
+}
 
 // This view shows an idea in the list of votable ideas (and calls a subview which shows the tokens for this idea)
-var TokenVoteItemView = Marionette.View.extend({
-  constructor: function TokenVoteItemView() {
-    Marionette.View.apply(this, arguments);
-  },
+class TokenVoteItemView extends Marionette.View.extend({
   template: '#tmpl-tokenVoteItem',
-  initialize: function(options){
-    this.childIndex = options.childIndex;
-    this.parent = options.parent;
-  },
 
   regions: {
     regionIdeaDescription: ".js_region-idea-description",
     tokensForIdea: ".tokens-for-idea"
-  },
+  }
+}) {
+  initialize(options) {
+    this.childIndex = options.childIndex;
+    this.parent = options.parent;
+  }
 
-  serializeData: function(){
+  serializeData() {
     return {
       "ideaTitle": (this.childIndex+1) + ". " + this.model.getShortTitleDisplayText(this.userLanguagePreferences)
     }
-  },
-  onRender: function(){
+  }
+
+  onRender() {
     var that = this;
     var tokenCategories = "tokenCategories" in this.parent.options ? this.parent.options.tokenCategories : null;
     var voteSpecification = "voteSpecification" in this.parent.options ? this.parent.options.voteSpecification : null;
@@ -891,9 +881,9 @@ var TokenVoteItemView = Marionette.View.extend({
     }
 
     this.renderCKEditorDescription();
-  },
+  }
 
-  renderCKEditorDescription: function() {
+  renderCKEditorDescription() {
     var defn = this.model.get('definition');
     if (!defn || defn.isEmptyStripped(this.userLanguagePreferences)) {
       return;
@@ -909,55 +899,51 @@ var TokenVoteItemView = Marionette.View.extend({
     });
 
     this.showChildView('regionIdeaDescription', description);
-  },
-});
+  }
+}
 
-
-var TokenVoteCollectionViewBody = Marionette.CollectionView.extend({
-  constructor: function TokenVoteCollectionViewBody() {
-    Marionette.CollectionView.apply(this, arguments);
-  },
-  initialize: function(options) {
-    this.parent = options.parent;
-  },
+class TokenVoteCollectionViewBody extends Marionette.CollectionView.extend({
   tagName: 'tbody',
-  childView: TokenVoteItemView,
-  childViewOptions: function(model){
+  childView: TokenVoteItemView
+}) {
+  initialize(options) {
+    this.parent = options.parent;
+  }
+
+  childViewOptions(model) {
     return {
       childIndex: this.collection.indexOf(model),
       parent: this.parent,
     };
-  },
-});
-
+  }
+}
 
 // This view shows the list of votable ideas and their tokens
-var TokenVoteCollectionView = Marionette.View.extend({
-  constructor: function TokenVoteCollectionView() {
-    Marionette.View.apply(this, arguments);
-  },
+class TokenVoteCollectionView extends Marionette.View.extend({
   template: '#tmpl-tokenVoteCollection',
+
   regions: {
     votes: {
       el: 'tbody',
       replaceElement: true
     },
-  },
-  onRender: function() {
+  }
+}) {
+  onRender() {
     this.showChildView('votes', new TokenVoteCollectionViewBody({
       collection: this.collection,
       parent: this,
     }));
-  },
-  templateContext: function(){
+  }
+
+  templateContext() {
     var that = this;
     return {
       i18n: i18n,
       numberOfIdeas: that.collection.length
     };
   }
-});
-
+}
 
 // List of views for the result modal.
 
@@ -965,11 +951,7 @@ var TokenVoteCollectionView = Marionette.View.extend({
   The view of a single vote result, which will be created by
   the collection view TokenVoteResultCollectionView
  */
-var TokenVoteResultView = Marionette.View.extend({
-  constructor: function TokenVoteResultView(){
-    Marionette.View.apply(this, arguments);
-  },
-
+class TokenVoteResultView extends Marionette.View.extend({
   template: '#tmpl-tokenVoteResultSingleView',
   className: 'token-result-row',
 
@@ -985,9 +967,9 @@ var TokenVoteResultView = Marionette.View.extend({
 
   regions: {
     'regionIdeaDescription': '@ui.descriptionRegion'
-  },
-
-  initialize: function(options){
+  }
+}) {
+  initialize(options) {
     this.categoryIndex = options.categoryIndex;
     this.shownDescription = false;
     this.categoryNumber = _.indexOf(this.categoryIndex, this.model.get('typename'));
@@ -999,9 +981,9 @@ var TokenVoteResultView = Marionette.View.extend({
     this.shownDescription = false;
     this.descriptionButton = i18n.gettext("See Description");
     this._calculate();
-  },
+  }
 
-  _calculateColor: function(categoryName){
+  _calculateColor(categoryName) {
     //http://jsfiddle.net/WK_of_Angmar/xgA5C/
     function validTextColour(stringToTest) {
       //Alter the following conditions according to your need.
@@ -1035,16 +1017,16 @@ var TokenVoteResultView = Marionette.View.extend({
       return color;
     }
     else { return null; }
-  },
+  }
 
-  _getCategoryName: function(catName){
+  _getCategoryName(catName) {
     var categoryModel = this.model.get('objectDescription').find(function(cat){
       return cat.get('typename') === catName;
     });
     return categoryModel.get('name').bestWithErrors(this.languagePreferences, false).entry.value();
-  },
+  }
 
-  _calculate: function(){
+  _calculate() {
     var that = this;
     this.results = _.map(this.categoryIndex, function(catName, index) {
         return {
@@ -1060,14 +1042,14 @@ var TokenVoteResultView = Marionette.View.extend({
             categoryName: that._getCategoryName(catName)
         };
     });
-  },
+  }
 
-  _getDefaultColor: function(){
+  _getDefaultColor() {
     var elem = $('#js_vote-result-default-color');
     return elem.css('background-color');
-  },
+  }
 
-  serializeData: function() {
+  serializeData() {
     var defn = this.model.get('objectConnectedTo').get('definition');
     return {
       ideaTitle: this.model.get('objectConnectedTo').getShortTitleDisplayText(this.userLanguagePreferences),
@@ -1075,9 +1057,9 @@ var TokenVoteResultView = Marionette.View.extend({
       showDescriptionButton: defn && !defn.isEmptyStripped(this.userLanguagePreferences),
       descriptionButton: this.descriptionButton
     };
-  },
+  }
 
-  onRender: function(){
+  onRender() {
     //Have to define the data-points in an array.
     Ctx.removeCurrentlyDisplayedTooltips();
     // var unknownColor = '#515151'; //$gray2
@@ -1126,9 +1108,9 @@ var TokenVoteResultView = Marionette.View.extend({
         return percent(d);
     });
     Ctx.initTooltips(this.$el);
-  },
+  }
 
-  onSeeDescriptionClick: function(ev){
+  onSeeDescriptionClick(ev) {
     ev.preventDefault();
     var icon = this.ui.descriptionArea.find('i');
     if (this.shownDescription === true) {
@@ -1149,24 +1131,21 @@ var TokenVoteResultView = Marionette.View.extend({
       this.ui.descriptionRegion.html(defn ? defn.bestValue(this.userLanguagePreferences) : '');
     }
   }
+}
 
-});
-
-
-var TokenVoteResultCollectionViewBody = Marionette.CollectionView.extend({
-  constructor: function TokenVoteResultCollectionViewBody(){
-    Marionette.CollectionView.apply(this, arguments);
-  },
+class TokenVoteResultCollectionViewBody extends Marionette.CollectionView.extend({
   childView: TokenVoteResultView,
-  tagName: 'tbody',
-  initialize: function(options) {
+  tagName: 'tbody'
+}) {
+  initialize(options) {
     this.categoryIndex = options.categoryIndex;
     this.sumTokens = options.sumTokens;
     this.maxPercent = options.maxPercent;
     this.voteSpecification = options.voteSpecification;
     this.languagePreferences = options.languagePreferences;
-  },
-  childViewOptions: function(){
+  }
+
+  childViewOptions() {
     return {
       categoryIndex: this.categoryIndex,
       sumTokens: this.sumTokens,
@@ -1174,18 +1153,13 @@ var TokenVoteResultCollectionViewBody = Marionette.CollectionView.extend({
       voteSpecification: this.voteSpecification,
       languagePreferences: this.languagePreferences
     };
-  },
-});
-
+  }
+}
 
 /*
   This is the collection view of each vote result
  */
-var TokenVoteResultCollectionView = Marionette.View.extend({
-  constructor: function TokenVoteResultCollectionView(){
-    Marionette.View.apply(this, arguments);
-  },
-
+class TokenVoteResultCollectionView extends Marionette.View.extend({
   template: '#tmpl-tokenVoteResultCollectionView',
 
   ui: {
@@ -1203,8 +1177,9 @@ var TokenVoteResultCollectionView = Marionette.View.extend({
     'click @ui.categoryName': 'onCategoryClickName'
   },
 
-  sortOnCategoryNum: 0,
-  initialize: function(options){
+  sortOnCategoryNum: 0
+}) {
+  initialize(options) {
     this.firstRender = true;
     this.categoryIndex = options.categoryIndex;
     this.sumTokens = options.sumTokens;
@@ -1215,15 +1190,15 @@ var TokenVoteResultCollectionView = Marionette.View.extend({
     this.sortAscending = _.map(this.categoryIndex, function() {return false;});
     this.voteResults.sortSpecName = this.categoryIndex[this.sortOnCategoryNum];
     this.voteResults.sort();
-  },
+  }
 
-  _colorMeBaby: function(element){
+  _colorMeBaby(element) {
     if (!element.hasClass('purple')){
       element.addClass('purple');
     }
-  },
+  }
 
-  onCategoryClickName: function(ev){
+  onCategoryClickName(ev) {
     // remove old arrow
     var arrowEl = $(this.ui.categoryName[this.sortOnCategoryNum]).find("i");
     arrowEl.removeClass("icon-down icon-up");
@@ -1257,9 +1232,9 @@ var TokenVoteResultCollectionView = Marionette.View.extend({
     this.voteResults.sortSpecName = this.categoryIndex[this.sortOnCategoryNum];
     this.voteResults.sortAscending = this.sortAscending[category];
     this.voteResults.sort();
-  },
+  }
 
-  onRender: function() {
+  onRender() {
     if (this.firstRender) {
       var el = $(this.ui.categoryName[0]);
       var arrowEl = el.find("i");
@@ -1275,9 +1250,9 @@ var TokenVoteResultCollectionView = Marionette.View.extend({
       voteSpecification: this.voteSpecification,
       languagePreferences: this.languagePreferences
     }));
-  },
+  }
 
-  serializeData: function(){
+  serializeData() {
     var that = this;
     var categories = _.values(this.categoryIndex);
     var categoryList = this.voteSpecification.get('token_categories');
@@ -1298,19 +1273,14 @@ var TokenVoteResultCollectionView = Marionette.View.extend({
       categories: categories
     }
   }
-});
-
+}
 
 /*
   The Token Vote Result View:
   It contains the question asked, and a collection view of each
   idea's vote results
  */
-var TokenResultView = Marionette.View.extend({
-  constructor: function ModalView(){
-    Marionette.View.apply(this, arguments);
-  },
-
+class TokenResultView extends Marionette.View.extend({
   template: "#tmpl-tokenVoteResultView",
 
   ui: {
@@ -1319,9 +1289,9 @@ var TokenResultView = Marionette.View.extend({
 
   regions: {
     'results': '@ui.resultArea'
-  },
-
-  initialize: function(options){
+  }
+}) {
+  initialize(options) {
     this.model = options.model;
 
     //categoryIndex will be used by each vote result view to show the results in the correct order,
@@ -1377,9 +1347,9 @@ var TokenResultView = Marionette.View.extend({
         that.render();
       });
     });
-  },
+  }
 
-  serializeData: function(){
+  serializeData() {
     var settings = this.model.get("settings") || {};
     var items = "items" in settings ? settings.items : [];
     var questionItem = items.length ? items[0] : null;
@@ -1436,65 +1406,56 @@ var TokenResultView = Marionette.View.extend({
         statement: statement
       }
     }
-  },
+  }
 
-  onRender: function(){
+  onRender() {
     if (this.tokenResultsView){
       this.showChildView('results', this.tokenResultsView);
     }
   }
-});
-
+}
 
 /*
   The results modal view
   It is barely a simple container for the real view: TokenResultView
  */
-var TokenVoteSessionResultModal = Backbone.Modal.extend({
-  constructor: function TokenVoteSessionResultModel(){
-    Backbone.Modal.apply(this, arguments);
-  },
-
+class TokenVoteSessionResultModal extends Backbone.Modal.extend({
   template: '#tmpl-modalWithoutIframe',
   className: 'modal-token-vote-session popin-wrapper',
   cancelEl: '.close, .js_close',
 
   ui: {
     'body': '.js_modal-body'
-  },
-
-  onRender: function(){
+  }
+}) {
+  onRender() {
     var resultView = new TokenResultView({model: this.model});
     this.$(this.ui.body).html(resultView.render().el);
-  },
+  }
 
-  serializeData: function(){
+  serializeData() {
     return {
       modal_title: i18n.gettext('Token Vote Results')
     }
   }
-
-});
-
+}
 
 // This view shows the whole vote popin and its contents
 // The model which should be given as parameter of this view is a Widget.Model instance (or a subclass of it)
-var TokenVoteSessionModal = Backbone.Modal.extend({
-  constructor: function TokenVoteSessionModal() {
-    Backbone.Modal.apply(this, arguments);
-  },
-
+class TokenVoteSessionModal extends Backbone.Modal.extend({
   template: '#tmpl-tokenVoteSessionModal',
   className: 'modal-token-vote-session popin-wrapper',
   cancelEl: '.close, .js_close',
+
   events: {
     //'scroll .popin-body': 'onScroll', // scroll event does not bubble up, and scrollable element is now .popin-body instead of this.$el
     'click .submit-button-container a': 'onSubmit'
   },
 
-  availableTokensPositionTop: 1000, // initial value high, will be updated in render()
-
-  initialize: function(options) {
+  // initial value high, will be updated in render()
+  availableTokensPositionTop: 1000
+}) {
+  initialize(options) {
     var that = this;
 
 
@@ -1544,18 +1505,17 @@ var TokenVoteSessionModal = Backbone.Modal.extend({
       var votableIdeas = that.widgetModel.get("votable_ideas"); // contains their id but not full information (because shown by server using "id_only" view)
       var votableIdeasIds = _.pluck(votableIdeas, "@id");
 
-      var IdeasSubset = Backbone.Subset.extend({
-        constructor: function IdeasSubset() {
-          Backbone.Subset.apply(this, arguments);
-        },
-        name: 'IdeasSubset',
-        sieve: function(idea) {
+      class IdeasSubset extends Backbone.Subset.extend({
+        name: 'IdeasSubset'
+      }) {
+        sieve(idea) {
           return _.contains(votableIdeasIds, idea.id);
-        },
-        parent: function() {
+        }
+
+        parent() {
           return allIdeasCollection
         }
-      });
+      }
 
       that.votableIdeasCollection = new IdeasSubset();
 
@@ -1612,10 +1572,10 @@ var TokenVoteSessionModal = Backbone.Modal.extend({
 
     that.throttledScroll = _.throttle(that.myOnScroll, 100);
 
-  },
+  }
 
   // this can remain a onShow because it is in a Backbone.Modal
-  onShow: function(){
+  onShow() {
     var that = this;
 
     that.availableTokensPositionTop = that.$(".available-tokens").position().top;
@@ -1625,22 +1585,22 @@ var TokenVoteSessionModal = Backbone.Modal.extend({
     that.$(".available-tokens-container").css('min-height', "36px");
 
     that.$(".popin-body").on('scroll', _.bind(that.onScroll, that)); // scroll event does not bubble up, and scrollable element is now .popin-body instead of this.$el
-  },
+  }
 
-  onScroll: function(){
+  onScroll() {
     this.throttledScroll();
-  },
+  }
 
-  myOnScroll: function(){
+  myOnScroll() {
     if (this.$(".popin-body").scrollTop() > this.availableTokensPositionTop) {
       this.$(".available-tokens").addClass("fixed");
     }
     else {
       this.$(".available-tokens").removeClass("fixed");
     }
-  },
+  }
 
-  serializeData: function() {
+  serializeData() {
     var settings = this.widgetModel.get("settings") || {};
     var items = "items" in settings ? settings.items : [];
     var question_item = items.length ? items[0] : null;
@@ -1651,9 +1611,9 @@ var TokenVoteSessionModal = Backbone.Modal.extend({
       available_tokens_info: i18n.gettext("Split your tokens among the ideas of your choice. By default, your vote is neutral per project."),
       save_vote: i18n.gettext("Save my votes")
     };
-  },
+  }
 
-  onDestroy: function(){
+  onDestroy() {
     if ( this.widgetModel ){
       /*
       We re-fetch widget data from the server, so that when the user opens the vote popin again,
@@ -1664,15 +1624,15 @@ var TokenVoteSessionModal = Backbone.Modal.extend({
       this.widgetModel.fetch();
     }
     Ctx.clearModal({destroyModal: false});
-  },
+  }
 
-  onSubmit: function(){
+  onSubmit() {
     this.onDestroy();
     this.remove();
     var modalView = new TokenVoteSessionSubmittedModal();
     Ctx.setCurrentModalView(modalView);
     IdeaLoom.rootView.showChildView('slider', modalView);
-  },
+  }
 
   /*
   @param tokenVoteSpecification: an instance of TokenVoteSpecificationModel
@@ -1685,7 +1645,7 @@ var TokenVoteSessionModal = Backbone.Modal.extend({
   }
   maximum_tokens_per_row := max(maximum_tokens_per_row, max(category.total_number foreach category in tokenVoteSpecification.tokenCategories))
   */
-  computeMaximumTokensPerRow: function(tokenVoteSpecification){
+  computeMaximumTokensPerRow(tokenVoteSpecification) {
     var maximum_tokens_per_row = 0;
     var maximum_tokens_per_idea_row = 0;
 
@@ -1722,9 +1682,9 @@ var TokenVoteSessionModal = Backbone.Modal.extend({
     var maximum_tokens_in_a_bag = tokenCategories.max('total_number').get('total_number') || 0;
     maximum_tokens_per_row = Math.max(maximum_tokens_per_idea_row, maximum_tokens_in_a_bag) || 0;
     return maximum_tokens_per_row;
-  },
+  }
 
-  computeTokenSize: function(maximum_tokens_per_row){
+  computeTokenSize(maximum_tokens_per_row) {
     var maximum_total_width = 480; // Could be 0.5 * popin_width
     var token_horizontal_margin = 5; /* Horizontal total margin should match _tokenVote.scss::.tokens-for-idea.token-icon */
     var maximum_token_size = 20 + token_horizontal_margin; // Including token_horizontal_margin. Was 60
@@ -1744,19 +1704,15 @@ var TokenVoteSessionModal = Backbone.Modal.extend({
     }
     return Math.floor(token_size - token_horizontal_margin);
   }
-});
+}
 
-var TokenVoteSessionSubmittedModal = Backbone.Modal.extend({
-  constructor: function TokenVoteSessionSubmittedModal(){
-    Backbone.Modal.apply(this, arguments);
-  },
-
+class TokenVoteSessionSubmittedModal extends Backbone.Modal.extend({
   template: '#tmpl-modalWithoutIframe',
   className: 'modal-token-vote-session-submitted popin-wrapper',
-  cancelEl: '.close, .js_close',
-
+  cancelEl: '.close, .js_close'
+}) {
   // this can remain a onShow because it is in a Backbone.Modal
-  onShow: function(){
+  onShow() {
     var container = this.$el.find(".js_modal-body");
     container.empty();
     var text = $("<p></p>");
@@ -1765,15 +1721,14 @@ var TokenVoteSessionSubmittedModal = Backbone.Modal.extend({
     var btn = $("<a class='btn btn-sm btn-primary js_close'></a>");
     btn.text(i18n.gettext("Go back to the discussion"));
     container.append(btn);
-  },
+  }
 
-  serializeData: function(){
+  serializeData() {
     return {
       modal_title: i18n.gettext("Vote confirmation")
     }
   }
-
-});
+}
 
 export default {
   TokenVoteSessionModal: TokenVoteSessionModal,

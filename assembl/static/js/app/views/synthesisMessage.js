@@ -13,31 +13,27 @@ import CollectionManager from '../common/collectionManager.js';
 /**
  * @class app.views.synthesisMessage.MessageView
  */
-var SynthesisMessageView = MessageView.extend({
-  constructor: function SynthesisMessageView() {
-    MessageView.apply(this, arguments);
-  },
-
-  /**
-   * @init
-   */
-  initialize: function(obj) {
-    MessageView.prototype.initialize.apply(this, arguments);
-    this.stopListening(this.messageListView, 'annotator:initComplete', this.onAnnotatorInitComplete);
-    this.synthesisId = this.model.get('publishes_synthesis');
-  },
-
+class SynthesisMessageView extends MessageView.extend({
   /**
    * The thread message template
    * @type {_.template}
    */
-  template: Ctx.loadTemplate('message'),
+  template: Ctx.loadTemplate('message')
+}) {
+  /**
+   * @init
+   */
+  initialize(obj) {
+    super.initialize(...arguments);
+    this.stopListening(this.messageListView, 'annotator:initComplete', this.onAnnotatorInitComplete);
+    this.synthesisId = this.model.get('publishes_synthesis');
+  }
 
   /**
    * Meant for derived classes to override
    * @type {}
    */
-  transformDataBeforeRender: function(data) {
+  transformDataBeforeRender(data) {
     data['subject'] = '';
     data['body'] = '';
     if (this.viewStyle == this.availableMessageViewStyles.PREVIEW) {
@@ -45,12 +41,13 @@ var SynthesisMessageView = MessageView.extend({
     }
 
     return data;
-  },
+  }
+
   /**
    * Meant for derived classes to override
    * @type {}
    */
-  postRender: function() {
+  postRender() {
     var that = this;
     var body;
     var collectionManager = new CollectionManager();
@@ -86,8 +83,7 @@ var SynthesisMessageView = MessageView.extend({
 
     return;
   }
-
-});
+}
 
 export default SynthesisMessageView;
 

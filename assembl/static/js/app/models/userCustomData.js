@@ -14,13 +14,9 @@ import Ctx from '../common/context.js';
  * @class app.models.userCustomData.UserCustomDataModel
  * @extends Backbone.Model
  */
-var UserCustomDataModel = Backbone.Model.extend({
-  constructor: function UserCustomDataModel() {
-    Backbone.Model.apply(this, arguments);
-  },
-
+class UserCustomDataModel extends Backbone.Model.extend({
   urlRoot: Ctx.getApiV2DiscussionUrl('user_ns_kv')
-});
+}) {}
 
 export default {
   Model: UserCustomDataModel

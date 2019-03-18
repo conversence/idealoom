@@ -32,17 +32,16 @@ var BaseMessageList = BaseMessageListMixin(BasePanel);
  * @class app.views.messageList.MessageList
  * @extends app.views.messageList.BaseMessageList
  */
-var MessageList = BaseMessageList.extend({
-  constructor: function MessageList() {
-    BaseMessageList.apply(this, arguments);
-  },
-
+class MessageList extends BaseMessageList.extend({
   template: '#tmpl-messageList',
   panelType: PanelSpecTypes.MESSAGE_LIST,
   className: 'panel messageList',
   lockable: true,
   gridSize: BasePanel.prototype.MESSAGE_PANEL_GRID_SIZE,
-  minWidth: 450, // basic, may receive idea offset.
+
+  // basic, may receive idea offset.
+  minWidth: 450,
+
   debugPaging: false,
   debugScrollLogging: false,
   _renderId: 0,
@@ -74,10 +73,31 @@ var MessageList = BaseMessageList.extend({
     announcementRegion: '@ui.announcementRegion'
   },
 
-  initialize: function(options) {
+  /**
+   * The events
+   * @type {Object}
+   */
+  events: {
+    'click .js_messageList-allmessages': 'showAllMessages',
+
+    'click @ui.loadPreviousMessagesButton': 'showPreviousMessages',
+    'click @ui.loadNextMessagesButton': 'showNextMessages',
+    'click @ui.loadAllButton': 'showAllMessagesAtOnce',
+
+    'click .js_openTargetInModal': 'openTargetInModal',
+
+    'click .js_scrollToTopPostBox': 'scrollToTopPostBox',
+
+    'click .js_loadPendingMessages': 'loadPendingMessages',
+    'click @ui.printButton': 'togglePrintableClass'
+  },
+
+  inspireMeLink: null
+}) {
+  initialize(options) {
     //console.log("messageList::initialize()");
     this.setLoading(true);
-    BaseMessageList.prototype.initialize.apply(this, arguments);
+    super.initialize(...arguments);
     var that = this;
     this.isUsingExpertView = (Ctx.getCurrentInterfaceType() === Ctx.InterfaceTypes.EXPERT); // TODO?: have a dedicated flag
 
@@ -161,45 +181,24 @@ var MessageList = BaseMessageList.extend({
         that.onReplyBoxBlur();
       });
     }
-  },
+  }
 
-  /**
-   * The events
-   * @type {Object}
-   */
-  events: {
-    'click .js_messageList-allmessages': 'showAllMessages',
-
-    'click @ui.loadPreviousMessagesButton': 'showPreviousMessages',
-    'click @ui.loadNextMessagesButton': 'showNextMessages',
-    'click @ui.loadAllButton': 'showAllMessagesAtOnce',
-
-    'click .js_openTargetInModal': 'openTargetInModal',
-
-    'click .js_scrollToTopPostBox': 'scrollToTopPostBox',
-
-    'click .js_loadPendingMessages': 'loadPendingMessages',
-    'click @ui.printButton': 'togglePrintableClass'
-  },
-
-  getTitle: function() {
+  getTitle() {
     return i18n.gettext('Messages');
-  },
+  }
 
-  inspireMeLink: null,
-
-  ideaChanged: function() {
+  ideaChanged() {
     var that = this;
     this.getPanelWrapper().filterThroughPanelLock(
             function() {
               that.syncWithCurrentIdea();
             }, 'syncWithCurrentIdea');
-  },
+  }
 
   /**
    * Synchronizes the panel with the currently selected idea (possibly none)
    */
-  syncWithCurrentIdea: function() {
+  syncWithCurrentIdea() {
     var currentIdea = this.getGroupState().get('currentIdea');
     var filterValue;
     var snapshot = this.currentQuery.getFilterConfigSnapshot();
@@ -234,9 +233,9 @@ var MessageList = BaseMessageList.extend({
         this.render();
       }
     }
-  },
+  }
 
-  showInspireMeIfAvailable: function() {
+  showInspireMeIfAvailable() {
     var currentIdea = this.getGroupState().get("currentIdea");
 
     if (!currentIdea) {
@@ -262,20 +261,20 @@ var MessageList = BaseMessageList.extend({
       that.inspireMeLink = null;
       that.ui.inspireMe.addClass("hidden");
     });
-  },
+  }
 
   /**
    * This is used by groupContent.js
    */
-  getMinWidthWithOffset: function(offset) {
+  getMinWidthWithOffset(offset) {
     return this.minWidth + offset;
-  },
+  }
 
-  getCurrentViewPortBottom: function() {
+  getCurrentViewPortBottom() {
     return this.getCurrentViewPortTop() + this.ui.panelBody.height() - this.ui.stickyBar.height();
-  },
+  }
 
-  renderMessageListHeader: function() {
+  renderMessageListHeader() {
       var messageListHeader = new MessageListHeaderView({
         expertViewIsAvailable: this.expertViewIsAvailable,
         isUsingExpertView: this.isUsingExpertView,
@@ -286,27 +285,27 @@ var MessageList = BaseMessageList.extend({
         currentQuery: this.currentQuery
       });
       this.showChildView('messageListHeader', messageListHeader);
-    },
+    }
 
-  onSetIsUsingExpertView: function(isUsingExpertView) {
+  onSetIsUsingExpertView(isUsingExpertView) {
     //console.log("messageList::onSetIsUsingExpertView()");
     this.isUsingExpertView = isUsingExpertView;
-  },
+  }
 
-  isInPrintableView: function() {
+  isInPrintableView() {
       if (this.ui.messageList.hasClass('printable')) {
         return true
       }
       else {
         return false;
       }
-    },
+    }
 
   /**
    * Hide elements of the messageList to make it more printable and
    * copy-pastable in word processing documents
    */
-  togglePrintableClass: function(ev) {
+  togglePrintableClass(ev) {
       console.log("togglePrintableClass", $(ev.currentTarget), this.ui.messageList);
       if (this.isInPrintableView()) {
         this.ui.messageList.removeClass('printable');
@@ -318,17 +317,17 @@ var MessageList = BaseMessageList.extend({
         $(ev.currentTarget).addClass('btn-primary');
         $(ev.currentTarget).removeClass('btn-secondary');
       }
-    },
+    }
 
-  serializeData: function(...args) {
-    var data = BaseMessageList.prototype.serializeData.apply(this, args);
+  serializeData(...args) {
+    var data = super.serializeData(args);
     data.inspireMeLink = this.inspireMeLink;
     return data;
-  },
+  }
 
-  onBeforeRender: function(...args) {
+  onBeforeRender(...args) {
       //Save some state from the previous render
-      BaseMessageList.prototype.onBeforeRender.apply(this, args);
+      super.onBeforeRender(args);
 
       if (this.currentQuery.isQueryValid()) {
         this.setLoading(false);
@@ -355,10 +354,10 @@ var MessageList = BaseMessageList.extend({
       }
 
       //console.log("onBeforeRender:  template is now:", this.template);
-    },
+    }
 
-  onRender: function(...args) {
-    BaseMessageList.prototype.onRender.apply(this, args);
+  onRender(...args) {
+    super.onRender(args);
     var that = this;
     var collectionManager = new CollectionManager();
     var renderId = _.clone(this._renderId);
@@ -417,19 +416,18 @@ var MessageList = BaseMessageList.extend({
       that.renderIsComplete = true;
       that.trigger("messageList:render_complete", "Render complete");
     }
-  },
+  }
 
-  showAnnouncement: function(announcement) {
+  showAnnouncement(announcement) {
     var announcementMessageView = new Announcements.AnnouncementMessageView({model: announcement});
     this.showChildView('announcementRegion', announcementMessageView);
     this.ui.announcementRegion.removeClass('hidden');
-  },
+  }
 
-  showTopPostBox: function(options) {
+  showTopPostBox(options) {
     this.newTopicView = new MessageSendView(options);
     this.showChildView('topPostRegion', this.newTopicView);
-  },
-
+  }
 
   // FIXME: this seems to be not used anymore, so I (Quentin) commented it out
   /**
@@ -446,7 +444,7 @@ var MessageList = BaseMessageList.extend({
   },
   */
 
-  constrainViewStyle: function(viewStyle) {
+  constrainViewStyle(viewStyle) {
     if (!viewStyle) {
       //If invalid, set global default
       viewStyle = this.ViewStyles.RECENTLY_ACTIVE_THREADS;
@@ -462,21 +460,21 @@ var MessageList = BaseMessageList.extend({
       }
     }
     return viewStyle;
-  },
+  }
 
   /**
    * Shows posts which are descendent of a given post
    * @param {string} postId
    */
-  addFilterByPostId: function(postId) {
+  addFilterByPostId(postId) {
     this.currentQuery.addFilter(this.currentQuery.availableFilters.POST_IS_DESCENDENT_OF_POST, postId);
     this.render();
-  },
+  }
 
   /**
    * Toggle hoist on a post (filter which shows posts which are descendent of a given post)
    */
-  toggleFilterByPostId: function(postId) {
+  toggleFilterByPostId(postId) {
     var alreadyHere = this.currentQuery.isFilterInQuery(this.currentQuery.availableFilters.POST_IS_DESCENDENT_OF_POST, postId);
     if (alreadyHere) {
       this.currentQuery.clearFilter(this.currentQuery.availableFilters.POST_IS_DESCENDENT_OF_POST, null);
@@ -487,24 +485,24 @@ var MessageList = BaseMessageList.extend({
     }
 
     return !alreadyHere;
-  },
+  }
 
   /**
    * @event
    * Shows all messages (clears all filters)
    */
-  showAllMessages: function() {
+  showAllMessages() {
     //console.log("messageList:showAllMessages() called");
     this.currentQuery.clearAllFilters();
     this.render();
-  },
+  }
 
   /**
    * Load posts that belong to an idea
    * @param {string} ideaId
    * @param {boolean} show only unread messages (this parameter is optional and is a flag)
    */
-  addFilterIsRelatedToIdea: function(idea, only_unread) {
+  addFilterIsRelatedToIdea(idea, only_unread) {
       var snapshot = this.currentQuery.getFilterConfigSnapshot();
 
       //Can't filter on an idea at the same time as getting synthesis messages
@@ -531,46 +529,45 @@ var MessageList = BaseMessageList.extend({
 
         this.render();
       }
-    },
+    }
 
   /**
    * Load posts that are synthesis posts
    * @param {string} ideaId
    */
-  addFilterIsSynthesisMessage: function() {
+  addFilterIsSynthesisMessage() {
     //Can't filter on an idea at the same time as getting synthesis messages
     this.currentQuery.clearFilter(this.currentQuery.availableFilters.POST_IS_IN_CONTEXT_OF_IDEA, null);
     this.currentQuery.addFilter(this.currentQuery.availableFilters.POST_IS_SYNTHESIS, true);
     this.render();
-  },
+  }
 
   /**
    * Load posts that are synthesis posts
    * @param {string} ideaId
    */
-  addFilterIsOrphanMessage: function() {
+  addFilterIsOrphanMessage() {
     //Can't filter on an idea at the same time as getting orphan messages
     this.currentQuery.clearFilter(this.currentQuery.availableFilters.POST_IS_IN_CONTEXT_OF_IDEA, null);
     this.currentQuery.addFilter(this.currentQuery.availableFilters.POST_IS_ORPHAN, true);
     this.render();
-  },
+  }
 
-  openTargetInModal: function(evt) {
+  openTargetInModal(evt) {
     return Ctx.openTargetInModal(evt);
-  },
+  }
 
-  onReplyBoxFocus: function() {
+  onReplyBoxFocus() {
       this.aReplyBoxHasFocus = true;
       this.ui.stickyBar.fadeOut();
-    },
+    }
 
-  onReplyBoxBlur: function() {
+  onReplyBoxBlur() {
       this.aReplyBoxHasFocus = false;
 
       // commented out because it will reappear on scroll if necessary (and forcing it is bad if the user clics from a message reply box to the bottom comment box)
       //this.ui.stickyBar.fadeIn();
-    },
-
-});
+    }
+}
 
 export default MessageList;

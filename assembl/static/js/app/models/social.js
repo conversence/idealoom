@@ -53,22 +53,7 @@ tokenTimeManager.prototype = {
  * @extends app.models.base.BaseModel
  */
 
-var FacebookAccessToken = Base.Model.extend({
-   constructor: function FacebookAccessToken() {
-    Base.Model.apply(this, arguments);
-  },
-
-   urlRoot: function(){
-        var fbId = Ctx.getCurrentUserFacebookAccountId();
-        if (!fbId) {
-            throw new Error("There is no Facebook Account for this user");
-        }
-        else {
-            var route = Ctx.getApiV2DiscussionUrl('/all_users/current/accounts/') +
-                Ctx.extractId(fbId) + "/access_tokens";
-            return route;
-        }
-    },
+class FacebookAccessToken extends Base.Model.extend({
     defaults: {
         fb_account_id: null,
         token: null,
@@ -78,36 +63,48 @@ var FacebookAccessToken = Base.Model.extend({
         object_fb_id: null,
         '@view': null,
         '@type': null
-    },
+    }
+}) {
+    urlRoot() {
+         var fbId = Ctx.getCurrentUserFacebookAccountId();
+         if (!fbId) {
+             throw new Error("There is no Facebook Account for this user");
+         }
+         else {
+             var route = Ctx.getApiV2DiscussionUrl('/all_users/current/accounts/') +
+                 Ctx.extractId(fbId) + "/access_tokens";
+             return route;
+         }
+     }
 
-    isExpired: function(){
+    isExpired() {
         var t = new tokenTimeManager().processTimeToUTC(this.get('expiration'));
         var d = new Moment(t).utc();
         var now = new Moment.utc();
         return now.isAfter(d);
-    },
+    }
 
-    isMinimumTime: function(){
+    isMinimumTime() {
         return new Time().isMinTime(this.get('expiration'));
-    },
+    }
 
-    isInfiniteToken: function(){
+    isInfiniteToken() {
         //Backend will return a property, is_infinite_token
         return this.get('is_infinite_token') === false;
-    },
+    }
 
-    isUserToken: function(){
+    isUserToken() {
         return this.get('token_type') === 'user';
-    },
+    }
 
-    isPageToken: function(){
+    isPageToken() {
         return this.get('token_type') === 'page';
-    }, 
+    }
 
-    isGroupToken: function(){
+    isGroupToken() {
         return this.get('token_type') === 'group';
   }
-});
+}
 
 /**
  * Facebook access token collection
@@ -115,36 +112,35 @@ var FacebookAccessToken = Base.Model.extend({
  * @extends app.models.base.BaseCollection
  */
 
-var FacebookAccessTokens = Base.Collection.extend({
-   constructor: function FacebookAccessTokens() {
-    Base.Collection.apply(this, arguments);
-  },
-  //Things to add: Promise function to get the agent model
-  //represented by this model.
-  model: FacebookAccessToken,
-  url: function() {
-    var fbId = Ctx.getCurrentUserFacebookAccountId();
-    if (!fbId) {
-      throw new Error("There is no Facebook Account for this user");
+class FacebookAccessTokens extends Base.Collection.extend({
+    //Things to add: Promise function to get the agent model
+    //represented by this model.
+    model: FacebookAccessToken
+}) {
+    url() {
+      var fbId = Ctx.getCurrentUserFacebookAccountId();
+      if (!fbId) {
+        throw new Error("There is no Facebook Account for this user");
+      }
+      else {
+        var route = Ctx.getApiV2DiscussionUrl('/all_users/current/accounts/') +
+            Ctx.extractId(fbId) + "/access_tokens";
+        return route;
+      }
     }
-    else {
-      var route = Ctx.getApiV2DiscussionUrl('/all_users/current/accounts/') +
-          Ctx.extractId(fbId) + "/access_tokens";
-      return route;
-    }
-  },
-  getUserToken: function() {
-    var tmp = this.find(function(model) { return model.isUserToken(); });
-    if (!tmp) return null;
-    else return tmp;
-  },
 
-  hasUserToken: function() {
-    var tmp = this.find(function(model) { return model.isUserToken(); });
-    if (!tmp) return false;
-    else return true;
-  }
-});
+    getUserToken() {
+      var tmp = this.find(function(model) { return model.isUserToken(); });
+      if (!tmp) return null;
+      else return tmp;
+    }
+
+    hasUserToken() {
+      var tmp = this.find(function(model) { return model.isUserToken(); });
+      if (!tmp) return false;
+      else return true;
+    }
+}
 
 export default {
   Facebook: {

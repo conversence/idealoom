@@ -9,14 +9,10 @@ import _ from 'underscore';
 import IdeaLoom from '../app.js';
 import Ctx from '../common/context.js';
 
-var LoaderView = Marionette.View.extend({
-  constructor: function LoaderView() {
-    Marionette.View.apply(this, arguments);
-  },
-
-  template: '#tmpl-loader',
-    
-  onRender: function() {
+class LoaderView extends Marionette.View.extend({
+  template: '#tmpl-loader'
+}) {
+  onRender() {
     // Get rid of that pesky wrapping-div.
     // Assumes 1 child element present in template.
     this.$el = this.$el.children();
@@ -26,6 +22,6 @@ var LoaderView = Marionette.View.extend({
     this.$el.unwrap();
     this.setElement(this.$el);
   }
-});
+}
 
 export default LoaderView;

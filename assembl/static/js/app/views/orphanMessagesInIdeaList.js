@@ -9,11 +9,7 @@ import Ctx from '../common/context.js';
 import PanelSpecTypes from '../utils/panelSpecTypes.js';
 import ideaInIdeaList from './ideaInIdeaList.js';
 
-var OrphanMessagesInIdeaListView = ideaInIdeaList.IdeaView.extend({
-  constructor: function OrphanMessagesInIdeaListView() {
-    ideaInIdeaList.IdeaView.apply(this, arguments);
-  },
-
+class OrphanMessagesInIdeaListView extends ideaInIdeaList.IdeaView.extend({
   /**
    * The template
    * @type {template}
@@ -21,9 +17,16 @@ var OrphanMessagesInIdeaListView = ideaInIdeaList.IdeaView.extend({
   template: Ctx.loadTemplate('orphanMessagesInIdeaList'),
 
   /**
+   * @events
+   */
+  events: {
+    'click .idealist-title': 'onTitleClick'
+  }
+}) {
+  /**
    * The render
    */
-  onRender: function() {
+  onRender() {
     Ctx.removeCurrentlyDisplayedTooltips(this.$el);
     var data = this.model.toJSON();
 
@@ -38,19 +41,12 @@ var OrphanMessagesInIdeaListView = ideaInIdeaList.IdeaView.extend({
     this.$el.html(this.template(data));
     Ctx.initTooltips(this.$el);
     return this;
-  },
-
-  /**
-   * @events
-   */
-  events: {
-    'click .idealist-title': 'onTitleClick'
-  },
+  }
 
   /**
    * @event
    */
-  onTitleClick: function(e) {
+  onTitleClick(e) {
     $('.idealist-item').removeClass('is-selected');
     this._groupContent.setCurrentIdea(null);
 
@@ -65,6 +61,6 @@ var OrphanMessagesInIdeaListView = ideaInIdeaList.IdeaView.extend({
       this.$el.addClass('is-selected');
     }
   }
-});
+}
 
 export default OrphanMessagesInIdeaListView;

@@ -9,17 +9,19 @@ import Ctx from '../common/context.js';
 import Permissions from '../utils/permissions.js';
 import i18n from '../utils/i18n.js';
 import Roles from '../utils/roles.js';
+
 /**
  * Discussion model
  * Frontend model for :py:class:`assembl.models.discussion.Discussion`
  * @class app.models.discussion.discussionModel
  * @extends app.models.base.BaseModel
  */
-var discussionModel = Base.Model.extend({
+class discussionModel extends Base.Model.extend({
   /**
    * @member {string} app.models.discussion.discussionModel.url
    */
   url: Ctx.getApiV2DiscussionUrl(),
+
   /**
    * Defaults
    * @type {Object}
@@ -43,37 +45,34 @@ var discussionModel = Base.Model.extend({
     'homepage': null,
     'show_help_in_debate_section': true,
     posts: []
-  },
-  /**
-   * @function app.models.discussion.discussionModel.constructor
-   */
-  constructor: function discussionModel() {
-    Base.Model.apply(this, arguments);
-  },
+  }
+}) {
   /**
    * Validate the model attributes
    * @function app.models.discussion.discussionModel.validate
    */
-  validate: function(attrs, options) {
+  validate(attrs, options) {
     /**
      * check typeof variable
      * */
-  },
+  }
+
   /**
    * Checks if translation service is available
    * @returns {Boolean}
    * @function app.models.discussion.discussionModel.hasTranslationService
    */
-  hasTranslationService: function(){
+  hasTranslationService() {
     return Ctx.hasTranslationService();
-  },
+  }
+
   /**
    * Returns roles according to permission
    * @param {Object} permission
    * @returns {Array}
    * @function app.models.discussion.discussionModel.getRolesForPermission
    */
-  getRolesForPermission: function(permission) {
+  getRolesForPermission(permission) {
       var roles = undefined;
       if (_.contains(Permissions, permission)) {
         roles = this.get('permissions')[permission];
@@ -87,13 +86,14 @@ var discussionModel = Base.Model.extend({
       else {
         throw Error("Permission " + permission + " does not exist");
       }
-    },
+    }
+
   /**
    * Get visualizations
    * @returns {BaseCollection}
    * @function app.models.discussion.discussionModel.getVisualizations
    */
-  getVisualizations: function() {
+  getVisualizations() {
     var jed;
     var settings = Ctx.getPreferences();
     var visualizations = settings.visualizations;
@@ -131,29 +131,25 @@ var discussionModel = Base.Model.extend({
     }
     return navigation_item_collections;
   }
-});
+}
+
 /**
  * Discussions collection
  * @class app.models.discussion.discussionCollection
  * @extends app.models.base.BaseCollection
  */
-var discussionCollection = Base.Collection.extend({
+class discussionCollection extends Base.Collection.extend({
   /**
    * @member {string} app.models.discussion.discussionCollection.url
    */
   url: Ctx.getApiV2DiscussionUrl(),
+
   /**
    * The model
    * @type {discussionModel}
    */
-  model: discussionModel,
-  /**
-   * @function app.models.discussion.discussionCollection.constructor
-   */
-  constructor: function discussionCollection() {
-    Base.Collection.apply(this, arguments);
-  }
-});
+  model: discussionModel
+}) {}
 
 export default {
   Model: discussionModel,

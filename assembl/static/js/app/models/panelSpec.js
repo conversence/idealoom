@@ -13,20 +13,16 @@ import PanelSpecTypes from '../utils/panelSpecTypes.js';
  * @extends app.models.base.BaseModel
  */
 
-var PanelSpecModel = Base.Model.extend({
-  constructor: function PanelSpecModel() {
-    Base.Model.apply(this, arguments);
-  },
-
+class PanelSpecModel extends Base.Model.extend({
   defaults: {
     type: '',
     hidden: false,
     locked: false,
     minWidth:40
-  },
-  
+  }
+}) {
   /** This returns undefined if the model is valid */
-  validate: function(attributes, options) {
+  validate(attributes, options) {
     var viewsFactory = require('../objects/viewsFactory.js').default;
     if (viewsFactory === undefined) {
       throw new Error("You must define viewsFactory to run validation");
@@ -44,19 +40,19 @@ var PanelSpecModel = Base.Model.extend({
     }
 
     //Everything ok
-  },
+  }
 
   /**
    @returns an instance of PanelSpecType, or throws an exception
    */
-  getPanelSpecType: function(psType) {
+  getPanelSpecType(psType) {
       return PanelSpecTypes.getByRawId(this.get('type'));
-    },
+    }
 
-  isOfType: function(psType) {
+  isOfType(psType) {
       return PanelSpecTypes.getByRawId(this.get('type')) == psType;
     }
-});
+}
 
 /**
  * Panel specifications collection
@@ -64,14 +60,10 @@ var PanelSpecModel = Base.Model.extend({
  * @extends app.models.base.BaseCollection
  */
 
-var PanelSpecs = Base.Collection.extend({
-  constructor: function PanelSpecs() {
-    Base.Collection.apply(this, arguments);
-  },
-
-  model: PanelSpecModel,
-  
-  validate: function(attributes, options) {
+class PanelSpecs extends Base.Collection.extend({
+  model: PanelSpecModel
+}) {
+  validate(attributes, options) {
     var invalid = [];
     this.each(function(panelSpec) {
       if (!panelSpec.isValid()) {
@@ -84,7 +76,7 @@ var PanelSpecs = Base.Collection.extend({
 
     return (this.length > 0);
   }
-});
+}
 
 export default {
   Model: PanelSpecModel,

@@ -15,17 +15,15 @@ import i18n from '../../utils/i18n.js';
 import partnerModel from '../../models/partners.js';
 import AdminNavigationMenu from './adminNavigationMenu.js';
 
-var Partners = Marionette.View.extend({
-  constructor: function Partners() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class Partners extends Marionette.View.extend({
   template: '#tmpl-partnersInAdmin',
   className: 'gr',
+
   ui: {
       'partnerItem':'.js_deletePartner',
       'partnerItemEdit': '.js_editPartner'
     },
+
   events: {
     'click @ui.partnerItem':'deletePartner',
     'click @ui.partnerItemEdit': 'editPartner'
@@ -33,9 +31,9 @@ var Partners = Marionette.View.extend({
 
   modelEvents: {
     'change':'render'
-  },
-
-  deletePartner: function() {
+  }
+}) {
+  deletePartner() {
     var that = this;
     this.model.destroy({
       success: function() {
@@ -45,28 +43,27 @@ var Partners = Marionette.View.extend({
 
       }
     });
-  },
+  }
 
-  editPartner: function() {
+  editPartner() {
     var self = this;
 
-    var Modal = Backbone.Modal.extend({
-  constructor: function Modal() {
-    Backbone.Modal.apply(this, arguments);
-  },
-
+    class Modal extends Backbone.Modal.extend({
       template: _.template($('#tmpl-adminPartnerEditForm').html()),
       className: 'partner-modal popin-wrapper',
       cancelEl: '.close, .js_close',
       keyControl: false,
       model: self.model,
-      initialize: function() {
-        this.$('.bbm-modal').addClass('popin');
-      },
+
       events: {
         'submit #partner-form-edit':'validatePartner'
-      },
-      validatePartner: function(e) {
+      }
+    }) {
+      initialize() {
+        this.$('.bbm-modal').addClass('popin');
+      }
+
+      validatePartner(e) {
 
         if (e.target.checkValidity()) {
 
@@ -93,33 +90,26 @@ var Partners = Marionette.View.extend({
 
         return false;
       }
-    });
+    }
 
     var modal = new Modal();
 
     IdeaLoom.rootView.showChildView('slider', modal);
-
   }
-});
+}
 
-var PartnerList = Marionette.CollectionView.extend({
-  constructor: function PartnerList() {
-    Marionette.CollectionView.apply(this, arguments);
-  },
-
+class PartnerList extends Marionette.CollectionView.extend({
   childView: Partners,
+
   collectionEvents: {
     'add sync':'render'
   }
-});
+}) {}
 
-var adminPartners = Marionette.View.extend({
-  constructor: function adminPartners() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class adminPartners extends Marionette.View.extend({
   template: '#tmpl-adminPartners',
   className: 'admin-notifications',
+
   ui: {
       partners: '.js_addPartner',
       close: '.bx-alert-success .bx-close'
@@ -133,15 +123,15 @@ var adminPartners = Marionette.View.extend({
   events: {
       'click @ui.partners': 'addNewPartner',
       'click @ui.close': 'close'
-    },
-
-  serializeData: function() {
+    }
+}) {
+  serializeData() {
     return {
       Ctx: Ctx
     }
-  },
+  }
 
-  onRender: function() {
+  onRender() {
     var that = this;
     var collectionManager = new CollectionManager();
 
@@ -162,31 +152,30 @@ var adminPartners = Marionette.View.extend({
     var menu = new AdminNavigationMenu.discussionAdminNavigationMenu(
       {selectedSection: "partners"});
     this.showChildView('navigationMenuHolder', menu);
-  },
+  }
 
-  close: function() {
+  close() {
     this.$('.bx-alert-success').addClass('hidden');
-  },
+  }
 
-  addNewPartner: function() {
+  addNewPartner() {
     var self = this;
 
-    var Modal = Backbone.Modal.extend({
-  constructor: function Modal() {
-    Backbone.Modal.apply(this, arguments);
-  },
-
+    class Modal extends Backbone.Modal.extend({
       template: _.template($('#tmpl-adminPartnerForm').html()),
       className: 'partner-modal popin-wrapper',
       cancelEl: '.close, .js_close',
       keyControl: false,
-      initialize: function() {
-        this.$('.bbm-modal').addClass('popin');
-      },
+
       events: {
         'submit #partner-form':'validatePartner'
-      },
-      validatePartner: function(e) {
+      }
+    }) {
+      initialize() {
+        this.$('.bbm-modal').addClass('popin');
+      }
+
+      validatePartner(e) {
 
         if (e.target.checkValidity()) {
           var inputs = document.querySelectorAll('#partner-form *[required]');
@@ -214,14 +203,12 @@ var adminPartners = Marionette.View.extend({
 
         return false;
       }
-    });
+    }
 
     var modal = new Modal();
 
     IdeaLoom.rootView.showChildView('slider', modal);
-
   }
-
-});
+}
 
 export default adminPartners;

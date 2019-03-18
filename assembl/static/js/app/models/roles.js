@@ -18,42 +18,34 @@ import Analytics from '../internal_modules/analytics/dispatcher.js';
  * @class app.models.roles.RoleModel
  * @extends app.models.base.BaseModel
  */
-var RoleModel = Base.Model.extend({
-  constructor: function RoleModel() {
-    Base.Model.apply(this, arguments);
-  },
-
+class RoleModel extends Base.Model.extend({
   urlRoot: Ctx.getApiV2Url("/roles"),
 
   defaults: {
     '@id': null,
     '@type': null,
     '@view': null
-  },
-});
+  }
+}) {}
 
 /**
  * LocalRoles collection
  * @class app.models.roles.localRoleCollection
  * @extends app.models.base.BaseCollection
  */
-var RoleCollection = Base.Collection.extend({
-  constructor: function RoleCollection() {
-    Base.Collection.apply(this, arguments);
+class RoleCollection extends Base.Collection.extend({
+  url: Ctx.getApiV2Url("/roles"),
+  model: RoleModel
+}) {
+  constructor() {
+    super(...arguments);
     var roles = Ctx.getJsonFromScriptTag('role-names')
     roles = _.sortBy(roles);
     _.map(roles, (v)=>{
       this.add(new RoleModel({'@id': v, name: v}));
     });
-  },
-
-  url: Ctx.getApiV2Url("/roles"),
-  model: RoleModel,
-});
-
-
-
-
+  }
+}
 
 /**
  * Role model
@@ -61,39 +53,34 @@ var RoleCollection = Base.Collection.extend({
  * @class app.models.roles.PermissionModel
  * @extends app.models.base.BaseModel
  */
-var PermissionModel = Base.Model.extend({
-  constructor: function PermissionModel() {
-    Base.Model.apply(this, arguments);
-  },
-
+class PermissionModel extends Base.Model.extend({
   urlRoot: Ctx.getApiV2Url("/permissions"),
 
   defaults: {
     '@id': null,
     '@type': null,
     '@view': null
-  },
-});
+  }
+}) {}
 
 /**
  * LocalPermissions collection
  * @class app.models.roles.localPermissionCollection
  * @extends app.models.base.BaseCollection
  */
-var PermissionCollection = Base.Collection.extend({
-  constructor: function PermissionCollection() {
-    Base.Collection.apply(this, arguments);
+class PermissionCollection extends Base.Collection.extend({
+  url: Ctx.getApiV2Url("/permissions"),
+  model: PermissionModel
+}) {
+  constructor() {
+    super(...arguments);
     var permissions = _.values(Permissions);
     permissions = _.sortBy(permissions);
     _.map(permissions, (v)=>{
       this.add(new PermissionModel({'@id': v, name: v}));
     });
-  },
-
-  url: Ctx.getApiV2Url("/permissions"),
-  model: PermissionModel,
-});
-
+  }
+}
 
 /**
  * LocalRole model
@@ -101,11 +88,7 @@ var PermissionCollection = Base.Collection.extend({
  * @class app.models.roles.localRoleModel
  * @extends app.models.base.BaseModel
  */
-var localRoleModel = Base.Model.extend({
-  constructor: function localRoleModel() {
-    Base.Model.apply(this, arguments);
-  },
-
+class localRoleModel extends Base.Model.extend({
   urlRoot: Ctx.getApiV2DiscussionUrl('local_user_roles'),
 
   defaults: {
@@ -116,67 +99,59 @@ var localRoleModel = Base.Model.extend({
     '@id': null,
     '@type': null,
     '@view': null
-  },
-
-  validate: function(attrs, options) {
+  }
+}) {
+  validate(attrs, options) {
     /**
      * check typeof variable
      * */
   }
-
-});
+}
 
 /**
  * LocalRoles collection
  * @class app.models.roles.localRoleCollection
  * @extends app.models.base.BaseCollection
  */
-var localRoleCollection = Base.Collection.extend({
-  constructor: function myLocalRoleCollection() {
-    Base.Collection.apply(this, arguments);
-  },
+class localRoleCollection extends Base.Collection.extend({
   url: Ctx.getApiV2DiscussionUrl('local_user_roles'),
-  model: localRoleModel,
-})
+  model: localRoleModel
+}) {}
 
 /**
  * MyLocalRoles collection
  * @class app.models.roles.myLocalRoleCollection
  * @extends app.models.base.BaseCollection
  */
-var myLocalRoleCollection = localRoleCollection.extend({
-  constructor: function myLocalRoleCollection() {
-    localRoleCollection.apply(this, arguments);
-  },
-
-  url: function() {
+class myLocalRoleCollection extends localRoleCollection {
+  url() {
     if (Ctx.isAdminApp()) {
       return Ctx.getApiV2Url("/"+Types.USER+"/"+Ctx.getCurrentUserId()+"/roles")
     } else {
       return Ctx.getApiV2DiscussionUrl("/all_users/current/local_roles")
     }
-  },
+  }
 
   /** This method needs to change once subscription has it's own table 
    *
    */
-  isUserSubscribedToDiscussion: function() {
+  isUserSubscribedToDiscussion() {
     //console.log("isUserSubscribedToDiscussion returning", this.hasRole(Roles.PARTICIPANT))
     return this.hasRole(Roles.PARTICIPANT);
-  },
+  }
 
   /**
    * @param  {Role}  The role
    * @returns {boolean} True if the user has the given role
    */
-  hasRole: function(role) {
+  hasRole(role) {
     var roleFound =  this.find(function(local_role) {
       return local_role.get('role') === role;
     });
     return roleFound !== undefined;
-  },
+  }
 
-  UnsubscribeUserFromDiscussion: function() {
+  UnsubscribeUserFromDiscussion() {
     var that = this;
 
     var role =  this.find(function(local_role) {
@@ -193,9 +168,7 @@ var myLocalRoleCollection = localRoleCollection.extend({
         console.error('ERROR: unSubscription failed', resp);
       }});
   }
-});
-
-
+}
 
 /**
  * DiscussionPermission model
@@ -204,11 +177,7 @@ var myLocalRoleCollection = localRoleCollection.extend({
  * @extends app.models.base.BaseModel
  */
 
-var discussionPermissionModel = Base.Model.extend({
-  constructor: function discussionPermissionModel() {
-    Base.Model.apply(this, arguments);
-  },
-
+class discussionPermissionModel extends Base.Model.extend({
   urlRoot: Ctx.getApiV2DiscussionUrl("/acls"),
 
   defaults: {
@@ -218,15 +187,14 @@ var discussionPermissionModel = Base.Model.extend({
     '@id': null,
     '@type': null,
     '@view': null
-  },
-
-  validate: function(attrs, options) {
+  }
+}) {
+  validate(attrs, options) {
     /**
      * check typeof variable
      * */
   }
-
-});
+}
 
 /**
  * DiscussionPermission collection
@@ -234,15 +202,10 @@ var discussionPermissionModel = Base.Model.extend({
  * @extends app.models.base.BaseCollection
  */
 
-var discussionPermissionCollection = Base.Collection.extend({
-  constructor: function discussionPermissionCollection() {
-    Base.Collection.apply(this, arguments);
-  },
-
+class discussionPermissionCollection extends Base.Collection.extend({
   url: Ctx.getApiV2DiscussionUrl("/acls"),
-  model: discussionPermissionModel,
-});
-
+  model: discussionPermissionModel
+}) {}
 
 /**
  * StatePermission model
@@ -251,11 +214,7 @@ var discussionPermissionCollection = Base.Collection.extend({
  * @extends app.models.base.BaseModel
  */
 
-var pubStatePermissionModel = Base.Model.extend({
-  constructor: function pubStatePermissionModel() {
-    Base.Model.apply(this, arguments);
-  },
-
+class pubStatePermissionModel extends Base.Model.extend({
   urlRoot: Ctx.getApiV2DiscussionUrl("/publication_permissions"),
 
   defaults: {
@@ -266,15 +225,14 @@ var pubStatePermissionModel = Base.Model.extend({
     '@id': null,
     '@type': null,
     '@view': null
-  },
-
-  validate: function(attrs, options) {
+  }
+}) {
+  validate(attrs, options) {
     /**
      * check typeof variable
      * */
   }
-
-});
+}
 
 /**
  * StatePermission collection
@@ -282,14 +240,10 @@ var pubStatePermissionModel = Base.Model.extend({
  * @extends app.models.base.BaseCollection
  */
 
-var pubStatePermissionCollection = Base.Collection.extend({
-  constructor: function pubStatePermissionCollection() {
-    Base.Collection.apply(this, arguments);
-  },
-
+class pubStatePermissionCollection extends Base.Collection.extend({
   url: Ctx.getApiV2DiscussionUrl("/publication_permissions"),
-  model: pubStatePermissionModel,
-});
+  model: pubStatePermissionModel
+}) {}
 
 
 export default {

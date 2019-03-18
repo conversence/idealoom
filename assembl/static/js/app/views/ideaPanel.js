@@ -96,7 +96,7 @@ class IdeaPanel extends BasePanel.extend({
   },
 }) {
   initialize(options) {
-    BasePanel.prototype.initialize.apply(this, arguments);
+    super.initialize(...arguments);
     this.setLoading(true);
     var that = this;
     var collectionManager = new CollectionManager();
@@ -369,7 +369,7 @@ class IdeaPanel extends BasePanel.extend({
           if (state) {
             pubStateName = state.nameOrLabel(this.translationData);
           } else {
-            log.error("Could not find state "+stateLabel);
+            console.error("Could not find state "+stateLabel);
           }
         }
         const transitionColl = this.ideaPubFlow.get('transitions').filter((transition) => {
@@ -534,32 +534,28 @@ class IdeaPanel extends BasePanel.extend({
       _.each(contributorsRaw, function(contributorId) {
         contributorsId.push(contributorId);
       });
-      //console.log(contributorsId);
-      var ContributorAgentSubset = Backbone.Subset.extend({
-        constructor: function ContributorAgentSubset() {
-          Backbone.Subset.apply(this, arguments);
-        },
 
-        name: 'ContributorAgentSubset',
-        sieve: function(agent) {
+      //console.log(contributorsId);
+      class ContributorAgentSubset extends Backbone.Subset.extend({
+        name: 'ContributorAgentSubset'
+      }) {
+        sieve(agent) {
           //console.log(agent.id, _.indexOf(contributorsId, agent.id), contributorsId);
           return _.indexOf(contributorsId, agent.id) !== -1;
-        },
-        parent: function() {
+        }
+
+        parent() {
           return allAgents
         }
-      });
+      }
 
       var contributors = new ContributorAgentSubset()
 
       //console.log(contributors);
-      var avatarCollectionView = Marionette.CollectionView.extend({
-        constructor: function avatarCollectionView() {
-          Marionette.CollectionView.apply(this, arguments);
-        },
-
+      class avatarCollectionView extends Marionette.CollectionView.extend({
         childView: AgentViews.AgentAvatarView
-      });
+      }) {}
+
       var avatarsView = new avatarCollectionView({
         collection: contributors
       });
@@ -1037,21 +1033,18 @@ class IdeaPanel extends BasePanel.extend({
       collectionManager.getAllAnnouncementCollectionPromise().then(
           function(allAnnouncementCollection) {
             // Filters on only this idea's announce (should be only one...)
-            var AnnouncementIdeaSubset = Backbone.Subset.extend({
-              constructor: function AnnouncementIdeaSubset() {
-                Backbone.Subset.apply(this, arguments);
-              },
-
-              beforeInitialize: function(models, options) {
+            class AnnouncementIdeaSubset extends Backbone.Subset {
+              beforeInitialize(models, options) {
                 this.idea = options.idea;
                 if (!this.idea) {
                   throw new Error("AnnouncementIdeaSubset mush have an idea")
                 }
-              },
-              sieve: function(announcement) {
+              }
+
+              sieve(announcement) {
                 return announcement.get('idObjectAttachedTo') == this.idea.id;
               }
-            });
+            }
 
             var announcementIdeaSubsetCollection = new AnnouncementIdeaSubset(
               [],

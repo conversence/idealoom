@@ -19,81 +19,82 @@ import UserCustomData from '../../models/userCustomData.js';
 /** Represents the entire content of a single panel group
 * @class  app.views.groups.groupContent.groupContent
 */
-var groupContentBody = Marionette.CollectionView.extend({
-  constructor: function groupContentBody() {
-    Marionette.CollectionView.apply(this, arguments);
-  },
-
+class groupContentBody extends Marionette.CollectionView.extend({
   className: 'groupBody',
-  childView: PanelWrapper,
-  initialize: function(options) {
+  childView: PanelWrapper
+}) {
+  initialize(options) {
     this.parent = options.parent;
-  },
+  }
+
   /**
    * Tell the panelWrapper which view to put in its contents
    */
-  childViewOptions: function(child) {
+  childViewOptions(child) {
     return {
       groupContent: this.parent,
       contentSpec: child,
     };
-  },
-});
+  }
+}
 
 /** Represents the entire content of a single panel group
 * @class  app.views.groups.groupContent.groupContent
 */
-var groupContent = Marionette.View.extend({
-  constructor: function groupContent() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class groupContent extends Marionette.View.extend({
   template: "#tmpl-groupContent",
   className: "groupContent",
+
   regions: {
     body: {
       el: '.groupBody',
       replaceElement: true,
     },
   },
+
   panel_borders_size: 1,
 
   events: {
     'click .js_closeGroup': 'closeGroup'
-  },
-  initialize: function(options) {
+  }
+}) {
+  initialize(options) {
     this.collection = this.model.get('panels');
     this.groupContainer = options['groupContainer'];
     this.body = new groupContentBody({
       collection: this.collection,
       parent: this,
     });
-  },
-  onRender: function(){
+  }
+
+  onRender() {
     if (!this.isDestroyed()) {
       this.showChildView('body', this.body);
     }
-  },
-  onAttach: function(){
+  }
+
+  onAttach() {
     if (!this.isDestroyed()) {
       var navView = this.findViewByType(PanelSpecTypes.NAV_SIDEBAR);
       if (navView) {
         navView.setViewByName(this.model.get('navigationState'), null);
       }
     }
-  },
-  serializeData: function() {
+  }
+
+  serializeData() {
     return {
       "Ctx": Ctx
     };
-  },
+  }
+
   /**
    * Set the given Idea as the current one to be edited
    * @param  {Idea} idea
    * @param  {boolean} noResetState: Do not change panels. Rare.
    * @param  {string} reason: deprecated. Should go to analytics?
    */
-  setCurrentIdea: function(idea, noResetState, reason) {
+  setCurrentIdea(idea, noResetState, reason) {
     if (idea !== this._getCurrentIdea()) {
       var analytics = Analytics.getInstance();
       if (idea !== null) {
@@ -113,51 +114,58 @@ var groupContent = Marionette.View.extend({
     if (!noResetState) {
       this.NavigationResetDebateState();
     }
-  },
+  }
+
   /**
    * @return: undefined if no idea was set yet.
    * null if it was explicitely set to no idea.
    *
    */
-  _getCurrentIdea: function() {
+  _getCurrentIdea() {
       return this.model.get('states').at(0).get('currentIdea');
-    },
-  closeGroup: function() {
+    }
+
+  closeGroup() {
     this.applyUserCustomDataChangesOnGroupClose();
     this.model.collection.remove(this.model);
     this.groupContainer.resizeAllPanels(true);
-  },
-  findNavigationSidebarPanelSpec: function() {
+  }
+
+  findNavigationSidebarPanelSpec() {
     return this.model.findNavigationSidebarPanelSpec();
-  },
-  isSimpleInterface: function() {
+  }
+
+  isSimpleInterface() {
     if (this.findNavigationSidebarPanelSpec()) {
       return true;
     } else {
       return false;
     }
-  },
+  }
+
   /**
    * Specific to the simple interface. Go back to default view.
    * As things stand, default view is debate state with last idea selected.
    */
-  NavigationResetDefaultState: function() {
+  NavigationResetDefaultState() {
     return this.NavigationResetDebateState();
-  },
+  }
+
   /**
    * Specific to the simple interface.  Does nothing if there is no
    * navigation sidebar panel in this group.
    * If there is, get's it back to the default debate view
    */
-  NavigationResetDebateState: function() {
+  NavigationResetDebateState() {
     if (!this.isDestroyed()) {  //Because this is called from outside the view
       if (this.findNavigationSidebarPanelSpec()) {
         this.model.set('navigationState', 'debate');
         this.SimpleUIResetMessageAndIdeaPanelState(this._getCurrentIdea());
       }
     }
-  },
-  NavigationResetAboutState: function() {
+  }
+
+  NavigationResetAboutState() {
     if (!this.isDestroyed()) {  //Because this is called from outside the view
       var nav = this.findNavigationSidebarPanelSpec();
       if (nav) {
@@ -165,8 +173,9 @@ var groupContent = Marionette.View.extend({
         this.ensureOnlyPanelsVisible(PanelSpecTypes.DISCUSSION_CONTEXT);
       }
     }
-  },
-  NavigationResetSynthesisMessagesState: function(synthesisInNavigationPanel) {
+  }
+
+  NavigationResetSynthesisMessagesState(synthesisInNavigationPanel) {
     if (!this.isDestroyed()) {  //Because this is called from outside the view
       if (this.findNavigationSidebarPanelSpec()) {
         this.setCurrentIdea(null);
@@ -174,8 +183,9 @@ var groupContent = Marionette.View.extend({
         this.ensurePanelsHidden(PanelSpecTypes.IDEA_PANEL);
       }
     }
-  },
-  NavigationResetVisualizationState: function(url) {
+  }
+
+  NavigationResetVisualizationState(url) {
     if (!this.isDestroyed()) {  //Because this is called from outside the view
       var nav = this.findNavigationSidebarPanelSpec();
       if (nav) {
@@ -185,8 +195,9 @@ var groupContent = Marionette.View.extend({
         vizPanel.setUrl(url);
       }
     }
-  },
-  SimpleUIResetMessageAndIdeaPanelState: function(idea) {
+  }
+
+  SimpleUIResetMessageAndIdeaPanelState(idea) {
     if (!this.isDestroyed()) {  //Because this is called from outside the view
       var preferences = Ctx.getPreferences();
       // defined here and in collectionManager.getGroupSpecsCollectionPromise
@@ -196,27 +207,31 @@ var groupContent = Marionette.View.extend({
           this.ensureOnlyPanelsVisible(PanelSpecTypes.IDEA_PANEL, PanelSpecTypes.MESSAGE_LIST);
       }
     }
-  },
+  }
+
   /**
    * @params panelSpecTypes
    */
-  removePanels: function(...args) {
+  removePanels(...args) {
     this.model.removePanels(...args);
-  },
-  addPanel: function(options, position) {
+  }
+
+  addPanel(options, position) {
     this.model.addPanel(options, position);
-  },
+  }
+
   /**
    * create the model (and corresponding view) if it does not exist.
    */
-  ensurePanel: function(options, position) {
+  ensurePanel(options, position) {
     this.model.ensurePanel(options, position);
-  },
+  }
+
   /* Typenames are available in the panelType class attribute of each
    * panel class
    *
    */
-  findPanelWrapperByType: function(panelSpecType) {
+  findPanelWrapperByType(panelSpecType) {
     var model = this.model.getPanelSpecByType(panelSpecType);
     if (model !== undefined) {
       var view = this.body.children.findByModel(model);
@@ -228,8 +243,9 @@ var groupContent = Marionette.View.extend({
       }
     }
     return undefined;
-  },
-  findViewByType: function(panelSpecType) {
+  }
+
+  findViewByType(panelSpecType) {
     var retval = undefined;
     var wrapper = this.findPanelWrapperByType(panelSpecType);
 
@@ -241,21 +257,23 @@ var groupContent = Marionette.View.extend({
       retval = wrapper.getRegion('contents').currentView;
     }
     return retval;
-  },
-  getNavigationPanel: function(panelSpecType) {
+  }
+
+  getNavigationPanel(panelSpecType) {
     var retval = undefined;
     var navigationPanelSpec = this.model.findNavigationPanelSpec();
     if (navigationPanelSpec) {
       retval = this.findViewByType(navigationPanelSpec);
     }
     return retval;
-  },
+  }
+
   /** 
    * ensure only the listed panels, are visible
    * However, all panels are created if necessary
    * @params list of panel names
    */
-  ensureOnlyPanelsVisible: function() {
+  ensureOnlyPanelsVisible() {
     var that = this;
     var args = Array.prototype.slice.call(arguments);
     var panels = this.model.get('panels');
@@ -274,7 +292,8 @@ var groupContent = Marionette.View.extend({
       }) !== undefined;
       aPanelSpec.set('hidden', !shouldBeVisible);
     });
-  },
+  }
+
   /**
    * Ensure all listed panels are visible, and in the order listed
    * creating them if necessary.
@@ -282,7 +301,7 @@ var groupContent = Marionette.View.extend({
    * it if absent
    * @params list of PanelSpecTypes
    */
-  ensurePanelsVisible: function() {
+  ensurePanelsVisible() {
     var that = this;
     var args = Array.prototype.slice.call(arguments);
     var panels = this.model.get('panels');
@@ -300,13 +319,14 @@ var groupContent = Marionette.View.extend({
     _.each(panelSpecsToMakeVisible, function(aPanelSpec) {
       aPanelSpec.set('hidden', false);
     });
-  },
+  }
+
   /**
    * Ensure all listed panels are hidden if present
    * Skips PanelSpecTypes.NAV_SIDEBAR
    * @params list of panel names
    */
-  ensurePanelsHidden: function() {
+  ensurePanelsHidden() {
     var that = this;
     var args = Array.prototype.slice.call(arguments);
     var panels = this.model.get('panels');
@@ -323,18 +343,19 @@ var groupContent = Marionette.View.extend({
         aPanelSpec.set('hidden', true);
       }
     });
-  },
+  }
 
-  getGroupStoragePrefix: function() {
+  getGroupStoragePrefix() {
     var groupContent = this;
     var groupContentIndexInGroupContainer = groupContent.groupContainer.collection.indexOf(groupContent.model);
     var storagePrefix = Storage.getStoragePrefix() + "_group_" + groupContentIndexInGroupContainer;
     return storagePrefix;
-  },
+  }
+
   /**
    * When the user closes a panel group, all UserCustomData entries which keys contain the index of the group have to be renamed with their new index.
    */
-  applyUserCustomDataChangesOnGroupClose: function() {
+  applyUserCustomDataChangesOnGroupClose() {
     if (!Ctx.isUserConnected()){
       return;
     }
@@ -367,5 +388,6 @@ var groupContent = Marionette.View.extend({
       });
     }
   }
-});
+}
+
 export default groupContent;

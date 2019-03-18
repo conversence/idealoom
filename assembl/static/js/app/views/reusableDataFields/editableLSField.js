@@ -16,17 +16,13 @@ import Ctx from '../../common/context.js';
 
 
 
-var EditableLSField = EditableField.extend({
-  constructor: function EditableLSField() {
-    EditableField.apply(this, arguments);
-  },
-
+class EditableLSField extends EditableField {
   /**
    * CkLSeditor default configuration
    * @type {object}
    */
 
-  initialize: function(options) {
+  initialize(options) {
     if (this.model === null) {
       throw new Error('EditableField needs a model');
     }
@@ -35,10 +31,10 @@ var EditableLSField = EditableField.extend({
       throw new Error('EditableField needs translationData');
     }
     this.translationData = options.translationData;
-    EditableField.prototype.initialize.apply(this, arguments)
-  },
+    super.initialize(...arguments);
+  }
 
-  getTextValue: function() {
+  getTextValue() {
     var ls = this.model.get(this.modelProp);
     if (!ls) {
       return '';
@@ -48,9 +44,9 @@ var EditableLSField = EditableField.extend({
       return ls.forInterfaceValue() || '';
     }
     return ls.bestValue(this.translationData);
-  },
+  }
 
-  setTextValue: function(text) {
+  setTextValue(text) {
     var lse;
     var attrs = {};
     var ls = this.model.get(this.modelProp);
@@ -75,7 +71,7 @@ var EditableLSField = EditableField.extend({
         console.error('ERROR: saveEdition', resp.responseJSON);
       },
     });
-  },
-});
+  }
+}
 
 export default EditableLSField;

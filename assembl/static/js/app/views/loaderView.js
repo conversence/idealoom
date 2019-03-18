@@ -1,14 +1,13 @@
 import Marionette from 'backbone.marionette';
+
 /** LoaderView: a Marionette View that starts as a loader.
  */
-var LoaderView = Marionette.View.extend({
-  constructor: function LoaderView() {
-    Marionette.View.apply(this, arguments);
-  },
-  isLoading: function() {
+class LoaderView extends Marionette.View {
+  isLoading() {
     return this.template === '#tmpl-loader';
-  },
-  setLoading: function(newVal, specialTemplate) {
+  }
+
+  setLoading(newVal, specialTemplate) {
     var specialTemplate;
     var current = this.isLoading();
     if (newVal) {
@@ -26,7 +25,7 @@ var LoaderView = Marionette.View.extend({
         this._isRendered = false;
     }
     return current;
-  },
-});
+  }
+}
 
 export default LoaderView;

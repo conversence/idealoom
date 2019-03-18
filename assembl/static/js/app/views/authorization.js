@@ -7,30 +7,29 @@ import Marionette from 'backbone.marionette';
 
 import Ctx from '../common/context.js';
 
-var authorization = Marionette.View.extend({
-  constructor: function authorization() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class authorization extends Marionette.View.extend({
   template: '#tmpl-authorization',
-  className: 'authorization',
-  initialize: function(options) {
+  className: 'authorization'
+}) {
+  initialize(options) {
     this.error = options.error;
     this.message = options.message;
-  },
-  serializeData: function() {
+  }
+
+  serializeData() {
       return {
         error: this.error,
         message: this.message
       }
-    },
-  templateContext: function() {
+    }
+
+  templateContext() {
     return {
       urlLogIn: function() {
         return '/login?next=/' + Ctx.getDiscussionSlug() + '/';
       }
     }
   }
-});
+}
 
 export default authorization;

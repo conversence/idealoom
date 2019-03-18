@@ -14,10 +14,7 @@ import i18n from '../utils/i18n.js';
 import Permissions from '../utils/permissions.js';
 import availableFilters from './postFilters.js';
 
-var AgentView = Marionette.View.extend({
-  constructor: function AgentView() {
-    Marionette.View.apply(this, arguments);
-  },
+class AgentView extends Marionette.View.extend({
   ui: {
     avatar: '.js_agentAvatar',
     name: '.js_agentName'
@@ -26,60 +23,53 @@ var AgentView = Marionette.View.extend({
   events: {
     'click @ui.avatar': 'onAvatarClick',
     'click @ui.name': 'onAvatarClick'
-  },
-
-  serializeData: function() {
+  }
+}) {
+  serializeData() {
     return {
       i18n: i18n,
       show_email: Ctx.getCurrentUser().can(Permissions.ADMIN_DISCUSSION),
       agent: this.model
     }
-  },
+  }
 
-  onRender: function() {
+  onRender() {
     Ctx.removeCurrentlyDisplayedTooltips(this.$el);
     Ctx.initTooltips(this.$el);
-  },
+  }
 
-  onAvatarClick: function(e) {
+  onAvatarClick(e) {
     e.stopPropagation();
     showUserMessages(this.model);
   }
-  
-});
+}
 
-var AgentAvatarView = AgentView.extend({
-  constructor: function AgentAvatarView() {
-    AgentView.apply(this, arguments);
-  },
-
+class AgentAvatarView extends AgentView.extend({
   template: '#tmpl-agentAvatar',
   className: 'agentAvatar',
-  avatarSize: null,
-  initialize: function(options){
+  avatarSize: null
+}) {
+  initialize(options) {
     if ( "avatarSize" in options ){
       this.avatarSize = options.avatarSize;
     }
     else {
       this.avatarSize = 30;
     }
-  },
-  serializeData: function() {
+  }
+
+  serializeData() {
     return {
       agent: this.model,
       avatarSize: this.avatarSize
     };
   }
-});
+}
 
-var AgentNameView = AgentView.extend({
-  constructor: function AgentNameView() {
-    AgentView.apply(this, arguments);
-  },
-
+class AgentNameView extends AgentView.extend({
   template: '#tmpl-agentName',
   className: 'agentName'
-});
+}) {}
 
 function showUserMessages(userModel) {
   var filters =  [{filterDef: availableFilters.POST_IS_FROM, value: userModel.id}];

@@ -17,19 +17,20 @@ import PanelSpecTypes from '../../utils/panelSpecTypes.js';
 /**
  * @class app.views.groups.panelWrapper.PanelWrapper
  */
-var PanelWrapper = Marionette.View.extend({
-  constructor: function PanelWrapper() {
-    Marionette.View.apply(this, arguments);
-  },
+class PanelWrapper extends Marionette.View.extend({
   template: "#tmpl-panelWrapper",
+
   regions: {
     contents: '.panelContents'
   },
+
   panelType: "groupPanel",
   className: "groupPanel",
+
   modelEvents: {
     "change:hidden": "setHidden"
   },
+
   ui: {
     title: ".panel-header-title",
     lockPanel: '.js_lockPanel', // clickable zone, which is bigger than just the following icon
@@ -39,17 +40,19 @@ var PanelWrapper = Marionette.View.extend({
     panelHeader: '.panel-header',
     panelContentsWhenMinimized: '.panelContentsWhenMinimized'
   },
+
   events: {
     'click @ui.closePanel': 'closePanel',
     'click @ui.lockPanel': 'toggleLock',
     'click @ui.minimizePanel': 'toggleMinimize'
   },
+
   _unlockCallbackQueue: {},
   panelLockedReason: null,
   panelUnlockedReason: null,
-  minPanelSize:BasePanel.prototype.minimized_size,
-  
-  initialize: function(options) {
+  minPanelSize:BasePanel.prototype.minimized_size
+}) {
+  initialize(options) {
     var that = this;
     var contentClass = panelViewByPanelSpec.byPanelSpec(options.contentSpec);
     this.groupContent = options.groupContent;
@@ -70,8 +73,9 @@ var PanelWrapper = Marionette.View.extend({
     $(window).on("resize",function(){
       that.setPanelMinWidth();
     });
-  },
-  onRender: function() {
+  }
+
+  onRender() {
     this.showChildView('contents', this.contentsView);
     this.setHidden();
     this.displayContent(true);
@@ -83,8 +87,9 @@ var PanelWrapper = Marionette.View.extend({
     else{
       this.unlockPanel(true);
     }
-  },
-  serializeData: function() {
+  }
+
+  serializeData() {
     return {
       hideHeader: this.contentsView.hideHeader || false,
       title: this.contentsView.getTitle(),
@@ -96,11 +101,12 @@ var PanelWrapper = Marionette.View.extend({
       hasClose: this.contentsView.closeable,
       icon: this.getIcon()
     }
-  },
+  }
+
   /**
    * TODO: refactor this function because the min-width is set also in _panel.scss AND in each panel!!!
    */
-  setPanelMinWidth:function(){
+  setPanelMinWidth() {
     this.$el.addClass(this.model.attributes.type + '-panel');
     var screenSize = window.innerWidth;
     var isPanelMinimized = this.model.get('minimized');
@@ -143,13 +149,13 @@ var PanelWrapper = Marionette.View.extend({
         this.model.set('minWidth',screenSize);
       }
     }
-  },
+  }
 
   /** 
    * Change the panel minimization state.  No-op if the state already matches
    * @param {boolean} requestedMiminizedState: Should the panel be minimized
    */
-  _changeMinimizePanelsState: function(requestedMiminizedState) {
+  _changeMinimizePanelsState(requestedMiminizedState) {
     if(requestedMiminizedState === this.model.get('minimized')) {
       return;
     }
@@ -159,26 +165,26 @@ var PanelWrapper = Marionette.View.extend({
       this.displayContent();
       this.groupContent.groupContainer.resizeAllPanels();
     }
-  },
+  }
 
-  toggleMinimize: function() {
+  toggleMinimize() {
     if(this.model.get('minimized')) {
       this._changeMinimizePanelsState(false);
     }
     else {
       this._changeMinimizePanelsState(true);
     }
-  },
+  }
 
-  unminimizePanel: function(evt) {
+  unminimizePanel(evt) {
     this._changeMinimizePanelsState(false);
-  },
+  }
 
-  minimizePanel: function(evt) {
+  minimizePanel(evt) {
     this._changeMinimizePanelsState(true);
-  },
+  }
 
-  displayContent:function(skipAnimation){
+  displayContent(skipAnimation) {
     //var animationDuration = 1000;
     var animationDuration = this.animationDuration;
     var that = this;
@@ -206,27 +212,30 @@ var PanelWrapper = Marionette.View.extend({
         this.$el.children(".panelContentsWhenMinimized").fadeOut(animationDuration * 0.3);
       }
     }
-  },
-  
-  resetTitle: function(newTitle) {
+  }
+
+  resetTitle(newTitle) {
     this.ui.title.html(newTitle);
-  },
-  closePanel: function() {
+  }
+
+  closePanel() {
     Ctx.removeCurrentlyDisplayedTooltips();
     this.model.collection.remove(this.model);
-  },
-  setHidden: function() {
+  }
+
+  setHidden() {
     if (this.model.get('hidden')) {
       this.$el.hide();
     } else {
       this.$el.css('display', 'table-cell'); /* Set it back to its original value, which is "display: table-cell" in _groupContainer.scss . But why is it so? */
     }
     this.groupContent.groupContainer.resizeAllPanels(true);
-  },
+  }
+
   /**
    * lock the panel if unlocked
    */
-  lockPanel: function(force) {
+  lockPanel(force) {
     if (force || !this.model.get('locked')) {
       this.model.set('locked', true);
       this.ui.lockPanelIcon
@@ -234,13 +243,14 @@ var PanelWrapper = Marionette.View.extend({
           .removeClass('icon-lock-open')
           .attr('data-original-title', i18n.gettext('Unlock panel'));
     }
-  },
+  }
+
   /**
    * @param {boolean} locking: True if we want to lock the panel. False if we want to unlock it
    * @param {boolean} informUser: Show a tooltip next to the lock icon, informing the user that the panel has been autolocked.
    * @param {string} reason: The reason why the panel will be automatically locked. Possible values: undefined, "USER_IS_WRITING_A_MESSAGE", "USER_WAS_WRITING_A_MESSAGE"
    **/
-  autoLockOrUnlockPanel: function(locking, informUser, reason) {
+  autoLockOrUnlockPanel(locking, informUser, reason) {
     var that = this;
     informUser = (informUser === undefined) ? true : informUser;
     locking = (locking === undefined) ? true : locking;
@@ -286,25 +296,28 @@ var PanelWrapper = Marionette.View.extend({
         }, 5000); // FIXME: if we set this timer lower than this, the tooltip shows and immediately disappears. Why?
       }
     }
-  },
+  }
+
   /**
    * @param {boolean} informUser: Show a tooltip next to the lock icon, informing the user that the panel has been autolocked.
    * @param {string} reason: The reason why the panel will be automatically locked. Possible values: undefined, "USER_IS_WRITING_A_MESSAGE"
    **/
-  autoLockPanel: function(informUser, reason) {
+  autoLockPanel(informUser, reason) {
     this.autoLockOrUnlockPanel(true, informUser, reason);
-  },
+  }
+
   /**
    * @param {boolean} informUser: bool. Show a tooltip next to the lock icon, informing the user that the panel has been autounlocked.
    * @param {string} reason: The reason why the panel will be automatically unlocked. Possible values: undefined, "USER_WAS_WRITING_A_MESSAGE"
    **/
-  autoUnlockPanel: function(informUser, reason) {
+  autoUnlockPanel(informUser, reason) {
     this.autoLockOrUnlockPanel(false, informUser, reason);
-  },
+  }
+
   /**
    * unlock the panel if locked
    */
-  unlockPanel: function(force) {
+  unlockPanel(force) {
     if (force || this.model.get('locked')) {
       this.model.set('locked', false);
       this.ui.lockPanelIcon
@@ -321,11 +334,12 @@ var PanelWrapper = Marionette.View.extend({
         this._unlockCallbackQueue = {};
       }
     }
-  },
+  }
+
   /**
    * Toggle the lock state of the panel
    */
-  toggleLock: function() {
+  toggleLock() {
     console.log("toggleLock()");
     if (this.isPanelLocked()) {
       console.log("panel was locked, so we unlock it");
@@ -334,22 +348,28 @@ var PanelWrapper = Marionette.View.extend({
       console.log("panel was unlocked, so we lock it");
       this.lockPanel(true);
     }
-  },
-  isPanelLocked: function() {
+  }
+
+  isPanelLocked() {
     return this.model.get('locked');
-  },
-  getPanelLockedReason: function() {
+  }
+
+  getPanelLockedReason() {
     return this.panelLockedReason;
-  },
-  getPanelUnlockedReason: function() {
+  }
+
+  getPanelUnlockedReason() {
     return this.panelUnlockedReason;
-  },
-  isPanelMinimized: function() {
+  }
+
+  isPanelMinimized() {
     return this.model.get('minimized');
-  },
-  isPanelHidden: function() {
+  }
+
+  isPanelHidden() {
     return this.model.get('hidden');
-  },
+  }
+
   /**
    * Process a callback that can be inhibited by panel locking.
    * If the panel is unlocked, the callback will be called immediately.
@@ -359,7 +379,7 @@ var PanelWrapper = Marionette.View.extend({
    * If queued, they must assume that they can be called at a later time,
    * and have the means of getting any updated information they need.
    */
-  filterThroughPanelLock: function(callback, queueWithId) {
+  filterThroughPanelLock(callback, queueWithId) {
     if (!this.model.get('locked')) {
       callback();
       this.ui.lockPanel.children().removeClass('lockedGlow');
@@ -376,8 +396,9 @@ var PanelWrapper = Marionette.View.extend({
         }
       }
     }
-  },
-  getIcon: function() {
+  }
+
+  getIcon() {
     var type = this.contentsView.panelType;
     var icon = '';
     switch (type.id) {
@@ -407,5 +428,6 @@ var PanelWrapper = Marionette.View.extend({
     }
     return icon;
   }
-});
+}
+
 export default PanelWrapper;

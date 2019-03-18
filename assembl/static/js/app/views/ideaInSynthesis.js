@@ -23,12 +23,9 @@ import LoaderView from './loaderView.js';
 import Analytics from '../internal_modules/analytics/dispatcher.js';
 import openIdeaInModal from './modals/ideaInModal.js';
 
-var IdeaInSynthesisView = LoaderView.extend({
-  constructor: function IdeaInSynthesisView() {
-    LoaderView.apply(this, arguments);
-  },
-
+class IdeaInSynthesisView extends LoaderView.extend({
   synthesis: null,
+
   /**
    * The template
    * @type {template}
@@ -54,12 +51,12 @@ var IdeaInSynthesisView = LoaderView.extend({
 
   regions: {
     regionExpression: ".js_region-synthesis-expression"
-  },
-
+  }
+}) {
   /**
    * @init
    */
-  initialize: function(options) {
+  initialize(options) {
     this.synthesis = options.synthesis || null;
     this.messageListView = options.messageListView;
     this.editing = false;
@@ -136,13 +133,13 @@ var IdeaInSynthesisView = LoaderView.extend({
     this.listenTo(this.parentPanel.getGroupState(), "change:currentIdea", function(state, currentIdea) {
       that.onIsSelectedChange(currentIdea);
     });
-  },
+  }
 
-  canEdit: function() {
+  canEdit() {
     return this.model.userCan(Permissions.EDIT_IDEA) && this.synthesis.get("published_in_post") === null;
-  },
+  }
 
-  serializeData: function() {
+  serializeData() {
     //As all ideas in a previously posted synthesis are tombstoned, the original idea is 
     //gathered from the original_uri attribute and view is re-rendered. Therefore, the 
     //original idea is expected to be the one that contants the num_posts field.
@@ -170,13 +167,13 @@ var IdeaInSynthesisView = LoaderView.extend({
         numMessages), numMessages),
       numMessages: numMessages
     }
-  },
+  }
 
   /**
    * The render
    * @returns {IdeaInSynthesisView}
    */
-  onRender: function() {
+  onRender() {
     /*if (Ctx.debugRender) {
       console.log("idesInSynthesis:onRender() is firing");
     }*/
@@ -196,12 +193,12 @@ var IdeaInSynthesisView = LoaderView.extend({
       //Currently disabled, but will be revived at some point
       //this.renderReplyView();
     }
-  },
+  }
 
   /**
    * renders the ckEditor if there is one editable field
    */
-  renderCKEditorIdea: function() {
+  renderCKEditorIdea() {
     var model = this.model.getLongTitleDisplayText(this.translationData);
 
     var ideaSynthesis = new CKEditorLSField({
@@ -216,12 +213,12 @@ var IdeaInSynthesisView = LoaderView.extend({
     });
 
     this.showChildView('regionExpression', ideaSynthesis);
-  },
+  }
 
   /**
    * renders the reply interface
    */
-  renderReplyView: function() {
+  renderReplyView() {
     var that = this;
     var partialCtx = "synthesis-idea-" + this.model.getId();
     var partialMessage = MessagesInProgress.getMessage(partialCtx);
@@ -251,12 +248,12 @@ var IdeaInSynthesisView = LoaderView.extend({
     });
 
     this.$('.synthesisIdea-replybox').html(replyView.render().el);
-  },
+  }
 
   /**
    *  Focus on the reply box, and open it if closed
    **/
-  focusReplyBox: function() {
+  focusReplyBox() {
       this.openReplyBox();
 
       var that = this;
@@ -266,68 +263,68 @@ var IdeaInSynthesisView = LoaderView.extend({
         }
         that.$('.js_messageSend-body').focus();
       }, 100);
-    },
+    }
+
   /**
    *  Opens the reply box the reply button
    */
-  openReplyBox: function() {
+  openReplyBox() {
       this.$('.synthesisIdea-replybox').removeClass("hidden");
-    },
+    }
 
   /**
    *  Closes the reply box
    */
-  closeReplyBox: function() {
+  closeReplyBox() {
       this.$('.synthesisIdea-replybox').addClass("hidden");
-    },
+    }
 
   /**
    * @event
    */
-  onIsSelectedChange: function(idea) {
+  onIsSelectedChange(idea) {
     //console.log("IdeaView:onIsSelectedChange(): new: ", idea, "current: ", this.model, this);
     if (idea === this.model || idea === this.original_idea) {
       this.$el.addClass('is-selected');
     } else {
       this.$el.removeClass('is-selected');
     }
-  },
+  }
 
   /**
    * @event
    */
-  onTitleClick: function(ev) {
+  onTitleClick(ev) {
       ev.stopPropagation();
       if (this.canEdit()) {
         this.makeEditable();
       }
 
       this.navigateToIdea(ev);
-    },
+    }
 
-  getPanel: function() {
+  getPanel() {
       return this.parentPanel;
-    },
-    
-  showIdeaInModal: function(ev) {
+    }
+
+  showIdeaInModal(ev) {
       this.navigateToIdea(ev, true);
-    },
-    
-  navigateToIdea: function(ev, forcePopup) {
+    }
+
+  navigateToIdea(ev, forcePopup) {
     var panel = this.getPanel();
     var analytics = Analytics.getInstance();
 
     analytics.trackEvent(analytics.events.NAVIGATE_TO_IDEA_IN_SYNTHESIS);
     openIdeaInModal(panel, this.original_idea, forcePopup, this.translationData);
-  },
+  }
 
-  makeEditable: function() {
+  makeEditable() {
       if (this.canEdit()) {
         this.editing = true;
         this.render();
       }
     }
-
-});
+}
 
 export default IdeaInSynthesisView;

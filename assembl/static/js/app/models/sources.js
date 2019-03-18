@@ -9,6 +9,7 @@ import i18n from '../utils/i18n.js';
 import Ctx from '../common/context.js';
 import Types from '../utils/types.js';
 import $ from 'jquery';
+
 /**
  * Source model
  * Frontend model for :py:class:`assembl.models.generic.ContentSource` and :py:class:`assembl.models.post.PostSource`
@@ -16,12 +17,10 @@ import $ from 'jquery';
  * @extends app.models.base.BaseModel
  */
 
-var Source = Base.Model.extend({
-   constructor: function Source() {
-    Base.Model.apply(this, arguments);
-  },
+class Source extends Base.Model.extend({
   urlRoot: Ctx.getApiV2DiscussionUrl('sources'),
   localizedName: i18n.gettext("Abstract content source"),
+
   defaults: {
     'created': null,
     /*
@@ -42,11 +41,13 @@ var Source = Base.Model.extend({
     '@type': Types.CONTENT_SOURCE,
     'is_content_sink': false // Used by API V2 as flag for side-effectful POST creation only.
     // DO NOT use for any other scenario than creating facebook content_sinks
-  },
-  fetchUrl: function(){
+  }
+}) {
+  fetchUrl() {
     return this.url() + '/fetch_posts';
-  },
-  doReimport: function() {
+  }
+
+  doReimport() {
     return $.ajax(
       this.fetchUrl(), {
         method: 'POST',
@@ -54,8 +55,9 @@ var Source = Base.Model.extend({
         dataType: 'json',
         data: {reimport: true}
     });
-  },
-  doReprocess: function() {
+  }
+
+  doReprocess() {
     return $.ajax(
       this.fetchUrl(), {
         method: 'POST',
@@ -64,14 +66,12 @@ var Source = Base.Model.extend({
         data: {reprocess: true}
     });
   }
-});
+}
 
-var IMAPMailboxSource = Source.extend({
-   constructor: function IMAPMailboxSource() {
-    Source.apply(this, arguments);
-  },
-  localizedName: i18n.gettext("IMAP mailbox"),
-  defaults: function() {
+class IMAPMailboxSource extends Source.extend({
+  localizedName: i18n.gettext("IMAP mailbox")
+}) {
+  defaults() {
     return _.extend(Source.prototype.defaults, {
       '@type': Types.IMAPMAILBOX,
       'admin_sender': '',
@@ -82,26 +82,21 @@ var IMAPMailboxSource = Source.extend({
       'port': 0
     });
   }
-});
+}
 
-var MailingListSource = IMAPMailboxSource.extend({
-   constructor: function MailingListSource() {
-    IMAPMailboxSource.apply(this, arguments);
-  },
-  localizedName: i18n.gettext("Mailing list"),
-  defaults: function() {
+class MailingListSource extends IMAPMailboxSource.extend({
+  localizedName: i18n.gettext("Mailing list")
+}) {
+  defaults() {
     return _.extend(IMAPMailboxSource.prototype.defaults(), {
       '@type': Types.MAILING_LIST
     });
   }
-});
+}
 
-var FacebookSource = Source.extend({
-   constructor: function FacebookSource() {
-    Source.apply(this, arguments);
-  },
+class FacebookSource extends Source {
   //An Abstract Class. Use children only!
-  defaults: function() {
+  defaults() {
     return _.extend(Source.prototype.defaults, {
       'fb_source_id': null,
       'url_path': null,
@@ -110,166 +105,136 @@ var FacebookSource = Source.extend({
       'creator_id': Ctx.getCurrentUserId()
     });
   }
-});
+}
 
-var FacebookSinglePostSource = FacebookSource.extend({
-   constructor: function FacebookSinglePostSource() {
-    FacebookSource.apply(this, arguments);
-  },
-  localizedName: i18n.gettext("Comments to a given facebook post (by URL)"),
-  defaults: function() {
+class FacebookSinglePostSource extends FacebookSource.extend({
+  localizedName: i18n.gettext("Comments to a given facebook post (by URL)")
+}) {
+  defaults() {
     return _.extend(FacebookSource.prototype.defaults(), {
       '@type': Types.FACEBOOK_SINGLE_POST_SOURCE
     });
   }
-});
+}
 
-var FacebookGroupSource = FacebookSource.extend({
-   constructor: function FacebookGroupSource() {
-    FacebookSource.apply(this, arguments);
-  },
-  localizedName: i18n.gettext("Posts from a Facebook group (by URL)"),
-  defaults: function() {
+class FacebookGroupSource extends FacebookSource.extend({
+  localizedName: i18n.gettext("Posts from a Facebook group (by URL)")
+}) {
+  defaults() {
     return _.extend(FacebookSource.prototype.defaults(), {
       '@type': Types.FACEBOOK_GROUP_SOURCE
     });
   }
-});
+}
 
-var FacebookGroupSourceFromUser = FacebookSource.extend({
-   constructor: function FacebookGroupSourceFromUser() {
-    FacebookSource.apply(this, arguments);
-  },
-  localizedName: i18n.gettext("Posts from a Facebook group to which you're subscribed"),
-  defaults: function() {
+class FacebookGroupSourceFromUser extends FacebookSource.extend({
+  localizedName: i18n.gettext("Posts from a Facebook group to which you're subscribed")
+}) {
+  defaults() {
     return _.extend(FacebookSource.prototype.defaults(), {
       '@type': Types.FACEBOOK_GROUP_SOURCE_FROM_USER
     });
   }
-});
+}
 
-var FacebookPagePostsSource = FacebookSource.extend({
-   constructor: function FacebookPagePostsSource() {
-    FacebookSource.apply(this, arguments);
-  },
-  localizedName: i18n.gettext("Posts from a Facebook page to which you're subscribed"),
-  defaults: function() {
+class FacebookPagePostsSource extends FacebookSource.extend({
+  localizedName: i18n.gettext("Posts from a Facebook page to which you're subscribed")
+}) {
+  defaults() {
     return _.extend(FacebookSource.prototype.defaults(), {
       '@type': Types.FACEBOOK_PAGE_POSTS_SOURCE
     });
   }
-});
+}
 
-var FacebookPageFeedSource = FacebookSource.extend({
-   constructor: function FacebookPageFeedSource() {
-    FacebookSource.apply(this, arguments);
-  },
-  localizedName: i18n.gettext("Posts from users on a Facebook page to which you're subscribed"),
-  defaults: function() {
+class FacebookPageFeedSource extends FacebookSource.extend({
+  localizedName: i18n.gettext("Posts from users on a Facebook page to which you're subscribed")
+}) {
+  defaults() {
     return _.extend(FacebookSource.prototype.defaults(), {
       '@type': Types.FACEBOOK_PAGE_FEED_SOURCE
     });
   }
-});
+}
 
-var ContentSourceId = Base.Model.extend({
-  constructor: function ContentSourceId() {
-    Base.Model.apply(this, arguments);
-  },
-
+class ContentSourceId extends Base.Model.extend({
   urlRoot: Ctx.getApiV2Url(Types.CONTENT_SOURCE_IDS),
+
   defaults: {
     'source_id': '', //Source.id
     'post_id': '', //message.id
     'message_id_in_source': '' //The ID from where the source came from
   }
-});
+}) {}
 
-
-var FeedPostSource = Source.extend({
-  constructor: function FeedPostSource() {
-    Source.apply(this, arguments);
-  },
+class FeedPostSource extends Source.extend({
   localizedName: i18n.gettext("RSS/Atom post feed"),
+
   knownParsers: [
     'assembl.models.feed_parsing.PaginatedParsedData',
     'assembl.models.feed_parsing.ParsedData',
-  ],
-  defaults: function() {
+  ]
+}) {
+  defaults() {
     return _.extend(Source.prototype.defaults, {
       '@type': Types.FEED_POST_SOURCE,
       "url": '',
       "parser_full_class_name": 'assembl.models.feed_parsing.PaginatedParsedData',
     });
   }
-});
+}
 
-
-var LoomioPostSource = FeedPostSource.extend({
-  constructor: function LoomioPostSource() {
-    Source.apply(this, arguments);
-  },
-  localizedName: i18n.gettext("Loomio post feed"),
-  defaults: function() {
+class LoomioPostSource extends FeedPostSource.extend({
+  localizedName: i18n.gettext("Loomio post feed")
+}) {
+  defaults() {
     return _.extend(FeedPostSource.prototype.defaults(), {
       '@type': Types.LOOMIO_POST_SOURCE,
     });
   }
-});
+}
 
-
-var AnnotatorSource = Source.extend({
-  constructor: function AnnotatorSource() {
-    Source.apply(this, arguments);
-  },
-  localizedName: i18n.gettext("Annotator extract source"),
-  defaults: function() {
+class AnnotatorSource extends Source.extend({
+  localizedName: i18n.gettext("Annotator extract source")
+}) {
+  defaults() {
     return _.extend(Source.prototype.defaults, {
       '@type': Types.ANNOTATOR_SOURCE,
     });
-  },
-});
+  }
+}
 
-
-var IdeaSource = Source.extend({
-  constructor: function IdeaSource() {
-    Source.apply(this, arguments);
-  },
-  defaults: function() {
+class IdeaSource extends Source {
+  defaults() {
     return _.extend(Source.prototype.defaults, {
       "source_uri": '',
       "data_filter": '',
       "target_state_label": '',
     });
-  },
-});
+  }
+}
 
-var IdeaLoomIdeaSource = IdeaSource.extend({
-  constructor: function IdeaLoomIdeaSource() {
-    IdeaSource.apply(this, arguments);
-  },
-  localizedName: i18n.gettext("IdeaLoom idea source"),
-  defaults: function() {
+class IdeaLoomIdeaSource extends IdeaSource.extend({
+  localizedName: i18n.gettext("IdeaLoom idea source")
+}) {
+  defaults() {
     return _.extend(IdeaSource.prototype.defaults(), {
       '@type': Types.IDEALOOM_IDEA_SOURCE,
       'username': '',
       'password': '',
     });
-  },
-});
+  }
+}
 
-
-var CatalystIdeaSource = IdeaSource.extend({
-  constructor: function CatalystIdeaSource() {
-    IdeaSource.apply(this, arguments);
-  },
-  localizedName: i18n.gettext("Catalyst Interchange Format idea source"),
-  defaults: function() {
+class CatalystIdeaSource extends IdeaSource.extend({
+  localizedName: i18n.gettext("Catalyst Interchange Format idea source")
+}) {
+  defaults() {
     return _.extend(IdeaSource.prototype.defaults(), {
       '@type': Types.CATALYST_IDEA_SOURCE,
     });
-  },
-});
+  }
+}
 
 
 
@@ -307,19 +272,16 @@ function getSourceClassByType(type) {
     }
   }
 
-var sourceCollection = Base.Collection.extend({
-  constructor: function sourceCollection() {
-    Base.Collection.apply(this, arguments);
-  },
-  url: Ctx.getApiV2DiscussionUrl() + 'sources',
-
-  model: function(attrs, options) {
+class sourceCollection extends Base.Collection.extend({
+  url: Ctx.getApiV2DiscussionUrl() + 'sources'
+}) {
+  model(attrs, options) {
     var sourceClass = getSourceClassByType(attrs["@type"]);
     if (sourceClass !== undefined) {
       return new sourceClass(attrs, options);
     }
   }
-});
+}
 
 export default {
   Model: {

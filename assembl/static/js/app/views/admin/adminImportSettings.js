@@ -11,25 +11,25 @@ import Sources from '../../models/sources.js';
 import SourceView from './generalSource.js';
 import AdminNavigationMenu from './adminNavigationMenu.js';
 
-var AdminImportSettings = Marionette.View.extend({
-  constructor: function AdminImportSettings() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class AdminImportSettings extends Marionette.View.extend({
   template: '#tmpl-adminImportSettings',
   className: 'admin-import',
+
   ui: {
     addSource: '.js_addSource'
   },
+
   events: {
     'click @ui.addSource': 'addFakeFacebookSource'
   },
+
   regions: {
     sources: "#sources-content",
     createSource: "#create-source",
     navigationMenuHolder: '.navigation-menu-holder'
-  },
-  onRender: function() {
+  }
+}) {
+  onRender() {
     var that = this;
     var collectionManager = new CollectionManager();
 
@@ -47,9 +47,9 @@ var AdminImportSettings = Marionette.View.extend({
     var menu = new AdminNavigationMenu.discussionAdminNavigationMenu(
       {selectedSection: "import"});
     this.showChildView('navigationMenuHolder', menu);
-  },
+  }
 
-  addFakeFacebookSource: function(evt){
+  addFakeFacebookSource(evt) {
     evt.preventDefault();
 
     //Mock facebook view
@@ -59,6 +59,6 @@ var AdminImportSettings = Marionette.View.extend({
     //   name: 'Benoit!'
     // }));
   }
-});
+}
 
 export default AdminImportSettings;

@@ -28,27 +28,28 @@ import StatisticsModal from './modals/discussionStatisticsModal.js';
 import LoaderView from './loaderView.js';
 import AgentViews from './agent.js';
 
-var navBarLeft = Marionette.View.extend({
-  constructor: function navBarLeft() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class navBarLeft extends Marionette.View.extend({
   template: '#tmpl-navBarLeft',
   className: 'navbar-left',
-  initialize: function(options) {
-    this.isAdminDiscussion = Ctx.getCurrentUser().can(Permissions.ADMIN_DISCUSSION);
-  },
+
   ui: {
     discussionStatistics: ".js_discussion_statistics",
   },
+
   regions: {
     widgetMenuConfig: ".navbar-widget-configuration-links",
     widgetMenuCreation: ".navbar-widget-creation-links"
   },
+
   events: {
     'click @ui.discussionStatistics': 'discussionStatistics',
-  },
-  onRender: function() {
+  }
+}) {
+  initialize(options) {
+    this.isAdminDiscussion = Ctx.getCurrentUser().can(Permissions.ADMIN_DISCUSSION);
+  }
+
+  onRender() {
     var that = this;
     this.listenTo(IdeaLoom.socket_vent, 'socket:open', function() {
       that.$('#onlinedot').addClass('is-online');
@@ -93,29 +94,45 @@ var navBarLeft = Marionette.View.extend({
     } else {
       this.$el.find(".discussion-title-dropdown").addClass("hidden");
     }
-  },
-  serializeData: function() {
+  }
+
+  serializeData() {
     return {
       isAdminDiscussion: this.isAdminDiscussion,
       canAccessStatistics: Ctx.getCurrentUser().can(Permissions.DISC_STATS),
       discussionSettings: '/' + Ctx.getDiscussionSlug() + '/edition',
       discussionPermissions: '/admin/permissions/discussion/' + Ctx.getDiscussionId(),
     };
-  },
-  discussionStatistics: function() {
+  }
+
+  discussionStatistics() {
       var modal = new StatisticsModal();
       $('#slider').html(modal.render().el);
-  },
-});
+  }
+}
 
-var navBarRight = LoaderView.extend({
-  constructor: function navBarRight() {
-    LoaderView.apply(this, arguments);
-  },
-
+class navBarRight extends LoaderView.extend({
   template: '#tmpl-navBarRight',
   className: 'navbar-right',
-  initialize: function(options) {
+
+  ui: {
+    currentLocal: '.js_setLocale',
+    joinDiscussion: '.js_joinDiscussion',
+    needJoinDiscussion: '.js_needJoinDiscussion',
+
+  },
+
+  events: {
+    'click @ui.currentLocal': 'setLocale',
+    'click @ui.joinDiscussion': 'joinPopin',
+    'click @ui.needJoinDiscussion': 'needJoinDiscussion'
+  },
+
+  regions: {
+    userAvatarRegion: '.user-avatar-container'
+  }
+}) {
+  initialize(options) {
     var that = this;
     var collectionManager = new CollectionManager();
 
@@ -141,24 +158,9 @@ var navBarRight = LoaderView.extend({
     else {
       this.isUserSubscribedToDiscussion = false;
     }
-  },
-  ui: {
-    currentLocal: '.js_setLocale',
-    joinDiscussion: '.js_joinDiscussion',
-    needJoinDiscussion: '.js_needJoinDiscussion',
+  }
 
-  },
-  events: {
-    'click @ui.currentLocal': 'setLocale',
-    'click @ui.joinDiscussion': 'joinPopin',
-    'click @ui.needJoinDiscussion': 'needJoinDiscussion'
-  },
-
-  regions: {
-    userAvatarRegion: '.user-avatar-container'
-  },
-
-  onRender: function() {
+  onRender() {
     if(this.isLoading()) {
       return {};
     }
@@ -170,9 +172,9 @@ var navBarRight = LoaderView.extend({
     if (!Ctx.getCurrentUser().isUnknownUser()) {
         this.showChildView('userAvatarRegion', userAvatarView);
     }
-  },
+  }
 
-  serializeData: function() {
+  serializeData() {
     if(this.isLoading()) {
       return {};
     }
@@ -183,94 +185,97 @@ var navBarRight = LoaderView.extend({
       canSubscribeToDiscussion: Ctx.getCurrentUser().can(Permissions.SELF_REGISTER),
       isAdminDiscussion: Ctx.getCurrentUser().can(Permissions.ADMIN_DISCUSSION)
     }
-  },
-  templateContext: function() {
+  }
+
+  templateContext() {
     return {
       urlNotifications: function() {
         return '/' + Ctx.getDiscussionSlug() + '/user/notifications';
       },
     }
-  },
-  setLocale: function(e) {
+  }
+
+  setLocale(e) {
     var lang = $(e.target).attr('data-locale');
     Ctx.setLocale(lang);
-  },
-  needJoinDiscussion: function() {
+  }
+
+  needJoinDiscussion() {
     if (!this._store.getItem('needJoinDiscussion')) {
       this._store.setItem('needJoinDiscussion', true);
     }
     var analytics = Analytics.getInstance();
     analytics.trackEvent(analytics.events.JOIN_DISCUSSION_CLICK);
-  },
+  }
 
-  joinPopin: function() {
+  joinPopin() {
     var analytics = Analytics.getInstance();
     IdeaLoom.other_vent.trigger('navBar:joinDiscussion');
     analytics.trackEvent(analytics.events.JOIN_DISCUSSION_CLICK);
   }
-});
+}
 
-var navBar = Marionette.View.extend({
-  constructor: function navBar() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class navBar extends Marionette.View.extend({
   template: '#tmpl-navBar',
   tagName: 'nav',
   className: 'navbar navbar-default',
-  initialize: function() {
-    this._store = window.localStorage;
-    this.showPopInDiscussion();
-    this.showPopInOnFirstLoginAfterAutoSubscribeToNotifications();
-    this.listenTo(IdeaLoom.other_vent, 'navBar:subscribeOnFirstPost', this.showPopInOnFirstPost);
-    this.listenTo(IdeaLoom.other_vent, 'navBar:joinDiscussion', this.joinDiscussion)
-  },
+
   ui: {
     groups: '.js_addGroup',
     expertInterface: '.js_switchToExpertInterface',
     simpleInterface: '.js_switchToSimpleInterface'
   },
+
   events: {
     'click @ui.groups': 'addGroup',
     'click @ui.expertInterface': 'switchToExpertInterface',
     'click @ui.simpleInterface': 'switchToSimpleInterface'
   },
+
   regions: {
       'navBarLeft':'#navBarLeft',
       'navBarRight':'#navBarRight'
-    },
+    }
+}) {
+  initialize() {
+    this._store = window.localStorage;
+    this.showPopInDiscussion();
+    this.showPopInOnFirstLoginAfterAutoSubscribeToNotifications();
+    this.listenTo(IdeaLoom.other_vent, 'navBar:subscribeOnFirstPost', this.showPopInOnFirstPost);
+    this.listenTo(IdeaLoom.other_vent, 'navBar:joinDiscussion', this.joinDiscussion)
+  }
 
-  serializeData: function() {
+  serializeData() {
     return {
       Ctx: Ctx
     }
-  },
+  }
 
-  onRender: function() {
+  onRender() {
     var navRight = new navBarRight();
     this.showChildView('navBarRight', navRight);
     this.showChildView('navBarLeft', new navBarLeft());
-  },
+  }
 
-  switchToExpertInterface: function(e) {
+  switchToExpertInterface(e) {
     Ctx.setInterfaceType(Ctx.InterfaceTypes.EXPERT);
-  },
+  }
 
-  switchToSimpleInterface: function(e) {
+  switchToSimpleInterface(e) {
     Ctx.setInterfaceType(Ctx.InterfaceTypes.SIMPLE);
-  },
+  }
 
-  addGroup: function() {
+  addGroup() {
     var collectionManager = new CollectionManager();
     var groupSpecsP = collectionManager.getGroupSpecsCollectionPromise(viewsFactory);
 
     IdeaLoom.rootView.showChildView('slider', new DefineGroupModal({groupSpecsP: groupSpecsP}));
-  },
+  }
 
   /**
     * @param {string|null} popinType: null, 'first_post', 'first_login_after_auto_subscribe_to_notifications'
     */
-  joinDiscussion: function(evt, popinType) {
+  joinDiscussion(evt, popinType) {
     var self = this;
     var collectionManager = new CollectionManager();
 
@@ -294,104 +299,103 @@ var navBar = Marionette.View.extend({
       collectionManager.getNotificationsDiscussionCollectionPromise(),
       collectionManager.getMyLocalRoleCollectionPromise(),
       function(discussionNotifications, localRoles) {
-              var isUserSubscribedToDiscussion = localRoles.isUserSubscribedToDiscussion();
-              model.notificationsToShow = _.filter(discussionNotifications.models, function(m) {
-                // keep only the list of notifications which become active when a user follows a discussion
-                return (m.get('creation_origin') === 'DISCUSSION_DEFAULT') && (m.get('status') === 'ACTIVE');
-              });
+        var isUserSubscribedToDiscussion = localRoles.isUserSubscribedToDiscussion();
+        model.notificationsToShow = _.filter(discussionNotifications.models, function(m) {
+          // keep only the list of notifications which become active when a user follows a discussion
+          return (m.get('creation_origin') === 'DISCUSSION_DEFAULT') && (m.get('status') === 'ACTIVE');
+        });
 
-              // we show the popin only if there are default notifications
-              // Actually we want the modal either way; commenting the condition for now. MAP
-              //if ( model.notificationsToShow && model.notificationsToShow.length ){
+        // we show the popin only if there are default notifications
+        // Actually we want the modal either way; commenting the condition for now. MAP
+        //if ( model.notificationsToShow && model.notificationsToShow.length ){
 
-              var Modal = Backbone.Modal.extend({
-                constructor: function Modal() {
-                  Backbone.Modal.apply(this, arguments);
-                },
+        class Modal extends Backbone.Modal.extend({
+          template: modalTemplate,
+          className: modalClassName,
+          cancelEl: '.close, .js_close',
+          submitEl: '.js_subscribe',
+          model: model
+        }) {
+          initialize() {
+            var that = this;
+            this.$('.bbm-modal').addClass('popin');
+            var analytics = Analytics.getInstance();
+            var previousPage = analytics.getCurrentPage();
 
-                template: modalTemplate,
-                className: modalClassName,
-                cancelEl: '.close, .js_close',
-                submitEl: '.js_subscribe',
+            this.returningPage = previousPage;
+            analytics.changeCurrentPage(analytics.pages.NOTIFICATION);
+          }
 
-                model: model,
-                initialize: function() {
-                  var that = this;
-                  this.$('.bbm-modal').addClass('popin');
-                  var analytics = Analytics.getInstance();
-                  var previousPage = analytics.getCurrentPage();
-
-                  this.returningPage = previousPage;
-                  analytics.changeCurrentPage(analytics.pages.NOTIFICATION);
-                },
-                serializeData: function() {
-                  return {
-                    i18n: i18n,
-                    notificationsToShow: model.notificationsToShow,
-                    urlNotifications: '/' + Ctx.getDiscussionSlug() + '/user/notifications'
-                  }
-                },
-                submit: function(ev) {
-                  var that = this;
-
-                  if (Ctx.getDiscussionId() && Ctx.getCurrentUserId() && !isUserSubscribedToDiscussion) {
-
-                    var LocalRolesUser = new RoleModels.localRoleModel({
-                      role: Roles.PARTICIPANT,
-                      discussion: 'local:Discussion/' + Ctx.getDiscussionId()
-                    });
-                    LocalRolesUser.save(null, {
-                      success: function(model, resp) {
-                        var analytics = Analytics.getInstance();
-                        analytics.trackEvent(analytics.events.JOIN_DISCUSSION);
-
-                        // TODO: Is there a simpler way to do this? MAP
-                        self.getRegion('navBarRight').currentView.ui.joinDiscussion.css('visibility', 'hidden');
-                        self._store.removeItem('needJoinDiscussion');
-
-                        // reload user data and its permissions (so for example now when he clicks on the "reply" button of a message, it should not show "Before you can reply to this message..." anymore)
-                        try { // we try to be a good Single Page Application and update user data without reloading the whole page
-                          Ctx.updateCurrentUser();
-                        } catch (e) { // but if it does not work, we reload the page
-                          console.log("Error while reloading user data: " + e.message);
-                          location.reload();
-                        }
-                      },
-                      error: function(model, resp) {
-                        console.error('ERROR: joinDiscussion->subscription', resp);
-                      }
-                    })
-                  }
-                },
-
-                cancel: function() {
-                  self._store.removeItem('needJoinDiscussion');
-                  var analytics = Analytics.getInstance();
-                  analytics.trackEvent(analytics.events.JOIN_DISCUSSION_REFUSED);
-                  analytics.changeCurrentPage(this.returningPage, {default: true}); //if page is null, go back to / page
-                }
-              });
-              IdeaLoom.rootView.showChildView('slider', new Modal());
-
-              //}
+          serializeData() {
+            return {
+              i18n: i18n,
+              notificationsToShow: model.notificationsToShow,
+              urlNotifications: '/' + Ctx.getDiscussionSlug() + '/user/notifications'
             }
+          }
+
+          submit(ev) {
+            var that = this;
+
+            if (Ctx.getDiscussionId() && Ctx.getCurrentUserId() && !isUserSubscribedToDiscussion) {
+
+              var LocalRolesUser = new RoleModels.localRoleModel({
+                role: Roles.PARTICIPANT,
+                discussion: 'local:Discussion/' + Ctx.getDiscussionId()
+              });
+              LocalRolesUser.save(null, {
+                success: function(model, resp) {
+                  var analytics = Analytics.getInstance();
+                  analytics.trackEvent(analytics.events.JOIN_DISCUSSION);
+
+                  // TODO: Is there a simpler way to do this? MAP
+                  self.getRegion('navBarRight').currentView.ui.joinDiscussion.css('visibility', 'hidden');
+                  self._store.removeItem('needJoinDiscussion');
+
+                  // reload user data and its permissions (so for example now when he clicks on the "reply" button of a message, it should not show "Before you can reply to this message..." anymore)
+                  try { // we try to be a good Single Page Application and update user data without reloading the whole page
+                    Ctx.updateCurrentUser();
+                  } catch (e) { // but if it does not work, we reload the page
+                    console.log("Error while reloading user data: " + e.message);
+                    location.reload();
+                  }
+                },
+                error: function(model, resp) {
+                  console.error('ERROR: joinDiscussion->subscription', resp);
+                }
+              })
+            }
+          }
+
+          cancel() {
+            self._store.removeItem('needJoinDiscussion');
+            var analytics = Analytics.getInstance();
+            analytics.trackEvent(analytics.events.JOIN_DISCUSSION_REFUSED);
+            analytics.changeCurrentPage(this.returningPage, {default: true}); //if page is null, go back to / page
+          }
+        }
+
+        IdeaLoom.rootView.showChildView('slider', new Modal());
+
+        //}
+      }
 
         );
-  },
+  }
 
-  showPopInOnFirstPost: function() {
+  showPopInOnFirstPost() {
     this.joinDiscussion(null, 'firstPost');
-  },
+  }
 
-  showPopInOnFirstLoginAfterAutoSubscribeToNotifications: function() {
+  showPopInOnFirstLoginAfterAutoSubscribeToNotifications() {
     if (typeof first_login_after_auto_subscribe_to_notifications != 'undefined'
         && first_login_after_auto_subscribe_to_notifications == true)
     {
       this.joinDiscussion(null, 'first_login_after_auto_subscribe_to_notifications');
     }
-  },
+  }
 
-  showPopInDiscussion: function() {
+  showPopInDiscussion() {
     var needPopIn = this._store.getItem('needJoinDiscussion');
     if (needPopIn && Ctx.getCurrentUserId() && this.roles.get('role') === null) {
       this.joinDiscussion();
@@ -399,7 +403,6 @@ var navBar = Marionette.View.extend({
       this._store.removeItem('needJoinDiscussion');
     }
   }
-
-});
+}
 
 export default navBar;

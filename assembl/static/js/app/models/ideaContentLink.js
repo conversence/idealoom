@@ -33,40 +33,37 @@ IdeaContentLinkTypeRank.prototype = {
         }
     }
 };
+
 /**
  * Idea content link model
  * Frontend model for :py:class:`assembl.models.idea_content_link.IdeaContentLink`
  * @class app.models.ideaContentLink.IdeaContentLinkModel
  * @extends app.models.base.BaseModel
  */
-var IdeaContentLinkModel = Base.Model.extend({
-  /**
-   * @function app.models.ideaContentLink.IdeaContentLinkModel.constructor
-   */
-  constructor: function IdeaContentLinkModel() {
-    Base.Model.apply(this, arguments);
-  },
-  /**
-   * @member {string} app.models.ideaContentLink.IdeaContentLinkModel.urlRoot
-   */
+class IdeaContentLinkModel extends Base.Model.extend({
+    /**
+     * @member {string} app.models.ideaContentLink.IdeaContentLinkModel.urlRoot
+     */
     urlRoot: Ctx.getApiV2Url(Types.IDEA_CONTENT_LINK),
-  /**
-   * Defaults
-   * @type {Object}
-   */
+
+    /**
+     * Defaults
+     * @type {Object}
+     */
     defaults: {
         idIdea: null,
         idPost: null,
         created: null,
         idCreator: null,
         created: null
-    },
-  /**
-   * Returns the post creator model promise
-   * @returns {Promise}
-   * @function app.models.ideaContentLink.IdeaContentLinkModel.getPostCreatorModelPromise
-   */
-    getPostCreatorModelPromise: function(){
+    }
+}) {
+    /**
+     * Returns the post creator model promise
+     * @returns {Promise}
+     * @function app.models.ideaContentLink.IdeaContentLinkModel.getPostCreatorModelPromise
+     */
+    getPostCreatorModelPromise() {
         var that = this;
         var messageId = this.get('idPost');
         return this.collection.collectionManager.getMessageFullModelPromise(messageId)
@@ -81,13 +78,14 @@ var IdeaContentLinkModel = Base.Model.extend({
                         return Promise.resolve(u);
                     }); 
             });
-    },
-  /**
-   * Returns the link creator model promise
-   * @returns {Promise}
-   * @function app.models.ideaContentLink.IdeaContentLinkModel.getLinkCreatorModelPromise
-   */
-    getLinkCreatorModelPromise: function(){
+    }
+
+    /**
+     * Returns the link creator model promise
+     * @returns {Promise}
+     * @function app.models.ideaContentLink.IdeaContentLinkModel.getLinkCreatorModelPromise
+     */
+    getLinkCreatorModelPromise() {
         var that = this;
         return this.collection.collectionManager.getAllUsersCollectionPromise()
             .then(function(users){
@@ -100,13 +98,14 @@ var IdeaContentLinkModel = Base.Model.extend({
             .error(function(e){
                 console.error(e.statusText);
             });
-    },
-  /**
-   * Returns message structure model promise
-   * @returns {Promise}
-   * @function app.models.ideaContentLink.IdeaContentLinkModel.getMessageStructurePromise
-   */
-    getMessageStructurePromise: function(){
+    }
+
+    /**
+     * Returns message structure model promise
+     * @returns {Promise}
+     * @function app.models.ideaContentLink.IdeaContentLinkModel.getMessageStructurePromise
+     */
+    getMessageStructurePromise() {
         var that = this;
         return this.collection.collectionManager.getAllMessageStructureCollectionPromise()
             .then(function(messages){
@@ -121,13 +120,14 @@ var IdeaContentLinkModel = Base.Model.extend({
             .error(function(e){
                 console.error(e.statusText);
             });
-    },
-  /**
-   * Returns idea model promise
-   * @returns {Promise}
-   * @function app.models.ideaContentLink.IdeaContentLinkModel.getMessageStructurePromise
-   */
-    getIdeaModelPromise: function(){
+    }
+
+    /**
+     * Returns idea model promise
+     * @returns {Promise}
+     * @function app.models.ideaContentLink.IdeaContentLinkModel.getMessageStructurePromise
+     */
+    getIdeaModelPromise() {
         var that = this;
         return this.collection.collectionManager.getAllIdeasCollectionPromise()
             .then(function(ideas){
@@ -144,23 +144,26 @@ var IdeaContentLinkModel = Base.Model.extend({
             .error(function(e){
                 console.error(e.statusText);
             });
-    },
-  /**
-   * Helper function for the comparator, might not work
-   * @returns {Boolean}
-   * @function app.models.ideaContentLink.IdeaContentLinkModel.isDirect
-   */
-    isDirect: function(){
+    }
+
+    /**
+     * Helper function for the comparator, might not work
+     * @returns {Boolean}
+     * @function app.models.ideaContentLink.IdeaContentLinkModel.isDirect
+     */
+    isDirect() {
         return this.get('idPost') === this.collection.messageModel.id;
-    },
-  /**
-   * @returns {String}
-   * @function app.models.ideaContentLink.IdeaContentLinkModel.getCreationDate
-   */
-    getCreationDate: function(){
+    }
+
+    /**
+     * @returns {String}
+     * @function app.models.ideaContentLink.IdeaContentLinkModel.getCreationDate
+     */
+    getCreationDate() {
         return this.get('created');
     }
-});
+}
+
 /**
  * Idea content link collection
  * This Collection is NOT created from an API call, like most other models, collections.
@@ -168,36 +171,33 @@ var IdeaContentLinkModel = Base.Model.extend({
  * @class app.models.ideaContentLink.Collection
  * @extends app.models.base.BaseCollection
  */
-var Collection = Base.Collection.extend({
-  /**
-   * @function app.models.ideaContentLink.Collection.constructor
-   */
-  constructor: function IdeaContentLinkCollection() {
-    Base.Collection.apply(this, arguments);
-  },
-  /**
-   * @member {string} app.models.ideaContentLink.Collection.url
-   */
+class Collection extends Base.Collection.extend({
+    /**
+     * @member {string} app.models.ideaContentLink.Collection.url
+     */
     url: Ctx.getApiV2DiscussionUrl('idea_content_link'),
-  /**
-   * The model
-   * @type {IdeaContentLinkModel}
-   */
-    model: IdeaContentLinkModel,
-  /**
-   * @member {string} app.models.ideaContentLink.Collection.initialize
-   */
-    initialize: function(attrs, options){
+
+    /**
+     * The model
+     * @type {IdeaContentLinkModel}
+     */
+    model: IdeaContentLinkModel
+}) {
+    /**
+     * @member {string} app.models.ideaContentLink.Collection.initialize
+     */
+    initialize(attrs, options) {
         this.messageModel = options.message || {};
         Base.Collection.prototype.initialize.call(this, attrs, options);
-    },
+    }
+
     /**
      * Firstly, sort based on direct vs indirect, then sort based on types. If the types match, sort in ascending order.
      * @param {Object} one
      * @param {Object} two
      * @function app.models.ideaContentLink.Collection.comparator
      */
-    comparator: function(one, two){
+    comparator(one, two) {
         function sortByDate(one, two){
             var d1 = Moment(one.getCreationDate());
             var d2 = Moment(one.getCreationDate());
@@ -226,13 +226,14 @@ var Collection = Base.Collection.extend({
         else {
             return sortByType(one, two);
         }
-    },
+    }
+
     /**
      * The string of short names of the ideas that a message is associated to. Note: It does not contain those that the user clipboarded.
      * @returns {Array}
      * @function app.models.ideaContentLink.Collection.getIdeaNamesPromise
      */
-    getIdeaNamesPromise: function(){
+    getIdeaNamesPromise() {
         var that = this;
         return Promise.join(
             this.collectionManager.getAllIdeasCollectionPromise(),
@@ -271,8 +272,8 @@ var Collection = Base.Collection.extend({
             .error(function(e){
                 console.error("[IdeaContentLink] Error in getting idea names: ", e.statusText);
             });
-    },
-});
+    }
+}
 
 export default {
     Model: IdeaContentLinkModel,

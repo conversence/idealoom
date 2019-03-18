@@ -17,7 +17,7 @@ import agent from './models/agents.js';
  * @class app.router.Router
  * @extends Marionette.AppRouter
  */
-var Router = Marionette.AppRouter.extend({
+class Router extends Marionette.AppRouter.extend({
   controller: routeManager,
 
   //Note:  This should match with assembl/lib/frontend_url.py
@@ -47,9 +47,8 @@ var Router = Marionette.AppRouter.extend({
 
   adminRoutes: {
     "global_preferences": "adminGlobalPreferences",
-  },
-
-});
+  }
+}) {}
 
 Router.prototype.appRoutes = (Ctx.isAdminApp())?
     Router.prototype.adminRoutes:Router.prototype.discussionRoutes;

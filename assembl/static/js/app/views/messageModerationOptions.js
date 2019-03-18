@@ -14,14 +14,29 @@ import AgentViews from './agent.js';
 import i18n from '../utils/i18n.js';
 
 
-var messageModerationOptions = Marionette.View.extend({
-  constructor: function messageModerationOptions() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class messageModerationOptions extends Marionette.View.extend({
   template: '#tmpl-messageModerationOptions',
   className: 'messageModerationOptions',
-  initialize: function(options) {
+
+  ui: {
+    publicationStatusSelect: '.js_messagePublicationStatusSelect',
+    moderationDetails: '.js_moderationDetails',
+    messageModerator: '.js_messageModerator',
+    messageModeratorAvatar: '.js_messageModerator .js_avatarContainer',
+    messageModeratorName: '.js_messageModerator .js_nameContainer',
+    messageModeratedVersion: '.js_messageModeratedVersion',
+    messageModerationRemarks: '.js_messageModerationRemarks',
+    saveButton: '.js_messageModerationSaveButton',
+    cancelButton: '.js_messageModerationCancelButton'
+  },
+
+  events: {
+    'change @ui.publicationStatusSelect': 'onPublicationStatusSelectChange',
+    'click @ui.saveButton': 'onSaveButtonClick',
+    'click @ui.cancelButton': 'onCancelButtonClick'
+  }
+}) {
+  initialize(options) {
     //console.log("messageModerationOptions::initialize() options: ", options);
     this.options = options;
 
@@ -40,27 +55,9 @@ var messageModerationOptions = Marionette.View.extend({
     if ( !("message_original_body_safe" in options) ){
       this.options.message_original_body_safe = "";
     }
-  },
+  }
 
-  ui: {
-    publicationStatusSelect: '.js_messagePublicationStatusSelect',
-    moderationDetails: '.js_moderationDetails',
-    messageModerator: '.js_messageModerator',
-    messageModeratorAvatar: '.js_messageModerator .js_avatarContainer',
-    messageModeratorName: '.js_messageModerator .js_nameContainer',
-    messageModeratedVersion: '.js_messageModeratedVersion',
-    messageModerationRemarks: '.js_messageModerationRemarks',
-    saveButton: '.js_messageModerationSaveButton',
-    cancelButton: '.js_messageModerationCancelButton'
-  },
-
-  events: {
-    'change @ui.publicationStatusSelect': 'onPublicationStatusSelectChange',
-    'click @ui.saveButton': 'onSaveButtonClick',
-    'click @ui.cancelButton': 'onCancelButtonClick'
-  },
-
-  onRender: function(){
+  onRender() {
     var that = this;
 
     this.updateContent();
@@ -78,13 +75,13 @@ var messageModerationOptions = Marionette.View.extend({
         that.ui.messageModeratorName.html(agentNameView.render().el);
       });
     }
-  },
+  }
 
-  onPublicationStatusSelectChange: function(ev){
+  onPublicationStatusSelectChange(ev) {
     this.updateContent();
-  },
+  }
 
-  updateContent: function(){
+  updateContent() {
     if ( this.ui.publicationStatusSelect.val() == "PUBLISHED" ){
       this.ui.moderationDetails.addClass("hidden");
     }
@@ -98,9 +95,9 @@ var messageModerationOptions = Marionette.View.extend({
     else {
       this.ui.messageModerator.addClass("hidden");
     }
-  },
+  }
 
-  onSaveButtonClick: function(){
+  onSaveButtonClick() {
     var publication_state = this.ui.publicationStatusSelect.val();
     if ( publication_state == "PUBLISHED" ){
       this.model.save({
@@ -116,13 +113,13 @@ var messageModerationOptions = Marionette.View.extend({
     }
     this.trigger("moderationOptionsSave");
     this.trigger("moderationOptionsClose");
-  },
+  }
 
-  onCancelButtonClick: function(){
+  onCancelButtonClick() {
     this.trigger("moderationOptionsClose");
-  },
+  }
 
-  serializeData: function() {
+  serializeData() {
     return {
       i18n: i18n,
       message_publication_status: this.options.message_publication_status,
@@ -130,8 +127,7 @@ var messageModerationOptions = Marionette.View.extend({
       message_moderation_remarks: this.options.message_moderation_remarks,
       message_original_body_safe: this.options.message_original_body_safe
     }
-  },
-
-});
+  }
+}
 
 export default messageModerationOptions;

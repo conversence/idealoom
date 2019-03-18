@@ -13,26 +13,26 @@ import $ from 'jquery';
 import Promise from 'bluebird';
 import AdminNavigationMenu from './adminNavigationMenu.js';
 
-var NotificationView = Marionette.View.extend({
-  constructor: function NotificationView() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class NotificationView extends Marionette.View.extend({
   template: '#tmpl-adminNotification',
   className: 'controls',
+
   ui: {
     subscribeCheckbox: ".js_adminNotification"
   },
+
   events: {
     'click @ui.subscribeCheckbox': 'discussionNotification'
-  },
-  serializeData: function() {
+  }
+}) {
+  serializeData() {
     return {
       i18n: i18n,
       notification: this.model
     }
-  },
-  discussionNotification: function(e) {
+  }
+
+  discussionNotification(e) {
     var elm = $(e.target);
     var status = elm.is(':checked') ? 'ACTIVE' : 'UNSUBSCRIBED';
 
@@ -46,47 +46,39 @@ var NotificationView = Marionette.View.extend({
       }
     });
   }
-});
+}
 
-var NotificationListBody = Marionette.CollectionView.extend({
-  constructor: function NotificationListBody() {
-    Marionette.CollectionView.apply(this, arguments);
-  },
-
+class NotificationListBody extends Marionette.CollectionView.extend({
   childView: NotificationView,
-  className: 'mtl',
-});
+  className: 'mtl'
+}) {}
 
-var NotificationList = Marionette.View.extend({
-  constructor: function NotificationList() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class NotificationList extends Marionette.View.extend({
   template: '#tmpl-adminNotificationList',
+
   regions: {
     list: '.control-group',
-  },
-  onRender: function() {
+  }
+}) {
+  onRender() {
     this.showChildView('list', new NotificationListBody({
       collection: this.collection,
     }));
-  },
-});
+  }
+}
 
-var defaultNotification = Marionette.View.extend({
-  constructor: function defaultNotification() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class defaultNotification extends Marionette.View.extend({
   template: '#tmpl-defaultNotification',
+
   ui: {
     autoSubscribeCheckbox: ".js_adminAutoSubscribe"
   },
+
   events: {
     'click @ui.autoSubscribeCheckbox': 'updateAutoSubscribe'
-  },
-
-  updateAutoSubscribe: function() {
+  }
+}) {
+  updateAutoSubscribe() {
     var val = (this.$('.autoSubscribe:checked').val()) ? true : false;
 
     this.model.set('subscribe_to_notifications_on_signup', val);
@@ -100,36 +92,36 @@ var defaultNotification = Marionette.View.extend({
       }
     })
   }
-});
+}
 
-var adminNotificationSubscriptions = Marionette.View.extend({
-  constructor: function adminNotificationSubscriptions() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class adminNotificationSubscriptions extends Marionette.View.extend({
   template: '#tmpl-adminNotificationSubscriptions',
   className: 'admin-notifications',
+
   regions: {
     notification:'#notification-content',
     autoSubscribe:'#notification-auto-subscribe',
     navigationMenuHolder: '.navigation-menu-holder'
   },
+
   ui: {
     close: '.bx-alert-success .bx-close'
   },
+
   events: {
     'click @ui.close': 'close'
-  },
-  initialize: function() {
+  }
+}) {
+  initialize() {
 
     if (!Ctx.getCurrentUser().can(Permissions.ADMIN_DISCUSSION)) {
       // TODO ghourlier: Éviter que les gens n'ayant pas l'autorisation accèdent à cet écran.
       alert("This is an administration screen.");
       return;
     }
-  },
+  }
 
-  onRender: function() {
+  onRender() {
     var that = this;
     var collectionManager = new CollectionManager();
 
@@ -152,12 +144,11 @@ var adminNotificationSubscriptions = Marionette.View.extend({
     var menu = new AdminNavigationMenu.discussionAdminNavigationMenu(
       {selectedSection: "notifications"});
     this.showChildView('navigationMenuHolder', menu);
-  },
-
-  close: function() {
-    this.$('.bx-alert-success').addClass('hidden');
   }
 
-});
+  close() {
+    this.$('.bx-alert-success').addClass('hidden');
+  }
+}
 
 export default adminNotificationSubscriptions;

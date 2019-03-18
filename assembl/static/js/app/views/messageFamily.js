@@ -22,12 +22,9 @@ import availableFilters from './postFilters.js';
 /**
  * @class app.views.messageFamily.MessageFamilyView
  */
-var MessageFamilyView = LoaderView.extend({
-  constructor: function MessageFamilyView() {
-    LoaderView.apply(this, arguments);
-  },
-
+class MessageFamilyView extends LoaderView.extend({
   template: '#tmpl-messageFamily',
+
   /**
    * @type {string}
    */
@@ -39,13 +36,20 @@ var MessageFamilyView = LoaderView.extend({
    */
   currentLevel: null,
 
+  events: {
+      'click >.message-family-arrow>.link-img': 'onIconbuttonClick',
+
+      //'click >.message-family-container>.message-family-arrow>.link-img': 'onIconbuttonClick',
+      'click >.message-conversation-block>.js_viewMessageFamilyConversation': 'onViewConversationClick'
+    }
+}) {
   /**
    * @init
    * @param {MessageModel} obj : the model
    * @param {boolean[]} options.last_sibling_chain : which of the view's ancestors
    *   are the last child of their respective parents.
    */
-  initialize: function(options) {
+  initialize(options) {
     this.setLoading(true);
     var that = this;
     if (_.isUndefined(options.last_sibling_chain)) {
@@ -78,9 +82,9 @@ var MessageFamilyView = LoaderView.extend({
         that.setLoading(false);
         that.render();
     });
-  },
+  }
 
-  serializeData: function() {
+  serializeData() {
     var hasParentsOrChildrenOutOfScope = false;
     var firstMessage = this.model;
     var numAncestors = undefined;
@@ -127,9 +131,9 @@ var MessageFamilyView = LoaderView.extend({
         "Messages available in this message's full context are from %d more authors.",
         numAuthorsOutOfContext), numAuthorsOutOfContext)
     };
-  },
+  }
 
-  onDestroy: function() {
+  onDestroy() {
     //Marionette view not used in a region
     if(this._messageView) {
       this._messageView.destroy();
@@ -140,14 +144,14 @@ var MessageFamilyView = LoaderView.extend({
       //so we manually call destroy, not remove
       messageFamily.destroy();
     });
-  },
-    
+  }
+
   /**
    * The render
    * @param {number} [level] The hierarchy level
    * @returns {MessageView}
    */
-  onRender: function() {
+  onRender() {
     if (this.isLoading()) {
         return {};
     }
@@ -210,33 +214,26 @@ var MessageFamilyView = LoaderView.extend({
 
     this.onCollapsedChange();
 
-  },
-
-  events: {
-      'click >.message-family-arrow>.link-img': 'onIconbuttonClick',
-
-      //'click >.message-family-container>.message-family-arrow>.link-img': 'onIconbuttonClick',
-      'click >.message-conversation-block>.js_viewMessageFamilyConversation': 'onViewConversationClick'
-    },
+  }
 
   /**
    * @event
    * Collapse icon has been toggled
    */
-  onIconbuttonClick: function(ev) {
+  onIconbuttonClick(ev) {
     //var collapsed = this.model.get('collapsed');
     //this.model.set('collapsed', !collapsed);
 
     this.collapsed = !this.collapsed;
 
     this.onCollapsedChange();
-  },
+  }
 
   /**
    * @event
    * View the entire conversation of a family (possibly composed of a single message)
    */
-  onViewConversationClick: function(ev) {
+  onViewConversationClick(ev) {
     var analytics = Analytics.getInstance();
     ev.preventDefault();
     analytics.trackEvent(analytics.events.THREAD_VIEW_COMPLETE_CONVERSATION);
@@ -254,12 +251,12 @@ var MessageFamilyView = LoaderView.extend({
 
     IdeaLoom.rootView.showChildView('slider', modal);
     messageList.showMessageById(this.model.id, undefined, true, true);
-  },
+  }
 
   /**
    * @event
    */
-  onCollapsedChange: function() {
+  onCollapsedChange() {
     if (this.isLoading()) {
         return;
     }
@@ -274,6 +271,6 @@ var MessageFamilyView = LoaderView.extend({
       children.show();
     }
   }
-});
+}
 
 export default MessageFamilyView;

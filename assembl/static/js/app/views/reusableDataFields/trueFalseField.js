@@ -9,16 +9,18 @@ import _ from 'underscore';
 import IdeaLoom from '../../app.js';
 import Ctx from '../../common/context.js';
 
-var TrueFalseField = Marionette.View.extend({
-  constructor: function TrueFalseField() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class TrueFalseField extends Marionette.View.extend({
   template: '#tmpl-trueFalseField',
+
   attributes: {
     "class": "TrueFalseField"
   },
-  initialize: function(options) {
+
+  events: {
+    'change': 'onChange'
+  }
+}) {
+  initialize(options) {
     this.view = this;
 
     this.canEdit = (_.has(options, 'canEdit')) ? options.canEdit : true;
@@ -33,18 +35,14 @@ var TrueFalseField = Marionette.View.extend({
     if (this.model.get(this.modelProp) === undefined) {
       throw new Error(this.modelProp + ' must be initialised to true or false');
     }
-  },
+  }
 
-  events: {
-    'change': 'onChange'
-  },
-
-  onRender: function() {
+  onRender() {
     this.$( "input:checkbox").prop( "checked", this.model.get(this.modelProp) );
     this.$( "input:checkbox").prop( "disabled", !this.canEdit);
-  },
+  }
 
-  onChange: function(ev) {
+  onChange(ev) {
     if (this.canEdit) {
       var data = this.$( "input:checkbox").prop("checked");
       if (this.model.get(this.modelProp) != data) {
@@ -61,7 +59,6 @@ var TrueFalseField = Marionette.View.extend({
       }
     }
   }
-
-});
+}
 
 export default TrueFalseField;

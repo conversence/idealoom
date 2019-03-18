@@ -5,41 +5,38 @@
 import Base from './base.js';
 
 import Idea from './idea.js';
+
 /**
  * Group state model
  * @class app.models.groupState.GroupStateModel
  * @extends app.models.base.BaseModel
  */
-var GroupStateModel = Base.Model.extend({
-  /**
-   * @function app.models.groupState.GroupStateModel.constructor
-   */
-  constructor: function GroupStateModel() {
-    Base.Model.apply(this, arguments);
-  },
+class GroupStateModel extends Base.Model.extend({
   /**
    * Defaults
    * @type {Object}
    */
   defaults: {
     currentIdea: null
-  },
+  }
+}) {
   /**
    * Return a copy of the model's attributes for JSON stringification. 
    * @function app.models.groupState.GroupStateModel.toJSON
    */
-  toJSON:  function(options) {
-    var json = Base.Model.prototype.toJSON.apply(this, arguments);
+  toJSON(options) {
+    var json = super.toJSON(...arguments);
     if (json.currentIdea !== null && json.currentIdea instanceof Idea.Model) {
       json.currentIdea = json.currentIdea.get("@id");
     }
     return json;
-  },
+  }
+
   /**
    * Validate the model attributes and returns an error message if the model is invalid and undefined if the model is valid
    * @function app.models.groupState.GroupStateModel.validate
    */
-  validate: function(attributes, options) {
+  validate(attributes, options) {
     if (attributes['currentIdea'] === null) {
       return;
     }
@@ -50,29 +47,25 @@ var GroupStateModel = Base.Model.extend({
       return "currentIdea isn't an instance of Idea";
     }
   }
-});
+}
+
 /**
  * Group states collection
  * @class app.models.groupState.GroupStates
  * @extends app.models.base.BaseCollection
  */
-var GroupStates = Base.Collection.extend({
-  /**
-   * @function app.models.groupState.GroupStates.constructor
-   */
-  constructor: function GroupStates() {
-    Base.Collection.apply(this, arguments);
-  },
+class GroupStates extends Base.Collection.extend({
   /**
    * The model
    * @type {GroupStateModel}
    */
-  model: GroupStateModel,
+  model: GroupStateModel
+}) {
   /**
    * Validate the model attributes
    * @function app.models.groupState.GroupStates.validate
    */
-  validate: function() {
+  validate() {
     var invalid = [];
     this.each(function(groupState) {
       if (!groupState.validate()) {
@@ -86,7 +79,7 @@ var GroupStates = Base.Collection.extend({
     }
     return (this.length > 0);
   }
-});
+}
 
 export default {
   Model: GroupStateModel,

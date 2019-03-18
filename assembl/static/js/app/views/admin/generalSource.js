@@ -17,102 +17,99 @@ import CollectionManager from '../../common/collectionManager.js';
 import getSourceEditView from './sourceEditViews.js';
 
 
-var ReadSource = Marionette.View.extend({
-  constructor: function ReadSource() {
-    Marionette.View.apply(this, arguments);
+class ReadSource extends Marionette.View.extend({
+  template: '#tmpl-adminImportSettingsGeneralSourceRead',
+
+  ui: {
+      manualStart: '.js_manualStart',
+      reimport: '.js_reimport',
+      reprocess: '.js_reprocess',
+      showEdit: '.js_moreOptions',
   },
 
-    template: '#tmpl-adminImportSettingsGeneralSourceRead',
-    ui: {
-        manualStart: '.js_manualStart',
-        reimport: '.js_reimport',
-        reprocess: '.js_reprocess',
-        showEdit: '.js_moreOptions',
-    },
+  modelEvents: {
+      'change': 'updateView'
+  },
 
-    modelEvents: {
-        'change': 'updateView'
-    },
+  events: {
+      'click @ui.manualStart': 'manualStart',
+      'click @ui.reimport': 'reimportSource',
+      'click @ui.reprocess': 'reprocessSource',
+      'click @ui.showEdit': 'toggleEditView'
+  }
+}) {
+  initialize(options) {
+      this.parent = options.parent;
+      this.model = this.parent.model;
+  }
 
-    events: {
-        'click @ui.manualStart': 'manualStart',
-        'click @ui.reimport': 'reimportSource',
-        'click @ui.reprocess': 'reprocessSource',
-        'click @ui.showEdit': 'toggleEditView'
-    },
+  toggleEditView() {
+      this.parent.toggleEditView();
+  }
 
-    initialize: function(options) {
-        this.parent = options.parent;
-        this.model = this.parent.model;
-    },
-
-    toggleEditView: function() {
-        this.parent.toggleEditView();
-    },
-
-    reimportSource: function(e){
-        e.preventDefault();
-        e.stopPropagation();
-        return Promise.resolve(this.model.doReimport()).then(function(resp) {
-            if (_.has(resp, 'error')){
-                Growl.showBottomGrowl(Growl.GrowlReason.ERROR, i18n.gettext("There was a reimport error!"));
-                console.error("Source " + this.model.name + " failed to reimport due to an internal server problem with response ", resp);
-            }
-            Growl.showBottomGrowl(Growl.GrowlReason.SUCCESS, i18n.gettext('Reimport has begun! It can take up to 15 minutes to complete.'));
-        }).catch(function(e) {
-            Growl.showBottomGrowl(Growl.GrowlReason.ERROR, i18n.gettext('Reimport failed.'));
-        });
-    },
-
-    reprocessSource: function(e){
-        e.preventDefault();
-        e.stopPropagation();
-        return Promise.resolve(this.model.doReprocess()).then(function(resp) {
-            if (_.has(resp, 'error')){
-                Growl.showBottomGrowl(Growl.GrowlReason.ERROR, i18n.gettext("There was a reprocess error!"));
-                console.error("Source " + this.model.name + " failed to reprocess due to an internal server problem with response", resp);
-            }
-            Growl.showBottomGrowl(Growl.GrowlReason.SUCCESS, i18n.gettext('Reprocess has begun! It can take up to 15 minutes to complete.'));
-        }).catch(function(e) {
-            Growl.showBottomGrowl(Growl.GrowlReason.ERROR, i18n.gettext('Reprocess failed'));
-        });
-    },
-
-    manualStart: function(evt){
-      var url = this.model.url() + "/fetch_posts";
-      var user = Ctx.getCurrentUser();
-      var payload = {};
-      if (user.can(Permissions.ADMIN_DISCUSSION)){
-        payload.force_restart = true;
-      }
-      $.ajax(
-        url,
-        {
-          method: "POST",
-          contentType: "application/json; charset=UTF-8",
-          data: JSON.stringify(payload)
-        }
-      ).then(function() {
-        Growl.showBottomGrowl(Growl.GrowlReason.SUCCESS, i18n.gettext('Import has begun!'))
+  reimportSource(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      return Promise.resolve(this.model.doReimport()).then(function(resp) {
+          if (_.has(resp, 'error')){
+              Growl.showBottomGrowl(Growl.GrowlReason.ERROR, i18n.gettext("There was a reimport error!"));
+              console.error("Source " + this.model.name + " failed to reimport due to an internal server problem with response ", resp);
+          }
+          Growl.showBottomGrowl(Growl.GrowlReason.SUCCESS, i18n.gettext('Reimport has begun! It can take up to 15 minutes to complete.'));
+      }).catch(function(e) {
+          Growl.showBottomGrowl(Growl.GrowlReason.ERROR, i18n.gettext('Reimport failed.'));
       });
-    },
+  }
 
-    serializeData: function() {
-      // TODO: Name for the types
-      var backoff = this.model.get('error_backoff_until');
-      return {
-        name: this.model.get('name'),
-        type: this.model.localizedName,
-        connection_error: this.model.get('connection_error') || '',
-        error_desc: this.model.get('error_description') || '',
-        error_backoff: backoff ? Moment(backoff).fromNow() : '',
-      };
-    },
+  reprocessSource(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      return Promise.resolve(this.model.doReprocess()).then(function(resp) {
+          if (_.has(resp, 'error')){
+              Growl.showBottomGrowl(Growl.GrowlReason.ERROR, i18n.gettext("There was a reprocess error!"));
+              console.error("Source " + this.model.name + " failed to reprocess due to an internal server problem with response", resp);
+          }
+          Growl.showBottomGrowl(Growl.GrowlReason.SUCCESS, i18n.gettext('Reprocess has begun! It can take up to 15 minutes to complete.'));
+      }).catch(function(e) {
+          Growl.showBottomGrowl(Growl.GrowlReason.ERROR, i18n.gettext('Reprocess failed'));
+      });
+  }
 
-    updateView: function(evt){
-        this.render(); //Update 
+  manualStart(evt) {
+    var url = this.model.url() + "/fetch_posts";
+    var user = Ctx.getCurrentUser();
+    var payload = {};
+    if (user.can(Permissions.ADMIN_DISCUSSION)){
+      payload.force_restart = true;
     }
-});
+    $.ajax(
+      url,
+      {
+        method: "POST",
+        contentType: "application/json; charset=UTF-8",
+        data: JSON.stringify(payload)
+      }
+    ).then(function() {
+      Growl.showBottomGrowl(Growl.GrowlReason.SUCCESS, i18n.gettext('Import has begun!'))
+    });
+  }
+
+  serializeData() {
+    // TODO: Name for the types
+    var backoff = this.model.get('error_backoff_until');
+    return {
+      name: this.model.get('name'),
+      type: this.model.localizedName,
+      connection_error: this.model.get('connection_error') || '',
+      error_desc: this.model.get('error_description') || '',
+      error_backoff: backoff ? Moment(backoff).fromNow() : '',
+    };
+  }
+
+  updateView(evt) {
+      this.render(); //Update 
+  }
+}
 
 function getSourceDisplayView(model) {
   // TODO
@@ -120,52 +117,52 @@ function getSourceDisplayView(model) {
 }
 
 
-var SourceView = Marionette.View.extend({
-  constructor: function SourceView() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class SourceView extends Marionette.View.extend({
   ui: {
     edit_container: '.js_source_edit_container'
   },
+
   template: '#tmpl-adminImportSettingsGeneralSource',
+
   regions: {
     readOnly: '.js_source_read',
     form: '.js_source_edit'
-  },
-  toggleEditView: function() {
+  }
+}) {
+  toggleEditView() {
     this.ui.edit_container.toggleClass('hidden');
-  },
-  onRender: function(){
+  }
+
+  onRender() {
     var display_view = getSourceDisplayView(this.model);
     this.showChildView('readOnly', new display_view({parent: this}));
     var editViewClass = getSourceEditView(this.model.get("@type"));
     if (editViewClass !== undefined) {
       this.showChildView('form', new editViewClass({model: this.model}));
     }
-  },
-});
+  }
+}
 
-
-var CreateSource = Marionette.View.extend({
-  constructor: function CreateSource() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class CreateSource extends Marionette.View.extend({
   template: '#tmpl-DiscussionSettingsCreateSource',
+
   regions: {
     edit_form: ".js_editform"
   },
+
   ui: {
     selector: ".js_contentSourceType",
     create_button: ".js_contentSourceCreate",
   },
+
   events: {
     'click @ui.create_button': 'createButton',
     'change @ui.selector': 'changeSubForm',
   },
-  editView: undefined,
-  serializeData: function() {
+
+  editView: undefined
+}) {
+  serializeData() {
     var types = [
         Types.IMAPMAILBOX,
         Types.MAILING_LIST,
@@ -188,8 +185,9 @@ var CreateSource = Marionette.View.extend({
       types: types,
       type_names: type_name_assoc
     };
-  },
-  changeSubForm: function(ev) {
+  }
+
+  changeSubForm(ev) {
     var sourceType = ev.currentTarget.value;
     var editViewClass = getSourceEditView(sourceType);
     var modelClass = Source.getSourceClassByType(sourceType);
@@ -200,23 +198,19 @@ var CreateSource = Marionette.View.extend({
       this.editView = undefined;
       this.showChildView('edit_form', "");
     }
-  },
-  createButton: function(ev) {
+  }
+
+  createButton(ev) {
     if (this.editView !== undefined) {
       this.editView.saveModel();
     }
   }
-});
+}
 
-
-var DiscussionSourceList = Marionette.CollectionView.extend({
-  constructor: function DiscussionSourceList() {
-    Marionette.CollectionView.apply(this, arguments);
-  },
-
-    // getChildView: getSourceDisplayView
-    childView: SourceView
-});
+class DiscussionSourceList extends Marionette.CollectionView.extend({
+  // getChildView: getSourceDisplayView
+  childView: SourceView
+}) {}
 
 
 export default {

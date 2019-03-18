@@ -16,12 +16,9 @@ import CK from 'ckeditor';
 import Ctx from '../../common/context.js';
 
 
-var cKEditorField = Marionette.View.extend({
-  constructor: function cKEditorField() {
-    Marionette.View.apply(this, arguments);
-  },
-
+class cKEditorField extends Marionette.View.extend({
   template: '#tmpl-ckeditorField',
+
   /**
    * Ckeditor default configuration
    * For complete reference see:
@@ -42,10 +39,26 @@ var cKEditorField = Marionette.View.extend({
   },
 
   ckInstance: null,
-
   showPlaceholderOnEditIfEmpty: false,
 
-  initialize: function(options) {
+  ui: {
+    mainfield: '.ckeditorField-mainfield',
+    saveButton: '.ckeditorField-savebtn',
+    cancelButton: '.ckeditorField-cancelbtn',
+    seeMoreOrLess: '.js_seeMoreOrLess',
+    seeMore: '.js_seeMore',
+    seeLess: '.js_seeLess'
+  },
+
+  events: {
+    'click @ui.mainfield': 'changeToEditMode',
+    'click @ui.saveButton': 'saveEdition',
+    'click @ui.cancelButton': 'cancelEdition',
+    'click @ui.seeMore': 'seeMoreContent',
+    'click @ui.seeLess': 'seeLessContent'
+  }
+}) {
+  initialize(options) {
 
     if (this.model === null) {
       throw new Error('EditableField needs a model');
@@ -79,39 +92,22 @@ var cKEditorField = Marionette.View.extend({
     this.hideSeeMoreButton = (options.hideSeeMoreButton) ? options.hideSeeMoreButton : false;
 
     this.listenTo(this.model, 'add remove change', this.render);
-  },
+  }
 
-  ui: {
-    mainfield: '.ckeditorField-mainfield',
-    saveButton: '.ckeditorField-savebtn',
-    cancelButton: '.ckeditorField-cancelbtn',
-    seeMoreOrLess: '.js_seeMoreOrLess',
-    seeMore: '.js_seeMore',
-    seeLess: '.js_seeLess'
-  },
-
-  events: {
-    'click @ui.mainfield': 'changeToEditMode',
-    'click @ui.saveButton': 'saveEdition',
-    'click @ui.cancelButton': 'cancelEdition',
-    'click @ui.seeMore': 'seeMoreContent',
-    'click @ui.seeLess': 'seeLessContent'
-  },
-
-  getTextValue: function() {
+  getTextValue() {
     return this.model.get(this.modelProp);
-  },
+  }
 
-  setTextValue: function(text) {
+  setTextValue(text) {
     this.model.save(this.modelProp, text, {
       success: function(model, resp) {},
       error: function(model, resp) {
         console.error('ERROR: saveEdition', resp.responseJSON);
       }
     });
-  },
+  }
 
-  serializeData: function() {
+  serializeData() {
     var text = this.getTextValue();
     var textToShow = (this.showPlaceholderOnEditIfEmpty && !text) ? this.placeholder : text;
 
@@ -125,9 +121,9 @@ var cKEditorField = Marionette.View.extend({
       placeholder: this.placeholder,
       hideButton: this.hideButton,
     };
-  },
+  }
 
-  onRender: function() {
+  onRender() {
     this.destroy();
     if (this.editing) {
       this.startEditing();
@@ -138,33 +134,33 @@ var cKEditorField = Marionette.View.extend({
     if(this.hideSeeMoreButton){
       this.$(this.ui.seeMore).hide();
     }
-  },
+  }
 
-  onAttach: function() {
+  onAttach() {
     this.requestEllipsis();
     this._viewIsAlreadyShown = true;
-  },
+  }
 
-  onDetach: function() {
+  onDetach() {
     this.destroy();
     this._viewIsAlreadyShown = false;
-  },
+  }
 
-  onDomRemove: function() {
+  onDomRemove() {
     if (this._viewIsAlreadyShown) {
       // onDetach seems not to happen?
       this.onDetach();
     }
-  },
+  }
 
-  requestEllipsis: function() {
+  requestEllipsis() {
     var that = this;
     setTimeout(function() {
       that.ellipsis(that.ui.mainfield, that.ui.seeMore);
     }, 0);
-  },
+  }
 
-  ellipsis: function(sectionSelector, seemoreUi) {
+  ellipsis(sectionSelector, seemoreUi) {
     /* We use https://github.com/MilesOkeefe/jQuery.dotdotdot to show
      * Read More links for introduction preview
      */
@@ -184,9 +180,9 @@ var cKEditorField = Marionette.View.extend({
       watch: "window"
     });
 
-  },
+  }
 
-  seeMoreContent: function(e) {
+  seeMoreContent(e) {
     e.stopPropagation();
     e.preventDefault();
     if(!this.openInModal){
@@ -198,13 +194,13 @@ var cKEditorField = Marionette.View.extend({
       var modalView = this.createModal();
       IdeaLoom.rootView.showChildView('slider', modalView);
     }
-  },
+  }
 
-  createModal: function() {
+  createModal() {
     return new CkeditorFieldInModal({model:this.model, modelProp:this.modelProp, canEdit:this.canEdit});
-  },
+  }
 
-  seeLessContent: function(e) {
+  seeLessContent(e) {
     e.stopPropagation();
     e.preventDefault();
 
@@ -217,12 +213,12 @@ var cKEditorField = Marionette.View.extend({
     this.ui.seeLess.addClass('hidden');
 
     this.ellipsis(this.ui.mainfield, this.ui.seeMore);
-  },
+  }
 
   /**
    * set the templace in editing mode
    */
-  startEditing: function() {
+  startEditing() {
     var editingArea = this.$('#' + this.fieldId).get(0);
     var that = this;
 
@@ -260,23 +256,23 @@ var cKEditorField = Marionette.View.extend({
 
       });
     }
-  },
+  }
 
   /**
    * Destroy the ckeditor instance
    */
-  destroy: function() {
+  destroy() {
     this.ckInstance = null;
-  },
+  }
 
-  changeToEditMode: function() {
+  changeToEditMode() {
     if (this.canEdit) {
       this.editing = true;
       this.render();
     }
-  },
+  }
 
-  saveEdition: function(ev) {
+  saveEdition(ev) {
     if (ev) {
       ev.stopPropagation();
     }
@@ -296,9 +292,9 @@ var cKEditorField = Marionette.View.extend({
 
     this.editing = false;
     this.render();
-  },
+  }
 
-  cancelEdition: function(ev) {
+  cancelEdition(ev) {
     if (ev) {
       ev.stopPropagation();
     }
@@ -313,27 +309,26 @@ var cKEditorField = Marionette.View.extend({
 
     this.trigger('cancel', [this]);
   }
+}
 
-});
-
-var CkeditorFieldInModal = Backbone.Modal.extend({
-  constructor: function CkeditorFieldInModal(){
-    Backbone.Modal.apply(this, arguments);
-  },
+class CkeditorFieldInModal extends Backbone.Modal.extend({
   keyControl:false,
   template: '#tmpl-modalWithoutIframe',
   className: 'modal-ckeditorfield popin-wrapper',
   cancelEl: '.close',
+
   ui: {
     'body': '.js_modal-body'
-  },
-  initialize:function(options){
+  }
+}) {
+  initialize(options) {
     this.model = options.model;
     this.modelProp = options.modelProp;
     this.canEdit = options.canEdit;
     this.autosave = options.autosave;
-  },
-  serializeData: function(){
+  }
+
+  serializeData() {
     var title = this.model.get('shortTitle');
     return {
       // this assumes the model is an idea, which should now be another case.
@@ -341,8 +336,9 @@ var CkeditorFieldInModal = Backbone.Modal.extend({
       // REVISIT. Probably use a substring of getTextValue.
       modal_title: title ? title.originalValue() : '',
     };
-  },
-  onRender: function(){
+  }
+
+  onRender() {
     var ckeditorField = new cKEditorField({
       'model': this.model,
       'modelProp': this.modelProp,
@@ -352,7 +348,7 @@ var CkeditorFieldInModal = Backbone.Modal.extend({
     });
     this.$(this.ui.body).html(ckeditorField.render().el);
   }
-});
+}
 
 cKEditorField.modalClass = CkeditorFieldInModal;
 

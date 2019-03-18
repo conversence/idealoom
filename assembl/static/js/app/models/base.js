@@ -16,15 +16,19 @@ import Types from '../utils/types.js';
   * @class app.models.base.BaseModel
   * @extends Backbone.Model
 */
-var BaseModel = Backbone.Model.extend({
+class BaseModel extends Backbone.Model.extend({
+  /**
+   * Overwriting the idAttribute
+   * @member {uri} app.models.base.BaseModel.idAttribute
+   */
+  idAttribute: '@id',
 
   /**
-   * @constructor
+   * The base of the Router URL for this class. Set in app/router.js.
+   * 2015/11/25 Currently only defined on post, idea and users
    */
-  constructor: function BaseModel() {
-    Backbone.Model.apply(this, arguments);
-  },
-
+  routerBaseUrl: null
+}) {
   /**
    * Get the numeric id from the id string
    * @function app.models.base.BaseModel.getNumericId
@@ -32,7 +36,7 @@ var BaseModel = Backbone.Model.extend({
    * finds '30' if the id is 'local:ModelName/30'
    * @returns {number}
    */
-  getNumericId: function() {
+  getNumericId() {
     var re = /\d+$/;
     if (re.test(this.id)) {
       //Return the numeric part
@@ -44,9 +48,9 @@ var BaseModel = Backbone.Model.extend({
       //id's like "next_synthesis";
       return this.id;
     }
-  },
+  }
 
-  getCssClassFromId: function() {
+  getCssClassFromId() {
     var re = /^(\w+):(\w+)\/(\d+)$/;
     if (re.test(this.id)) {
       return this.id.replace(re, "$1-$2-$3");
@@ -54,7 +58,7 @@ var BaseModel = Backbone.Model.extend({
     else {
       return this.id;
     }
-  },
+  }
 
   /**
    * Get the innerText from the given `id` element
@@ -62,7 +66,7 @@ var BaseModel = Backbone.Model.extend({
    *
    * @param {string} id The script tag id
    */
-  fetchFromScriptTag: function(id, parse) {
+  fetchFromScriptTag(id, parse) {
     var json = null;
     try {
       json = Ctx.getJsonFromScriptTag(id);
@@ -75,13 +79,13 @@ var BaseModel = Backbone.Model.extend({
     } else {
       this.set(json);
     }
-  },
+  }
 
-  toScriptTag: function(id) {
+  toScriptTag(id) {
     Ctx.writeJsonToScriptTag(this.toJSON(), id);
-  },
+  }
 
-  url: function() {
+  url() {
     var base =
         _.result(this, 'urlRoot') ||
         _.result(this.collection, 'url');
@@ -92,40 +96,34 @@ var BaseModel = Backbone.Model.extend({
 
     if (this.isNew()) return base;
     return base.replace(/([^\/])$/, '$1/') + encodeURIComponent(this.getNumericId());
-  },
-
-  /**
-   * Overwriting the idAttribute
-   * @member {uri} app.models.base.BaseModel.idAttribute
-   */
-  idAttribute: '@id',
+  }
 
   /**
    * Alias for `.get('id') || .get('@id') || .cid`
    * @function app.models.base.BaseModel.getId
    * @returns {string}
    */
-  getId: function() {
+  getId() {
     return this.get('@id') || this.get('id') || this.cid;
-  },
+  }
 
-  getBEType: function() {
+  getBEType() {
     return this.get('@type');
-  },
+  }
 
-  getBaseType: function() {
+  getBaseType() {
     return Types.getBaseType(this.getBEType());
-  },
+  }
 
-  isInstance: function(type) {
+  isInstance(type) {
     return Types.isInstance(this.getBEType(), type);
-  },
+  }
 
   /**
    * Overwritting backbone's parse function
    * @returns {Object} [description]
    */
-  parse: function(resp, options) {
+  parse(resp, options) {
     var id = resp[this.idAttribute];
 
     if (resp['ok'] === true && id !== undefined) {
@@ -171,13 +169,7 @@ var BaseModel = Backbone.Model.extend({
     }
 
     return resp;
-  },
-
-  /**
-   * The base of the Router URL for this class. Set in app/router.js.
-   * 2015/11/25 Currently only defined on post, idea and users
-   */
-  routerBaseUrl: null,
+  }
 
   /**
    * Get the Router URL of an object
@@ -187,7 +179,7 @@ var BaseModel = Backbone.Model.extend({
    * @param {Object} options.parameters - Optional. Can pass in query string as an object. Eg. {'foo': 'bar', 'baz': 'cookie'}
    * @returns {String|null} The fully composed URL of the post/idea
   */
-  getRouterUrl: function(options){
+  getRouterUrl(options) {
     if (!this.id || this.routerBaseUrl === null) {
       return null;
     }
@@ -209,28 +201,20 @@ var BaseModel = Backbone.Model.extend({
       params
     );
   }
-
-});
+}
 
 /**
  * BaseCollection which should be used by ALL collections
  * @class app.models.base.BaseCollection
  */
-var BaseCollection = Backbone.Collection.extend({
-  /**
-   * Constructor
-   */
-  constructor: function BaseCollection() {
-    Backbone.Collection.apply(this, arguments);
-  },
-
+class BaseCollection extends Backbone.Collection {
   /**
    * Get the innerText from the given `id` element
    * Parses the json and execute `.reset` method in the collection
    *
    * @param {string} id The script tag id
    */
-  fetchFromScriptTag: function(id, parse) {
+  fetchFromScriptTag(id, parse) {
       var that = this;
 
       return Promise.delay(1).then(function() {
@@ -253,13 +237,13 @@ var BaseCollection = Backbone.Collection.extend({
         }
         return that;
       });
-    },
+    }
 
   /**
    * Find the model by the given cid
    * @returns {BaseModel}
    */
-  getByCid: function(cid) {
+  getByCid(cid) {
     var result = null;
     this.each(function(model) {
       if (model.cid === cid) {
@@ -267,7 +251,7 @@ var BaseCollection = Backbone.Collection.extend({
       }
     });
     return result;
-  },
+  }
 
   /**
    * Find the model by numeric id instead of string
@@ -276,7 +260,7 @@ var BaseCollection = Backbone.Collection.extend({
    * @param {number} id
    * @returns {BaseModel}
    */
-  getByNumericId: function(id) {
+  getByNumericId(id) {
     var re = new RegExp(id + '$');
     var i = 0;
     var model = this.models[i];
@@ -291,22 +275,22 @@ var BaseCollection = Backbone.Collection.extend({
     }
 
     return model;
-  },
+  }
 
   /**
    * Removes a model by the given id
    * @param  {string} id
    */
-  removeById: function(id) {
+  removeById(id) {
     var model = this.get(id);
     this.remove(model);
-  },
+  }
 
   /**
    * Updates the given model into the collection
    * @param {object} item
    */
-  updateFromSocket: function(item) {
+  updateFromSocket(item) {
     var model = this.get(item['@id']);
     var debug = Ctx.debugSocket;
     if (item['@tombstone']) {
@@ -346,9 +330,7 @@ var BaseCollection = Backbone.Collection.extend({
       console.log("updateFromSocket(): collection is now:", this);
     }
   }
-
-});
-
+}
 
 /**
  * Collection of relationships to objects which "exist" in another
@@ -356,13 +338,9 @@ var BaseCollection = Backbone.Collection.extend({
  * So add/remove should not create/delete object, but relation.
  * @class app.models.base.RelationsCollection
  */
-var RelationsCollection = BaseCollection.extend({
-  constructor: function RelationsCollection() {
-    BaseCollection.apply(this, arguments);
-  },
-
+class RelationsCollection extends BaseCollection {
   // Add a model, or list of models to the set.
-  add: function(models, options) {
+  add(models, options) {
     models = Backbone.Collection.prototype.add.apply(this, arguments);
     // use previousModels to detect whether called from reset
     if (options === undefined || options.previousModels === undefined) {
@@ -374,10 +352,10 @@ var RelationsCollection = BaseCollection.extend({
       });
     }
     return models;
-  },
+  }
 
   // Remove a model, or a list of models from the set.
-  remove: function(models, options) {
+  remove(models, options) {
     models = Backbone.Collection.prototype.remove.apply(this, arguments);
     //console.log(models);
     // use previousModels to detect whether called from reset
@@ -392,7 +370,7 @@ var RelationsCollection = BaseCollection.extend({
     }
     return models;
   }
-});
+}
 
 export default {
   Model: BaseModel,

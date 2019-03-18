@@ -14,17 +14,13 @@ import RoleModels from '../../models/roles.js';
 import LoaderView from '../loaderView.js';
 import Permissions from '../../utils/permissions.js';
 
-var userNavigationMenu = LoaderView.extend({
-  constructor: function userNavigationMenu() {
-    LoaderView.apply(this, arguments);
-  },
-
+class userNavigationMenu extends LoaderView.extend({
   template: '#tmpl-userNavigationMenu',
   tagName: 'nav',
   className: 'sidebar-nav',
-  selectedSection: undefined,
-
-  initialize: function(options) {
+  selectedSection: undefined
+}) {
+  initialize(options) {
     var that = this;
     var collectionManager = new CollectionManager();
 
@@ -44,9 +40,9 @@ var userNavigationMenu = LoaderView.extend({
           }
         });
     }
-  },
+  }
 
-  serializeData: function() {
+  serializeData() {
     if(this.isLoading()) {
       return {};
     }
@@ -57,7 +53,7 @@ var userNavigationMenu = LoaderView.extend({
       Roles: Roles,
       localRoles: this.localRoles
     };
-  },
-});
+  }
+}
 
 export default userNavigationMenu;
