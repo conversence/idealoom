@@ -93,7 +93,7 @@ class CrudPermissions(object):
             return True
         elif needed_owned in permissions:
             return MAYBE
-        if operation == CREATE:
+        if operation == self.CREATE:
             return False  # no maybe for create
         return self.variable
 

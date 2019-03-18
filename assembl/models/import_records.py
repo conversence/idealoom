@@ -2,6 +2,7 @@ from abc import abstractmethod
 import logging
 from collections import defaultdict
 from itertools import groupby
+from datetime import datetime, timedelta
 try:
     from urllib.parse import urljoin
 except ImportError:
@@ -23,6 +24,7 @@ from .uriref import URIRefDb
 from ..lib.sqla_types import URLString
 from .generic import ContentSource
 from .auth import AgentProfile
+from ..tasks.source_reader import PullSourceReader, ClientError, IrrecoverableError
 from .publication_states import PublicationState
 from ..lib.sqla import get_named_class, get_named_object, PromiseObjectImporter
 from ..lib.generic_pointer import (
@@ -61,7 +63,7 @@ class IdeaSource(ContentSource, PromiseObjectImporter):
 
     def load_previous_records(self):
         records = list(self.import_records)
-        records.sort(key=lambda r: r.target_table)
+        records.sort(key=lambda r: str(r.target_table))
         for (table_id, recs) in groupby(records, lambda r: r.target_table):
             recs = list(recs)
             cls = ImportRecord.target.property.type_mapper.value_to_class(table_id, None)
@@ -152,13 +154,7 @@ class IdeaSource(ContentSource, PromiseObjectImporter):
         self.load_previous_records()
 
     def read_data_gen(self, data_gen, admin_user_id):
-        # preload
-        waiting_for = defaultdict(list)
-        #
         ctx = self.discussion.get_instance_context(user_id=admin_user_id)
-        def resolve(id, instance):
-            pass
-
         for data in data_gen:
             ext_id = self.id_from_data(data)
             if not ext_id:
