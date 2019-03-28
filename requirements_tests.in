@@ -3,9 +3,9 @@ codecov==2.0.15
 mock==2.0.0
 pytest-cov==2.6.1
 pytest-localserver==0.5.0
-pytest-mock==1.10.1
+pytest-mock==1.10.2
 pytest-splinter==2.0.1
-pytest==4.3.0
+pytest==4.3.1
 WebTest==2.0.33
 
 # Do I still need this?
