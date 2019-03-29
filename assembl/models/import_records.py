@@ -5,10 +5,10 @@ from sqlalchemy import (
     UniqueConstraint, Unicode, Index)
 from sqlalchemy.orm import relationship
 
-from . import DiscussionBoundBase
+from . import DiscussionBoundBase, Base
 # from .generic import ContentSource
 from ..lib.generic_pointer import (
-    UniversalTableRefColType, generic_relationship)
+    UniversalTableRefColType, generic_relationship, init_datatype)
 
 
 log = logging.getLogger(__name__)
@@ -64,3 +64,7 @@ class ImportRecord(DiscussionBoundBase):
         if source_id:
             q = q.filter_by(source_id=None)
         return q
+
+
+def includeme(config):
+    init_datatype(Base)

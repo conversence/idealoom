@@ -40,13 +40,17 @@ class UniversalTableRefColType(UpdatablePgEnum):
         self._setup_for_values(values, objects, kw)
 
 
-def init_data(base_class, db=None):
+def init_datatype(base_class):
     from ..models.import_records import ImportRecord
-    db = db or base_class.default_db
-    bind = db.session_factory.kw['bind']
     BaseTableEnum.init_members(base_class)
     type = ImportRecord.__mapper__.columns['target_table'].type
     type.reset_enum()
+
+
+def init_dbtype(db):
+    from ..models.import_records import ImportRecord
+    bind = db.session_factory.kw['bind']
+    type = ImportRecord.__mapper__.columns['target_table'].type
     type.update_type(bind)
 
 

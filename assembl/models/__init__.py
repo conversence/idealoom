@@ -398,5 +398,5 @@ from .idea_source import (
 
 
 def includeme(config):
-    config.include('.langstrings')
+    config.include('.import_records')
     config.include('.preferences')

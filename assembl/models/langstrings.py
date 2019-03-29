@@ -871,8 +871,3 @@ class LangStringEntry(TombstonableMixin, Base):
 #     crud_permissions = CrudPermissions(
 #          P_TRANSLATE, P_READ, P_SYSADMIN, P_SYSADMIN,
 #          P_TRANSLATE, P_TRANSLATE)
-
-
-
-def includeme(config):
-    pass

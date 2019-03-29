@@ -55,15 +55,15 @@ def bootstrap_db_data(db, mark=True):
         return
     # import after session to delay loading of BaseOps
     from assembl.models import (
-        Base, Permission, Role, IdentityProvider, LocaleLabel, URIRefDb)
-    from .generic_pointer import init_data
+        Permission, Role, IdentityProvider, LocaleLabel, URIRefDb)
+    from .generic_pointer import init_dbtype
     from .database_functions import ensure_functions
     session = db()
     for cls in (Permission, Role, IdentityProvider, LocaleLabel, URIRefDb):
         cls.populate_db(session)
     ensure_functions(session)
     mark |= update_indices(session)
-    init_data(Base, db)
+    init_dbtype(db)
     if mark:
         mark_changed(session)
 
