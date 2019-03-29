@@ -14,7 +14,7 @@ from sqlalchemy.orm import (joinedload, subqueryload, undefer)
 from assembl.lib.parsedatetime import parse_datetime
 from assembl.models import (
     Idea, RootIdea, IdeaLink, Discussion,
-    Extract, SubGraphIdeaAssociation, LangString)
+    Extract, SubGraphIdeaAssociation, LangString, ImportRecord)
 from assembl.auth import (
     CrudPermissions, P_READ, P_ADD_IDEA, P_EDIT_IDEA, P_READ_IDEA,
     P_ASSOCIATE_IDEA)
@@ -186,6 +186,7 @@ def _get_ideas_real(request, view_def=None, ids=None, user_id=None,
         joinedload(Idea.title).subqueryload("entries"),
         joinedload(Idea.synthesis_title).subqueryload("entries"),
         joinedload(Idea.description).subqueryload("entries"),
+        joinedload(Idea.import_record),
         undefer(Idea.num_children))
 
     permissions = request.permissions

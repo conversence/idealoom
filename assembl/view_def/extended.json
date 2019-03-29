@@ -198,6 +198,8 @@
         "num_total_and_read_posts": true,
         "contributors": "&get_contributors:default",
         "widget_links": "&widget_link_signatures",
+        "imported_from_url": true,
+        "import_record": ":",
         "widget_add_post_endpoint": true
     },
     "RootIdea": {
@@ -213,6 +215,11 @@
         "source": true,
         "subtype": "rdf_type",
         "order": true
+    },
+    "ImportRecord": {
+      "source": true,
+      "external_id": true,
+      "target":true
     },
     "Map": {
         "created": "creation_date",

@@ -415,6 +415,12 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
             query, request.base_permissions, request.roles, clsAlias)
 
     @property
+    def imported_from_url(self):
+        record = self.import_record
+        if record:
+            return record.source.external_id_to_uri(record.external_id)
+
+    @property
     def widget_add_post_endpoint(self):
         # Only for api v2
         from pyramid.threadlocal import get_current_request

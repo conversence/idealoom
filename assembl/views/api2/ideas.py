@@ -1,10 +1,11 @@
 from pyramid.view import view_config
 from pyramid.httpexceptions import (
-    HTTPUnauthorized, HTTPBadRequest)
+    HTTPUnauthorized, HTTPBadRequest, HTTPFound)
 from pyramid.security import authenticated_userid, Everyone
 from sqlalchemy.orm import aliased
 
 from ..traversal import (InstanceContext, CollectionContext)
+from . import instance_view
 from assembl.auth import (CrudPermissions, P_READ, P_EDIT_IDEA)
 from assembl.lib.text_search import add_text_search
 from assembl.models import (
@@ -26,6 +27,18 @@ def instance_del(request):
 
     return {}
 
+
+@view_config(context=InstanceContext, request_method='GET',
+             ctx_instance_class=Idea, accept="text/html")
+def redirect_idea_html(request):
+    if request.accept.quality('text/html') > max(
+            request.accept.quality('application/json'),
+            request.accept.quality('application/ld+json')):
+        idea = request.context._instance
+        return HTTPFound(request.route_url(
+            'purl_idea', discussion_slug=idea.discussion.slug,
+            remainder='/'+str(idea.id)))
+    return instance_view(request)
 
 
 @view_config(context=InstanceContext, request_method='POST', renderer='json',

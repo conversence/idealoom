@@ -237,12 +237,25 @@ class IdeaLoomIdeaSource(IdeaSource):
             data['pub_state_name'] = self.target_state.name
         return data
 
+    def external_id_to_uri(self, external_id):
+        if '//' in external_id:
+            return external_id
+        if external_id.startswith('local:'):
+            return self.base_source_uri() + external_id[6:]
+        return external_id  # as urn?
+
+    def uri_to_external_id(self, uri):
+        base = self.base_source_uri()
+        if uri.startswith(base) and self.use_local:
+            uri = 'local:' + uri[len(base):]
+        return uri
+
     def normalize_id(self, id):
         id = self.id_from_data(id)
         if not id:
             return
         if id.startswith('local:') and not self.use_local:
-            return self.base_source_uri() + id[6:]
+            return self.external_id_to_uri(id)
         return super(IdeaLoomIdeaSource, self).normalize_id(id)
 
     def login(self, admin_user_id=None):
