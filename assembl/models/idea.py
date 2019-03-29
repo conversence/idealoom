@@ -200,9 +200,9 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
         PublicationState.id, ondelete="SET NULL", onupdate="CASCADE"))
 
     @declared_attr
-    def import_records(cls):
+    def import_record(cls):
         return relationship(
-            ImportRecord,
+            ImportRecord, uselist=False,
             primaryjoin=(remote(ImportRecord.target_id)==foreign(cls.id)) &
                         (ImportRecord.target_table == cls.__tablename__))
 
@@ -1425,6 +1425,13 @@ class IdeaLink(HistoryMixinWithOrigin, DiscussionBoundBase):
     order = Column(
         Float, nullable=False, default=0.0,
         info={'rdf': QuadMapPatternS(None, ASSEMBL.link_order)})
+
+    @declared_attr
+    def import_record(cls):
+        return relationship(
+            ImportRecord, uselist=False,
+            primaryjoin=(remote(ImportRecord.target_id)==foreign(cls.id)) &
+                        (ImportRecord.target_table == cls.__tablename__))
 
     rdf_type_db = relationship(URIRefDb)
 

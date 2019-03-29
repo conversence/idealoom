@@ -180,6 +180,9 @@ class ContextualNamedClassMixin(NamedClassMixin):
 from .uriref import (
     URIRefDb,
 )
+from .import_records import (
+    ImportRecord,
+)
 from .auth import (
     AbstractAgentAccount,
     AgentProfile,
@@ -386,7 +389,7 @@ from .announcement import (
     Announcement,
     IdeaAnnouncement,
 )
-from .import_records import (
+from .idea_source import (
     CatalystIdeaSource,
     IdeaSource,
     IdeaLoomIdeaSource,

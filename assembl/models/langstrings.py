@@ -13,14 +13,16 @@ from sqlalchemy.sql.expression import case
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import (
     relationship, backref, subqueryload, joinedload, aliased,
-    attributes)
+    attributes, remote, foreign)
 from sqlalchemy.orm.query import Query
 from sqlalchemy.orm.collections import attribute_mapped_collection
 from sqlalchemy.ext.hybrid import hybrid_method, hybrid_property
-from ..lib.sqla_types import CoerceUnicode
+from sqlalchemy.ext.declarative import declared_attr
 import simplejson as json
 
+from ..lib.sqla_types import CoerceUnicode
 from . import Base, TombstonableMixin
+from .import_records import ImportRecord
 from ..lib import config
 from ..lib.abc import classproperty
 from ..lib.locale import locale_ancestry, create_mt_code, locale_compatible
@@ -136,6 +138,13 @@ class LangString(Base):
         return Sequence(cls.id_sequence_name, schema=cls.metadata.schema)
 
     id = Column(Integer, primary_key=True)
+
+    @declared_attr
+    def import_record(cls):
+        return relationship(
+            ImportRecord, uselist=False,
+            primaryjoin=(remote(ImportRecord.target_id)==foreign(cls.id)) &
+                        (ImportRecord.target_table == cls.__tablename__))
 
     def as_jsonld(self, default_lang=None, use_map=False):
         entries = [e.as_jsonld(default_lang) for e in self.entries]
@@ -682,6 +691,13 @@ class LangStringEntry(TombstonableMixin, Base):
         doc="Type of error from the translation server")
     # tombstone_date = Column(DateTime) implicit from Tombstonable mixin
     value = Column(UnicodeText)  # not searchable in virtuoso
+
+    @declared_attr
+    def import_record(cls):
+        return relationship(
+            ImportRecord, uselist=False,
+            primaryjoin=(remote(ImportRecord.target_id)==foreign(cls.id)) &
+                        (ImportRecord.target_table == cls.__tablename__))
 
     def as_jsonld(self, default_lang=None):
         if self.locale in (default_lang, LocaleLabel.UNDEFINED):
