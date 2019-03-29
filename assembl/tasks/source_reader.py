@@ -604,6 +604,8 @@ if __name__ == '__main__':
         print_stack()
 
     configure(registry, 'source_reader')
+    from assembl.models.import_records import includeme
+    includeme(None)
     log.disabled = False
     url = (settings.get('celery_tasks.broker') or
            settings.get('celery_tasks.imap.broker'))
