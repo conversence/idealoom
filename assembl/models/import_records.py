@@ -18,12 +18,13 @@ class ImportRecord(DiscussionBoundBase):
     __tablename__ = 'import_record'
     __table_args__ = (
         UniqueConstraint('source_id', 'external_id'),
-        UniqueConstraint('source_id', 'target_id', 'target_table'),
+        UniqueConstraint('target_id', 'target_table'),
         Index('idx_import_record_target', 'target_id', 'target_table'))
 
     id = Column(Integer, primary_key=True)
     external_id = Column(Unicode, nullable=False)
-    source_id = Column(Integer, ForeignKey("idea_source.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False)
+    source_id = Column(Integer, ForeignKey(
+        "content_source.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=False)
     last_import_time = Column(DateTime, server_default="now()")
     target_id = Column(Integer, nullable=False)
     target_table = Column(UniversalTableRefColType(), nullable=False)
