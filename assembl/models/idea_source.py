@@ -151,8 +151,8 @@ class IdeaSource(ContentSource, PromiseObjectImporter):
     def read_data_gen(self, data_gen, admin_user_id):
         ctx = self.discussion.get_instance_context(user_id=admin_user_id)
         if self.parsed_data_filter:
-            data_gen = list(data_gen)
-            filtered = self.parsed_data_filter.find(data_gen)
+            filtered = [
+                x.value for x in self.parsed_data_filter.find(list(data_gen))]
             filtered_ids = {self.id_from_data(data) for data in filtered}
             for data in data_gen:
                 ext_id = self.id_from_data(data)
