@@ -198,7 +198,9 @@
         "num_total_and_read_posts": true,
         "contributors": "&get_contributors:default",
         "widget_links": "&widget_link_signatures",
+        "imported_from_id": true,
         "imported_from_url": true,
+        "imported_from_source_name": true,
         "import_record": ":",
         "widget_add_post_endpoint": true
     },

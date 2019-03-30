@@ -50,6 +50,9 @@ class IdeaModel extends Base.Model.extend({
     level: 0,
     inNextSynthesis: false,
     extra_permissions: [],
+    imported_from_id: null,
+    imported_from_url: null,
+    imported_from_source_name: null,
     order: 1,
     created: null
   }

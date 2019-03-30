@@ -355,7 +355,9 @@
         "widget_add_post_endpoint": true,
         "extra_permissions": "&extra_permissions",
         "pub_state_name": true,
+        "imported_from_id": true,
         "imported_from_url": true,
+        "imported_from_source_name": true,
         "attachments": [":default"]
     },
     "RootIdea": {

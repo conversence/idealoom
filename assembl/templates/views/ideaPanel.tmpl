@@ -26,6 +26,18 @@
         <div class="section-title">
           <i class="icon icon-info"></i><span class="title-text">{{ gettext('What you need to know') }}</span>
         </div>
+        <% if (imported_from_id.length) { %>
+          <div class="imported-from">
+            <% if (imported_from_url.length) {
+              print(i18n.sprintf(i18n.gettext("imported by %1$s from <a target='_blank' href='%2$s'>%3$s</a>"),
+                imported_from_source_name, id=imported_from_url, url=imported_from_id));
+            } else {
+              print(i18n.sprintf(i18n.gettext("imported by %1$s from %2$s"),
+                imported_from_source_name, url=imported_from_id));
+            } %>
+          </div>
+        <% } %>
+
         <div class="link_idea_type_description">
         <% if (canEdit) { %>
           <div class="sub-section-title">{{ gettext('Idea type') }}</div>
@@ -39,8 +51,12 @@
              <option value="<%= type %>" <%= selected %> ><%= description %></option>
              <% } %>
           </select>
-        <% } else { %>
-          <!-- span class="link_description"><%= linkTypeDescription %></span> → <span class="node_description"><%= nodeTypeDescription %></span -->
+        <% } else if (nodeTypeDescription) { %>
+          <div class="sub-section-title">{{ gettext('Idea type') }}</div>
+            <% if (linkTypeDescription) { %>
+              <span class="link_description"><%= linkTypeDescription %></span> →
+            <% } %>
+          <span class="node_description"><%= nodeTypeDescription %></span>
         <% } %>
         </div>
 

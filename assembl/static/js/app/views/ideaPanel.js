@@ -331,12 +331,18 @@ class IdeaPanel extends BasePanel.extend({
     var contributors = undefined;
     var pubStateName = null;
     var transitions = [];
+    var imported_from_source_name = null;
+    var imported_from_id = null;
+    var imported_from_url = null;
 
     if (this.model) {
       subIdeas = this.model.getChildren();
       canEdit = this.model.userCan(Permissions.EDIT_IDEA) || false;
       canDelete = this.model.userCan(Permissions.EDIT_IDEA);
       canAddExtracts = this.model.userCan(Permissions.ASSOCIATE_EXTRACT); //TODO: This is a bit too coarse
+      imported_from_source_name = this.model.get('imported_from_source_name');
+      imported_from_id = this.model.get('imported_from_id');
+      imported_from_url = this.model.get('imported_from_url');
       if (this.parentLink != undefined) {
         currentTypes = this.model.getCombinedSubtypes(this.parentLink);
         possibleTypes = this.model.getPossibleCombinedSubtypes(this.parentLink);
@@ -407,6 +413,9 @@ class IdeaPanel extends BasePanel.extend({
       currentTypes,
       possibleTypes,
       possibleTypeDescriptions,
+      imported_from_source_name,
+      imported_from_id,
+      imported_from_url,
       linkTypeDescription: currentTypeDescriptions[0],
       nodeTypeDescription: currentTypeDescriptions[1],
       share_link_url,
