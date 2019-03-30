@@ -26,9 +26,9 @@
         <div class="section-title">
           <i class="icon icon-info"></i><span class="title-text">{{ gettext('What you need to know') }}</span>
         </div>
-        <% if (imported_from_id.length) { %>
+        <% if (imported_from_id) { %>
           <div class="imported-from">
-            <% if (imported_from_url.length) {
+            <% if (imported_from_url) {
               print(i18n.sprintf(i18n.gettext("imported by %1$s from <a target='_blank' href='%2$s'>%3$s</a>"),
                 imported_from_source_name, id=imported_from_url, url=imported_from_id));
             } else {
