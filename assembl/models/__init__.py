@@ -393,7 +393,6 @@ from .idea_source import (
     CatalystIdeaSource,
     IdeaSource,
     IdeaLoomIdeaSource,
-    ImportRecord,
 )
 
 

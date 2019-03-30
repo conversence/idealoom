@@ -14,7 +14,7 @@ from sqlalchemy.orm import (joinedload, subqueryload, undefer)
 from assembl.lib.parsedatetime import parse_datetime
 from assembl.models import (
     Idea, RootIdea, IdeaLink, Discussion,
-    Extract, SubGraphIdeaAssociation, LangString, ImportRecord)
+    Extract, SubGraphIdeaAssociation, LangString)
 from assembl.auth import (
     CrudPermissions, P_READ, P_ADD_IDEA, P_EDIT_IDEA, P_READ_IDEA,
     P_ASSOCIATE_IDEA)

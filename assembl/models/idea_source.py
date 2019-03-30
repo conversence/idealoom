@@ -115,6 +115,7 @@ class IdeaSource(ContentSource, PromiseObjectImporter):
             return record.target
 
     def __setitem__(self, id, instance):
+        id = self.normalize_id(id)
         exists = id in self.instance_by_id
         super(IdeaSource, self).__setitem__(id, instance)
         if exists:
