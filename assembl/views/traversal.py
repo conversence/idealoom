@@ -86,11 +86,12 @@ class BaseContext(object):
         """Look in the context chain for a model instance of a given class"""
         return self.__parent__.get_instance_of_class(cls)
 
-    def get_permissions(self):
+    def get_permissions(self, discussion_id=None):
         """Get the permissions from the request, maybe altering on the way.
 
         See e.g. in :py:class:`assembl.models.widgets.IdeaCreatingWidget.BaseIdeaHidingCollection`"""
-        return self.__parent__.get_permissions()
+        discussion_id = discussion_id or self.get_discussion_id()
+        return self.__parent__.get_permissions(discussion_id)
 
     def __eq__(self, other):
         return (self.__class__ is other.__class__ and
@@ -201,12 +202,13 @@ class AppRoot(DictContext):
         if user is not None:
             yield user
 
-    def get_permissions(self):
+    def get_permissions(self, discussion_id=None):
         if self.user_id:
             if self._permissions is None:
                 from assembl.auth.util import get_permissions
+                discussion_id = discussion_id or self.get_discussion_id()
                 self._permissions = get_permissions(
-                    self.user_id, self.get_discussion_id())
+                    self.user_id, discussion_id)
             return self._permissions
         elif self.request:
             # only use request if it knows the user
@@ -658,9 +660,10 @@ class CollectionContext(TraversalContext):
         self.collection.on_new_instance(instance, self.parent_instance)
         super(CollectionContext, self).on_new_instance(instance)
 
-    def get_permissions(self):
+    def get_permissions(self, discussion_id=None):
+        discussion_id = discussion_id or self.get_discussion_id()
         permissions = super(
-            CollectionContext, self).get_permissions()
+            CollectionContext, self).get_permissions(discussion_id)
         new_permissions = self.collection.extra_permissions(permissions)
         if new_permissions:
             permissions = new_permissions.extend(permissions)
