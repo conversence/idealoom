@@ -24,7 +24,7 @@ from .import_records import ImportRecord
 from .idea import Idea, IdeaLink
 from ..tasks.source_reader import PullSourceReader, ClientError, IrrecoverableError
 from .publication_states import PublicationState
-from ..lib.sqla import get_named_class, PromiseObjectImporter
+from ..lib.sqla import get_named_class, PromiseObjectImporter, get_named_object
 from ..lib.utils import get_global_base_url
 
 
@@ -56,6 +56,9 @@ class IdeaSource(ContentSource, PromiseObjectImporter):
         self.parsed_data_filter = parse(self.data_filter) if self.data_filter else None
         self.global_url = get_global_base_url() + "/data/"
 
+    def base_source_uri(self):
+        return self.source_uri
+
     def load_previous_records(self):
         records = list(self.import_records)
         records.sort(key=lambda r: str(r.target_table))
@@ -67,6 +70,12 @@ class IdeaSource(ContentSource, PromiseObjectImporter):
             for r in recs:
                 eid = self.normalize_id(r.external_id)
                 self.instance_by_id[eid] = instance_by_id[r.target_id]
+        self.local_urls = {Idea.uri_generic(id, self.global_url) for (id,)
+            in self.db.query(Idea.id).filter_by(
+                discussion_id=self.discussion_id).all()}
+        self.local_urls.update({IdeaLink.uri_generic(id, self.global_url) for (id,)
+            in self.db.query(IdeaLink.id).join(Idea, IdeaLink.source_id==Idea.id).filter_by(
+                discussion_id=self.discussion_id).all()})
 
     def external_id_to_uri(self, external_id):
         if '//' in external_id:
@@ -94,6 +103,9 @@ class IdeaSource(ContentSource, PromiseObjectImporter):
         if isinstance(data, string_types):
             return data
         # TODO: array of ids...
+
+    def get_imported_from_in_data(self, data):
+        return None
 
     def normalize_id(self, id):
         id = self.id_from_data(id)
@@ -149,16 +161,29 @@ class IdeaSource(ContentSource, PromiseObjectImporter):
     def read(self, admin_user_id, base=None):
         self.load_previous_records()
 
-    def read_data_gen(self, data_gen, admin_user_id):
+    def read_data_gen(self, data_gen, admin_user_id, apply_filter=False):
         ctx = self.discussion.get_instance_context(user_id=admin_user_id)
-        if self.parsed_data_filter:
+        remainder = []
+        for data in data_gen:
+            ext_id = self.id_from_data(data)
+            if not ext_id:
+                continue
+            if ext_id in self:
+                continue
+            imported_from = self.get_imported_from_in_data(data)
+            if imported_from and imported_from in self.local_urls:
+                short_form = 'local:' + imported_from[len(self.global_url):]
+                target = get_named_object(short_form)
+                assert target
+                # do not create ImportRecord
+                PromiseObjectImporter.__setitem__(self, ext_id, target)
+                continue
+            remainder.append(data)
+        data_gen = remainder
+        if apply_filter and self.parsed_data_filter:
             filtered = [
-                x.value for x in self.parsed_data_filter.find(list(data_gen))]
+                x.value for x in self.parsed_data_filter.find(data_gen)]
             filtered_ids = {self.id_from_data(data) for data in filtered}
-            for data in data_gen:
-                ext_id = self.id_from_data(data)
-                if ext_id not in filtered_ids:
-                    self[ext_id] = None
             data_gen = filtered
         for data in data_gen:
             ext_id = self.id_from_data(data)
@@ -251,6 +276,9 @@ class IdeaLoomIdeaSource(IdeaSource):
             uri = 'local:' + uri[len(base):]
         return uri
 
+    def get_imported_from_in_data(self, data):
+        return data.get('imported_from_url', None)
+
     def normalize_id(self, id):
         id = self.id_from_data(id)
         if not id:
@@ -281,7 +309,7 @@ class IdeaLoomIdeaSource(IdeaSource):
         r = requests.get(self.source_uri, cookies=self.cookies)
         assert r.ok
         ideas = r.json()
-        self.read_json(ideas, admin_user_id)
+        self.read_json(ideas, admin_user_id, True)
         discussion_id = self.source_uri.split('/')[-2]
         link_uri = urljoin(
             self.source_uri,
@@ -301,7 +329,7 @@ class IdeaLoomIdeaSource(IdeaSource):
         if local_server:
             for oid in missing_oids:
                 loid = 'local:'+oid[len(self.global_url):]
-                self[oid] = AgentProfile.get_instance(loid)
+                PromiseObjectImporter.__setitem__(self, oid, AgentProfile.get_instance(loid))
         else:
             self.read_json([
                 requests.get(oid, cookies=self.cookies).json()
@@ -310,7 +338,7 @@ class IdeaLoomIdeaSource(IdeaSource):
         self.db.flush()
         self.add_missing_links()
 
-    def read_json(self, data, admin_user_id):
+    def read_json(self, data, admin_user_id, apply_filter=False):
         if isinstance(data, string_types):
             data = json.loads(data)
 
@@ -327,7 +355,7 @@ class IdeaLoomIdeaSource(IdeaSource):
                     for obj in find_objects(x):
                         yield obj
 
-        self.read_data_gen(find_objects(data), admin_user_id)
+        self.read_data_gen(find_objects(data), admin_user_id, apply_filter)
 
     def make_reader(self):
         return SimpleIdealoomReader(self.id)
