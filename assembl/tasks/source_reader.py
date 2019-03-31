@@ -14,7 +14,7 @@ from abc import ABCMeta, abstractmethod
 import logging
 from logging.config import fileConfig
 
-from future.utils import as_native_str
+from future.utils import as_native_str, with_metaclass
 from pyramid.paster import get_appsettings
 from zope.component import getGlobalSiteManager
 from kombu import BrokerConnection, Exchange, Queue
@@ -23,12 +23,12 @@ from kombu.utils.debug import setup_logging
 from sqlalchemy import event, inspect
 from sqlalchemy.exc import TimeoutError
 
-from assembl.tasks import configure
-from assembl.lib.raven_client import setup_raven, capture_exception
-from assembl.lib.config import set_config
-from assembl.lib.enum import OrderedEnum
-from assembl.lib.sqla import configure_engine
-from future.utils import with_metaclass
+from . import configure
+from ..lib.raven_client import setup_raven, capture_exception
+from ..lib.config import set_config
+from ..lib.enum import OrderedEnum
+from ..lib.sqla import configure_engine
+from ..lib.zmqlib import configure_zmq
 
 log = logging.getLogger(__name__)
 pool_counter = 0
@@ -604,6 +604,7 @@ if __name__ == '__main__':
         print_stack()
 
     configure(registry, 'source_reader')
+    configure_zmq(settings['changes_socket'], False)
     from assembl.models.import_records import includeme
     includeme(None)
     log.disabled = False
