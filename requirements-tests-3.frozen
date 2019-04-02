@@ -14,6 +14,7 @@
 -e git+https://github.com/assembl/pyramid_beaker.git@assembl#egg=pyramid_beaker
 -e git+https://github.com/conversence/sqlalchemy-rdfbridge.git#egg=sqlalchemy-rdfbridge
 -e git+https://github.com/maparent/sqlalchemy-utils.git@abstract_generic#egg=sqlalchemy_utils
+-e git+https://github.com/maparent/tornadio2.git@session_id_str#egg=tornadIO2
 alabaster==0.7.12         # via sphinx
 alembic==1.0.8
 amqp==2.4.2               # via kombu
@@ -191,8 +192,7 @@ sqlalchemy==1.2.18
 structlog==19.1.0
 termcolor==1.1.0
 tomako==0.1.0.post1
-tornadio2==0.0.3
-tornado==4.5.3            # via circus, tomako, tornadio2
+tornado==4.5.3            # via circus, tomako
 traitlets==4.3.2          # via ipython
 transaction==2.4.0
 translationstring==1.3
