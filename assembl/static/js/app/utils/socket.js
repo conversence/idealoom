@@ -4,8 +4,8 @@
  */
 
 import _ from 'underscore';
-
 import SockJS from 'sockjs-client';
+
 import App from '../app.js';
 import Ctx from '../common/context.js';
 
@@ -25,9 +25,6 @@ var Socket = function(connectCallback, collManager) {
 /**
  * @const
  */
-Socket.STATE_CLOSED = 0;
-Socket.STATE_CONNECTING = 1;
-Socket.STATE_OPEN = 2;
 Socket.RECONNECTION_WAIT_TIME = 5000;
 
 /**
@@ -45,7 +42,7 @@ Socket.prototype.init = function() {
   if (Ctx.debugSocket) {
     console.log("Socket::init() state is now STATE_CLOSED");
   }
-  this.state = Socket.STATE_CLOSED;
+  this.state = SockJS.CLOSED;
 };
 
 /**
@@ -64,7 +61,7 @@ Socket.prototype.onOpen = function(ev) {
   if (Ctx.debugSocket) {
     console.log("Socket::onOpen() state is now STATE_CONNECTING");
   }
-  this.state = Socket.STATE_CONNECTING;
+  this.state = SockJS.CONNECTING;
 };
 
 /**
@@ -85,13 +82,13 @@ Socket.prototype.onMessage = function(ev) {
   if (Ctx.debugSocket) {
     console.log("Socket::onMessage()");
   }
-  if (this.state === Socket.STATE_CONNECTING) {
+  if (this.state === SockJS.CONNECTING) {
     this.connectCallback(this);
     App.socket_vent.trigger('socket:open');
     if (Ctx.debugSocket) {
       console.log("Socket::onOpen() state is now STATE_OPEN");
     }
-    this.state = Socket.STATE_OPEN;
+    this.state = SockJS.OPEN;
   }
 
   var data = JSON.parse(ev.data);
@@ -116,7 +113,7 @@ Socket.prototype.onClose = function(ev) {
   if (Ctx.debugSocket) {
     console.log("Socket::onClose() state is now STATE_CLOSED");
   }
-  this.state = Socket.STATE_CLOSED;
+  this.state = SockJS.CLOSED;
   App.socket_vent.trigger('socket:close');
 
   var that = this;
