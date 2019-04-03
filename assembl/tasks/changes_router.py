@@ -1,27 +1,27 @@
 """This process obtains JSON representations of modified, created or deleted
 database objects through ZeroMQ, and feeds them to browser clients
 through a websocket."""
-from __future__ import print_function
 import signal
 import time
 import sys
 from os import makedirs, access, R_OK, W_OK
 from os.path import exists, dirname
 import configparser
-import traceback
 from time import sleep
 from datetime import timedelta
 import logging
+import multiprocessing
 import logging.config
+from functools import partial
 
 import asyncio
 from aiohttp import web, WSMsgType
+from aiohttp.web_runner import GracefulExit
 # import aiohttp_cors
 import sockjs
 import simplejson as json
 import zmq
 import zmq.asyncio
-from zmq.eventloop import zmqstream, ioloop
 from aiohttp_requests import requests
 
 # from assembl.lib.zmqlib import INTERNAL_SOCKET
@@ -47,12 +47,15 @@ def setup_async_loop():
 
 
 def setup_router(in_socket, out_socket):
+    original_sigint_handler = signal.signal(signal.SIGINT, signal.SIG_IGN)
     td = zmq.devices.ProcessDevice(zmq.FORWARDER, zmq.XSUB, zmq.XPUB)
     td.bind_in(in_socket)
     td.bind_out(out_socket)
     td.setsockopt_in(zmq.IDENTITY, b'XSUB')
     td.setsockopt_out(zmq.IDENTITY, b'XPUB')
     td.start()
+    signal.signal(signal.SIGINT, original_sigint_handler)
+    return td
 
 
 async def websocket_handler(request):
@@ -125,6 +128,7 @@ class ActiveSocket(object):
     discussion = None
     userId = None
     task = None
+    is_shutdown = False
 
     def on_open(self, request):
         self.valid = True
@@ -133,6 +137,23 @@ class ActiveSocket(object):
     @classmethod
     def by_session(cls, session):
         return cls.active_sockets.get(session.id, None)
+
+    @classmethod
+    async def do_shutdown(cls, app):
+        for session in list(cls.active_sockets.values()):
+            await session.close()
+        for session in app._state['__sockjs_managers__']['changes'].values():
+            session.expire()
+        await app.shutdown()
+        for task in list(asyncio.all_tasks()):
+            if task._coro.__name__ == 'do_shutdown':
+                continue
+            if task.done():
+                continue
+            if task.cancelled():
+                continue
+            task.cancel()
+
 
     async def on_recv(self, data):
         try:
@@ -156,7 +177,7 @@ class ActiveSocket(object):
             return
         self.valid = False
         self.active_sockets.pop(self.session.id, None)
-        if self.task and not self.task.cancelled:
+        if self.task and not self.task.cancelled():
             self.task.cancel()
         if self.raw_token and self.discussion and self.userId != Everyone:
             await requests.post('%s/data/Discussion/%s/all_users/%d/disconnecting' % (
@@ -223,16 +244,18 @@ class ActiveSocket(object):
 
     @staticmethod
     async def sockjs_handler(msg, session):
+        if msg.type == sockjs.MSG_CLOSED:
+            socket = ActiveSocket.by_session(session)
+            if socket:
+                await socket.close()
+        if ActiveSocket.is_shutdown:
+            return
         if msg.type == sockjs.MSG_OPEN:
             active_socket = ActiveSocket(session)
         elif msg.type == sockjs.MSG_MESSAGE:
             socket = ActiveSocket.by_session(session)
             if socket:
                 await socket.on_message(msg.data)
-        elif msg.type == sockjs.MSG_CLOSED:
-            socket = ActiveSocket.by_session(session)
-            if socket:
-                await socket.close()
 
 
 async def log_queue(zmq_context, out_socket):
@@ -246,6 +269,20 @@ async def log_queue(zmq_context, out_socket):
             log.debug(msg)
     finally:
         socket.close()
+
+
+def term(router, loop, app, *_ignore):
+    ActiveSocket.is_shutdown = True
+    router.launcher.terminate()
+    router.join()
+    signal.alarm(1)
+    if loop.is_running():
+        loop.create_task(ActiveSocket.do_shutdown(app))
+
+
+def raise_graceful_exit():
+    # why is it so hard to stop?
+    raise GracefulExit()
 
 
 if __name__ == '__main__':
@@ -279,11 +316,11 @@ if __name__ == '__main__':
     for socket_name in (in_socket, out_socket):
         if socket_name.startswith('ipc://'):
             socket_name = in_socket[6:]
-            dir = dirname(socket_name)
-            if not exists(dir):
-                makedirs(dir)
+            sdir = dirname(socket_name)
+            if not exists(sdir):
+                makedirs(sdir)
 
-    setup_router(in_socket, out_socket)
+    router = setup_router(in_socket, out_socket)
 
     for socket_name in (in_socket, out_socket):
         if socket_name.startswith('ipc://'):
@@ -301,20 +338,18 @@ if __name__ == '__main__':
     ActiveSocket.setup(zmq_context, token_secret, server_url, out_socket)
     app = setup_app('/socket', server_url, loop)
 
-    def term(*_ignore):
-        for task in asyncio.all_tasks():
-            task.cancel()
-        app.stop()
-        sys.exit(0)
-
-    signal.signal(signal.SIGTERM, term)
-
+    log_task = loop.create_task(log_queue(zmq_context, out_socket))
+    signal.signal(signal.SIGTERM, partial(term, router, loop, app))
+    signal.signal(signal.SIGINT, partial(term, router, loop, app))
+    loop.add_signal_handler(signal.SIGALRM, raise_graceful_exit)
     try:
-        loop.create_task(log_queue(zmq_context, out_socket))
-        web.run_app(app, port=websocket_port)
+        web.run_app(app, handle_signals=False, port=websocket_port)
+    except asyncio.CancelledError:
+        print("done")
     except KeyboardInterrupt:
-        term()
         raise
     except Exception:
         capture_exception()
         raise
+    finally:
+        loop.close()
