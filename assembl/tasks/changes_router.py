@@ -15,14 +15,13 @@ import logging.config
 from functools import partial
 
 import asyncio
-from aiohttp import web, WSMsgType
+from aiohttp import web, WSMsgType, ClientSession
 from aiohttp.web_runner import GracefulExit
 # import aiohttp_cors
 import sockjs
 import simplejson as json
 import zmq
 import zmq.asyncio
-from aiohttp_requests import requests
 
 # from assembl.lib.zmqlib import INTERNAL_SOCKET
 from assembl.lib.raven_client import setup_raven, capture_exception
@@ -111,11 +110,13 @@ class ActiveSocket(object):
     active_sockets = dict()
 
     @classmethod
-    def setup(cls, zmq_context, token_secret, server_url, out_socket_name):
+    def setup(cls, zmq_context, token_secret, server_url, out_socket_name, http_client, loop):
         cls.zmq_context = zmq_context
         cls.token_secret = token_secret
         cls.server_url = server_url
         cls.out_socket_name = out_socket_name
+        cls.http_client = http_client
+        cls.loop = loop
 
     def __init__(self, session):
         self.session = session
@@ -144,6 +145,7 @@ class ActiveSocket(object):
             await session.close()
         for session in app._state['__sockjs_managers__']['changes'].values():
             session.expire()
+        await cls.http_client.close()
         await app.shutdown()
         for task in list(asyncio.all_tasks()):
             if task._coro.__name__ == 'do_shutdown':
@@ -180,9 +182,11 @@ class ActiveSocket(object):
         if self.task and not self.task.cancelled():
             self.task.cancel()
         if self.raw_token and self.discussion and self.userId != Everyone:
-            await requests.post('%s/data/Discussion/%s/all_users/%d/disconnecting' % (
-                self.server_url, self.discussion, self.token['userId']
-                ), data={'token': self.raw_token})
+            async with self.http_client.post(
+                    '%s/data/Discussion/%s/all_users/%d/disconnecting' % (
+                        self.server_url, self.discussion, self.token['userId']
+                    ), json={'token': self.raw_token}) as resp:
+                await resp.text()
 
     async def on_message(self, msg):
         try:
@@ -203,21 +207,23 @@ class ActiveSocket(object):
                     pass
             if self.token and self.discussion:
                 # Check if token authorizes discussion
-                r = await requests.get(
+                async with self.http_client.get(
                     '%s/api/v1/discussion/%s/permissions/Conversation.R/u/%s' % (
-                        self.server_url, self.discussion, self.token['userId']
-                        ), headers={"Accept": "application/json"})
-                text = await r.text()
+                            self.server_url, self.discussion, self.token['userId']
+                        ), headers={"Accept": "application/json"}) as resp:
+                    text = await resp.text()
                 log.debug(text)
                 if text != 'true':
                     return
                 log.info("connected")
-                self.task = asyncio.create_task(self.connect())
+                self.task = self.loop.create_task(self.connect())
                 self.session.send('[{"@type":"Connection"}]')
                 if self.token and self.raw_token and self.discussion and self.userId != Everyone:
-                    await requests.post('%s/data/Discussion/%s/all_users/%d/connecting' % (
-                        self.server_url, self.discussion, self.token['userId']
-                        ), data={'token': self.raw_token})
+                    async with self.http_client.post(
+                            '%s/data/Discussion/%s/all_users/%d/connecting' % (
+                                self.server_url, self.discussion, self.token['userId']
+                            ), json={'token': self.raw_token}) as resp:
+                        await resp.text()
         except Exception:
             capture_exception()
             await self.close()
@@ -335,7 +341,8 @@ if __name__ == '__main__':
                 raise RuntimeError(socket_name + " cannot be accessed")
 
     zmq_context, loop = setup_async_loop()
-    ActiveSocket.setup(zmq_context, token_secret, server_url, out_socket)
+    http_client = ClientSession()
+    ActiveSocket.setup(zmq_context, token_secret, server_url, out_socket, http_client, loop)
     app = setup_app('/socket', server_url, loop)
 
     log_task = loop.create_task(log_queue(zmq_context, out_socket))

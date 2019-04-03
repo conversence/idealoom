@@ -28,9 +28,9 @@ backcall==0.1.0           # via ipython
 bcrypt==3.1.6             # via paramiko
 beautifulsoup4==4.7.1
 billiard==3.5.0.5         # via celery
-boto3==1.9.127            # via smart-open
+boto3==1.9.128            # via smart-open
 boto==2.49.0              # via smart-open
-botocore==1.12.127        # via boto3, s3transfer
+botocore==1.12.128        # via boto3, s3transfer
 bz2file==0.98             # via smart-open
 cachetools==3.1.0         # via google-auth, premailer
 celery==4.2.2
