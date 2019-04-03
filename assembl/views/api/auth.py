@@ -61,6 +61,13 @@ discussion_roles_for_user = Service(
     renderer='json', cors_policy=cors_policy
 )
 
+all_roles_for_user = Service(
+    name='all_roles_for_user',
+    path=API_DISCUSSION_PREFIX + '/roles/allfor/{user_id:.+}',
+    description="The per-discussion and global roles of a given user",
+    renderer='json', cors_policy=cors_policy
+)
+
 permissions_for_user = Service(
     name='permissions_for_user',
     path=API_DISCUSSION_PREFIX + '/permissions/u/{user_id:.+}',
@@ -207,6 +214,24 @@ def put_global_roles_for_user(request):
         session.add(UserRole(user=user, role=role))
     return {"added": list(roles - known_roles),
             "removed": list(known_roles - roles)}
+
+
+@all_roles_for_user.get(permission=P_READ)
+def get_discussion_roles_for_user(request):
+    discussion = request.context
+    user_id = request.matchdict['user_id']
+    user = User.get_instance(user_id)
+    db = Discussion.default_db
+    if not user:
+        raise HTTPNotFound("User id %d does not exist" % (user_id,))
+    rolenames = db.query(Role.name
+        ).join(LocalUserRole
+        ).filter(LocalUserRole.user == user,
+                 LocalUserRole.discussion_id == discussion.id
+        ).union(db.query(Role.name).join(
+            UserRole).filter(UserRole.user == user)).distinct()
+
+    return [x for (x,) in rolenames]
 
 
 @discussion_roles_for_user.get(permission=P_READ)
