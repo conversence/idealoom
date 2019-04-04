@@ -256,11 +256,16 @@ class IdeaLoomIdeaSource(IdeaSource):
         return urljoin(self.source_uri, '/data/')
 
     def process_data(self, data):
-        if data['@type'] == 'RootIdea':
+        dtype = data.get('@type', None)
+        if dtype == 'RootIdea':
             self[data['@id']] = self.discussion.root_idea
             return None
-        if data['@type'] == 'Idea':
+        if dtype == 'GenericIdeaNode':
             data['pub_state_name'] = self.target_state.name
+        elif dtype == 'DirectedIdeaRelation':
+            source = self.normalize_id(data['source'])
+            if source not in self.instance_by_id:
+                self[source] = self.discussion.root_idea
         return data
 
     def external_id_to_uri(self, external_id):
@@ -319,8 +324,7 @@ class IdeaLoomIdeaSource(IdeaSource):
         links = r.json()
         link_subset = [
             l for l in links
-            if self.normalize_id(l['source']) in self.instance_by_id and
-            self.normalize_id(l['target']) in self.instance_by_id]
+            if self.normalize_id(l['target']) in self.instance_by_id]
         self.read_json(link_subset, admin_user_id)
         missing_oids = list(self.promises_by_target_id.keys())
         missing_classes = {oid.split('/')[-2] for oid in missing_oids}
