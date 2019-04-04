@@ -216,8 +216,8 @@ def put_global_roles_for_user(request):
             "removed": list(known_roles - roles)}
 
 
-@all_roles_for_user.get(permission=P_READ)
-def get_discussion_roles_for_user(request):
+@all_roles_for_user.get()  # wide open for now, used by changes router
+def get_all_roles_for_user(request):
     discussion = request.context
     user_id = request.matchdict['user_id']
     user = User.get_instance(user_id)

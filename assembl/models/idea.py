@@ -1113,7 +1113,7 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
         creator_id = self.creator_id
         if creator_id:
             base.add(User.uri_generic(creator_id))
-        return base
+        return list(base)
 
     # def get_notifications(self):
     #     # Dead code?
