@@ -258,14 +258,15 @@ class IdeaLoomIdeaSource(IdeaSource):
     def process_data(self, data):
         dtype = data.get('@type', None)
         if dtype == 'RootIdea':
-            self[data['@id']] = self.discussion.root_idea
+            PromiseObjectImporter.__setitem__(self, self.normalize_id(data['@id']), self.discussion.root_idea)
             return None
         if dtype == 'GenericIdeaNode':
             data['pub_state_name'] = self.target_state.name
         elif dtype == 'DirectedIdeaRelation':
-            source = self.normalize_id(data['source'])
-            if source not in self.instance_by_id:
-                self[source] = self.discussion.root_idea
+            source_id = self.normalize_id(data['source'])
+            if source_id not in self.instance_by_id:
+                PromiseObjectImporter.__setitem__(self, source_id, self.discussion.root_idea)
+                self[source_id] = self.discussion.root_idea
         return data
 
     def external_id_to_uri(self, external_id):
