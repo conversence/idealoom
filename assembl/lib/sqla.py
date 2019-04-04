@@ -795,12 +795,31 @@ class BaseOps(object):
                     pyinspect.ismethod(m) or pyinspect.isfunction(m))
                     and m.__code__.co_argcount == 1))
         return cls._methods_by_class[cls]
+
     @classmethod
     def get_props_of(cls):
         if cls not in cls._props_by_class:
             cls._props_by_class[cls] = dict(pyinspect.getmembers(
                 cls, lambda p: pyinspect.isdatadescriptor(p)))
         return cls._props_by_class[cls]
+
+    @property
+    def imported_from_id(self):
+        record = getattr(self, 'import_record', None)
+        if record:
+            return record.external_id
+
+    @property
+    def imported_from_url(self):
+        record = getattr(self, 'import_record', None)
+        if record:
+            return record.source.external_id_to_uri(record.external_id)
+
+    @property
+    def imported_from_source_name(self):
+        record = getattr(self, 'import_record', None)
+        if record:
+            return record.source.name
 
     def generic_json(
             self, view_def_name='default', user_id=None,

@@ -374,6 +374,9 @@
         "source": true,
         "subtype": "rdf_type",
         "is_tombstone": true,
+        "imported_from_id": true,
+        "imported_from_url": true,
+        "imported_from_source_name": true,
         "order": true
     },
     "Map": {
