@@ -4,6 +4,7 @@
         "type": false,
         "@id": "self",
         "@type": "&external_typename",
+        "@private": "&principals_with_read_permission",
         "_default": false
     },
     "Permission": {

@@ -1998,6 +1998,16 @@ class BaseOps(object):
         """The user owns this ressource, and has more permissions."""
         return False
 
+    def principals_with_read_permission(self):
+        permissions = self.crud_permissions
+        if permissions.read == P_READ:
+            return None  # i.e. everyone
+        # make this into a protocol!
+        creator_id = getattr(self, 'creator_id', None)
+        if creator_id:
+            return [User.uri_generic(creator_id)]
+        return []
+
     @classmethod
     def restrict_to_owners(cls, query, user_id, alias=None):
         """filter query according to object owners"""
@@ -2335,8 +2345,9 @@ class Tombstone(object):
         self.typename = ob.external_typename()
         self.uri = ob.uri()
         self.extra_args = kwargs
-        if isinstance(ob, PrivateObjectMixin):
-            self.extra_args['@private'] = ob.get_user_uri()
+        privacy_info = ob.principals_with_read_permission()
+        if privacy_info:
+            self.extra_args['@private'] = privacy_info
 
     def generic_json(self, *vargs, **kwargs):
         args = {"@type": self.typename,

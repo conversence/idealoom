@@ -118,6 +118,21 @@ class DiscussionBoundBase(AbstractBase):
             duplicate_handling=duplicate_handling,
             object_importer=object_importer)
 
+    def principals_with_read_permission(self):
+        from ..auth import P_READ
+        from ..auth.util import roles_with_permission
+        from .auth import User
+        permissions = self.crud_permissions
+        if permissions.read == P_READ:
+            return None  # i.e. everyone
+        # TODO: CACHE!!!
+        base = roles_with_permission(self.get_discussion(), permissions.read)
+        # make this into a protocol!
+        creator_id = getattr(self, 'creator_id', None)
+        if creator_id:
+            base.append(User.uri_generic(creator_id))
+        return base
+
 
 class DiscussionBoundTombstone(Tombstone):
     "A :py:class:`assembl.lib.sqla.Tombstone` that is bound to a discussion"

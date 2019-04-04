@@ -33,6 +33,7 @@ log = logging.getLogger("assembl.tasks.changes_router")
 
 SECTION = 'app:idealoom'
 Everyone = 'system.Everyone'
+Authenticated = 'system.Authenticated'
 
 
 def setup_async_loop():
@@ -160,13 +161,17 @@ class ActiveSocket(object):
     async def on_recv(self, data):
         try:
             data = data[-1].decode('utf-8')
-            if '@private' in data:
+            if ("r:sysadmin" not in self.roles) and '@private' in data:
                 jsondata = json.loads(data)
-                jsondata = [x for x in jsondata
-                            if x.get('@private', self.userId) == self.userId]
-                if not jsondata:
+                allowed = []
+                for x in jsondata:
+                    if '@private' in x:
+                        if not self.roles.intersection(set(x['@private'])):
+                            continue
+                    allowed.append(x)
+                if not allowed:
                     return
-                data = json.dumps(jsondata)
+                data = json.dumps(allowed)
             self.session.send(data)
             log.debug('sent:'+data)
         except Exception:
@@ -216,6 +221,17 @@ class ActiveSocket(object):
                 if text != 'true':
                     return
                 log.info("connected")
+                if self.userId == Everyone:
+                    self.roles = {Everyone}
+                else:
+                    async with self.http_client.get(
+                        '%s/api/v1/discussion/%s/roles/allfor/%s' % (
+                                self.server_url, self.discussion, self.token['userId']
+                            ), headers={"Accept": "application/json"}) as resp:
+                        text = await resp.text()
+                        self.roles = set(json.loads(text))
+                        self.roles.add(Everyone)
+                        self.roles.add(Authenticated)
                 self.task = self.loop.create_task(self.connect())
                 self.session.send('[{"@type":"Connection"}]')
                 if self.token and self.raw_token and self.discussion and self.userId != Everyone:

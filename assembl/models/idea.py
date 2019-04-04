@@ -1113,6 +1113,26 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
         user_id = request.unauthenticated_userid
         return self.extra_permissions_for(user_id)
 
+    def principals_with_read_permission(self):
+        from ..auth.util import roles_with_permission
+        from .publication_states import StateDiscussionPermission
+        from .auth import User
+        # TODO: CACHE!!!
+        base = set(roles_with_permission(self.get_discussion(), P_READ_IDEA))
+        q = self.db.query(Role.name).join(StateDiscussionPermission
+            ).filter_by(discussion_id=self.discussion_id,
+                pub_state_id=self.pub_state_id
+            ).join(Permission).filter_by(name=P_READ_IDEA).all()
+        base.update((x for (x,) in q))
+        # stop caching here
+        base.update((local_role.get_user_uri()
+            for local_role in self.local_user_roles
+            if local_role.role_name in base))
+        creator_id = self.creator_id
+        if creator_id:
+            base.add(User.uri_generic(creator_id))
+        return base
+
     # def get_notifications(self):
     #     # Dead code?
     #     from .widgets import BaseIdeaWidgetLink
