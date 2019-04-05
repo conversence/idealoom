@@ -211,6 +211,9 @@ class TableLockCreationThread(Thread):
 class SimpleObjectImporter(object):
     def __init__(self, use_local=True):
         self.use_local = use_local
+        self.init_importer()
+
+    def init_importer(self):
         self.instance_by_id = {}
 
     def __getitem__(self, oid):
@@ -262,8 +265,8 @@ class SimpleObjectImporter(object):
 
 
 class PromiseObjectImporter(SimpleObjectImporter):
-    def __init__(self, use_local=True):
-        super(PromiseObjectImporter, self).__init__(use_local)
+    def init_importer(self):
+        super(PromiseObjectImporter, self).init_importer()
         self.promises_by_source = defaultdict(set)
         self.promises_by_target_id = defaultdict(list)
 

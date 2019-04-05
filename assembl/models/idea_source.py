@@ -52,9 +52,12 @@ class IdeaSource(ContentSource, PromiseObjectImporter):
 
     @reconstructor
     def init_on_load(self):
-        PromiseObjectImporter.__init__(self)
         self.parsed_data_filter = parse(self.data_filter) if self.data_filter else None
         self.global_url = get_global_base_url() + "/data/"
+
+    def init_importer(self):
+        super(IdeaSource, self).init_importer()
+        self.load_previous_records()
 
     def base_source_uri(self):
         return self.source_uri
@@ -159,7 +162,7 @@ class IdeaSource(ContentSource, PromiseObjectImporter):
 
     @abstractmethod
     def read(self, admin_user_id, base=None):
-        self.load_previous_records()
+        self.init_importer()
 
     def read_data_gen(self, data_gen, admin_user_id, apply_filter=False):
         ctx = self.discussion.get_instance_context(user_id=admin_user_id)
@@ -306,8 +309,9 @@ class IdeaLoomIdeaSource(IdeaSource):
         return True
 
     def read(self, admin_user_id=None):
-        local_server = self.source_uri.startswith(urljoin(self.global_url, '/'))
         admin_user_id = admin_user_id or self.discussion.creator_id
+        super(IdeaLoomIdeaSource, self).read(admin_user_id)
+        local_server = self.source_uri.startswith(urljoin(self.global_url, '/'))
         super(IdeaLoomIdeaSource, self).read(admin_user_id)
         last_login = getattr(self, '_last_login', None)
         if not last_login or datetime.now() - last_login > timedelta(days=1):
