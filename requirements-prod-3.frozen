@@ -27,14 +27,14 @@ babel==2.6.0
 backcall==0.1.0           # via ipython
 bcrypt==3.1.6             # via paramiko
 beautifulsoup4==4.7.1
-billiard==3.5.0.5         # via celery
-boto3==1.9.128            # via smart-open
+billiard==3.6.0.0         # via celery
+boto3==1.9.129            # via smart-open
 boto==2.49.0              # via smart-open
-botocore==1.12.128        # via boto3, s3transfer
+botocore==1.12.129        # via boto3, s3transfer
 bz2file==0.98             # via smart-open
 cachetools==3.1.0         # via google-auth, premailer
 cchardet==2.1.4
-celery==4.2.2
+celery==4.3.0
 certifi==2019.3.9         # via requests
 cffi==1.12.2              # via bcrypt, cryptography, pycares, pynacl
 chameleon==3.6.1          # via lingua
@@ -85,7 +85,7 @@ jedi==0.13.3              # via ipython
 jinja2==2.10
 jmespath==0.9.4           # via boto3, botocore
 jsonpath-ng==1.4.3
-kombu==4.3.0
+kombu==4.5.0
 lingua==4.13
 lxml==4.3.3
 mako==1.0.8               # via alembic, tomako
@@ -138,7 +138,7 @@ pyramid==1.10.2
 pystemmer==1.3.0
 python-dateutil==2.8.0
 python-editor==1.0.4      # via alembic
-python-json-logger==0.1.10
+python-json-logger==0.1.11
 python3-openid==3.1.0     # via social-auth-core
 python3-saml==1.5.0 ; python_version >= "3"
 pytz==2018.9
@@ -184,10 +184,10 @@ urllib3==1.24.1           # via botocore, requests
 uwsgitop==0.11
 venusian==1.2.0           # via cornice, pyramid
 verboselogs==1.7          # via property-manager, rotate-backups
-vine==1.3.0               # via amqp
+vine==1.3.0               # via amqp, celery
 wcwidth==0.1.7            # via prompt-toolkit
 webob==1.8.5
-werkzeug==0.15.1
+werkzeug==0.15.2
 xmlsec==1.3.3             # via python3-saml
 yarl==1.3.0               # via aiohttp
 zope.component==4.5
