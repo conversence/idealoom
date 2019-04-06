@@ -68,6 +68,7 @@ known_transitions = {
     ReaderStatus.PAUSED: {
         ReaderStatus.CLOSED,
         ReaderStatus.READING,
+        ReaderStatus.SHUTDOWN,
         ReaderStatus.WAIT_FOR_PUSH,
     },
     ReaderStatus.CLIENT_ERROR: {
@@ -474,11 +475,6 @@ class PullSourceReader(SourceReader):
 
     def do_close(self):
         pass
-
-    def read(self):
-        super(PullSourceReader, self).read()
-        if (self.status == ReaderStatus.PAUSED):
-            self.set_status(ReaderStatus.CLOSED)
 
 
 # Kombu communication. Does not work yet.
