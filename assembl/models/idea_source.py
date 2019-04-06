@@ -397,9 +397,7 @@ class SimpleIdealoomReader(PullSourceReader):
             self.source.read()
             sess.commit()
         except Exception as e:
-            print(e)
-            import pdb
-            pdb.post_mortem()
+            self.new_error(e)
 
 
 class CatalystIdeaSource(IdeaSource):

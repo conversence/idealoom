@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 from abc import ABCMeta, abstractmethod
 import logging
 from logging.config import fileConfig
+import pdb
 
 from future.utils import as_native_str, with_metaclass
 from pyramid.paster import get_appsettings
@@ -161,6 +162,7 @@ class SourceReader(with_metaclass(ABCMeta, Thread)):
         self.reimporting = False
         self.can_push = False  # Set to true for, eg, imap with polling.
         self.event = Event()
+        self.debug = False
 
     def set_status(self, status):
         lvl = logging.INFO if status in known_transitions[self.status] else logging.ERROR
@@ -196,6 +198,8 @@ class SourceReader(with_metaclass(ABCMeta, Thread)):
         import traceback
         from assembl.models import ContentSource
         log.error(traceback.format_exc())
+        if self.debug:
+            pdb.post_mortem()
         if not expected:
             capture_exception()
         status = status or reader_error.status
@@ -501,10 +505,11 @@ def external_shutdown():
 
 class SourceDispatcher(ConsumerMixin):
 
-    def __init__(self, connection):
+    def __init__(self, connection, debug=False):
         super(SourceDispatcher, self).__init__()
         self.connection = connection
         self.readers = {}
+        self.debug = debug
         log.disabled = False
 
     def get_consumers(self, Consumer, channel):
@@ -544,6 +549,7 @@ class SourceDispatcher(ConsumerMixin):
             if force_restart:
                 source.reset_errors()
             reader = source.make_reader()
+            reader.debug = self.debug
             self.readers[source_id] = reader
             if reader is None:
                 return False
@@ -577,9 +583,13 @@ def includeme(config):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        print("usage: python source_reader.py configuration.ini")
-    config_file_name = sys.argv[-1]
+    import argparse
+    parser = argparse.ArgumentParser(description='Process to read from sources')
+    parser.add_argument('--debug', '-d', action='store_true',
+                        help='enter debugger on exception')
+    parser.add_argument('config', help='configuration ini file')
+    args = parser.parse_args()
+    config_file_name = args.config
     settings = get_appsettings(config_file_name, 'idealoom')
     registry = getGlobalSiteManager()
     registry.settings = settings
@@ -611,7 +621,7 @@ if __name__ == '__main__':
     url = (settings.get('celery_tasks.broker') or
            settings.get('celery_tasks.imap.broker'))
     with BrokerConnection(url) as conn:
-        sourcedispatcher = SourceDispatcher(conn)
+        sourcedispatcher = SourceDispatcher(conn, args.debug)
         def shutdown(*args):
             sourcedispatcher.shutdown()
         signal.signal(signal.SIGTERM, shutdown)
