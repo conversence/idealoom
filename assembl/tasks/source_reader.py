@@ -397,6 +397,8 @@ class SourceReader(with_metaclass(ABCMeta, Thread)):
                 self.end_wait_for_push()
             except ReaderError as e:
                 self.new_error(e, min(e.status, ReaderStatus.CLIENT_ERROR))
+        if self.status == ReaderStatus.SHUTDOWN:
+            return
         self.set_status(ReaderStatus.CLOSED)
         try:
             self.do_close()
@@ -473,6 +475,10 @@ class PullSourceReader(SourceReader):
     def do_close(self):
         pass
 
+    def read(self):
+        super(PullSourceReader, self).read()
+        if (self.status == ReaderStatus.PAUSED):
+            self.set_status(ReaderStatus.CLOSED)
 
 
 # Kombu communication. Does not work yet.
