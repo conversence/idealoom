@@ -22,6 +22,15 @@
       </div>
     </div>
 
+  {#
+    <div class="control-group">
+      <label for="update_back_imports" class="control-label">{{ gettext("Update ideas that were imported from here") }}</label>
+      <div class="controls">
+        <input type="checkbox" id="update_back_imports" <% if (update_back_imports) { print("checked");} %> value="<%= update_back_imports %>">
+      </div>
+    </div>
+  #}
+
     <div class="control-group">
       <label for="target_state_label" class="control-label">{{ gettext("Target state") }}</label>
       <div class="controls">

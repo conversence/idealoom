@@ -110,6 +110,7 @@ class IdeaSourceEditView extends SourceViewBase.extend({
       name: this.$('#name').val(),
       source_uri: this.$('#source_uri').val(),
       data_filter: this.$('#data_filter').val(),
+      update_back_imports: this.$('#update_back_imports').prop('checked'),
       target_state_label: this.$('#target_state_label').val(),
     }
   }

@@ -1512,7 +1512,9 @@ class BaseOps(object):
                             log.error("this reference was present in two objects: "+val_id)
                     if existing:
                         assert isinstance(existing, Base)
-                        if val_id and val_id.startswith('local:') and existing.id and existing.uri() != val_id:
+                        if (val_id and val_id.startswith('local:') and
+                                existing.id and existing.uri() != val_id and
+                                existing != object_importer.get_object(val_id)):
                             # import pdb
                             # pdb.set_trace()
                             assert False, "conflict for %s: we have %s\nreplacing with %s" % (

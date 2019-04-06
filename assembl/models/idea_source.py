@@ -8,7 +8,7 @@ except ImportError:
     from urlparse import urljoin
 
 from sqlalchemy import (
-    Column, ForeignKey, Integer, String)
+    Column, ForeignKey, Integer, String, Boolean)
 from sqlalchemy.orm import relationship, reconstructor
 from future.utils import string_types
 import simplejson as json
@@ -41,6 +41,7 @@ class IdeaSource(ContentSource, PromiseObjectImporter):
 
     target_state = relationship(PublicationState)
     import_records = relationship(ImportRecord, backref="source")
+    update_back_imports = Column(Boolean)
 
     __mapper_args__ = {
         'polymorphic_identity': 'abstract_idea_source',
@@ -57,6 +58,7 @@ class IdeaSource(ContentSource, PromiseObjectImporter):
 
     def init_importer(self):
         super(IdeaSource, self).init_importer()
+        self.back_import_ids = set()
         self.load_previous_records()
 
     def base_source_uri(self):
@@ -73,6 +75,7 @@ class IdeaSource(ContentSource, PromiseObjectImporter):
             for r in recs:
                 eid = self.normalize_id(r.external_id)
                 self.instance_by_id[eid] = instance_by_id[r.target_id]
+        self.import_record_by_eid = {rec.external_id: rec for rec in records}
         self.local_urls = {Idea.uri_generic(id, self.global_url) for (id,)
             in self.db.query(Idea.id).filter_by(
                 discussion_id=self.discussion_id).all()}
@@ -171,8 +174,6 @@ class IdeaSource(ContentSource, PromiseObjectImporter):
             ext_id = self.id_from_data(data)
             if not ext_id:
                 continue
-            if ext_id in self:
-                continue
             imported_from = self.get_imported_from_in_data(data)
             if imported_from and imported_from in self.local_urls:
                 short_form = 'local:' + imported_from[len(self.global_url):]
@@ -180,7 +181,9 @@ class IdeaSource(ContentSource, PromiseObjectImporter):
                 assert target
                 # do not create ImportRecord
                 PromiseObjectImporter.__setitem__(self, ext_id, target)
-                continue
+                self.back_import_ids.add(ext_id)
+                if not self.update_back_imports:
+                    continue
             remainder.append(data)
         data_gen = remainder
         if apply_filter and self.parsed_data_filter:
@@ -192,24 +195,29 @@ class IdeaSource(ContentSource, PromiseObjectImporter):
             ext_id = self.id_from_data(data)
             if not ext_id:
                 continue
-            if ext_id in self:
-                continue
-            cls = self.class_from_data(data)
-            if not cls:
-                self[ext_id] = None
-                continue
             pdata = self.process_data(data)
             if not pdata:
                 continue
-            # Don't we need a CollectionCtx?
-            instance_ctx = cls.create_from_json(
-                pdata, ctx, object_importer=self, parse_def_name='import')
-            if instance_ctx:
-                instance = instance_ctx._instance
-                self[ext_id] = instance
-                if getattr(instance.__class__, 'pub_state', None):
-                    instance.pub_state = self.target_state
-                self.db.add(instance)
+            if ext_id in self:
+                if self.normalize_id(ext_id) in self.import_record_by_eid or (
+                        ext_id in self.back_import_ids and self.update_back_imports):
+                    target = self[ext_id]
+                    target.update_from_json(
+                        pdata, context=ctx, object_importer=self, parse_def_name='import')
+            else:
+                cls = self.class_from_data(data)
+                if not cls:
+                    self[ext_id] = None
+                    continue
+                # Don't we need a CollectionCtx?
+                instance_ctx = cls.create_from_json(
+                    pdata, ctx, object_importer=self, parse_def_name='import')
+                if instance_ctx:
+                    instance = instance_ctx._instance
+                    self[ext_id] = instance
+                    if getattr(instance.__class__, 'pub_state', None):
+                        instance.pub_state = self.target_state
+                    self.db.add(instance)
         if self.pending():
             self.resolve_pending()
         self.db.flush()

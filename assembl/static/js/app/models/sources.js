@@ -209,6 +209,7 @@ class IdeaSource extends Source {
     return _.extend(Source.prototype.defaults, {
       "source_uri": '',
       "data_filter": '',
+      "update_back_imports": false,
       "target_state_label": '',
     });
   }

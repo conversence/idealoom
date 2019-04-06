@@ -80,6 +80,7 @@
         "@extends": "Container",
         "source_uri": true,
         "data_filter": true,
+        "update_back_imports": true,
         "target_state_label": true
     },
     "IdeaLoomIdeaSource": {
