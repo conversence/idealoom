@@ -21,7 +21,7 @@ from sqlalchemy.ext.declarative import declared_attr
 import simplejson as json
 
 from ..lib.sqla_types import CoerceUnicode
-from . import Base, TombstonableMixin
+from . import Base, TombstonableMixin, CrudOperation
 from .import_records import ImportRecord
 from ..lib import config
 from ..lib.abc import classproperty
@@ -313,6 +313,16 @@ class LangString(Base):
             id, cls_name = data
             cls = [cls for (cls, _) in self._owning_relns if cls.__name__ == cls_name][0]
             return self.db.query(cls).filter_by(id=id).first()
+
+    def send_to_changes(self, connection, operation=CrudOperation.DELETE,
+                        discussion_id=None, view_def="changes"):
+        owner_object = self.get_owner_object()
+        if owner_object is not None:
+            owner_object.send_to_changes(
+                connection, operation, discussion_id, view_def)
+        else:
+            super(LangString, self).send_to_changes(
+                connection, operation, discussion_id, view_def)
 
     def user_can(self, user_id, operation, permissions):
         owner_object = self.get_owner_object()
@@ -850,6 +860,15 @@ class LangStringEntry(TombstonableMixin, Base):
         self.locale_identification_data = None
         self.error_code = None
         self.error_count = 0
+
+    def send_to_changes(self, connection, operation=CrudOperation.DELETE,
+                        discussion_id=None, view_def="changes"):
+        if self.langstring is not None:
+            self.langstring.send_to_changes(
+                connection, operation, discussion_id, view_def)
+        else:
+            super(LangStringEntry, self).send_to_changes(
+                connection, operation, discussion_id, view_def)
 
     def user_can(self, user_id, operation, permissions):
         if self.langstring is not None:

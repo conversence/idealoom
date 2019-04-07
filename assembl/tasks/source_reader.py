@@ -616,7 +616,7 @@ if __name__ == '__main__':
         print_stack()
 
     configure(registry, 'source_reader')
-    configure_zmq(settings['changes_socket'], False)
+    configure_zmq(settings['changes_socket'], True)
     from assembl.models.import_records import includeme
     includeme(None)
     log.disabled = False
