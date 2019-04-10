@@ -17,6 +17,7 @@ from jsonpath_ng.ext import parse
 import requests
 from requests.cookies import RequestsCookieJar as CookieJar
 
+from ..auth import P_ADMIN_DISC
 from ..lib.sqla_types import URLString
 from .generic import ContentSource
 from .auth import AgentProfile
@@ -202,8 +203,12 @@ class IdeaSource(ContentSource, PromiseObjectImporter):
                 if self.normalize_id(ext_id) in self.import_record_by_eid or (
                         ext_id in self.back_import_ids and self.update_back_imports):
                     target = self[ext_id]
+                    permissions = ctx.get_permissions()
+                    if P_ADMIN_DISC in permissions:
+                        permissions.append(target.crud_permissions.update_owned)
                     target.update_from_json(
-                        pdata, context=ctx, object_importer=self, parse_def_name='import')
+                        pdata, context=ctx, object_importer=self, permissions=permissions,
+                        parse_def_name='import')
             else:
                 cls = self.class_from_data(data)
                 if not cls:
