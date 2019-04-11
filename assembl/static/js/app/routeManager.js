@@ -34,6 +34,7 @@ import AdminImportSettings from './views/admin/adminImportSettings.js';
 import AdminTimeline from './views/admin/adminTimelineEvents.js';
 import PreferencesView from './views/preferencesView.js';
 import PermissionsView from  './views/admin/adminPermissions.js';
+import AdminIdeaPubFlow from  './views/admin/AdminIdeaPubFlow.js';
 import FirstIdeaToShowVisitor from './views/visitors/firstIdeaToShowVisitor.js';
 import i18n from './utils/i18n.js';
 import Analytics from './internal_modules/analytics/dispatcher.js';
@@ -208,6 +209,14 @@ class routeManager extends Marionette.Object {
     IdeaLoom.rootView.showChildView('headerRegions', new NavBar());
     if (this.userHaveAccess()) {
       var page = new PermissionsView();
+      IdeaLoom.rootView.showChildView('groupContainer', page);
+    }
+  }
+
+  adminIdeaPubFlow() {
+    IdeaLoom.rootView.showChildView('headerRegions', new NavBar());
+    if (this.userHaveAccess()) {
+      var page = new AdminIdeaPubFlow();
       IdeaLoom.rootView.showChildView('groupContainer', page);
     }
   }

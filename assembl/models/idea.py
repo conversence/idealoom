@@ -47,7 +47,7 @@ from .discussion import Discussion
 from .uriref import URIRefDb
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..auth import (
-    CrudPermissions, P_READ, P_ADMIN_DISC, P_EDIT_IDEA,
+    CrudPermissions, P_READ, P_ADMIN_DISC, P_EDIT_IDEA, P_SYSADMIN,
     P_ADD_IDEA, P_ASSOCIATE_IDEA, P_READ_IDEA, R_OWNER, MAYBE)
 from .permissions import (
     AbstractLocalUserRole, Role, Permission)
@@ -1044,28 +1044,68 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
             self.pub_state = state
             return old
 
+    def can_apply_transition(self, transition, user_id, base_permissions):
+        if transition.req_permission_name in base_permissions:
+            return True
+        return transition.req_permission_name in self.extra_permissions_for(user_id)
+
     def apply_transition(self, transition_name, user_id, permissions=None):
         flow = self.discussion.idea_publication_flow
         transition = PublicationTransition.getByName(name, parent_object=flow)
         assert transition, "Cannot find transition " + name
-        if not permissions:
-            from pyramid.threadlocal import get_current_request
-            request = get_current_request()
-            if request:
-                if request.main_target == this:
-                    permissions = request.permissions
-                else:
-                    permissions = list(set(request.base_permissions) + set(self.extra_permissions_for(user_id)))
-            else:
-                from assembl.auth.util import get_permissions
-                permissions = get_permissions(user_id, self.discussion_id, self)
+        if permissions is None:
+            permissions = self.all_permissions_for(user_id)
         if transition.req_permission_name not in permissions:
             raise HTTPUnauthorized("You need permission %s to apply transition %s" % (
                 transition.req_permission_name, transition.label))
-        if transition.source_id and transition.source_id != this.pub_state_id:
+        if transition.source_id and transition.source_id != self.pub_state_id:
             raise HTTPBadRequest("Transition %s applies to state %s, not %s" %(
-                transition.label, transition.source_label, this.pub_state_name))
-        this.pub_state_id = transition.target_id
+                transition.label, transition.source_label, self.pub_state_name))
+        self.pub_state_id = transition.target_id
+
+    def safe_set_pub_state(self, state_label, user_id=None, request=None):
+        if state_label == self.pub_state.label:
+            return True
+        assert self.discussion.idea_publication_flow
+        if request is None:
+            from pyramid.threadlocal import get_current_request
+            request = get_current_request()
+        assert user_id or request, "Please call with a request or user_id"
+        if not user_id:
+            user_id = request.user.id
+        permissions = self.all_permissions_for(user_id, request)
+        if P_SYSADMIN in permissions or P_ADMIN_DISC in permissions:
+            state = self.discussion.idea_publication_flow.state_by_label(state_label)
+            assert state, "No such state"
+            self.pub_state = state
+            return True
+        # look for a transition chain that can lead you to target state.
+        new_states = {self.pub_state}
+        known_states = set()
+        while new_states:
+            state = new_states.pop()
+            for transition in state.transitions_to:
+                if transition.req_permission_name in permissions:
+                    if transition.target.label == state_label:
+                        self.pub_state = transition.target
+                        return True
+                    new_states.add(transition.target)
+            known_states.add(state)
+            new_states -= known_states
+        return False
+
+    def all_permissions_for(self, user_id, request=None):
+        if request is None:
+            from pyramid.threadlocal import get_current_request
+            request = get_current_request()
+        if request:
+            if request.main_target == self:
+                return request.permissions
+            else:
+                return list(set(request.base_permissions) | set(self.extra_permissions_for(user_id)))
+        else:
+            from assembl.auth.util import get_permissions
+            return get_permissions(user_id, self.discussion_id, self)
 
     def extra_permissions_for(self, user_id):
         from assembl.auth.util import get_permissions, permissions_for_state

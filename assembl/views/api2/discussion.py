@@ -57,7 +57,7 @@ from assembl.auth import (
     R_ADMINISTRATOR)
 from assembl.auth.password import verify_data_token, data_token, Validity
 from assembl.auth.util import get_permissions
-from assembl.models import (Discussion, Permission)
+from assembl.models import (Discussion, Permission, PublicationFlow)
 from assembl.models.permissions import create_default_permissions
 from ..traversal import InstanceContext, ClassContext
 from . import (JSON_HEADER, FORM_HEADER, CreationResponse, instance_view)
@@ -258,6 +258,26 @@ def user_private_view_jsonld(request):
     else:
         content_type = "application/ld+json"
     return Response(body=jdata, content_type=content_type, charset="utf-8")
+
+
+@view_config(context=InstanceContext, name="bulk_idea_pub_state_transition",
+             ctx_instance_class=Discussion, request_method='POST',
+             permission=P_ADMIN_DISC)
+def bulk_change_idea_pub_state(request):
+    discussion = request.context._instance
+    content = request.json
+    flow = discussion.idea_publication_flow
+    if content['flow']:
+        flow = PublicationFlow.getByName(content['flow'])
+        if not flow:
+            raise HTTPBadRequest('flow does not exist')
+    if flow != discussion.idea_publication_flow:
+        discussion.reset_idea_publication_flow(
+            content['flow'], None, content['changes'])
+    else:
+        discussion.bulk_change_publication_states(
+            content['changes'], request.context.get_user_id())
+    return HTTPOk()
 
 
 JSON_MIMETYPE = 'application/json'

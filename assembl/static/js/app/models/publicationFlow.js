@@ -50,6 +50,15 @@ class publicationFlowModel extends Base.Model.extend({
      * check typeof variable
      * */
   }
+
+  nameOrLabel(langPrefs) {
+    const name = this.get('name');
+    if (name) {
+      return name.bestValue(langPrefs);
+    } else {
+      return this.get('label');
+    }
+  }
 }
 
 /**
@@ -61,7 +70,7 @@ class publicationFlowCollection extends Base.Collection.extend({
   /**
    * @member {string} app.models.publicationFlow.publicationFlowCollection.url
    */
-  url: Ctx.getApiV2Url(Types.PUBLICATION_FLOW)+"?view=changes",
+  url: Ctx.getApiV2Url(Types.PUBLICATION_FLOW)+"?view=extended",
 
   /**
    * The model

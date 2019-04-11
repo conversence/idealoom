@@ -31,6 +31,7 @@ class Router extends Marionette.AppRouter.extend({
     "about": "about",
     "discussion_preferences": "adminDiscussionPreferences",
     "permissions": "adminDiscussionPermissions",
+    "idea_pub_flow": "adminIdeaPubFlow",
     "sentrytest": "sentryTest",
     "user/notifications": "userNotifications",
     "user/profile": "profile",

@@ -259,19 +259,26 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
             if idea.pub_state_id == transition.source_id:
                 idea.pub_state_id = transition.target_id
 
+    def bulk_change_publication_states(self, changes, user_id, permissions=None):
+        for idea in self.ideas:
+            dest = changes.get(idea.pub_state_name, None)
+            if dest:
+                assert idea.safe_set_pub_state(dest, user_id)
+
     def reset_idea_publication_flow(self, new_flow_name, default_state_name, correspondances=None):
+        # this should only be done by sysadmin or discussion_admin
         correspondances = correspondances or {}
         new_flow = PublicationFlow.getByName(new_flow_name)
         assert new_flow, "No publication flow named " + new_flow_name
         old_flow = self.idea_publication_flow
-        assert default_state, "Please specify default state"
         for idea in self.ideas:
             source_name = idea.pub_state_name
             target_name = correspondances.get(source_name, default_state_name)
+            assert target_name, "Please specify all states or a default"
             target_state = new_flow.state_by_label(target_name)
             assert target_state, "Could not find target state %s in flow %s" % (
                 target_name, new_flow_name)
-            idea.publication_state = target_state
+            idea.pub_state = target_state
         self.idea_publication_flow = new_flow
 
     @classmethod

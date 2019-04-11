@@ -1,0 +1,63 @@
+<div class="grid-pad">
+  <div class="admin-permissions admin-panel">
+    <div class="col-3-12 navigation-menu-holder"></div>
+    <div class="col-9-12 admin-section">
+      <section class="section">
+        <div class="admin-title">
+          <h3 class="h3">{{ gettext('Idea Publication Flow') }}</h3>
+        </div>
+        <div id="content-container" class="content-container">
+          <form class="core-form form-horizontal">
+            <h4><span  style="font-weight: normal;">{{gettext('Current flow:')}} </span><span id="js-current-flow-name"><%= (currentFlow) ? currentFlow.nameOrLabel(langPrefs):i18n.gettext('None') %></span></h4>
+            <p>{{gettext('Next flow:')}}
+              <select id="next_flow">
+                <% flowCollection.each(function(flow) { %>
+                  <option value="<%= flow.get('label') %>"
+                    <% if (flow==nextFlow) {print('selected')} %>
+                    ><%= flow.nameOrLabel(langPrefs) %></option>
+                <% }); %>
+              </select>
+            </p>
+            <h4>{{gettext('States:')}}</h4>
+            <% currentStates.each(function(state) {
+              var label = state.get('label');
+              var count = ideaCounts[label] || 0;
+              var nextStateLabel = nextStateMap[label];
+             %>
+            <h5><%= state.nameOrLabel(langPrefs) %></h5>
+            <p><%= i18n.sprintf(i18n.ngettext('%d idea', '%d ideas', count), count) %>
+            <% if (count) { %>
+            : {{gettext('convert to')}}
+              <select id="state-<%= label %>-convert" class="js-next-state">
+                <% nextStates.each(function(nextState) {
+                  var nextLabel = nextState.get('label'); %>
+                    <option value="<%= nextLabel %>"
+                    <% if (nextLabel==nextStateLabel) {print('selected')} %>
+                    ><%= nextState.nameOrLabel(langPrefs) %></option>
+            <%  });%>
+              </select>
+              <%  } %>
+              </p>
+            <% }); %>
+            <% if (ideaCounts[null]) {
+              var count = ideaCounts[null] || 0;
+              var nextStateLabel = nextStateMap[null];
+             %>
+            <h5>{{gettext('Stateless')}}</h5>
+            <p><%= i18n.sprintf(i18n.ngettext('%d idea', '%d ideas', count), count) %> : {{gettext('convert to')}}
+              <select id="state-null-convert" class="js-next-state">
+                <% nextStates.each(function(nextState) {
+                  var nextLabel = nextState.get('label'); %>
+                    <option value="<%= nextLabel %>"
+                    <% if (nextLabel==nextStateLabel) {print('selected')} %>
+                    ><%= nextState.nameOrLabel(langPrefs) %></option>
+            <%  });%>
+              </select></p>
+            <%  } %>
+            <button class="btn btn-primary js_save" type="submit">{{ gettext("Save changes") }}</button>
+          </form>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>

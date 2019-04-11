@@ -285,6 +285,7 @@
         "order": false,
         "parentId": false,
         "parents": false,
+        "pub_state_name": "&safe_set_pub_state",
         "widget_links": true
     },
     "RootIdea": {

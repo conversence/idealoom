@@ -20,6 +20,9 @@
   <li <% if (selectedSection == 'permissions'){ %>class="active"<% } %>>
     <a href="#permissions" class="menu">{{ gettext('Edit permissions') }}</a>
   </li>
+  <li <% if (selectedSection == 'ideaPubFlow'){ %>class="active"<% } %>>
+    <a href="#idea_pub_flow" class="menu">{{ gettext('Edit Idea Publication Flow') }}</a>
+  </li>
   <li class="mtxl">
     <a href="{{ get_route('home') }}">{{ gettext('Return to the discussion') }}</a>
   </li>

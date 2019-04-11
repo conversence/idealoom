@@ -39,6 +39,7 @@ class FrontendUrls(object):
         'about': '/about',
         'admin_discussion_preferences': '/discussion_preferences',
         'admin_discussion_permissions': '/permissions',
+        'admin_discusion_idea_pub_flow': '/idea_pub_flow',
         'notifications': '/notifications',
         'user_notifications': '/user/notifications',
         'profile': '/user/profile',
