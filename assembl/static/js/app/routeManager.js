@@ -34,7 +34,7 @@ import AdminImportSettings from './views/admin/adminImportSettings.js';
 import AdminTimeline from './views/admin/adminTimelineEvents.js';
 import PreferencesView from './views/preferencesView.js';
 import PermissionsView from  './views/admin/adminPermissions.js';
-import AdminIdeaPubFlow from  './views/admin/AdminIdeaPubFlow.js';
+import AdminIdeaPubFlow from  './views/admin/adminIdeaPubFlow.js';
 import FirstIdeaToShowVisitor from './views/visitors/firstIdeaToShowVisitor.js';
 import i18n from './utils/i18n.js';
 import Analytics from './internal_modules/analytics/dispatcher.js';
