@@ -1608,6 +1608,20 @@ class IdeaLink(HistoryMixinWithOrigin, DiscussionBoundBase):
         return ((idea_link.source_id == source_idea.id),
                 (source_idea.discussion_id == discussion_id))
 
+    def user_can(self, user_id, operation, permissions):
+        result = super(IdeaLink, self).user_can(user_id, operation, permissions)
+        if operation != CrudOperation.CREATE and not result:
+            user_id = user_id or Everyone
+            perm, owner_perm = self.crud_permissions.crud_permissions(operation)
+            local_perms = self.target.local_permissions(user_id)
+            if perm in local_perms:
+                return perm
+            is_owner = self.target.is_owner(user_id)
+            if is_owner and owner_perm in local_perms:
+                return owner_perm
+            return False
+        return result
+
     crud_permissions = CrudPermissions(
         P_ADD_IDEA, P_READ, P_ASSOCIATE_IDEA, P_ASSOCIATE_IDEA)
 
