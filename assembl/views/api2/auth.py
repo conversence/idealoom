@@ -586,6 +586,8 @@ def set_user_dis_connected(request, connecting):
     token = request.POST.get('token')
     # see if token corresponds to user
     user = ctx.get_instance_of_class(User)
+    if not token:
+        raise HTTPUnauthorized()
     try:
         token = decode_token(token, TOKEN_SECRET)
         assert token['userId'] == user.id

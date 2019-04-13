@@ -203,7 +203,8 @@ class SourceReader(with_metaclass(ABCMeta, Thread)):
             pdb.post_mortem()
         if not expected:
             capture_exception()
-        status = status or reader_error.status
+        status = status or getattr(
+            reader_error, 'status', ReaderStatus.TRANSIENT_ERROR)
         if status != self.last_error_status:
             # Counter-intuitive, but either lighter or more severe errors
             # reset the count.
