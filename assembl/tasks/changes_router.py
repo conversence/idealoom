@@ -166,7 +166,8 @@ class ActiveSocket(object):
                 allowed = []
                 for x in jsondata:
                     if '@private' in x:
-                        if not self.roles.intersection(set(x['@private'])):
+                        private = x['@private']
+                        if private is not None and not self.roles.intersection(set(private)):
                             continue
                     allowed.append(x)
                 if not allowed:
