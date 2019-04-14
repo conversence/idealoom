@@ -32,24 +32,20 @@ from ..lib.utils import get_global_base_url
 log = logging.getLogger(__name__)
 
 
-class IdeaSource(ContentSource, PromiseObjectImporter):
-    __tablename__ = 'idea_source'
+class ImportRecordSource(ContentSource, PromiseObjectImporter):
+    __tablename__ = 'import_record_source'
     id = Column(Integer, ForeignKey(ContentSource.id), primary_key=True)
     source_uri = Column(URLString, nullable=False)
     data_filter = Column(String)  # jsonpath-based, assuming json data
-    target_state_id = Column(Integer, ForeignKey(
-        PublicationState.id, ondelete="SET NULL", onupdate="CASCADE"))
-
-    target_state = relationship(PublicationState)
     import_records = relationship(ImportRecord, backref="source")
     update_back_imports = Column(Boolean)
 
     __mapper_args__ = {
-        'polymorphic_identity': 'abstract_idea_source',
+        'polymorphic_identity': 'import_record_source',
     }
 
     def __init__(self, *args, **kwargs):
-        super(IdeaSource, self).__init__(*args, **kwargs)
+        super(ImportRecordSource, self).__init__(*args, **kwargs)
         self.init_on_load()
 
     @reconstructor
@@ -58,7 +54,7 @@ class IdeaSource(ContentSource, PromiseObjectImporter):
         self.global_url = get_global_base_url() + "/data/"
 
     def init_importer(self):
-        super(IdeaSource, self).init_importer()
+        super(ImportRecordSource, self).init_importer()
         self.back_import_ids = set()
         self.load_previous_records()
 
@@ -77,12 +73,6 @@ class IdeaSource(ContentSource, PromiseObjectImporter):
                 eid = self.normalize_id(r.external_id)
                 self.instance_by_id[eid] = instance_by_id[r.target_id]
         self.import_record_by_eid = {rec.external_id: rec for rec in records}
-        self.local_urls = {Idea.uri_generic(id, self.global_url) for (id,)
-            in self.db.query(Idea.id).filter_by(
-                discussion_id=self.discussion_id).all()}
-        self.local_urls.update({IdeaLink.uri_generic(id, self.global_url) for (id,)
-            in self.db.query(IdeaLink.id).join(Idea, IdeaLink.source_id==Idea.id).filter_by(
-                discussion_id=self.discussion_id).all()})
 
     def external_id_to_uri(self, external_id):
         if '//' in external_id:
@@ -118,14 +108,14 @@ class IdeaSource(ContentSource, PromiseObjectImporter):
         id = self.id_from_data(id)
         if not id:
             return
-        id = super(IdeaSource, self).normalize_id(id)
+        id = super(ImportRecordSource, self).normalize_id(id)
         if id.startswith('local:'):
             return self.source_uri + id[6:]
         return id
 
     def get_object(self, id, default=None):
         id = self.normalize_id(id)
-        instance = super(IdeaSource, self).get_object(id, default)
+        instance = super(ImportRecordSource, self).get_object(id, default)
         if instance:
             return instance
         record = self.db.query(ImportRecord).filter_by(
@@ -136,26 +126,11 @@ class IdeaSource(ContentSource, PromiseObjectImporter):
     def __setitem__(self, id, instance):
         id = self.normalize_id(id)
         exists = id in self.instance_by_id
-        super(IdeaSource, self).__setitem__(id, instance)
+        super(ImportRecordSource, self).__setitem__(id, instance)
         if exists:
             return
         self.db.add(ImportRecord(
             source=self, target=instance, external_id=id))
-
-    @property
-    def target_state_label(self):
-        if self.target_state:
-            return self.target_state.label
-
-    @target_state_label.setter
-    def target_state_label(self, label):
-        if not label:
-            self.target_state = None
-            return
-        assert self.discussion.idea_publication_flow
-        target_state = self.discussion.idea_publication_flow.state_by_label(label)
-        assert target_state
-        self.target_state = target_state
 
     @abstractmethod
     def class_from_data(self, data):
@@ -219,9 +194,7 @@ class IdeaSource(ContentSource, PromiseObjectImporter):
                     pdata, ctx, object_importer=self, parse_def_name='import')
                 if instance_ctx:
                     instance = instance_ctx._instance
-                    self[ext_id] = instance
-                    if getattr(instance.__class__, 'pub_state', None):
-                        instance.pub_state = self.target_state
+                    self.process_new_object(instance)
                     self.db.add(instance)
         if self.pending():
             self.resolve_pending()
@@ -231,6 +204,27 @@ class IdeaSource(ContentSource, PromiseObjectImporter):
     def resolve_pending(self):
         """resolve any pending reference, may require queries. May fail."""
         pass
+
+    def process_new_object(self, instance):
+        self[ext_id] = instance
+
+
+class IdeaSource(ImportRecordSource):
+    __tablename__ = 'idea_source'
+    id = Column(Integer, ForeignKey(ImportRecordSource.id), primary_key=True)
+    target_state_id = Column(Integer, ForeignKey(
+        PublicationState.id, ondelete="SET NULL", onupdate="CASCADE"))
+
+    target_state = relationship(PublicationState)
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'abstract_idea_source',
+    }
+
+    def process_new_object(self, instance):
+        if getattr(instance.__class__, 'pub_state', None):
+            instance.pub_state = self.target_state
+        super(IdeaSource, self).process_new_object(instance)
 
     def add_missing_links(self):
         # add links from discussion root to roots of idea subtrees
@@ -242,6 +236,30 @@ class IdeaSource(ContentSource, PromiseObjectImporter):
             self.db.add(IdeaLink(source_id=root_id, target_id=id))
         self.db.flush()
         # Maybe tombstone objects that had import records and were not reimported or referred to?
+
+    def load_previous_records(self):
+        super(IdeaSource, self).load_previous_records()
+        self.local_urls = {Idea.uri_generic(id, self.global_url) for (id,)
+            in self.db.query(Idea.id).filter_by(
+                discussion_id=self.discussion_id).all()}
+        self.local_urls.update({IdeaLink.uri_generic(id, self.global_url) for (id,)
+            in self.db.query(IdeaLink.id).join(Idea, IdeaLink.source_id==Idea.id).filter_by(
+                discussion_id=self.discussion_id).all()})
+
+    @property
+    def target_state_label(self):
+        if self.target_state:
+            return self.target_state.label
+
+    @target_state_label.setter
+    def target_state_label(self, label):
+        if not label:
+            self.target_state = None
+            return
+        assert self.discussion.idea_publication_flow
+        target_state = self.discussion.idea_publication_flow.state_by_label(label)
+        assert target_state
+        self.target_state = target_state
 
 
 class IdeaLoomIdeaSource(IdeaSource):
