@@ -12,7 +12,6 @@ from sqlalchemy.orm import relationship, reconstructor
 from future.utils import string_types
 import simplejson as json
 from rdflib_jsonld.context import Context
-from jsonpath_ng.ext import parse
 import requests
 from requests.cookies import RequestsCookieJar as CookieJar
 

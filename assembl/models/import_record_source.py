@@ -3,6 +3,7 @@ from abc import abstractmethod
 from sqlalchemy import (
     Column, ForeignKey, Integer, String, Boolean)
 from sqlalchemy.orm import relationship, reconstructor
+from jsonpath_ng.ext import parse
 
 from . import DiscussionBoundBase, Base
 from ..auth import P_ADMIN_DISC
