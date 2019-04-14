@@ -404,6 +404,9 @@ from .announcement import (
     Announcement,
     IdeaAnnouncement,
 )
+from .import_record_source import (
+    ImportRecordSource,
+)
 from .idea_source import (
     CatalystIdeaSource,
     IdeaSource,
