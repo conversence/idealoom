@@ -78,6 +78,23 @@ class EmailSourceEditView extends SourceViewBase.extend({
 
 class AnnotatorSourceEditView extends SourceViewBase {}
 
+
+class HypothesisExtractView extends SourceViewBase.extend({
+  template: '#tmpl-hypothesisExtractSource'
+}) {
+  fetchValues() {
+    return {
+      name: this.$('#name').val(),
+      api_key: this.$('#api_key').val(),
+      user: this.$('#user').val(),
+      group: this.$('#group').val(),
+      tag: this.$('#tag').val(),
+      document_url: this.$('#document_url').val(),
+    }
+  }
+}
+
+
 class IdeaSourceEditView extends SourceViewBase.extend({
   template: '#tmpl-IdeaSource'
 }) {
@@ -161,6 +178,8 @@ function getSourceEditView(model_type) {
     case Types.FACEBOOK_PAGE_FEED_SOURCE:
     case Types.FACEBOOK_SINGLE_POST_SOURCE:
       return FacebookSourceEditView.init;
+    case Types.HYPOTHESIS_EXTRACT_SOURCE:
+      return HypothesisExtractView;
     case Types.ANNOTATOR_SOURCE:
       return AnnotatorSourceEditView;
     case Types.FEED_POST_SOURCE:

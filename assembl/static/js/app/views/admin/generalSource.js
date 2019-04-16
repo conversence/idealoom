@@ -170,6 +170,7 @@ class CreateSource extends Marionette.View.extend({
         Types.LOOMIO_POST_SOURCE,
         Types.IDEALOOM_IDEA_SOURCE,
         Types.CATALYST_IDEA_SOURCE,
+        Types.HYPOTHESIS_EXTRACT_SOURCE,
         Types.FACEBOOK_GROUP_SOURCE,
         Types.FACEBOOK_GROUP_SOURCE_FROM_USER,
         Types.FACEBOOK_PAGE_POSTS_SOURCE,

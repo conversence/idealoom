@@ -57,6 +57,7 @@ var Types = {
   MAILDIR_MAILBOX: 'MaildirMailbox',
   FEED_POST_SOURCE: 'FeedPostSource',
   LOOMIO_POST_SOURCE: 'LoomioPostSource',
+  HYPOTHESIS_EXTRACT_SOURCE: 'HypothesisExtractSource',
   IDEALOOM_IDEA_SOURCE: 'IdeaLoomIdeaSource',
   CATALYST_IDEA_SOURCE: 'CatalystIdeaSource',
   ANNOTATOR_SOURCE: 'AnnotatorSource',

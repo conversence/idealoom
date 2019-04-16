@@ -204,12 +204,35 @@ class AnnotatorSource extends Source.extend({
   }
 }
 
-class IdeaSource extends Source {
+
+class ImportRecordSource extends Source {
   defaults() {
     return _.extend(Source.prototype.defaults, {
       "source_uri": '',
       "data_filter": '',
       "update_back_imports": false,
+    });
+  }
+}
+
+class HypothesisExtractSource extends ImportRecordSource.extend({
+  localizedName: i18n.gettext("Hypothesis extract source")
+}) {
+  defaults() {
+    return _.extend(ImportRecordSource.prototype.defaults, {
+      '@type': Types.HYPOTHESIS_EXTRACT_SOURCE,
+      "api_key": null,
+      "user": null,
+      "group": null,
+      "tag": null,
+      "document_url": null
+    });
+  }
+}
+
+class IdeaSource extends ImportRecordSource {
+  defaults() {
+    return _.extend(ImportRecordSource.prototype.defaults, {
       "target_state_label": '',
     });
   }
@@ -259,6 +282,8 @@ function getSourceClassByType(type) {
         return MailingListSource;
       case Types.ANNOTATOR_SOURCE:
         return AnnotatorSource;
+      case Types.HYPOTHESIS_EXTRACT_SOURCE:
+        return HypothesisExtractSource;
       case Types.FEED_POST_SOURCE:
         return FeedPostSource;
       case Types.LOOMIO_POST_SOURCE:
@@ -287,14 +312,15 @@ class sourceCollection extends Base.Collection.extend({
 export default {
   Model: {
     Source: Source,
-    IMAPMailboxSource: IMAPMailboxSource,
-    MailingListSource: MailingListSource,
-    FacebookSinglePostSource: FacebookSinglePostSource,
-    FacebookGroupSource: FacebookGroupSource,
-    FacebookGroupSourceFromUser: FacebookGroupSourceFromUser,
-    FacebookPagePostsSource: FacebookPagePostsSource,
-    FacebookPageFeedSource: FacebookPageFeedSource,
-    ContentSourceID: ContentSourceId
+    IMAPMailboxSource,
+    MailingListSource,
+    FacebookSinglePostSource,
+    FacebookGroupSource,
+    FacebookGroupSourceFromUser,
+    FacebookPagePostsSource,
+    FacebookPageFeedSource,
+    ContentSourceID: ContentSourceId,
+    HypothesisExtractSource,
   },
   Collection: sourceCollection,
   getSourceClassByType: getSourceClassByType

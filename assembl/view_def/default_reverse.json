@@ -76,11 +76,22 @@
         "name": true,
         "created": false
     },
-    "IdeaSource": {
+    "ImportRecordSource": {
         "@extends": "Container",
         "source_uri": true,
         "data_filter": true,
-        "update_back_imports": true,
+        "update_back_imports": true
+    },
+    "HypothesisExtractSource": {
+        "@extends": "ImportRecordSource",
+        "api_key": true,
+        "user": true,
+        "group": true,
+        "tag": true,
+        "document_url": true
+    },
+    "IdeaSource": {
+        "@extends": "ImportRecordSource",
         "target_state_label": true
     },
     "IdeaLoomIdeaSource": {

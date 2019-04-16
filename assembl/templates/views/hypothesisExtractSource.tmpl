@@ -1,0 +1,75 @@
+<form class="core-form" id="source-settings">
+  <fieldset class="prl">
+
+    <div class="control-tag">
+      <label for="name" class="control-label">{{ gettext("Name") }}</label>
+      <div class="controls">
+        <input type="text" id="name" class="input-xxlarge" value="<%= name %>">
+      </div>
+    </div>
+
+  {#
+  <div class="control-group">
+    <label for="source_uri" class="control-label">{{ gettext("URL") }}</label>
+    <div class="controls">
+      <input type="text" id="source_uri" class="input-xxlarge" value="<%= source_uri %>">
+    </div>
+  </div>
+
+    <div class="control-group">
+      <label for="data_filter" class="control-label">{{ gettext("Filter (JSONPath)") }}</label>
+      <div class="controls">
+        <input type="text" id="data_filter" class="input-xxlarge" value="<%= data_filter %>">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label for="update_back_imports" class="control-label">{{ gettext("Update ideas that were imported from here") }}</label>
+      <div class="controls">
+        <input type="checkbox" id="update_back_imports" <% if (update_back_imports) { print("checked");} %> value="<%= update_back_imports %>">
+      </div>
+    </div>
+  #}
+
+    <div class="control-group">
+      <label for="api_key" class="control-label">{{ gettext("API key") }}</label>
+      <div class="controls">
+        <input type="password" id="api_key" class="input-xxlarge">
+      </div>
+    </div>
+
+    <h5>{{gettext('Search criteria')}}</h5>
+
+    <div class="control-group">
+      <label for="user" class="control-label">{{ gettext("Hypothesis user name") }}</label>
+      <div class="controls">
+        <input type="text" id="user" class="input-xxlarge" value="<%= user %>">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label for="group" class="control-label">{{ gettext("Hypothesis group") }}</label>
+      <div class="controls">
+        <input type="text" id="group" class="input-xxlarge" value="<%= group %>">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label for="tag" class="control-label">{{ gettext("Hypothesis tag") }}</label>
+      <div class="controls">
+        <input type="text" id="tag" class="input-xxlarge" value="<%= tag %>">
+      </div>
+    </div>
+
+    <div class="control-group">
+      <label for="document_url" class="control-label">{{ gettext("Document URL") }}</label>
+      <div class="controls">
+        <input type="text" id="document_url" class="input-xxlarge" value="<%= document_url %>">
+      </div>
+    </div>
+
+  </fieldset>
+	<div class="form-actions">
+		<button class="btn btn-primary js_saveSource fr" type="submit">{{ gettext("Save changes") }}</button>
+	</div>
+</form>

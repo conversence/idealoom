@@ -412,6 +412,9 @@ from .idea_source import (
     IdeaSource,
     IdeaLoomIdeaSource,
 )
+from .hypothesis_source import (
+    HypothesisExtractSource,
+)
 
 
 def includeme(config):
