@@ -1,5 +1,4 @@
 import logging
-from itertools import groupby
 from datetime import datetime, timedelta
 try:
     from urllib.parse import urljoin
