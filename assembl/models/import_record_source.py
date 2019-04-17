@@ -182,7 +182,7 @@ class ImportRecordSource(ContentSource, PromiseObjectImporter):
                     pdata, ctx, object_importer=self, parse_def_name='import')
                 if instance_ctx:
                     instance = instance_ctx._instance
-                    self.process_new_object(instance)
+                    self.process_new_object(ext_id, instance)
                     self.db.add(instance)
         if self.pending():
             self.resolve_pending()
@@ -193,5 +193,5 @@ class ImportRecordSource(ContentSource, PromiseObjectImporter):
         """resolve any pending reference, may require queries. May fail."""
         pass
 
-    def process_new_object(self, instance):
+    def process_new_object(self, ext_id, instance):
         self[ext_id] = instance

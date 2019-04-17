@@ -37,10 +37,10 @@ class IdeaSource(ImportRecordSource):
         'polymorphic_identity': 'abstract_idea_source',
     }
 
-    def process_new_object(self, instance):
+    def process_new_object(self, ext_id, instance):
         if getattr(instance.__class__, 'pub_state', None):
             instance.pub_state = self.target_state
-        super(IdeaSource, self).process_new_object(instance)
+        super(IdeaSource, self).process_new_object(ext_id, instance)
 
     def add_missing_links(self):
         # add links from discussion root to roots of idea subtrees
