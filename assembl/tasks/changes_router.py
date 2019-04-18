@@ -233,6 +233,7 @@ class ActiveSocket(object):
                         self.roles = set(json.loads(text))
                         self.roles.add(Everyone)
                         self.roles.add(Authenticated)
+                        self.roles.add('local:Agent/'+str(self.token['userId']))
                 self.task = self.loop.create_task(self.connect())
                 self.session.send('[{"@type":"Connection"}]')
                 if self.token and self.raw_token and self.discussion and self.userId != Everyone:
