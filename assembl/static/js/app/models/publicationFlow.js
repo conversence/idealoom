@@ -70,7 +70,7 @@ class publicationFlowCollection extends Base.Collection.extend({
   /**
    * @member {string} app.models.publicationFlow.publicationFlowCollection.url
    */
-  url: Ctx.getApiV2Url(Types.PUBLICATION_FLOW)+"?view=extended",
+  url: Ctx.getApiV2DiscussionUrl("all_pub_flows"),
 
   /**
    * The model

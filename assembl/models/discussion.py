@@ -685,6 +685,19 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
                 return parent_instance.db.query(
                     literal(instance.id).in_(participants.subquery())).first()[0]
 
+        class AllPubFlowsCollection(AbstractCollectionDefinition):
+            def __init__(self, cls):
+                super(AllPubFlowsCollection, self).__init__(cls, 'all_pub_flows', PublicationFlow)
+
+            def decorate_query(self, query, owner_alias, last_alias, parent_instance, ctx):
+                return parent_instance.db.query(PublicationFlow)
+
+            def contains(self, parent_instance, instance):
+                return True
+
+            def get_default_view(self):
+                return 'extended'
+
         class ConnectedUsersCollection(AbstractCollectionDefinition):
             def __init__(self, cls):
                 super(ConnectedUsersCollection, self).__init__(
@@ -750,6 +763,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
                 inst_ctx['pushed_messages'], cs)
 
         return (AllUsersCollection(cls),
+                AllPubFlowsCollection(cls),
                 ConnectedUsersCollection(cls),
                 ActiveWidgetsCollection(cls),
                 UserNsDictCollection(cls),
