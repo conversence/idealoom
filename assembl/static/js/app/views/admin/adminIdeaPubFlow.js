@@ -59,15 +59,25 @@ export default class AdminIdeaPubFlow extends LoaderView.extend({
   }
 
   computeCurrentIdeaCount() {
+    const rootIdea = this.ideasCollections.find((idea)=>idea.get('@type')==Types.ROOT_IDEA);
     const currentFlowName = this.discussion.get('idea_publication_flow_name');
+    this.rootPubState = null;
+    this.currentIdeaFlow = null;
     if (currentFlowName) {
       this.currentIdeaFlow = this.getFlowByLabel(currentFlowName);
-      this.currentStates = this.currentIdeaFlow.get('states');
-    } else {
-      this.currentIdeaFlow = null;
-      this.currentStates = new PubFlow.publicationStateCollection();
+      if (this.currentIdeaFlow) {
+        this.currentStates = this.currentIdeaFlow.get('states');
+        if (rootIdea) {
+          const rootPubStateName = rootIdea.get('pub_state_name');
+          if (rootPubStateName) {
+            this.rootPubState = this.currentIdeaFlow.get('states').findByLabel(rootPubStateName);
+          }
+        }
+      }
     }
+    this.currentStates = this.currentStates || new PubFlow.publicationStateCollection();
     this.ideaCounts = this.ideasCollections.countBy((idea)=>idea.get('pub_state_name'));
+    this.ideaCounts[this.rootPubState] -= 1;
     this.setNextFlow(this.currentIdeaFlow)
   }
 
@@ -87,12 +97,18 @@ export default class AdminIdeaPubFlow extends LoaderView.extend({
         }
         return this.nextStateMap[label] = defaultLabel;
       });
+      if (_.indexOf(destLabels, this.rootPubState)) {
+        this.nextStateMap['@root'] = this.rootPubState;
+      } else {
+        this.nextStateMap['@root'] = defaultLabel;
+      }
     } else {
       // assume cannot delete flow
       const sourceLabels = this.currentStates.map((state)=>state.get('label'));
       this.nextStates = this.currentStates;
       this.nextStateMap = _.object(sourceLabels, sourceLabels);
       this.nextStateMap[null] = (sourceLabels.length) ? sourceLabels[0] : null;
+      this.nextStateMap['@root'] = this.rootPubState;
     }
   }
 
@@ -112,10 +128,14 @@ export default class AdminIdeaPubFlow extends LoaderView.extend({
   changeNextState(ev) {
     const originStateLabelDecorated = ev.currentTarget.id;
     const stateLabel = ev.currentTarget.value;
-    // pattern is "state-<label>-convert"
-    const originStateLabel = originStateLabelDecorated.substring(
-      6, originStateLabelDecorated.length-8);
-    this.nextStateMap[originStateLabel] = stateLabel;
+    if (originStateLabelDecorated == 'root-state-convert') {
+      this.nextStateMap['@root'] = stateLabel;
+    } else {
+      // pattern is "state-<label>-convert"
+      const originStateLabel = originStateLabelDecorated.substring(
+        6, originStateLabelDecorated.length-8);
+      this.nextStateMap[originStateLabel] = stateLabel;
+    }
   }
 
   save(ev) {
@@ -144,6 +164,7 @@ export default class AdminIdeaPubFlow extends LoaderView.extend({
       nextFlow: this.nextFlow,
       nextStateMap: this.nextStateMap,
       ideaCounts: this.ideaCounts,
+      rootPubState: this.rootPubState,
       i18n,      
     }
   }

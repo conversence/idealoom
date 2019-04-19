@@ -260,8 +260,11 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
                 idea.pub_state_id = transition.target_id
 
     def bulk_change_publication_states(self, changes, user_id, permissions=None):
+        from .idea import RootIdea
         for idea in self.ideas:
             dest = changes.get(idea.pub_state_name, None)
+            if isinstance(idea, RootIdea):
+                dest = changes.get('@root', dest)
             if dest:
                 assert idea.safe_set_pub_state(dest, user_id)
 

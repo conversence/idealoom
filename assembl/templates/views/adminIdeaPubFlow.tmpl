@@ -18,6 +18,17 @@
                 <% }); %>
               </select>
             </p>
+            <h4>{{gettext('Root idea:')}}</h4>
+            {{gettext('Current state:')}} <em><%= (rootPubState) ? rootPubState.nameOrLabel(langPrefs) : '' %></em> {{gettext('convert to')}}
+            <select id="root-state-convert" class="js-next-state">
+                <% nextStates.each(function(nextState) {
+                  var nextLabel = nextState.get('label');
+                  var nextStateLabel = nextStateMap['@root']; %>
+                    <option value="<%= nextLabel %>"
+                    <% if (nextLabel==nextStateLabel) {print('selected')} %>
+                    ><%= nextState.nameOrLabel(langPrefs) %></option>
+            <%  });%>
+            </select>
             <h4>{{gettext('States:')}}</h4>
             <% currentStates.each(function(state) {
               var label = state.get('label');
