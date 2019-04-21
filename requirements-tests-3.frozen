@@ -6,7 +6,6 @@
 #
 -e git+https://github.com/conversence/Beaker.git@assembl#egg=Beaker
 -e git+https://github.com/maparent/circus-web.git@p3#egg=circus_web
--e git+https://github.com/dgilland/hashfs.git@master#egg=hashfs
 -e git+https://github.com/conversence/jasmine-splinter-runner.git#egg=jasmine-splinter-runner
 -e git+https://github.com/FreeDiscovery/jwzthreading.git@master#egg=jwzthreading
 -e git+https://github.com/maparent/langdetect.git@no_sample#egg=langdetect
@@ -70,6 +69,7 @@ gensim==3.7.2
 google-api-python-client==1.7.8
 google-auth-httplib2==0.0.3  # via google-api-python-client
 google-auth==1.6.3        # via google-api-python-client, google-auth-httplib2
+hashfs==0.7.1
 hiredis==1.0.0
 httplib2==0.12.1          # via google-api-python-client, google-auth-httplib2
 humanfriendly==4.18       # via coloredlogs, executor, property-manager, rotate-backups, update-dotdee

@@ -1,6 +1,5 @@
 -e git+https://github.com/conversence/Beaker.git@assembl#egg=Beaker
 -e git+https://github.com/maparent/circus-web.git@p3#egg=circus_web
--e git+https://github.com/dgilland/hashfs.git@master#egg=hashfs
 -e git+https://github.com/FreeDiscovery/jwzthreading.git@master#egg=jwzthreading
 -e git+https://github.com/maparent/langdetect.git@no_sample#egg=langdetect
 -e git+https://github.com/assembl/pyramid_beaker.git@assembl#egg=pyramid_beaker
@@ -31,6 +30,7 @@ flaky==3.5.3
 future==0.17.1
 gensim==3.7.2
 google-api-python-client==1.7.8
+hashfs==0.7.1
 hiredis==1.0.0
 IMAPClient==2.1.0
 imaplib2==2.45.0
