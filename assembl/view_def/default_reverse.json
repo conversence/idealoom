@@ -346,17 +346,32 @@
         "discussion": false,
         "quote": false,
         "attributed_to": true,
-        "ranges": ["selectors"],
+        "ranges": "selectors",
+        "external_url": true,
         "text": "annotation_text"
     },
     "AnnotationSelector": {
-        "extract_id": false
+        "extract_id": false,
+        "body": true
+    },
+    "TextQuoteSelector": {
+        "@extends": "AnnotationSelector",
+        "prefix": true,
+        "suffix": true
+    },
+    "TextPositionSelector": {
+        "@extends": "AnnotationSelector",
+        "start": true,
+        "end": true
     },
     "FragmentSelector": {
         "@extends": "AnnotationSelector",
+        "value": true
+    },
+    "RangeSelector": {
+        "@extends": "AnnotationSelector",
         "end": "xpath_end",
         "endOffset": "offset_end",
-        "body": true,
         "start": "xpath_start",
         "startOffset": "offset_start"
     },

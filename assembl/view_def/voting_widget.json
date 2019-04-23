@@ -311,7 +311,21 @@
     "AnnotationSelector": {
         "extract_id": false
     },
+    "TextQuoteSelector": {
+        "@extends": "AnnotationSelector",
+        "prefix": true,
+        "suffix": true
+    },
+    "TextPositionSelector": {
+        "@extends": "AnnotationSelector",
+        "start": true,
+        "end": true
+    },
     "FragmentSelector": {
+        "@extends": "AnnotationSelector",
+        "value": true
+    },
+    "RangeSelector": {
         "@extends": "AnnotationSelector",
         "end": "xpath_end_calc",
         "endOffset": "offset_end",

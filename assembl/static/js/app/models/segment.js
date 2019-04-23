@@ -40,6 +40,7 @@ class SegmentModel extends Base.Model.extend({
     created: null,
     idCreator: null,
     important: false,
+    external_url: null,
     ranges: [],
     target: null
   }
@@ -160,6 +161,20 @@ class SegmentModel extends Base.Model.extend({
    */
   getAssociatedPostPromise() {
     return this.collection.collectionManager.getMessageFullModelPromise(this.get('idPost'));
+  }
+
+  getWebUrl() {
+    const target = this.get('target');
+    if (target && target['@type'] == 'Webpage') {
+      return target.url;
+    }
+  }
+
+  getWebTitle() {
+    const target = this.get('target');
+    if (target && target['@type'] == 'Webpage') {
+      return target.title;
+    }
   }
 
   /**

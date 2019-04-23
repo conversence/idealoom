@@ -57,9 +57,19 @@ data-segmentid="<%= segment.cid %>">
         <div class="js_authorName authorName"></div>
 
       <% } else { %>
-        <% if (type == "Webpage") { %>
+        <% if (type == "Webpage") {
+          var web_url = segment.getWebUrl();
+          var harvested = i18n.gettext('Harvested from webpage');
+          var web_title = segment.getWebTitle();
+          if (web_title) {
+            harvested += ': ' + web_title;
+          } %>
           <img src="{{ STATIC_URL }}/img/icon/search_document.svg" width="35" height="35" class="image-rounded fl prxs" alt="{{ gettext('Document extracted from the web') }}" />
-          {{ gettext('Harvested from webpage') }}
+          <% if (web_url) { %>
+            <a href="<%= web_url %>" target="_blank"><%= harvested %></a>
+          <% } else {
+               print(harvested);
+             } %>
         <% } else { %>
           {{ gettext('Unknown segment type: ') }}<%= type %>
         <% } %>

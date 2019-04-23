@@ -1082,7 +1082,9 @@ Context.prototype = {
 
     switch (target['@type']) {
       case 'Webpage':
-        window.open(target.url, "_blank");
+        const external_url = segment.get('external_url');
+        const web_url = segment.getWebUrl();
+        window.open(external_url || web_url, "_blank");
         break;
 
       default:

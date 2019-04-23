@@ -146,6 +146,12 @@ class LangString(Base):
             primaryjoin=(remote(ImportRecord.target_id)==foreign(cls.id)) &
                         (ImportRecord.target_table == cls.__tablename__))
 
+    def __bool__(self):
+        for entry in self.entries:
+            if entry:
+                return True
+        return False
+
     def as_jsonld(self, default_lang=None, use_map=False):
         entries = [e.as_jsonld(default_lang) for e in self.entries]
         if len(self.entries) == 1:
@@ -701,6 +707,9 @@ class LangStringEntry(TombstonableMixin, Base):
         doc="Type of error from the translation server")
     # tombstone_date = Column(DateTime) implicit from Tombstonable mixin
     value = Column(UnicodeText)  # not searchable in virtuoso
+
+    def __bool__(self):
+        return bool(self.value)
 
     @declared_attr
     def import_record(cls):

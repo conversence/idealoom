@@ -222,7 +222,21 @@
     },
     "AnnotationSelector": {
     },
+    "TextQuoteSelector": {
+        "@extends": "AnnotationSelector",
+        "prefix": true,
+        "suffix": true
+    },
+    "TextPositionSelector": {
+        "@extends": "AnnotationSelector",
+        "start": true,
+        "end": true
+    },
     "FragmentSelector": {
+        "@extends": "AnnotationSelector",
+        "value": true
+    },
+    "RangeSelector": {
         "@extends": "AnnotationSelector",
         "conformsTo": "'\"http://tools.ietf.org/rfc/rfc3023\"",
         "value": "&as_xpointer"

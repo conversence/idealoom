@@ -43,7 +43,10 @@
     "IdeaThreadContextBreakLink": {},
     "Excerpt": {},
     "AnnotationSelector": {},
+    "TextQuoteSelector": {},
+    "TextPositionSelector": {},
     "FragmentSelector": {},
+    "RangeSelector": {},
     "DiscussionPermission": {},
     "LikedPost": {},
     "ReadStatusChange": {}

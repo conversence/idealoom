@@ -79,6 +79,7 @@ class SegmentView extends Marionette.View.extend({
       allUsersCollection: this.allUsersCollection,
       canEditExtracts: currentUser.can(Permissions.EDIT_EXTRACT),
       canAddExtracts: currentUser.can(Permissions.ADD_EXTRACT),
+      i18n,
       ctx: Ctx
     }
   }
@@ -312,7 +313,7 @@ class SegmentListPanel extends BasePanel.extend({
 
   serializeData() {
     return {
-      Ctx: Ctx
+      Ctx
     }
   }
 

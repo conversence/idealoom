@@ -212,8 +212,9 @@ class TableLockCreationThread(Thread):
 
 
 class SimpleObjectImporter(object):
-    def __init__(self, use_local=True):
-        self.use_local = use_local
+    use_local = True
+
+    def __init__(self):
         self.init_importer()
 
     def init_importer(self):

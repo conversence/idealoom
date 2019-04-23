@@ -225,8 +225,27 @@
         "relevantToConversation": "discussion"
     },
     "AnnotationSelector": {
+        "body": true,
+    },
+    "AnnotationSelector": {
+        "extract_id": false,
+        "body": true
+    },
+    "TextQuoteSelector": {
+        "@extends": "AnnotationSelector",
+        "prefix": true,
+        "suffix": true
+    },
+    "TextPositionSelector": {
+        "@extends": "AnnotationSelector",
+        "start": true,
+        "end": true
     },
     "FragmentSelector": {
+        "@extends": "AnnotationSelector",
+        "value": true
+    },
+    "RangeSelector": {
         "@extends": "AnnotationSelector",
         "value": "&from_xpointer"
     },

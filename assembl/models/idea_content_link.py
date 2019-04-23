@@ -13,6 +13,7 @@ from sqlalchemy import (
     Integer,
     String,
     Float,
+    Unicode,
     UnicodeText,
     ForeignKey,
     event,
@@ -27,6 +28,7 @@ from ..lib.sqla import CrudOperation
 from ..lib.model_watcher import get_model_watcher
 from ..lib.utils import get_global_base_url
 from ..lib.clean_input import sanitize_html
+from ..lib.sqla_types import URLString
 from .discussion import Discussion
 from .idea import Idea
 from .generic import Content
@@ -242,7 +244,8 @@ class Extract(IdeaContentPositiveLink):
         Discussion, backref=backref('extracts', cascade="all, delete-orphan"),
         info={'rdf': QuadMapPatternS(None, ASSEMBL.in_conversation)})
 
-    important = Column('important', Boolean, server_default='0')
+    important = Column(Boolean, server_default='0')
+    external_url = Column(URLString)
 
     attributed_to_id = Column(
         Integer, ForeignKey(AgentProfile.id,
@@ -363,6 +366,9 @@ class Extract(IdeaContentPositiveLink):
             retval['@id'] = Post.uri_generic(self.content.id)
         elif self.content.type == 'webpage':
             retval['url'] = self.content.url
+            subject = self.content.subject
+            if subject:
+                retval['title'] = subject.first_original().value
         return retval
 
     @as_native_str()
@@ -500,6 +506,7 @@ class AnnotationSelector(DiscussionBoundBase):
         Extract.id, ondelete="CASCADE"), nullable=False, index=True)
     type = Column(String(60))
     refines_id = Column(Integer, ForeignKey(id, ondelete="CASCADE"))
+    body = Column(UnicodeText)
 
     __mapper_args__ = {
         'polymorphic_identity': 'AbstractSelector',
@@ -532,10 +539,60 @@ class AnnotationSelector(DiscussionBoundBase):
             P_ADD_EXTRACT, P_READ, P_EDIT_EXTRACT, P_EDIT_EXTRACT)
 
 
+class TextQuoteSelector(AnnotationSelector):
+    __tablename__ = 'text_quote_selector'
+    id = Column(Integer,
+                ForeignKey(
+                    AnnotationSelector.id,
+                    ondelete='CASCADE',
+                    onupdate='CASCADE'),
+                primary_key=True,
+                info={'rdf': QuadMapPatternS(None, ASSEMBL.db_id)})
+    prefix = Column(UnicodeText)
+    suffix = Column(UnicodeText)
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'TextQuoteSelector'
+    }
+
+
+class TextPositionSelector(AnnotationSelector):
+    __tablename__ = 'text_position_selector'
+    id = Column(Integer,
+                ForeignKey(
+                    AnnotationSelector.id,
+                    ondelete='CASCADE',
+                    onupdate='CASCADE'),
+                primary_key=True,
+                info={'rdf': QuadMapPatternS(None, ASSEMBL.db_id)})
+    start = Column(Integer)
+    end = Column(Integer)
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'TextPositionSelector'
+    }
+
+
+class FragmentSelector(AnnotationSelector):
+    __tablename__ = 'fragment_selector'
+    id = Column(Integer,
+                ForeignKey(
+                    AnnotationSelector.id,
+                    ondelete='CASCADE',
+                    onupdate='CASCADE'),
+                primary_key=True,
+                info={'rdf': QuadMapPatternS(None, ASSEMBL.db_id)})
+    value = Column(Unicode)
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'FragmentSelector'
+    }
+
+
 class TextFragmentIdentifier(AnnotationSelector):
     __tablename__ = 'text_fragment_identifier'
-    __external_typename = "FragmentSelector"
-    rdf_class = OA.FragmentSelector
+    __external_typename = "RangeSelector"
+    rdf_class = OA.RangeSelector
 
     id = Column(Integer,
                 ForeignKey(
@@ -548,7 +605,6 @@ class TextFragmentIdentifier(AnnotationSelector):
     offset_start = Column(Integer)
     xpath_end = Column(String)
     offset_end = Column(Integer)
-    body = Column(UnicodeText)
 
     __mapper_args__ = {
         'polymorphic_identity': 'AnnotatorRange'

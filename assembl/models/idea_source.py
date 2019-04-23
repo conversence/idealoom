@@ -85,6 +85,7 @@ class IdeaLoomIdeaSource(IdeaSource):
     username = Column(String())
     password = Column(String())
     # add credentials!
+    use_local = False
 
     __mapper_args__ = {
         'polymorphic_identity': 'idealoom',
@@ -93,7 +94,6 @@ class IdeaLoomIdeaSource(IdeaSource):
     @reconstructor
     def init_on_load(self):
         super(IdeaLoomIdeaSource, self).init_on_load()
-        self.use_local = False
         # TODO: find a way to reuse Users when self.source_uri.startswith(self.global_url)
         self.cookies = CookieJar()
 
