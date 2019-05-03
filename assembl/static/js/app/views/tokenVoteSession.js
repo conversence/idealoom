@@ -575,7 +575,7 @@ class TokenCategoryAllocationView extends Marionette.View.extend({
     };
 
     var renderAllTokenIcons = function(){
-      for ( var i = 0; i <= that.maximum_per_idea; ++i ){
+      for ( var i = container[0].childElementCount; i <= that.maximum_per_idea; ++i ){
         renderClickableTokenIcon(i);
       }
     };
@@ -1584,7 +1584,8 @@ class TokenVoteSessionModal extends Backbone.Modal.extend({
     that.$(".available-tokens").css("top", popinHeaderTotalHeight + (popinHeaderTotalHeight > 0 ? "px" : ""));
     that.$(".available-tokens-container").css('min-height', "36px");
 
-    that.$(".popin-body").on('scroll', _.bind(that.onScroll, that)); // scroll event does not bubble up, and scrollable element is now .popin-body instead of this.$el
+    // disable until I can figure out how to have better layout. TODO important fix
+    // that.$(".popin-body").on('scroll', _.bind(that.onScroll, that)); // scroll event does not bubble up, and scrollable element is now .popin-body instead of this.$el
   }
 
   onScroll() {
@@ -1592,12 +1593,8 @@ class TokenVoteSessionModal extends Backbone.Modal.extend({
   }
 
   myOnScroll() {
-    if (this.$(".popin-body").scrollTop() > this.availableTokensPositionTop) {
-      this.$(".available-tokens").addClass("fixed");
-    }
-    else {
-      this.$(".available-tokens").removeClass("fixed");
-    }
+     this.$(".available-tokens").toggleClass(
+       'fixed', this.$(".popin-body").scrollTop() > this.availableTokensPositionTop);
   }
 
   serializeData() {
