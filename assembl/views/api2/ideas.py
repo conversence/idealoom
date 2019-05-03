@@ -28,7 +28,7 @@ def instance_del(request):
     return {}
 
 
-@view_config(context=InstanceContext, request_method='GET',
+@view_config(context=InstanceContext, request_method='GET', renderer='json',
              ctx_instance_class=Idea, accept="text/html")
 def redirect_idea_html(request):
     if (request.accept.quality('text/html') or 0) > max(
