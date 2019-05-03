@@ -173,7 +173,7 @@ def permission_token(
 
 @view_config(context=InstanceContext, name="perm_token",
              ctx_instance_class=Discussion, request_method='GET',
-             accept="application/ld+json", renderer="json")
+             json_ld=True, renderer="json")
 def get_token(request):
     user_id = authenticated_userid(request)
     if not user_id:
@@ -203,17 +203,11 @@ def get_token(request):
 
 @view_config(context=InstanceContext, name="jsonld",
              ctx_instance_class=Discussion, request_method='GET',
-             accept="application/ld+json")
+             json_ld=True)
 @view_config(context=InstanceContext,
              ctx_instance_class=Discussion, request_method='GET',
-             accept="application/ld+json")
+             json_ld=True)
 def discussion_instance_view_jsonld(request):
-    if (not request.path.endswith('jsonld')) and (
-            request.accept.quality('application/json') >=
-            request.accept.quality('application/ld+json')):
-        # not specifically asking for json-ld
-        return Response(body=json.dumps(instance_view(request)),
-            content_type='application/json', charset='utf-8')
     discussion = request.context._instance
     user_id, permissions, salt = read_user_token(request)
     if P_READ not in permissions:
@@ -236,7 +230,7 @@ def discussion_instance_view_jsonld(request):
 
 @view_config(context=InstanceContext, name="private_jsonld",
              ctx_instance_class=Discussion, request_method='GET',
-             accept="application/ld+json")
+             json_ld=True)
 def user_private_view_jsonld(request):
     if request.scheme == "http" and asbool(request.registry.settings.get(
             'accept_secure_connection', False)):

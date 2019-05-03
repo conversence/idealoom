@@ -404,6 +404,24 @@ class ClassContext(TraversalContext):
         return super(ClassContext, self).hash() % hash(self._class)
 
 
+class JsonLdPredicate(object):
+    """A `view predicate factory`_ that checks that a request really asks for jsonld
+
+    .. _`view predicate factory`: http://docs.pylonsproject.org/projects/pyramid/en/latest/narr/hooks.html#view-and-route-predicates
+    """
+    def __init__(self, val, config):
+        self.val = val
+
+    def text(self):
+        return 'jsonld'
+
+    phash = text
+
+    def __call__(self, context, request):
+        return (request.accept.quality('application/ld+json') or 0) > (
+            request.accept.quality('application/json') or 0)
+
+
 class ClassContextPredicate(object):
     """A `view predicate factory`_ that checks that a given traversal context
     is a :py:class:`ClassContext` and represents the given class.
@@ -1273,6 +1291,7 @@ def root_factory(request, user_id=None):
 
 
 def includeme(config):
+    config.add_view_predicate('json_ld', JsonLdPredicate)
     config.add_view_predicate('ctx_class', ClassContextPredicate)
     config.add_view_predicate('ctx_instance_class', InstanceContextPredicate)
     config.add_view_predicate('ctx_instance_class_with_exceptions',

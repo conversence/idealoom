@@ -31,9 +31,9 @@ def instance_del(request):
 @view_config(context=InstanceContext, request_method='GET',
              ctx_instance_class=Idea, accept="text/html")
 def redirect_idea_html(request):
-    if request.accept.quality('text/html') > max(
-            request.accept.quality('application/json'),
-            request.accept.quality('application/ld+json')):
+    if (request.accept.quality('text/html') or 0) > max(
+            request.accept.quality('application/json') or 0,
+            request.accept.quality('application/ld+json') or 0):
         idea = request.context._instance
         return HTTPFound(request.route_url(
             'purl_idea', discussion_slug=idea.discussion.slug,

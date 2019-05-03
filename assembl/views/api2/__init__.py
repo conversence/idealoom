@@ -110,14 +110,11 @@ def class_view(request):
 
 @view_config(context=InstanceContext, renderer='json', name="jsonld",
              request_method='GET', permission=P_READ,
-             accept="application/ld+json")
+             json_ld=True)
 @view_config(context=InstanceContext, renderer='json',
              request_method='GET', permission=P_READ,
-             accept="application/ld+json")
+             json_ld=True)
 def instance_view_jsonld(request):
-    if (request.accept.quality('application/json') >= request.accept.quality('application/ld+json')):
-        # not specifically asking for json-ld
-        return instance_view(request)
     from assembl.semantic.virtuoso_mapping import AppQuadStorageManager
     from rdflib import URIRef, ConjunctiveGraph
     ctx = request.context
