@@ -73,6 +73,9 @@ def init_key_for_classes(db):
         NotificationSubscription, DiscussionPerUserNamespacedKeyValue,
         IdeaLocalUserRole, PublicationFlow, PublicationState,
         PublicationTransition)
+    # TODO: Json Settings in VotingWidget has textual pointers to VotingSpecifications.
+    # Also settings in Voting specifications have pointers to self.
+    # Either move the settings inside the votingSpec, or adjus the json upon copy
     fn_for_classes = {
         AgentProfile: partial(find_or_create_agent_profile, db),
         User: partial(find_or_create_agent_profile, db),
