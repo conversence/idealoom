@@ -350,7 +350,7 @@ def adjust_settings(settings):
                     'your ini file and add a few')
     for k, v in settings.items():
         if k.startswith("SOCIAL_AUTH_"):
-            if k.endswith("_SCOPE"):
+            if k.endswith("_SCOPE") or k.endswith("_FIELD_SELECTORS"):
                 settings[k] = aslist(v)
             elif isinstance(v, str) and v.lstrip().startswith('{'):
                 settings[k] = json.loads(v)
