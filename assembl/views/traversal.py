@@ -647,6 +647,11 @@ class CollectionContext(TraversalContext):
     def get_target_alias(self):
         return self.class_alias
 
+    def get_instance_of_class(self, cls):
+        if isinstance(self.parent_instance, cls):
+            return self.parent_instance
+        return self.__parent__.get_instance_of_class(cls)
+
     def create_query(self, id_only=True, tombstones=False):
         alias = self.class_alias
         if id_only:

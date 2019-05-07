@@ -440,7 +440,7 @@ class Extract(IdeaContentPositiveLink):
             watcher.processExtractCreated(self.id)
 
     def get_discussion_id(self):
-        return self.discussion_id
+        return self.discussion_id or self.discussion.id
 
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):
@@ -530,6 +530,13 @@ class AnnotationSelector(DiscussionBoundBase):
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):
         return ((cls.extract_id == Extract.id),
                 (Extract.discussion_id == discussion_id))
+
+    def find_best_sibling(self, parent, siblings):
+        # self is a non-persistent object created from json,
+        # and a corresponding persistent object may already exist in parent
+        for sibling in siblings:
+            if sibling.__class__ == self.__class__:
+                return sibling
 
     discussion = relationship(
         Discussion, viewonly=True, uselist=False, secondary=Extract.__table__,

@@ -1259,67 +1259,6 @@ class BaseOps(object):
             return self.handle_duplication(
                 json, parse_def, context, None, object_importer)
 
-    def _assign_subobject_list(self, instances, accessor, user_id, permissions):
-        # only known case yet is Langstring.entries
-        if isinstance(accessor, RelationshipProperty):
-            if not accessor.back_populates:
-                # Try the brutal approach
-                setattr(self, accessor.key, instances)
-            else:
-                from ..lib.history_mixin import TombstonableMixin
-                current_instances = getattr(self, accessor.key)
-                missing = set(instances) - set(current_instances)
-                if missing:
-                    # Maybe tombstones
-                    missing = filter(
-                        lambda a: not isinstance(a, TombstonableMixin) or
-                        not a.is_tombstone, missing)
-                assert not missing, "what's wrong with back_populates?"
-                extra = set(current_instances) - set(instances)
-                if extra:
-                    remote_columns = list(accessor.remote_side)
-                    if len(accessor.remote_side) > 1:
-                        if issubclass(accessor.mapper.class_, TombstonableMixin):
-                            remote_columns = list(filter(lambda c: c.name != 'tombstone_date', remote_columns))
-                    assert len(remote_columns) == 1
-                    remote = remote_columns[0]
-                    if remote.nullable:
-                        # TODO: check update permissions on that object.
-                        for inst in missing:
-                            setattr(inst, remote.key, None)
-                    else:
-                        for inst in extra:
-                            if inspect(inst).pending:
-                                self.db.expunge(inst)
-                            elif not inst.user_can(
-                                    user_id, CrudPermissions.DELETE,
-                                    permissions):
-                                raise HTTPUnauthorized(
-                                    "Cannot delete object %s", inst.uri())
-                            else:
-                                if isinstance(inst, TombstonableMixin):
-                                    inst.is_tombstone = True
-                                else:
-                                    self.db.delete(inst)
-        elif isinstance(accessor, property):
-            # Note: Does not happen yet.
-            property.fset(self, instances)
-        elif isinstance(accessor, Column):
-            raise HTTPBadRequest(
-                "%s cannot have multiple values" % (accessor.key, ))
-        elif isinstance(accessor, AssociationProxy):
-            # Also never happens
-            current_instances = accessor.__get__(self, self.__class__)
-            missing = set(instances) - set(current_instances)
-            extra =  set(current_instances) - set(instances)
-            for inst in missing:
-                accessor.add(inst)
-            if extra:
-                log.error("should we eliminate missing objects from AssociationProxy?")
-                # for inst in extra:
-                #     accessor.remove(inst)
-        else:
-            assert False, "we should not get here"
 
     def _assign_subobject(self, instance, accessor):
         if isinstance(accessor, RelationshipProperty):
@@ -1435,7 +1374,22 @@ class BaseOps(object):
                         continue
                     values = value
                     instances = []
+                    current_instances = []
+                    if isinstance(accessor, property):
+                        current_instances = property.fget(self)
+                        return
+                    elif isinstance(accessor, Column):
+                        raise HTTPBadRequest(
+                            "%s cannot have multiple values" % (accessor.key, ))
+                    elif isinstance(accessor, RelationshipProperty):
+                        if accessor.back_populates:
+                            current_instances = getattr(self, accessor.key)
+                    elif isinstance(accessor, AssociationProxy):
+                        current_instances = accessor.__get__(self, self.__class__)
+                    current_instances = set(current_instances)
+                    remaining_instances = set(current_instances)
                     for value in values:
+                        val_id = None
                         existing = None
                         if isinstance(value, string_types):
                             val_id = value
@@ -1446,34 +1400,22 @@ class BaseOps(object):
                                     # import pdb
                                     # pdb.set_trace()
                                     log.error("this reference was present in two objects: "+val_id)
+                                    existing = object_importer[val_id]
                         else:
                             raise NotImplementedError()
-
+                        if val_id and not existing:
+                            existing = get_named_object(val_id)
                         if existing and inspect(existing).persistent:
-                                    # existing object, so we did not go through delayed creation
-                                sub_i_ctx = existing.get_instance_context(c_context)
-                                existing2 = existing._do_update_from_json(
-                                    value, s_parse_def, sub_i_ctx,
-                                    duplicate_handling, object_importer)
-                                if existing is not existing2:
-                                    # delete existing? Or will that be implicit?
-                                    existing = existing2
-                                instances.append(existing)
-                        elif isinstance(value, dict):
-                            # just create the subobject
-                            instance_ctx = self._create_subobject_from_json(
-                                value, target_cls, parse_def,
-                                c_context, accessor_name, object_importer)
-                            if not instance_ctx:
-                                raise HTTPBadRequest("Could not create " + dumps(value))
-                            instance = instance_ctx._instance
-                            assert instance is not None
-                            # create sub_i_ctx?
-                            instance = instance.handle_duplication(
-                                value, parse_def, context, duplicate_handling,
-                                object_importer)
-                            instances.append(instance)
-                        else:
+                            # existing object, so we did not go through delayed creation
+                            sub_i_ctx = existing.get_instance_context(c_context)
+                            existing2 = existing._do_update_from_json(
+                                value, s_parse_def, sub_i_ctx,
+                                duplicate_handling, object_importer)
+                            if existing is not existing2:
+                                # delete existing? Or will that be implicit?
+                                existing = existing2
+                            remaining_instances.discard(existing)
+                        elif val_id:
                             def process(instance, accessor_name):
                                 done = False
                                 rel = self.__class__.__mapper__.relationships.get(accessor_name, None)
@@ -1496,9 +1438,67 @@ class BaseOps(object):
                                         # delete instance? Or will that be implicit?
                                         instance = instance2
                             object_importer.apply(self, val_id, partial(process, accessor_name=accessor_name))
-                    self._assign_subobject_list(
-                        instances, accessor, context.get_user_id(),
-                        context.get_permissions())
+                        elif isinstance(value, dict):
+                            # just create the subobject
+                            instance_ctx = self._create_subobject_from_json(
+                                value, target_cls, parse_def,
+                                c_context, accessor_name, object_importer)
+                            if not instance_ctx:
+                                raise HTTPBadRequest("Could not create " + dumps(value))
+                            instance = instance_ctx._instance
+                            assert instance is not None
+                            best_match = instance.find_best_sibling(self, remaining_instances)
+                            if best_match:
+                                self.db.expunge(instance)
+                                sub_i_ctx = best_match.get_instance_context(c_context)
+                                existing = best_match._do_update_from_json(
+                                    value, s_parse_def, sub_i_ctx,
+                                    duplicate_handling, object_importer)
+                                remaining_instances.remove(existing)
+                            else:
+                                # create sub_i_ctx?
+                                instance = instance.handle_duplication(
+                                    value, parse_def, context, duplicate_handling,
+                                    object_importer)
+                                instances.append(instance)
+                        else:
+                            assert False, "We should not get here"
+                    # self._assign_subobject_list(
+                    #     instances, accessor, context.get_user_id(),
+                    #     context.get_permissions())
+                    if instances and isinstance(accessor, AssociationProxy):
+                        for instance in instances:
+                            accessor.add(instance)
+                    if remaining_instances:
+                        if isinstance(accessor, RelationshipProperty):
+                            remote_columns = list(accessor.remote_side)
+                            if len(accessor.remote_side) > 1:
+                                if issubclass(accessor.mapper.class_, TombstonableMixin):
+                                    remote_columns = list(filter(lambda c: c.name != 'tombstone_date', remote_columns))
+                            assert len(remote_columns) == 1
+                            remote = remote_columns[0]
+                            if remote.nullable:
+                                # TODO: check update permissions on that object.
+                                for inst in missing:
+                                    setattr(inst, remote.key, None)
+                            else:
+                                for inst in remaining_instances:
+                                    if inspect(inst).pending:
+                                        self.db.expunge(inst)
+                                    elif not inst.user_can(
+                                            user_id, CrudPermissions.DELETE,
+                                            permissions):
+                                        raise HTTPUnauthorized(
+                                            "Cannot delete object %s", inst.uri())
+                                    else:
+                                        if isinstance(inst, TombstonableMixin):
+                                            inst.is_tombstone = True
+                                        else:
+                                            self.db.delete(inst)
+                        elif isinstance(accessor, AssociationProxy):
+                            for instance in remaining_instances:
+                                accessor.delete(instance)
+
                 elif isinstance(accessor, property):
                     # instance would have been treated above,
                     # this is a json thingy.
@@ -1580,6 +1580,13 @@ class BaseOps(object):
             elif attr != sub_instance:
                 collection.on_new_instance(self, sub_instance)
             self.db.add(sub_instance)
+
+    def find_best_sibling(self, parent, siblings):
+        # self is a non-persistent object created from json,
+        # and a corresponding persistent object may already exist in parent
+        # define when list-to-list assignment is likely
+        console.warn("find_best_sibling on class "+self.__class__.__name__)
+        return None
 
     # TODO: Add security by attribute?
     # Some attributes may be settable only on create.

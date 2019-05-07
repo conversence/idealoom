@@ -757,6 +757,17 @@ class LangStringEntry(TombstonableMixin, Base):
             self.langstring = context.get_instance_of_class(LangString)
         super(LangStringEntry, self).populate_from_context(context)
 
+    def find_best_sibling(self, parent, siblings):
+        # self is a non-persistent object created from json,
+        # and a corresponding persistent object may already exist in parent
+        for sibling in siblings:
+            if sibling.locale == self.locale:
+                return sibling
+        if self.locale == LocaleLabel.UNDEFINED:
+            for sibling in siblings:
+                if sibling.value == self.value:
+                    return sibling
+
     @as_native_str()
     def __repr__(self):
         value = self.value or ''
