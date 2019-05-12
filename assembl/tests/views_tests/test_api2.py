@@ -87,7 +87,10 @@ def test_add_subidea_in_synthesis(
     new_idea_r = test_app.post_json(
         '/data/Conversation/%d/views/%d/ideas/%d/children' % (
             discussion.id, synthesis_1.id, subidea_1_1.id),
-        {"short_title": "New subidea"})
+        {"shortTitle": {
+            "@type": "LangString", "entries":[
+                {"@type": "LangStringEntry", "@language":"en",
+                 "value":"New subidea"}]}})
     assert new_idea_r.status_code == 201
     link = new_idea_r.location
     new_idea = Idea.get_instance(link)
@@ -102,6 +105,12 @@ def test_add_subidea_in_synthesis(
     idealink_assoc = db.query(SubGraphIdeaLinkAssociation).filter_by(
         sub_graph=synthesis_1, idea_link=idea_link).first()
     assert idealink_assoc
+    
+    idealink_assoc.delete()
+    idea_assoc.delete()
+    idea_link.delete()
+    new_idea.delete()
+    new_idea.db.commit()
 
 
 def test_widget_settings(
@@ -262,7 +271,11 @@ def test_creativity_session_widget(
     ctx_url = "http://example.com/cardgame.xml#card_1"
     # Create a new sub-idea
     new_idea_create = test_app.post_json(idea_hiding_endpoint, {
-        "@type": "GenericIdeaNode", "short_title": "This is a brand new idea",
+        "@type": "GenericIdeaNode",
+        "shortTitle": {
+            "@type": "LangString","entries":[{
+                "@type": "LangStringEntry", "@language":"en",
+                "value":"This is a brand new idea"}]},
         "widget_links": [
             {
                 "@type": "GeneratedIdeaWidgetLink",
@@ -376,7 +389,11 @@ def test_creativity_session_widget(
 
     # Create a second idea
     new_idea_create = test_app.post_json(idea_hiding_endpoint, {
-        "@type": "GenericIdeaNode", "short_title": "This is another new idea"})
+        "@type": "GenericIdeaNode",
+        "shortTitle": {
+            "@type": "LangString","entries":[{
+                "@type": "LangStringEntry", "@language":"en",
+                "value":"This is another new idea"}]}})
     assert new_idea_create.status_code == 201
     # Get the sub-idea from the db
     discussion.db.flush()
@@ -730,7 +747,7 @@ def DISABLEDtest_voting_widget_criteria(
     criteria_def = [
         {
             "@id": criterion.uri(),
-            "short_title": criterion.short_title
+            "shortTitle": criterion.short_title
         } for criterion in criteria
     ]
     new_widget_loc = test_app.post_json(
@@ -777,7 +794,7 @@ def DISABLEDtest_voting_widget_criteria(
     criteria_def = [
         {
             "@id": criterion.uri(),
-            "short_title": criterion.short_title
+            "shortTitle": criterion.short_title
         } for criterion in criteria
     ]
     test_app.put_json(criteria_url, criteria_def)

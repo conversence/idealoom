@@ -989,6 +989,11 @@ class BaseOps(object):
                         getattr(self, fkey.key))
 
                 continue
+            elif isinstance(getattr(self.__class__, prop_name, None), AssociationProxy):
+                # will be an ObjectAssociationProxyInstance in sqla 1.3
+                known.add(prop_name)
+                val = getattr(self, prop_name)
+                continue
             assert prop_name in relns,\
                     "in viewdef %s, class %s, prop_name %s not a column, property or relation" % (
                         view_def_name, my_typename, prop_name)

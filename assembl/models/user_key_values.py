@@ -19,6 +19,7 @@ from sqlalchemy import (
     UniqueConstraint,
     event,
 )
+from sqlalchemy.schema import conv
 from sqlalchemy.orm import (relationship)
 from sqlalchemy.ext.declarative import declared_attr
 from pyramid.httpexceptions import HTTPUnauthorized
@@ -66,8 +67,8 @@ class AbstractNamespacedKeyValue(object):
             getattr(cls, cls.target_id_name),
             cls.namespace,
             cls.key,
-            name="%s_%s_%s_unique_constraint" % (
-                schema, user, cls.__tablename__)),)
+            name=conv("%s_%s_%s_unique_constraint" % (
+                schema, user, cls.__tablename__))),)
 
     @classmethod
     def add_nkv(cls, target, namespace, key, value):
@@ -121,8 +122,8 @@ class AbstractPerUserNamespacedKeyValue(
             cls.namespace,
             cls.key,
             cls.user_id,
-            name="%s_%s_%s_unique_constraint" % (
-                schema, user, cls.__tablename__)),)
+            name=conv("%s_%s_%s_unique_constraint" % (
+                schema, user, cls.__tablename__))),)
 
     @classmethod
     def add_nukv(cls, target, user, namespace, key, value):
