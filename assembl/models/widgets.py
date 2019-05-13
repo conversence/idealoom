@@ -8,7 +8,8 @@ from datetime import datetime
 import logging
 
 from sqlalchemy import (
-    Column, Integer, ForeignKey, Text, String, Boolean, DateTime, inspect)
+    Column, Integer, ForeignKey, Text, String, Boolean, DateTime, inspect,
+    FetchedValue)
 from sqlalchemy.sql import text, column
 from sqlalchemy.orm import (
     relationship, backref, aliased, join)
@@ -63,8 +64,8 @@ class Widget(DiscussionBoundBase):
         Discussion, backref=backref("widgets", cascade="all, delete-orphan"),
         info={'rdf': QuadMapPatternS(None, ASSEMBL.in_conversation)})
 
-    start_date = Column(DateTime, server_default=None)
-    end_date = Column(DateTime, server_default=None)
+    start_date = Column(DateTime, server_default=FetchedValue())
+    end_date = Column(DateTime, server_default=FetchedValue())
     hide_notification = Column(Boolean, server_default='false', default=False)
 
     def __init__(self, *args, **kwargs):

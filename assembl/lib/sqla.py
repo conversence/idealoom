@@ -32,7 +32,8 @@ from sqlalchemy import (
     inspect, or_, and_)
 from sqlalchemy.exc import NoInspectionAvailable, OperationalError
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
-from sqlalchemy.ext.associationproxy import AssociationProxy
+from sqlalchemy.ext.associationproxy import (
+    AssociationProxy, ObjectAssociationProxyInstance)
 from sqlalchemy.orm import mapper, scoped_session, sessionmaker, aliased
 from sqlalchemy.orm.interfaces import MANYTOONE, ONETOMANY, MANYTOMANY
 from sqlalchemy.orm.properties import RelationshipProperty
@@ -989,8 +990,8 @@ class BaseOps(object):
                         getattr(self, fkey.key))
 
                 continue
-            elif isinstance(getattr(self.__class__, prop_name, None), AssociationProxy):
-                # will be an ObjectAssociationProxyInstance in sqla 1.3
+            elif isinstance(getattr(self.__class__, prop_name, None),
+                    (AssociationProxy, ObjectAssociationProxyInstance)):
                 known.add(prop_name)
                 val = getattr(self, prop_name)
                 continue
@@ -1297,7 +1298,8 @@ class BaseOps(object):
                 else:
                     # Maybe delay and flush after identity check?
                     raise NotImplementedError()
-        elif isinstance(accessor, AssociationProxy):
+        elif isinstance(accessor,
+                (AssociationProxy, ObjectAssociationProxyInstance)):
             # only for lists, I think
             assert False, "we should not get here"
         else:
@@ -1389,7 +1391,8 @@ class BaseOps(object):
                     elif isinstance(accessor, RelationshipProperty):
                         if accessor.back_populates:
                             current_instances = getattr(self, accessor.key)
-                    elif isinstance(accessor, AssociationProxy):
+                    elif isinstance(accessor,
+                            (AssociationProxy, ObjectAssociationProxyInstance)):
                         current_instances = accessor.__get__(self, self.__class__)
                     current_instances = set(current_instances)
                     remaining_instances = set(current_instances)
@@ -1471,7 +1474,8 @@ class BaseOps(object):
                     # self._assign_subobject_list(
                     #     instances, accessor, context.get_user_id(),
                     #     context.get_permissions())
-                    if instances and isinstance(accessor, AssociationProxy):
+                    if instances and isinstance(accessor,
+                            (AssociationProxy, ObjectAssociationProxyInstance)):
                         for instance in instances:
                             accessor.add(instance)
                     if remaining_instances:
@@ -1500,7 +1504,8 @@ class BaseOps(object):
                                             inst.is_tombstone = True
                                         else:
                                             self.db.delete(inst)
-                        elif isinstance(accessor, AssociationProxy):
+                        elif isinstance(accessor,
+                                (AssociationProxy, ObjectAssociationProxyInstance)):
                             for instance in remaining_instances:
                                 accessor.delete(instance)
 
@@ -1743,7 +1748,7 @@ class BaseOps(object):
                 can_be_list = True
             elif getattr(self.__class__, key, None) is not None\
                     and isinstance(getattr(self.__class__, key),
-                                   AssociationProxy):
+                        (AssociationProxy, ObjectAssociationProxyInstance)):
                 accessor = getattr(self.__class__, key)
                 # Target_cls?
                 can_be_list = must_be_list = True

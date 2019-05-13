@@ -5,14 +5,15 @@ from datetime import datetime
 
 from sqlalchemy import (
     Column, DateTime, Integer, UniqueConstraint, event, Table, ForeignKey,
-    Sequence, Index, asc)
+    Sequence, Index, asc, FetchedValue)
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.sql.expression import join, nullslast
 from sqlalchemy.orm import relationship, Query
 from sqlalchemy.sql.elements import (
     BinaryExpression, BooleanClauseList, operators, True_)
 from sqlalchemy.sql.visitors import ReplacingCloningVisitor
-from sqlalchemy.ext.associationproxy import AssociationProxy
+from sqlalchemy.ext.associationproxy import (
+    AssociationProxy, ObjectAssociationProxyInstance)
 
 from .sqla import DuplicateHandling
 from ..semantic.virtuoso_mapping import QuadMapPatternS
@@ -28,7 +29,7 @@ class TombstonableMixin(object):
     TODO: Generate a DB view on live objects."""
 
     # Note on tombstone_date: Virtuoso can test for its being null, but not non-null.
-    tombstone_date = Column(DateTime, server_default=None, default=None)
+    tombstone_date = Column(DateTime, server_default=FetchedValue())
 
     @property
     def is_tombstone(self):
@@ -378,7 +379,7 @@ class HistoricalProxy(object):
     def __getattr__(self, name):
         if (name in self._target.__class__.__mapper__.relationships or
                 isinstance(getattr(self._target.__class__, name),
-                           AssociationProxy)):
+                    (AssociationProxy, ObjectAssociationProxyInstance))):
             return self._wrap(
                 self._target.reln_in_history(name, self._timestamp), True)
         return self._wrap(getattr(self._target, name))
