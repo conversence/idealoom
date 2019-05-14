@@ -201,6 +201,8 @@ class AgentProfile(Base):
         for post in other_profile.posts_created[:]:
             post.creator = self
             post.creator_id = self.id
+        for extract in other_user.extracts_created[:]:
+            extract.creator = self
         for attachment in other_profile.attachments[:]:
             attachment.creator = self
         from .action import Action
@@ -855,8 +857,6 @@ class User(NamedClassMixin, OriginMixin, AgentProfile):
                         (not self.last_login)
                         or (other_user.last_login > self.last_login)):
                     self.password = other_user.password
-            for extract in other_user.extracts_created[:]:
-                extract.creator = self
             for extract in other_user.extracts_owned[:]:
                 extract.owner = self
             for role in other_user.roles[:]:
