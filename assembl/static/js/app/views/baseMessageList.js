@@ -1504,7 +1504,10 @@ return cls.extend({
     //console.log("initAnnotator called");
     // Saving the annotator reference
     this.annotator = this.ui.messageList.annotator(this.annotator_config).data('annotator');
-
+    if (!this.annotator) {
+      // e.g. empty message list
+      return;
+    }
 
     /*
       The actual initalization of annotator is based on each message's individual
