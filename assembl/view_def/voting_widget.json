@@ -551,6 +551,9 @@
     "BinaryVoteSpecification": {
         "@extends": "AbstractVoteSpecification"
     },
+    "ResourceVoteSpecification": {
+        "@extends": "AbstractVoteSpecification"
+    },
     "TokenVoteSpecification": {
         "@extends": "AbstractVoteSpecification",
         "exclusive_categories": true,

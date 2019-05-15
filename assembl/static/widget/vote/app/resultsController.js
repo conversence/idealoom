@@ -254,6 +254,37 @@ voteApp.controller('resultsCtl',
         }
       };
 
+      // @param destination_for_this_result: d3 selector
+      var resource_vote_spec_result_received = function(vote_spec_uri, destination, target_id){
+        return function(vote_spec_result_data){
+          var vote_spec_target_data = vote_spec_result_data[target_id];
+
+          var inline_vote_holder = destination.append("div");
+          inline_vote_holder.classed({"inline-vote-result-for-a-target": true});
+
+          $scope.drawTargetTitleHolder(inline_vote_holder, target_id);
+          if (vote_spec_target_data) {
+            var num_vote_holder = inline_vote_holder.append("div");
+            num_vote_holder.classed({"inline-vote-result-for-a-target--item": true});
+            $translate('voteResultsVotes').then(function(t) {
+              num_vote_holder.text(t+vote_spec_target_data['n']);
+            });
+            var total_vote_holder = inline_vote_holder.append("div");
+            total_vote_holder.classed({"inline-vote-result-for-a-target--item": true});
+            $translate('voteResultsTotal').then(function(t) {
+              total_vote_holder.text(t+vote_spec_target_data['total']);
+            });
+          } else {
+            var num_vote_holder = inline_vote_holder.append("div");
+            num_vote_holder.classed({"inline-vote-result-for-a-target--item": true});
+            $translate('voteResultsNoResult').then(function(t) {
+              num_vote_holder.text(t);
+            });
+          }
+
+        }
+      };
+
       var grouped_vote_spec_results_received = function(vote_spec_uris, destination_for_this_result, target_id){
         return function(vote_spec_result_data){
           var filter_by_targets = [target_id];
@@ -289,7 +320,18 @@ voteApp.controller('resultsCtl',
 
 
               if ( item_vote_specifications && item_vote_specifications.length ){
-                if ( item_type != "2_axes" && item_vote_specifications.length == 1 ){ // this is a single criterion item/question, so we show its results as a bar chart
+                if (item_type == "resource_vote" && item_vote_specifications.length == 1) {
+                  var vote_spec = item_vote_specifications[0];
+                  var vote_spec_id = "@id" in vote_spec ? vote_spec["@id"] : null;
+                  if ( vote_spec_id ){
+                    results_urls[vote_spec_id] = AssemblToolsService.resourceToUrl(results_uris[vote_spec_id]);
+                    if ( !questions || (questions.indexOf(vote_spec_id) != -1) ){
+                      results_promises[vote_spec_id] = $.ajax(results_urls[vote_spec_id]);
+                      var destination_for_this_result = question_holder_d3.append("div");
+                      $.when(results_promises[vote_spec_id]).done(resource_vote_spec_result_received(vote_spec_id, destination_for_this_result, target_id));
+                    }
+                  }
+                } else if ( item_type != "2_axes" && item_vote_specifications.length == 1 ){ // this is a single criterion item/question, so we show its results as a bar chart
                   var vote_spec = item_vote_specifications[0];
                   var vote_spec_id = "@id" in vote_spec ? vote_spec["@id"] : null;
                   if ( vote_spec_id ){
@@ -371,7 +413,7 @@ voteApp.controller('resultsCtl',
           // add a <section> for the question
 
           var question_holder = $("<section class='vote-question-item' />");
-          if ( item_type == "radio" || item_type == "vertical_gauge" || item_type == "2_axes" ){
+          if ( item_type == "radio" || item_type == "vertical_gauge" || item_type == "2_axes" || item_type == "resource_vote"){
             question_holder.addClass("vote-question-item-type-"+item_type);
           }
           question_holder.attr("id", "vote-question-item-"+item_index);
@@ -404,7 +446,18 @@ voteApp.controller('resultsCtl',
 
 
           if ( item_vote_specifications && item_vote_specifications.length ){
-            if ( item_type != "2_axes" && item_vote_specifications.length == 1 ){ // this is a single criterion item/question, so we show its results as a bar chart
+            if (item_type == "resource_vote" && item_vote_specifications.length == 1) {
+              var vote_spec = item_vote_specifications[0];
+              var vote_spec_id = "@id" in vote_spec ? vote_spec["@id"] : null;
+              if ( vote_spec_id ){
+                results_urls[vote_spec_id] = AssemblToolsService.resourceToUrl(results_uris[vote_spec_id]);
+                if ( !questions || (questions.indexOf(vote_spec_id) != -1) ){
+                  results_promises[vote_spec_id] = $.ajax(results_urls[vote_spec_id]);
+                  var destination_for_this_result = question_holder_d3.append("div");
+                  $.when(results_promises[vote_spec_id]).done(resource_vote_spec_result_received(vote_spec_id, destination_for_this_result));
+                }
+              }
+            } else if ( item_type != "2_axes" && item_vote_specifications.length == 1 ){ // this is a single criterion item/question, so we show its results as a bar chart
               var vote_spec = item_vote_specifications[0];
               var vote_spec_id = "@id" in vote_spec ? vote_spec["@id"] : null;
               if ( vote_spec_id ){
@@ -451,7 +504,7 @@ voteApp.controller('resultsCtl',
       var drawTargetTitleAndItem = function(destination, first_vote_spec_uri, second_vote_spec_uri, vote_spec_result_data, target_id, draw_title, vote_specs_result_data){
         var inline_vote_holder = destination.append("div");
         inline_vote_holder.classed({"inline-vote-result-for-a-target": true});
-        
+
         if ( draw_title !== false ){
           $scope.drawTargetTitleHolder(inline_vote_holder, target_id);
         }
@@ -866,7 +919,7 @@ voteApp.controller('resultsCtl',
       var drawTargetTitleAndItem = function(destination, vote_spec_uri, vote_spec_result_data, target_id, draw_title){
         var inline_vote_holder = destination.append("div");
         inline_vote_holder.classed({"inline-vote-result-for-a-target": true});
-        
+
         if (draw_title !== false ){
           $scope.drawTargetTitleHolder(inline_vote_holder, target_id);
         }
@@ -1102,7 +1155,8 @@ voteApp.controller('resultsCtl',
         //var text = "Result on the idea \"<span title='" + (target_idea_definition || target) + "'>" + target_idea_label + "</span>\":";
         var text = "";
         var text_number_of_votes = strItemContentVotes + " " + result_number_of_voters;
-        if ( vote_spec_type == "MultipleChoiceVoteSpecification" || vote_spec_type == "BinaryVoteSpecification" ){
+        if ( vote_spec_type == "MultipleChoiceVoteSpecification" || vote_spec_type == "BinaryVoteSpecification" ||
+             vote_spec_type == "ResourceVoteSpecification"){
           // add only the number of votes
           text += text_number_of_votes;
           result_info.html(text);

@@ -261,7 +261,7 @@ voteApp.controller('indexCtl',
         alert_if_a_criterion_has_no_value = true;
       }
 
-      container = container || $("#d3_container");
+      container = container || $("#vote_container");
 
       $scope.myVotes = [];
 
@@ -908,7 +908,7 @@ voteApp.controller('indexCtl',
         {
           // There is no automatic word wrapping in SVG
           // So we create an HTML element
-          var elParent = $("#d3_container");
+          var elParent = $("#vote_container");
           var elOrigin = $(svg[0]);
           var text = document.createTextNode(criterion.description);
           var node = document.createElement("span");
@@ -1272,7 +1272,7 @@ voteApp.controller('indexCtl',
           {
             // There is no automatic word wrapping in SVG
             // So we create an HTML element
-            var elParent = $("#d3_container");
+            var elParent = $("#vote_container");
             var elOrigin = $(svg[0]);
             var text = document.createTextNode(criteria[i].description);
             var node = document.createElement("span");
@@ -1469,7 +1469,7 @@ voteApp.controller('indexCtl',
       var hasVoted = true;
       if ( getUserPreviousVoteFunction ){
         var user_previous_vote = getUserPreviousVoteFunction(criterion_id, target_id);
-        
+
         // special case of binary vote
         if ( user_previous_vote === true )
           user_previous_vote = 1;
@@ -1494,7 +1494,7 @@ voteApp.controller('indexCtl',
       var padding = "padding" in item_data ? item_data.padding : null;
       if ( !padding )
         padding = "padding" in padding ? config.padding : 60;
-      
+
       var div = $('<div>');
       div.attr({
         'class': 'criterion',
@@ -1557,7 +1557,7 @@ voteApp.controller('indexCtl',
         updateSelectedValue();
         div.attr('data-criterion-value-has-changed', true);
         $scope.askConfirmationOnWindowCloseIfNecessary(true);
-        refreshVoteButtonFunction();     
+        refreshVoteButtonFunction();
       };
 
       if ('possibleValues' in criterion)
@@ -1607,20 +1607,153 @@ voteApp.controller('indexCtl',
           }
         });
       }
-      
+
       destination.append(div);
 
       updateSelectedValue();
     };
 
+    // @param destination
+    // The DOM element which will be used as container (div)
+    // @param item_data
+    // One of the elements of the "items" array, from the configuration JSON
+    // @param target_id
+    // Id of the target votable (for example: "local:GenericIdeaNode/228")
+    // @param getUserPreviousVoteFunction
+    // function(criterion_id [, target_id]) which returns the user's previous vote for this criterion and this (or current) target
+    $scope.drawResourceVote = function(destination, item_data, target_id, getUserPreviousVoteFunction, refreshVoteButtonFunction) {
+      if ( !$.isFunction(refreshVoteButtonFunction) ){
+        refreshVoteButtonFunction = function(){};
+      }
+
+      var config = $scope.settings;
+      if (!("vote_specifications" in item_data && item_data.vote_specifications.length > 0)) {
+        var str = "error: item has no 'vote_specifications' field";
+        console.log(str);
+        destination.append("div").text(str);
+        return;
+      }
+
+      var criterion = item_data.vote_specifications[0];
+      var criterion_id = "@id" in criterion ? criterion["@id"] : null;
+      if ( !criterion_id ){
+        var str = "error: item's vote specification had no '@id' field";
+        console.log(str);
+        destination.append("div").text(str);
+        return;
+      }
+      target_id = target_id || null;
+
+      var criterionValue = null;
+      var hasVoted = true;
+      if ( getUserPreviousVoteFunction ){
+        var user_previous_vote = getUserPreviousVoteFunction(criterion_id, target_id);
+
+        criterionValue = user_previous_vote;
+      }
+      if ( criterionValue === null ){
+        hasVoted = false;
+      }
+
+      var width = "width" in item_data ? item_data.width : null;
+      if ( !width )
+        width = "width" in config ? config.witdth : 300;
+      var height = "height" in item_data ? item_data.height : null;
+      if ( !height )
+        height = "height" in config ? config.height : 300;
+      var padding = "padding" in item_data ? item_data.padding : null;
+      if ( !padding )
+        padding = "padding" in padding ? config.padding : 60;
+
+      var div = $('<div>');
+      div.attr({
+        'class': 'criterion',
+        'data-criterion-id': criterion_id,
+        'data-criterion-name': "name" in criterion ? criterion.name : "",
+        'data-criterion-value': null,
+        'data-criterion-value-has-changed': false,
+        'data-voted': hasVoted,
+        'data-target-id': target_id
+      });
+      div.css('width',width);
+      div.css('height',height);
+      div.css('padding',padding);
+      // required so that padding does not increase element width and height
+      div.css('box-sizing','border-box');
+      div.css('-moz-box-sizing','border-box');
+      div.css('-webkit-box-sizing','border-box');
+
+      var updateSelectedValue = function() {
+        var el = div.find('input');
+        var val = el.val();
+        if (val)
+        {
+          div.attr('data-criterion-value', val).attr('data-voted', true);
+        }
+        else {
+          div.attr('data-criterion-value', null);
+        }
+      };
+
+      var onChange = function(){
+        updateSelectedValue();
+        div.attr('data-criterion-value-has-changed', true);
+        $scope.askConfirmationOnWindowCloseIfNecessary(true);
+        refreshVoteButtonFunction();
+      };
+
+      if (!target_id && 'name' in criterion)
+      {
+        var name = $('<strong>');
+        name.text(criterion.name);
+        div.append(name);
+      }
+
+      if (!target_id && 'description' in criterion)
+      {
+        var description = $('<p>');
+        description.text(criterion.description);
+        div.append(description);
+      }
+
+      var form = $('<form>');
+      var option = $('<div>');
+      var input = $('<input>');
+      var input_name = criterion_id;
+      if ( target_id ){
+        input_name = criterion_id + "_" + target_id;
+      }
+      input.attr({
+        type: 'number',
+        name: input_name,
+        value: criterionValue || 0,
+        min: 0,
+        max: 100000,
+        id: target_id
+      });
+      input.on('change', onChange);
+      // var label = $('<label>');
+      // label.attr('for', target_id);
+      // label.text(criterion.name);
+      option.append(input);
+      // option.append(label);
+      form.append(option);
+      div.append(form); 
+
+      destination.append(div);
+
+      updateSelectedValue();
+    };
+
+
     $scope.drawUIWithTable = function() {
       console.log("drawUIWithTable()");
       var config = $scope.settings;
-      var holder_svg = null; //d3.select("#d3_container");
-      var holder_jquery = null; //$("#d3_container");
+      var holder_svg = null; //d3.select("#vote_container");
+      var holder_jquery = null; //$("#vote_container");
       var table = $("<table/>");
       table.attr("id", "table-vote");
-      $("#d3_container").append(table);
+      $("#vote_container").append(table);
       
 
       // first row: name of fields (votable target title, and the title of each criterion)
@@ -1716,8 +1849,8 @@ voteApp.controller('indexCtl',
     $scope.drawUIWithoutTable = function() {
       console.log("drawUIWithoutTable()");
       var config = $scope.settings;
-      //var holder_svg = d3.select("#d3_container");
-      var holder_jquery = $("#d3_container");
+      //var holder_svg = d3.select("#vote_container");
+      var holder_jquery = $("#vote_container");
 
       if ("items" in config) {
         for (var i = 0; i < config.items.length; ++i) {
@@ -1773,6 +1906,19 @@ voteApp.controller('indexCtl',
       }
     };
 
+    $scope.applyD3 = function(item_holder) {
+      var item_holder_d3 = d3.select(item_holder.get(0));
+      if ( !item_holder_d3 ){
+        console.log("error: could not deduce item_holder_d3 from item_holder: ", item_holder);
+        return;
+      }
+      item_holder.attr('style', '-moz-user-select: none; -webkit-user-select: none; -ms-user-select:none; user-select:none;')
+                 .attr('unselectable', 'on')
+                 .attr('onselectstart', 'return false;')
+                 .attr('onmousedown', 'return false;');
+      return item_holder_d3;
+    };
+
     /**
      * @param item_holder: jQuery selector
      * @param item: one of widget.settings.items
@@ -1780,11 +1926,6 @@ voteApp.controller('indexCtl',
      * @param section_holder: optional. One of the parents of item_holder, which contains all items of the current "section" of items and a "vote" button. If given, this "vote" button will be found and disabled at the beginning, and re-enabled once the user has set a value on all items, or has changed the current value on any item (if they already had all a value)
      */
     $scope.drawVoteItem = function(item_holder, item, target_id, section_holder, refreshVoteButtonFunction) {
-      var item_holder_d3 = d3.select(item_holder.get(0));
-      if ( !item_holder_d3 ){
-        console.log("error: could not deduce item_holder_d3 from item_holder: ", item_holder);
-        return;
-      }
       var item_type = "type" in item ? item.type : null;
       if ( !item_type ){
         console.log("Error: item has no type. item was: ", item );
@@ -1827,11 +1968,14 @@ voteApp.controller('indexCtl',
 
       if (item_type == "vertical_gauge")
       {
-        $scope.drawVerticalGauge(item_holder_d3, item, target_id, fctGetUserPreviousVote, maybeEnableVoteButton);
+        $scope.drawVerticalGauge($scope.applyD3(item_holder), item, target_id, fctGetUserPreviousVote, maybeEnableVoteButton);
       }
       else if (item_type == "2_axes")
       {
-        $scope.draw2AxesVote(item_holder_d3, item, target_id, fctGetUserPreviousVote, maybeEnableVoteButton);
+        $scope.draw2AxesVote($scope.applyD3(item_holder), item, target_id, fctGetUserPreviousVote, maybeEnableVoteButton);
+      }
+      else if (item_type == "resource_vote") {
+        $scope.drawResourceVote(item_holder, item, target_id, fctGetUserPreviousVote, maybeEnableVoteButton);
       }
       else if (item_type == "radio")
       {
@@ -1873,8 +2017,8 @@ voteApp.controller('indexCtl',
     $scope.drawUIAsVotableIdeaThenCriterionQuestion = function() {
       console.log("drawUIAsVotableIdeaThenCriterionQuestion()");
       var settings = $scope.settings;
-      var holder_svg = d3.select("#d3_container");
-      var holder_jquery = $("#d3_container");
+      var holder_svg = d3.select("#vote_container");
+      var holder_jquery = $("#vote_container");
 
       // check that there are at least 1 item and at least 1 target
       
@@ -1969,8 +2113,8 @@ voteApp.controller('indexCtl',
     $scope.drawMultipleTargetsUI = function() {
       console.log("drawMultipleTargetsUI()");
       var settings = $scope.settings;
-      var holder_svg = d3.select("#d3_container");
-      var holder_jquery = $("#d3_container");
+      var holder_svg = d3.select("#vote_container");
+      var holder_jquery = $("#vote_container");
 
       // check that there are at least 1 item and at least 1 target
       

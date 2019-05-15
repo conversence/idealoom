@@ -70,7 +70,8 @@ class AbstractVoteSpecification(DiscussionBoundBase):
         Idea, backref="criterion_for")
 
     retypeable_as = ("LickertRange", "BinaryVoteSpecification",
-                     "MultipleChoiceVoteSpecification", "TokenVoteSpecification")
+                     "MultipleChoiceVoteSpecification", "TokenVoteSpecification",
+                     "ResourceVoteSpecification",)
 
     def populate_from_context(self, context):
         if not(self.widget or self.widget_id):
@@ -561,7 +562,7 @@ class LickertVoteSpecification(AbstractVoteSpecification):
         ordered_idea_ids = Idea.visit_idea_ids_depth_first(
             AppendingVisitor(), self.get_discussion_id())
         ordered_idea_ids = [id for id in ordered_idea_ids if id in values]
-        for idea_id, base in ordered_idea_ids:
+        for idea_id in ordered_idea_ids:
             base = values[idea_id]
             r = dict(enumerate(base['histogram']))
             r['idea'] = idea_names[idea_id]
@@ -573,6 +574,48 @@ class LickertVoteSpecification(AbstractVoteSpecification):
         if not super(LickertVoteSpecification, self).is_valid_vote(vote):
             return False
         return self.minimum <= vote.vote_value <= self.maximum
+
+
+class ResourceVoteSpecification(AbstractVoteSpecification):
+    __mapper_args__ = {
+        'polymorphic_identity': 'resource_vote_specification'
+    }
+
+    def results_for(self, voting_results, histogram_size=None):
+        base = super(ResourceVoteSpecification, self).results_for(voting_results)
+        base['total'] = sum([v.vote_value for v in voting_results])
+        return base
+
+    def vote_range(self):
+        from math import inf
+        return (0, inf)
+
+    def csv_results(self, csv_file):
+        dw = DictWriter(csv_file, ["idea", "n", "total"],
+                        dialect='excel', delimiter=';')
+        dw.writeheader()
+        by_idea = self._gather_results()
+        values = {
+            votable_id: self.results_for(voting_results)
+            for (votable_id, voting_results) in by_idea.items()
+        }
+        idea_names = dict(self.db.query(Idea.id, Idea.short_title).filter(
+            Idea.id.in_(list(by_idea.keys()))))
+        ordered_idea_ids = Idea.visit_idea_ids_depth_first(
+            AppendingVisitor(), self.get_discussion_id())
+        ordered_idea_ids = [id for id in ordered_idea_ids if id in values]
+        for idea_id in ordered_idea_ids:
+            base = values[idea_id]
+            r = {
+                'idea': idea_names[idea_id],
+                'n': base['n'],
+                'total': base['total']
+            }
+            dw.writerow(r)
+
+    @classmethod
+    def get_vote_class(cls):
+        return LickertIdeaVote
 
 
 class BinaryVoteSpecification(AbstractVoteSpecification):
@@ -605,7 +648,7 @@ class BinaryVoteSpecification(AbstractVoteSpecification):
         ordered_idea_ids = Idea.visit_idea_ids_depth_first(
             AppendingVisitor(), self.get_discussion_id())
         ordered_idea_ids = [id for id in ordered_idea_ids if id in values]
-        for idea_id, base in ordered_idea_ids:
+        for idea_id in ordered_idea_ids:
             base = values[idea_id]
             r = {
                 'idea': idea_names[idea_id],

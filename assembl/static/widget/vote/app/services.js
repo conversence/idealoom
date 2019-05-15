@@ -178,6 +178,12 @@ voteServices.service('VoteWidgetService', ['$window', '$rootScope', '$log', '$ht
       "allowed_criteria_types": ["LickertRange"]
     },
     {
+      "key": "resource_vote",
+      "label": "Pledge: needs 1 criterion (of type ResourceVote)",
+      "number_of_criteria": 1,
+      "allowed_criteria_types": ["ResourceVoteSpecification"]
+    },
+    {
       "key": "radio",
       "label": "Radio buttons: needs 1 criterion (of type Binary or MultipleChoice)",
       "number_of_criteria": 1,
@@ -276,6 +282,11 @@ voteServices.service('VoteWidgetService', ['$window', '$rootScope', '$log', '$ht
       "label": "Binary"
     },
     {
+      "key": "ResourceVoteSpecification",
+      // "description": "",
+      "label": "Resource"
+    },
+    {
       "key": "MultipleChoiceVoteSpecification",
       // "description": "",
       "label": "Multiple choice"
@@ -334,6 +345,7 @@ voteServices.service('VoteWidgetService', ['$window', '$rootScope', '$log', '$ht
         "storage": "attribute"
       }
     ],
+    "ResourceVoteSpecification": [],
     "BinaryVoteSpecification": [
 
       //possibleValues

@@ -314,6 +314,7 @@ from .votes import (
     BinaryVoteSpecification,
     LickertIdeaVote,
     LickertVoteSpecification,
+    ResourceVoteSpecification,
     MultipleChoiceIdeaVote,
     MultipleChoiceVoteSpecification,
     TokenCategorySpecification,

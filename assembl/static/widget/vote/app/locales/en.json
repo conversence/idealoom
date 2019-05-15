@@ -14,6 +14,7 @@
     "voteResultsShowVotesAsCriterionQuestionThenVotableIdea":"Show votes results hierarchised as criterion question then votable idea",
     "voteResultsChangeDisplayStyle":"Change display style of the vote results",
     "voteResultsVotes":"Votes:",
+    "voteResultsTotal":"Total:",
     "voteResultsFrequency":"Frequency:",
     "voteResultsAverage":"Average:",
     "voteResultsAverageHelp":"This is the sum of the values of each vote, divided by the number of votes.",
