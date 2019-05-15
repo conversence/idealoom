@@ -72,10 +72,7 @@ def init_key_for_classes(db):
         IdentityProvider, EmailAccount, WebLinkAccount, Preferences, URIRefDb,
         NotificationSubscription, DiscussionPerUserNamespacedKeyValue,
         IdeaLocalUserRole, PublicationFlow, PublicationState,
-        PublicationTransition)
-    # TODO: Json Settings in VotingWidget has textual pointers to VotingSpecifications.
-    # Also settings in Voting specifications have pointers to self.
-    # Either move the settings inside the votingSpec, or adjus the json upon copy
+        PublicationTransition, MultiCriterionVotingWidget)
     fn_for_classes = {
         AgentProfile: partial(find_or_create_agent_profile, db),
         User: partial(find_or_create_agent_profile, db),
@@ -643,6 +640,24 @@ def clone_discussion(
                 subobs = [subobs]
             for subob in subobs:
                 stage_2_rec_clone(subob, path + [(r.key, subob)])
+        if isinstance(copy, MultiCriterionVotingWidget):
+            # TODO similar for tokens?
+            uri_equivs = {}
+            uri_qnum = {}
+            for vs in copy.vote_specifications:
+                j = vs.settings_json
+                old_id = j['@id']
+                uri = vs.uri()
+                j['@id'] = uri
+                vs.settings_json = j
+                uri_equivs[old_id] = uri
+                uri_qnum[vs.question_id] = uri
+            j = copy.settings_json
+            for qnum, item in enumerate(j['items']):
+                for spec in item['vote_specifications']:
+                    old_id = spec["@id"]
+                    spec["@id"] = uri_equivs.get(old_id, uri_qnum.get(qnum, old_id))
+            copy.settings_json = j
 
     path = [('', discussion)]
     copy = recursive_clone(discussion, path)
