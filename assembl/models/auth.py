@@ -201,7 +201,7 @@ class AgentProfile(Base):
         for post in other_profile.posts_created[:]:
             post.creator = self
             post.creator_id = self.id
-        for extract in other_user.extracts_created[:]:
+        for extract in other_profile.extracts_created[:]:
             extract.creator = self
         for attachment in other_profile.attachments[:]:
             attachment.creator = self
