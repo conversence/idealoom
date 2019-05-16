@@ -448,7 +448,7 @@ def clone_discussion(
         from_session, discussion_id, to_session=None, new_slug=None):
     from assembl.models import (
         DiscussionBoundBase, Discussion, Post, User, Preferences, HistoryMixin,
-        BaseIdeaWidget, TombstonableMixin)
+        BaseIdeaWidget, TombstonableMixin, MultiCriterionVotingWidget)
     global user_refs
     discussion = from_session.query(Discussion).get(discussion_id)
     assert discussion
