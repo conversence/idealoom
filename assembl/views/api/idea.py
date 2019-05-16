@@ -266,10 +266,11 @@ def save_idea(request):
                 current = LangString.create_from_json(ls_data, context=subcontext)
                 setattr(idea, attr_name, current._instance)
 
-    if 'parentId' in idea_data and idea_data['parentId'] is not None:
+    new_parent_id = idea_data.get('parentId', None)
+    if new_parent_id:
         # TODO: Make sure this is sent as a list!
         # Actually, use embedded links to do this properly...
-        new_parent_ids = set((idea_data['parentId'],))
+        new_parent_ids = {new_parent_id}
         old_parent_ids = {Idea.uri_generic(l.source_id) for l in idea.source_links}
         if new_parent_ids != old_parent_ids:
             added_parent_ids = new_parent_ids - old_parent_ids
@@ -316,6 +317,14 @@ def save_idea(request):
                 new_ancestors.update(parent.get_all_ancestors())
             for ancestor in new_ancestors ^ old_ancestors:
                 ancestor.send_to_changes()
+        else:
+            order = idea_data.get('order', None)
+            if order is not None:
+                new_parent_id = Idea.get_database_id(new_parent_id)
+                parent_links = [link for link in idea.source_links
+                                if link.source_id == new_parent_id]
+                assert len(parent_links) == 1
+                parent_links[0].order = idea_data.get('order', 0.0)
 
     if 'subtype' in idea_data:
         idea.rdf_type = idea_data['subtype']
