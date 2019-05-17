@@ -433,7 +433,7 @@ class IdeaInIdeaListView extends Marionette.View.extend({
         return;
       }
       if (ev.target.classList.contains('idealist-dropzone')) {
-        if (!this.model.can(Permissions.ADD_IDEA)) {
+        if (!this.model.userCan(Permissions.ADD_IDEA)) {
           ev.dataTransfer.dropEffect = 'none';
           return;
         }
