@@ -16,7 +16,7 @@
 -e git+https://github.com/maparent/tornadio2.git@session_id_str#egg=tornadIO2
 aiodns==2.0.0
 aiohttp==3.5.4
-alembic==1.0.9
+alembic==1.0.10
 amqp==2.4.2               # via kombu
 anyjson==0.3.3
 appnope==0.1.0            # via ipython
@@ -28,9 +28,9 @@ backcall==0.1.0           # via ipython
 bcrypt==3.1.6             # via paramiko
 beautifulsoup4==4.7.1
 billiard==3.6.0.0         # via celery
-boto3==1.9.142            # via smart-open
+boto3==1.9.150            # via smart-open
 boto==2.49.0              # via smart-open
-botocore==1.12.142        # via boto3, s3transfer
+botocore==1.12.150        # via boto3, s3transfer
 cachetools==3.1.0         # via google-auth, premailer
 cchardet==2.1.4
 celery==4.3.0
@@ -62,7 +62,7 @@ fasteners==0.14.1         # via executor
 feedparser==5.2.1
 flaky==3.5.3
 future==0.17.1
-gensim==3.7.2
+gensim==3.7.3
 google-api-python-client==1.7.8
 google-auth-httplib2==0.0.3  # via google-api-python-client
 google-auth==1.6.3        # via google-api-python-client, google-auth-httplib2
@@ -76,7 +76,7 @@ idna==2.8                 # via idna-ssl, requests, yarl
 imapclient==2.1.0
 imaplib2==2.45.0
 ipython-genutils==0.2.0   # via traitlets
-ipython==7.4.0 ; python_version >= "3"
+ipython==7.5.0 ; python_version >= "3"
 iso639==0.1.4
 iso8601==0.1.12           # via colander
 isodate==0.6.0
@@ -84,11 +84,12 @@ jdcal==1.4.1              # via openpyxl
 jedi==0.13.3              # via ipython
 jinja2==2.10.1
 jmespath==0.9.4           # via boto3, botocore
+joblib==0.13.2            # via scikit-learn
 jsonpath-ng==1.4.3
 kombu==4.5.0
 lingua==4.13
 lxml==4.3.3
-mako==1.0.9               # via alembic, tomako
+mako==1.0.10              # via alembic, tomako
 markupsafe==1.1.1         # via jinja2, mako, pyramid-jinja2
 monotonic==1.5            # via fasteners
 multidict==4.5.2          # via aiohttp, yarl
@@ -103,13 +104,13 @@ parso==0.4.0              # via jedi
 pastedeploy==2.0.1        # via plaster-pastedeploy
 pexpect==4.7.0            # via ipython
 pickleshare==0.7.5        # via ipython
-pip-tools==3.6.0
+pip-tools==3.7.0
 pkgconfig==1.5.1          # via xmlsec
 plaster-pastedeploy==0.7  # via pyramid
 plaster==1.0              # via plaster-pastedeploy, pyramid
 ply==3.11                 # via jsonpath-ng
 polib==1.1.0
-premailer==3.4.0
+premailer==3.4.1
 prompt-toolkit==2.0.9     # via ipython
 property-manager==2.3.1   # via executor, rotate-backups, update-dotdee
 psutil==5.6.2             # via circus
@@ -120,7 +121,7 @@ pyasn1==0.4.5             # via ndg-httpsclient, paramiko, pyasn1-modules, rsa
 pycares==3.0.0            # via aiodns
 pycparser==2.19           # via cffi
 pydot==1.4.1              # via sqlalchemy-schemadisplay
-pygments==2.3.1           # via ipython
+pygments==2.4.0           # via ipython
 pygraphviz==1.5
 pyisemail==1.3.2
 pyjwt==1.7.1
@@ -152,11 +153,11 @@ reg==0.11
 repoze.lru==0.7           # via reg
 repoze.sendmail==4.4.1    # via pyramid-mailer
 requests-oauthlib==1.2.0
-requests==2.21.0
+requests==2.22.0
 rotate-backups==6.0
 rsa==4.0                  # via google-auth
 s3transfer==0.2.0         # via boto3
-scikit-learn==0.20.3
+scikit-learn==0.21.1
 scipy==1.2.1              # via gensim, scikit-learn
 simpleeval==0.9.8         # via rotate-backups
 simplejson==3.16.0
@@ -186,7 +187,7 @@ verboselogs==1.7          # via property-manager, rotate-backups
 vine==1.3.0               # via amqp, celery
 wcwidth==0.1.7            # via prompt-toolkit
 webob==1.8.5
-werkzeug==0.15.2
+werkzeug==0.15.4
 xmlsec==1.3.3             # via python3-saml
 yarl==1.3.0               # via aiohttp
 zope.component==4.5
