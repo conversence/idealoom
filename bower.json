@@ -19,7 +19,7 @@
   "dependencies": {
     "ink": "~1.0.5",
     "Backbone.Subset": "https://github.com/assembl/Backbone.Subset.git#~0.1.1",
-    "jquery-oembed-all": "https://github.com/assembl/jquery-oembed-all.git#f0fe241934f3bbfe2c27d1fa7054b2518a1b5b53",
+    "jquery-oembed-all": "https://github.com/conversence/jquery-oembed-all.git#assembl",
     "jquery.dotdotdot": "https://github.com/assembl/jQuery.dotdotdot.git#fix-paragraph-and-read-more-not-showing"
   },
   "resolutions": {
