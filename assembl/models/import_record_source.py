@@ -48,6 +48,7 @@ class ImportRecordSource(ContentSource, PromiseObjectImporter):
     def load_previous_records(self):
         records = list(self.import_records)
         records.sort(key=lambda r: str(r.target_table))
+        to_delete = set()
         for (table_id, recs) in groupby(records, lambda r: r.target_table):
             recs = list(recs)
             cls = ImportRecord.target.property.type_mapper.value_to_class(table_id, None)
@@ -55,8 +56,18 @@ class ImportRecordSource(ContentSource, PromiseObjectImporter):
             instance_by_id = {i.id: i for i in instances}
             for r in recs:
                 eid = self.normalize_id(r.external_id)
-                self.instance_by_id[eid] = instance_by_id[r.target_id]
-        self.import_record_by_eid = {rec.external_id: rec for rec in records}
+                instance = instance_by_id.get(r.target_id, None)
+                if instance is None:
+                    # instance was deleted outside.
+                    # TODO: cascade generic pointers.
+                    to_delete.add(r)
+                else:
+                    self.instance_by_id[eid] = instance
+        self.import_record_by_eid = {
+            rec.external_id: rec for rec in records
+            if rec not in to_delete}
+        for rec in to_delete:
+            rec.delete()
 
     def external_id_to_uri(self, external_id):
         if '//' in external_id:
