@@ -26,7 +26,7 @@ def get_syntheses(request, default_view='default'):
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
     permissions = ctx.get_permissions()
-    check_permissions(ctx, user_id, permissions, CrudPermissions.READ)
+    check_permissions(ctx, user_id, CrudPermissions.READ, Synthesis)
     include_unpublished = P_EDIT_SYNTHESIS in permissions
     view = request.GET.get('view', None) or ctx.get_default_view() or default_view
     include_tombstones = asbool(request.GET.get('tombstones', False))
