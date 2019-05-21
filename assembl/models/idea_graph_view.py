@@ -482,7 +482,8 @@ class Synthesis(ExplicitSubGraphView):
 
         # Copy tombstoned versions of all idea links and relevant ideas in the current synthesis
         links = Idea.get_all_idea_links(self.discussion_id)
-        synthesis_idea_ids = {idea.id for idea in self.ideas}
+        ideas = [idea for idea in self.ideas if not idea.is_tombstone]
+        synthesis_idea_ids = {idea.id for idea in ideas}
         # Do not copy the root
         root = self.discussion.root_idea
         idea_copies = {root.id: root}
@@ -498,7 +499,7 @@ class Synthesis(ExplicitSubGraphView):
                 path.append(idea)
             for parent in idea.parents:
                 add_ancestors_between(parent, path)
-        for idea in self.ideas:
+        for idea in ideas:
             for parent in idea.parents:
                 add_ancestors_between(parent)
         for link in links:
