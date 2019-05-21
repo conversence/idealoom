@@ -297,7 +297,8 @@ class LangString extends Base.Model.extend({
    * @function app.models.langstrings.LangString.original
    */
   original() {
-    var originals = this.get("entries").filter(function(e) {return !e.isMachineTranslation();});
+    var entries = this.get("entries");
+    var originals = entries.filter(function(e) {return !e.isMachineTranslation();});
     if ( originals.length === 1 ){
       return originals[0];
     }
@@ -305,8 +306,8 @@ class LangString extends Base.Model.extend({
       return this.bestOf(originals);
     }
     else { // if ( originals.length == 0 ) {
-      if ( this.get("entries").models.length ){
-        return this.get("entries").models[0];
+      if ( entries.models && entries.models.length ){
+        return entries.models[0];
       }
       return new LangStringEntry({
         "value": "",

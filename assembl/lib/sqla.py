@@ -857,6 +857,7 @@ class BaseOps(object):
         properties = self.__class__.get_props_of()
         known = set()
         for name, spec in local_view.items():
+            vals = None
             if name == "_default":
                 continue
             elif spec is False:
@@ -992,17 +993,18 @@ class BaseOps(object):
                 continue
             elif isinstance(getattr(self.__class__, prop_name, None),
                     (AssociationProxy, ObjectAssociationProxyInstance)):
-                known.add(prop_name)
-                val = getattr(self, prop_name)
-                continue
-            assert prop_name in relns,\
-                    "in viewdef %s, class %s, prop_name %s not a column, property or relation" % (
-                        view_def_name, my_typename, prop_name)
-            known.add(prop_name)
-            # Add derived prop?
-            reln = relns[prop_name]
-            if reln.uselist:
                 vals = getattr(self, prop_name)
+            else:
+                assert prop_name in relns,\
+                        "in viewdef %s, class %s, prop_name %s not a column, property or relation" % (
+                            view_def_name, my_typename, prop_name)
+                known.add(prop_name)
+                # Add derived prop?
+                reln = relns[prop_name]
+                if reln.uselist:
+                    vals = getattr(self, prop_name)
+            if vals is not None:
+                known.add(prop_name)
                 if view_name:
                     if isinstance(spec, dict):
                         result[name] = {
