@@ -727,6 +727,20 @@ def update_pip_requirements(force_reinstall=False):
     run("yes w | %s/requirements.txt" % base_cmd)
 
 
+def install_awscli():
+    if venvcmd('which aws', warn_only=True).failed:
+        venvcmd('pip install awscli')
+
+
+def is_db_updated():
+    """
+    Return if the database is update or not
+    """
+    history = venvcmd('alembic -c {} history'.format(env.ini_file))
+    current = venvcmd('alembic -c {} heads'.format(env.ini_file))
+    return current in history
+
+
 @task
 def app_db_update():
     """
@@ -1300,7 +1314,7 @@ def update_python_package_builddeps():
         sudo('apt-get install -y libpq-dev libmemcached-dev libzmq3-dev '
              'libxslt1-dev libffi-dev libhiredis-dev libxml2-dev libssl-dev '
              'libreadline-dev liblapack-dev libatlas-base-dev libblas-dev '
-             'libxmlsec1-dev libgraphviz-dev libsnappy-dev')
+             'libxmlsec1-dev libgraphviz-dev libsnappy-dev libcurl4-openssl-dev')
         print("We are still trying to get some requirements right for linux, "
               "See http://www.scipy.org/scipylib/building/linux.html "
               "for details.")
