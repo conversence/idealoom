@@ -16,26 +16,23 @@ import transaction
 
 
 from assembl.lib import config
-from assembl.lib.sqla import using_virtuoso
 
 
 def upgrade(pyramid_env):
-    if not using_virtuoso():
-        with context.begin_transaction():
-            op.drop_index(
-                'ix_public_abstract_agent_account_email',
-                'abstract_agent_account')
-            op.create_index(
-                'ix_public_abstract_agent_account_email_ci',
-                'abstract_agent_account', [sa.text('lower(email)')], unique=False)
+    with context.begin_transaction():
+        op.drop_index(
+            'ix_public_abstract_agent_account_email',
+            'abstract_agent_account')
+        op.create_index(
+            'ix_public_abstract_agent_account_email_ci',
+            'abstract_agent_account', [sa.text('lower(email)')], unique=False)
 
 
 def downgrade(pyramid_env):
-    if not using_virtuoso():
-        with context.begin_transaction():
-            op.drop_index(
-                'ix_public_abstract_agent_account_email_ci',
-                'abstract_agent_account')
-            op.create_index(
-                'ix_public_abstract_agent_account_email',
-                'abstract_agent_account', ['email'], unique=False)
+    with context.begin_transaction():
+        op.drop_index(
+            'ix_public_abstract_agent_account_email_ci',
+            'abstract_agent_account')
+        op.create_index(
+            'ix_public_abstract_agent_account_email',
+            'abstract_agent_account', ['email'], unique=False)

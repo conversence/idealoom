@@ -160,23 +160,15 @@ class HistoryMixin(TombstonableMixin):
             uselist=False, viewonly=True, **kwargs)
 
     def _before_insert(self):
-        if self.using_virtuoso:
+        if self.base_id:
             (id,) = self.db.execute(
                 self.id_sequence.next_value().select()).first()
             self.id = id
-            if not self.base_id:
-                self.db.execute(self.identity_table.insert().values(id=id))
-                self.base_id = id
         else:
-            if self.base_id:
-                (id,) = self.db.execute(
-                    self.id_sequence.next_value().select()).first()
-                self.id = id
-            else:
-                res = self.db.execute(
-                    self.identity_table.insert().values(
-                        id=self.id_sequence.next_value()))
-                self.id = self.base_id = res.inserted_primary_key[0]
+            res = self.db.execute(
+                self.identity_table.insert().values(
+                    id=self.id_sequence.next_value()))
+            self.id = self.base_id = res.inserted_primary_key[0]
 
     @declared_attr
     def _before_insert_set_event(cls):

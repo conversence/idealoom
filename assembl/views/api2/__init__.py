@@ -108,39 +108,6 @@ def class_view(request):
         return [x for x in r if x is not None]
 
 
-@view_config(context=InstanceContext, renderer='json', name="jsonld",
-             request_method='GET', permission=P_READ,
-             json_ld=True)
-@view_config(context=InstanceContext, renderer='json',
-             request_method='GET', permission=P_READ,
-             json_ld=True)
-def instance_view_jsonld(request):
-    from assembl.semantic.virtuoso_mapping import AppQuadStorageManager
-    from rdflib import URIRef, ConjunctiveGraph
-    ctx = request.context
-    user_id = authenticated_userid(request) or Everyone
-    permissions = ctx.get_permissions()
-    instance = ctx._instance
-    if not instance.user_can(user_id, CrudPermissions.READ, permissions):
-        raise HTTPUnauthorized()
-    discussion = ctx.get_instance_of_class(Discussion)
-    if not discussion:
-        raise HTTPNotFound()
-    aqsm = AppQuadStorageManager()
-    uri = URIRef(aqsm.local_uri() + instance.uri()[6:])
-    d_storage_name = aqsm.discussion_storage_name(discussion.id)
-    v = get_virtuoso(instance.db, d_storage_name)
-    cg = ConjunctiveGraph(v, d_storage_name)
-    result = cg.triples((uri, None, None))
-    #result = v.query('select ?p ?o ?g where {graph ?g {<%s> ?p ?o}}' % uri)
-    # Something is wrong here.
-    triples = '\n'.join([
-        '%s %s %s.' % (uri.n3(), p.n3(), o.n3())
-        for (s, p, o) in result
-        if '_with_no_name_entry' not in o])
-    return aqsm.quads_to_jsonld(triples)
-
-
 @view_config(context=InstanceContext, renderer='json',
              request_method='GET', accept="application/json")
 def instance_view(request):

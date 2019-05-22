@@ -983,7 +983,6 @@ class Email(ImportedPost):
         onupdate='CASCADE'
     ), primary_key=True)
 
-    # in virtuoso, varchar is 1024 bytes and sizeof(wchar)==4, so varchar is 256 chars
     recipients = Column(UnicodeText, nullable=False)
     sender = Column(CoerceUnicode(), nullable=False)
 

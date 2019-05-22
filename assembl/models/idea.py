@@ -37,6 +37,7 @@ from sqlalchemy import (
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqla_rdfbridge.mapping import IriClass, PatternIriClass
 from pyramid.i18n import TranslationStringFactory
+from sqlalchemy.types import TIMESTAMP as Timestamp
 
 from ..lib.clean_input import sanitize_text
 from ..lib.utils import get_global_base_url
@@ -64,10 +65,6 @@ from assembl.views.traversal import (
     collection_creation_side_effects, InstanceContext)
 from future.utils import with_metaclass
 
-if DiscussionBoundBase.using_virtuoso:
-    from virtuoso.alchemy import Timestamp
-else:
-    from sqlalchemy.types import TIMESTAMP as Timestamp
 
 
 _ = TranslationStringFactory('assembl')
@@ -461,39 +458,28 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
     def get_ancestors_query_cls(
             cls, target_id=bindparam('root_id', type_=Integer),
             inclusive=True, tombstone_date=None):
-        if cls.using_virtuoso:
-            if isinstance(target_id, list):
-                raise NotImplementedError()
-            sql = text(
-                """SELECT transitive t_in (1) t_out (2) T_DISTINCT T_NO_CYCLES
-                    source_id, target_id FROM idea_idea_link
-                    WHERE tombstone_date IS NULL"""
-                ).columns(column('source_id'), column('target_id')).alias()
-            select_exp = select([sql.c.source_id.label('id')]
-                ).select_from(sql).where(sql.c.target_id==target_id)
+        if isinstance(target_id, list):
+            root_condition = IdeaLink.target_id.in_(target_id)
         else:
-            if isinstance(target_id, list):
-                root_condition = IdeaLink.target_id.in_(target_id)
-            else:
-                root_condition = (IdeaLink.target_id == target_id)
-            link = select(
-                    [IdeaLink.source_id, IdeaLink.target_id]
-                ).select_from(
-                    IdeaLink
-                ).where(
-                    (IdeaLink.tombstone_date == tombstone_date) &
-                    (root_condition)
-                ).cte(recursive=True)
-            target_alias = aliased(link)
-            sources_alias = aliased(IdeaLink)
-            parent_link = sources_alias.target_id == target_alias.c.source_id
-            parents = select(
-                    [sources_alias.source_id, sources_alias.target_id]
-                ).select_from(sources_alias).where(parent_link
-                    & (sources_alias.tombstone_date == tombstone_date))
-            with_parents = link.union(parents)
-            select_exp = select([with_parents.c.source_id.label('id')]
-                ).select_from(with_parents)
+            root_condition = (IdeaLink.target_id == target_id)
+        link = select(
+                [IdeaLink.source_id, IdeaLink.target_id]
+            ).select_from(
+                IdeaLink
+            ).where(
+                (IdeaLink.tombstone_date == tombstone_date) &
+                (root_condition)
+            ).cte(recursive=True)
+        target_alias = aliased(link)
+        sources_alias = aliased(IdeaLink)
+        parent_link = sources_alias.target_id == target_alias.c.source_id
+        parents = select(
+                [sources_alias.source_id, sources_alias.target_id]
+            ).select_from(sources_alias).where(parent_link
+                & (sources_alias.tombstone_date == tombstone_date))
+        with_parents = link.union(parents)
+        select_exp = select([with_parents.c.source_id.label('id')]
+            ).select_from(with_parents)
         if inclusive:
             if isinstance(target_id, int):
                 target_id = literal_column(str(target_id), Integer)
@@ -538,33 +524,24 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
     def get_descendants_query_cls(
             cls, root_idea_id=bindparam('root_idea_id', type_=Integer),
             inclusive=True):
-        if cls.using_virtuoso:
-            sql = text(
-                """SELECT transitive t_in (1) t_out (2) T_DISTINCT T_NO_CYCLES
-                    source_id, target_id FROM idea_idea_link
-                    WHERE tombstone_date IS NULL"""
-                ).columns(column('source_id'), column('target_id')).alias()
-            select_exp = select([sql.c.target_id.label('id')]
-                ).select_from(sql).where(sql.c.source_id==root_idea_id)
-        else:
-            link = select(
-                    [IdeaLink.source_id, IdeaLink.target_id]
-                ).select_from(
-                    IdeaLink
-                ).where(
-                    (IdeaLink.tombstone_date == None) &
-                    (IdeaLink.source_id == root_idea_id)
-                ).cte(recursive=True)
-            source_alias = aliased(link)
-            targets_alias = aliased(IdeaLink)
-            parent_link = targets_alias.source_id == source_alias.c.target_id
-            children = select(
-                    [targets_alias.source_id, targets_alias.target_id]
-                ).select_from(targets_alias).where(parent_link
-                    & (targets_alias.tombstone_date == None))
-            with_children = link.union(children)
-            select_exp = select([with_children.c.target_id.label('id')]
-                ).select_from(with_children)
+        link = select(
+                [IdeaLink.source_id, IdeaLink.target_id]
+            ).select_from(
+                IdeaLink
+            ).where(
+                (IdeaLink.tombstone_date == None) &
+                (IdeaLink.source_id == root_idea_id)
+            ).cte(recursive=True)
+        source_alias = aliased(link)
+        targets_alias = aliased(IdeaLink)
+        parent_link = targets_alias.source_id == source_alias.c.target_id
+        children = select(
+                [targets_alias.source_id, targets_alias.target_id]
+            ).select_from(targets_alias).where(parent_link
+                & (targets_alias.tombstone_date == None))
+        with_children = link.union(children)
+        select_exp = select([with_children.c.target_id.label('id')]
+            ).select_from(with_children)
         if inclusive:
             if isinstance(root_idea_id, int):
                 root_idea_id = literal_column(str(root_idea_id), Integer)

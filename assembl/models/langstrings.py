@@ -161,14 +161,6 @@ class LangString(Base):
         else:
             return [e.as_jsonld(default_lang) for e in self.entries]
 
-    def _before_insert(self):
-        if self.using_virtuoso:
-            # This is a virtuoso workaround: virtuoso does not like
-            # empty inserts.
-            (id,) = self.db.execute(
-                self.id_sequence.next_value().select()).first()
-            self.id = id
-
     def add_entry(self, entry, allow_replacement=True):
         """Add a LangStringEntry to the langstring.
         Previous versions with the same language will be tombstoned,
@@ -650,12 +642,6 @@ class LangString(Base):
     crud_permissions = CrudPermissions(P_READ, P_SYSADMIN, P_SYSADMIN, P_SYSADMIN)
 
 
-if LangString.using_virtuoso:
-    @event.listens_for(LangString, 'before_insert', propagate=True)
-    def receive_before_insert(mapper, connection, target):
-        target._before_insert()
-
-
 class LangStringEntry(TombstonableMixin, Base):
     """A string bound to a given locale. Many of those form a :py:class:`LangString`"""
     __tablename__ = "langstring_entry"
@@ -706,7 +692,7 @@ class LangStringEntry(TombstonableMixin, Base):
         SmallInteger, default=None,
         doc="Type of error from the translation server")
     # tombstone_date = Column(DateTime) implicit from Tombstonable mixin
-    value = Column(UnicodeText)  # not searchable in virtuoso
+    value = Column(UnicodeText)
 
     def __bool__(self):
         return bool(self.value)

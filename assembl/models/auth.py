@@ -490,8 +490,6 @@ class AbstractAgentAccount(Base):
         return CaseInsensitiveWord(self.email)
 
     __table_args__ = (
-        Index("ix_abstract_agent_account_email", email)  # nigh useless
-        if Base.using_virtuoso else
         Index("ix_public_abstract_agent_account_email_ci", func.lower(email)),)
 
     # info={'rdf': QuadMapPatternS(None, SIOC.email)}

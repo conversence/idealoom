@@ -40,22 +40,14 @@ def maybe_cast(column):
     return column if cast_to is None else cast(column, cast_to)
 
 
-def is_virtuoso(session):
-    return str(session.bind.url).startswith('virtuoso')
-
-
 def set_sequence(session, name, value):
     session.execute(
-            "SELECT {command}('{name}', {value})".format(
-                command="sequence_set" if is_virtuoso(session) else "setval",
+            "SELECT setval('{name}', {value})".format(
                 name=name, value=value))
 
 
 def get_sequence(session, name):
-    if is_virtuoso(session):
-        return session.query("sequence_set('%s', 0, 1)" % (name,)).first()[0]
-    else:
-        return session.query("currval('%s')" % (name,)).first()[0]
+    return session.query("currval('%s')" % (name,)).first()[0]
 
 
 def copy_table(source_session, dest_session, source_table, dest_table):
@@ -93,16 +85,13 @@ def copy_table(source_session, dest_session, source_table, dest_table):
                 max_id = max(max_id, get_sequence(
                     source_session, source_table.fullname+"_idsequence"))
                 set_sequence(dest_session, dest_table.fullname+"_idsequence", max_id)
-            elif not is_virtuoso(dest_session):
+            else:
                 set_sequence(dest_session, dest_table.fullname+"_id_seq", max_id)
 
 
 def engine_from_settings(config, full_config=False):
     settings = get_appsettings(config, 'idealoom')
-    if settings['sqlalchemy.url'].startswith('virtuoso:'):
-        db_schema = '.'.join((settings['db_schema'], settings['db_user']))
-    else:
-        db_schema = settings['db_schema']
+    db_schema = settings['db_schema']
     set_config(settings, True)
     session = None
     if full_config:

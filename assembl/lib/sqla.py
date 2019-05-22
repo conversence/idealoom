@@ -119,17 +119,6 @@ def get_target_class(column):
             return cls
 
 
-_using_virtuoso = None
-
-
-def using_virtuoso():
-    global _using_virtuoso
-    if _using_virtuoso is None:
-        _using_virtuoso = str(get_config(
-            )["sqlalchemy.url"]).startswith('virtuoso:')
-    return _using_virtuoso
-
-
 def uses_list(prop):
     "is a property a list?"
     # Weird indirection
@@ -345,17 +334,9 @@ class BaseOps(object):
         return object_session(self)
 
     @classproperty
-    def using_virtuoso(cls):
-        return using_virtuoso()
-
-    @classproperty
     def full_schema(cls):
         config = get_config()
-        if using_virtuoso():
-            return "_".join([
-                config.get('db_schema'), config.get('db_user')])
-        else:
-            return config.get('db_schema')
+        return config.get('db_schema')
 
     def __iter__(self, **kwargs):
         """Return a generator that iterates through model columns."""
@@ -2559,10 +2540,7 @@ def configure_engine(settings, zope_tr=True, autoflush=True, session_maker=None,
         read_engine = None
     session_maker.configure(bind=engine, read_bind=read_engine)
     global db_schema, _metadata, Base, class_registry
-    if str(settings['sqlalchemy.url']).startswith('virtuoso:'):
-        db_schema = '.'.join((settings['db_schema'], settings['db_user']))
-    else:
-        db_schema = settings['db_schema']
+    db_schema = settings['db_schema']
     _metadata = MetaData(schema=db_schema)
     Base = declarative_base(cls=BaseOps, metadata=_metadata,
                             class_registry=class_registry)

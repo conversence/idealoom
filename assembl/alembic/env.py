@@ -11,7 +11,6 @@ from assembl.lib.sqla import (
     connection_url)
 from assembl.lib.zmqlib import configure_zmq
 from assembl.lib.config import set_config
-from assembl.semantic import upgrade_semantic_mapping
 # from assembl.lib.migration import bootstrap_db_data
 
 # this is the Alembic Config object, which provides
@@ -73,4 +72,3 @@ if context.is_offline_mode():
     run_migrations_offline()
 else:
     run_migrations_online()
-upgrade_semantic_mapping()

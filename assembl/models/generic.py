@@ -329,7 +329,7 @@ class Content(TombstonableOriginMixin, DiscussionBoundBase):
     @classmethod
     def best_locale_query(cls, locales):
         "BUGGY. Return a query that will load the post, best subject and best body for the given locales"
-        # this fails because virtuoso, but the SQL is correct.
+        # this failed in virtuoso, check now
         # Note that it fails with just body, and succeeds with subject.
         # Go figure. Fortunately not needed yet.
         subject_ls = aliased(LangString)
@@ -352,9 +352,6 @@ class Content(TombstonableOriginMixin, DiscussionBoundBase):
 
     # TODO: Refactor hidden into PublicationStates.WIDGET_SCOPED
     hidden = Column(Boolean, server_default='0')
-
-    # Another bloody virtuoso bug. Insert with large string fails.
-    # body_text_index = TextIndex(body, clusters=[discussion_id])
 
     __mapper_args__ = {
         'polymorphic_identity': 'content',

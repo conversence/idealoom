@@ -10,8 +10,6 @@ from sqlalchemy.ext.hybrid import Comparator
 from sqlalchemy.sql import func
 from werkzeug.urls import iri_to_uri
 from pyisemail import is_email
-# if using virtuoso
-# from virtuoso.alchemy import CoerceUnicode
 from sqlalchemy import Unicode as CoerceUnicode
 from sqlalchemy.databases import postgresql
 import simplejson as json
@@ -93,16 +91,6 @@ class EmailString(TypeDecorator):
     def copy(self, **kw):
         return self.__class__(self.impl.length)
 
-
-# if using virtuoso
-# class EmailUnicode(CoerceUnicode, EmailString):
-#
-#     def normalize_to_type(self, value, dialect):
-#         return CoerceUnicode.process_bind_param(self, value, dialect)
-#
-#     def process_bind_param(self, value, dialect):
-#         # TODO: Handle RFC 6530
-#         return EmailString.process_bind_param(self, value, dialect)
 
 class EmailUnicode(EmailString):
     impl = CoerceUnicode

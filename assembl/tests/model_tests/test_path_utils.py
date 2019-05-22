@@ -157,6 +157,3 @@ def test_delete_posts(
     assert reply_post_2.is_tombstone
     assert reply_post_1.is_tombstone
 
-
-if Post.using_virtuoso:
-    test_jack_layton_linked_discussion = pytest.mark.xfail(test_jack_layton_linked_discussion)

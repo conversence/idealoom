@@ -12,22 +12,6 @@ ontology_dir = path.abspath(path.join(path.dirname(__file__), 'ontology'))
 local_context_loc = path.join(ontology_dir, 'context.jsonld')
 DEFAULT_ROOT = ontology_dir + "/"
 
-def upgrade_semantic_mapping():
-    from assembl.lib.sqla import using_virtuoso
-    if using_virtuoso():
-        from .virtuoso_mapping import AppQuadStorageManager
-        aqsm = AppQuadStorageManager()
-        aqsm.update_all_storages()
-
-
-def reset_semantic_mapping():
-    from assembl.lib.sqla import using_virtuoso
-    if using_virtuoso():
-        from .virtuoso_mapping import AppQuadStorageManager
-        aqsm = AppQuadStorageManager()
-        aqsm.drop_all()
-        aqsm.update_all_storages()
-
 _jsonld_context = None
 
 def jsonld_context(ontology_root=DEFAULT_ROOT):

@@ -347,7 +347,7 @@ def get_time_series_analytics(request):
             Column('interval_id', Integer, primary_key=True),
             Column('interval_start', DateTime, nullable=False),
             Column('interval_end', DateTime, nullable=False),
-            prefixes=None if discussion.using_virtuoso else ['TEMPORARY']
+            prefixes=['TEMPORARY']
         )
         intervals_table.drop(bind=bind, checkfirst=True)
         intervals_table.create(bind=bind)
@@ -1157,7 +1157,7 @@ def get_participant_time_series_analytics(request):
             Column('interval_id', Integer, primary_key=True),
             Column('interval_start', DateTime, nullable=False),
             Column('interval_end', DateTime, nullable=False),
-            prefixes=None if discussion.using_virtuoso else ['TEMPORARY']
+            prefixes=['TEMPORARY']
         )
         # In case there is a leftover from a previous crash
         intervals_table.drop(bind=bind, checkfirst=True)
