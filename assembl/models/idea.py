@@ -29,6 +29,7 @@ from sqlalchemy import (
     UnicodeText,
     DateTime,
     ForeignKey,
+    Index,
     inspect,
     select,
     event,
@@ -1657,6 +1658,10 @@ class IdeaLocalUserRole(AbstractLocalUserRole):
     idea = relationship(
         Idea, backref=backref(
             "local_user_roles", cascade="all, delete-orphan", lazy="subquery"))
+
+    __table_args__ = (
+        Index('ix_idea_local_user_role_user_idea',
+              'profile_id', 'idea_id'),)
 
     @classmethod
     def filter_on_instance(cls, instance, query):

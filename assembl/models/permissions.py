@@ -199,13 +199,9 @@ class LocalUserRole(AbstractLocalUserRole):
             "local_user_roles", cascade="all, delete-orphan"),
         info={'rdf': QuadMapPatternS(None, ASSEMBL.in_conversation)})
     requested = Column(Boolean, server_default='0', default=False)
-    # BUG in virtuoso: It will often refuse to create an index
-    # whose name exists in another schema. So having this index in
-    # schemas assembl and assembl_test always fails.
-    # TODO: Bug virtuoso about this,
-    # or introduce the schema name in the index name as workaround.
-    # __table_args__ = (
-    #     Index('user_discussion_idx', 'profile_id', 'discussion_id'),)
+    __table_args__ = (
+        Index('ix_local_user_role_user_discussion',
+              'profile_id', 'discussion_id'),)
 
     def get_discussion_id(self):
         return self.discussion_id or self.discussion.id
