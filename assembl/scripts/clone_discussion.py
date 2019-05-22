@@ -555,6 +555,12 @@ def clone_discussion(
             values['base_id'] = history_new_base_ids.get(
                 (ob.__class__, ob.base_id), None)
             copy = ob.__class__(**values)
+            copy._before_insert()  # set the base_id
+            if ob.is_tombstone:
+                copy.id = None
+                copy._before_insert()  # reset a new id
+            else:
+                copy.id = copy.base_id
             history_new_base_ids[(ob.__class__, ob.base_id)] = copy.base_id
         else:
             copy = ob.__class__(**values)
@@ -646,11 +652,12 @@ def clone_discussion(
             uri_qnum = {}
             for vs in copy.vote_specifications:
                 j = vs.settings_json
-                old_id = j['@id']
+                old_id = j.get('@id', None)
                 uri = vs.uri()
                 j['@id'] = uri
                 vs.settings_json = j
-                uri_equivs[old_id] = uri
+                if old_id:
+                    uri_equivs[old_id] = uri
                 uri_qnum[vs.question_id] = uri
             j = copy.settings_json
             for qnum, item in enumerate(j['items']):

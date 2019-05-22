@@ -161,9 +161,10 @@ class HistoryMixin(TombstonableMixin):
 
     def _before_insert(self):
         if self.base_id:
-            (id,) = self.db.execute(
-                self.id_sequence.next_value().select()).first()
-            self.id = id
+            if not self.id:
+                (id,) = self.db.execute(
+                    self.id_sequence.next_value().select()).first()
+                self.id = id
         else:
             res = self.db.execute(
                 self.identity_table.insert().values(
