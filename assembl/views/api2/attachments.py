@@ -47,7 +47,7 @@ def delete_file(request):
 
 def disposition(title):
     escaped_double_quotes_filename = title.replace(u'"', u'\\"'
-        ).encode('iso-8859-1', 'replace')
+        ).encode('iso-8859-1', 'replace').decode('iso-8859-1')
     url_quoted_utf8_filename = url_quote(title.encode('utf-8'))
     return 'attachment; filename="%s"; filename*=utf-8\'\'%s' % (
         escaped_double_quotes_filename, url_quoted_utf8_filename)
@@ -114,7 +114,7 @@ def get_file(request):
         **kwargs
     )
     if handoff_to_nginx:
-        r.headers['X-Accel-Redirect'] = f.handoff_url
+        r.headers['X-Accel-Redirect'] = f.handoff_url.decode('ascii')
     return r
 
 
