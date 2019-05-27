@@ -57,6 +57,21 @@ class FunctionManager(object):
 
 
 class PostgresFunctionManager(FunctionManager):
+    extensions = ('plpgsql', 'pg_trgm')
+    def ensureFunctionsExist(self):
+        # self.ensureExtensions()
+        super(PostgresFunctionManager, self).ensureFunctionsExist()
+
+    def ensureExtensions(self):
+        installed = list(self.session.execute(
+            'SELECT extname FROM pg_extension'))
+        print(installed)
+        for name in self.extensions:
+            if (name,) not in installed:
+                raise RuntimeError(
+                    "Missing Postgres extension: %s. "
+                    "Please install as superuser." % (name,))
+
     def testFunctionExists(self, fname):
         (exists,) = self.session.execute(
             "select exists(select * from pg_proc where proname = '%s');" % (

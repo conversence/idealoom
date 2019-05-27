@@ -1463,6 +1463,23 @@ def compile_fontello_fonts():
                         ffile.write(fdata.read())
 
 
+def run_db_superuser_command(command, database=None):
+    db_user = system_db_user()
+    pypsql = join(code_root(), 'assembl', 'scripts', 'pypsql.py')
+    database_flag = '-d ' + database if database else ''
+    if is_local(env.host_string) and db_user:
+        pwd_flag = ''
+        sudo_user = db_user
+    else:
+        db_password = env.get('postgres_db_password', None)
+        assert db_password is not None, "We need a password for postgres on " + host
+        pwd_flag = "-p '%s'" % db_password
+        sudo_user = None
+    run_db_command('python {pypsql} -u {db_user} -n {host} {pwd_flag} {database_flag} "{command}"'.format(
+        command=command, pypsql=pypsql, db_user=db_user, host=host, pwd_flag=pwd_flag, database_flag=database_flag),
+        sudo_user)
+
+
 @task
 def check_and_create_database_user(host=None, user=None, password=None):
     """
@@ -1481,20 +1498,9 @@ def check_and_create_database_user(host=None, user=None, password=None):
             pypsql=pypsql, password=password, host=host, user=user))
     if checkUser.failed:
         print(yellow("User does not exist, let's try to create it. (The error above is not problematic if the next command which is going to be run now will be successful. This next command tries to create the missing Postgres user.)"))
-        db_user = system_db_user()
-        if is_local(env.host_string) and db_user:
-            db_password_string = ''
-            sudo_user = db_user
-        else:
-            db_password = env.get('postgres_db_password', None)
-            assert db_password is not None, "We need a password for postgres on " + host
-            db_password_string = "-p '%s'" % db_password
-            sudo_user = None
-        run_db_command('python {pypsql} -u {db_user} -n {host} {db_password_string} "{command}"'.format(
-            command="CREATE USER %s WITH CREATEDB ENCRYPTED PASSWORD '%s'; COMMIT;" % (
-                user, password),
-            pypsql=pypsql, db_user=db_user, host=host, db_password_string=db_password_string),
-            sudo_user)
+        run_db_superuser_command(
+            "CREATE USER %s WITH CREATEDB ENCRYPTED PASSWORD '%s'; COMMIT;" % (
+                user, password))
     else:
         print(green("User exists and can connect"))
 
@@ -1599,6 +1605,8 @@ def database_create():
                     database=env.db_database))
         if createDatabase.succeeded:
             print(green("Database created successfully!"))
+        # checkExtensions = run_db_superuser_command(
+        #     "CREATE EXTENSION pg_trgm", database=env.db_database)
     else:
         print(green("Database exists and user can connect"))
 
