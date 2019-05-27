@@ -797,6 +797,8 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
         from .idea_content_link import Extract
         from .announcement import Announcement
         from .attachment import Attachment
+        from .idea import IdeaLocalUserRole, Idea
+
         post = with_polymorphic(Post, [Post])
         attachment = with_polymorphic(Attachment, [Attachment])
         extract = with_polymorphic(Extract, [Extract])
@@ -804,6 +806,8 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
         queries = [
             db.query(LocalUserRole.profile_id.label('user_id')).filter(
                 LocalUserRole.discussion_id == self.id),
+            db.query(IdeaLocalUserRole.profile_id.label('user_id')).join(Idea).filter(
+                Idea.discussion_id == self.id),
             db.query(post.creator_id.label('user_id')).filter(
                 post.discussion_id == self.id),
             db.query(extract.creator_id.label('user_id')).filter(
