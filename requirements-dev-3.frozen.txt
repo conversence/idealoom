@@ -35,9 +35,9 @@ backcall==0.1.0           # via ipython
 bcrypt==3.1.6             # via paramiko
 beautifulsoup4==4.7.1
 billiard==3.6.0.0         # via celery
-boto3==1.9.156            # via smart-open
+boto3==1.9.157            # via smart-open
 boto==2.49.0              # via smart-open
-botocore==1.12.156        # via boto3, s3transfer
+botocore==1.12.157        # via boto3, s3transfer
 cachetools==3.1.1         # via google-auth, premailer
 cchardet==2.1.4
 celery==4.3.0
@@ -87,6 +87,7 @@ idna==2.8                 # via idna-ssl, requests, yarl
 imagesize==1.1.0          # via sphinx
 imapclient==2.1.0
 imaplib2==2.45.0
+importlib-metadata==0.15  # via pluggy
 ipython-genutils==0.2.0   # via traitlets
 ipython==7.5.0 ; python_version >= "3"
 iso639==0.1.4
@@ -111,7 +112,7 @@ multidict==4.5.2          # via aiohttp, yarl
 naturalsort==1.5.1        # via rotate-backups, update-dotdee
 ndg_httpsclient==0.5.1
 nodeenv==1.3.3
-numpy==1.16.3             # via gensim, scikit-learn, scipy
+numpy==1.16.4             # via gensim, scikit-learn, scipy
 oauthlib==3.0.1           # via requests-oauthlib
 openpyxl==2.6.2
 packaging==19.0           # via sphinx
@@ -125,7 +126,7 @@ pip-tools==3.7.0
 pkgconfig==1.5.1          # via xmlsec
 plaster-pastedeploy==0.7  # via pyramid
 plaster==1.0              # via plaster-pastedeploy, pyramid
-pluggy==0.11.0            # via pytest
+pluggy==0.12.0            # via pytest
 ply==3.11                 # via jsonpath-ng
 polib==1.1.0
 premailer==3.4.1
@@ -140,7 +141,7 @@ pyasn1==0.4.5             # via ndg-httpsclient, paramiko, pyasn1-modules, rsa
 pycares==3.0.0            # via aiodns
 pycparser==2.19           # via cffi
 pydot==1.4.1              # via sqlalchemy-schemadisplay
-pygments==2.4.1           # via ipython, pyramid-debugtoolbar, sphinx
+pygments==2.4.2           # via ipython, pyramid-debugtoolbar, sphinx
 pygraphviz==1.5
 pyisemail==1.3.2
 pyjwt==1.7.1
@@ -208,7 +209,7 @@ sphinxcontrib-serializinghtml==1.1.3  # via sphinx
 sphinxcontrib-zopeext==0.2.1
 splinter==0.10.0          # via pytest-splinter
 sqlalchemy-schemadisplay==1.3
-sqlalchemy==1.3.3
+sqlalchemy==1.3.4
 sqlparse==0.3.0
 structlog==19.1.0
 termcolor==1.1.0
@@ -234,6 +235,7 @@ webtest==2.0.33
 werkzeug==0.15.4
 xmlsec==1.3.3             # via python3-saml
 yarl==1.3.0               # via aiohttp
+zipp==0.5.1               # via importlib-metadata
 zope.component==4.5
 zope.deferredimport==4.3  # via zope.component
 zope.deprecation==4.4.0   # via pyramid, pyramid-jinja2, zope.component
