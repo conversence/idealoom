@@ -353,7 +353,7 @@ class AgentProfile(Base):
     def accepted_tos_version(self, value):
         status = self.status_in_current_discussion
         assert status
-        status.accepted_tos_version = int(value)
+        status.accepted_tos_version = int(value) if value else None
 
     @property
     def was_created_on_current_discussion(self):
