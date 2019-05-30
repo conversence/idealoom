@@ -116,7 +116,10 @@ class PublicationState(ContextualNamedClassMixin, Base):
 
     def unique_query(self):
         query, _ = super(PublicationState, self).unique_query()
-        return query.filter_by(label=self.label, flow=self.flow), True
+        query = query.filter_by(label=self.label)
+        if self.flow.id:
+            return query.filter_by(flow=self.flow), True
+        return  query, False
 
     crud_permissions = CrudPermissions(P_SYSADMIN, P_READ, P_SYSADMIN)
 
@@ -190,7 +193,10 @@ class PublicationTransition(ContextualNamedClassMixin, Base):
 
     def unique_query(self):
         query, _ = super(PublicationTransition, self).unique_query()
-        return query.filter_by(label=self.label, flow=self.flow), True
+        query = query.filter_by(label=self.label)
+        if self.flow.id:
+            return query.filter_by(flow=self.flow), True
+        return  query, False
 
     @property
     def req_permission_name(self):
