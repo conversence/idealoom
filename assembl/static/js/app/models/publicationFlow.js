@@ -70,7 +70,13 @@ class publicationFlowCollection extends Base.Collection.extend({
   /**
    * @member {string} app.models.publicationFlow.publicationFlowCollection.url
    */
-  url: Ctx.getApiV2DiscussionUrl("all_pub_flows"),
+  url: function() {
+    if (Ctx.getDiscussionId() > 0) {
+      return Ctx.getApiV2DiscussionUrl("all_pub_flows")
+    } else {
+      return Ctx.getApiV2Url("PublicationFlow?view=extended")
+    }
+  },
 
   /**
    * The model
