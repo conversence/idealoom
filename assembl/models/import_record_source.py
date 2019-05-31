@@ -14,6 +14,7 @@ from ..lib.sqla_types import URLString
 from ..lib.utils import get_global_base_url
 from .import_records import ImportRecord
 from .generic import ContentSource
+from ..tasks.source_reader import PullSourceReader, ClientError, IrrecoverableError
 
 
 class ImportRecordSource(ContentSource, PromiseObjectImporter):

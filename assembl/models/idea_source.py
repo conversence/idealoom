@@ -17,7 +17,6 @@ from requests.cookies import RequestsCookieJar as CookieJar
 from .auth import AgentProfile
 from .import_record_source import ImportRecordSource
 from .idea import Idea, IdeaLink
-from ..tasks.source_reader import PullSourceReader, ClientError, IrrecoverableError
 from .publication_states import PublicationState
 from ..lib.sqla import get_named_class
 
