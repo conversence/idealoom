@@ -33,6 +33,9 @@ class ImportRecordSource(ContentSource, PromiseObjectImporter):
         super(ImportRecordSource, self).__init__(*args, **kwargs)
         self.init_on_load()
 
+    def login(self):
+        return True
+
     @reconstructor
     def init_on_load(self):
         self.parsed_data_filter = parse(self.data_filter) if self.data_filter else None
