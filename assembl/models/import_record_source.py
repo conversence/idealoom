@@ -206,3 +206,27 @@ class ImportRecordSource(ContentSource, PromiseObjectImporter):
 
     def process_new_object(self, ext_id, instance):
         self[ext_id] = instance
+
+    def make_reader(self):
+        return SimpleImportReader(self.id)
+
+
+class SimpleImportReader(PullSourceReader):
+    def __init__(self, source_id):
+        super(SimpleImportReader, self).__init__(source_id)
+
+    def login(self):
+        try:
+            login = self.source.login()
+            if not login:
+                raise IrrecoverableError("could not login")
+        except AssertionError:
+            raise ClientError("login connection error")
+
+    def do_read(self):
+        sess = self.source.db
+        try:
+            self.source.read()
+            sess.commit()
+        except Exception as e:
+            self.new_error(e)

@@ -131,7 +131,7 @@ class ContentSource(DiscussionBoundBase, OriginMixin):
         wake(self.id, reimport=not only_new)
 
     def make_reader(self):
-        return None
+        raise NotImplementedError()
 
     def get_discussion_id(self):
         return self.discussion_id or self.discussion.id
@@ -227,6 +227,10 @@ class AnnotatorSource(ContentSource):
     def generate_message_id(self, source_post_id):
         return source_post_id or (uuid.uuid1().hex +
             "_annotator@" + config.get('public_hostname'))
+
+    def make_reader(self):
+        # only push
+        return None
 
 
 class ContentSourceIDs(Base):
