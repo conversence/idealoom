@@ -3,6 +3,7 @@ from simplejson import dumps, loads
 import logging
 from datetime import datetime
 
+from Levenshtein import jaro_winkler
 from pyramid.response import Response
 from pyramid.view import view_config
 from pyramid.settings import asbool
@@ -14,6 +15,7 @@ from pyramid.httpexceptions import (
     HTTPOk, HTTPNoContent, HTTPForbidden, HTTPNotImplemented, HTTPError,
     HTTPPreconditionFailed, HTTPConflict)
 from pyisemail import is_email
+from sqlalchemy.sql.expression import literal
 
 import assembl.lib.config as settings
 from assembl.lib.web_token import decode_token, TokenInvalid
@@ -696,22 +698,44 @@ def modify_user_language_preference(request):
              ctx_class=AgentProfile, name='autocomplete', permission=P_ADMIN_DISC)
 @view_config(context=CollectionContext, renderer='json',
              ctx_collection_class=AgentProfile, name='autocomplete', permission=P_READ)
-def autocomplete(request):
-    keywords = request.GET.get('q')
-    if not keywords:
+def participant_autocomplete(request):
+    ctx = request.context
+    keyword = request.GET.get('q')
+    if not keyword:
         raise HTTPBadRequest("please specify search terms (q)")
-    discussion = request.context.get_instance_of_class(Discussion)
-    query = Discussion.default_db.query(AgentProfile.id, AgentProfile.name)
+    limit = request.GET.get('limit', 20)
+    try:
+        limit = int(limit)
+    except:
+        raise HTTPBadRequest("limit must be an integer")
+    if limit > 100:
+        raise HTTPBadRequest("be reasonable")
+    query = AgentProfile.default_db.query(
+            AgentProfile.id, AgentProfile.name, User.username
+        ).outerjoin(User).filter((User.verified == True) | (User.id == None))
+    discussion = ctx.get_instance_of_class(Discussion)
     if discussion:
         query = query.filter(AgentProfile.id.in_(
-            discussion.get_participants_query(
-                True, True, request.authenticated_userid
-            ).subquery()))
-    limit = int(request.GET.get('limit') or 20)
-    query, rank = add_simple_text_search(
-        query, [AgentProfile.name], keywords.split())
-    query = query.order_by(rank.desc()).limit(limit).all()
-    print(query)
+            discussion.get_participants_query(True, True).subquery()))
+
+    if len(keyword) < 6:
+        query = query.add_column(literal(0))
+        matchstr = '%'.join(keyword)
+        matchstr = '%'.join(('', matchstr, ''))
+        agents = query.filter(AgentProfile.name.ilike(matchstr) |
+                             User.username.ilike(matchstr)
+            ).limit(limit * 5).all()
+        agents.sort(key=lambda u: max(
+            jaro_winkler(u[1], keyword),
+            jaro_winkler(u[2], keyword) if u[2] else 0
+            ), reverse=True)
+        num = min(len(agents), limit)
+        agents = agents[:num]
+    else:
+        matchstr = keyword
+        query, rank = add_simple_text_search(
+            query, [AgentProfile.name], keyword.split())
+        agents = query.order_by(rank.desc()).limit(limit).all()
     return {'results': [{
         'id': AgentProfile.uri_generic(id),
-        'text': name} for (id, name, rank) in query]}
+        'text': name} for (id, name, username, rank) in agents]}

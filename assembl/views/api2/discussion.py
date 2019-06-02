@@ -1539,45 +1539,6 @@ def get_participant_time_series_analytics(request):
     return csv_response(rows, format)
 
 
-@view_config(context=InstanceContext, name="participant_autocomplete",
-             ctx_instance_class=Discussion, request_method='GET',
-             permission=P_READ, renderer='json')
-def participant_autocomplete(request):
-    from assembl.models import AgentProfile, User
-    from Levenshtein import jaro_winkler
-    ctx = request.context
-    discussion = ctx._instance
-    keyword = request.GET.get('q')
-    if not keyword:
-        raise HTTPBadRequest("please specify search terms (q)")
-    limit = request.GET.get('limit', 5)
-    try:
-        limit = int(limit)
-    except:
-        raise HTTPBadRequest("limit must be an integer")
-    if limit > 100:
-        raise HTTPBadRequest("be reasonable")
-    if len(keyword) < 6:
-        matchstr = '%'.join(keyword)
-    else:
-        matchstr = keyword
-    matchstr = '%'.join(('', matchstr, ''))
-    query = discussion.get_participants_query(False, True)
-    query = query.filter(AgentProfile.name.like(matchstr) | User.username.like(matchstr)).limit(100)
-    agents = query.all()
-    agents.sort(key=lambda u: max(
-        jaro_winkler(u.name, keyword),
-        jaro_winkler(u.username, keyword) if u.username else 0
-        ), reverse=True)
-    num = min(len(agents), limit)
-    agents = agents[:num]
-    view = (request.matchdict or {}).get('view', None)\
-        or ctx.get_default_view() or 'default'
-    if view == 'id_only':
-        return [u.id for u in agents]
-    return [u.generic_json(view) for u in agents]
-
-
 def includeme(config):
     # Make sure that the cornice view is registered
     pass
