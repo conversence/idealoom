@@ -32,7 +32,7 @@ from .auth import (
 )
 from .social_auth import SocialAuthAccount
 
-from ..auth import (CrudPermissions, P_EXPORT_EXTERNAL_SOURCE, P_SYSADMIN)
+from ..auth import CrudPermissions, Permissions
 from ..lib.config import get_config
 from ..lib.sqla_types import URLString
 from ..lib.parsedatetime import parse_datetime
@@ -1256,8 +1256,8 @@ class FacebookAccessToken(Base):
         query = query.join(alias.user)
         return (query, SocialAuthAccount.profile_id == user_id)
 
-    crud_permissions = CrudPermissions(P_EXPORT_EXTERNAL_SOURCE, P_SYSADMIN,
-                                       read_owned=P_EXPORT_EXTERNAL_SOURCE)
+    crud_permissions = CrudPermissions(Permissions.EXPORT_EXTERNAL_SOURCE, Permissions.SYSADMIN,
+                                       read_owned=Permissions.EXPORT_EXTERNAL_SOURCE)
 
 
 class FacebookPost(ImportedPost):

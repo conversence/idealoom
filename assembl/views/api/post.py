@@ -30,7 +30,7 @@ from assembl.lib.config import get
 from assembl.lib.text_search import (
     add_text_search, postgres_language_configurations)
 from assembl.views.api import API_DISCUSSION_PREFIX
-from assembl.auth import P_READ, P_ADD_POST
+from assembl.auth import Permissions
 from assembl.tasks.translate import (
     translate_content,
     PrefCollectionTranslationTable)
@@ -58,7 +58,7 @@ post_read = Service(name='post_read', path=API_DISCUSSION_PREFIX + '/post_read/{
 _ = TranslationStringFactory('assembl')
 
 
-@posts.get(permission=P_READ)
+@posts.get(permission=Permissions.READ)
 def get_posts(request):
     """
     Query interface on posts
@@ -431,7 +431,7 @@ def get_posts(request):
     return data
 
 
-@post.get(permission=P_READ)
+@post.get(permission=Permissions.READ)
 def get_post(request):
     post_id = request.matchdict['id']
     post = Post.get_instance(post_id)
@@ -446,7 +446,7 @@ def get_post(request):
     return post.generic_json(view_def, user_id, permissions)
 
 
-@post_read.put(permission=P_READ)
+@post_read.put(permission=Permissions.READ)
 def mark_post_read(request):
     """Mark this post as un/read. Return the read post count for all affected ideas."""
     discussion = request.context
@@ -487,7 +487,7 @@ def mark_post_read(request):
         } for (idea_id, read_posts) in new_counts] }
 
 
-@posts.post(permission=P_ADD_POST)
+@posts.post(permission=Permissions.ADD_POST)
 def create_post(request):
     """
     Create a new post in this discussion.

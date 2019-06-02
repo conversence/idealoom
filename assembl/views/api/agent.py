@@ -7,7 +7,7 @@ from sqlalchemy.orm import joinedload
 from cornice import Service
 
 from assembl.views.api import API_DISCUSSION_PREFIX
-from assembl.auth import (P_READ, Everyone, P_SYSADMIN, P_ADMIN_DISC)
+from assembl.auth import Permissions, Everyone
 from assembl.models import (
     Discussion, AgentProfile, EmailAccount, User)
 
@@ -31,7 +31,7 @@ def _get_agents_real(request, user_id=None, view_def='default'):
     user_id = user_id or Everyone
     agents = discussion.get_participants_query()
     permissions = request.permissions
-    include_emails = P_ADMIN_DISC in permissions or P_SYSADMIN in permissions
+    include_emails = Permissions.ADMIN_DISC in permissions or Permissions.SYSADMIN in permissions
     if include_emails:
         agents = agents.options(joinedload(AgentProfile.accounts))
     num_posts_per_user = \
@@ -50,14 +50,14 @@ def _get_agents_real(request, user_id=None, view_def='default'):
     return [view(agent) for agent in agents if agent is not None]
 
 
-@agents.get(permission=P_READ)
+@agents.get(permission=Permissions.READ)
 def get_agents(request, discussion_only=False):
     view_def = request.GET.get('view')
     return _get_agents_real(
         request, authenticated_userid(request), view_def)
 
 
-@agent.get(permission=P_READ)
+@agent.get(permission=Permissions.READ)
 def get_agent(request):
     view_def = request.GET.get('view') or 'default'
     agent_id = request.matchdict['id']

@@ -32,7 +32,7 @@ from .auth import User, AgentProfile
 from .generic import Content
 from .discussion import Discussion
 from .idea import Idea
-from ..auth import P_READ, P_SYSADMIN, CrudPermissions
+from ..auth import Permissions, CrudPermissions
 
 
 class Action(TombstonableMixin, OriginMixin, DiscussionBoundBase):
@@ -112,7 +112,7 @@ class Action(TombstonableMixin, OriginMixin, DiscussionBoundBase):
         return (query, alias.actor_id == user_id)
 
     crud_permissions = CrudPermissions(
-        P_READ, P_SYSADMIN, P_SYSADMIN, P_SYSADMIN, P_READ, P_READ, P_READ)
+        Permissions.READ, Permissions.SYSADMIN, Permissions.SYSADMIN, Permissions.SYSADMIN, Permissions.READ, Permissions.READ, Permissions.READ)
 
 
 Action.creation_date.info['rdf'] = QuadMapPatternS(None, VERSION.when)
@@ -243,7 +243,7 @@ class LikedPost(UniqueActionOnPost):
     verb = 'liked'
 
     crud_permissions = CrudPermissions(
-        P_READ, P_READ, P_SYSADMIN, P_SYSADMIN, P_READ, P_READ, P_READ)
+        Permissions.READ, Permissions.READ, Permissions.SYSADMIN, Permissions.SYSADMIN, Permissions.READ, Permissions.READ, Permissions.READ)
 
 
 @event.listens_for(LikedPost, 'after_insert', propagate=True)

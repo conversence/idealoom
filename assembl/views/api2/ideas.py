@@ -6,14 +6,14 @@ from sqlalchemy.orm import aliased
 
 from ..traversal import (InstanceContext, CollectionContext)
 from . import instance_view
-from assembl.auth import (CrudPermissions, P_READ, P_EDIT_IDEA)
+from assembl.auth import CrudPermissions, Permissions
 from assembl.lib.text_search import add_text_search
 from assembl.models import (
     Idea, LangString, LangStringEntry, LanguagePreferenceCollection, Discussion)
 
 
 @view_config(context=InstanceContext, request_method='DELETE', renderer='json',
-             ctx_instance_class=Idea, permission=P_EDIT_IDEA)
+             ctx_instance_class=Idea, permission=Permissions.EDIT_IDEA)
 def instance_del(request):
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
@@ -63,7 +63,7 @@ def pub_state_transition(request):
 
 
 @view_config(context=CollectionContext, renderer='json',
-             ctx_collection_class=Idea, name='autocomplete', permission=P_READ)
+             ctx_collection_class=Idea, name='autocomplete', permission=Permissions.READ)
 def autocomplete(request):
     discussion = request.context.get_instance_of_class(Discussion)
     keywords = request.GET.get('q')

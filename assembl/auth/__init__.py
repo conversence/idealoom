@@ -3,6 +3,7 @@
 This module defines basic roles and permissions."""
 
 from builtins import object
+from enum import Enum
 from pyramid.security import (
     Everyone, Authenticated, ALL_PERMISSIONS)
 
@@ -19,42 +20,43 @@ SYSTEM_ROLES = set(
     (Everyone, Authenticated, R_PARTICIPANT, R_CATCHER,
      R_MODERATOR, R_ADMINISTRATOR, R_SYSADMIN, R_OWNER))
 
-# Permissions
-P_READ_USER_INFO = 'User.R.baseInfo'
-P_READ = 'Conversation.R'
-P_READ_IDEA = 'Idea.R'
-P_ADD_POST = 'Post.C'
-P_EDIT_POST = 'Post.U'
-P_DELETE_POST = 'Post.D'
-P_VOTE = 'Idea.C.Vote'
-P_ADD_EXTRACT = 'Content.C.Extract'
-P_EDIT_EXTRACT = 'Extract.U'
-P_ADD_IDEA_DRAFT = 'Idea.C.draft'
-P_ASSOCIATE_IDEA = 'Idea.A.Idea'
-P_ADD_IDEA = 'Idea.C'
-P_EDIT_IDEA = 'Idea.U'
-P_EDIT_SYNTHESIS = 'Synthesis.U'
-P_SEND_SYNTHESIS = 'Synthesis.U.send'
-P_SELF_REGISTER = 'Conversation.A.User'
-P_SELF_REGISTER_REQUEST = 'Conversation.A.User.request'
-P_ADMIN_DISC = 'Conversation.U'
-P_SYSADMIN = '*'
-P_EXPORT_EXTERNAL_SOURCE = 'Content.U.export'
-P_MODERATE = 'Content.U.moderate'
-P_DISC_STATS = 'Conversation.U.stats'
-P_OVERRIDE_SOCIAL_AUTOLOGIN = 'Conversation.A.User.override_autologin'
-P_ASSOCIATE_EXTRACT = 'Idea.A.Extract'
+class Permissions(Enum):
+    READ_USER_INFO = 'User.R.baseInfo'
+    READ = 'Conversation.R'
+    READ_IDEA = 'Idea.R'
+    ADD_POST = 'Post.C'
+    EDIT_POST = 'Post.U'
+    DELETE_POST = 'Post.D'
+    VOTE = 'Idea.C.Vote'
+    ADD_EXTRACT = 'Content.C.Extract'
+    EDIT_EXTRACT = 'Extract.U'
+    ADD_IDEA_DRAFT = 'Idea.C.draft'
+    ASSOCIATE_IDEA = 'Idea.A.Idea'
+    ADD_IDEA = 'Idea.C'
+    EDIT_IDEA = 'Idea.U'
+    EDIT_SYNTHESIS = 'Synthesis.U'
+    SEND_SYNTHESIS = 'Synthesis.U.send'
+    SELF_REGISTER = 'Conversation.A.User'
+    SELF_REGISTER_REQUEST = 'Conversation.A.User.request'
+    ADMIN_DISC = 'Conversation.U'
+    SYSADMIN = '*'
+    EXPORT_EXTERNAL_SOURCE = 'Content.U.export'
+    MODERATE = 'Content.U.moderate'
+    DISC_STATS = 'Conversation.U.stats'
+    OVERRIDE_SOCIAL_AUTOLOGIN = 'Conversation.A.User.override_autologin'
+    ASSOCIATE_EXTRACT = 'Idea.A.Extract'
+
+    @classmethod
+    def by_value(cls, value):
+        for v in cls.__members__.values():
+            if v.value == value:
+                return v
+
+    def __json__(self):
+        return self.value
+
 
 MAYBE = "MAYBE"
-
-ASSEMBL_PERMISSIONS = set((
-    P_READ, P_ADD_POST, P_EDIT_POST, P_DELETE_POST, P_VOTE, P_ADD_EXTRACT,
-    P_EDIT_EXTRACT, P_ADD_IDEA, P_EDIT_IDEA, P_EDIT_SYNTHESIS,
-    P_SEND_SYNTHESIS, P_SELF_REGISTER, P_SELF_REGISTER_REQUEST,
-    P_ADMIN_DISC, P_SYSADMIN, P_READ_USER_INFO, P_OVERRIDE_SOCIAL_AUTOLOGIN,
-    P_EXPORT_EXTERNAL_SOURCE, P_MODERATE, P_DISC_STATS, P_ASSOCIATE_EXTRACT,
-    P_ADD_IDEA_DRAFT, P_READ_IDEA, P_ASSOCIATE_IDEA
-))
 
 
 class CrudPermissions(object):
@@ -76,17 +78,17 @@ class CrudPermissions(object):
     def __init__(self, create=None, read=None, update=None, delete=None,
                  update_owned=None, delete_owned=None, read_owned=None,
                  variable=False):
-        self.create = create or P_SYSADMIN
-        self.read = read or P_READ
-        self.update = update or create or P_SYSADMIN
-        self.delete = delete or P_SYSADMIN
+        self.create = create or Permissions.SYSADMIN
+        self.read = read or Permissions.READ
+        self.update = update or create or Permissions.SYSADMIN
+        self.delete = delete or Permissions.SYSADMIN
         self.read_owned = read_owned or self.read
         self.update_owned = update_owned or self.update
         self.delete_owned = delete_owned or self.delete
         self.variable = variable
 
     def can(self, operation, permissions):
-        if P_SYSADMIN in permissions:
+        if Permissions.SYSADMIN in permissions:
             return True
         needed, needed_owned = self.crud_permissions(operation)
         if needed in permissions:

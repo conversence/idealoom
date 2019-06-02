@@ -42,8 +42,7 @@ from assembl.models import (
     EmailAccount, IdentityProvider, SocialAuthAccount,
     AgentProfile, User, Role, LocalUserRole, Preferences,
     AbstractAgentAccount, Discussion, AgentStatusInDiscussion)
-from assembl.auth import (
-    P_READ, R_PARTICIPANT, P_SELF_REGISTER, P_SELF_REGISTER_REQUEST)
+from assembl.auth import (Permissions, R_PARTICIPANT)
 from assembl.auth.password import (
     verify_email_token, verify_password_change_token,
     password_change_token, Validity, get_data_token_time)
@@ -76,9 +75,9 @@ def get_login_context(request, force_show_providers=False):
     providers = get_provider_data(get_routes)
     hide_registration = (discussion
         and not public_roles.intersection(set(roles_with_permissions(
-            discussion, P_READ)))
+            discussion, Permissions.READ)))
         and not roles_with_permissions(
-            discussion, P_SELF_REGISTER_REQUEST, P_SELF_REGISTER))
+            discussion, Permissions.SELF_REGISTER_REQUEST, Permissions.SELF_REGISTER))
     if not force_show_providers:
         hide_providers = aslist(request.registry.settings.get(
             'hide_login_providers', ()))
@@ -408,8 +407,8 @@ def assembl_register_view(request):
     discussion = discussion_from_request(request)
     if discussion:
         permissions = get_permissions(Everyone, discussion.id)
-        if not (P_SELF_REGISTER in permissions or
-                P_SELF_REGISTER_REQUEST in permissions):
+        if not (Permissions.SELF_REGISTER in permissions or
+                Permissions.SELF_REGISTER_REQUEST in permissions):
             discussion = None
     if discussion:
         _now = datetime.utcnow()

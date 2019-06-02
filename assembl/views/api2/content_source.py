@@ -4,11 +4,7 @@ from pyramid.httpexceptions import (
     HTTPUnauthorized, HTTPError, HTTPBadRequest)
 from dateutil.parser import parse
 
-from assembl.auth import (
-    P_READ,
-    P_ADMIN_DISC,
-    P_EXPORT_EXTERNAL_SOURCE,
-    Everyone)
+from assembl.auth import Permissions, Everyone
 from assembl.models import ContentSource
 from ..traversal import InstanceContext
 from . import JSON_HEADER
@@ -16,7 +12,7 @@ from assembl.tasks.source_reader import wake
 
 
 @view_config(context=InstanceContext, request_method='POST',
-             ctx_instance_class=ContentSource, permission=P_READ,
+             ctx_instance_class=ContentSource, permission=Permissions.READ,
              header=JSON_HEADER, renderer='json', name="fetch_posts")
 def fetch_posts(request):
     ctx = request.context
@@ -42,7 +38,7 @@ def fetch_posts(request):
     if force_restart or reimport or upper_bound or lower_bound or reprocess:
         # Only discussion admins
         user_id = authenticated_userid(request) or Everyone
-        if P_ADMIN_DISC not in ctx.get_permissions():
+        if Permissions.ADMIN_DISC not in ctx.get_permissions():
             requested = []
             if reimport:
                 requested.append('reimport')
@@ -69,7 +65,7 @@ def fetch_posts(request):
 
 @view_config(context=InstanceContext, request_method='POST',
              ctx_instance_class=ContentSource, name='export_post',
-             permission=P_EXPORT_EXTERNAL_SOURCE, header=JSON_HEADER,
+             permission=Permissions.EXPORT_EXTERNAL_SOURCE, header=JSON_HEADER,
              renderer='json')
 def export_post(request):
     # Populate the assocation table

@@ -23,7 +23,7 @@ from ..lib.sqla_types import URLString
 from .discussion import Discussion
 from .idea import Idea, AppendingVisitor
 from .auth import AgentProfile
-from ..auth import CrudPermissions, P_VOTE, P_SYSADMIN, P_ADMIN_DISC, P_READ
+from ..auth import CrudPermissions, Permissions
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..semantic.namespaces import (VOTE, ASSEMBL, DCTERMS, QUADNAMES)
 from ..views.traversal import (
@@ -254,7 +254,7 @@ class AbstractVoteSpecification(DiscussionBoundBase):
         return ((cls.widget_id == VotingWidget.id),
                 (VotingWidget.discussion_id == discussion_id))
 
-    crud_permissions = CrudPermissions(P_ADMIN_DISC, P_READ)
+    crud_permissions = CrudPermissions(Permissions.ADMIN_DISC, Permissions.READ)
 
 
 def empty_matrix(size, dim):
@@ -409,7 +409,7 @@ class TokenCategorySpecification(DiscussionBoundBase):
                 (tvs.widget_id == widget.id),
                 (widget.discussion_id == discussion_id))
 
-    crud_permissions = CrudPermissions(P_ADMIN_DISC, P_READ)
+    crud_permissions = CrudPermissions(Permissions.ADMIN_DISC, Permissions.READ)
 
 
 LangString.setup_ownership_load_event(TokenCategorySpecification, ['name'])
@@ -911,7 +911,7 @@ class AbstractIdeaVote(HistoryMixinWithOrigin, DiscussionBoundBase):
             idea_id=idea_id, widget_id=widget_id, voter_id=voter_id, vote_spec_id=vote_spec_id), True)
 
     crud_permissions = CrudPermissions(
-        P_VOTE, P_ADMIN_DISC, P_SYSADMIN, P_SYSADMIN, P_VOTE, P_VOTE, P_READ)
+        Permissions.VOTE, Permissions.ADMIN_DISC, Permissions.SYSADMIN, Permissions.SYSADMIN, Permissions.VOTE, Permissions.VOTE, Permissions.READ)
 
 
 class LickertIdeaVote(AbstractIdeaVote):

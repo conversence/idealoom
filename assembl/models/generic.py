@@ -31,8 +31,7 @@ from ..lib.utils import get_global_base_url
 from . import Base, DiscussionBoundBase, OriginMixin
 from .langstrings import (LangString, LangStringEntry)
 from ..semantic.virtuoso_mapping import QuadMapPatternS
-from ..auth import (
-    CrudPermissions, P_ADD_POST, P_READ, P_ADMIN_DISC, P_EDIT_POST)
+from ..auth import CrudPermissions, Permissions
 from ..semantic.namespaces import (
     SIOC, CATALYST, ASSEMBL, DCTERMS, QUADNAMES, FOAF)
 from .discussion import Discussion
@@ -147,7 +146,7 @@ class ContentSource(DiscussionBoundBase, OriginMixin):
         return (cls.discussion_id == discussion_id,)
 
     # Cannot be readable to all, because subclasses contain passwords
-    crud_permissions = CrudPermissions(P_ADMIN_DISC, P_ADMIN_DISC)
+    crud_permissions = CrudPermissions(Permissions.ADMIN_DISC, Permissions.ADMIN_DISC)
 
     def reset_errors(self):
         self.connection_error = None
@@ -574,7 +573,7 @@ class Content(TombstonableOriginMixin, DiscussionBoundBase):
         return [Idea.uri_generic(wil.idea_id) for wil in self.widget_idea_links]
 
     crud_permissions = CrudPermissions(
-            P_ADD_POST, P_READ, P_EDIT_POST, P_ADMIN_DISC)
+            Permissions.ADD_POST, Permissions.READ, Permissions.EDIT_POST, Permissions.ADMIN_DISC)
 
 
 LangString.setup_ownership_load_event(Content, ['subject', 'body'])

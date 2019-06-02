@@ -14,6 +14,10 @@ class DateJSONEncoder(JSONEncoder):
                 from pytz import UTC
                 obj = obj.astimezone(UTC).replace(tzinfo=None)
             return obj.isoformat() + "Z"
+        elif getattr(obj, '__json__', None):
+            import pdb
+            pdb.set_trace()
+            return obj.__json__()
         else:
             return super(DateJSONEncoder, self).default(obj)
 

@@ -21,13 +21,13 @@ from assembl.lib import config
 def upgrade(pyramid_env):
     # Do stuff with the app's models here.
     from assembl import models as m
-    from assembl.auth import P_READ, P_SELF_REGISTER
+    from assembl.auth import Permissions
     from pyramid.security import Authenticated, Everyone
 
     db = m.get_session_maker()()
     with transaction.manager:
-        p_read = db.query(m.Permission).filter_by(name=P_READ).one()
-        p_self_reg = db.query(m.Permission).filter_by(name=P_SELF_REGISTER).one()
+        p_read = db.query(m.Permission).filter_by(name=Permissions.READ).one()
+        p_self_reg = db.query(m.Permission).filter_by(name=Permissions.SELF_REGISTER).one()
         r_everyone = db.query(m.Role).filter_by(name=Everyone).one()
         r_authenticated = db.query(m.Role).filter_by(name=Authenticated).one()
         # Only open discussions, i.e. where everyone can read.

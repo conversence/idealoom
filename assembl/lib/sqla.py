@@ -53,8 +53,7 @@ from .zmqlib import get_pub_socket, send_changes
 from ..semantic.namespaces import QUADNAMES
 from .config import CascadingSettings
 from ..auth import (
-    Everyone, Authenticated, CrudPermissions, MAYBE, P_READ, R_OWNER,
-    P_SYSADMIN, P_READ_IDEA)
+    Everyone, Authenticated, CrudPermissions, MAYBE, Permissions, R_OWNER)
 from .decl_enums import EnumSymbol, DeclEnumType
 from .utils import get_global_base_url
 from .config import get_config
@@ -819,7 +818,7 @@ class BaseOps(object):
 
     def generic_json(
             self, view_def_name='default', user_id=None,
-            permissions=(P_READ, P_READ_IDEA), base_uri='local:'):
+            permissions=(Permissions.READ, Permissions.READ_IDEA), base_uri='local:'):
         """Return a representation of this object as a JSON object,
         according to the given view_def and access control."""
         user_id = user_id or Everyone
@@ -908,6 +907,8 @@ class BaseOps(object):
                 elif isinstance(v, (
                         string_types, int, long, float, bool, type(None))):
                     return v
+                elif isinstance(v, Permissions):
+                    return v.value
                 elif isinstance(v, EnumSymbol):
                     return v.name
                 elif isinstance(v, datetime):
@@ -2035,7 +2036,7 @@ class BaseOps(object):
 
     def principals_with_read_permission(self):
         permissions = self.crud_permissions
-        if permissions.read == P_READ:
+        if permissions.read == Permissions.READ:
             return None  # i.e. everyone
         # make this into a protocol!
         creator_id = getattr(self, 'creator_id', None)
@@ -2067,7 +2068,7 @@ class BaseOps(object):
 
     @classmethod
     def query_filter_with_permission(
-            cls, discussion, user_id, permission=P_READ,
+            cls, discussion, user_id, permission=Permissions.READ,
             query=None, base_permissions=None, roles=None, clsAlias=None,
             owner_permission=None):
         from ..models.permissions import Role, Permission, DiscussionPermission
@@ -2092,11 +2093,11 @@ class BaseOps(object):
 
         query = query or db.query(clsAlias)
         base_permissions = base_permissions or ()
-        if permission in base_permissions or P_SYSADMIN in base_permissions: # 1 shortcut
+        if permission in base_permissions or Permissions.SYSADMIN in base_permissions: # 1 shortcut
             return query
         roles_with_d_permission_q = db.query(Role.id).join(
             DiscussionPermission).join(Permission).filter(
-                (Permission.name == permission) &
+                (Permission.name == permission.value) &
                 (DiscussionPermission.discussion == discussion)
             ).subquery()
         local_role_class, lrc_fk = cls.local_role_class_and_fkey()
@@ -2106,7 +2107,7 @@ class BaseOps(object):
             owner_has_permission = db.query(DiscussionPermission
                 ).filter_by(discussion_id=discussion.id
                 ).join(Role).filter_by(name=R_OWNER
-                ).join(Permission).filter_by(name=owner_permission).limit(1).count()
+                ).join(Permission).filter_by(name=owner_permission.value).limit(1).count()
             if owner_has_permission:
                 conditions.append(ownership_condition)
         if local_role_class:    # 5
@@ -2132,7 +2133,7 @@ class BaseOps(object):
                     Role.name.in_(roles)
                 ).join(Permission,
                     (StateDiscussionPermission.permission_id==Permission.id) &
-                    (Permission.name == permission))
+                    (Permission.name == permission.value))
             conditions.append(clsAlias.pub_state_id.in_(states_with_permission_q))
             if ownership_condition is not None:  # 4
                 states_with_owner_permission_q = db.query(PublicationState.id
@@ -2142,7 +2143,7 @@ class BaseOps(object):
                         (StateDiscussionPermission.discussion_id==discussion.id)
                     ).join(Permission,
                         (StateDiscussionPermission.permission_id==Permission.id) &
-                        Permission.name.in_(owner_permissions)
+                        Permission.name.in_([p.value for p in owner_permissions])
                     ).join(Role,
                         (StateDiscussionPermission.role_id==Role.id) &
                         (Role.name == R_OWNER))
@@ -2170,7 +2171,7 @@ class BaseOps(object):
 
     @classmethod
     def query_filter_with_permission_req(
-            cls, request, permission=P_READ, query=None, clsAlias=None):
+            cls, request, permission=Permissions.READ, query=None, clsAlias=None):
         return cls.query_filter_with_permission(
             request.discussion, request.authenticated_userid, permission,
             query, request.base_permissions, request.roles, clsAlias)
@@ -2267,7 +2268,7 @@ class BaseOps(object):
         query = queries.pop(0)
         if queries:
             query = query.union(*queries)
-        return [x for (x,) in query.distinct()]
+        return [Permissions.by_value(x) for (x,) in query.distinct()]
 
     def local_permissions_req(self, request=None, include_global=False):
         # TODO: Cache in request
@@ -2286,7 +2287,7 @@ class BaseOps(object):
         assert request
         if permission in request.base_permissions:
             return True
-        if P_SYSADMIN in request.base_permissions:
+        if Permissions.SYSADMIN in request.base_permissions:
             return True
         return permission in self.local_permissions_req(request)
 
@@ -2311,7 +2312,7 @@ class BaseOps(object):
         perm, owner_perm = self.crud_permissions.crud_permissions(operation)
         if perm in permissions:
             return perm
-        if P_SYSADMIN in permissions:
+        if Permissions.SYSADMIN in permissions:
             return True
         is_owner = self.is_owner(user_id)
         if is_owner and owner_perm in permissions:

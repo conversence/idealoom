@@ -8,7 +8,7 @@ from jsonpath_ng.ext import parse
 from future.utils import string_types
 
 from . import DiscussionBoundBase, Base
-from ..auth import P_ADMIN_DISC
+from ..auth import Permissions
 from ..lib.sqla import PromiseObjectImporter, get_named_object
 from ..lib.sqla_types import URLString
 from ..lib.utils import get_global_base_url
@@ -182,7 +182,7 @@ class ImportRecordSource(ContentSource, PromiseObjectImporter):
                         ext_id in self.back_import_ids and self.update_back_imports):
                     target = self[ext_id]
                     permissions = ctx.get_permissions()
-                    if P_ADMIN_DISC in permissions:
+                    if Permissions.ADMIN_DISC in permissions:
                         permissions.append(target.crud_permissions.update_owned)
                     target.update_from_json(
                         pdata, context=ctx, object_importer=self, permissions=permissions,

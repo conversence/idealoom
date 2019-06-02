@@ -20,14 +20,14 @@ from assembl.lib import config
 
 def upgrade(pyramid_env):
     from assembl import models as m
-    from assembl.auth import P_ADMIN_DISC, P_DISC_STATS
+    from assembl.auth import Permissions
 
     db = m.get_session_maker()()
     # give statistics access to whoever already has admin_discs.
     # We want to add to moderators, but we'll do this by hand.
     with transaction.manager:
-        p_admin_disc = db.query(m.Permission).filter_by(name=P_ADMIN_DISC).one()
-        p_disc_stats = db.query(m.Permission).filter_by(name=P_DISC_STATS).one()
+        p_admin_disc = db.query(m.Permission).filter_by(name=Permissions.ADMIN_DISC).one()
+        p_disc_stats = db.query(m.Permission).filter_by(name=Permissions.DISC_STATS).one()
         dps = db.query(m.DiscussionPermission).filter_by(
             permission_id=p_admin_disc.id)
         for dp in dps:

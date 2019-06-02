@@ -5,7 +5,7 @@ from pyramid.httpexceptions import (HTTPNotFound, HTTPBadRequest)
 from pyramid.response import Response
 
 from assembl.auth import (
-    P_READ, Everyone, CrudPermissions)
+    Permissions, Everyone, CrudPermissions)
 from assembl.models.user_key_values import *
 from . import JSON_HEADER
 from ..traversal import (
@@ -15,21 +15,21 @@ from ..traversal import (
 
 
 @view_config(context=UserBoundNamespacedDictContext, renderer='json',
-             request_method='GET', permission=P_READ)
+             request_method='GET', permission=Permissions.READ)
 def view_u_namespaces(request):
     user_b_nskvdict = request.context.as_collection()
     return list(iter(user_b_nskvdict))
 
 
 @view_config(context=UserNSBoundDictContext, renderer='json',
-             request_method='GET', permission=P_READ)
+             request_method='GET', permission=Permissions.READ)
 def view_u_dict(request):
     user_ns_b_kvdict = request.context.collection
     return dict(user_ns_b_kvdict)
 
 
 @view_config(context=UserNSBoundDictContext, renderer='json',
-             request_method='PATCH', permission=P_READ)
+             request_method='PATCH', permission=Permissions.READ)
 def patch_u_dict(request):
     user_ns_b_kvdict = request.context.collection
     if not isinstance(request.json, dict):
@@ -48,7 +48,7 @@ def patch_u_dict(request):
 
 
 @view_config(context=UserNSBoundDictContext, renderer='json',
-             request_method='PUT', permission=P_READ)
+             request_method='PUT', permission=Permissions.READ)
 def put_u_dict(request):
     user_ns_b_kvdict = request.context.collection
     if not isinstance(request.json, dict):
@@ -70,7 +70,7 @@ def put_u_dict(request):
 
 
 @view_config(context=UserNSBoundDictContext, renderer='json',
-             request_method='DELETE', permission=P_READ)
+             request_method='DELETE', permission=Permissions.READ)
 def clear_u_namespace(request):
     ctx = request.context
     user_ns_b_kvdict = ctx.collection
@@ -85,7 +85,7 @@ def clear_u_namespace(request):
 
 
 @view_config(context=UserNSKeyBoundDictItemContext, renderer='json',
-             request_method='GET', permission=P_READ)
+             request_method='GET', permission=Permissions.READ)
 def get_u_value(request):
     ctx = request.context
     user_ns_b_kvdict = ctx.collection
@@ -96,7 +96,7 @@ def get_u_value(request):
 
 
 @view_config(context=UserNSKeyBoundDictItemContext, renderer='json',
-             request_method='PUT', permission=P_READ, header=JSON_HEADER)
+             request_method='PUT', permission=Permissions.READ, header=JSON_HEADER)
 def put_u_value(request):
     ctx = request.context
     value = request.json
@@ -113,7 +113,7 @@ def put_u_value(request):
 
 
 @view_config(context=UserNSKeyBoundDictItemContext, renderer='json',
-             request_method='DELETE', permission=P_READ)
+             request_method='DELETE', permission=Permissions.READ)
 def del_u_value(request):
     ctx = request.context
     user_ns_b_kvdict = ctx.collection
@@ -127,21 +127,21 @@ def del_u_value(request):
 
 
 @view_config(context=NamespacedDictContext, renderer='json',
-             request_method='GET', permission=P_READ)
+             request_method='GET', permission=Permissions.READ)
 def view_namespaces(request):
     nskvdict = request.context.as_collection()
     return list(iter(nskvdict))
 
 
 @view_config(context=NSBoundDictContext, renderer='json',
-             request_method='GET', permission=P_READ)
+             request_method='GET', permission=Permissions.READ)
 def view_dict(request):
     ns_b_kvdict = request.context.collection
     return dict(ns_b_kvdict)
 
 
 @view_config(context=NSBoundDictContext, renderer='json',
-             request_method='PATCH', permission=P_READ)
+             request_method='PATCH', permission=Permissions.READ)
 def patch_dict(request):
     ns_b_kvdict = request.context.collection
     if not isinstance(request.json, dict):
@@ -160,7 +160,7 @@ def patch_dict(request):
 
 
 @view_config(context=NSBoundDictContext, renderer='json',
-             request_method='PUT', permission=P_READ)
+             request_method='PUT', permission=Permissions.READ)
 def put_dict(request):
     ns_b_kvdict = request.context.collection
     if not isinstance(request.json, dict):
@@ -182,7 +182,7 @@ def put_dict(request):
 
 
 @view_config(context=NSBoundDictContext, renderer='json',
-             request_method='DELETE', permission=P_READ)
+             request_method='DELETE', permission=Permissions.READ)
 def clear_namespace(request):
     ctx = request.context
     ns_b_kvdict = ctx.collection
@@ -197,7 +197,7 @@ def clear_namespace(request):
 
 
 @view_config(context=NSKeyBoundDictItemContext, renderer='json',
-             request_method='GET', permission=P_READ)
+             request_method='GET', permission=Permissions.READ)
 def get_value(request):
     ctx = request.context
     ns_b_kvdict = ctx.collection
@@ -208,7 +208,7 @@ def get_value(request):
 
 
 @view_config(context=NSKeyBoundDictItemContext, renderer='json',
-             request_method='PUT', permission=P_READ, header=JSON_HEADER)
+             request_method='PUT', permission=Permissions.READ, header=JSON_HEADER)
 def put_value(request):
     ctx = request.context
     value = request.json
@@ -225,7 +225,7 @@ def put_value(request):
 
 
 @view_config(context=NSKeyBoundDictItemContext, renderer='json',
-             request_method='DELETE', permission=P_READ)
+             request_method='DELETE', permission=Permissions.READ)
 def del_value(request):
     ctx = request.context
     ns_b_kvdict = ctx.collection

@@ -53,8 +53,7 @@ from simplejson import dumps
 from assembl.lib.sqla import ObjectNotUniqueError
 from ..traversal import (
     InstanceContext, CollectionContext, ClassContext, Api2Context)
-from assembl.auth import (
-    P_READ, P_SYSADMIN, CrudPermissions)
+from assembl.auth import (Permissions, CrudPermissions)
 from assembl.semantic.virtuoso_mapping import get_virtuoso
 from assembl.models import (
     User, Discussion, TombstonableMixin)
@@ -82,7 +81,7 @@ def check_permissions(
 
 class CreationResponse(Response):
     def __init__(
-            self, ob_created, user_id=Everyone, permissions=(P_READ,),
+            self, ob_created, user_id=Everyone, permissions=(Permissions.READ,),
             view='default', uri=None):
         uri = uri or ob_created.uri()
         super(CreationResponse, self).__init__(
@@ -92,7 +91,7 @@ class CreationResponse(Response):
 
 
 @view_config(context=ClassContext, renderer='json',
-             request_method='GET', permission=P_READ)
+             request_method='GET', permission=Permissions.READ)
 def class_view(request):
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
@@ -254,13 +253,13 @@ def instance_del(request):
 
 
 @view_config(name="collections", context=InstanceContext, renderer='json',
-             request_method="GET", permission=P_READ)
+             request_method="GET", permission=Permissions.READ)
 def show_collections(request):
     return request.context.get_collection_names()
 
 
 @view_config(name="classes", context=Api2Context, renderer='json',
-             request_method="GET", permission=P_READ)
+             request_method="GET", permission=Permissions.READ)
 def show_class_names(request):
     return request.context.all_class_names()
 

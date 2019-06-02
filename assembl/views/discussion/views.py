@@ -14,7 +14,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from assembl.models import Discussion, Role
 from assembl.models.post import Post
 from assembl.models.idea import Idea
-from assembl.auth import P_READ, P_ADD_EXTRACT
+from assembl.auth import Permissions
 from assembl.auth.util import user_has_permission, get_non_expired_user_id
 from assembl.lib.locale import (to_posix_string, strip_country)
 from assembl.lib.utils import is_url_from_same_server, path_qs
@@ -102,7 +102,7 @@ def home_view(request):
     user_id = get_non_expired_user_id(request) or Everyone
     context = get_default_context(request)
     discussion = context["discussion"]
-    canRead = user_has_permission(discussion.id, user_id, P_READ)
+    canRead = user_has_permission(discussion.id, user_id, Permissions.READ)
     if not canRead and user_id == Everyone:
         # User isn't logged-in and discussion isn't public:
         # redirect to login page
@@ -164,7 +164,7 @@ def home_view(request):
                 'home', discussion_slug=discussion.slug))
         context['idea'] = idea
 
-    canAddExtract = user_has_permission(discussion.id, user_id, P_ADD_EXTRACT)
+    canAddExtract = user_has_permission(discussion.id, user_id, Permissions.ADD_EXTRACT)
     context['canAddExtract'] = canAddExtract
     context['canDisplayTabs'] = True
     preferences = discussion.preferences

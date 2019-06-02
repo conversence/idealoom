@@ -11,8 +11,7 @@ from sqlalchemy.orm import joinedload_all
 import simplejson as json
 
 from assembl.views.api import API_DISCUSSION_PREFIX
-from assembl.auth import (
-    P_READ, P_ADD_EXTRACT, P_EDIT_EXTRACT, P_ASSOCIATE_EXTRACT)
+from assembl.auth import Permissions
 from assembl.auth.util import get_permissions
 from assembl.models import (
     AgentProfile, Extract, TextFragmentIdentifier,
@@ -53,7 +52,7 @@ search_extracts = Service(
 )
 
 
-@extract.get(permission=P_READ)
+@extract.get(permission=Permissions.READ)
 def get_extract(request):
     extract_id = request.matchdict['id']
     extract = Extract.get_instance(extract_id)
@@ -89,7 +88,7 @@ def _get_extracts_real(request, view_def='default', ids=None, user_id=None):
             for extract in all_extracts]
 
 
-@extracts.get(permission=P_READ)
+@extracts.get(permission=Permissions.READ)
 def get_extracts(request):
     view_def = request.GET.get('view')
     ids = request.GET.getall('ids')
@@ -119,9 +118,9 @@ def post_extract(request):
         permissions = get_permissions(user_id, discussion_id)
     else:
         permissions = request.permissions
-    if P_ADD_EXTRACT not in permissions:
+    if Permissions.ADD_EXTRACT not in permissions:
         #TODO: maparent:  restore this code once it works:
-        #raise HTTPForbidden(result=ACLDenied(permission=P_ADD_EXTRACT))
+        #raise HTTPForbidden(result=ACLDenied(permission=Permissions.ADD_EXTRACT))
         raise HTTPForbidden()
     if not user_id or user_id == Everyone:
         # TODO: Create an anonymous user.
@@ -168,7 +167,7 @@ def post_extract(request):
         if(idea.discussion.id != discussion.id):
             raise HTTPBadRequest(
                 "Extract from discussion %s cannot be associated with an idea from a different discussion." % extract.get_discussion_id())
-        if not idea.has_permission_req(P_ASSOCIATE_EXTRACT):
+        if not idea.has_permission_req(Permissions.ASSOCIATE_EXTRACT):
             raise HTTPForbidden("Cannot associate extact with this idea")
     else:
         idea = None
@@ -222,7 +221,7 @@ def put_extract(request):
         raise HTTPNotFound("Extract with id '%s' not found." % extract_id)
     permissions = get_permissions(user_id, discussion.id, extract)
 
-    if P_EDIT_EXTRACT not in permissions:
+    if Permissions.EDIT_EXTRACT not in permissions:
         raise HTTPForbidden()
 
     updated_extract_data = json.loads(request.body)
@@ -236,7 +235,7 @@ def put_extract(request):
         if(idea.discussion != extract.discussion):
             raise HTTPBadRequest(
                 "Extract from discussion %s cannot be associated with an idea from a different discussion." % extract.get_discussion_id())
-        if not idea.has_permission_req(P_ASSOCIATE_EXTRACT):
+        if not idea.has_permission_req(Permissions.ASSOCIATE_EXTRACT):
             raise HTTPForbidden("Cannot associate extact with this idea")
         extract.idea = idea
     else:
@@ -248,7 +247,7 @@ def put_extract(request):
     return {'ok': True}
 
 
-@extract.delete(permission=P_READ)
+@extract.delete(permission=Permissions.READ)
 def delete_extract(request):
     user_id = authenticated_userid(request)
     discussion = request.context
@@ -266,7 +265,7 @@ def delete_extract(request):
     extract_id = request.matchdict['id']
     extract = Extract.get_instance(extract_id)
     permissions = get_permissions(user_id, discussion.id, extract)
-    if P_EDIT_EXTRACT not in permissions:
+    if Permissions.EDIT_EXTRACT not in permissions:
         raise HTTPForbidden()
 
     if not extract:
@@ -294,9 +293,9 @@ def do_search_extracts(request):
             if token:
                 user_id = token['userId']
     user_id = user_id or Everyone
-    if not user_has_permission(discussion.id, user_id, P_READ):
+    if not user_has_permission(discussion.id, user_id, Permissions.READ):
         raise HTTPForbidden()
-    permissions = [P_READ]
+    permissions = [Permissions.READ]
 
     if not uri:
         raise HTTPBadRequest("Please specify a search uri")

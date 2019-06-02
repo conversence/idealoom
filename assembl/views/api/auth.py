@@ -13,8 +13,7 @@ from assembl.views.api import API_DISCUSSION_PREFIX
 from assembl.models import (
     get_database_id, AgentProfile, User, Role, Permission, UserRole,
     LocalUserRole, DiscussionPermission, Discussion)
-from assembl.auth import (
-    P_READ, P_ADMIN_DISC, P_SYSADMIN, R_SYSADMIN, SYSTEM_ROLES)
+from assembl.auth import (Permissions, R_SYSADMIN, SYSTEM_ROLES)
 from assembl.auth.util import (
     user_has_permission as a_user_has_permission,
     users_with_permission as a_users_with_permission)
@@ -91,13 +90,13 @@ users_with_permission = Service(
 )
 
 
-@permissions.get(permission=P_READ)
+@permissions.get(permission=Permissions.READ)
 def get_permissions_for_discussion(request):
     discussion = request.context
     return discussion.get_permissions_by_role()
 
 
-@permissions_for_role.get(permission=P_READ)
+@permissions_for_role.get(permission=Permissions.READ)
 def get_permissions_for_role(request):
     discussion = request.context
     role_name = request.matchdict['role_name']
@@ -107,7 +106,7 @@ def get_permissions_for_role(request):
     return discussion.get_permissions_by_role().get(role_name, [])
 
 
-@permissions_for_role.put(permission=P_ADMIN_DISC)
+@permissions_for_role.put(permission=Permissions.ADMIN_DISC)
 def put_permissions_for_role(request):
     discussion = request.context
     role_name = request.matchdict['role_name']
@@ -141,14 +140,14 @@ def put_permissions_for_role(request):
             "removed": list(known_permissions - permissions)}
 
 
-@roles.get(permission=P_READ)
+@roles.get(permission=Permissions.READ)
 def get_roles(request):
     session = Role.default_db
     roles = session.query(Role)
     return [r.name for r in roles]
 
 
-@roles.put(permission=P_SYSADMIN)
+@roles.put(permission=Permissions.SYSADMIN)
 def put_roles(request):
     session = Role.default_db
     try:
@@ -173,7 +172,7 @@ def put_roles(request):
             "removed": list(role_names - data - SYSTEM_ROLES)}
 
 
-@global_roles_for_user.get(permission=P_READ)
+@global_roles_for_user.get(permission=Permissions.READ)
 def get_global_roles_for_user(request):
     user_id = request.matchdict['user_id']
     user = User.get_instance(user_id)
@@ -184,7 +183,7 @@ def get_global_roles_for_user(request):
     return [x[0] for x in rolenames]
 
 
-@global_roles_for_user.put(permission=P_SYSADMIN)
+@global_roles_for_user.put(permission=Permissions.SYSADMIN)
 def put_global_roles_for_user(request):
     user_id = request.matchdict['user_id']
     user = User.get_instance(user_id)
@@ -234,7 +233,7 @@ def get_all_roles_for_user(request):
     return [x for (x,) in rolenames]
 
 
-@discussion_roles_for_user.get(permission=P_READ)
+@discussion_roles_for_user.get(permission=Permissions.READ)
 def get_discussion_roles_for_user(request):
     discussion = request.context
     user_id = request.matchdict['user_id']
@@ -248,7 +247,7 @@ def get_discussion_roles_for_user(request):
     return [x[0] for x in rolenames]
 
 
-@discussion_roles_for_user.put(permission=P_ADMIN_DISC)
+@discussion_roles_for_user.put(permission=Permissions.ADMIN_DISC)
 def put_discussion_roles_for_user(request):
     discussion = request.context
     user_id = request.matchdict['user_id']

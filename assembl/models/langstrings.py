@@ -26,7 +26,7 @@ from .import_records import ImportRecord
 from ..lib import config
 from ..lib.abc import classproperty
 from ..lib.locale import locale_ancestry, create_mt_code, locale_compatible
-from ..auth import CrudPermissions, P_READ, P_ADMIN_DISC, P_SYSADMIN
+from ..auth import CrudPermissions, Permissions
 
 
 class LocaleLabel(Base):
@@ -116,7 +116,7 @@ class LocaleLabel(Base):
         db.execute("lock table %s in exclusive mode" % cls.__table__.name)
         cls.load_names(db)
 
-    crud_permissions = CrudPermissions(P_READ, P_ADMIN_DISC)
+    crud_permissions = CrudPermissions(Permissions.READ, Permissions.ADMIN_DISC)
 
 
 class LangString(Base):
@@ -433,7 +433,7 @@ class LangString(Base):
     # TODO: Reinstate when the javascript can handle empty body/subject.
     # def generic_json(
     #         self, view_def_name='default', user_id=None,
-    #         permissions=(P_READ, ), base_uri='local:'):
+    #         permissions=(Permissions.READ, ), base_uri='local:'):
     #     if self.id == self.EMPTY_ID:
     #         return None
     #     return super(LangString, self).generic_json(
@@ -639,7 +639,7 @@ class LangString(Base):
         return clone
 
     # Those permissions are for an ownerless object. Accept Create before ownership.
-    crud_permissions = CrudPermissions(P_READ, P_SYSADMIN, P_SYSADMIN, P_SYSADMIN)
+    crud_permissions = CrudPermissions(Permissions.READ, Permissions.SYSADMIN, Permissions.SYSADMIN, Permissions.SYSADMIN)
 
 
 class LangStringEntry(TombstonableMixin, Base):
@@ -882,7 +882,7 @@ class LangStringEntry(TombstonableMixin, Base):
         return super(LangStringEntry, self).user_can(user_id, operation, permissions)
 
     # Those permissions are for an ownerless object. Accept Create before ownership.
-    crud_permissions = CrudPermissions(P_READ, P_SYSADMIN, P_SYSADMIN, P_SYSADMIN)
+    crud_permissions = CrudPermissions(Permissions.READ, Permissions.SYSADMIN, Permissions.SYSADMIN, Permissions.SYSADMIN)
 
 
 # class TranslationStamp(Base):
@@ -894,5 +894,5 @@ class LangStringEntry(TombstonableMixin, Base):
 #     translator = Column(Integer, ForeignKey(User.id))
 #     created = Column(DateTime, server_default="now()")
 #     crud_permissions = CrudPermissions(
-#          P_TRANSLATE, P_READ, P_SYSADMIN, P_SYSADMIN,
-#          P_TRANSLATE, P_TRANSLATE)
+#          Permissions.TRANSLATE, Permissions.READ, Permissions.SYSADMIN, Permissions.SYSADMIN,
+#          Permissions.TRANSLATE, Permissions.TRANSLATE)

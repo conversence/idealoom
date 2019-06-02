@@ -19,9 +19,7 @@ from ..semantic.namespaces import DCTERMS
 from . import DiscussionBoundBase, OriginMixin, TimestampedMixin
 from .idea import Idea
 from .langstrings import LangString
-from .auth import (
-    AgentProfile, CrudPermissions, P_READ, P_ADMIN_DISC, P_ADD_POST,
-    P_EDIT_POST, P_ADD_IDEA, P_EDIT_IDEA)
+from .auth import AgentProfile, CrudPermissions, Permissions
 
 
 class Announcement(DiscussionBoundBase, OriginMixin, TimestampedMixin):
@@ -144,7 +142,7 @@ class IdeaAnnouncement(Announcement):
 
     # Same crud permissions as a idea
     crud_permissions = CrudPermissions(
-        P_ADD_IDEA, P_READ, P_EDIT_IDEA, P_ADMIN_DISC)
+        Permissions.ADD_IDEA, Permissions.READ, Permissions.EDIT_IDEA, Permissions.ADMIN_DISC)
 
 
 @event.listens_for(IdeaAnnouncement.idea, 'set',

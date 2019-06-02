@@ -21,9 +21,7 @@ import assembl.lib.config as settings
 from assembl.lib.web_token import decode_token, TokenInvalid
 from assembl.lib.sqla_types import EmailString
 from assembl.lib.text_search import add_simple_text_search
-from assembl.auth import (
-    P_ADMIN_DISC, P_SELF_REGISTER, P_SELF_REGISTER_REQUEST,
-    R_PARTICIPANT, P_READ, CrudPermissions)
+from assembl.auth import (Permissions, R_PARTICIPANT, CrudPermissions)
 from assembl.auth.social_auth import maybe_social_logout
 from assembl.models import (
     User, Discussion, LocalUserRole, AbstractAgentAccount, AgentProfile,
@@ -88,16 +86,16 @@ def add_local_role(request):
     requested_user = json.get('user', None)
     if not requested_user:
         json['user'] = requested_user = user_uri
-    elif requested_user != user_uri and P_ADMIN_DISC not in permissions:
+    elif requested_user != user_uri and Permissions.ADMIN_DISC not in permissions:
         raise HTTPUnauthorized()
-    if P_ADMIN_DISC not in permissions:
-        if P_SELF_REGISTER in permissions:
+    if Permissions.ADMIN_DISC not in permissions:
+        if Permissions.SELF_REGISTER in permissions:
             json['requested'] = False
             json['role'] = R_PARTICIPANT
             req_user = User.get_instance(requested_user)
             if not discussion.check_authorized_email(req_user):
                 raise HTTPForbidden()
-        elif P_SELF_REGISTER_REQUEST in permissions:
+        elif Permissions.SELF_REGISTER_REQUEST in permissions:
             json['requested'] = True
         else:
             raise HTTPUnauthorized()
@@ -158,13 +156,13 @@ def set_local_role(request):
     requested_user = json.get('user', None)
     if not requested_user:
         json['user'] = requested_user = user_uri
-    elif requested_user != user_uri and P_ADMIN_DISC not in permissions:
+    elif requested_user != user_uri and Permissions.ADMIN_DISC not in permissions:
         raise HTTPUnauthorized()
-    if P_ADMIN_DISC not in permissions:
-        if P_SELF_REGISTER in permissions:
+    if Permissions.ADMIN_DISC not in permissions:
+        if Permissions.SELF_REGISTER in permissions:
             json['requested'] = False
             json['role'] = R_PARTICIPANT
-        elif P_SELF_REGISTER_REQUEST in permissions:
+        elif Permissions.SELF_REGISTER_REQUEST in permissions:
             json['requested'] = True
         else:
             raise HTTPUnauthorized()
@@ -202,7 +200,7 @@ def delete_local_role(request):
         raise HTTPBadRequest()
     permissions = ctx.get_permissions()
     requested_user = instance.user
-    if requested_user.id != user_id and P_ADMIN_DISC not in permissions:
+    if requested_user.id != user_id and Permissions.ADMIN_DISC not in permissions:
         raise HTTPUnauthorized()
 
     user = User.get(user_id)
@@ -247,7 +245,7 @@ def view_localuserrole_collection(request):
 
 @view_config(context=CollectionContext, renderer='json', request_method='GET',
              ctx_collection_class=AgentProfile,
-             accept="application/json", permission=P_READ)
+             accept="application/json", permission=Permissions.READ)
 def view_profile_collection(request):
     ctx = request.context
     view = request.GET.get('view', None) or ctx.get_default_view() or 'default'
@@ -267,7 +265,7 @@ def view_profile_collection(request):
 
 @view_config(context=InstanceContext, renderer='json', request_method='GET',
              ctx_instance_class=AgentProfile,
-             accept="application/json", permission=P_READ)
+             accept="application/json", permission=Permissions.READ)
 def view_agent_profile(request):
     profile = instance_view(request)
     if isinstance(profile, HTTPError):
@@ -488,8 +486,8 @@ def assembl_register_user(request):
 
         user.update_from_json(json, user_id=user.id)
         if discussion and not (
-                P_SELF_REGISTER in permissions or
-                P_SELF_REGISTER_REQUEST in permissions):
+                Permissions.SELF_REGISTER in permissions or
+                Permissions.SELF_REGISTER_REQUEST in permissions):
             # Consider it without context
             discussion = None
         if discussion:
@@ -628,9 +626,9 @@ def interesting_ideas(request):
     user_id = authenticated_userid(request) or Everyone
     discussion_id = ctx.get_discussion_id()
     permissions = ctx.get_permissions()
-    if P_READ not in permissions:
+    if Permissions.READ not in permissions:
         raise HTTPUnauthorized()
-    if user_id != target.id and P_ADMIN_DISC not in permissions:
+    if user_id != target.id and Permissions.ADMIN_DISC not in permissions:
         raise HTTPUnauthorized()
     discussion = Discussion.get(discussion_id)
     if not discussion:
@@ -695,9 +693,9 @@ def modify_user_language_preference(request):
 
 
 @view_config(context=ClassContext, renderer='json',
-             ctx_class=AgentProfile, name='autocomplete', permission=P_ADMIN_DISC)
+             ctx_class=AgentProfile, name='autocomplete', permission=Permissions.ADMIN_DISC)
 @view_config(context=CollectionContext, renderer='json',
-             ctx_collection_class=AgentProfile, name='autocomplete', permission=P_READ)
+             ctx_collection_class=AgentProfile, name='autocomplete', permission=Permissions.READ)
 def participant_autocomplete(request):
     ctx = request.context
     keyword = request.GET.get('q')

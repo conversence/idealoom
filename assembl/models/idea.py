@@ -48,9 +48,7 @@ from . import (
 from .discussion import Discussion
 from .uriref import URIRefDb
 from ..semantic.virtuoso_mapping import QuadMapPatternS
-from ..auth import (
-    CrudPermissions, P_READ, P_ADMIN_DISC, P_EDIT_IDEA, P_SYSADMIN,
-    P_ADD_IDEA, P_ASSOCIATE_IDEA, P_READ_IDEA, R_OWNER, MAYBE)
+from ..auth import CrudPermissions, Permissions, R_OWNER, MAYBE
 from .permissions import (
     AbstractLocalUserRole, Role, Permission)
 from .langstrings import LangString, LangStringEntry
@@ -407,7 +405,7 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
 
     @classmethod
     def query_filter_with_permission_req(
-            cls, request, permission=P_READ_IDEA, query=None, clsAlias=None):
+            cls, request, permission=Permissions.READ_IDEA, query=None, clsAlias=None):
         return cls.query_filter_with_permission(
             request.discussion, request.authenticated_userid, permission,
             query, request.base_permissions, request.roles, clsAlias)
@@ -1052,7 +1050,7 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
         if not user_id:
             user_id = request.user.id
         permissions = self.all_permissions_for(user_id, request)
-        if P_SYSADMIN in permissions or P_ADMIN_DISC in permissions:
+        if Permissions.SYSADMIN in permissions or Permissions.ADMIN_DISC in permissions:
             state = self.discussion.idea_publication_flow.state_by_label(state_label)
             assert state, "No such state"
             self.pub_state = state
@@ -1118,11 +1116,11 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
         from .publication_states import StateDiscussionPermission
         from .auth import User
         # TODO: CACHE!!!
-        base = set(roles_with_permission(self.get_discussion(), P_READ_IDEA))
+        base = set(roles_with_permission(self.get_discussion(), Permissions.READ_IDEA))
         q = self.db.query(Role.name).join(StateDiscussionPermission
             ).filter_by(discussion_id=self.discussion_id,
                 pub_state_id=self.pub_state_id
-            ).join(Permission).filter_by(name=P_READ_IDEA).all()
+            ).join(Permission).filter_by(name=Permissions.READ_IDEA.value).all()
         base.update((x for (x,) in q))
         # stop caching here
         base.update((local_role.get_user_uri()
@@ -1323,7 +1321,7 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
                 for l in self.active_showing_widget_links]
 
     crud_permissions = CrudPermissions(
-        P_ADD_IDEA, P_READ_IDEA, P_EDIT_IDEA, P_ADMIN_DISC, variable=MAYBE)
+        Permissions.ADD_IDEA, Permissions.READ_IDEA, Permissions.EDIT_IDEA, Permissions.ADMIN_DISC, variable=MAYBE)
 
 LangString.setup_ownership_load_event(Idea,
     ['title', 'description', 'synthesis_title'])
@@ -1408,7 +1406,7 @@ class RootIdea(Idea):
     def discussion_topic(self):
         return self.discussion.topic
 
-    crud_permissions = CrudPermissions(P_ADMIN_DISC)
+    crud_permissions = CrudPermissions(Permissions.ADMIN_DISC)
 
 
 class IdeaLink(HistoryMixinWithOrigin, DiscussionBoundBase):
@@ -1601,7 +1599,7 @@ class IdeaLink(HistoryMixinWithOrigin, DiscussionBoundBase):
         return result
 
     crud_permissions = CrudPermissions(
-        P_ADD_IDEA, P_READ, P_ASSOCIATE_IDEA, P_ASSOCIATE_IDEA)
+        Permissions.ADD_IDEA, Permissions.READ, Permissions.ASSOCIATE_IDEA, Permissions.ASSOCIATE_IDEA)
 
     # discussion = relationship(
     #     Discussion, viewonly=True, uselist=False, backref="idea_links",
@@ -1732,7 +1730,7 @@ class IdeaLocalUserRole(AbstractLocalUserRole):
                 raise HTTPBadRequest()
         return self
 
-    crud_permissions = CrudPermissions(P_ADMIN_DISC, P_READ)
+    crud_permissions = CrudPermissions(Permissions.ADMIN_DISC, Permissions.READ)
 
 
 @event.listens_for(IdeaLocalUserRole, 'after_delete', propagate=True)

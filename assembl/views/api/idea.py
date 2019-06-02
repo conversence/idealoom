@@ -15,9 +15,7 @@ from assembl.lib.parsedatetime import parse_datetime
 from assembl.models import (
     Idea, RootIdea, IdeaLink, Discussion,
     Extract, SubGraphIdeaAssociation, LangString)
-from assembl.auth import (
-    CrudPermissions, P_READ, P_ADD_IDEA, P_EDIT_IDEA, P_READ_IDEA,
-    P_ASSOCIATE_IDEA)
+from assembl.auth import (CrudPermissions, Permissions)
 from . import (
     API_DISCUSSION_PREFIX, instance_check_op, instance_check_permission,
     instance_check_permission_id)
@@ -43,7 +41,7 @@ langstring_fields = {
 }
 
 
-def idea_check_permission(request, permission=P_READ_IDEA, **kwargs):
+def idea_check_permission(request, permission=Permissions.READ_IDEA, **kwargs):
     return instance_check_permission(request, permission, Idea)
 
 
@@ -56,8 +54,8 @@ def check_add_on_parent(request, **kwargs):
     parent_id = idea_data.get('parentId', None)
     if parent_id:
         return instance_check_permission_id(
-            request, P_ADD_IDEA, Idea, parent_id)
-    elif P_ADD_IDEA in request.base_permissions:
+            request, Permissions.ADD_IDEA, Idea, parent_id)
+    elif Permissions.ADD_IDEA in request.base_permissions:
         return True
     else:
         request.errors.add("querystring", 'permissions', "Cannot add idea")
@@ -208,7 +206,7 @@ def _get_ideas_real(request, view_def=None, ids=None, user_id=None,
     return retval
 
 
-@ideas.get(permission=P_READ)
+@ideas.get(permission=Permissions.READ)
 def get_ideas(request):
     user_id = authenticated_userid(request) or Everyone
     discussion = request.context
@@ -282,10 +280,10 @@ def save_idea(request):
             if None in added_parents:
                 missing = [id for id in added_parent_ids if not Idea.get_instance(id)]
                 raise HTTPNotFound("Missing parentId %s" % (','.join(missing)))
-            if not idea.has_permission_req(P_ASSOCIATE_IDEA):
+            if not idea.has_permission_req(Permissions.ASSOCIATE_IDEA):
                 raise HTTPUnauthorized("Cannot associate idea "+idea.uri())
             for parent in added_parents + removed_parents:
-                if not parent.has_permission_req(P_ASSOCIATE_IDEA):
+                if not parent.has_permission_req(Permissions.ASSOCIATE_IDEA):
                     raise HTTPUnauthorized("Cannot associate parent idea "+idea.uri())
             old_ancestors = set()
             new_ancestors = set()

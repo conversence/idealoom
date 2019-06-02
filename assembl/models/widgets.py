@@ -17,9 +17,7 @@ from sqlalchemy.ext.associationproxy import association_proxy
 import simplejson as json
 
 from assembl.lib.parsedatetime import parse_datetime
-from ..auth import (
-    CrudPermissions, Everyone, P_ADD_IDEA, P_READ, P_EDIT_IDEA,
-    P_ADD_POST, P_ADMIN_DISC)
+from ..auth import (CrudPermissions, Everyone, Permissions)
 from ..lib.sqla_types import URLString
 from . import DiscussionBoundBase
 from .discussion import Discussion
@@ -203,7 +201,7 @@ class Widget(DiscussionBoundBase):
     def test_ended(cls):
         return (cls.end_date != None) | (cls.end_date < datetime.utcnow())
 
-    crud_permissions = CrudPermissions(P_ADMIN_DISC)
+    crud_permissions = CrudPermissions(Permissions.ADMIN_DISC)
 
     def notification_data(self, notification_setting_data):
         pass
@@ -275,8 +273,8 @@ class IdeaWidgetLink(DiscussionBoundBase):
         info={'rdf': QuadMapPatternS(None, ASSEMBL.in_conversation)})
 
     crud_permissions = CrudPermissions(
-        P_ADD_IDEA, P_READ, P_EDIT_IDEA, P_EDIT_IDEA,
-        P_EDIT_IDEA, P_EDIT_IDEA)
+        Permissions.ADD_IDEA, Permissions.READ, Permissions.EDIT_IDEA, Permissions.EDIT_IDEA,
+        Permissions.EDIT_IDEA, Permissions.EDIT_IDEA)
 
 
 # Note: declare all subclasses of IdeaWidgetLink here,
@@ -577,8 +575,8 @@ class IdeaCreatingWidget(BaseIdeaWidget):
             def extra_permissions(self, permissions):
                 """permission loophoole: allow participants (someone with the ADD_POST
                 permission) to create (hidden) ideas in this context."""
-                if P_ADD_POST in permissions and P_ADD_IDEA not in permissions:
-                    return [P_ADD_IDEA]
+                if Permissions.ADD_POST in permissions and Permissions.ADD_IDEA not in permissions:
+                    return [Permissions.ADD_IDEA]
                 return []
 
 
@@ -1022,7 +1020,7 @@ class WidgetUserConfig(DiscussionBoundBase):
         Discussion, viewonly=True, uselist=False, secondary=Widget.__table__,
         info={'rdf': QuadMapPatternS(None, ASSEMBL.in_conversation)})
 
-    crud_permissions = CrudPermissions(P_ADD_POST)  # all participants...
+    crud_permissions = CrudPermissions(Permissions.ADD_POST)  # all participants...
 
 
 

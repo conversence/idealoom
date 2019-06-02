@@ -20,13 +20,13 @@ from assembl.lib import config
 
 def upgrade(pyramid_env):
     from assembl import models as m
-    from assembl.auth import P_ADD_POST, P_VOTE
+    from assembl.auth import Permissions
     from pyramid.security import Authenticated, Everyone
 
     db = m.get_session_maker()()
     with transaction.manager:
-        p_add_post = db.query(m.Permission).filter_by(name=P_ADD_POST).one()
-        p_vote = db.query(m.Permission).filter_by(name=P_VOTE).one()
+        p_add_post = db.query(m.Permission).filter_by(name=Permissions.ADD_POST).one()
+        p_vote = db.query(m.Permission).filter_by(name=Permissions.VOTE).one()
         # Only open discussions, i.e. where everyone can read.
         dps = db.query(m.DiscussionPermission).filter_by(
         	permission_id=p_add_post.id)

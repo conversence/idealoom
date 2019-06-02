@@ -175,8 +175,8 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
         self.local_values_json = values
         return old_value
 
-    def can_edit(self, key, permissions=(P_READ,), pref_data=None):
-        if P_SYSADMIN in permissions:
+    def can_edit(self, key, permissions=(Permissions.READ,), pref_data=None):
+        if Permissions.SYSADMIN in permissions:
             if key == 'name' and self.name == self.BASE_PREFS_NAME:
                 # Protect the base name
                 return False
@@ -189,17 +189,17 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
         if pref_data is None:
             pref_data = self.get_preference_data()[key]
         req_permission = pref_data.get(
-            'modification_permission', P_ADMIN_DISC)
-        if req_permission not in permissions:
+            'modification_permission', Permissions.ADMIN_DISC.value)
+        if Permissions.by_value(req_permission) not in permissions:
             return False
         return True
 
-    def safe_del(self, key, permissions=(P_READ,)):
+    def safe_del(self, key, permissions=(Permissions.READ,)):
         if not self.can_edit(key, permissions):
             raise HTTPUnauthorized("Cannot delete "+key)
         del self[key]
 
-    def safe_set(self, key, value, permissions=(P_READ,)):
+    def safe_set(self, key, value, permissions=(Permissions.READ,)):
         if not self.can_edit(key, permissions):
             raise HTTPUnauthorized("Cannot edit "+key)
         self[key] = value
@@ -282,7 +282,7 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
                 assert idea_pub_flow.state_by_label(value), "No state %d in flow %d" % (
                     value, idea_pub_flow.label)
             elif data_type == "permission":
-                assert value in ASSEMBL_PERMISSIONS
+                assert Permissions.by_value(value)
             elif data_type == "role":
                 if value not in SYSTEM_ROLES:
                     from .auth import Role
@@ -299,7 +299,7 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
 
     def generic_json(
             self, view_def_name='default', user_id=Everyone,
-            permissions=(P_READ, ), base_uri='local:'):
+            permissions=(Permissions.READ, ), base_uri='local:'):
         # TODO: permissions
         values = self.local_values_json
         values['name'] = self.name
@@ -342,7 +342,7 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
         keys = self.preference_data_key_list
         return [data[key] for key in keys]
 
-    crud_permissions = CrudPermissions(P_SYSADMIN)
+    crud_permissions = CrudPermissions(Permissions.SYSADMIN)
 
     # This defines the allowed properties and their data format
     # Each preference metadata has the following format:
@@ -355,7 +355,7 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
     #   more types may be added, but need to be added to both frontend and backend
     # show_in_preferences: Do we always hide this preference?
     # modification_permission: What permission do you need to change that preference?
-    #   (default: P_DISCUSSION_ADMIN)
+    #   (default: Permissions.DISCUSSION_ADMIN)
     # allow_user_override: Do we allow users to have their personal value for that permission?
     #   if so what permission is required? (default False)
     # scalar_values: "{value: "label"}" a dictionary of permitted options for a scalar value type
@@ -395,7 +395,7 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
             "description": _(
                 "Translation service"),
             "allow_user_override": None,
-            "modification_permission": P_SYSADMIN,
+            "modification_permission": Permissions.SYSADMIN.value,
             # "frontend_validator_function": func_name...?,
             # "backend_validator_function": func_name...?,
             "default": ""
@@ -410,8 +410,8 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
                 "NIM": _("Navigation, Idea, Messages"),
                 "NMI": _("Navigation, Messages, Idea")},
             "description": _("Order of panels"),
-            "allow_user_override": P_READ,
-            "modification_permission": P_ADMIN_DISC,
+            "allow_user_override.value": Permissions.READ.value,
+            "modification_permission": Permissions.ADMIN_DISC.value,
             # "frontend_validator_function": func_name...?,
             # "backend_validator_function": func_name...?,
             "default": "NMI"
@@ -425,7 +425,7 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
             # "scalar_values": {value: "label"},
             "description": _("Show the share button on posts and ideas"),
             "allow_user_override": None,
-            "modification_permission": P_ADMIN_DISC,
+            "modification_permission": Permissions.ADMIN_DISC.value,
             # "frontend_validator_function": func_name...?,
             # "backend_validator_function": func_name...?,
             "default": True
@@ -439,7 +439,7 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
             # "scalar_values": {value: "label"},
             "description": _("Run an anti-virus on file attachments"),
             "allow_user_override": None,
-            "modification_permission": P_ADMIN_DISC,
+            "modification_permission": Permissions.ADMIN_DISC.value,
             # "frontend_validator_function": func_name...?,
             # "backend_validator_function": func_name...?,
             "default": False  # for development
@@ -453,7 +453,7 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
             # "scalar_values": {value: "label"},
             "description": _("Version number of terms of service. Increment when terms change, participants will be alerted."),
             "allow_user_override": None,
-            "modification_permission": P_ADMIN_DISC,
+            "modification_permission": Permissions.ADMIN_DISC.value,
             # "frontend_validator_function": func_name...?,
             # "backend_validator_function": func_name...?,
             "default": 1
@@ -467,7 +467,7 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
             # "scalar_values": {value: "label"},
             "description": _("Terms of service. Multilingual HTML String."),
             "allow_user_override": None,
-            "modification_permission": P_ADMIN_DISC,
+            "modification_permission": Permissions.ADMIN_DISC.value,
             # "frontend_validator_function": func_name...?,
             # "backend_validator_function": func_name...?,
             "default": None  # for development
@@ -487,7 +487,7 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
                 "auto-logged in to that server, and discussion auto-"
                 "subscription will require an account from this backend."),
             "allow_user_override": None,
-            "modification_permission": P_SYSADMIN,
+            "modification_permission": Permissions.SYSADMIN.value,
             # "frontend_validator_function": func_name...?,
             # "backend_validator_function": func_name...?,
             "default": ""
@@ -503,7 +503,7 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
                 "Are moderated posts simply hidden or made inaccessible "
                 "by default?"),
             "allow_user_override": None,
-            "modification_permission": P_ADMIN_DISC,
+            "modification_permission": Permissions.ADMIN_DISC.value,
             # "frontend_validator_function": func_name...?,
             # "backend_validator_function": func_name...?,
             "default": True
@@ -517,8 +517,8 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
             # "scalar_values": {value: "label"},
             "description": _(
                 "Does the Idea panel automatically open when an idea is clicked ? (and close when a special section is clicked)"),
-            "allow_user_override": P_READ,
-            "modification_permission": P_ADMIN_DISC,
+            "allow_user_override": Permissions.READ.value,
+            "modification_permission.value": Permissions.ADMIN_DISC.value,
             # "frontend_validator_function": func_name...?,
             # "backend_validator_function": func_name...?,
             "default": True
@@ -533,7 +533,7 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
             "description": _(
                 "The idea publication flow to use for a new discussion"),
             "allow_user_override": None,
-            "modification_permission": P_SYSADMIN,
+            "modification_permission": Permissions.SYSADMIN.value,
             # "frontend_validator_function": func_name...?,
             # "backend_validator_function": func_name...?,
             "default": "default"
@@ -548,7 +548,7 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
             "description": _(
                 "The idea publication state to use for a new ideas, taken from the discussion's flow"),
             "allow_user_override": None,
-            "modification_permission": P_ADMIN_DISC,
+            "modification_permission": Permissions.ADMIN_DISC.value,
             # "frontend_validator_function": func_name...?,
             # "backend_validator_function": func_name...?,
             "default": "shared"
@@ -563,73 +563,73 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
             "description": _(
                 "The basic permissions for a new discussion"),
             "allow_user_override": None,
-            "modification_permission": P_SYSADMIN,
+            "modification_permission": Permissions.SYSADMIN.value,
             # "frontend_validator_function": func_name...?,
             # "backend_validator_function": func_name...?,
             "item_default": {
-                R_PARTICIPANT: [P_READ],
+                R_PARTICIPANT: [Permissions.READ.value],
             },
             "default": {
                 R_ADMINISTRATOR: [
-                    P_ADD_EXTRACT,
-                    P_ADD_IDEA,
-                    P_ADD_POST,
-                    P_ADMIN_DISC,
-                    P_DELETE_POST,
-                    P_DISC_STATS,
-                    P_EDIT_EXTRACT,
-                    P_EDIT_IDEA,
-                    P_ASSOCIATE_IDEA,
-                    P_EDIT_POST,
-                    P_EDIT_SYNTHESIS,
-                    P_EXPORT_EXTERNAL_SOURCE,
-                    P_MODERATE,
-                    P_OVERRIDE_SOCIAL_AUTOLOGIN,
-                    P_SEND_SYNTHESIS,
-                    P_VOTE,
+                    Permissions.ADD_EXTRACT.value,
+                    Permissions.ADD_IDEA.value,
+                    Permissions.ADD_POST.value,
+                    Permissions.ADMIN_DISC.value,
+                    Permissions.DELETE_POST.value,
+                    Permissions.DISC_STATS.value,
+                    Permissions.EDIT_EXTRACT.value,
+                    Permissions.EDIT_IDEA.value,
+                    Permissions.ASSOCIATE_IDEA.value,
+                    Permissions.EDIT_POST.value,
+                    Permissions.EDIT_SYNTHESIS.value,
+                    Permissions.EXPORT_EXTERNAL_SOURCE.value,
+                    Permissions.MODERATE.value,
+                    Permissions.OVERRIDE_SOCIAL_AUTOLOGIN.value,
+                    Permissions.SEND_SYNTHESIS.value,
+                    Permissions.VOTE.value,
                 ],
                 R_CATCHER: [
-                    P_ADD_EXTRACT,
-                    P_ADD_IDEA,
-                    P_ADD_POST,
-                    P_EDIT_EXTRACT,
-                    P_EDIT_IDEA,
-                    P_ASSOCIATE_IDEA,
-                    P_OVERRIDE_SOCIAL_AUTOLOGIN,
-                    P_VOTE,
+                    Permissions.ADD_EXTRACT.value,
+                    Permissions.ADD_IDEA.value,
+                    Permissions.ADD_POST.value,
+                    Permissions.EDIT_EXTRACT.value,
+                    Permissions.EDIT_IDEA.value,
+                    Permissions.ASSOCIATE_IDEA.value,
+                    Permissions.OVERRIDE_SOCIAL_AUTOLOGIN.value,
+                    Permissions.VOTE.value,
                 ],
                 R_MODERATOR: [
-                    P_ADD_EXTRACT,
-                    P_ADD_IDEA,
-                    P_ADD_POST,
-                    P_DELETE_POST,
-                    P_DISC_STATS,
-                    P_EDIT_EXTRACT,
-                    P_EDIT_IDEA,
-                    P_ASSOCIATE_IDEA,
-                    P_EDIT_POST,
-                    P_EDIT_SYNTHESIS,
-                    P_EXPORT_EXTERNAL_SOURCE,
-                    P_MODERATE,
-                    P_OVERRIDE_SOCIAL_AUTOLOGIN,
-                    P_SEND_SYNTHESIS,
-                    P_VOTE,
+                    Permissions.ADD_EXTRACT.value,
+                    Permissions.ADD_IDEA.value,
+                    Permissions.ADD_POST.value,
+                    Permissions.DELETE_POST.value,
+                    Permissions.DISC_STATS.value,
+                    Permissions.EDIT_EXTRACT.value,
+                    Permissions.EDIT_IDEA.value,
+                    Permissions.ASSOCIATE_IDEA.value,
+                    Permissions.EDIT_POST.value,
+                    Permissions.EDIT_SYNTHESIS.value,
+                    Permissions.EXPORT_EXTERNAL_SOURCE.value,
+                    Permissions.MODERATE.value,
+                    Permissions.OVERRIDE_SOCIAL_AUTOLOGIN.value,
+                    Permissions.SEND_SYNTHESIS.value,
+                    Permissions.VOTE.value,
                 ],
                 R_PARTICIPANT: [
-                    P_ADD_POST,
-                    P_READ_USER_INFO,
-                    P_VOTE,
+                    Permissions.ADD_POST.value,
+                    Permissions.READ_USER_INFO.value,
+                    Permissions.VOTE.value,
                 ],
                 R_OWNER: [
-                    P_DELETE_POST,
-                    P_EDIT_EXTRACT,
+                    Permissions.DELETE_POST.value,
+                    Permissions.EDIT_EXTRACT.value,
                 ],
                 Authenticated: [
-                    P_SELF_REGISTER,
+                    Permissions.SELF_REGISTER.value,
                 ],
                 Everyone: [
-                    P_READ,
-                    P_READ_IDEA,
+                    Permissions.READ.value,
+                    Permissions.READ_IDEA.value,
                 ],
             },
         },
@@ -646,7 +646,7 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
                 "domains can self-register to this discussion. Anyone can "
                 "self-register if this is empty."),
             "allow_user_override": None,
-            "modification_permission": P_ADMIN_DISC,
+            "modification_permission": Permissions.ADMIN_DISC.value,
             # "frontend_validator_function": func_name...?,
             # "backend_validator_function": func_name...?,
             "default": [],
@@ -662,7 +662,7 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
             "description": _(
                 "Show the CI Dashboard in the panel group window"),
             "allow_user_override": None,
-            "modification_permission": P_ADMIN_DISC,
+            "modification_permission": Permissions.ADMIN_DISC.value,
             # "frontend_validator_function": func_name...?,
             # "backend_validator_function": func_name...?,
             "default": False
@@ -676,7 +676,7 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
             "description": _(
                 "Idea types, must be present in ontology"),
             "allow_user_override": None,
-            "modification_permission": P_ADMIN_DISC,
+            "modification_permission": Permissions.ADMIN_DISC.value,
             # "frontend_validator_function": func_name...?,
             # "backend_validator_function": func_name...?,
             "default": {}
@@ -689,7 +689,7 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
             "value_type": "text",
             "description": _("CSS"),
             "allow_user_override": None,
-            "modification_permission": P_ADMIN_DISC,
+            "modification_permission": Permissions.ADMIN_DISC.value,
             # "frontend_validator_function": func_name...?,
             # "backend_validator_function": func_name...?,
             "default": ""
@@ -704,7 +704,7 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
                 "Configuration of the visualizations shown in the "
                 "CI Dashboard"),
             "allow_user_override": None,
-            "modification_permission": P_ADMIN_DISC,
+            "modification_permission": Permissions.ADMIN_DISC.value,
             # "frontend_validator_function": func_name...?,
             # "backend_validator_function": func_name...?,
             "default":
@@ -724,7 +724,7 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
             "description": _(
                 "A JSON description of available Catalyst visualizations"),
             "allow_user_override": None,
-            "modification_permission": P_ADMIN_DISC,
+            "modification_permission": Permissions.ADMIN_DISC.value,
             # "frontend_validator_function": func_name...?,
             # "backend_validator_function": func_name...?,
             "default": {}
@@ -740,7 +740,7 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
                 "A JSON specification of Catalyst visualizations to show "
                 "in the navigation section"),
             "allow_user_override": None,
-            "modification_permission": P_ADMIN_DISC,
+            "modification_permission": Permissions.ADMIN_DISC.value,
             # "frontend_validator_function": func_name...?,
             # "backend_validator_function": func_name...?,
             "default": {}
@@ -756,8 +756,8 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
                 "Translations applicable to Catalyst visualizations, "
                 "in Jed (JSON) format"),
             "allow_user_override": None,
-            # "view_permission": P_READ,  # by default
-            "modification_permission": P_ADMIN_DISC,
+            # "view_permission": Permissions.READ,  # by default
+            "modification_permission": Permissions.ADMIN_DISC.value,
             # "frontend_validator_function": func_name...?,
             # "backend_validator_function": func_name...?,
             "default": {}
@@ -776,8 +776,8 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
                 "Default expanded/collapsed state of each idea in the table "
                 "of ideas. A user can override it by opening/closing an idea"),
             "allow_user_override": None,
-            # "view_permission": P_READ,  # by default
-            "modification_permission": P_ADD_IDEA,
+            # "view_permission": Permissions.READ,  # by default
+            "modification_permission": Permissions.ADD_IDEA.value,
             # "frontend_validator_function": func_name...?,
             # "backend_validator_function": func_name...?,
             "default": {},
@@ -793,7 +793,7 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
             "description": _(
                 "The preference configuration; override only with care"),
             "allow_user_override": None,
-            "modification_permission": P_SYSADMIN,
+            "modification_permission": Permissions.SYSADMIN.value,
             # "frontend_validator_function": func_name...?,
             # "backend_validator_function": func_name...?,
             "default": None  # this should be recursive...
@@ -808,7 +808,7 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
             "description": _(
                 "Show the banner offering to disable Piwik cookies"),
             "allow_user_override": None,
-            "modification_permission": P_ADMIN_DISC,
+            "modification_permission": Permissions.ADMIN_DISC.value,
             # "frontend_validator_function": func_name...?,
             # "backend_validator_function": func_name...?,
             "default": True  # this should be recursive...

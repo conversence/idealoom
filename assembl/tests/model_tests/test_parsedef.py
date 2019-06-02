@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
-from assembl.auth import P_SYSADMIN
+from assembl.auth import Permissions
 
 
 def _test_load_fixture(request, discussion, fixture):
     request.matchdict = {'discussion_slug': discussion.slug}
-    json = fixture.generic_json(permissions=(P_SYSADMIN, ))
+    json = fixture.generic_json(permissions=(Permissions.SYSADMIN, ))
     print(fixture.__dict__)
     request.populate()
     context = fixture.get_instance_context(request=request)

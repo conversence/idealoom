@@ -21,14 +21,14 @@ def upgrade(pyramid_env):
 
 
     from assembl import models as m
-    from assembl.auth import P_DELETE_MY_POST, P_DELETE_POST, P_ADD_POST, P_MODERATE
+    from assembl.auth import Permissions
     from pyramid.security import Authenticated, Everyone
 
     db = m.get_session_maker()()
     with transaction.manager:
-    	# Give the P_DELETE_MY_POST permission to every role which already has the P_ADD_POST permission
-        p_add_post = db.query(m.Permission).filter_by(name=P_ADD_POST).one()
-        p_delete_my_post = db.query(m.Permission).filter_by(name=P_DELETE_MY_POST).one()
+        # Give the Permissions.DELETE_MY_POST permission to every role which already has the Permissions.ADD_POST permission
+        p_add_post = db.query(m.Permission).filter_by(name=Permissions.ADD_POST).one()
+        p_delete_my_post = db.query(m.Permission).filter_by(name=Permissions.DELETE_MY_POST).one()
 
         dps = db.query(m.DiscussionPermission).filter_by(
         	permission_id=p_add_post.id)
@@ -38,9 +38,9 @@ def upgrade(pyramid_env):
                 role_id = dp.role_id,
                 permission_id = p_delete_my_post.id))
 
-        # Give the P_DELETE_POST permission to every role which already has the P_MODERATE permission
-        p_moderate = db.query(m.Permission).filter_by(name=P_MODERATE).one()
-        p_delete_post = db.query(m.Permission).filter_by(name=P_DELETE_POST).one()
+        # Give the Permissions.DELETE_POST permission to every role which already has the Permissions.MODERATE permission
+        p_moderate = db.query(m.Permission).filter_by(name=Permissions.MODERATE).one()
+        p_delete_post = db.query(m.Permission).filter_by(name=Permissions.DELETE_POST).one()
 
         dps2 = db.query(m.DiscussionPermission).filter_by(
         	permission_id=p_moderate.id)
@@ -57,13 +57,13 @@ def downgrade(pyramid_env):
         op.drop_column('content', 'tombstone_date')
 
 
-    # Remove P_DELETE_MY_POST and P_DELETE_POST permissions, as well as their appearances in DiscussionPermission table (their activation on roles)
+    # Remove Permissions.DELETE_MY_POST and Permissions.DELETE_POST permissions, as well as their appearances in DiscussionPermission table (their activation on roles)
     from assembl import models as m
-    from assembl.auth import P_DELETE_MY_POST, P_DELETE_POST
+    from assembl.auth import Permissions
     db = m.get_session_maker()()
     with transaction.manager:
-        p_delete_my_post = db.query(m.Permission).filter_by(name=P_DELETE_MY_POST).one()
-        p_delete_post = db.query(m.Permission).filter_by(name=P_DELETE_POST).one()
+        p_delete_my_post = db.query(m.Permission).filter_by(name=Permissions.DELETE_MY_POST).one()
+        p_delete_post = db.query(m.Permission).filter_by(name=Permissions.DELETE_POST).one()
 
         db.query(m.DiscussionPermission).filter_by(
             permission_id=p_delete_post.id).delete()

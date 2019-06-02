@@ -10,7 +10,7 @@ from pyramid.security import authenticated_userid, Everyone
 from pyramid.settings import asbool
 
 from assembl.lib import config
-from assembl.auth import P_READ, P_ADD_POST
+from assembl.auth import Permissions
 from assembl.models import File, Document, Discussion
 from assembl.views.traversal import InstanceContext, CollectionContext
 from assembl.lib.raven_client import capture_message
@@ -18,7 +18,7 @@ from . import MULTIPART_HEADER, update_from_form
 
 
 @view_config(context=InstanceContext, request_method='DELETE',
-             permission=P_READ, ctx_instance_class=Document,
+             permission=Permissions.READ, ctx_instance_class=Document,
              renderer='json')
 def delete_file(request):
     # If there is no attachment, delete it and return positive.
@@ -54,7 +54,7 @@ def disposition(title):
 
 
 @view_config(context=InstanceContext, request_method='HEAD',
-             permission=P_READ, ctx_instance_class=File,
+             permission=Permissions.READ, ctx_instance_class=File,
              name='data')
 def get_file_header(request):
     ctx = request.context
@@ -74,7 +74,7 @@ def get_file_header(request):
 
 
 @view_config(context=InstanceContext, request_method='GET',
-             permission=P_READ, ctx_instance_class=File,
+             permission=Permissions.READ, ctx_instance_class=File,
              name='data')
 def get_file(request):
     # TODO: Add a route that enables the call to have the filename
@@ -123,7 +123,7 @@ def get_file(request):
 
 
 @view_config(context=CollectionContext, request_method='POST',
-             header=MULTIPART_HEADER, permission=P_ADD_POST,
+             header=MULTIPART_HEADER, permission=Permissions.ADD_POST,
              ctx_collection_class=Document, renderer='json')
 def upload_file(request):
     """
@@ -163,7 +163,7 @@ def upload_file(request):
 
 
 @view_config(context=InstanceContext, request_method=('PUT', 'PATCH'),
-             header=MULTIPART_HEADER, permission=P_ADD_POST,
+             header=MULTIPART_HEADER, permission=Permissions.ADD_POST,
              ctx_instance_class=Document, renderer='json')
 def update_upload_file(request):
     ctx = request.context

@@ -6,7 +6,7 @@ from pyramid.security import authenticated_userid, Everyone
 from cornice import Service
 
 from . import API_DISCUSSION_PREFIX
-from assembl.auth import P_READ, P_EDIT_SYNTHESIS
+from assembl.auth import Permissions
 from assembl.models import Synthesis
 
 
@@ -19,7 +19,7 @@ synthesis = Service(name='ExplicitSubgraphs',
     description="Manipulate a single synthesis", renderer='json')
 
 
-@syntheses.get(permission=P_READ)
+@syntheses.get(permission=Permissions.READ)
 def get_syntheses(request):
     discussion = request.context
     user_id = authenticated_userid(request) or Everyone
@@ -30,7 +30,7 @@ def get_syntheses(request):
     return [x for x in res if x is not None]
 
 
-@synthesis.get(permission=P_READ)
+@synthesis.get(permission=Permissions.READ)
 def get_synthesis(request):
     synthesis_id = request.matchdict['id']
     discussion = request.context
@@ -48,7 +48,7 @@ def get_synthesis(request):
 
 
 # Update
-@synthesis.put(permission=P_EDIT_SYNTHESIS)
+@synthesis.put(permission=Permissions.EDIT_SYNTHESIS)
 def save_synthesis(request):
     synthesis_id = request.matchdict['id']
     discussion = request.context

@@ -52,9 +52,7 @@ from assembl.lib.parsedatetime import parse_datetime
 from assembl.lib.sqla import ObjectNotUniqueError
 from assembl.lib.json import DateJSONEncoder
 from assembl.lib.utils import get_global_base_url
-from assembl.auth import (
-    P_READ, P_READ_USER_INFO, P_ADMIN_DISC, P_DISC_STATS, P_SYSADMIN,
-    R_ADMINISTRATOR)
+from assembl.auth import Permissions, R_ADMINISTRATOR
 from assembl.auth.password import verify_data_token, data_token, Validity
 from assembl.auth.util import get_permissions
 from assembl.models import (Discussion, Permission, PublicationFlow)
@@ -65,7 +63,7 @@ from ..api.discussion import etalab_discussions, API_ETALAB_DISCUSSIONS_PREFIX
 
 
 @view_config(context=InstanceContext, request_method='GET',
-             ctx_instance_class=Discussion, permission=P_READ,
+             ctx_instance_class=Discussion, permission=Permissions.READ,
              accept="application/json", name="settings",
              renderer='json')
 def discussion_settings_get(request):
@@ -73,10 +71,10 @@ def discussion_settings_get(request):
 
 
 @view_config(context=InstanceContext, request_method='PATCH',
-             ctx_instance_class=Discussion, permission=P_ADMIN_DISC,
+             ctx_instance_class=Discussion, permission=Permissions.ADMIN_DISC,
              header=JSON_HEADER, name="settings")
 @view_config(context=InstanceContext, request_method='PUT',
-             ctx_instance_class=Discussion, permission=P_ADMIN_DISC,
+             ctx_instance_class=Discussion, permission=Permissions.ADMIN_DISC,
              header=JSON_HEADER, name="settings")
 def discussion_settings_put(request):
     request.context._instance.settings_json = request.json_body
@@ -110,8 +108,8 @@ def read_user_token(request):
     user_id = authenticated_userid(request) or Everyone
     discussion_id = request.context.get_discussion_id()
     permissions = ctx.get_permissions()
-    if P_READ_USER_INFO in permissions:
-        permissions.append(P_READ)
+    if Permissions.READ_USER_INFO in permissions:
+        permissions.append(Permissions.READ)
 
     if 'token' in request.GET:
         token = request.GET['token']
@@ -125,17 +123,19 @@ def read_user_token(request):
             t_user_id, t_discussion_id = data[:2]
             req_permissions = data[2:]
             if len(req_permissions):
-                req_permissions = [x for (x,) in Permission.default_db.query(
-                    Permission.name).filter(
-                    Permission.id.in_(req_permissions)).all()]
+                req_permissions = [
+                    Permission.by_value(x)
+                    for (x,) in Permission.default_db.query(
+                        Permission.name).filter(
+                        Permission.id.in_(req_permissions)).all()]
         except (ValueError, IndexError):
             raise HTTPBadRequest("Invalid token")
         if discussion_id is not None and t_discussion_id != discussion_id:
             raise HTTPUnauthorized("Token for another discussion")
         if user_id == Everyone:
             permissions = get_permissions(t_user_id, discussion_id)
-            if P_READ_USER_INFO in permissions:
-                permissions.append(P_READ)
+            if Permissions.READ_USER_INFO in permissions:
+                permissions.append(Permissions.READ)
         elif t_user_id != user_id:
             raise HTTPUnauthorized("Token for another user")
         user_id = t_user_id
@@ -160,13 +160,13 @@ def permission_token(
     permissions = get_permissions(user_id, discussion_id)
     if not req_permissions:
         req_permissions = permissions
-    elif P_SYSADMIN not in permissions:
+    elif Permissions.SYSADMIN not in permissions:
         req_permissions = req_permissions.intersection(set(permissions))
     req_permissions = list(req_permissions)
     user_id = 0 if user_id == Everyone else user_id
     data = [str(user_id), str(discussion_id)]
     data.extend([str(x) for (x,) in Permission.default_db.query(
-            Permission.id).filter(Permission.name.in_(req_permissions)).all()])
+            Permission.id).filter(Permission.name.in_([p.value for p in req_permissions])).all()])
     data = ','.join(data) + '.' + base64.urlsafe_b64encode(random_str).decode('iso-8859-1')
     return data_token(data)
 
@@ -183,12 +183,12 @@ def get_token(request):
     if permission_sets:
         permission_sets = [s.split(',') for s in permission_sets]
         for permissions in permission_sets:
-            if P_READ_USER_INFO in permissions:
-                permissions.append(P_READ)
+            if Permissions.READ_USER_INFO in permissions:
+                permissions.append(Permissions.READ)
         permission_sets = [sorted(set(permissions))
                            for permissions in permission_sets]
     else:
-        permission_sets = [[P_READ, P_READ_USER_INFO]]
+        permission_sets = [[Permissions.READ, Permissions.READ_USER_INFO]]
     random_str = urandom(16)
     data = {','.join(permissions): permission_token(
         user_id, discussion_id, permissions, random_str)
@@ -210,9 +210,9 @@ def get_token(request):
 def discussion_instance_view_jsonld(request):
     discussion = request.context._instance
     user_id, permissions, salt = read_user_token(request)
-    if P_READ not in permissions:
+    if Permissions.READ not in permissions:
         raise HTTPUnauthorized()
-    if not salt and P_ADMIN_DISC not in permissions:
+    if not salt and Permissions.ADMIN_DISC not in permissions:
         salt = base64.urlsafe_b64encode(urandom(12))
 
     jdata = discussion_jsonld(discussion.id)
@@ -237,9 +237,9 @@ def user_private_view_jsonld(request):
         return HTTPFound(get_global_base_url(True) + request.path_qs)
     discussion_id = request.context.get_discussion_id()
     user_id, permissions, salt = read_user_token(request)
-    if P_READ_USER_INFO not in permissions:
+    if Permissions.READ_USER_INFO not in permissions:
         raise HTTPUnauthorized()
-    if not salt and P_ADMIN_DISC not in permissions:
+    if not salt and Permissions.ADMIN_DISC not in permissions:
         salt = base64.urlsafe_b64encode(urandom(12))
 
     jdata = userprivate_jsonld(discussion_id)
@@ -256,7 +256,7 @@ def user_private_view_jsonld(request):
 
 @view_config(context=InstanceContext, name="bulk_idea_pub_state_transition",
              ctx_instance_class=Discussion, request_method='POST',
-             permission=P_ADMIN_DISC)
+             permission=Permissions.ADMIN_DISC)
 def bulk_change_idea_pub_state(request):
     discussion = request.context._instance
     content = request.json
@@ -331,7 +331,7 @@ def get_time_series_timing(request):
 
 @view_config(context=InstanceContext, name="time_series_analytics",
              ctx_instance_class=Discussion, request_method='GET',
-             permission=P_DISC_STATS)
+             permission=Permissions.DISC_STATS)
 def get_time_series_analytics(request):
     start, end, interval = get_time_series_timing(request)
     discussion = request.context._instance
@@ -713,7 +713,7 @@ def csv_response(results, format, fieldnames=None):
 
 @view_config(context=InstanceContext, name="contribution_count",
              ctx_instance_class=Discussion, request_method='GET',
-             permission=P_DISC_STATS)
+             permission=Permissions.DISC_STATS)
 def get_contribution_count(request):
     start, end, interval = get_time_series_timing(request)
     format = get_format(request)
@@ -775,7 +775,7 @@ def get_contribution_count(request):
 
 @view_config(context=InstanceContext, name="visit_count",
              ctx_instance_class=Discussion, request_method='GET',
-             permission=P_DISC_STATS)
+             permission=Permissions.DISC_STATS)
 def get_visit_count(request):
     start, end, interval = get_time_series_timing(request)
     format = get_format(request)
@@ -816,7 +816,7 @@ def get_visit_count(request):
 
 @view_config(context=InstanceContext, name="visitors",
              ctx_instance_class=Discussion, request_method='GET',
-             permission=P_DISC_STATS)
+             permission=Permissions.DISC_STATS)
 def get_visitors(request):
     discussion = request.context._instance
     use_first = asbool(request.GET.get("first", False))
@@ -851,7 +851,7 @@ pygraphviz_formats = {
 
 @view_config(context=InstanceContext, name="mindmap",
              ctx_instance_class=Discussion, request_method='GET',
-             permission=P_READ)
+             permission=Permissions.READ)
 def as_mind_map(request):
     """Provide a mind-map like representation of the table of ideas"""
     for mimetype in request.GET.getall('mimetype'):
@@ -888,7 +888,7 @@ def get_analytics_alerts(discussion, user_id, types, all_users=False):
         host += ':' + port
     seed = urandom(8)
     obfuscator = AESObfuscator(seed)
-    token = permission_token(user_id, discussion.id, [P_READ], seed)
+    token = permission_token(user_id, discussion.id, [Permissions.READ], seed)
     metrics_requests = [{
         "metric": "alerts",
         "types": types}]
@@ -913,7 +913,7 @@ def get_analytics_alerts(discussion, user_id, types, all_users=False):
 
 @view_config(context=InstanceContext, name="activity_alerts",
              ctx_instance_class=Discussion, request_method='GET',
-             permission=P_DISC_STATS)
+             permission=Permissions.DISC_STATS)
 def get_activity_alerts(request):
     discussion = request.context._instance
     user_id = authenticated_userid(request) or Everyone
@@ -926,7 +926,7 @@ def get_activity_alerts(request):
 
 @view_config(context=InstanceContext, name="interest_alerts",
              ctx_instance_class=Discussion, request_method='GET',
-             permission=P_DISC_STATS)
+             permission=Permissions.DISC_STATS)
 def get_interest_alerts(request):
     discussion = request.context._instance
     user_id = authenticated_userid(request) or Everyone
@@ -939,7 +939,7 @@ def get_interest_alerts(request):
 
 @view_config(context=InstanceContext, name="clusters",
              ctx_instance_class=Discussion, request_method='GET',
-             permission=P_DISC_STATS)
+             permission=Permissions.DISC_STATS)
 def show_cluster(request):
     discussion = request.context._instance
     output = BytesIO()
@@ -954,7 +954,7 @@ def show_cluster(request):
 
 @view_config(context=InstanceContext, name="optics",
              ctx_instance_class=Discussion, request_method='GET',
-             permission=P_READ)
+             permission=Permissions.READ)
 def show_optics_cluster(request):
     discussion = request.context._instance
     eps = float(request.GET.get("eps", "0.02"))
@@ -986,7 +986,7 @@ def show_optics_cluster(request):
 
 @view_config(context=InstanceContext, name="suggestions_test",
              ctx_instance_class=Discussion, request_method='GET',
-             permission=P_READ)
+             permission=Permissions.READ)
 def show_suggestions_test(request):
     discussion = request.context._instance
     user_id = authenticated_userid(request)
@@ -1008,7 +1008,7 @@ def show_suggestions_test(request):
 
 @view_config(context=InstanceContext, name="test_results",
              ctx_instance_class=Discussion, request_method='POST',
-             header=FORM_HEADER, permission=P_READ)
+             header=FORM_HEADER, permission=Permissions.READ)
 def test_results(request):
     mailer = get_mailer(request)
     config = get_config()
@@ -1023,14 +1023,14 @@ def test_results(request):
 
 @view_config(context=InstanceContext, name="test_sentry",
              ctx_instance_class=Discussion, request_method='GET',
-             permission=P_READ)
+             permission=Permissions.READ)
 def test_sentry(request):
     raise RuntimeError("Let's test sentry")
 
 
-@etalab_discussions.post(permission=P_SYSADMIN)
+@etalab_discussions.post(permission=Permissions.SYSADMIN)
 @view_config(context=ClassContext, ctx_class=Discussion,
-             request_method='POST', header=JSON_HEADER, permission=P_SYSADMIN)
+             request_method='POST', header=JSON_HEADER, permission=Permissions.SYSADMIN)
 def post_discussion(request):
     from assembl.models import EmailAccount, User, LocalUserRole, Role, AbstractAgentAccount
     ctx = request.context
@@ -1107,7 +1107,7 @@ class defaultdict_of_dict(defaultdict):
 
 @view_config(context=InstanceContext, name="participant_time_series_analytics",
              ctx_instance_class=Discussion, request_method='GET',
-             permission=P_DISC_STATS)
+             permission=Permissions.DISC_STATS)
 def get_participant_time_series_analytics(request):
     start, end, interval = get_time_series_timing(request)
     data_descriptors = request.GET.getall("data")
@@ -1117,10 +1117,10 @@ def get_participant_time_series_analytics(request):
     ctx = request.context
     permissions = ctx.get_permissions()
     if with_email is None:
-        with_email = P_ADMIN_DISC in permissions
+        with_email = Permissions.ADMIN_DISC in permissions
     else:
         with_email = asbool(with_email)
-        if with_email and P_ADMIN_DISC not in permissions:
+        if with_email and Permissions.ADMIN_DISC not in permissions:
             raise HTTPUnauthorized("Cannot obtain email information")
     format = get_format(request)
     sort_key = request.GET.get('sort', 'domain' if with_email else 'name')
@@ -1146,7 +1146,7 @@ def get_participant_time_series_analytics(request):
         raise HTTPBadRequest("No valid data descriptor given")
     if sort_key and sort_key not in ('name', 'domain') and sort_key not in default_data_descriptors:
         raise HTTPBadRequest("Invalid sort column")
-    if sort_key == 'domain' and P_ADMIN_DISC not in permissions:
+    if sort_key == 'domain' and Permissions.ADMIN_DISC not in permissions:
         raise HTTPUnauthorized("Cannot obtain email information")
 
     with transaction.manager:

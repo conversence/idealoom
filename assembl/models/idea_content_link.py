@@ -34,9 +34,7 @@ from .idea import Idea
 from .generic import Content
 from .post import Post
 from .auth import AgentProfile
-from ..auth import (
-    CrudPermissions, P_READ, P_EDIT_IDEA,
-    P_EDIT_EXTRACT, P_ADD_IDEA, P_ADD_EXTRACT)
+from ..auth import CrudPermissions, Permissions
 from ..semantic.namespaces import (
     CATALYST, ASSEMBL, DCTERMS, OA, QUADNAMES, RDF, SIOC)
 
@@ -115,7 +113,7 @@ class IdeaContentLink(DiscussionBoundBase, OriginMixin):
                 (idea.tombstone_date == None))
 
     crud_permissions = CrudPermissions(
-            P_ADD_IDEA, P_READ, P_EDIT_IDEA, P_EDIT_IDEA)
+            Permissions.ADD_IDEA, Permissions.READ, Permissions.EDIT_IDEA, Permissions.EDIT_IDEA)
 
 @event.listens_for(IdeaContentLink.idea, 'set', propagate=True, active_history=True)
 def idea_content_link_idea_set_listener(target, value, oldvalue, initiator):
@@ -461,7 +459,7 @@ class Extract(IdeaContentPositiveLink):
         return (query, alias.owner_id == user_id)
 
     crud_permissions = CrudPermissions(
-            P_ADD_EXTRACT, P_READ, P_EDIT_EXTRACT, P_EDIT_EXTRACT)
+            Permissions.ADD_EXTRACT, Permissions.READ, Permissions.EDIT_EXTRACT, Permissions.EDIT_EXTRACT)
 
 class IdeaContentNegativeLink(IdeaContentLink):
     """
@@ -543,7 +541,7 @@ class AnnotationSelector(DiscussionBoundBase):
         info={'rdf': QuadMapPatternS(None, ASSEMBL.in_conversation)})
 
     crud_permissions = CrudPermissions(
-            P_ADD_EXTRACT, P_READ, P_EDIT_EXTRACT, P_EDIT_EXTRACT)
+            Permissions.ADD_EXTRACT, Permissions.READ, Permissions.EDIT_EXTRACT, Permissions.EDIT_EXTRACT)
 
 
 class TextQuoteSelector(AnnotationSelector):

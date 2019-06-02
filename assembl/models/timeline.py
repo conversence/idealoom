@@ -16,9 +16,7 @@ from sqlalchemy import (
 
 from . import DiscussionBoundBase
 from ..semantic.virtuoso_mapping import QuadMapPatternS
-from ..auth import (
-    CrudPermissions, P_ADD_POST, P_READ, P_EDIT_POST, P_ADMIN_DISC,
-    P_EDIT_POST, P_ADMIN_DISC)
+from ..auth import CrudPermissions, Permissions
 from ..lib.sqla_types import CoerceUnicode, URLString
 from ..semantic.namespaces import TIME, DCTERMS, ASSEMBL
 from .discussion import Discussion
@@ -152,7 +150,7 @@ class TimelineEvent(DiscussionBoundBase):
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):
         return (cls.discussion_id == discussion_id,)
 
-    crud_permissions = CrudPermissions(P_ADMIN_DISC, P_READ)
+    crud_permissions = CrudPermissions(Permissions.ADMIN_DISC, Permissions.READ)
 
 
 LangString.setup_ownership_load_event(TimelineEvent, ['title', 'description'])

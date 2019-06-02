@@ -18,7 +18,7 @@ from .. import get_default_context
 from assembl.models.mail import IMAPMailbox, MailingList
 from assembl.auth import (
     R_PARTICIPANT, R_SYSADMIN, R_ADMINISTRATOR, SYSTEM_ROLES,
-    P_SYSADMIN, P_ADMIN_DISC, Everyone)
+    Permissions, Everyone)
 from assembl.auth.util import (
     add_multiple_users_csv, user_has_permission, get_non_expired_user_id)
 from assembl.models.auth import (
@@ -51,7 +51,7 @@ class PseudoDiscussion(object):
 
 
 @view_config(route_name='base_admin', request_method='GET', http_cache=60,
-             permission=P_SYSADMIN)
+             permission=Permissions.SYSADMIN)
 def base_admin_view(request):
     """The Base admin view, for frontend urls"""
     user_id = get_non_expired_user_id(request) or Everyone
@@ -97,7 +97,7 @@ def base_admin_view(request):
 
 
 @view_config(route_name='test_simultaneous_ajax_calls',
-             permission=P_SYSADMIN, request_method="GET")
+             permission=Permissions.SYSADMIN, request_method="GET")
 def test_simultaneous_ajax_calls(request):
     g = lambda x: request.GET.get(x, None)
 
@@ -135,7 +135,7 @@ def test_simultaneous_ajax_calls(request):
         request=request)
 
 
-@view_config(route_name='discussion_admin', permission=P_SYSADMIN,
+@view_config(route_name='discussion_admin', permission=Permissions.SYSADMIN,
              request_method=("GET", "POST"))
 def discussion_admin(request):
     user_id = get_non_expired_user_id(request)
@@ -218,7 +218,7 @@ def discussion_admin(request):
         request=request)
 
 
-@view_config(route_name='discussion_edit', permission=P_ADMIN_DISC,
+@view_config(route_name='discussion_edit', permission=Permissions.ADMIN_DISC,
              request_method=("GET", "POST"))
 def discussion_edit(request):
     discussion_id = int(request.matchdict['discussion_id'])
@@ -267,7 +267,7 @@ def order_by_domain_and_name(user):
     return (domain, user.name or '')
 
 
-@view_config(route_name='discussion_permissions', permission=P_ADMIN_DISC,
+@view_config(route_name='discussion_permissions', permission=Permissions.ADMIN_DISC,
              request_method=("GET", "POST"))
 def discussion_permissions(request):
     user_id = get_non_expired_user_id(request)
@@ -392,7 +392,7 @@ def discussion_permissions(request):
         elif 'submit_user_file' in request.POST:
             role = request.POST['add_with_role'] or R_PARTICIPANT
             if role == R_SYSADMIN and not user_has_permission(
-                    discussion_id, user_id, P_SYSADMIN):
+                    discussion_id, user_id, Permissions.SYSADMIN):
                 role = R_ADMINISTRATOR
             if 'user_csvfile' in request.POST:
                 try:
@@ -441,7 +441,7 @@ def discussion_permissions(request):
         request=request)
 
 
-@view_config(route_name='general_permissions', permission=P_SYSADMIN,
+@view_config(route_name='general_permissions', permission=Permissions.SYSADMIN,
              request_method=("GET", "POST"))
 def general_permissions(request):
     user_id = get_non_expired_user_id(request)

@@ -4,7 +4,7 @@ from pyramid.security import authenticated_userid, Everyone
 from cornice import Service
 
 import assembl.models
-from assembl.auth import P_READ
+from assembl.auth import Permissions
 from assembl.view_def import get_view_def
 from assembl.views.api import API_DISCUSSION_PREFIX
 
@@ -16,7 +16,7 @@ generic = Service(
     renderer='json')
 
 
-@generic.get(permission=P_READ)
+@generic.get(permission=Permissions.READ)
 def get_object(request):
     classname = request.matchdict['cls']
     id = request.matchdict['id']

@@ -425,7 +425,7 @@ class AgentProfile(Base):
             autologin = discussion.preferences['authorization_server_backend']
         from ..auth.util import user_has_permission
         if autologin and not user_has_permission(
-                discussion.id, self.id, P_OVERRIDE_SOCIAL_AUTOLOGIN):
+                discussion.id, self.id, Permissions.OVERRIDE_SOCIAL_AUTOLOGIN):
             # the discussion restricts access to this specific
             # social identity provider. The override permission
             # bypasses that, mostly for external moderators.
@@ -531,8 +531,8 @@ class AbstractAgentAccount(Base):
     }
 
     crud_permissions = CrudPermissions(
-        P_READ, P_SYSADMIN, P_SYSADMIN, P_SYSADMIN,
-        P_READ, P_READ, P_READ)
+        Permissions.READ, Permissions.SYSADMIN, Permissions.SYSADMIN, Permissions.SYSADMIN,
+        Permissions.READ, Permissions.READ, Permissions.READ)
 
     @classmethod
     def user_can_cls(cls, user_id, operation, permissions):
@@ -716,8 +716,8 @@ class AgentStatusInDiscussion(DiscussionBoundBase):
         return user_id == self.profile_id
 
     crud_permissions = CrudPermissions(
-        P_READ, P_ADMIN_DISC, P_ADMIN_DISC, P_ADMIN_DISC,
-        P_READ, P_READ, P_READ)
+        Permissions.READ, Permissions.ADMIN_DISC, Permissions.ADMIN_DISC, Permissions.ADMIN_DISC,
+        Permissions.READ, Permissions.READ, Permissions.READ)
 
 
 @event.listens_for(AgentStatusInDiscussion, 'after_insert', propagate=True)
@@ -1092,7 +1092,7 @@ class User(NamedClassMixin, OriginMixin, AgentProfile):
                 discussion_id = parent_ctx.get_discussion_id()
                 current_user_id = get_current_user_id()
                 if user_id != current_user_id and not user_has_permission(
-                        discussion_id, current_user_id, P_SYSADMIN):
+                        discussion_id, current_user_id, Permissions.SYSADMIN):
                     raise HTTPUnauthorized()
                 if discussion_id:
                     discussion = Discussion.get(discussion_id)
@@ -1336,7 +1336,7 @@ class PartnerOrganization(DiscussionBoundBase):
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):
         return (cls.discussion_id == discussion_id,)
 
-    crud_permissions = CrudPermissions(P_ADMIN_DISC)
+    crud_permissions = CrudPermissions(Permissions.ADMIN_DISC)
 
 
 class LanguagePreferenceOrder(IntEnum):
@@ -1522,8 +1522,8 @@ class UserLanguagePreference(Base):
                         order_by=source_of_evidence))
 
     crud_permissions = CrudPermissions(
-            P_READ, P_SYSADMIN, P_SYSADMIN, P_SYSADMIN,
-            P_READ, P_READ, P_READ)
+            Permissions.READ, Permissions.SYSADMIN, Permissions.SYSADMIN, Permissions.SYSADMIN,
+            Permissions.READ, Permissions.READ, Permissions.READ)
 
     def is_owner(self, user_id):
         return user_id == self.user_id

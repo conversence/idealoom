@@ -2,7 +2,7 @@ from __future__ import print_function
 import pytest
 from sqlalchemy import inspect
 
-from assembl.auth import P_READ, R_PARTICIPANT
+from assembl.auth import Permissions, R_PARTICIPANT
 
 
 @pytest.fixture(scope="function")
@@ -96,7 +96,7 @@ def closed_discussion(request, test_session, discussion):
     role = test_session.query(Role).filter_by(name=R_PARTICIPANT).first()
     # Take the read for everyone, put it on participant
     dp = test_session.query(DiscussionPermission).join(Permission).filter(
-        DiscussionPermission.discussion==discussion, Permission.name==P_READ).first()
+        DiscussionPermission.discussion==discussion, Permission.name==Permissions.READ.value).first()
     dp.role = role
     test_session.commit()
 

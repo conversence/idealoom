@@ -5,7 +5,7 @@ from pyramid.security import authenticated_userid, Everyone
 from pyramid.settings import asbool
 import simplejson as json
 
-from assembl.auth import (P_READ, P_EDIT_SYNTHESIS, CrudPermissions)
+from assembl.auth import (Permissions, CrudPermissions)
 from assembl.models import (
     Discussion, Idea, SubGraphIdeaAssociation, Synthesis)
 from ..traversal import InstanceContext, CollectionContext
@@ -13,21 +13,21 @@ from . import check_permissions
 
 
 @view_config(context=InstanceContext, renderer='json', request_method='GET',
-             ctx_instance_class=Discussion, permission=P_READ,
+             ctx_instance_class=Discussion, permission=Permissions.READ,
              accept="application/json", name="notifications")
 def discussion_notifications(request):
     return list(request.context._instance.get_notifications())
 
 
 @view_config(context=CollectionContext, renderer='json', request_method='GET',
-             ctx_named_collection="Discussion.syntheses", permission=P_READ,
+             ctx_named_collection="Discussion.syntheses", permission=Permissions.READ,
              accept="application/json")
 def get_syntheses(request, default_view='default'):
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
     permissions = ctx.get_permissions()
     check_permissions(ctx, user_id, CrudPermissions.READ, Synthesis)
-    include_unpublished = P_EDIT_SYNTHESIS in permissions
+    include_unpublished = Permissions.EDIT_SYNTHESIS in permissions
     view = request.GET.get('view', None) or ctx.get_default_view() or default_view
     include_tombstones = asbool(request.GET.get('tombstones', False))
     discussion = ctx.get_instance_of_class(Discussion)
@@ -44,7 +44,7 @@ def get_syntheses(request, default_view='default'):
 
 @view_config(context=CollectionContext, renderer='json', request_method='POST',
              ctx_named_collection="ExplicitSubGraphView.ideas",
-             permission=P_EDIT_SYNTHESIS, accept="application/json")
+             permission=Permissions.EDIT_SYNTHESIS, accept="application/json")
 def add_idea_to_synthesis(request):
     """Add an idea to an ExplictSubgraphView"""
     ctx = request.context
@@ -75,7 +75,7 @@ def add_idea_to_synthesis(request):
 
 @view_config(context=InstanceContext, renderer='json', request_method='DELETE',
              ctx_named_collection_instance="ExplicitSubGraphView.ideas",
-             permission=P_EDIT_SYNTHESIS, accept="application/json")
+             permission=Permissions.EDIT_SYNTHESIS, accept="application/json")
 def remove_idea_from_synthesis(request):
     """Remove an idea from an ExplictSubgraphView"""
     ctx = request.context
@@ -100,7 +100,7 @@ def remove_idea_from_synthesis(request):
 
 
 @view_config(context=InstanceContext, request_method='GET',
-             ctx_instance_class=Synthesis, permission=P_READ,
+             ctx_instance_class=Synthesis, permission=Permissions.READ,
              accept="text/html", name="preview")
 def html_export(request):
     from pyramid_jinja2 import IJinja2Environment

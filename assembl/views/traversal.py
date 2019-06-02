@@ -20,7 +20,7 @@ from pyramid.httpexceptions import HTTPNotFound
 from abc import ABCMeta, abstractmethod
 import reg
 
-from assembl.auth import P_READ, R_SYSADMIN
+from assembl.auth import Permissions, R_SYSADMIN
 from assembl.auth.util import discussion_from_request
 from assembl.lib.sqla import uses_list, get_named_class, Base
 from assembl.lib.logging import getLogger
@@ -121,7 +121,7 @@ class DictContext(BaseContext):
 
 
 ACL_READABLE = [(Allow, R_SYSADMIN, ALL_PERMISSIONS),
-                (Allow, Everyone, P_READ), DENY_ALL]
+                (Allow, Everyone, Permissions.READ), DENY_ALL]
 ACL_RESTRICTIVE = [(Allow, R_SYSADMIN, ALL_PERMISSIONS), DENY_ALL]
 
 

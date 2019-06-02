@@ -16,7 +16,7 @@ from sqlalchemy.orm import aliased
 
 from ..traversal import (CollectionContext, InstanceContext)
 from assembl.auth import (
-    P_READ, Everyone, CrudPermissions, P_ADMIN_DISC, P_VOTE, P_DISC_STATS)
+    Permissions, Everyone, CrudPermissions)
 from assembl.models import (
     Idea, AbstractIdeaVote, User, AbstractVoteSpecification, VotingWidget,
     TokenVoteSpecification, LanguagePreferenceCollection)
@@ -26,7 +26,7 @@ from . import (FORM_HEADER, JSON_HEADER, check_permissions)
 
 # Votes are private
 @view_config(context=CollectionContext, renderer='json',
-             request_method='GET', permission=P_READ,
+             request_method='GET', permission=Permissions.READ,
              ctx_collection_class=AbstractIdeaVote)
 def votes_collection_view(request):
     ctx = request.context
@@ -44,7 +44,7 @@ def votes_collection_view(request):
 
 
 @view_config(context=CollectionContext, request_method='POST',
-             header=JSON_HEADER, permission=P_VOTE,
+             header=JSON_HEADER, permission=Permissions.VOTE,
              ctx_collection_class=AbstractIdeaVote)
 def votes_collection_add_json(request):
     ctx = request.context
@@ -102,7 +102,7 @@ def votes_collection_add_json(request):
 @view_config(context=InstanceContext, request_method='GET',
              ctx_instance_class=AbstractVoteSpecification,
              name="vote_results", renderer="json",
-             permission=P_READ)
+             permission=Permissions.READ)
 def vote_results(request):
     ctx = request.context
     user_id = authenticated_userid(request)
@@ -120,13 +120,13 @@ def vote_results(request):
     widget = ctx._instance.widget
     if widget.activity_state != "ended":
         permissions = ctx.get_permissions()
-        if P_ADMIN_DISC not in permissions:
+        if Permissions.ADMIN_DISC not in permissions:
             raise HTTPUnauthorized()
     return ctx._instance.voting_results(histogram)
 
 @view_config(context=InstanceContext, request_method='GET',
              ctx_instance_class=AbstractVoteSpecification,
-             name="vote_results_csv", permission=P_DISC_STATS)
+             name="vote_results_csv", permission=Permissions.DISC_STATS)
 def vote_results_csv(request):
     ctx = request.context
     user_id = authenticated_userid(request)
@@ -144,7 +144,7 @@ def vote_results_csv(request):
     widget = ctx._instance.widget
     if widget.activity_state != "ended":
         permissions = ctx.get_permissions()
-        if P_ADMIN_DISC not in permissions:
+        if Permissions.ADMIN_DISC not in permissions:
             raise HTTPUnauthorized()
     output = BytesIO()
     output_utf8 = TextIOWrapper(output, encoding='utf-8')
@@ -156,7 +156,7 @@ def vote_results_csv(request):
 
 @view_config(context=InstanceContext, request_method='GET',
              ctx_instance_class=VotingWidget,
-             name="vote_results_csv", permission=P_DISC_STATS)
+             name="vote_results_csv", permission=Permissions.DISC_STATS)
 def global_vote_results_csv(request):
     ctx = request.context
     user_id = request.authenticated_userid
@@ -165,7 +165,7 @@ def global_vote_results_csv(request):
     widget = ctx._instance
     if widget.activity_state != "ended":
         permissions = ctx.get_permissions()
-        if P_ADMIN_DISC not in permissions:
+        if Permissions.ADMIN_DISC not in permissions:
             raise HTTPUnauthorized()
     user_prefs = LanguagePreferenceCollection.getCurrent()
     # first fetch the ideas voted on

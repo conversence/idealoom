@@ -119,11 +119,11 @@ class DiscussionBoundBase(AbstractBase):
             object_importer=object_importer)
 
     def principals_with_read_permission(self):
-        from ..auth import P_READ
+        from ..auth import Permissions
         from ..auth.util import roles_with_permission
         from .auth import User
         permissions = self.crud_permissions
-        if permissions.read == P_READ:
+        if permissions.read == Permissions.READ:
             return None  # i.e. everyone
         # TODO: CACHE!!!
         base = roles_with_permission(self.get_discussion(), permissions.read)

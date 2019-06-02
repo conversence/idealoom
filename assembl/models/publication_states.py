@@ -23,8 +23,7 @@ from ..lib.sqla import CrudOperation, DuplicateHandling
 from . import Base, DiscussionBoundBase, NamedClassMixin, ContextualNamedClassMixin
 from .langstrings import LangString
 from .permissions import Permission, Role
-from ..auth import (
-    CrudPermissions, P_READ, P_SYSADMIN, P_ADMIN_DISC)
+from ..auth import CrudPermissions, Permissions
 
 
 class PublicationFlow(NamedClassMixin, Base):
@@ -79,7 +78,7 @@ class PublicationFlow(NamedClassMixin, Base):
             transition.update_from_json(transitionJ, context=ctx)
         return target
 
-    crud_permissions = CrudPermissions(P_SYSADMIN, P_READ, P_SYSADMIN)
+    crud_permissions = CrudPermissions(Permissions.SYSADMIN, Permissions.READ, Permissions.SYSADMIN)
 
 
 class PublicationState(ContextualNamedClassMixin, Base):
@@ -121,7 +120,7 @@ class PublicationState(ContextualNamedClassMixin, Base):
             return query.filter_by(flow=self.flow), True
         return  query, False
 
-    crud_permissions = CrudPermissions(P_SYSADMIN, P_READ, P_SYSADMIN)
+    crud_permissions = CrudPermissions(Permissions.SYSADMIN, Permissions.READ, Permissions.SYSADMIN)
 
 
 class PublicationTransition(ContextualNamedClassMixin, Base):
@@ -217,7 +216,7 @@ class PublicationTransition(ContextualNamedClassMixin, Base):
             assert target.source.flow == target.flow
         return target
 
-    crud_permissions = CrudPermissions(P_SYSADMIN, P_READ, P_SYSADMIN)
+    crud_permissions = CrudPermissions(Permissions.SYSADMIN, Permissions.READ, Permissions.SYSADMIN)
 
 
 class StateDiscussionPermission(DiscussionBoundBase):
@@ -280,4 +279,4 @@ class StateDiscussionPermission(DiscussionBoundBase):
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):
         return (cls.discussion_id == discussion_id, )
 
-    crud_permissions = CrudPermissions(P_ADMIN_DISC, P_READ, P_ADMIN_DISC)
+    crud_permissions = CrudPermissions(Permissions.ADMIN_DISC, Permissions.READ, Permissions.ADMIN_DISC)

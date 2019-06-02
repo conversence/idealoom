@@ -5,8 +5,7 @@ from pyramid.security import authenticated_userid, Everyone
 from pyramid.httpexceptions import (
     HTTPOk, HTTPNoContent, HTTPNotFound, HTTPUnauthorized)
 
-from assembl.auth import (
-    P_READ, P_ADMIN_DISC, P_ADD_POST)
+from assembl.auth import Permissions
 from assembl.models import (
     Widget, User, Discussion, Idea, IdeaCreatingWidget,
     VotingWidget)
@@ -20,7 +19,7 @@ from . import (
 @view_config(context=InstanceContext, renderer='json', request_method='GET',
              ctx_instance_class_with_exceptions=(
              Widget, (VotingWidget,)),
-             permission=P_READ, accept="application/json")
+             permission=Permissions.READ, accept="application/json")
 def widget_view(request):
     # owrenship not applicable for widgets... so far
     ctx = request.context
@@ -35,7 +34,7 @@ def widget_view(request):
         user = User.get(user_id)
         user_state = ctx._instance.get_user_state(user_id)
         json['user'] = user.generic_json(view, user_id, permissions)
-        json['user_permissions'] = permissions
+        json['user_permissions'] = [p.value for p in permissions]
         if user_state is not None:
             json['user_state'] = user_state
     target_id = request.GET.get('target', None)
@@ -68,7 +67,7 @@ def widget_instance_put(request):
 
 
 @view_config(context=InstanceContext, request_method='GET',
-             ctx_instance_class=Widget, permission=P_READ,
+             ctx_instance_class=Widget, permission=Permissions.READ,
              accept="application/json", name="user_state",
              renderer='json')
 def widget_userstate_get(request):
@@ -79,12 +78,12 @@ def widget_userstate_get(request):
 
 
 @view_config(context=InstanceContext, request_method='PATCH',
-             ctx_instance_class=Widget, permission=P_READ,
-             # TODO @maparent: with permission=P_ADD_POST we had problems
+             ctx_instance_class=Widget, permission=Permissions.READ,
+             # TODO @maparent: with permission=Permissions.ADD_POST we had problems
              header=JSON_HEADER, name="user_state")
 @view_config(context=InstanceContext, request_method='PUT',
-             ctx_instance_class=Widget, permission=P_READ,
-             # TODO @maparent: with permission=P_ADD_POST we had problems
+             ctx_instance_class=Widget, permission=Permissions.READ,
+             # TODO @maparent: with permission=Permissions.ADD_POST we had problems
              header=JSON_HEADER, name="user_state")
 def widget_userstate_put(request):
     # No further permission check for user_state
@@ -99,7 +98,7 @@ def widget_userstate_put(request):
 
 
 @view_config(context=InstanceContext, request_method='GET',
-             ctx_instance_class=Widget, permission=P_READ,
+             ctx_instance_class=Widget, permission=Permissions.READ,
              accept="application/json", name="settings",
              renderer='json')
 def widget_settings_get(request):
@@ -107,10 +106,10 @@ def widget_settings_get(request):
 
 
 @view_config(context=InstanceContext, request_method='PATCH',
-             ctx_instance_class=Widget, permission=P_ADMIN_DISC,
+             ctx_instance_class=Widget, permission=Permissions.ADMIN_DISC,
              header=JSON_HEADER, name="settings")
 @view_config(context=InstanceContext, request_method='PUT',
-             ctx_instance_class=Widget, permission=P_ADMIN_DISC,
+             ctx_instance_class=Widget, permission=Permissions.ADMIN_DISC,
              header=JSON_HEADER, name="settings")
 def widget_settings_put(request):
     request.context._instance.settings_json = request.json_body
@@ -118,7 +117,7 @@ def widget_settings_put(request):
 
 
 @view_config(context=InstanceContext, request_method='GET',
-             ctx_instance_class=Widget, permission=P_READ,
+             ctx_instance_class=Widget, permission=Permissions.READ,
              accept="application/json", name="state",
              renderer='json')
 def widget_state_get(request):
@@ -126,10 +125,10 @@ def widget_state_get(request):
 
 
 @view_config(context=InstanceContext, request_method='PATCH',
-             ctx_instance_class=Widget, permission=P_ADD_POST,
+             ctx_instance_class=Widget, permission=Permissions.ADD_POST,
              header=JSON_HEADER, name="state")
 @view_config(context=InstanceContext, request_method='PUT',
-             ctx_instance_class=Widget, permission=P_ADD_POST,
+             ctx_instance_class=Widget, permission=Permissions.ADD_POST,
              header=JSON_HEADER, name="state")
 def widget_state_put(request):
     request.context._instance.state_json = request.json_body
@@ -138,7 +137,7 @@ def widget_state_put(request):
 
 @view_config(
     context=InstanceContext, ctx_instance_class=IdeaCreatingWidget,
-    request_method="GET", permission=P_READ,
+    request_method="GET", permission=Permissions.READ,
     renderer="json", name="confirm_ideas")
 def view_confirmed_ideas(request):
     ctx = request.context
@@ -147,7 +146,7 @@ def view_confirmed_ideas(request):
 
 @view_config(
     context=InstanceContext, ctx_instance_class=IdeaCreatingWidget,
-    request_method="POST", permission=P_ADMIN_DISC,
+    request_method="POST", permission=Permissions.ADMIN_DISC,
     renderer="json", name="confirm_ideas", header=FORM_HEADER)
 def set_confirmed_ideas(request):
     ids = loads(request.POST['ids'])
@@ -158,7 +157,7 @@ def set_confirmed_ideas(request):
 
 @view_config(
     context=InstanceContext, ctx_instance_class=IdeaCreatingWidget,
-    request_method="POST", permission=P_ADMIN_DISC,
+    request_method="POST", permission=Permissions.ADMIN_DISC,
     renderer="json", name="confirm_ideas", header=JSON_HEADER)
 def set_confirmed_ideas_json(request):
     ids = request.json_body.get('ids', ())
@@ -169,7 +168,7 @@ def set_confirmed_ideas_json(request):
 
 @view_config(
     context=InstanceContext, ctx_instance_class=IdeaCreatingWidget,
-    request_method="GET", permission=P_READ,
+    request_method="GET", permission=Permissions.READ,
     renderer="json", name="confirm_messages")
 def view_confirmed_messages(request):
     ctx = request.context
@@ -178,7 +177,7 @@ def view_confirmed_messages(request):
 
 @view_config(
     context=InstanceContext, ctx_instance_class=IdeaCreatingWidget,
-    request_method="POST", permission=P_ADMIN_DISC,
+    request_method="POST", permission=Permissions.ADMIN_DISC,
     renderer="json", name="confirm_messages", header=FORM_HEADER)
 def set_confirmed_messages(request):
     ids = loads(request.POST['ids'])
@@ -189,7 +188,7 @@ def set_confirmed_messages(request):
 
 @view_config(
     context=InstanceContext, ctx_instance_class=IdeaCreatingWidget,
-    request_method="POST", permission=P_ADMIN_DISC,
+    request_method="POST", permission=Permissions.ADMIN_DISC,
     renderer="json", name="confirm_messages", header=JSON_HEADER)
 def set_confirmed_messages_json(request):
     ids = request.json_body.get('ids', ())
@@ -200,7 +199,7 @@ def set_confirmed_messages_json(request):
 
 @view_config(
     context=InstanceContext, ctx_instance_class=VotingWidget,
-    request_method="GET", permission=P_READ,
+    request_method="GET", permission=Permissions.READ,
     renderer="json", name="criteria")
 def get_idea_sibling_criteria(request):
     ctx = request.context
@@ -214,14 +213,14 @@ def get_idea_sibling_criteria(request):
 
 @view_config(
     context=InstanceContext, ctx_instance_class=Widget,
-    request_method="GET", permission=P_READ,
+    request_method="GET", permission=Permissions.READ,
     renderer="json", name="user_states")
 def get_all_users_states(request):
     return request.context._instance.get_all_user_states()
 
 
 @view_config(context=InstanceContext, renderer='json', request_method='GET',
-             ctx_instance_class=VotingWidget, permission=P_READ,
+             ctx_instance_class=VotingWidget, permission=Permissions.READ,
              accept="application/json")
 def voting_widget_view(request):
     user_id = authenticated_userid(request) or Everyone
@@ -235,7 +234,7 @@ def voting_widget_view(request):
     if user_id != Everyone:
         user = User.get(user_id)
         json['user'] = user.generic_json(view, user_id, permissions)
-        json['user_permissions'] = permissions
+        json['user_permissions'] = [p.value for p in permissions]
         user_state = widget.get_user_state(user_id)
         if user_state is not None:
             json['user_state'] = user_state
@@ -250,7 +249,7 @@ def voting_widget_view(request):
 
 @view_config(context=CollectionContext, request_method='POST',
              ctx_named_collection="VotingWidget.criteria",
-             permission=P_ADMIN_DISC, header=FORM_HEADER)
+             permission=Permissions.ADMIN_DISC, header=FORM_HEADER)
 def post_to_vote_criteria(request):
     ctx = request.context
     target_id = request.POST.get('id', None)
@@ -267,7 +266,7 @@ def post_to_vote_criteria(request):
 @view_config(context=InstanceContext, request_method='DELETE',
              ctx_instance_class=Idea,
              ctx_named_collection_instance="VotingWidget.criteria",
-             permission=P_ADMIN_DISC)
+             permission=Permissions.ADMIN_DISC)
 def delete_vote_criteria(request):
     ctx = request.context
     idea = ctx._instance
@@ -278,7 +277,7 @@ def delete_vote_criteria(request):
 
 @view_config(context=CollectionContext, request_method='POST',
              ctx_named_collection="VotingWidget.votable_ideas",
-             permission=P_ADMIN_DISC, header=FORM_HEADER)
+             permission=Permissions.ADMIN_DISC, header=FORM_HEADER)
 def post_to_vote_votables(request):
     ctx = request.context
     target_id = request.POST.get('id', None)
@@ -293,7 +292,7 @@ def post_to_vote_votables(request):
 
 
 @view_config(context=InstanceContext, request_method='DELETE',
-             ctx_instance_class=Idea, permission=P_ADMIN_DISC,
+             ctx_instance_class=Idea, permission=Permissions.ADMIN_DISC,
              ctx_named_collection_instance="VotingWidget.votable_ideas")
 def delete_vote_votable(request):
     ctx = request.context
@@ -309,11 +308,11 @@ def delete_vote_votable(request):
 @view_config(
     context=CollectionContext, request_method="PATCH",
     ctx_named_collection="VotingWidget.votable_ideas",
-    permission=P_ADMIN_DISC, header=JSON_HEADER)
+    permission=Permissions.ADMIN_DISC, header=JSON_HEADER)
 @view_config(
     context=CollectionContext, request_method="PUT",
     ctx_named_collection="VotingWidget.votable_ideas",
-    permission=P_ADMIN_DISC, header=JSON_HEADER)
+    permission=Permissions.ADMIN_DISC, header=JSON_HEADER)
 def set_vote_votables(request):
     ctx = request.context
     widget = ctx.parent_instance
@@ -325,11 +324,11 @@ def set_vote_votables(request):
 @view_config(
     context=CollectionContext, request_method="PATCH",
     ctx_named_collection="VotingWidget.criteria",
-    permission=P_ADMIN_DISC, header=JSON_HEADER)
+    permission=Permissions.ADMIN_DISC, header=JSON_HEADER)
 @view_config(
     context=CollectionContext, request_method="PUT",
     ctx_named_collection="VotingWidget.criteria",
-    permission=P_ADMIN_DISC, header=JSON_HEADER)
+    permission=Permissions.ADMIN_DISC, header=JSON_HEADER)
 def set_idea_criteria(request):
     ctx = request.context
     widget = ctx.parent_instance
@@ -340,7 +339,7 @@ def set_idea_criteria(request):
 
 @view_config(context=InstanceContext, request_method='GET',
              ctx_instance_class=VotingWidget,
-             permission=P_READ, accept="application/json",
+             permission=Permissions.READ, accept="application/json",
              name="vote_results", renderer="json")
 def vote_results(request):
     ctx = request.context
@@ -349,6 +348,6 @@ def vote_results(request):
     if not widget:
         raise HTTPNotFound()
     if widget.activity_state != "ended":
-        if P_ADMIN_DISC not in ctx.get_permissions():
+        if Permissions.ADMIN_DISC not in ctx.get_permissions():
             raise HTTPUnauthorized()
     return ctx._instance.all_voting_results()

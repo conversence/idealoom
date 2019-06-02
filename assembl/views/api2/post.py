@@ -5,7 +5,7 @@ from pyramid.response import Response
 from pyramid.httpexceptions import HTTPUnauthorized, HTTPBadRequest
 from pyramid.security import authenticated_userid, Everyone
 
-from assembl.auth import P_READ, P_MODERATE, P_DELETE_POST
+from assembl.auth import Permissions
 from assembl.models import Content, Post, SynthesisPost, User, Extract, Discussion
 from assembl.models.post import PublicationStates
 from ..traversal import InstanceContext, CollectionContext
@@ -15,7 +15,7 @@ from . import (
 
 
 @view_config(context=InstanceContext, request_method='GET',
-             ctx_instance_class=Content, permission=P_READ,
+             ctx_instance_class=Content, permission=Permissions.READ,
              accept="application/json", name="similar",
              renderer='json')
 def show_similar_posts(request):
@@ -39,7 +39,7 @@ def show_similar_posts(request):
 
 
 @view_config(context=CollectionContext, request_method='POST',
-             ctx_collection_class=Content, permission=P_READ,
+             ctx_collection_class=Content, permission=Permissions.READ,
              accept="application/json", name="similar",
              renderer='json')
 def show_posts_similar_to_text(request):
@@ -67,13 +67,13 @@ def show_posts_similar_to_text(request):
     ctx_instance_class=Post, renderer='json')
 def delete_post_instance(request):
     # Users who are allowed to delete (actually tombstone) a Post instance:
-    # - user who has the P_DELETE_POST permission in this discussion or on this post
+    # - user who has the Permissions.DELETE_POST permission in this discussion or on this post
     ctx = request.context
     user_id = authenticated_userid(request) or Everyone
     permissions = ctx.get_permissions()
     instance = ctx._instance
 
-    if P_DELETE_POST not in permissions:
+    if Permissions.DELETE_POST not in permissions:
         raise HTTPUnauthorized()
 
     # Remove extracts associated to this post
@@ -96,7 +96,7 @@ def delete_post_instance(request):
 
 
 @view_config(context=InstanceContext, request_method='GET',
-             ctx_instance_class=SynthesisPost, permission=P_READ,
+             ctx_instance_class=SynthesisPost, permission=Permissions.READ,
              accept="text/html", name="html_export")
 def html_export(request):
     from pyramid_jinja2 import IJinja2Environment
@@ -126,7 +126,7 @@ def raise_if_cannot_moderate(request):
     if not user_id:
         raise HTTPUnauthorized()
     permissions = ctx.get_permissions()
-    if P_MODERATE not in permissions:
+    if Permissions.MODERATE not in permissions:
         raise HTTPUnauthorized()
 
 

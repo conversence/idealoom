@@ -44,8 +44,7 @@ from ..lib.decl_enums import DeclEnum
 from ..lib.utils import waiting_get
 from ..lib.sqla import DuplicateHandling
 from ..lib import config
-from .auth import (
-    User, Everyone, P_ADMIN_DISC, CrudPermissions, P_READ)
+from .auth import User, Everyone, Permissions, CrudPermissions
 from .permissions import UserTemplate
 from .discussion import Discussion
 from .generic import Content
@@ -280,7 +279,7 @@ class NotificationSubscription(DiscussionBoundBase, OriginMixin):
             target_user_id = user.id
         if self.user_id:
             if target_user_id != self.user_id:
-                if not user_has_permission(self.discussion_id, user_id, P_ADMIN_DISC):
+                if not user_has_permission(self.discussion_id, user_id, Permissions.ADMIN_DISC):
                     raise HTTPUnauthorized()
             # For now, do not allow changing user, it's way too complicated.
             if 'user' in json and User.get_database_id(json['user']) != self.user_id:
@@ -291,7 +290,7 @@ class NotificationSubscription(DiscussionBoundBase, OriginMixin):
                 json_user_id = target_user_id
             else:
                 json_user_id = User.get_database_id(json_user_id)
-                if json_user_id != user_id and not user_has_permission(self.discussion_id, user_id, P_ADMIN_DISC):
+                if json_user_id != user_id and not user_has_permission(self.discussion_id, user_id, Permissions.ADMIN_DISC):
                     raise HTTPUnauthorized()
             self.user_id = json_user_id
         if self.discussion_id:
@@ -380,8 +379,8 @@ class NotificationSubscription(DiscussionBoundBase, OriginMixin):
             user_id, operation, permissions)
 
     crud_permissions = CrudPermissions(
-        P_READ, P_ADMIN_DISC, P_ADMIN_DISC, P_ADMIN_DISC,
-        P_READ, P_READ, P_READ)
+        Permissions.READ, Permissions.ADMIN_DISC, Permissions.ADMIN_DISC, Permissions.ADMIN_DISC,
+        Permissions.READ, Permissions.READ, Permissions.READ)
 
 
 @event.listens_for(NotificationSubscription.status, 'set', propagate=True)

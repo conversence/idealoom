@@ -11,7 +11,7 @@ from . import API_DISCUSSION_PREFIX, API_ETALAB_DISCUSSIONS_PREFIX
 from assembl.models import Discussion
 from assembl.auth.util import discussions_with_access
 
-from ...auth import P_READ, P_ADMIN_DISC, P_SYSADMIN
+from ...auth import Permissions
 
 
 discussion = Service(
@@ -51,15 +51,15 @@ def etalab_get_discussions(request):
     view = "etalab"
     user_id = authenticated_userid(request) or Everyone
     permissions = request.permissions
-    if P_READ not in permissions:
+    if Permissions.READ not in permissions:
         raise HTTPUnauthorized()
     discussions = discussions_with_access(user_id)
     return {"items": [discussion.generic_json(view, user_id, permissions)
                       for discussion in discussions]}
 
 
-@etalab_discussion.get(permission=P_READ)
-@discussion.get(permission=P_READ)
+@etalab_discussion.get(permission=Permissions.READ)
+@discussion.get(permission=Permissions.READ)
 def get_discussion(request):
     discussion_id = int(request.matchdict['discussion_id'])
     discussion = Discussion.get_instance(discussion_id)
@@ -76,7 +76,7 @@ def get_discussion(request):
     return discussion.generic_json(view_def, user_id, permissions)
 
 
-@discussion.put(permission=P_ADMIN_DISC)
+@discussion.put(permission=Permissions.ADMIN_DISC)
 def post_discussion(request):
     discussion_id = int(request.matchdict['discussion_id'])
     discussion = Discussion.get_instance(discussion_id)
@@ -95,8 +95,8 @@ def post_discussion(request):
     return {'ok': True}
 
 
-@etalab_discussion.delete(permission=P_SYSADMIN)
-@discussion.delete(permission=P_SYSADMIN)
+@etalab_discussion.delete(permission=Permissions.SYSADMIN)
+@discussion.delete(permission=Permissions.SYSADMIN)
 def delete_discussion(request):
     discussion_id = int(request.matchdict['discussion_id'])
     discussion = Discussion.get_instance(discussion_id)

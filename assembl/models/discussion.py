@@ -42,7 +42,7 @@ from ..lib.discussion_creation import IDiscussionCreationCallback
 from . import DiscussionBoundBase, NamedClassMixin, OriginMixin
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..auth import (
-    P_READ, R_SYSADMIN, P_ADMIN_DISC, R_PARTICIPANT, P_SYSADMIN,
+    Permissions, R_SYSADMIN, R_PARTICIPANT,
     CrudPermissions, Authenticated, Everyone)
 from .auth import User
 from .permissions import (
@@ -372,7 +372,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
                 DiscussionPermission.discussion_id == self.id).all()
         roleperms.sort()
         byrole = groupby(roleperms, lambda r_p: r_p[0])
-        return {r: [p for (r2, p) in rps] for (r, rps) in byrole}
+        return {r: [Permissions.by_value(p) for (r2, p) in rps] for (r, rps) in byrole}
 
     def get_roles_by_permission(self):
         permroles = self.db.query(Permission.name, Role.name).select_from(
@@ -380,29 +380,29 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
                 DiscussionPermission.discussion_id == self.id).all()
         permroles.sort()
         byperm = groupby(permroles, lambda p_r: p_r[0])
-        return {p: [r for (p2, r) in prs] for (p, prs) in byperm}
+        return {Permissions.by_value(p): [r for (p2, r) in prs] for (p, prs) in byperm}
 
     def get_readers(self):
         session = self.db
         users = session.query(User).join(
             UserRole, Role, DiscussionPermission, Permission).filter(
                 DiscussionPermission.discussion_id == self.id and
-                Permission.name == P_READ
+                Permission.name == Permissions.READ.value
             ).union(self.db.query(User).join(
                 LocalUserRole, Role, DiscussionPermission, Permission).filter(
                     DiscussionPermission.discussion_id == self.id and
                     LocalUserRole.discussion_id == self.id and
-                    Permission.name == P_READ)).all()
+                    Permission.name == Permissions.READ.value)).all()
         if session.query(DiscussionPermission).join(
             Role, Permission).filter(
                 DiscussionPermission.discussion_id == self.id and
-                Permission.name == P_READ and
+                Permission.name == Permissions.READ.value and
                 Role.name == Authenticated).first():
             pass  # add a pseudo-authenticated user???
         if session.query(DiscussionPermission).join(
             Role, Permission).filter(
                 DiscussionPermission.discussion_id == self.id and
-                Permission.name == P_READ and
+                Permission.name == Permissions.READ.value and
                 Role.name == Everyone).first():
             pass  # add a pseudo-anonymous user?
         return users
@@ -452,7 +452,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
         return get_permissions(user_id, self.id)
 
     def get_user_permissions_preload(self, user_id):
-        return json.dumps(self.get_user_permissions(user_id))
+        return json.dumps([v.value for v in self.get_user_permissions(user_id)])
 
     def get_base_url(self, require_secure=None):
         """Get the base URL of this server
@@ -867,16 +867,16 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
             yield i.generic_json(view_def_name="cif")
         for s in self.sources:
             yield i.generic_json(
-                view_def_name="cif", permissions=[P_ADMIN_DISC])
+                view_def_name="cif", permissions=[Permissions.ADMIN_DISC])
         for action in self.db.query(ActionOnPost).join(Post).filter_by(
                 discussion_id=self.id, tombstone_date=None):
             yield action.generic_json(
-                view_def_name="cif", permissions=[P_SYSADMIN])
+                view_def_name="cif", permissions=[Permissions.SYSADMIN])
         for vote in self.db.query(AbstractIdeaVote).join(
                 AbstractIdeaVote.idea).filter_by(
                 discussion_id=self.id, tombstone_date=None):
             yield vote.generic_json(
-                view_def_name="cif", permissions=[P_ADMIN_DISC])
+                view_def_name="cif", permissions=[Permissions.ADMIN_DISC])
             if isinstance(vote, LickertIdeaVote):
                 yield vote.vote_spec.generic_json(view_def_name="cif")
             elif isinstance(vote, TokenIdeaVote):
@@ -885,7 +885,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
             yield p.generic_json(view_def_name="cif")
             for acc in p.accounts:
                 yield acc.generic_json(
-                    view_def_name="cif", permissions=[P_SYSADMIN])
+                    view_def_name="cif", permissions=[Permissions.SYSADMIN])
         for e in self.get_bound_extracts():
             yield e.generic_json(view_def_name="cif")
             yield e.generic_json(view_def_name="cif2")
@@ -910,7 +910,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
             yield p.generic_json(view_def_name="cif2")
             for acc in p.accounts:
                 yield acc.generic_json(
-                    view_def_name="cif2", permissions=[P_SYSADMIN])
+                    view_def_name="cif2", permissions=[Permissions.SYSADMIN])
 
     def get_private_graphs_cif(self):
         graphs = [x for x in self.get_user_graph_cif() if x]
@@ -1035,7 +1035,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
         return G
 
     crud_permissions = CrudPermissions(
-        P_SYSADMIN, P_READ, P_ADMIN_DISC, P_SYSADMIN)
+        Permissions.SYSADMIN, Permissions.READ, Permissions.ADMIN_DISC, Permissions.SYSADMIN)
 
     @property
     def discussion_locales(self):

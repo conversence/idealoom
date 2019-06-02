@@ -24,8 +24,7 @@ import lxml.html as htmlt
 from . import DiscussionBoundBase, OriginMixin
 from .discussion import Discussion
 from ..semantic.virtuoso_mapping import QuadMapPatternS
-from ..auth import (
-    CrudPermissions, P_ADMIN_DISC, P_EDIT_SYNTHESIS)
+from ..auth import CrudPermissions, Permissions
 from .idea import Idea, IdeaLink, RootIdea, IdeaVisitor
 from ..semantic.namespaces import (
     SIOC, CATALYST, IDEA, ASSEMBL, DCTERMS, QUADNAMES)
@@ -81,7 +80,7 @@ class IdeaGraphView(DiscussionBoundBase, OriginMixin):
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):
         return (cls.discussion_id == discussion_id, )
 
-    crud_permissions = CrudPermissions(P_ADMIN_DISC)
+    crud_permissions = CrudPermissions(Permissions.ADMIN_DISC)
 
     @abstractmethod
     def get_idea_links(self):
@@ -160,7 +159,7 @@ class SubGraphIdeaAssociation(DiscussionBoundBase):
     #         Idea.iri_class().apply(cls.target_id),
     #         name=QUADNAMES.idea_inclusion_reln)]
 
-    crud_permissions = CrudPermissions(P_ADMIN_DISC)
+    crud_permissions = CrudPermissions(Permissions.ADMIN_DISC)
 
 
 class SubGraphIdeaLinkAssociation(DiscussionBoundBase):
@@ -225,7 +224,7 @@ class SubGraphIdeaLinkAssociation(DiscussionBoundBase):
             return ((cls.sub_graph_id == ExplicitSubGraphView.id),
                     (ExplicitSubGraphView.discussion_id == discussion_id))
 
-    crud_permissions = CrudPermissions(P_ADMIN_DISC)
+    crud_permissions = CrudPermissions(Permissions.ADMIN_DISC)
 
 
 class ExplicitSubGraphView(IdeaGraphView):
@@ -386,7 +385,7 @@ class ExplicitSubGraphView(IdeaGraphView):
         return (GViewIdeaCollectionDefinition(cls),
                 GViewIdeaLinkCollectionDefinition(cls))
 
-    crud_permissions = CrudPermissions(P_ADMIN_DISC)
+    crud_permissions = CrudPermissions(Permissions.ADMIN_DISC)
 
 
 SubGraphIdeaLinkAssociation.discussion = relationship(
@@ -558,7 +557,7 @@ class Synthesis(ExplicitSubGraphView):
         subject = self.subject or ""
         return r[:-1] + subject + ">"
 
-    crud_permissions = CrudPermissions(P_EDIT_SYNTHESIS)
+    crud_permissions = CrudPermissions(Permissions.EDIT_SYNTHESIS)
 
 
 class SynthesisHtmlizationVisitor(IdeaVisitor):

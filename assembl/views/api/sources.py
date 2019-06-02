@@ -6,7 +6,7 @@ from cornice import Service
 
 from . import API_DISCUSSION_PREFIX
 
-from assembl.auth import P_READ
+from assembl.auth import Permissions
 
 sources = Service(
     name='sources',
@@ -16,7 +16,7 @@ sources = Service(
 )
 
 
-@sources.get(permission=P_READ)
+@sources.get(permission=Permissions.READ)
 def get_sources(request):
     discussion = request.context
     view_def = request.GET.get('view') or 'default'

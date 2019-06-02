@@ -3,7 +3,7 @@ import os.path
 from pyramid.view import view_config
 from pyramid.security import authenticated_userid, Everyone, Authenticated
 
-from assembl.auth import R_SYSADMIN, P_ADMIN_DISC
+from assembl.auth import R_SYSADMIN, Permissions
 from assembl.models import User
 from assembl.auth.util import (
     discussions_with_access, user_has_permission, get_roles)
@@ -38,7 +38,7 @@ def discussion_list_view(request):
             'slug': discussion.slug,
             'url': discussionFrontendUrls.get_discussion_url()
         }
-        if user_has_permission(discussion.id, user_id, P_ADMIN_DISC):
+        if user_has_permission(discussion.id, user_id, Permissions.ADMIN_DISC):
             discussion_context['admin_url'] = discussionFrontendUrls.get_discussion_edition_url()
             discussion_context['permissions_url'] = request.route_url(
                 'discussion_permissions', discussion_id=discussion.id)

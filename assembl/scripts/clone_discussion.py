@@ -26,7 +26,7 @@ from sqlalchemy.sql.visitors import ClauseVisitor
 from sqlalchemy.sql.expression import and_
 from sqlalchemy import inspect
 
-from assembl.auth import SYSTEM_ROLES, ASSEMBL_PERMISSIONS
+from assembl.auth import SYSTEM_ROLES, Permissions
 from assembl.lib.config import set_config, get_config
 from assembl.lib.sqla import (
     configure_engine, get_session_maker, make_session_maker, get_metadata,
@@ -732,7 +732,7 @@ def copy_discussion(source_config, dest_config, source_slug, dest_slug,
         permissions = [x.split('+') for x in permissions or ()]
         for (role, permission) in permissions:
             assert role in SYSTEM_ROLES
-            assert permission in ASSEMBL_PERMISSIONS
+            assert Permissions.by_value(permission)
         existing = dest_session.query(Discussion).filter_by(slug=dest_slug).first()
         if existing:
             if delete:

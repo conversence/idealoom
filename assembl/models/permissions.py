@@ -2,6 +2,7 @@
 from future import standard_library
 standard_library.install_aliases()
 from collections import defaultdict
+from enum import Enum
 import logging
 
 from sqlalchemy import (
@@ -29,6 +30,8 @@ from ..semantic.namespaces import (
 from ..semantic.virtuoso_mapping import (
     QuadMapPatternS, USER_SECTION, AppQuadStorageManager)
 from .auth import User, AgentProfile
+from .vocabulary import AbstractEnumVocabulary
+
 
 log = logging.getLogger(__name__)
 
@@ -285,15 +288,15 @@ class LocalUserRole(AbstractLocalUserRole):
                 name=QUADNAMES.class_LocalUserRole_rolename)]
 
     crud_permissions = CrudPermissions(
-        P_SELF_REGISTER, P_READ, P_ADMIN_DISC, P_ADMIN_DISC,
-        P_SELF_REGISTER, P_SELF_REGISTER)
+        Permissions.SELF_REGISTER, Permissions.READ, Permissions.ADMIN_DISC, Permissions.ADMIN_DISC,
+        Permissions.SELF_REGISTER, Permissions.SELF_REGISTER)
 
     @classmethod
     def user_can_cls(cls, user_id, operation, permissions):
         # bypass... more checks are required upstream,
         # see assembl.views.api2.auth.add_local_role
         if operation == CrudPermissions.CREATE \
-                and P_SELF_REGISTER_REQUEST in permissions:
+                and Permissions.SELF_REGISTER_REQUEST in permissions:
             return True
         return super(LocalUserRole, cls).user_can_cls(
             user_id, operation, permissions)
@@ -311,7 +314,6 @@ def send_user_to_socket_for_local_user_role(
         connection, CrudOperation.UPDATE, target.discussion_id, "private")
 
 
-
 class Permission(NamedClassMixin, Base):
     """A permission that a user may have"""
     __tablename__ = 'permission'
@@ -323,6 +325,7 @@ class Permission(NamedClassMixin, Base):
         db = db or cls.default_db()
         db.execute("lock table %s in exclusive mode" % cls.__table__.name)
         perms = {p[0] for p in db.query(cls.name).all()}
+        ASSEMBL_PERMISSIONS = {v.value for v in Permissions.__members__.values()}
         for perm in ASSEMBL_PERMISSIONS - perms:
             db.add(cls(name=perm))
 

@@ -19,7 +19,7 @@ import transaction
 
 from assembl.lib.sqla import mark_changed
 from assembl.lib import config
-from assembl.auth import R_PARTICIPANT, Everyone, Authenticated, P_OVERRIDE_SOCIAL_AUTOLOGIN
+from assembl.auth import R_PARTICIPANT, Everyone, Authenticated, Permissions
 
 base_roles = set((R_PARTICIPANT, Everyone, Authenticated))
 
@@ -41,8 +41,8 @@ def upgrade(pyramid_env):
                 found = False
                 for role, permissions in list(values['default_permissions'].items()):
                     if role not in base_roles:
-                        if P_OVERRIDE_SOCIAL_AUTOLOGIN not in permissions:
-                            permissions.append(P_OVERRIDE_SOCIAL_AUTOLOGIN)
+                        if Permissions.OVERRIDE_SOCIAL_AUTOLOGIN not in permissions:
+                            permissions.append(Permissions.OVERRIDE_SOCIAL_AUTOLOGIN)
                             values['default_permissions'][role] = permissions
                             found = True
                 if found:
@@ -57,7 +57,7 @@ def upgrade(pyramid_env):
         discussions = [id for (id,) in discussions]
         (permission_id,) = db.execute(
             "SELECT id FROM permission WHERE name='%s'" % (
-                P_OVERRIDE_SOCIAL_AUTOLOGIN)).first()
+                Permissions.OVERRIDE_SOCIAL_AUTOLOGIN)).first()
         db.bulk_insert_mappings(m.DiscussionPermission, [
             {'discussion_id': d, 'role_id': r, 'permission_id': permission_id}
             for (d, r) in product(discussions, role_ids)])
@@ -76,7 +76,7 @@ def downgrade(pyramid_env):
                 found = False
                 for role, permissions in list(values['default_permissions'].items()):
                     try:
-                        permissions.remove(P_OVERRIDE_SOCIAL_AUTOLOGIN)
+                        permissions.remove(Permissions.OVERRIDE_SOCIAL_AUTOLOGIN)
                         values['default_permissions'][role] = permissions
                         found = True
                     except ValueError:
@@ -87,7 +87,7 @@ def downgrade(pyramid_env):
             db.bulk_update_mappings(m.Preferences.__mapper__, changes)
         (permission_id,) = db.execute(
             "SELECT id FROM permission WHERE name='%s'" % (
-                P_OVERRIDE_SOCIAL_AUTOLOGIN)).first()
+                Permissions.OVERRIDE_SOCIAL_AUTOLOGIN)).first()
         db.execute("DELETE FROM discussion_permission WHERE permission_id="+str(permission_id))
         db.execute("DELETE FROM permission WHERE id="+str(permission_id))
         mark_changed()
