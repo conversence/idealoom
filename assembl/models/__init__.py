@@ -167,7 +167,8 @@ class NamedClassMixin(object):
         instance = super(NamedClassMixin, cls).get_instance(id, session)
         if instance:
             return instance
-        return cls.getByName(id, session)
+        if isinstance(id, (str, unicode)):
+            return cls.getByName(id, session)
 
 
 class ContextualNamedClassMixin(NamedClassMixin):
