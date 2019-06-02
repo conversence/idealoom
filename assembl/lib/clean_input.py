@@ -1,6 +1,6 @@
 from lxml import html
 from lxml.html.clean import Cleaner
-from six.moves.html_parser import HTMLParser
+from html.parser import HTMLParser
 
 VALID_TAGS = ['a',
               'b',

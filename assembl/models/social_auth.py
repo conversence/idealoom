@@ -6,10 +6,10 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import str
 import logging
-import six
 import re
 from datetime import datetime, timedelta
 
+from future.utils import string_types
 import transaction
 from sqlalchemy import (
     Boolean,
@@ -258,7 +258,7 @@ class SocialAuthAccount(
 
     @classmethod
     def get_social_auth(cls, provider, uid):
-        if not isinstance(uid, six.string_types):
+        if not isinstance(uid, string_types):
             uid = str(uid)
         return cls._query().join(
             cls.identity_provider).filter(
@@ -278,7 +278,7 @@ class SocialAuthAccount(
 
     @classmethod
     def create_social_auth(cls, user, uid, provider):
-        if not isinstance(uid, six.string_types):
+        if not isinstance(uid, string_types):
             uid = str(uid)
         id_provider = IdentityProvider.get_by_type(provider)
         return cls._new_instance(

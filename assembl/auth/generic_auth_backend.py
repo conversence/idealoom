@@ -6,7 +6,7 @@ from social_core.backends.base import BaseAuth
 from social_core.backends.oauth import BaseOAuth2
 import social_pyramid.utils
 import jsonpath_ng
-from six import string_types
+from future.utils import string_types
 
 from ..lib import logging
 

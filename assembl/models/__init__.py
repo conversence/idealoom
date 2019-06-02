@@ -17,7 +17,7 @@ from abc import abstractmethod, ABCMeta
 
 from sqlalchemy import and_
 from sqlalchemy.ext.declarative import DeclarativeMeta
-from future.utils import with_metaclass
+from future.utils import with_metaclass, string_types
 
 from ..lib.abc import abstractclassmethod
 from ..lib.sqla import (
@@ -167,7 +167,7 @@ class NamedClassMixin(object):
         instance = super(NamedClassMixin, cls).get_instance(id, session)
         if instance:
             return instance
-        if isinstance(id, (str, unicode)):
+        if isinstance(id, string_types):
             return cls.getByName(id, session)
 
 
