@@ -254,7 +254,10 @@ class Post(Content):
             return self.moderation_text
         elif self.publication_state in deleted_publication_states:
             return LangString.EMPTY(self.db)
-        body = self.get_body().first_original().value
+        body = self.get_body()
+        if not body:
+            return None
+        body = body.first_original().value
         is_html = self.get_body_mime_type() == 'text/html'
         shortened = False
         if not body:
