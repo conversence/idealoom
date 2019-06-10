@@ -5,7 +5,7 @@ var path = require('path'),
     MiniCssExtractPlugin = require("mini-css-extract-plugin"),
     HtmlWebpackPlugin = require('html-webpack-plugin'),
     HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin'),
-    UglifyJSPlugin = require('uglifyjs-webpack-plugin'),
+    TerserPlugin = require('terser-webpack-plugin'),
     sassStaticUrl = process.env.sassStaticUrl || '/static/';
 
 function theme_entries() {
@@ -79,6 +79,12 @@ module.exports = {
     ],
     annotator_ext: './css/lib/annotator_ext.scss',
   }),
+  optimization: {
+    minimizer: [
+      new TerserPlugin({
+      sourceMap: true,
+    })],
+  },
   output: {
     path: path.join(__dirname, 'js/build'),
     filename: (chunkData) => {
@@ -218,7 +224,6 @@ module.exports = {
     //     NODE_ENV: JSON.stringify('production')
     //   }
     // }),
-    new UglifyJSPlugin({ sourceMap: true }),
     // temporary: No caching because it breaks annotator_ext. Wait for
     // https://github.com/webpack-contrib/mini-css-extract-plugin/pull/225
     new MiniCssExtractPlugin({
