@@ -185,7 +185,7 @@ social-auth-core==3.2.0
 social-auth-storage-sqlalchemy==1.1.0
 soupsieve==1.9.1          # via beautifulsoup4
 sparqlwrapper==1.8.4
-sphinx==2.1.1
+sphinx==2.0.1
 sphinxcontrib-applehelp==1.0.1  # via sphinx
 sphinxcontrib-devhelp==1.0.1  # via sphinx
 sphinxcontrib-htmlhelp==1.0.2  # via sphinx
