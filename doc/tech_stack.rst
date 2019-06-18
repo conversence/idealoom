@@ -584,8 +584,8 @@ We have used multiple processes rather than threads.
 .. _Bourbon: http://bourbon.io/
 .. _Bower: https://bower.io/
 .. _Caravan: http://caravan.coop/en/
-.. _Catalyst: http://catalyst-fp7.eu/
-.. _`Catalyst interoperability`: http://projects.sigma-orionis.com/catalyst/wp-content/uploads/2014/03/D3.1-Software-Architecture-and-Cross-Platform-Interoperability-Specification.pdf
+.. _Catalyst: http://catalyst-fp7.eu.idea.kmi.open.ac.uk/
+.. _`Catalyst interoperability`: https://catalyst-fp7.idea.kmi.open.ac.uk/wp-content/uploads/2014/03/D3.1-Software-Architecture-and-Cross-Platform-Interoperability-Specification.pdf
 .. _Celery: http://www.celeryproject.org/
 .. _Chai: http://chaijs.com/
 .. _CKEditor: http://ckeditor.com/
