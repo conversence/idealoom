@@ -2191,7 +2191,8 @@ class BaseOps(object):
         (local_role_class, fkey) = self.local_role_class_and_fkey()
         if local_role_class:
             query = self.db.query(Role.name).join(local_role_class).filter(
-                getattr(local_role_class, fkey)==user_id)
+                getattr(local_role_class, fkey)==self.id,
+                local_role_class.profile_id==user_id)
             roles.extend((x for (x,) in query))
         return roles
 
