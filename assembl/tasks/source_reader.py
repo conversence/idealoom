@@ -552,6 +552,8 @@ class SourceDispatcher(ConsumerMixin):
             if force_restart:
                 source.reset_errors()
             reader = source.make_reader()
+            if not reader:
+                return False
             reader.debug = self.debug
             self.readers[source_id] = reader
             if reader is None:
