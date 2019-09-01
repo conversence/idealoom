@@ -751,6 +751,30 @@
       "css": "issue",
       "code": 59458,
       "src": "fontawesome"
+    },
+    {
+      "uid": "711fdb6caa365d5b69d4a72da2009cf6",
+      "css": "exclamation",
+      "code": 59459,
+      "src": "elusive"
+    },
+    {
+      "uid": "d4aeb916de8d3aea716442778346d244",
+      "css": "plus-circled",
+      "code": 59460,
+      "src": "elusive"
+    },
+    {
+      "uid": "b35d6abdf5632eafeeb91377b0b6e9a1",
+      "css": "minus-circled",
+      "code": 59461,
+      "src": "elusive"
+    },
+    {
+      "uid": "1e89103762be72b0720eda0468e62b90",
+      "css": "globe",
+      "code": 59462,
+      "src": "linecons"
     }
   ]
 }
