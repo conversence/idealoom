@@ -377,6 +377,11 @@ class Extract(IdeaContentPositiveLink):
         body = self.quote or ""
         return r[:-1] + body[:20] + ">"
 
+    def populate_from_context(self, context):
+        if not(self.owner or self.owner_id):
+            self.owner_id = context.get_user_id()
+        super(Extract, self).populate_from_context(context)
+
     def get_target(self):
         return self.content
 
