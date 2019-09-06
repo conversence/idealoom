@@ -152,10 +152,12 @@ module.exports = {
           {
             loader: 'sass-loader',
             options: {
-              includePaths: [
-                path.resolve(__dirname, 'node_modules/bourbon/app/assets/stylesheets'),
-              ],
-              data: '$static_url: "'+sassStaticUrl+'";',
+              sassOptions: {
+                includePaths: [
+                  path.resolve(__dirname, 'node_modules/bourbon/app/assets/stylesheets'),
+                ],
+              },
+              prependData: '$static_url: "'+sassStaticUrl+'";',
             },
           },
         ],
