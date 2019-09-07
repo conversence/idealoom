@@ -15,8 +15,11 @@ def logger_for_request(request):
         )
     if request.matchdict and 'discussion' not in request._logger._context:
         from ..auth.util import discussion_from_request
-        discussion = discussion_from_request(request)
-        slug = discussion.slug if discussion else None
+        try:
+            discussion = discussion_from_request(request)
+            slug = discussion.slug if discussion else None
+        except Exception:
+            slug = None
         request._logger = request._logger.bind(discussion=slug)
     return request._logger
 
