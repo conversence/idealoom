@@ -191,7 +191,7 @@ class ActiveSocket(object):
             async with self.http_client.post(
                     '%s/data/Discussion/%s/all_users/%d/disconnecting' % (
                         self.server_url, self.discussion, self.token['userId']
-                    ), json={'token': self.raw_token}) as resp:
+                    ), data={'token': self.raw_token}) as resp:
                 await resp.text()
 
     async def on_message(self, msg):
@@ -240,7 +240,7 @@ class ActiveSocket(object):
                     async with self.http_client.post(
                             '%s/data/Discussion/%s/all_users/%d/connecting' % (
                                 self.server_url, self.discussion, self.token['userId']
-                            ), json={'token': self.raw_token}) as resp:
+                            ), data={'token': self.raw_token}) as resp:
                         await resp.text()
         except Exception:
             capture_exception()
