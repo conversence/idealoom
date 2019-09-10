@@ -709,7 +709,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
             def decorate_query(self, query, owner_alias, last_alias, parent_instance, ctx):
                 from .auth import AgentStatusInDiscussion
                 return query.join(AgentStatusInDiscussion).join(
-                    owner_alias, owner_alias.id != None).filter(
+                    owner_alias).filter(
                     (AgentStatusInDiscussion.last_connected != None) & (
                     (AgentStatusInDiscussion.last_disconnected
                         < AgentStatusInDiscussion.last_connected ) |
