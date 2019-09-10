@@ -710,10 +710,11 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
                 from .auth import AgentStatusInDiscussion
                 return query.join(AgentStatusInDiscussion).join(
                     owner_alias).filter(
-                    (AgentStatusInDiscussion.last_connected != None) & (
-                    (AgentStatusInDiscussion.last_disconnected
-                        < AgentStatusInDiscussion.last_connected ) |
-                    (AgentStatusInDiscussion.last_disconnected == None)))
+                    owner_alias.id == parent_instance.id,
+                    AgentStatusInDiscussion.last_connected != None,
+                    ((AgentStatusInDiscussion.last_disconnected
+                      < AgentStatusInDiscussion.last_connected) |
+                     (AgentStatusInDiscussion.last_disconnected == None)))
 
             def contains(self, parent_instance, instance):
                 ast = instance.get_status_in_discussion(parent_instance.id)
@@ -721,7 +722,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
                     return False
                 return ast.last_connected and (
                     (ast.last_disconnected < ast.last_connected) or (
-                    ast.last_disconnected is None))
+                     ast.last_disconnected is None))
 
         class ActiveWidgetsCollection(RelationCollectionDefinition):
 
