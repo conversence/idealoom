@@ -21,26 +21,26 @@
 aiodns==2.0.0
 aiohttp==3.5.4
 alabaster==0.7.12         # via sphinx
-alembic==1.0.11
+alembic==1.2.1
 amqp==2.5.1               # via kombu
 anyjson==0.3.3
 appnope==0.1.0            # via ipython
 asn1crypto==0.24.0        # via cryptography
 async-timeout==3.0.1      # via aiohttp
 atomicwrites==1.3.0       # via pytest
-attrs==19.1.0             # via aiohttp, packaging, pytest
+attrs==19.1.0             # via aiohttp, pytest
 babel==2.7.0
 backcall==0.1.0           # via ipython
 bcrypt==3.1.7             # via paramiko
 beautifulsoup4==4.8.0
 billiard==3.6.1.0         # via celery
-boto3==1.9.215            # via smart-open
+boto3==1.9.238            # via smart-open
 boto==2.49.0              # via smart-open
-botocore==1.12.215        # via boto3, s3transfer
+botocore==1.12.238        # via boto3, s3transfer
 cachetools==3.1.1         # via google-auth, premailer
 cchardet==2.1.4
 celery==4.3.0
-certifi==2019.6.16        # via requests
+certifi==2019.9.11        # via requests
 cffi==1.12.3              # via bcrypt, cryptography, pycares, pynacl
 chameleon==3.6.2          # via lingua
 characteristic==14.3.0    # via montague
@@ -52,7 +52,7 @@ colander==1.7.0
 colorama==0.4.1
 coloredlogs==10.0
 colour==0.1.5
-contextlib2==0.5.5
+contextlib2==0.6.0
 cornice==3.6.0
 cornice_sphinx==0.3
 coverage==4.5.4           # via codecov, pytest-cov
@@ -63,22 +63,22 @@ decorator==4.4.0          # via dogpile.cache, ipython, jsonpath-ng, traitlets
 defusedxml==0.6.0         # via python3-openid, python3-saml, social-auth-core
 dnspython==1.16.0         # via pyisemail
 docutils==0.15.2          # via botocore, cornice-sphinx, sphinx
-dogpile.cache==0.7.1      # via pyramid-dogpile-cache
+dogpile.cache==0.8.0      # via pyramid-dogpile-cache
 et-xmlfile==1.0.1         # via openpyxl
 executor==21.3            # via rotate-backups, update-dotdee
-fabric3==1.14.post1 ; python_version >= "3"
+fabric3==1.14.post1
 facebook-sdk==1.0.0
 fasteners==0.15           # via executor
 feedparser==5.2.1
 flaky==3.6.1
 future==0.17.1
-gensim==3.8.0
+gensim==3.8.1
 google-api-python-client==1.7.11
 google-auth-httplib2==0.0.3  # via google-api-python-client
 google-auth==1.6.3        # via google-api-python-client, google-auth-httplib2
 hashfs==0.7.1
 hiredis==1.0.0
-httplib2==0.13.1          # via google-api-python-client, google-auth-httplib2
+httplib2==0.14.0          # via google-api-python-client, google-auth-httplib2
 humanfriendly==4.18       # via coloredlogs, executor, property-manager, rotate-backups, update-dotdee
 hupper==1.8.1             # via pyramid
 idna-ssl==1.1.0           # via aiohttp
@@ -86,9 +86,9 @@ idna==2.8                 # via idna-ssl, requests, yarl
 imagesize==1.1.0          # via sphinx
 imapclient==2.1.0
 imaplib2==2.45.0
-importlib-metadata==0.19  # via kombu, pluggy, pytest
+importlib-metadata==0.23  # via kombu, pluggy, pytest
 ipython-genutils==0.2.0   # via traitlets
-ipython==7.7.0 ; python_version >= "3"
+ipython==7.8.0
 iso639==0.1.4
 iso8601==0.1.12           # via colander
 isodate==0.6.0
@@ -98,7 +98,7 @@ jinja2==2.10.1
 jmespath==0.9.4           # via boto3, botocore
 joblib==0.13.2            # via scikit-learn
 jsonpath-ng==1.4.3
-kombu==4.6.4
+kombu==4.6.5
 lingua==4.13
 lxml==4.4.1
 mako==1.1.0               # via alembic, pyramid-mako, tomako
@@ -106,29 +106,29 @@ markupsafe==1.1.1         # via jinja2, mako, pyramid-jinja2
 mock==3.0.5
 monotonic==1.5            # via fasteners
 montague==0.2.1
-more-itertools==7.2.0     # via pytest
+more-itertools==7.2.0     # via pytest, zipp
 multidict==4.5.2          # via aiohttp, yarl
 naturalsort==1.5.1        # via rotate-backups, update-dotdee
 ndg_httpsclient==0.5.1
 nodeenv==1.3.3
-numpy==1.17.0             # via gensim, scikit-learn, scipy
+numpy==1.17.2             # via gensim, scikit-learn, scipy
 oauthlib==3.1.0           # via requests-oauthlib, social-auth-core
-openpyxl==2.6.3
-packaging==19.1           # via pytest, sphinx
+openpyxl==3.0.0
+packaging==19.2           # via pytest, sphinx
 paramiko==2.6.0           # via fabric3
 parso==0.5.1              # via jedi
 pastedeploy==2.0.1        # via plaster-pastedeploy
 pdbsublimetextsupport==0.2
 pexpect==4.7.0            # via ipython
 pickleshare==0.7.5        # via ipython
-pip-tools==4.0.0
+pip-tools==4.1.0
 pkgconfig==1.5.1          # via xmlsec
 plaster-pastedeploy==0.7  # via pyramid
 plaster==1.0              # via plaster-pastedeploy, pyramid
-pluggy==0.12.0            # via pytest
+pluggy==0.13.0            # via pytest
 ply==3.11                 # via jsonpath-ng
 polib==1.1.0
-premailer==3.6.0
+premailer==3.6.1
 prompt-toolkit==2.0.9     # via ipython
 property-manager==2.3.1   # via executor, rotate-backups, update-dotdee
 psutil==5.6.3             # via circus
@@ -136,7 +136,7 @@ psycopg2-binary==2.8.3
 ptyprocess==0.6.0         # via pexpect
 py==1.8.0                 # via pytest
 pyasn1-modules==0.2.6     # via google-auth
-pyasn1==0.4.6             # via ndg-httpsclient, pyasn1-modules, rsa
+pyasn1==0.4.7             # via ndg-httpsclient, pyasn1-modules, rsa
 pycares==3.0.0            # via aiodns
 pycparser==2.19           # via cffi
 pydot==1.4.1              # via sqlalchemy-schemadisplay
@@ -161,15 +161,15 @@ pyramid==1.10.4
 pystemmer==1.3.0
 pytest-cov==2.7.1
 pytest-localserver==0.5.0
-pytest-mock==1.10.4
+pytest-mock==1.11.0
 pytest-splinter==2.0.1
-pytest==5.1.1
+pytest==5.2.0
 python-dateutil==2.8.0
 python-editor==1.0.4      # via alembic
 python-json-logger==0.1.11
 python-levenshtein==0.12.0
 python3-openid==3.1.0     # via social-auth-core
-python3-saml==1.7.0 ; python_version >= "3"
+python3-saml==1.8.0
 pytz==2019.2
 pyyaml==5.1.2
 pyzmq==16.0.4
@@ -192,11 +192,11 @@ simpleeval==0.9.8         # via rotate-backups
 simplejson==3.16.0
 six==1.12.0
 smart-open==1.8.4         # via gensim
-snowballstemmer==1.9.0    # via sphinx
+snowballstemmer==1.9.1    # via sphinx
 social-auth-app-pyramid==1.0.0
 social-auth-core==3.2.0
 social-auth-storage-sqlalchemy==1.1.0
-soupsieve==1.9.3          # via beautifulsoup4
+soupsieve==1.9.4          # via beautifulsoup4
 sparqlwrapper==1.8.4
 sphinx==2.0.1
 sphinxcontrib-applehelp==1.0.1  # via sphinx
@@ -209,7 +209,7 @@ sphinxcontrib-serializinghtml==1.1.3  # via sphinx
 sphinxcontrib-zopeext==0.2.1
 splinter==0.10.0          # via pytest-splinter
 sqlalchemy-schemadisplay==1.3
-sqlalchemy==1.3.7
+sqlalchemy==1.3.8
 sqlparse==0.3.0
 structlog==19.1.0
 termcolor==1.1.0
@@ -223,19 +223,19 @@ typing==3.7.4.1           # via aiodns
 unidecode==1.1.1
 update-dotdee==5.0        # via rotate-backups
 uritemplate==3.0.0        # via google-api-python-client
-urllib3==1.25.3           # via botocore, pytest-splinter, requests, selenium
+urllib3==1.25.6           # via botocore, pytest-splinter, requests, selenium
 uwsgitop==0.11
 venusian==1.2.0           # via cornice, pyramid
 verboselogs==1.7          # via property-manager, rotate-backups
 vine==1.3.0               # via amqp, celery
-waitress==1.3.0           # via webtest
+waitress==1.3.1           # via webtest
 wcwidth==0.1.7            # via prompt-toolkit, pytest
 webob==1.8.5
 webtest==2.0.33
-werkzeug==0.15.5
+werkzeug==0.16.0
 xmlsec==1.3.3             # via python3-saml
 yarl==1.3.0               # via aiohttp
-zipp==0.5.2               # via importlib-metadata
+zipp==0.6.0               # via importlib-metadata
 zope.component==4.5
 zope.deferredimport==4.3.1  # via zope.component
 zope.deprecation==4.4.0   # via pyramid, pyramid-jinja2, zope.component
