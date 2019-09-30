@@ -16,7 +16,7 @@
 -e git+https://github.com/maparent/sqlalchemy-utils.git@abstract_generic#egg=sqlalchemy_utils
 -e git+https://github.com/maparent/tornadio2.git@session_id_str#egg=tornadIO2
 aiodns==2.0.0
-aiohttp==3.5.4
+aiohttp==3.6.1
 alembic==1.2.1
 amqp==2.5.1               # via kombu
 anyjson==0.3.3

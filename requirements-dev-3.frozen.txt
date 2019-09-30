@@ -19,7 +19,7 @@
 -e git+https://github.com/assembl/sqltap.git@readonly_binds#egg=sqltap
 -e git+https://github.com/maparent/tornadio2.git@session_id_str#egg=tornadIO2
 aiodns==2.0.0
-aiohttp==3.5.4
+aiohttp==3.6.1
 alabaster==0.7.12         # via sphinx
 alembic==1.2.1
 amqp==2.5.1               # via kombu
