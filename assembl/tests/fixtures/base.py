@@ -273,7 +273,8 @@ def browser(request):
     from os.path import exists, join
     if sys.platform in ('linux', 'linux2'):
         for path in ('/usr/lib/chromium-browser',  # ubuntu
-                     '/usr/lib/chromium'):  # debian jessie (on stretch it's /usr/bin/chromedriver)
+                     '/usr/lib/chromium',  # debian jessie (on stretch it's /usr/bin/chromedriver)
+                     '/usr/bin'):  # ubuntu, alternative
             if exists(join(path, 'chromedriver')):  # ubuntu
                 os.environ["PATH"] += ":" + path
                 os.environ["LD_LIBRARY_PATH"] = path
