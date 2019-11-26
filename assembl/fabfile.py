@@ -1147,7 +1147,7 @@ def install_assembl_server_deps():
     """
     Will install most assembl components on a single server, except db
     """
-    execute(install_yarn)
+    execute(install_yarn, False)
     execute(install_server_deps)
     execute(install_assembl_deps)
 
