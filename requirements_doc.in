@@ -4,5 +4,5 @@ cornice_sphinx==0.3
 # https://github.com/Cornices/cornice.ext.sphinx/issues/22
 Sphinx==2.0.1  # rq.filter: <2.1
 sphinxcontrib-httpdomain==1.7.0
-sphinxcontrib-zopeext==0.2.1
+sphinxcontrib-zopeext==0.2.3
 sqlalchemy-schemadisplay==1.3

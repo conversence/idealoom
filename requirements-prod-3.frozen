@@ -16,45 +16,43 @@
 -e git+https://github.com/maparent/sqlalchemy-utils.git@abstract_generic#egg=sqlalchemy_utils
 -e git+https://github.com/maparent/tornadio2.git@session_id_str#egg=tornadIO2
 aiodns==2.0.0
-aiohttp==3.6.1
-alembic==1.2.1
-amqp==2.5.1               # via kombu
+aiohttp==3.6.2
+alembic==1.3.1
+amqp==2.5.2               # via kombu
 anyjson==0.3.3
 appnope==0.1.0            # via ipython
-asn1crypto==0.24.0        # via cryptography
 async-timeout==3.0.1      # via aiohttp
-attrs==19.1.0             # via aiohttp
+attrs==19.3.0             # via aiohttp
 babel==2.7.0
 backcall==0.1.0           # via ipython
 bcrypt==3.1.7             # via paramiko
-beautifulsoup4==4.8.0
+beautifulsoup4==4.8.1
 billiard==3.6.1.0         # via celery
-boto3==1.9.238            # via smart-open
+boto3==1.10.27            # via smart-open
 boto==2.49.0              # via smart-open
-botocore==1.12.238        # via boto3, s3transfer
+botocore==1.13.27         # via boto3, s3transfer
 cachetools==3.1.1         # via google-auth, premailer
 cchardet==2.1.4
 celery==4.3.0
 certifi==2019.9.11        # via requests
-cffi==1.12.3              # via bcrypt, cryptography, pycares, pynacl
-chameleon==3.6.2          # via lingua
+cffi==1.13.2              # via bcrypt, cryptography, pycares, pynacl
 chardet==3.0.4            # via aiohttp, requests
 circus==0.15.0
-click==7.0                # via pip-tools
+click==7.0                # via lingua, pip-tools
 colander==1.7.0
 colorama==0.4.1
 coloredlogs==10.0
 colour==0.1.5
 contextlib2==0.6.0
-cornice==3.6.0
-cryptography==2.7
+cornice==3.6.1
+cryptography==2.8
 cssselect==1.1.0          # via premailer
 cssutils==1.0.2           # via premailer
-decorator==4.4.0          # via dogpile.cache, ipython, jsonpath-ng, traitlets
+decorator==4.4.1          # via dogpile.cache, ipython, jsonpath-ng, traitlets
 defusedxml==0.6.0         # via python3-openid, python3-saml, social-auth-core
 dnspython==1.16.0         # via pyisemail
 docutils==0.15.2          # via botocore
-dogpile.cache==0.8.0      # via pyramid-dogpile-cache
+dogpile.cache==0.9.0      # via pyramid-dogpile-cache
 et-xmlfile==1.0.1         # via openpyxl
 executor==21.3            # via rotate-backups, update-dotdee
 fabric3==1.14.post1
@@ -62,82 +60,82 @@ facebook-sdk==1.0.0
 fasteners==0.15           # via executor
 feedparser==5.2.1
 flaky==3.6.1
-future==0.17.1
+future==0.18.2
 gensim==3.8.1
 google-api-python-client==1.7.11
 google-auth-httplib2==0.0.3  # via google-api-python-client
-google-auth==1.6.3        # via google-api-python-client, google-auth-httplib2
-hashfs==0.7.1
-hiredis==1.0.0
+google-auth==1.7.1        # via google-api-python-client, google-auth-httplib2
+hashfs==0.7.2
+hiredis==1.0.1
 httplib2==0.14.0          # via google-api-python-client, google-auth-httplib2
 humanfriendly==4.18       # via coloredlogs, executor, property-manager, rotate-backups, update-dotdee
-hupper==1.8.1             # via pyramid
+hupper==1.9.1             # via pyramid
 idna-ssl==1.1.0           # via aiohttp
 idna==2.8                 # via idna-ssl, requests, yarl
 imapclient==2.1.0
 imaplib2==2.45.0
 importlib-metadata==0.23  # via kombu
 ipython-genutils==0.2.0   # via traitlets
-ipython==7.8.0
+ipython==7.9.0
 iso639==0.1.4
 iso8601==0.1.12           # via colander
 isodate==0.6.0
 jdcal==1.4.1              # via openpyxl
 jedi==0.15.1              # via ipython
-jinja2==2.10.1
+jinja2==2.10.3
 jmespath==0.9.4           # via boto3, botocore
-joblib==0.13.2            # via scikit-learn
+joblib==0.14.0            # via scikit-learn
 jsonpath-ng==1.4.3
-kombu==4.6.5
-lingua==4.13
-lxml==4.4.1
+kombu==4.6.6
+lingua==4.14
+lxml==4.4.2
 mako==1.1.0               # via alembic, tomako
 markupsafe==1.1.1         # via jinja2, mako, pyramid-jinja2
 monotonic==1.5            # via fasteners
 more-itertools==7.2.0     # via zipp
-multidict==4.5.2          # via aiohttp, yarl
+multidict==4.6.1          # via aiohttp, yarl
 naturalsort==1.5.1        # via rotate-backups, update-dotdee
 ndg_httpsclient==0.5.1
 nodeenv==1.3.3
-numpy==1.17.2             # via gensim, scikit-learn, scipy
+numpy==1.17.4             # via gensim, scikit-learn, scipy
 oauthlib==3.1.0           # via requests-oauthlib, social-auth-core
-openpyxl==3.0.0
+openpyxl==3.0.2
 paramiko==2.6.0           # via fabric3
 parso==0.5.1              # via jedi
 pastedeploy==2.0.1        # via plaster-pastedeploy
 pexpect==4.7.0            # via ipython
 pickleshare==0.7.5        # via ipython
-pip-tools==4.1.0
+pip-tools==4.3.0
 pkgconfig==1.5.1          # via xmlsec
 plaster-pastedeploy==0.7  # via pyramid
 plaster==1.0              # via plaster-pastedeploy, pyramid
 ply==3.11                 # via jsonpath-ng
 polib==1.1.0
 premailer==3.6.1
-prompt-toolkit==2.0.9     # via ipython
+prompt-toolkit==2.0.10    # via ipython
 property-manager==2.3.1   # via executor, rotate-backups, update-dotdee
-psutil==5.6.3             # via circus
-psycopg2-binary==2.8.3
+psutil==5.6.7             # via circus
+psycopg2-binary==2.8.4
 ptyprocess==0.6.0         # via pexpect
-pyasn1-modules==0.2.6     # via google-auth
-pyasn1==0.4.7             # via ndg-httpsclient, pyasn1-modules, rsa
+pyasn1-modules==0.2.7     # via google-auth
+pyasn1==0.4.8             # via ndg-httpsclient, pyasn1-modules, rsa
 pycares==3.0.0            # via aiodns
 pycparser==2.19           # via cffi
 pydot==1.4.1              # via sqlalchemy-schemadisplay
-pygments==2.4.2           # via ipython
+pygments==2.5.0           # via ipython
 pygraphviz==1.5
 pyisemail==1.3.2
 pyjwt==1.7.1
 pylibmc==1.6.1
 pynacl==1.3.0             # via paramiko
-pyopenssl==19.0.0         # via ndg-httpsclient
-pyparsing==2.4.2          # via pydot, rdflib
+pyopenssl==19.1.0         # via ndg-httpsclient
+pyparsing==2.4.5          # via pydot, rdflib
 pyramid-dogpile-cache==0.0.4
 pyramid-ipython==0.2
 pyramid-jinja2==2.8
 pyramid-mailer==0.15.1
-pyramid-retry==2.0
-pyramid-tm==2.2.1
+pyramid-retry==2.1
+pyramid-tm==2.3
 pyramid==1.10.4
 pystemmer==1.3.0
 python-dateutil==2.8.0
@@ -145,49 +143,49 @@ python-editor==1.0.4      # via alembic
 python-json-logger==0.1.11
 python-levenshtein==0.12.0
 python3-openid==3.1.0     # via social-auth-core
-python3-saml==1.8.0
-pytz==2019.2
+python3-saml==1.9.0
+pytz==2019.3
 pyyaml==5.1.2
 pyzmq==16.0.4
 raven==6.10.0
 rdflib-jsonld==0.4.0
 rdflib==4.2.2
-redis==3.3.8
+redis==3.3.11
 reg==0.11
 repoze.lru==0.7           # via reg
 repoze.sendmail==4.4.1    # via pyramid-mailer
-requests-oauthlib==1.2.0
+requests-oauthlib==1.3.0
 requests==2.22.0
 rotate-backups==6.0
 rsa==4.0                  # via google-auth
 s3transfer==0.2.1         # via boto3
 scikit-learn==0.21.3
-scipy==1.3.1              # via gensim, scikit-learn
+scipy==1.3.3              # via gensim, scikit-learn
 simpleeval==0.9.8         # via rotate-backups
-simplejson==3.16.0
-six==1.12.0
-smart-open==1.8.4         # via gensim
+simplejson==3.17.0
+six==1.13.0
+smart-open==1.9.0         # via gensim
 social-auth-app-pyramid==1.0.0
 social-auth-core==3.2.0
 social-auth-storage-sqlalchemy==1.1.0
-soupsieve==1.9.4          # via beautifulsoup4
+soupsieve==1.9.5          # via beautifulsoup4
 sparqlwrapper==1.8.4
 sqlalchemy-schemadisplay==1.3
-sqlalchemy==1.3.8
-structlog==19.1.0
+sqlalchemy==1.3.11
+structlog==19.2.0
 tomako==0.1.0.post1
 tornado==4.5.3            # via circus, tomako
-traitlets==4.3.2          # via ipython
+traitlets==4.3.3          # via ipython
 transaction==2.4.0
 translationstring==1.3
-typing-extensions==3.7.4  # via aiohttp
+typing-extensions==3.7.4.1  # via aiohttp
 typing==3.7.4.1           # via aiodns
 unidecode==1.1.1
 update-dotdee==5.0        # via rotate-backups
 uritemplate==3.0.0        # via google-api-python-client
-urllib3==1.25.6           # via botocore, requests
+urllib3==1.25.7           # via botocore, requests
 uwsgitop==0.11
-venusian==1.2.0           # via cornice, pyramid
+venusian==3.0.0           # via cornice, pyramid
 verboselogs==1.7          # via property-manager, rotate-backups
 vine==1.3.0               # via amqp, celery
 wcwidth==0.1.7            # via prompt-toolkit
@@ -196,14 +194,14 @@ werkzeug==0.16.0
 xmlsec==1.3.3             # via python3-saml
 yarl==1.3.0               # via aiohttp
 zipp==0.6.0               # via importlib-metadata
-zope.component==4.5
+zope.component==4.6
 zope.deferredimport==4.3.1  # via zope.component
 zope.deprecation==4.4.0   # via pyramid, pyramid-jinja2, zope.component
 zope.event==4.4           # via zope.component
-zope.hookable==4.2.0      # via zope.component
-zope.interface==4.6.0
-zope.proxy==4.3.2         # via zope.deferredimport
-zope.sqlalchemy==1.1
+zope.hookable==5.0.0      # via zope.component
+zope.interface==4.7.1
+zope.proxy==4.3.3         # via zope.deferredimport
+zope.sqlalchemy==1.2
 
 # The following packages are considered to be unsafe in a requirements file:
-# setuptools==41.2.0        # via ipython, lingua, plaster, pyramid, python-levenshtein, reg, repoze.sendmail, sqlalchemy-schemadisplay, zope.component, zope.deferredimport, zope.deprecation, zope.event, zope.hookable, zope.interface, zope.proxy, zope.sqlalchemy
+# setuptools
