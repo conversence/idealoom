@@ -3,12 +3,12 @@ _extends = base_env.rc
 # add configs/no_sentry to the mix if you're not using sentry at all
 ini_files = production.ini RANDOM:random.ini.tmpl:saml_random.ini.tmpl:random_docker.ini.tmpl RC_DATA
 _projectpath = /opt/idealoom
+_venvpath = /opt/idealoom/venv
 db_password = __delete_key__
 public_hostname = idealoom.cloud
 _hosts = localhost
 _postgres_db_password = 
 _user = idealoom_user
-
 *db_host = database
 smtp_host = localhost
 imap_host = localhost
