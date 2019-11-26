@@ -7,8 +7,10 @@ ARG	GITBRANCH=master
 ARG DOCKER_RC=assembl/configs/docker.rc
 ARG BUILDING_DOCKER=true
 
-RUN     apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y \
             apt-utils \
+            apt-transport-https \
+            ca-certificates \
             locales \
             python3 \
             python3-pip \
@@ -28,8 +30,13 @@ RUN     apt-get update && apt-get install -y \
             monit \
             uwsgi \
             curl \
-            uwsgi-plugin-python
-RUN         pip3 install Fabric3
+            fail2ban \
+            uwsgi-plugin-python && \
+            echo 'deb https://dl.yarnpkg.com/debian/ stable main' > /etc/apt/sources.list.d/yarn.list && \
+            curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
+            apt-get update && \
+            apt-get install -y yarn && \
+            pip3 install Fabric3
 RUN         useradd -m -U -G www-data idealoom_user && \
             ssh-keygen -P '' -f ~/.ssh/id_rsa && cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys && \
             sudo -u idealoom_user -i sh -c "cd && mkdir .ssh && ssh-keygen -P '' -f .ssh/id_rsa && cat .ssh/id_rsa.pub >> .ssh/authorized_keys" && \
