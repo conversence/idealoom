@@ -43,7 +43,7 @@ from sqlalchemy.orm.session import object_session, Session
 from sqlalchemy.engine import strategies
 from sqla_rdfbridge.mapping import PatternIriClass
 from sqlalchemy.engine.url import URL
-from zope.sqlalchemy import ZopeTransactionEvents
+from zope.sqlalchemy import ZopeTransactionExtension
 from zope.sqlalchemy.datamanager import mark_changed as z_mark_changed
 from pyramid.httpexceptions import HTTPUnauthorized, HTTPBadRequest
 
@@ -2344,7 +2344,7 @@ def make_session_maker(zope_tr=True, autoflush=True):
     return scoped_session(sessionmaker(
         autoflush=autoflush,
         class_=ReadWriteSession,
-        extension=ZopeTransactionEvents() if zope_tr else None))
+        extension=ZopeTransactionExtension() if zope_tr else None))
 
 
 def initialize_session_maker(zope_tr=True, autoflush=True):
@@ -2563,7 +2563,7 @@ def configure_engine(settings, zope_tr=True, autoflush=True, session_maker=None,
 def is_zopish():
     return isinstance(
         _session_maker.session_factory.kw.get('extension'),
-        ZopeTransactionEvents)
+        ZopeTransactionExtension)
 
 
 def mark_changed(session=None):

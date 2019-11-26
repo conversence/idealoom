@@ -240,7 +240,7 @@ zope.event==4.4           # via zope.component
 zope.hookable==5.0.0      # via zope.component
 zope.interface==4.7.1
 zope.proxy==4.3.3         # via zope.deferredimport
-zope.sqlalchemy==1.2
+zope.sqlalchemy==1.1
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

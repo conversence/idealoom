@@ -91,10 +91,10 @@ WebOb==1.8.5
 Werkzeug==0.16.0
 zope.component==4.6
 zope.interface==4.7.1
-zope.sqlalchemy==1.2
+zope.sqlalchemy==1.1
 
 # are any of those really needed?
-# ecdsa==0.13
+# ecdsa==0.13.3
 # greenlet==0.4.10
 # anykeystore==0.2
 # DateTime==4.1.1
