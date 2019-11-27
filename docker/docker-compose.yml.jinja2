@@ -22,7 +22,7 @@ services:
       - my_net
 
   database:
-    image: postgres:9.6-alpine
+    image: postgres:12.1-alpine
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:

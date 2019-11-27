@@ -1,5 +1,4 @@
-#FROM    ubuntu:16.04
-FROM    debian:stretch
+FROM    debian:buster
 
 ENV     DEBIAN_FRONTEND noninteractive
 ARG	GITREPO=conversence/idealoom
@@ -14,7 +13,6 @@ RUN apt-get update && apt-get install -y \
             locales \
             python3 \
             python3-pip \
-            python3-paramiko \
             python3-future \
             python3-virtualenv \
             python3-wheel \
@@ -27,7 +25,6 @@ RUN apt-get update && apt-get install -y \
             sudo \
             net-tools \
             nodejs \
-            monit \
             uwsgi \
             curl \
             fail2ban \
@@ -49,11 +46,16 @@ ENV LC_CTYPE C.UTF-8
 RUN     /etc/init.d/ssh start && \
            ssh-keyscan localhost && \
            touch empty.rc && \
+           ssh -o StrictHostKeyChecking=no localhost uptime && \
+           cat ~/.ssh/known_hosts >> ~idealoom_user/.ssh/known_hosts && \
+           eval `ssh-agent` && \
+           ssh-add ~/.ssh/id_rsa && \
            fab -f assembl/fabfile.py -c empty.rc install_assembl_server_deps && \
            rm -rf __pycache__ fabfile.py* empty.rc && \
            /etc/init.d/ssh stop
 RUN     /etc/init.d/ssh start && \
            ssh-keyscan localhost && \
+           sudo -i -u idealoom_user sh -c 'eval `ssh-agent` ; ssh-add ~/.ssh/id_rsa' && \
            fab -f assembl/fabfile.py -c $DOCKER_RC build_virtualenv && \
            /etc/init.d/ssh stop
 RUN     /etc/init.d/ssh start && \
