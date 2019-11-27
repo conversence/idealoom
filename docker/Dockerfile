@@ -48,8 +48,13 @@ ENV LC_ALL C.UTF-8
 ENV LC_CTYPE C.UTF-8
 RUN     /etc/init.d/ssh start && \
            ssh-keyscan localhost && \
+           touch empty.rc && \
+           fab -f assembl/fabfile.py -c empty.rc install_assembl_server_deps && \
+           rm -rf __pycache__ fabfile.py* empty.rc && \
+           /etc/init.d/ssh stop
+RUN     /etc/init.d/ssh start && \
+           ssh-keyscan localhost && \
            fab -f assembl/fabfile.py -c $DOCKER_RC build_virtualenv && \
-           fab -f assembl/fabfile.py -c $DOCKER_RC install_assembl_server_deps && \
            /etc/init.d/ssh stop
 RUN     /etc/init.d/ssh start && \
            ssh-keyscan localhost && \

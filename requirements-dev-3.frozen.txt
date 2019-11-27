@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file=requirements-dev-3.frozen.txt requirements.in requirements_chrouter.in requirements_dev.in requirements_doc.in requirements_tests.in
 #
---find-links /Users/maparent/OpenSource/wheelhouse
+--find-links https://idealoom.org/wheelhouse/
 
 -e git+https://github.com/conversence/Beaker.git@assembl#egg=Beaker
 -e git+https://github.com/maparent/circus-web.git@p3#egg=circus_web
