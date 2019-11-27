@@ -29,7 +29,7 @@ secure_proxy = true
 # Override what follows in your specific docker.rc file
 
 # Have a local file with the random values for this specific deploy
-random_file = configs/docker_random.ini
+random_file = docker_random.ini
 
 # What are the public hostnames of your idealoom hosts? Can be multiple, separated by spaces
 docker_idealoom_hosts = idealoom1.docker idealoom2.docker

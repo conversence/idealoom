@@ -51,23 +51,17 @@ RUN     /etc/init.d/ssh start && \
            eval `ssh-agent` && \
            ssh-add ~/.ssh/id_rsa && \
            fab -f assembl/fabfile.py -c empty.rc install_assembl_server_deps && \
-           rm -rf __pycache__ fabfile.py* empty.rc && \
+           rm -rf __pycache__ fabfile.pyc empty.rc && \
            /etc/init.d/ssh stop
 RUN     /etc/init.d/ssh start && \
-           ssh-keyscan localhost && \
-           sudo -i -u idealoom_user sh -c 'eval `ssh-agent` ; ssh-add ~/.ssh/id_rsa' && \
-           fab -f assembl/fabfile.py -c $DOCKER_RC build_virtualenv && \
+           sudo -i -u idealoom_user sh -c 'eval `ssh-agent` ; ssh-add ~/.ssh/id_rsa ; cd /opt/idealoom ; fab -f assembl/fabfile.py -c assembl/configs/docker.rc build_virtualenv' && \
            /etc/init.d/ssh stop
 RUN     /etc/init.d/ssh start && \
-           ssh-keyscan localhost && \
-           fab -f assembl/fabfile.py -c $DOCKER_RC app_update_dependencies && \
+           sudo -i -u idealoom_user sh -c 'eval `ssh-agent` ; ssh-add ~/.ssh/id_rsa ; cd /opt/idealoom ; fab -f assembl/fabfile.py -c assembl/configs/docker.rc app_update_dependencies' && \
            /etc/init.d/ssh stop
 RUN        /etc/init.d/ssh start && \
-           ssh-keyscan localhost && \
-           fab -c $DOCKER_RC app_compile_nodbupdate && \
-           fab -c $DOCKER_RC set_file_permissions && \
+           sudo -i -u idealoom_user sh -c 'eval `ssh-agent` ; ssh-add ~/.ssh/id_rsa ; cd /opt/idealoom ; . venv/bin/activate ; fab -c assembl/configs/docker.rc app_compile_nodbupdate ; fab -c assembl/configs/docker.rc set_file_permissions' && \
            /etc/init.d/ssh stop
 CMD     /etc/init.d/ssh start && \
-        . venv/bin/activate && \
-        fab -c $DOCKER_RC docker_startup && \
+        sudo -i -u idealoom_user sh -c 'eval `ssh-agent` ; ssh-add ~/.ssh/id_rsa ; cd /opt/idealoom ; . venv/bin/activate ; fab -c assembl/configs/docker.rc docker_startup' && \
         tail -f /dev/null
