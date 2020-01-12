@@ -7,6 +7,6 @@ aiohttp==3.6.2
 # Those chrouter reqs repeat requirements in requirements.in, keep in sync.
 PyJWT==1.7.1
 pytz==2019.3
-pyzmq==16.0.4  # rq.filter: <17
+pyzmq==18.1.1
 raven==6.10.0
 simplejson==3.17.0

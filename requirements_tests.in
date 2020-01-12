@@ -3,7 +3,7 @@ codecov==2.0.15
 mock==3.0.5
 pytest-cov==2.8.1
 pytest-localserver==0.5.0
-pytest-mock==1.13.0
+pytest-mock==2.0.0
 pytest-splinter==2.0.1
 pytest==5.3.2
 WebTest==2.0.33
