@@ -5,8 +5,8 @@ pytest-cov==2.8.1
 pytest-localserver==0.5.0
 pytest-mock==2.0.0
 pytest-splinter==2.0.1
-pytest==5.3.2
-WebTest==2.0.33
+pytest==5.3.5
+WebTest==2.0.34
 
 # Do I still need this?
 # cov-core==1.15.0

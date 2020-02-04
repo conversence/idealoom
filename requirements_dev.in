@@ -1,4 +1,4 @@
 -e git+https://github.com/assembl/sqltap.git@readonly_binds#egg=sqltap
 PdbSublimeTextSupport==0.2
 pyramid-debugtoolbar-ajax==0.1.2
-pyramid-debugtoolbar==4.5.2
+pyramid-debugtoolbar==4.6
