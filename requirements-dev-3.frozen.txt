@@ -21,7 +21,7 @@
 aiodns==2.0.0
 aiohttp==3.6.2
 alabaster==0.7.12         # via sphinx
-alembic==1.3.3
+alembic==1.4.2
 amqp==2.5.2               # via kombu
 anyjson==0.3.3
 appnope==0.1.0            # via ipython
@@ -31,38 +31,37 @@ babel==2.8.0
 backcall==0.1.0           # via ipython
 bcrypt==3.1.7             # via paramiko
 beautifulsoup4==4.8.2
-billiard==3.6.2.0         # via celery
-boto3==1.11.9             # via smart-open
-boto==2.49.0              # via smart-open
-botocore==1.14.9          # via boto3, s3transfer
+billiard==3.6.3.0         # via celery
+boto3==1.12.26            # via smart-open
+botocore==1.15.26         # via boto3, s3transfer
 cachetools==4.0.0         # via google-auth, premailer
 cchardet==2.1.4
-celery==4.4.0
+celery==4.4.2
 certifi==2019.11.28       # via requests
-cffi==1.13.2              # via bcrypt, cryptography, pycares, pynacl
+cffi==1.14.0              # via bcrypt, cryptography, pycares, pynacl
 characteristic==14.3.0    # via montague
 chardet==3.0.4            # via aiohttp, requests
 circus==0.16.1
-click==7.0                # via lingua, pip-tools
-codecov==2.0.15
+click==7.1.1              # via lingua, pip-tools
+codecov==2.0.22
 colander==1.7.0
 colorama==0.4.3
-coloredlogs==10.0
+coloredlogs==14.0
 colour==0.1.5
 contextlib2==0.6.0
 cornice==4.0.1
 cornice_sphinx==0.3
-coverage==5.0.3           # via codecov, pytest-cov
+coverage==5.0.4           # via codecov, pytest-cov
 cryptography==2.8
 cssselect==1.1.0          # via premailer
 cssutils==1.0.2           # via premailer
-decorator==4.4.1          # via dogpile.cache, ipython, jsonpath-ng, traitlets
+decorator==4.4.2          # via dogpile.cache, ipython, jsonpath-ng, traitlets
 defusedxml==0.6.0         # via python3-openid, python3-saml, social-auth-core
 dnspython==1.16.0         # via pyisemail
 docutils==0.15.2          # via botocore, cornice-sphinx, sphinx
 dogpile.cache==0.9.0      # via pyramid-dogpile-cache
 et-xmlfile==1.0.1         # via openpyxl
-executor==21.3            # via rotate-backups, update-dotdee
+executor==22.0            # via rotate-backups, update-dotdee
 fabric3==1.14.post1
 facebook-sdk==1.0.0
 fasteners==0.15           # via executor
@@ -70,55 +69,60 @@ feedparser==5.2.1
 flaky==3.6.1
 future==0.18.2
 gensim==3.8.1
-google-api-python-client==1.7.11
+google-api-core==1.16.0   # via google-api-python-client, google-cloud-core
+google-api-python-client==1.8.0
 google-auth-httplib2==0.0.3  # via google-api-python-client
-google-auth==1.11.0       # via google-api-python-client, google-auth-httplib2
+google-auth==1.11.3       # via google-api-core, google-api-python-client, google-auth-httplib2, google-cloud-storage
+google-cloud-core==1.3.0  # via google-cloud-storage
+google-cloud-storage==1.26.0  # via smart-open
+google-resumable-media==0.5.0  # via google-cloud-storage
+googleapis-common-protos==1.51.0  # via google-api-core
 hashfs==0.7.2
 hiredis==1.0.1
 httplib2==0.17.0          # via google-api-python-client, google-auth-httplib2
-humanfriendly==4.18       # via coloredlogs, executor, property-manager, rotate-backups, update-dotdee
-hupper==1.9.1             # via pyramid
+humanfriendly==8.1        # via coloredlogs, executor, property-manager, rotate-backups, update-dotdee
+hupper==1.10.2            # via pyramid
 idna-ssl==1.1.0           # via aiohttp
-idna==2.8                 # via idna-ssl, requests, yarl
+idna==2.9                 # via idna-ssl, requests, yarl
 imagesize==1.2.0          # via sphinx
 imapclient==2.1.0
 imaplib2==2.45.0
 importlib-metadata==1.5.0  # via kombu, pluggy, pytest
 ipython-genutils==0.2.0   # via traitlets
-ipython==7.12.0
+ipython==7.13.0
 iso639==0.1.4
 iso8601==0.1.12           # via colander
 isodate==0.6.0
 jdcal==1.4.1              # via openpyxl
 jedi==0.16.0              # via ipython
-jinja2==2.10.3
-jmespath==0.9.4           # via boto3, botocore
+jinja2==2.11.1
+jmespath==0.9.5           # via boto3, botocore
 joblib==0.14.1            # via scikit-learn
-jsonpath-ng==1.4.3
-kombu==4.6.7              # via celery
+jsonpath-ng==1.5.1
+kombu==4.6.8              # via celery
 lingua==4.14
-lxml==4.4.2
-mako==1.1.1               # via alembic, pyramid-mako, tomako
+lxml==4.5.0
+mako==1.1.2               # via alembic, pyramid-mako, tomako
 markupsafe==1.1.1         # via jinja2, mako, pyramid-jinja2
-mock==3.0.5
+mock==4.0.2
 monotonic==1.5            # via fasteners
 montague==0.2.1
 more-itertools==8.2.0     # via pytest
-multidict==4.7.4          # via aiohttp, yarl
+multidict==4.7.5          # via aiohttp, yarl
 naturalsort==1.5.1        # via rotate-backups, update-dotdee
 ndg_httpsclient==0.5.1
-nodeenv==1.3.4
-numpy==1.18.1             # via gensim, scikit-learn, scipy
+nodeenv==1.3.5
+numpy==1.18.2             # via gensim, scikit-learn, scipy
 oauthlib==3.1.0           # via requests-oauthlib, social-auth-core
 openpyxl==3.0.3
-packaging==20.1           # via pytest, sphinx
+packaging==20.3           # via pytest, sphinx
 paramiko==2.7.1           # via fabric3
-parso==0.6.1              # via jedi
+parso==0.6.2              # via jedi
 pastedeploy==2.1.0        # via plaster-pastedeploy
 pdbsublimetextsupport==0.2
 pexpect==4.8.0            # via ipython
 pickleshare==0.7.5        # via ipython
-pip-tools==4.4.1
+pip-tools==4.5.1
 pkgconfig==1.5.1          # via xmlsec
 plaster-pastedeploy==0.7  # via pyramid
 plaster==1.0              # via plaster-pastedeploy, pyramid
@@ -126,18 +130,19 @@ pluggy==0.13.1            # via pytest
 ply==3.11                 # via jsonpath-ng
 polib==1.1.0
 premailer==3.6.1
-prompt-toolkit==3.0.3     # via ipython
-property-manager==2.3.1   # via executor, rotate-backups, update-dotdee
-psutil==5.6.7             # via circus
+prompt-toolkit==3.0.4     # via ipython
+property-manager==3.0     # via executor, rotate-backups, update-dotdee
+protobuf==3.11.3          # via google-api-core, googleapis-common-protos
+psutil==5.7.0             # via circus
 psycopg2-binary==2.8.4
 ptyprocess==0.6.0         # via pexpect
 py==1.8.1                 # via pytest
 pyasn1-modules==0.2.8     # via google-auth
 pyasn1==0.4.8             # via ndg-httpsclient, pyasn1-modules, rsa
 pycares==3.1.1            # via aiodns
-pycparser==2.19           # via cffi
+pycparser==2.20           # via cffi
 pydot==1.4.1              # via sqlalchemy-schemadisplay
-pygments==2.5.2           # via ipython, pyramid-debugtoolbar, sphinx
+pygments==2.6.1           # via ipython, pyramid-debugtoolbar, sphinx
 pygraphviz==1.5
 pyisemail==1.3.2
 pyjwt==1.7.1
@@ -146,13 +151,13 @@ pynacl==1.3.0             # via paramiko
 pyopenssl==19.1.0         # via ndg-httpsclient
 pyparsing==2.4.6          # via packaging, pydot, rdflib
 pyramid-debugtoolbar-ajax==0.1.2
-pyramid-debugtoolbar==4.6
+pyramid-debugtoolbar==4.6.1
 pyramid-dogpile-cache==0.0.4
 pyramid-ipython==0.2
 pyramid-jinja2==2.8
 pyramid-mailer==0.15.1
 pyramid-mako==1.1.0       # via pyramid-debugtoolbar
-pyramid-retry==2.1
+pyramid-retry==2.1.1
 pyramid-tm==2.4
 pyramid==1.10.4
 pystemmer==1.3.0
@@ -160,7 +165,7 @@ pytest-cov==2.8.1
 pytest-localserver==0.5.0
 pytest-mock==2.0.0
 pytest-splinter==2.0.1
-pytest==5.3.5
+pytest==5.4.1
 python-dateutil==2.8.1
 python-editor==1.0.4      # via alembic
 python-json-logger==0.1.11
@@ -168,8 +173,8 @@ python-levenshtein==0.12.0
 python3-openid==3.1.0     # via social-auth-core
 python3-saml==1.9.0
 pytz==2019.3
-pyyaml==5.3
-pyzmq==18.1.1
+pyyaml==5.3.1
+pyzmq==19.0.0
 raven==6.10.0
 rdflib-jsonld==0.4.0
 rdflib==4.2.2
@@ -178,36 +183,36 @@ reg==0.12
 repoze.lru==0.7           # via pyramid-debugtoolbar, reg
 repoze.sendmail==4.4.1    # via pyramid-mailer
 requests-oauthlib==1.3.0
-requests==2.22.0
-rotate-backups==6.0
+requests==2.23.0
+rotate-backups==8.0
 rsa==4.0                  # via google-auth
-s3transfer==0.3.2         # via boto3
+s3transfer==0.3.3         # via boto3
 scikit-learn==0.22.1
 scipy==1.4.1              # via gensim, scikit-learn
 selenium==3.141.0         # via pytest-splinter, splinter
 simpleeval==0.9.10        # via rotate-backups
 simplejson==3.17.0
 six==1.14.0
-smart-open==1.9.0         # via gensim
+smart-open==1.10.0        # via gensim
 snowballstemmer==2.0.0    # via sphinx
 social-auth-app-pyramid==1.0.0
-social-auth-core==3.2.0
+social-auth-core==3.3.0
 social-auth-storage-sqlalchemy==1.1.0
-soupsieve==1.9.5          # via beautifulsoup4
+soupsieve==2.0            # via beautifulsoup4
 sparqlwrapper==1.8.5
 sphinx==2.0.1
-sphinxcontrib-applehelp==1.0.1  # via sphinx
-sphinxcontrib-devhelp==1.0.1  # via sphinx
-sphinxcontrib-htmlhelp==1.0.2  # via sphinx
+sphinxcontrib-applehelp==1.0.2  # via sphinx
+sphinxcontrib-devhelp==1.0.2  # via sphinx
+sphinxcontrib-htmlhelp==1.0.3  # via sphinx
 sphinxcontrib-httpdomain==1.7.0
 sphinxcontrib-jsmath==1.0.1  # via sphinx
-sphinxcontrib-qthelp==1.0.2  # via sphinx
-sphinxcontrib-serializinghtml==1.1.3  # via sphinx
-sphinxcontrib-zopeext==0.2.3
+sphinxcontrib-qthelp==1.0.3  # via sphinx
+sphinxcontrib-serializinghtml==1.1.4  # via sphinx
+sphinxcontrib-zopeext==0.2.4
 splinter==0.13.0          # via pytest-splinter
 sqlalchemy-schemadisplay==1.3
-sqlalchemy==1.3.13
-sqlparse==0.3.0
+sqlalchemy==1.3.15
+sqlparse==0.3.1
 structlog==20.1.0
 termcolor==1.1.0
 tomako==0.1.0.post1
@@ -229,17 +234,17 @@ waitress==1.4.3           # via webtest
 wcwidth==0.1.8            # via prompt-toolkit, pytest
 webob==1.8.6              # via pyramid, webtest
 webtest==2.0.34
-werkzeug==0.16.1          # via pytest-localserver
+werkzeug==1.0.0           # via pytest-localserver
 xmlsec==1.3.3             # via python3-saml
 yarl==1.4.2               # via aiohttp
-zipp==2.1.0               # via importlib-metadata
+zipp==3.1.0               # via importlib-metadata
 zope.component==4.6
 zope.deferredimport==4.3.1  # via zope.component
 zope.deprecation==4.4.0   # via pyramid, pyramid-jinja2, zope.component
 zope.event==4.4           # via zope.component
-zope.hookable==5.0.0      # via zope.component
-zope.interface==4.7.1
-zope.proxy==4.3.3         # via zope.deferredimport
+zope.hookable==5.0.1      # via zope.component
+zope.interface==5.0.1
+zope.proxy==4.3.5         # via zope.deferredimport
 zope.sqlalchemy==1.1
 
 # The following packages are considered to be unsafe in a requirements file:
