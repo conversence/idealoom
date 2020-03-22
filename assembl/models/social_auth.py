@@ -427,7 +427,7 @@ class SocialAuthAccount(
         query, _ = super(SocialAuthAccount, self).unique_query()
         return query.filter_by(
             type=self.type, provider_id=self.provider_id,
-            username=self.username), True
+            uid=self.uid), True
 
     @classmethod
     def find_accounts(cls, provider, social_account):
@@ -437,15 +437,20 @@ class SocialAuthAccount(
                 provider=provider,
                 domain=social_account['domain'],
                 email_ci=social_account['email']).all()
+        elif 'uid' in social_account:
+            return provider.db.query(cls).filter_by(
+                provider=provider,
+                domain=social_account['domain'],
+                uid=social_account['uid']).all()
         elif 'username' in social_account:
             return provider.db.query(cls).filter_by(
                 provider=provider,
                 domain=social_account['domain'],
-                uid=social_account['username']).all()
+                username=social_account['username']).all()
         else:
-            log.error("account needs username or email" +
+            log.error("account needs username, uid or email" +
                       social_account)
-            raise RuntimeError("account needs username or uid")
+            raise RuntimeError("account needs username uid or email")
 
     def login_duration(self):
         data = self.extra_data
