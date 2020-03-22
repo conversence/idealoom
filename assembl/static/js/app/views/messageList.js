@@ -319,15 +319,15 @@ class MessageList extends BaseMessageList.extend({
       }
     }
 
-  serializeData(...args) {
-    var data = super.serializeData(args);
+  serializeData() {
+    var data = super.serializeData(...arguments);
     data.inspireMeLink = this.inspireMeLink;
     return data;
   }
 
-  onBeforeRender(...args) {
+  onBeforeRender() {
       //Save some state from the previous render
-      super.onBeforeRender(args);
+      super.onBeforeRender(...arguments);
 
       if (this.currentQuery.isQueryValid()) {
         this.setLoading(false);
@@ -356,8 +356,8 @@ class MessageList extends BaseMessageList.extend({
       //console.log("onBeforeRender:  template is now:", this.template);
     }
 
-  onRender(...args) {
-    super.onRender(args);
+  onRender() {
+    super.onRender(...arguments);
     var that = this;
     var collectionManager = new CollectionManager();
     var renderId = _.clone(this._renderId);

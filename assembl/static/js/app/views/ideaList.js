@@ -317,7 +317,7 @@ class IdeaList extends BasePanel.extend({
     return this.defaultTableOfIdeasCollapsedState;
   }
 
-  render(...args) {
+  render() {
     //Overriding render because getting the scrollTop position of the ideaList body container
     //is lost upon re-rendering. BeforeRender and onRender are too late.
     if (Ctx.debugRender) {
@@ -336,7 +336,7 @@ class IdeaList extends BasePanel.extend({
         console.log("before scrollTop:"+this.bodyTopPosition);
       }
     }
-    super.render(args);
+    super.render(...arguments);
   }
 
   onRender() {

@@ -435,8 +435,8 @@ class IntPreferenceView extends StringPreferenceView {
 class ScalarPreferenceView extends BasePreferenceView.extend({
   template: '#tmpl-scalarPreferenceView'
 }) {
-  serializeData(...args) {
-    var data = super.serializeData(args);
+  serializeData() {
+    var data = super.serializeData(...arguments);
     // Note: This is unsorted. Maybe should by value?
     data.scalarOptions = data.preferenceData.scalar_values;
     return data;
@@ -449,8 +449,8 @@ class ScalarPreferenceView extends BasePreferenceView.extend({
  * @extends app.views.preferencesView.ScalarPreferenceView
  */
 class LocalePreferenceView extends ScalarPreferenceView {
-  serializeData(...args) {
-    var data = super.serializeData(args);
+  serializeData() {
+    var data = super.serializeData(...arguments);
     data.scalarOptions = Ctx.getLocaleToLanguageNameCache();
     return data;
   }
@@ -462,8 +462,8 @@ class LocalePreferenceView extends ScalarPreferenceView {
  * @extends app.views.preferencesView.ScalarPreferenceView
  */
 class PermissionPreferenceView extends ScalarPreferenceView {
-  serializeData(...args) {
-    var data = super.serializeData(args);
+  serializeData() {
+    var data = super.serializeData(...arguments);
     data.scalarOptions = {};
     _.each(Permissions, function(key) {
       data.scalarOptions[key] = key;
@@ -483,8 +483,8 @@ class RolePreferenceView extends ScalarPreferenceView {
     this.roles = Ctx.getRoleNames();
   }
 
-  serializeData(...args) {
-    var data = super.serializeData(args);
+  serializeData() {
+    var data = super.serializeData(...arguments);
     data.scalarOptions = {};
     _.each(this.roles, function(key) {
       data.scalarOptions[key] = key;
@@ -513,8 +513,8 @@ class PubFlowPreferenceView extends ScalarPreferenceView {
     })
   }
 
-  serializeData(...args) {
-    var data = super.serializeData(args);
+  serializeData() {
+    var data = super.serializeData(...arguments);
     data.scalarOptions = {};
     if (this.pubFlowCollection) {
       this.pubFlowCollection.each((pubFlowModel) => {
@@ -559,8 +559,8 @@ class PubStatePreferenceView extends ScalarPreferenceView {
     }
   }
 
-  serializeData(...args) {
-    var data = super.serializeData(args);
+  serializeData() {
+    var data = super.serializeData(...arguments);
     data.scalarOptions = {};
     const langPrefs = this.langPrefs;
     if (this.pubStateCollection) {
