@@ -38,6 +38,7 @@ from sqlalchemy import (
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqla_rdfbridge.mapping import IriClass, PatternIriClass
 from pyramid.i18n import TranslationStringFactory
+from pyramid.httpexceptions import HTTPBadRequest, HTTPUnauthorized
 from sqlalchemy.types import TIMESTAMP as Timestamp
 
 from ..lib.clean_input import sanitize_text
@@ -59,7 +60,7 @@ from ..semantic.namespaces import (
 from ..lib.sqla import CrudOperation
 from ..lib.model_watcher import get_model_watcher
 from .auth import AgentProfile
-from .publication_states import PublicationState
+from .publication_states import PublicationState, PublicationTransition
 from .import_records import ImportRecord
 from assembl.views.traversal import (
     AbstractCollectionDefinition, RelationCollectionDefinition,
@@ -1027,7 +1028,7 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
             return True
         return transition.req_permission_name in self.extra_permissions_for(user_id)
 
-    def apply_transition(self, transition_name, user_id, permissions=None):
+    def apply_transition(self, name, user_id, permissions=None):
         flow = self.discussion.idea_publication_flow
         transition = PublicationTransition.getByName(name, parent_object=flow)
         assert transition, "Cannot find transition " + name
@@ -1042,7 +1043,9 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
         self.pub_state_id = transition.target_id
 
     def safe_set_pub_state(self, state_label, user_id=None, request=None):
-        if state_label == self.pub_state.label:
+        pub_state = (self.pub_state or
+                     self.discussion.preferences['default_idea_pub_state'])
+        if state_label == pub_state.label:
             return True
         assert self.discussion.idea_publication_flow
         if request is None:
@@ -1058,7 +1061,7 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
             self.pub_state = state
             return True
         # look for a transition chain that can lead you to target state.
-        new_states = {self.pub_state}
+        new_states = {pub_state}
         known_states = set()
         while new_states:
             state = new_states.pop()

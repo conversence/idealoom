@@ -14,6 +14,7 @@ import simplejson as json
 from pyramid.security import Allow, ALL_PERMISSIONS
 from pyramid.settings import asbool
 from pyramid.path import DottedNameResolver
+from pyramid.httpexceptions import HTTPUnauthorized
 from pyramid.threadlocal import get_current_registry
 from sqlalchemy import (
     Column,
@@ -243,7 +244,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
     def bulk_apply_idea_transition(self, transition_name, user_id, permissions=None):
         flow = self.idea_publication_flow
         transition = flow.transition_by_label(transition_name)
-        assert transition, "Cannot find transition " + name
+        assert transition, "Cannot find transition " + transition_name
         if not permissions:
             from pyramid.threadlocal import get_current_request
             request = get_current_request()
