@@ -900,7 +900,7 @@ def publication_flow_diagram(request):
     mimetype = request_to_graph_mimetype(request)
     discussion = request.context._instance
     locale = strip_country(request.locale_name)
-    G = discussion.publication_flow_as_dot(locale, request.user_id)
+    G = discussion.publication_flow_as_dot(locale, request.authenticated_userid)
     io = BytesIO()
     G.draw(io, format=pygraphviz_formats[mimetype])
     io.seek(0)

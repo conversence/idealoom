@@ -174,7 +174,7 @@ def permissions_for_state(
 
 
 def permissions_for_states_from_req(request):
-    return permissions_for_states(request.discussion_id, request.user_id)
+    return permissions_for_states(request.discussion_id, request.authenticated_userid)
 
 
 def discussion_id_from_request(request):
