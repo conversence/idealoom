@@ -47,6 +47,7 @@ from pyramid_mailer import get_mailer
 from pyramid_mailer.message import Message
 import requests
 
+from assembl.lib.locale import (to_posix_string, strip_country)
 from assembl.lib.config import get_config
 from assembl.lib.parsedatetime import parse_datetime
 from assembl.lib.sqla import ObjectNotUniqueError
@@ -882,7 +883,8 @@ def idea_type_diagram(request):
     """Provide a mind-map like representation of the table of ideas"""
     mimetype = request_to_graph_mimetype(request)
     discussion = request.context._instance
-    G = discussion.idea_typology_as_dot(request.locale_name)
+    locale = strip_country(request.locale_name)
+    G = discussion.idea_typology_as_dot(locale)
     io = BytesIO()
     G.draw(io, format=pygraphviz_formats[mimetype])
     io.seek(0)
