@@ -849,11 +849,7 @@ pygraphviz_formats = {
 }
 
 
-@view_config(context=InstanceContext, name="mindmap",
-             ctx_instance_class=Discussion, request_method='GET',
-             permission=P_READ)
-def as_mind_map(request):
-    """Provide a mind-map like representation of the table of ideas"""
+def request_to_graph_mimetype(request):
     for mimetype in request.GET.getall('mimetype'):
         mimetype = mimetype
         if mimetype in pygraphviz_formats:
@@ -862,8 +858,31 @@ def as_mind_map(request):
         mimetype = request.accept.best_match(list(pygraphviz_formats.keys()))
         if not mimetype:
             raise HTTPNotAcceptable("Not known to pygraphviz: "+mimetype)
+    return mimetype
+
+
+@view_config(context=InstanceContext, name="mindmap",
+             ctx_instance_class=Discussion, request_method='GET',
+             permission=P_READ)
+def as_mind_map(request):
+    """Provide a mind-map like representation of the table of ideas"""
+    mimetype = request_to_graph_mimetype(request)
     discussion = request.context._instance
     G = discussion.as_mind_map()
+    io = BytesIO()
+    G.draw(io, format=pygraphviz_formats[mimetype])
+    io.seek(0)
+    return Response(body_file=io, content_type=mimetype)
+
+
+@view_config(context=InstanceContext, name="ideatypes",
+             ctx_instance_class=Discussion, request_method='GET',
+             permission=P_READ)
+def idea_type_diagram(request):
+    """Provide a mind-map like representation of the table of ideas"""
+    mimetype = request_to_graph_mimetype(request)
+    discussion = request.context._instance
+    G = discussion.idea_typology_as_dot(request.locale_name)
     io = BytesIO()
     G.draw(io, format=pygraphviz_formats[mimetype])
     io.seek(0)
