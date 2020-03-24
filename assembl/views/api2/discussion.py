@@ -846,6 +846,7 @@ pygraphviz_formats = {
     'image/png': 'png',
     'application/postscript': 'ps',
     'image/svg+xml': 'svg',
+    'image/svg xml': 'svg',  # to allow plus in url
     'model/vrml': 'vrml',
 }
 
@@ -889,6 +890,22 @@ def idea_type_diagram(request):
     G.draw(io, format=pygraphviz_formats[mimetype])
     io.seek(0)
     return Response(body_file=io, content_type=mimetype)
+
+
+@view_config(context=InstanceContext, name="pubflow",
+             ctx_instance_class=Discussion, request_method='GET',
+             permission=P_READ)
+def publication_flow_diagram(request):
+    """Provide a mind-map like representation of the table of ideas"""
+    mimetype = request_to_graph_mimetype(request)
+    discussion = request.context._instance
+    locale = strip_country(request.locale_name)
+    G = discussion.publication_flow_as_dot(locale)
+    io = BytesIO()
+    G.draw(io, format=pygraphviz_formats[mimetype])
+    io.seek(0)
+    return Response(body_file=io, content_type=mimetype)
+
 
 
 def get_analytics_alerts(discussion, user_id, types, all_users=False):

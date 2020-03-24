@@ -1014,6 +1014,22 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
         G.layout('dot')
         return G
 
+    def publication_flow_as_dot(self, locale=None):
+        import pygraphviz
+        locale = locale or self.main_locale
+        flow = self.idea_publication_flow
+        G = pygraphviz.AGraph(directed=True)
+        for state in flow.states:
+            name_e = state.name.closest_entry(locale) if state.name else None
+            name = name_e.value if name_e else state.label
+            G.add_node(state.label, label=name)
+        for transition in flow.transitions:
+            name_e = transition.name.closest_entry(locale) if transition.name else None
+            name = name_e.value if name_e else transition.label
+            G.add_edge(transition.source_label, transition.target_label, label=name)
+        G.layout('dot')
+        return G
+
     def as_mind_map(self):
         import pygraphviz
         from colour import Color
