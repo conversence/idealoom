@@ -10,7 +10,7 @@ from builtins import str
 import itertools
 from collections import defaultdict
 import argparse
-from inspect import isabstract, getargspec
+from inspect import isabstract, signature
 import logging.config
 import traceback
 from functools import partial
@@ -51,7 +51,7 @@ def find_or_create_object_by_keys(db, keys, obj, columns=None, joins=None):
     if eq is None:
         if columns is not None:
             args.update({key: getattr(obj, key) for key in columns})
-        if "session" in getargspec(obj.__class__.__init__).args:
+        if "session" in signature(obj.__class__.__init__).parameters:
             args["session"] = db
         eq = obj.__class__(**args)
         db.add(eq)
@@ -549,7 +549,7 @@ def clone_discussion(
                     if not isinstance(user, User):
                         return ob
                     break
-        if "session" in getargspec(ob.__class__.__init__).args:
+        if "session" in signature(ob.__class__.__init__).parameters:
             values["session"] = to_session
         if isinstance(ob, HistoryMixin):
             values['base_id'] = history_new_base_ids.get(

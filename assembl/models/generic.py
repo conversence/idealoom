@@ -564,8 +564,6 @@ class Content(TombstonableOriginMixin, DiscussionBoundBase):
             subject_original = self.subject.first_original()
             ts.confirm_locale(subject_original, priors)
 
-    widget_idea_links = relationship('IdeaContentWidgetLink')
-
     def indirect_idea_content_links(self):
         return []
 

@@ -1632,12 +1632,13 @@ class BaseOps(object):
                 elif not (pyinspect.ismethod(setter) or pyinspect.isfunction(setter)):
                     raise HTTPBadRequest("Not a setter: %s in class %s" % (
                         parse_instruction[1:], self.__class__.__name__))
-                (args, varargs, keywords, defaults) = \
-                    pyinspect.getargspec(setter)
-                if len(args) - len(defaults or ()) != 2:
+                num_params = len([
+                    p for p in pyinspect.signature(setter).parameters.values()
+                    if p.default == pyinspect._empty])
+                if num_params != 2:
                     raise HTTPBadRequest(
                         "Wrong number of args: %s(%d) in class %s" % (
-                            parse_instruction[1:], len(args),
+                            parse_instruction[1:], num_params,
                             self.__class__.__name__))
                 setter(self, value)
                 continue

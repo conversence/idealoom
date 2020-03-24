@@ -1611,7 +1611,6 @@ class IdeaLink(HistoryMixinWithOrigin, DiscussionBoundBase):
     #     secondary=Idea.__table__, primaryjoin=(source_id == Idea.id),
     #     info={'rdf': QuadMapPatternS(None, ASSEMBL.in_conversation)})
 
-
     discussion = relationship(
         Discussion,
         viewonly=True,
@@ -1619,12 +1618,7 @@ class IdeaLink(HistoryMixinWithOrigin, DiscussionBoundBase):
         secondary=Idea.__table__,
         primaryjoin=(source_id == Idea.id),
         # secondaryjoin=(Idea.discussion_id == Discussion.id),
-        backref=backref(
-            'idea_links',
-            primaryjoin=(Idea.discussion_id == Discussion.id),
-            secondaryjoin="""and_(IdeaLink.source_id==Idea.id,
-                             Idea.tombstone_date == None,
-                             IdeaLink.tombstone_date == None)"""),
+        # backref is Discussion.idea_links below
         info={'rdf': QuadMapPatternS(None, ASSEMBL.in_conversation)}
     )
 
@@ -1634,9 +1628,28 @@ class IdeaLink(HistoryMixinWithOrigin, DiscussionBoundBase):
         uselist=False,
         secondary=Idea.__table__,
         primaryjoin=(source_id == Idea.id),
-        backref='idea_links_ts',
+        # backref is Discussion.idea_links_ts below
         info={'rdf': QuadMapPatternS(None, ASSEMBL.in_conversation)}
     )
+
+
+# explicit backref to IdeaLink.discussion
+Discussion.idea_links = relationship(
+    IdeaLink,
+    viewonly=True,
+    secondary=Idea.__table__,
+    primaryjoin=(Idea.discussion_id == Discussion.id),
+    secondaryjoin="""and_(IdeaLink.source_id==Idea.id,
+                     Idea.tombstone_date == None,
+                     IdeaLink.tombstone_date == None)""")
+
+# explicit backref to IdeaLink.discussion_ts
+Discussion.idea_links_ts = relationship(
+    IdeaLink,
+    viewonly=True,
+    secondary=Idea.__table__,
+    secondaryjoin=(IdeaLink.source_id == Idea.id)
+)
 
 
 _it = Idea.__table__

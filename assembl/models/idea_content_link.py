@@ -99,9 +99,8 @@ class IdeaContentLink(DiscussionBoundBase, OriginMixin):
 
     discussion = relationship(
         Discussion, viewonly=True, uselist=False, secondary=Content.__table__,
-        backref="idea_content_links",
+        # backref is Discussion.idea_content_links below
         info={'rdf': QuadMapPatternS(None, ASSEMBL.in_conversation)})
-
 
     @classmethod
     def base_conditions(cls, alias=None, alias_maker=None):
@@ -116,6 +115,12 @@ class IdeaContentLink(DiscussionBoundBase, OriginMixin):
 
     crud_permissions = CrudPermissions(
             P_ADD_IDEA, P_READ, P_EDIT_IDEA, P_EDIT_IDEA)
+
+
+# explicit backref of IdeaContentLink.discussion
+Discussion.idea_content_links = relationship(
+    IdeaContentLink, viewonly=True, secondary=Content.__table__)
+
 
 @event.listens_for(IdeaContentLink.idea, 'set', propagate=True, active_history=True)
 def idea_content_link_idea_set_listener(target, value, oldvalue, initiator):
