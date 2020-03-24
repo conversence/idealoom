@@ -1135,7 +1135,7 @@ def install_single_server():
     Follow with bootstrap_from_checkout
     """
     execute(install_database)
-    execute(install_assembl_server_deps)
+    execute(install_idealoom_server_deps)
     execute(install_redis)
     execute(install_memcached)
     if not env.package_install:
@@ -1143,17 +1143,17 @@ def install_single_server():
 
 
 @task
-def install_assembl_server_deps():
+def install_idealoom_server_deps():
     """
     Will install most assembl components on a single server, except db
     """
     execute(install_yarn, False)
     execute(install_server_deps)
-    execute(install_assembl_deps)
+    execute(install_idealoom_deps)
 
 
 @task
-def install_assembl_deps():
+def install_idealoom_deps():
     """
     Will install commonly needed build deps for pip django virtualenvs.
     """
