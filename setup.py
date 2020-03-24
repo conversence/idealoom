@@ -97,7 +97,7 @@ setup(name='idealoom',
       },
       zip_safe=False,
       test_suite='assembl',
-      setup_requires=['pip>=6'],
+      setup_requires=['pip>=20'],
       install_requires=parse_reqs(
           'requirements.in', 'requirements_chrouter.in'),
       tests_require=parse_reqs('requirements_tests.in'),
