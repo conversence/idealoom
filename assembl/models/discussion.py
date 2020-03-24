@@ -1019,10 +1019,12 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
         locale = locale or self.main_locale
         flow = self.idea_publication_flow
         G = pygraphviz.AGraph(directed=True)
+        default = self.preferences['default_idea_pub_state']
         for state in flow.states:
+            kwargs = dict(peripheries=2) if state.label == default else {}
             name_e = state.name.closest_entry(locale) if state.name else None
             name = name_e.value if name_e else state.label
-            G.add_node(state.label, label=name)
+            G.add_node(state.label, label=name, **kwargs)
         for transition in flow.transitions:
             name_e = transition.name.closest_entry(locale) if transition.name else None
             name = name_e.value if name_e else transition.label
