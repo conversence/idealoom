@@ -864,7 +864,6 @@ def as_mind_map(request):
             raise HTTPNotAcceptable("Not known to pygraphviz: "+mimetype)
     discussion = request.context._instance
     G = discussion.as_mind_map()
-    G.layout(prog='twopi')
     io = BytesIO()
     G.draw(io, format=pygraphviz_formats[mimetype])
     io.seek(0)

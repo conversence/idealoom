@@ -999,9 +999,19 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
             title = data.get('title', {}).get(locale, idea_type)
             G.add_node(idea_type, label=title)
         for source, data in typology.get("ideas", {}).items():
+            links = defaultdict(list)
             for link_type, dests in data.get('rules', {}).items():
                 for dest in dests:
-                    G.add_edge(source, dest, label=link_names[link_type])
+                    links[dest].append(link_type)
+            for dest, link_types in links.items():
+                kwargs = {}
+                if link_types == ['InclusionRelation']:
+                    kwargs = dict(color="grey", fontcolor="#333333")
+                G.add_edge(
+                    source, dest, label=";\\n".join([
+                        link_names[link_type] for link_type in link_types]),
+                    **kwargs)
+        G.layout('dot')
         return G
 
     def as_mind_map(self):
@@ -1054,6 +1064,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
                 G.add_edge(link.source_id, link.target_id, style="invis")
             else:
                 G.add_edge(link.source_id, link.target_id)
+        G.layout(prog='twopi')
         return G
 
     crud_permissions = CrudPermissions(
