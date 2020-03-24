@@ -900,12 +900,11 @@ def publication_flow_diagram(request):
     mimetype = request_to_graph_mimetype(request)
     discussion = request.context._instance
     locale = strip_country(request.locale_name)
-    G = discussion.publication_flow_as_dot(locale)
+    G = discussion.publication_flow_as_dot(locale, request.user_id)
     io = BytesIO()
     G.draw(io, format=pygraphviz_formats[mimetype])
     io.seek(0)
     return Response(body_file=io, content_type=mimetype)
-
 
 
 def get_analytics_alerts(discussion, user_id, types, all_users=False):

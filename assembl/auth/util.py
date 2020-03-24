@@ -43,7 +43,8 @@ def get_user(request):
     return request._user
 
 
-def get_role_query(user_id, discussion_id, target_instance=None):
+def get_role_query(user_id, discussion_id, target_instance=None,
+                   with_ownership=False):
     user_id = user_id or Everyone
     session = get_session_maker()()
     if user_id == Everyone:
@@ -56,6 +57,8 @@ def get_role_query(user_id, discussion_id, target_instance=None):
     clauses = []
     roles = session.query(Role).join(UserRole).filter(
             UserRole.profile_id == user_id)
+    if with_ownership:
+        clauses.append(session.query(Role).filter_by(name=R_OWNER))
     if discussion_id:
         clauses.append(session.query(Role).join(LocalUserRole).filter(and_(
                     LocalUserRole.profile_id == user_id,
@@ -140,30 +143,38 @@ def permissions_from_request(request):
         request.authenticated_userid, request.discussion_id, request.main_target)
 
 
-def permissions_for_states(discussion_id):
+def permissions_for_states(discussion_id, user_id):
     from ..models import Idea, StateDiscussionPermission
     db = get_session_maker()()
+
+    roles = get_role_query(user_id, discussion_id).with_entities(Role.id)
     states = db.query(Idea.pub_state_id).filter_by(discussion_id=discussion_id).distinct()
     states = [x[0] for x in states if x[0]]
     sdps = db.query(StateDiscussionPermission).filter(
-        StateDiscussionPermission.discussion_id==discussion_id,
-        StateDiscussionPermission.pub_state_id.in_(states))
+        StateDiscussionPermission.discussion_id == discussion_id,
+        StateDiscussionPermission.pub_state_id.in_(states),
+        StateDiscussionPermission.role_id.in_(roles),)
     result = defaultdict(list)
     for sdp in sdps:
         result[sdp.publication_state_label].append(sdp.permission_name)
     return result
 
 
-def permissions_for_state(discussion_id, state_id):
+def permissions_for_state(
+        discussion_id, state_id, user_id, with_ownership=False):
     from ..models import StateDiscussionPermission
     db = get_session_maker()()
-    perms = db.query(Permission.name).join(StateDiscussionPermission).filter_by(
-        discussion_id=discussion_id, pub_state_id=state_id)
+    roles = get_role_query(
+        user_id, discussion_id, None, with_ownership).with_entities(Role.id)
+    perms = db.query(Permission.name).join(StateDiscussionPermission).filter(
+        StateDiscussionPermission.discussion_id == discussion_id,
+        StateDiscussionPermission.pub_state_id == state_id,
+        StateDiscussionPermission.role_id.in_(roles))
     return [p[0] for p in perms]
 
 
 def permissions_for_states_from_req(request):
-    return permissions_for_states(request.discussion_id)
+    return permissions_for_states(request.discussion_id, request.user_id)
 
 
 def discussion_id_from_request(request):

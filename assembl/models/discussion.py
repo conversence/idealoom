@@ -46,6 +46,7 @@ from ..auth import (
     P_READ, R_SYSADMIN, P_ADMIN_DISC, R_PARTICIPANT, P_SYSADMIN,
     CrudPermissions, Authenticated, Everyone)
 from .auth import User
+from ..auth.util import get_permissions, permissions_for_state
 from .permissions import (
     DiscussionPermission, Role, Permission, UserRole, LocalUserRole,
     UserTemplate)
@@ -251,7 +252,6 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
             if request:
                 permissions = request.base_permissions
             else:
-                from assembl.auth.util import get_permissions
                 permissions = get_permissions(user_id, self.discussion_id)
         if transition.req_permission_name not in permissions:
             raise HTTPUnauthorized("You need permission %s to apply transition %s" % (
@@ -449,7 +449,6 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
         return json.dumps(_get_extracts_real(request, user_id=user_id))
 
     def get_user_permissions(self, user_id):
-        from ..auth.util import get_permissions
         return get_permissions(user_id, self.id)
 
     def get_user_permissions_preload(self, user_id):
@@ -1014,21 +1013,36 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
         G.layout('dot')
         return G
 
-    def publication_flow_as_dot(self, locale=None):
+    def publication_flow_as_dot(self, locale=None, for_user_id=None):
         import pygraphviz
         locale = locale or self.main_locale
         flow = self.idea_publication_flow
         G = pygraphviz.AGraph(directed=True)
         default = self.preferences['default_idea_pub_state']
+        if for_user_id:
+            base_permissions = get_permissions(for_user_id, self.id)
         for state in flow.states:
             kwargs = dict(peripheries=2) if state.label == default else {}
             name_e = state.name.closest_entry(locale) if state.name else None
             name = name_e.value if name_e else state.label
             G.add_node(state.label, label=name, **kwargs)
         for transition in flow.transitions:
+            kwargs = {}
             name_e = transition.name.closest_entry(locale) if transition.name else None
             name = name_e.value if name_e else transition.label
-            G.add_edge(transition.source_label, transition.target_label, label=name)
+            if for_user_id:
+                state = transition.source
+                required = transition.req_permission_name
+                if required not in base_permissions:
+                    if required not in permissions_for_state(
+                            self.id, state.id, for_user_id):
+                        if required not in permissions_for_state(
+                                self.id, state.id, for_user_id, True):
+                            kwargs['color'] = "grey"
+                        else:
+                            kwargs['color'] = "orange"
+            G.add_edge(transition.source_label, transition.target_label,
+                       label=name, **kwargs)
         G.layout('dot')
         return G
 

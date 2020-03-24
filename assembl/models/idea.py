@@ -1103,7 +1103,7 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
             if request:
                 permissions = request.permissions_for_states[self.pub_state.label]
             else:
-                permissions = permissions_for_state(self.discussion_id, self.pub_state_id)
+                permissions = permissions_for_state(self.discussion_id, self.pub_state_id, user_id)
         else:
             permissions = get_permissions(user_id, self.discussion_id, self)
         return list(set(permissions) - set(base_permissions))
