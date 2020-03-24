@@ -1753,7 +1753,7 @@ def postgres_user_detach():
     process_list = run('psql -U %s -h %s -d %s -c "SELECT pid FROM pg_stat_activity where pid <> pg_backend_pid()" ' % (
                         env.db_user,
                         env.db_host,
-                        env.db_database))
+                        env.db_database), warn_only=True)
 
     numexp = re.compile(r'\d+')
     pids = [pid for pid in process_list.split("\r\n") if numexp.fullmatch(pid.strip())]
@@ -1762,7 +1762,7 @@ def postgres_user_detach():
             env.db_user,
             env.db_host,
             env.db_database,
-            pid))
+            pid), warn_only=True)
 
 
 @task
