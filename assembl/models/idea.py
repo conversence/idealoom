@@ -843,7 +843,7 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
     def applyTypeRules(self):
         from ..semantic.inference import get_inference_store
         ontology = get_inference_store()
-        typology = self.discussion.preferences['idea_typology'] or {}
+        typology = self.discussion.idea_typology
         rules = typology.get('ideas', {}).get(self.rdf_type, {}).get('rules', {})
         for child_link in self.target_links:
             link_type = child_link.rdf_type

@@ -984,6 +984,26 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
             query = query.filter(ViewPost.creation_date < end_date)
         return query.first()[0]
 
+    @property
+    def idea_typology(self):
+        return self.preferences['idea_typology'] or {}
+
+    def idea_typology_as_dot(self, locale=None):
+        import pygraphviz
+        locale = locale or self.main_locale
+        typology = self.idea_typology
+        G = pygraphviz.AGraph(directed=True)
+        link_names = {key: value["title"][locale]
+                      for (key, value) in typology.get("links", {}).items()}
+        for idea_type, data in typology.get("ideas", {}).items():
+            title = data.get('title', {}).get(locale, idea_type)
+            G.add_node(idea_type, label=title)
+        for source, data in typology.get("ideas", {}).items():
+            for link_type, dests in data.get('rules', {}).items():
+                for dest in dests:
+                    G.add_edge(source, dest, label=link_names[link_type])
+        return G
+
     def as_mind_map(self):
         import pygraphviz
         from colour import Color
@@ -994,7 +1014,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
         links = self.db.query(IdeaLink).filter_by(
             tombstone_date=None).join(Idea, IdeaLink.source_id==Idea.id).filter(
             Idea.discussion_id==self.id).all()
-        G = pygraphviz.AGraph()
+        G = pygraphviz.AGraph(directed=True)
         # G.graph_attr['overlap']='prism'
         G.node_attr['penwidth']=0
         G.node_attr['shape']='rect'
