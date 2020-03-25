@@ -161,7 +161,7 @@ class LanguageIdentificationService(object):
         lse.error_code = error_code.value
         lse.error_count = 1 + (lse.error_count or 0)
         if (lse.error_count > 10 and
-                lse.error_code < LangStringStatus.PERMANENT_TRANSLATION_FAILURE):
+                lse.error_code < LangStringStatus.PERMANENT_TRANSLATION_FAILURE.value):
             lse.error_code = LangStringStatus.TOO_MANY_TRANSIENTS.value
         if error_description:
             lid = lse.locale_identification_data_json
@@ -169,7 +169,7 @@ class LanguageIdentificationService(object):
             lse.locale_identification_data_json = lid
 
     def has_fatal_error(self, lse):
-        return lse.error_code >= LangStringStatus.PERMANENT_TRANSLATION_FAILURE
+        return lse.error_code >= LangStringStatus.PERMANENT_TRANSLATION_FAILURE.value
 
     @staticmethod
     def decode_exception(e, identify_phase=False):
@@ -573,7 +573,7 @@ class GoogleTranslationService(DummyGoogleTranslationService):
 
 
 class DeeplTranslationService(AbstractTranslationService):
-    distinct_identify_step = True
+    distinct_identify_step = False
 
     known_locales_cls = {
         "de", "en", "fr", "it", "ja", "es", "nl", "pl", "pt", "ru", "zh"}
@@ -588,6 +588,11 @@ class DeeplTranslationService(AbstractTranslationService):
             discussion.preferences['translation_service_api_key'] or
             config.get("deepl.server_api_key"), None)
         self._known_locales = None
+
+    def canTranslate(self, source, target):
+        return ((source == LocaleLabel.UNDEFINED or
+                 source in self.known_locales) and
+                target in self.known_locales)
 
     @property
     def known_locales(self):
@@ -623,5 +628,5 @@ class DeeplTranslationService(AbstractTranslationService):
             args['source_lang'] = source.upper()
         r = requests.get(self.translate_url, params=args)
         assert r.ok
-        r = r.json()
-        return r['text'], r['detected_source_language']
+        r = r.json()['translations'][0]
+        return r['text'], r['detected_source_language'].lower()
