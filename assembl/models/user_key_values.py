@@ -28,7 +28,7 @@ from ..lib.abc import abstractclassmethod
 from . import DiscussionBoundBase
 from assembl.lib import config
 from .auth import User
-from ..auth.util import user_has_permission
+from ..auth.util import user_has_permission, get_permissions
 from .discussion import Discussion
 from .preferences import Preferences
 from .idea import Idea
@@ -346,10 +346,12 @@ class UserPreferenceCollection(NamespacedUserKVCollection):
             self.dprefs = Preferences.get_by_name()
         else:
             self.dprefs = discussion.preferences
+            self.permissions = get_permissions(user_id, discussion.preferences)
         super(UserPreferenceCollection, self).__init__(
             discussion, user_id, self.PREFERENCE_NAMESPACE)
 
     def __len__(self):
+        # TODO: handle permissions
         return len(self.dprefs.property_defaults)
 
     def __setitem__(self, key, value):
@@ -374,6 +376,7 @@ class UserPreferenceCollection(NamespacedUserKVCollection):
         self[key] = value
 
     def __iter__(self):
+        # TODO: handle permissions
         return self.dprefs.property_defaults.__iter__()
 
     iterkeys = __iter__
@@ -385,17 +388,18 @@ class UserPreferenceCollection(NamespacedUserKVCollection):
             yield k, v
         for k, v in self.dprefs.items():
             if k not in keys:
-                yield k, v
+                if self.dpref.can_read(k, self.permissions):
+                    yield k, v
 
     def items(self):
         # the inherited items makes multiple requests
-        return list(self.items())
+        return list(self.iteritems())
 
     def __getitem__(self, key):
         try:
             return super(UserPreferenceCollection, self).__getitem__(key)
         except IndexError:
-            return self.dprefs[key]
+            return self.dprefs.safe_get_value(key, self.permissions)
 
     def __delitem__(self, key):
         try:
@@ -405,6 +409,7 @@ class UserPreferenceCollection(NamespacedUserKVCollection):
                 raise e
 
     def __contains__(self, key):
+        # TODO: handle permissions
         return key in self.dprefs
 
 

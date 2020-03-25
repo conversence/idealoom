@@ -107,6 +107,8 @@ function getPreferenceEditView(preferenceModel, subViewKey, useKey) {
       return PubStatePreferenceView;
     case "string":
       return StringPreferenceView;
+    case "password":
+      return PasswordPreferenceView;
     case "scalar":
       return ScalarPreferenceView;
     case "locale":
@@ -366,6 +368,15 @@ class JsonPreferenceView extends TextPreferenceView.extend({
  */
 class StringPreferenceView extends BasePreferenceView.extend({
   template: '#tmpl-stringPreferenceView'
+}) {}
+
+/**
+ * View to set a hidden string value preference
+ * @class app.views.preferencesView.PasswordPreferenceView
+ * @extends app.views.preferencesView.BasePreferenceView
+ */
+class PasswordPreferenceView extends BasePreferenceView.extend({
+  template: '#tmpl-passwordPreferenceView'
 }) {}
 
 /**

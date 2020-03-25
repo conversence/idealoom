@@ -223,6 +223,10 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
     def settings_json(self):
         if not self.preferences:
             return Preferences.property_defaults
+        from pyramid.threadlocal import get_current_request
+        request = get_current_request()
+        if request:
+            return self.preferences.safe_values_json(request.base_permissions)
         return self.preferences.values_json
 
     def get_discussion_id(self):

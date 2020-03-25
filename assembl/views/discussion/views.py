@@ -244,7 +244,8 @@ def frontend_test_view(request):
         DummyGoogleTranslationService.target_locale_labels_cls(target_locale))
     context['translation_locale_names_json'] = locale_labels
     context['translation_service_data_json'] = '{}'
-    context['preferences_json'] = json.dumps(dict(discussion.preferences))
+    context['preferences_json'] = json.dumps(
+        discussion.preferences.safe_values_json(request.base_permissions))
     static_url = context['STATIC_URL']
     context['js_links'] = get_js_links(static_url, True)
     context['css_links'] = get_css_links(static_url, True)

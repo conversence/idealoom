@@ -101,10 +101,68 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
 
     @property
     def values_json(self):
-        if not self.cascade_preferences:
-            return self.local_values_json
-        values = self.cascade_preferences.values_json
+        if self.cascade_preferences:
+            values = self.cascade_preferences.values_json
+        else:
+            values = self.property_defaults
+            if not values.get('preference_data', None):
+                values['preference_data'] = self.get_preference_data_list()
         values.update(self.local_values_json)
+        return values
+
+    def safe_local_values_json(self, permissions):
+        json = self.local_values_json
+        spec = self.get_preference_data()
+        json = {k: v for (k, v) in json.items()
+                if k in spec}
+        permissions = permissions[:] or []
+        permissions.append("default_read")
+        json = {k: v for (k, v) in json.items()
+                if k in spec and
+                spec[k].get("read_permission", "default_read") in permissions}
+        return json
+
+    def can_read(self, key, permissions):
+        specs = self.get_preference_data()
+        spec = specs.get(key, None)
+        if not spec:
+            return False
+        needed = spec.get("read_permission", None)
+        return not needed or (needed in permissions)
+
+    def can_modify(self, key, permissions):
+        specs = self.get_preference_data()
+        spec = specs.get(key, None)
+        if not spec:
+            return False
+        needed = spec.get("modification_permission", None)
+        return not needed or (needed in permissions)
+
+    def safe_get_value(self, key, permissions):
+        specs = self.get_preference_data()
+        spec = specs.get(key, None)
+        if spec:
+            needed = spec.get("read_permission", None)
+            if not needed or (needed in permissions):
+                return self[key]
+
+    def safe_property_defaults(self, permissions):
+        values = self.property_defaults
+        if not values.get('preference_data', None):
+            values['preference_data'] = self.get_preference_data_list()
+        spec = self.get_preference_data()
+        permissions = permissions[:]
+        permissions.append("default_read")
+        return {k: v for (k, v) in values.items()
+                if k in spec and
+                spec[k].get("read_permission", "default_read") in permissions}
+
+    def safe_values_json(self, permissions):
+        if self.cascade_preferences:
+            values = self.cascade_preferences.safe_values_json(permissions)
+        else:
+            values = self.safe_property_defaults(permissions)
+        values.update(self.safe_local_values_json(permissions))
         return values
 
     def _get_local(self, key):
@@ -224,7 +282,7 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
 
     def validate_single_value(self, key, value, pref_data, data_type):
         # TODO: Validation for the datatypes.
-        # base_type: (bool|json|int|string|text|scalar|url|email|domain|locale|langstr|permission|role|pubflow|pubstate)
+        # base_type: (bool|json|int|string|text|scalar|url|email|domain|locale|langstr|permission|role|pubflow|pubstate|password)
         # type: base_type|list_of_(type)|dict_of_(base_type)_to_(type)
         if data_type.startswith("list_of_"):
             assert isinstance(value, (list, tuple)), "Not a list"
@@ -254,7 +312,7 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
             pass  # no check
         else:
             assert isinstance(value, string_types), "Not a string"
-            if data_type in ("string", "text"):
+            if data_type in ("string", "text", "password"):
                 pass
             elif data_type == "scalar":
                 assert value in pref_data.get("scalar_values", ()), (
@@ -391,11 +449,30 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
                 "assembl.nlp.translation_service.DummyTranslationServiceOneStepWithErrors":
                     _("Dummy translation service (one step) with errors"),
                 "assembl.nlp.translation_service.GoogleTranslationService":
-                    _("Google Translate")},
+                    _("Google Translate"),
+                # "assembl.nlp.translation_service.DeeplTranslationService":
+                #     _("Deepl"),
+            },
             "description": _(
                 "Translation service"),
             "allow_user_override": None,
             "modification_permission": P_SYSADMIN,
+            # "frontend_validator_function": func_name...?,
+            # "backend_validator_function": func_name...?,
+            "default": ""
+        },
+
+        # full class name of translation service to use, if any
+        # e.g. assembl.nlp.translate.GoogleTranslationService
+        {
+            "id": "translation_service_api_key",
+            "name": _("Translation service API key"),
+            "value_type": "password",
+            "description": _(
+                "API key for translation service"),
+            "allow_user_override": None,
+            "modification_permission": P_SYSADMIN,
+            "read_permission": P_SYSADMIN,
             # "frontend_validator_function": func_name...?,
             # "backend_validator_function": func_name...?,
             "default": ""

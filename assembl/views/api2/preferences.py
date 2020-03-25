@@ -1,14 +1,11 @@
-from simplejson import dumps, loads
+from simplejson import dumps
 
 from pyramid.view import view_config
-from pyramid.httpexceptions import (HTTPNotFound, HTTPBadRequest)
-from pyramid.security import authenticated_userid
+from pyramid.httpexceptions import (
+    HTTPNotFound, HTTPBadRequest, HTTPUnauthorized)
 from pyramid.response import Response
 
-from assembl.auth import (
-    P_READ, Everyone, CrudPermissions)
-from assembl.models import (
-    User, Discussion, TombstonableMixin)
+from assembl.auth import P_READ
 from assembl.models.user_key_values import *
 from . import JSON_HEADER
 from ..traversal import (
@@ -19,7 +16,8 @@ from ..traversal import (
              request_method='GET', permission=P_READ)
 def view_dict(request):
     preferences = request.context.preferences
-    return dict(preferences)
+    ctx = request.context
+    return preferences.safe_values_json(ctx.get_permissions())
 
 
 @view_config(context=PreferenceContext, renderer='json',
@@ -41,7 +39,7 @@ def patch_dict(request):
         raise HTTPNotFound()
     except (AssertionError, ValueError) as e:
         raise HTTPBadRequest(e)
-    return dict(preferences)
+    return preferences.safe_values_json(permissions)
 
 
 @view_config(context=PreferenceValueContext, renderer='json',
@@ -49,10 +47,13 @@ def patch_dict(request):
 def get_value(request):
     ctx = request.context
     preferences = ctx.collection
-    try:
-        return preferences[ctx.key]
-    except KeyError:
+    permissions = ctx.get_permissions()
+    key = ctx.key
+    if key not in preferences:
         raise HTTPNotFound()
+    if not preferences.can_read(key, permissions):
+        return HTTPUnauthorized()
+    return preferences.safe_get_value(ctx.key, permissions)
 
 
 @view_config(context=PreferenceValueContext, renderer='json',
@@ -61,10 +62,14 @@ def put_value(request):
     ctx = request.context
     value = request.json
     preferences = ctx.collection
+    permissions = ctx.get_permissions()
+    key = ctx.key
+    if key not in preferences:
+        raise HTTPNotFound()
+    if not preferences.can_modify(key, permissions):
+        return HTTPUnauthorized()
     try:
         preferences.safe_set(ctx.key, value, ctx.get_permissions())
-    except KeyError:
-        raise HTTPNotFound()
     except (AssertionError, ValueError) as e:
         raise HTTPBadRequest(e)
     return Response(
