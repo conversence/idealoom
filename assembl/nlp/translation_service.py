@@ -254,6 +254,7 @@ class AbstractTranslationService(LanguageIdentificationService):
             target_lse = LangStringEntry(
                 langstring_id=source_lse.langstring_id,
                 locale = LocaleLabel.UNDEFINED,
+                mt_trans_of_id=source_lse.id,
                 value='')
             is_new_lse = True
         if self.canTranslate(source_locale, target):
