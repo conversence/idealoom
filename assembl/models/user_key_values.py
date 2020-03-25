@@ -346,7 +346,7 @@ class UserPreferenceCollection(NamespacedUserKVCollection):
             self.dprefs = Preferences.get_by_name()
         else:
             self.dprefs = discussion.preferences
-            self.permissions = get_permissions(user_id, discussion.preferences)
+            self.permissions = get_permissions(user_id, discussion.id)
         super(UserPreferenceCollection, self).__init__(
             discussion, user_id, self.PREFERENCE_NAMESPACE)
 
