@@ -450,8 +450,8 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
                     _("Dummy translation service (one step) with errors"),
                 "assembl.nlp.translation_service.GoogleTranslationService":
                     _("Google Translate"),
-                # "assembl.nlp.translation_service.DeeplTranslationService":
-                #     _("Deepl"),
+                "assembl.nlp.translation_service.DeeplTranslationService":
+                    _("Deepl"),
             },
             "description": _(
                 "Translation service"),

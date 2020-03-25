@@ -15,6 +15,7 @@ from langdetect.detector_factory import init_factory
 from langdetect.detector import LangDetectException
 from sqlalchemy import inspect
 from pyramid.i18n import TranslationStringFactory
+import requests
 
 from assembl.lib.abc import (abstractclassmethod, classproperty)
 from assembl.lib import config
@@ -466,8 +467,8 @@ class GoogleTranslationService(DummyGoogleTranslationService):
     def __init__(self, discussion, apikey=None):
         super(GoogleTranslationService, self).__init__(discussion)
         import apiclient.discovery
-        # Look it up in config. TODO: Admin property of discussion
-        apikey = config.get("google.server_api_key")
+        apikey = (discussion.preferences['translation_service_api_key'] or
+                  config.get("google.server_api_key"))
         self._known_locales = None
         self.client = apiclient.discovery.build(
             'translate', 'v2', developerKey=apikey) if apikey else None
@@ -569,3 +570,58 @@ class GoogleTranslationService(DummyGoogleTranslationService):
                 # make it permanent after awhile?
             return LangStringStatus.UNKNOWN_ERROR, content
         return LangStringStatus.UNKNOWN_ERROR, str(exception)
+
+
+class DeeplTranslationService(AbstractTranslationService):
+    distinct_identify_step = True
+
+    known_locales_cls = {
+        "de", "en", "fr", "it", "ja", "es", "nl", "pl", "pt", "ru", "zh"}
+    _known_locales = None
+    server = 'https://api.deepl.com/v2/'
+    translate_url = server + 'translate'
+    language_url = server + 'languages'
+
+    def __init__(self, discussion, apikey=None):
+        super(DeeplTranslationService, self).__init__(discussion)
+        self.apikey = (
+            discussion.preferences['translation_service_api_key'] or
+            config.get("deepl.server_api_key"), None)
+        self._known_locales = None
+
+    @property
+    def known_locales(self):
+        if self._known_locales is None and self.apikey:
+            try:
+                r = requests.get(
+                    self.language_url, params=dict(auth_key=self.apikey))
+                if r.ok:
+                    self._known_locales = {
+                        x['language'].lower() for x in r.json()}
+                    if self._known_locales != self.known_locales_cls:
+                        from ..lib.raven_client import capture_message
+                        capture_message("Deepl changed its language set again")
+            except Exception:
+                pass
+        return self._known_locales or self.known_locales_cls
+
+    def translate(self, text, target, is_html=False, source=None, db=None):
+        if not text:
+            return text, LocaleLabel.NON_LINGUISTIC
+        if not self.apikey:
+            raise RuntimeError("Please define server_api_key")
+        args = dict(
+            auth_key=self.apikey,
+            text=text,
+            target_lang=target.upper(),
+            split_sentences="nonewlines" if is_html else "1",
+            tag_handling="xml" if is_html else ""
+            )
+        if is_html:
+            args['tag_handling'] = "xml"
+        if source:
+            args['source_lang'] = source.upper()
+        r = requests.get(self.translate_url, params=args)
+        assert r.ok
+        r = r.json()
+        return r['text'], r['detected_source_language']
