@@ -26,6 +26,7 @@ from pyramid_mailer import mailer_factory_from_settings
 
 from ..lib.sqla import configure_engine
 from ..lib.zmqlib import configure_zmq
+from ..lib.raven_client import setup_raven
 from ..lib.config import get, set_config
 from zope.component import getGlobalSiteManager
 from ..lib.model_watcher import configure_model_watcher
