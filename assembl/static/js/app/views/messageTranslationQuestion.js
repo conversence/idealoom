@@ -274,7 +274,7 @@ class TranslationView extends LoaderView.extend({
     }
 
     serializeData() {
-        if (this.isLoading()) {
+        if (!this.isLoading()) {
             var translationQuestion;
             var noAnswer;
             var yesAnswer;
