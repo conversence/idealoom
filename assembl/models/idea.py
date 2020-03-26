@@ -928,6 +928,47 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
         frontendUrls = FrontendUrls(self.discussion)
         return frontendUrls.get_idea_url(self)
 
+    def local_mind_map(self):
+        import pygraphviz
+        from colour import Color
+        from datetime import datetime
+        from assembl.models import Idea, IdeaLink, RootIdea
+        G = pygraphviz.AGraph(directed=True)
+        # G.graph_attr['overlap']='prism'
+        G.node_attr['penwidth']=0
+        G.node_attr['shape']='rect'
+        G.node_attr['style']='filled'
+        G.node_attr['fillcolor'] = '#efefef'
+        root_time = self.creation_date
+
+        class MindMapVisitor(IdeaVisitor):
+            def __init__(self, G):
+                self.G = G
+                self.min_time = None
+                self.max_time = None
+
+            def visit_idea(self, idea, level, prev_result):
+                age = ((idea.last_modified or idea.creation_date)-root_time).total_seconds()  # may be negative
+                color = Color(hsl=(180-(135.0 * age), 0.15, 0.85))
+                G.add_node(idea.id,
+                           label=idea.short_title or "",
+                           fontsize = 18 - (1.5 * level),
+                           height=(20-(1.5*level))/72.0,
+                           # fillcolor=color.hex,
+                           target="idealoom",
+                           URL=idea.get_url())
+                if prev_result:
+                    links = [l for l in idea.source_links if l.source_id == prev_result.id]
+                    if links:
+                        link = links[0]
+                        G.add_edge(link.source_id, link.target_id)
+                return idea
+
+        visitor = MindMapVisitor(G)
+        self.visit_ideas_depth_first(visitor)
+        G.layout(prog='twopi')
+        return G
+
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):
         return (cls.discussion_id == discussion_id,)

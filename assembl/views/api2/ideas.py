@@ -1,3 +1,6 @@
+from io import BytesIO
+
+from pyramid.response import Response
 from pyramid.view import view_config
 from pyramid.httpexceptions import (
     HTTPUnauthorized, HTTPBadRequest, HTTPFound)
@@ -10,7 +13,7 @@ from assembl.auth import (CrudPermissions, P_READ, P_EDIT_IDEA)
 from assembl.lib.text_search import add_text_search
 from assembl.models import (
     Idea, LangString, LangStringEntry, LanguagePreferenceCollection, Discussion)
-
+from .discussion import request_to_graph_mimetype, pygraphviz_formats
 
 @view_config(context=InstanceContext, request_method='DELETE', renderer='json',
              ctx_instance_class=Idea, permission=P_EDIT_IDEA)
@@ -60,6 +63,20 @@ def pub_state_transition(request):
         raise HTTPUnauthorized()
     idea.pub_state_id = transition.target_id
     return {"pub_state_name": transition.target.label}
+
+
+@view_config(context=InstanceContext, name="mindmap",
+             ctx_instance_class=Idea, request_method='GET',
+             permission=P_READ)
+def as_mind_map(request):
+    """Provide a mind-map like representation of the table of ideas"""
+    mimetype = request_to_graph_mimetype(request)
+    idea = request.context._instance
+    G = idea.local_mind_map()
+    io = BytesIO()
+    G.draw(io, format=pygraphviz_formats[mimetype])
+    io.seek(0)
+    return Response(body_file=io, content_type=mimetype)
 
 
 @view_config(context=CollectionContext, renderer='json',
