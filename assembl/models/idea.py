@@ -454,7 +454,7 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
             title=self.title.clone(db=db) if self.title else None,
             synthesis_title=self.synthesis_title.clone(db=db) if self.synthesis_title else None,
             description=self.description.clone(db=db) if self.description else None)
-
+        # TODO: Clone local roles?
         return super(Idea, self).copy(db=db, **kwargs)
 
     @classmethod

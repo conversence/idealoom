@@ -670,7 +670,6 @@ def clone_discussion(
     copy = recursive_clone(discussion, path)
     stage_2_rec_clone(discussion, path)
     to_session.flush()
-    # TODO: This does not work anymore!!!
     for p in to_session.query(Post).filter_by(
             discussion=copy, parent_id=None).all():
         p._set_ancestry('')
