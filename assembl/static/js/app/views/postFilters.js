@@ -517,6 +517,39 @@ class FilterPostIsRead extends FilterPostHasUnread {
 }
 
 
+class FilterPostHasText extends AbstractFilterSingleValue {
+    constructor() {
+        super();
+        this.keyword_value = null;
+    }
+    getId() {
+      return 'has_text';
+    }
+    getImplicitValuePromise() {
+        return Promise.resolve(this.keyword_value);
+    }
+    getServerParam() {
+      return 'keyword';
+    }
+    getLabelPromise() {
+      return this.getImplicitValuePromise().then((value) => {
+        return i18n.gettext('Messages with text...');
+      });
+    }
+    getHelpText() {
+      return i18n.gettext('Only include posts containing certain keywords.');
+    }
+    askForValue(){
+        var val = window.prompt(i18n.gettext('Search for keywords'));
+        if ( val ){
+            this.keyword_value = val;
+        }
+        return val;
+    }
+}
+FilterPostHasText.should_ask_value_from_user = true;
+
+
 class FilterPostIsPostedAfterDate extends AbstractFilterSingleValue {
     constructor() {
         super();
@@ -722,7 +755,7 @@ var availableFilters = {
     POST_IS_DESCENDENT_OR_ANCESTOR_OF_POST: FilterPostIsDescendentOrAncestorOfPost,
     POST_IS_ORPHAN: FilterPostIsOrphan,
     POST_IS_SYNTHESIS: FilterPostIsSynthesis,
-    // POST_HAS_TEXT: FilterPostHasText,
+    POST_HAS_TEXT: FilterPostHasText,
     POST_IS_UNREAD: FilterPostIsUnread,
     POST_IS_READ: FilterPostIsRead,
     POST_IS_POSTED_SINCE_LAST_SYNTHESIS: FilterPostIsPostedSinceLastSynthesis,

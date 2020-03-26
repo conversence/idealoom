@@ -4,6 +4,7 @@ from builtins import next
 from math import ceil
 import logging
 from collections import defaultdict
+from itertools import chain
 
 import simplejson as json
 from cornice import Service
@@ -240,6 +241,8 @@ def get_posts(request):
         posts = posts.filter(parent_alias.creator_id == post_replies_to)
 
     if keywords:
+        # temporary: break up words. Ideally should find phrases...
+        keywords = list(chain(*[keyword.split() for keyword in keywords]))
         locales = request.GET.getall('locale')
         posts, rank = add_text_search(
             posts, (PostClass.body_id,), keywords, locales, order == 'score')
