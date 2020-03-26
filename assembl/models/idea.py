@@ -450,6 +450,7 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
             hidden=self.hidden,
             creation_date=self.creation_date,
             discussion=self.discussion,
+            pub_state_id=self.pub_state_id,
             title=self.title.clone(db=db) if self.title else None,
             synthesis_title=self.synthesis_title.clone(db=db) if self.synthesis_title else None,
             description=self.description.clone(db=db) if self.description else None)
