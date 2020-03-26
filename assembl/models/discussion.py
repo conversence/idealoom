@@ -1095,7 +1095,9 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
                     label=idea.short_title or "",
                     fontsize = 18 - (1.5 * level),
                     height=(20-(1.5*level))/72.0,
-                    fillcolor=color.hex)
+                    fillcolor=color.hex,
+                    target="idealoom",
+                    URL=idea.get_url())
         for link in links:
             if link.source_id == root_id:
                 G.add_edge(link.source_id, link.target_id, style="invis")
