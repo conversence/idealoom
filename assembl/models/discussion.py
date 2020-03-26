@@ -1179,8 +1179,8 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
 # explicit backref to Discussion.all_participants
 User.involved_in_discussion = relationship(
         Discussion, viewonly=True, secondary=LocalUserRole.__table__,
-        primaryjoin="LocalUserRole.discussion_id == Discussion.id",
-        secondaryjoin=((LocalUserRole.profile_id == User.id)
+        secondaryjoin="LocalUserRole.discussion_id == Discussion.id",
+        primaryjoin=((LocalUserRole.profile_id == User.id)
             & (LocalUserRole.requested == False)))
 
 # explicit backref to Discussion.simple_participants
@@ -1188,8 +1188,8 @@ User.participant_in_discussion = relationship(
         Discussion, viewonly=True,
         secondary=join(LocalUserRole, Role,
             ((LocalUserRole.role_id == Role.id) & (Role.name == R_PARTICIPANT))),
-        primaryjoin="LocalUserRole.discussion_id == Discussion.id",
-        secondaryjoin=((LocalUserRole.profile_id == User.id)
+        secondaryjoin="LocalUserRole.discussion_id == Discussion.id",
+        primaryjoin=((LocalUserRole.profile_id == User.id)
             & (LocalUserRole.requested == False)))
 
 
