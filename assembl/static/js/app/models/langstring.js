@@ -335,6 +335,11 @@ class LangString extends Base.Model.extend({
     var entry;
     var commonLenF;
     var that = this;
+    if (!available || !available.length) {
+        // this should never happen, need to look deeper;
+        // but happens to body of SythesisPost
+        return LangStringEntry.empty;
+    }
     if (available.length == 1) {
         return available[0];
     }
