@@ -1,6 +1,5 @@
 -e git+https://github.com/conversence/sockjs.git@tick_heartbeat#egg=sockjs
 cchardet==2.1.4
-aiodns==2.0.0
 aiohttp==3.6.2
 # aiohttp-cors==0.7.0
 
