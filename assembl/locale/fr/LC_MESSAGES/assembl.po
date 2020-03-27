@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: assembl 0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-03-27 07:24-0400\n"
+"POT-Creation-Date: 2020-03-27 11:10-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Marc-Antoine Parent <maparent@acm.org>, 2016\n"
 "Language: fr\n"
@@ -344,6 +344,14 @@ msgstr "Bandeau de cookies"
 #: assembl/models/preferences.py:885
 msgid "Show the banner offering to disable Piwik cookies"
 msgstr "Afficher le bandeau qui permet de désactiver les cookies Piwik"
+
+#: assembl/nlp/translation_service.py:419
+msgid "Translated by Google Translate"
+msgstr "Traduit par Google Translate"
+
+#: assembl/nlp/translation_service.py:587
+msgid "Translated by Deepl"
+msgstr "Traduit par Deepl"
 
 #: assembl/static/js/app/routeManager.js:549
 msgid "You must be logged in to access this page."
@@ -1701,8 +1709,8 @@ msgstr "Messages non-lus"
 #: assembl/static/js/app/views/postFilters.js:493
 msgid "Only include messages you haven't read yet, or you manually marked unread."
 msgstr ""
-"N'inclure que les messages que je n’ai pas lu et ceux que j’ai marqué"
-" \"Non-lus\""
+"N'inclure que les messages que je n’ai pas lu et ceux que j’ai marqué "
+"\"Non-lus\""
 
 #: assembl/static/js/app/views/postFilters.js:509
 msgid "Read messages"
@@ -1774,8 +1782,8 @@ msgid ""
 "Only include messages that have been deleted (by their author or by an "
 "administrator), and their ancestors."
 msgstr ""
-"N'inclure que les messages qui ont été supprimés (par leur auteur ou "
-"par un administrateur), et leurs ancêtres."
+"N'inclure que les messages qui ont été supprimés (par leur auteur ou par "
+"un administrateur), et leurs ancêtres."
 
 #: assembl/static/js/app/views/postFilters.js:728
 msgid "Show also deleted messages"

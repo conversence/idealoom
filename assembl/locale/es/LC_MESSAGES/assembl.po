@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: idealoom 0.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-03-27 07:24-0400\n"
+"POT-Creation-Date: 2020-03-27 11:10-0400\n"
 "PO-Revision-Date: 2019-03-11 10:58-0400\n"
 "Last-Translator: Automatically generated\n"
 "Language: es\n"
@@ -317,6 +317,14 @@ msgstr "Banner de cookies"
 msgid "Show the banner offering to disable Piwik cookies"
 msgstr "Mostrar el banner ofreciendo desactivar las cookies de Piwik."
 
+#: assembl/nlp/translation_service.py:419
+msgid "Translated by Google Translate"
+msgstr ""
+
+#: assembl/nlp/translation_service.py:587
+msgid "Translated by Deepl"
+msgstr ""
+
 #: assembl/static/js/app/routeManager.js:549
 msgid "You must be logged in to access this page."
 msgstr "Debes iniciar sesión para acceder a esta página."
@@ -494,6 +502,7 @@ msgid "Annotator extract source"
 msgstr "Fuente de extracto de anotador"
 
 # | msgid "Annotator extract source"
+#: assembl/static/js/app/models/sources.js:219
 msgid "Hypothesis extract source"
 msgstr "Fuente de extracto de Hypothesis"
 
@@ -2740,6 +2749,7 @@ msgid ""
 msgstr ""
 
 # | msgid "Default idea publication flow"
+#: assembl/templates/views/adminIdeaPubFlow.tmpl:7
 msgid "Idea Publication Flow"
 msgstr "flujo de publicación de las ideas"
 
@@ -2756,6 +2766,7 @@ msgid "Root idea:"
 msgstr ""
 
 # | msgid "Target state"
+#: assembl/templates/views/adminIdeaPubFlow.tmpl:22
 msgid "Current state:"
 msgstr ""
 
@@ -3206,6 +3217,7 @@ msgid "Edit permissions"
 msgstr "Permisos de edición"
 
 # | msgid "Default idea publication flow"
+#: assembl/templates/views/discussionAdminNavigationMenu.tmpl:24
 msgid "Edit Idea Publication Flow"
 msgstr ""
 
@@ -3584,7 +3596,7 @@ msgstr ""
 msgid "Search criteria"
 msgstr ""
 
-#: assembl/templates/views/hypothesisExtractSource.tmpl:45
+#: assembl/templates/views/hypothesisExtractSource.tmpl:44
 msgid "Hypothesis user name"
 msgstr "Nombre de usuario Hypothesis"
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: idealoom 0.1.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-03-27 07:24-0400\n"
+"POT-Creation-Date: 2020-03-27 11:10-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -310,6 +310,14 @@ msgstr ""
 
 #: assembl/models/preferences.py:885
 msgid "Show the banner offering to disable Piwik cookies"
+msgstr ""
+
+#: assembl/nlp/translation_service.py:419
+msgid "Translated by Google Translate"
+msgstr ""
+
+#: assembl/nlp/translation_service.py:587
+msgid "Translated by Deepl"
 msgstr ""
 
 #: assembl/static/js/app/routeManager.js:549
