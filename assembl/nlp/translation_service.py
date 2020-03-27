@@ -601,7 +601,7 @@ class DeeplTranslationService(AbstractTranslationService):
             try:
                 r = requests.get(
                     self.language_url, params=dict(auth_key=self.apikey),
-                    timeout=(2, 5), max_retries=2)
+                    timeout=(2, 5))
                 if r.ok:
                     self._known_locales = {
                         x['language'].lower() for x in r.json()}
@@ -630,7 +630,7 @@ class DeeplTranslationService(AbstractTranslationService):
             args['source_lang'] = source.upper()
         r = requests.get(
             self.translate_url, params=args,
-            timeout=(2, 3+floor(len(text)/100)), max_retries=2)
+            timeout=(2, 3+floor(len(text)/100)))
         assert r.ok
         r = r.json()['translations'][0]
         return r['text'], r['detected_source_language'].lower()
