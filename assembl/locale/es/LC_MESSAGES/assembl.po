@@ -1036,6 +1036,8 @@ msgid ""
 "An error occured whilst communicating with Facebook. Close the box and try "
 "again."
 msgstr ""
+"Ha ocurrido un error durante la comunicación con Facebook. Cierre la ventana"
+" y vuelva a intentarlo."
 
 #: assembl/static/js/app/views/facebookViews.js:433
 msgid "You did not log into facebook. Please log-in to continue."
@@ -1047,12 +1049,16 @@ msgid ""
 "There was an issue with getting your Facebook login status. Please close "
 "this box and contact your discussion administrator."
 msgstr ""
+"Hubo algún problema para recuperar tu registro en Facebook. Por favor, "
+"cierra esta ventan y contacta el administrador de tu conversación."
 
 #: assembl/static/js/app/views/facebookViews.js:552
 msgid ""
 "Great! You already have a facebook account. Below are the list of "
 "permissions we need for the exportation process."
 msgstr ""
+"Genial! Ya tenias un cuenta en facebook. Más abajo está la lista de permisos"
+" necesarios para el proceso de exportación."
 
 #: assembl/static/js/app/views/facebookViews.js:553
 msgid "Click here if you agree with these permissions."
@@ -1065,6 +1071,9 @@ msgid ""
 "session. As always, below are the permissions that %s would need to "
 "continue."
 msgstr ""
+"Parece que tu sesión ha caducado. Vuelve a hacer click abajo para refrescar "
+"la sesión. Como habitualmente, más abajo están los permisos que %s necesita "
+"para continuar."
 
 #: assembl/static/js/app/views/facebookViews.js:558
 msgid "Click here to continue."
@@ -1084,6 +1093,9 @@ msgid ""
 "%s is a collective intelligence tool designed to enable open, democratic "
 "discussions that lead to idea generation and innovation."
 msgstr ""
+"%s es una herramienta de inteligencia colectiva, diseñada para fomentar "
+"conversaciones abiertas y democráticas que propician la generación nuevas "
+"ideas y creatividad."
 
 #: assembl/static/js/app/views/facebookViews.js:866
 msgid "Facebook was unable to create the post. Close the box and try again."
@@ -1095,6 +1107,8 @@ msgid ""
 "Please select between pages, groups or your wall as the final destination to"
 " complete the form."
 msgstr ""
+"Por favor, escoge entre páginas, grupos o muro como destino final para "
+"completar el formulario."
 
 #: assembl/static/js/app/views/facebookViews.js:970
 #, python-format
@@ -1102,6 +1116,8 @@ msgid ""
 "Something went wrong on %s whilst creating your post. Please contact the "
 "Discussion administrator for more information."
 msgstr ""
+"Algo no ha funcionado cuando %s creaba tu envío. Por favor contacta "
+"administrador de la Conversación para más información."
 
 #: assembl/static/js/app/views/facebookViews.js:1066
 msgid "This account does NOT have a facebook account"
@@ -2180,6 +2196,8 @@ msgid ""
 "You may <a href=\"%(logout)s\">logout</a> and login as another user with "
 "those permissions."
 msgstr ""
+"Puede <a href=\"%(logout)s\"> cerrar sesión </a> y iniciar sesión como otro "
+"usuario con esos permisos. "
 
 #: assembl/templates/confirm.jinja2:23
 msgid "Resend the email"
