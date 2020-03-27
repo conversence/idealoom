@@ -55,6 +55,7 @@ class IdeaPanel extends BasePanel.extend({
     'widgetsSection': '.js_ideaPanel-section-widgets',
     'adminSection': '.js_ideaPanel-section-admin',
     'attachmentButton': '.js_attachment-button',
+    'mindmapButton': '.js_mindmap-button',
     'attachmentImage': '.js_idea-attachment',
     'openTargetInPopOver': '.js_openTargetInPopOver',
     'pubStateTransition': '.js_transition',
@@ -93,6 +94,7 @@ class IdeaPanel extends BasePanel.extend({
     'click @ui.deleteIdea': 'onDeleteButtonClick',
     'click @ui.openTargetInPopOver': 'openTargetInPopOver',
     'click @ui.pubStateTransition': 'pubStateTransition',
+    'click @ui.mindmapButton': 'openMindMap',
   },
 }) {
   initialize(options) {
@@ -1114,6 +1116,13 @@ class IdeaPanel extends BasePanel.extend({
     console.log("ideaPanel openTargetInPopOver(evt: ", evt);
     return Ctx.openTargetInPopOver(evt);
   }
+
+  openMindMap(evt) {
+    const id = this.model.getNumericId();
+    const url = Ctx.getApiV2DiscussionUrl("/ideas/"+id+"/mindmap?mimetype=image/svg%2bxml");
+    window.open(url, "_il_mindmap");
+  }
+
   pubStateTransition(evt) {
     const transition = evt.target.attributes.data.value;
     const url = this.model.getApiV2Url() + "/do_transition";
