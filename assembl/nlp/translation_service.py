@@ -583,6 +583,11 @@ class DeeplTranslationService(AbstractTranslationService):
     translate_url = server + 'translate'
     language_url = server + 'languages'
 
+    def serviceData(self):
+        return {"translation_notice": _("Translated by Deepl"),
+                "translation_notice_url": "http://deepl.com",
+                "idiosyncrasies": {}}
+
     def __init__(self, discussion, apikey=None):
         super(DeeplTranslationService, self).__init__(discussion)
         self.apikey = (
