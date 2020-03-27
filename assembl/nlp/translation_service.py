@@ -609,7 +609,8 @@ class DeeplTranslationService(AbstractTranslationService):
                         from ..lib.raven_client import capture_message
                         capture_message("Deepl changed its language set again")
             except Exception:
-                pass
+                # assume we have correct info
+                self._known_locales = self.known_locales_cls
         return self._known_locales or self.known_locales_cls
 
     def translate(self, text, target, is_html=False, source=None, db=None):
@@ -631,6 +632,21 @@ class DeeplTranslationService(AbstractTranslationService):
         r = requests.get(
             self.translate_url, params=args,
             timeout=(2, 3+floor(len(text)/100)))
-        assert r.ok
+        if not r.ok:
+            return RuntimeError("status", r.status)
         r = r.json()['translations'][0]
         return r['text'], r['detected_source_language'].lower()
+
+    def decode_exception(self, exception, identify_phase=False):
+        if isinstance(exception, requests.Timeout):
+            return LangStringStatus.SERVICE_DOWN, str(exception)
+        if isinstance(exception, RuntimeError):
+            if exception.args[0] == "status":
+                status = exception.args[1]
+                if status in (456,):
+                    return LangStringStatus.QUOTA_ERROR, ""
+                if status in (400, 403, 404):
+                    return LangStringStatus.PERMANENT_TRANSLATION_FAILURE, ""
+                elif status in (503, 429):
+                    return LangStringStatus.SERVICE_DOWN, ""
+        return LangStringStatus.UNKNOWN_ERROR, ""
