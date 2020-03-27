@@ -187,8 +187,8 @@ msgstr "Permitir el acceso a texto moderado"
 #: assembl/models/preferences.py:579
 msgid "Are moderated posts simply hidden or made inaccessible by default?"
 msgstr ""
-"¿los mensajes moderadas simplemente se ocultan o se vuelven "
-"inaccesibles por defecto?"
+"¿los mensajes moderadas simplemente se ocultan o se vuelven inaccesibles por"
+" defecto?"
 
 #: assembl/models/preferences.py:592
 msgid "Idea panel opens automatically"
@@ -1510,8 +1510,7 @@ msgstr "Mensajes con identificadores específicos"
 
 #: assembl/static/js/app/views/postFilters.js:193
 msgid "Only include posts that are in a range of specific ids"
-msgstr ""
-"Incluir solo los mensajes que están en un rango de ID específicos"
+msgstr "Incluir solo los mensajes que están en un rango de ID específicos"
 
 #: assembl/static/js/app/views/postFilters.js:206
 msgid "Related to idea"
@@ -1712,8 +1711,7 @@ msgstr "Mensajes publicados antes ..."
 
 #: assembl/static/js/app/views/postFilters.js:633
 msgid "Only include posts created before a given date."
-msgstr ""
-"Incluir solo los mensajes creadas antes de una fecha determinada."
+msgstr "Incluir solo los mensajes creadas antes de una fecha determinada."
 
 #: assembl/static/js/app/views/postFilters.js:637
 msgid ""
@@ -3711,6 +3709,9 @@ msgid ""
 "Number of unread messages related to this idea, or any of its sub-ideas.  "
 "Click on this number to view ONLY the new unread messages"
 msgstr ""
+"Número de mensajes no leídos relacionados con esta idea, o cualquiera de sus"
+" sub-ideas. Haga clic en este número para ver SOLO los nuevos mensajes no "
+"leídos"
 
 #: assembl/templates/views/ideaInSynthesis.tmpl:14
 msgid "View conversation on this idea"
@@ -3807,6 +3808,8 @@ msgid ""
 "Number of participants who contributed messages about this idea or it's sub-"
 "ideas."
 msgstr ""
+"Número de participantes que contribuyeron con mensajes sobre esta idea o sus"
+" sub-ideas."
 
 #: assembl/templates/views/ideaPanel.tmpl:128
 msgid "Expressions of this idea in messages or on the web"
@@ -4456,8 +4459,7 @@ msgstr "No hay archivo dado."
 
 #: assembl/views/api/post.py:176
 msgid "Getting orphan posts of a specific idea isn't supported."
-msgstr ""
-"Obtener mensajes huérfanas de una idea específica no es compatible."
+msgstr "Obtener mensajes huérfanas de una idea específica no es compatible."
 
 #: assembl/views/api/post.py:285
 msgid "You must be logged in to view which posts are read"
