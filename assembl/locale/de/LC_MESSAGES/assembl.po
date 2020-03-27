@@ -3,7 +3,6 @@
 # This file is distributed under the same license as the assembl project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2016.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: assembl 0.0\n"
@@ -2200,7 +2199,7 @@ msgid ""
 "You may <a href=\"%(logout)s\">logout</a> and login as another user with "
 "those permissions."
 msgstr ""
-"Sie können sich <a href=\"/%(slug)s/logout\">ausloggen</a> und als "
+"Sie können sich <a href=\"/%(logout)s/logout\">ausloggen</a> und als "
 "anderer Benutzer mit diesen Berechtigungen wieder einloggen."
 
 #: assembl/templates/confirm.jinja2:23

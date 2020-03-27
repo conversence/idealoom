@@ -6,7 +6,6 @@
 # Translators:
 # Marc-Antoine Parent <maparent@acm.org>, 2020
 # 
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: idealoom 0.1.0\n"
