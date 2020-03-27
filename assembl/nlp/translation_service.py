@@ -8,7 +8,7 @@ import urllib.request, urllib.error, urllib.parse
 from traceback import print_exc
 import re
 from collections import defaultdict
-from math import log
+from math import log, floor
 
 import simplejson as json
 from langdetect.detector_factory import init_factory
@@ -600,7 +600,8 @@ class DeeplTranslationService(AbstractTranslationService):
         if self._known_locales is None and self.apikey:
             try:
                 r = requests.get(
-                    self.language_url, params=dict(auth_key=self.apikey))
+                    self.language_url, params=dict(auth_key=self.apikey),
+                    timeout=(2, 5), max_retries=2)
                 if r.ok:
                     self._known_locales = {
                         x['language'].lower() for x in r.json()}
@@ -627,7 +628,9 @@ class DeeplTranslationService(AbstractTranslationService):
             args['tag_handling'] = "xml"
         if source:
             args['source_lang'] = source.upper()
-        r = requests.get(self.translate_url, params=args)
+        r = requests.get(
+            self.translate_url, params=args,
+            timeout=(2, 3+floor(len(text)/100)), max_retries=2)
         assert r.ok
         r = r.json()['translations'][0]
         return r['text'], r['detected_source_language'].lower()
