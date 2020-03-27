@@ -187,7 +187,7 @@ msgstr "Permitir el acceso a texto moderado"
 #: assembl/models/preferences.py:579
 msgid "Are moderated posts simply hidden or made inaccessible by default?"
 msgstr ""
-"¿Las publicaciones moderadas simplemente se ocultan o se vuelven "
+"¿los mensajes moderadas simplemente se ocultan o se vuelven "
 "inaccesibles por defecto?"
 
 #: assembl/models/preferences.py:592
@@ -491,20 +491,20 @@ msgstr "Comentarios a una publicación dada en Facebook (por URL)"
 
 #: assembl/static/js/app/models/sources.js:121
 msgid "Posts from a Facebook group (by URL)"
-msgstr "Publicaciones de un grupo de Facebook (por URL)"
+msgstr "Mensajes de un grupo de Facebook (por URL)"
 
 #: assembl/static/js/app/models/sources.js:131
 msgid "Posts from a Facebook group to which you're subscribed"
-msgstr "Publicaciones de un grupo de Facebook al que estás suscrito."
+msgstr "Mensajes de un grupo de Facebook al que estás suscrito."
 
 #: assembl/static/js/app/models/sources.js:141
 msgid "Posts from a Facebook page to which you're subscribed"
-msgstr "Publicaciones desde una página de Facebook a la que estás suscrito."
+msgstr "Mensajes desde una página de Facebook a la que estás suscrito."
 
 #: assembl/static/js/app/models/sources.js:151
 msgid "Posts from users on a Facebook page to which you're subscribed"
 msgstr ""
-"Publicaciones de usuarios en una página de Facebook a la que estás suscrito."
+"Mensajes de usuarios en una página de Facebook a la que estás suscrito."
 
 #: assembl/static/js/app/models/sources.js:171
 msgid "RSS/Atom post feed"
@@ -1506,12 +1506,12 @@ msgstr "NO %s"
 
 #: assembl/static/js/app/views/postFilters.js:189
 msgid "Posts with specific ids"
-msgstr "Publicaciones con identificadores específicos"
+msgstr "Mensajes con identificadores específicos"
 
 #: assembl/static/js/app/views/postFilters.js:193
 msgid "Only include posts that are in a range of specific ids"
 msgstr ""
-"Incluir solo las publicaciones que están en un rango de ID específicos"
+"Incluir solo los mensajes que están en un rango de ID específicos"
 
 #: assembl/static/js/app/views/postFilters.js:206
 msgid "Related to idea"
@@ -1696,7 +1696,7 @@ msgstr "Mensajes publicados después de ..."
 #: assembl/static/js/app/views/postFilters.js:586
 msgid "Only include posts created after a given date."
 msgstr ""
-"Incluir solo las publicaciones creadas después de una fecha determinada."
+"Incluir solo los mensajes publicados después de una fecha determinada."
 
 #: assembl/static/js/app/views/postFilters.js:590
 msgid ""
@@ -1713,7 +1713,7 @@ msgstr "Mensajes publicados antes ..."
 #: assembl/static/js/app/views/postFilters.js:633
 msgid "Only include posts created before a given date."
 msgstr ""
-"Incluir solo las publicaciones creadas antes de una fecha determinada."
+"Incluir solo los mensajes creadas antes de una fecha determinada."
 
 #: assembl/static/js/app/views/postFilters.js:637
 msgid ""
@@ -3060,7 +3060,7 @@ msgstr "Todos los mensajes"
 
 #: assembl/templates/views/allMessagesInIdeaList.tmpl:12
 msgid "Number of unread posts in the entire discussion"
-msgstr "Número de publicaciones sin leer en toda la discusión."
+msgstr "Número de mensajes sin leer en toda la discusión."
 
 #: assembl/templates/views/announcementEditable.tmpl:1
 msgid "The title of this announcement"
@@ -3326,7 +3326,7 @@ msgstr "Mensajes"
 #: assembl/templates/views/discussionStatisticsModal.tmpl:38
 #: assembl/templates/views/discussionStatisticsModal.tmpl:53
 msgid "Cumulative posts"
-msgstr "Publicaciones acumulativas"
+msgstr "Mensajes acumulativas"
 
 #: assembl/templates/views/discussionStatisticsModal.tmpl:39
 #: assembl/templates/views/discussionStatisticsModal.tmpl:54
@@ -4457,11 +4457,11 @@ msgstr "No hay archivo dado."
 #: assembl/views/api/post.py:176
 msgid "Getting orphan posts of a specific idea isn't supported."
 msgstr ""
-"Obtener publicaciones huérfanas de una idea específica no es compatible."
+"Obtener mensajes huérfanas de una idea específica no es compatible."
 
 #: assembl/views/api/post.py:285
 msgid "You must be logged in to view which posts are read"
-msgstr "Debes iniciar sesión para ver qué publicaciones se leen"
+msgstr "Debes iniciar sesión para ver qué mensajes se leen"
 
 #: assembl/views/api/post.py:516
 msgid "Your message is empty"
