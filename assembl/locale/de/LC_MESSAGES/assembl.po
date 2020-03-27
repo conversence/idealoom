@@ -4731,7 +4731,7 @@ msgid "email"
 msgstr "E-Mail"
 
 #: assembl/views/auth/views.py:1030
-msgid "Please confirm your {confirm_what} with {assembl}"
+msgid "Please confirm your {confirm_what} with {idealoom}"
 msgstr ""
 
 #: assembl/views/auth/views.py:1032
@@ -4740,35 +4740,35 @@ msgstr "Konto"
 
 #: assembl/views/auth/views.py:1033
 msgid ""
-"Hello, {name}, and welcome to {assembl}!\n"
+"Hello, {name}, and welcome to {idealoom}!\n"
 "\n"
 "Please confirm your email address &lt;{email}&gt; and complete your "
 "registration by clicking the link below.\n"
 "<{confirm_url}>\n"
 "\n"
 "Best regards,\n"
-"The {assembl} Team"
+"The {idealoom} Team"
 msgstr ""
 
 #: assembl/views/auth/views.py:1040
 msgid ""
-"<p>Hello, {name}, and welcome to {assembl}!</p>\n"
+"<p>Hello, {name}, and welcome to {idealoom}!</p>\n"
 "<p>Please <a href=\"{confirm_url}\">click here to confirm your email "
 "address</a>\n"
 "&lt;{email}&gt; and complete your registration.</p>\n"
-"<p>Best regards,<br />The {assembl} Team</p>"
+"<p>Best regards,<br />The {idealoom} Team</p>"
 msgstr ""
 
 #: assembl/views/auth/views.py:1045
 msgid ""
 "Hello, {name}!\n"
 "\n"
-"Please confirm your new email address <{email}> on your {assembl} account"
+"Please confirm your new email address <{email}> on your {idealoom} account"
 " by clicking the link below.\n"
 "<{confirm_url}>\n"
 "\n"
 "Best regards,\n"
-"The {assembl} Team"
+"The {idealoom} Team"
 msgstr ""
 
 #: assembl/views/auth/views.py:1052
@@ -4776,8 +4776,8 @@ msgid ""
 "<p>Hello, {name}!</p>\n"
 "<p>Please <a href=\"{confirm_url}\">click here to confirm your new email "
 "address</a>\n"
-"&lt;{email}&gt; on your {assembl} account.</p>\n"
-"<p>Best regards,<br />The {assembl} Team</p>"
+"&lt;{email}&gt; on your {idealoom} account.</p>\n"
+"<p>Best regards,<br />The {idealoom} Team</p>"
 msgstr ""
 
 #: assembl/views/auth/views.py:1106
@@ -4787,19 +4787,19 @@ msgstr "Antrag auf Änderung des Kennworts"
 #: assembl/views/auth/views.py:1110
 msgid ""
 "<p>Hello, {name}!</p>\n"
-"<p>We have received a request to change the password on your {assembl} "
+"<p>We have received a request to change the password on your {idealoom} "
 "account.\n"
 "Please <a href=\"{confirm_url}\">click here to confirm your password "
 "change</a>.</p>\n"
 "<p>If you did not ask to reset your password please disregard this "
 "email.</p>\n"
-"<p>Best regards,<br />The {assembl} Team</p>\n"
+"<p>Best regards,<br />The {idealoom} Team</p>\n"
 msgstr ""
 
 #: assembl/views/auth/views.py:1116
 msgid ""
 "Hello, {name}!\n"
-"We have received a request to change the password on your {assembl} "
+"We have received a request to change the password on your {idealoom} "
 "account.\n"
 "To confirm your password change please click on the link below.\n"
 "<{confirm_url}>\n"
@@ -4807,7 +4807,7 @@ msgid ""
 "If you did not ask to reset your password please disregard this email.\n"
 "\n"
 "Best regards,\n"
-"The {assembl} Team\n"
+"The {idealoom} Team\n"
 msgstr ""
 
 #: assembl/views/discussion/views.py:50
