@@ -49,7 +49,7 @@
                   {% if provider.type == "openid" %}
                     <div class="openid-icon-bg"></div><input type="text" class="openid-bg" name="openid_identifier" class="form-control" />
                   {% endif %}
-                  <button type="submit" class="{{provider.type}}-bg mbs">{{gettext('Login with ') + provider.name}}</button>
+                  <button type="submit" class="{{provider.type}}-bg social-bg mbs">{{gettext('Login with ') + provider.name}}</button>
                 </form>
               {% endfor %}
           </div>
