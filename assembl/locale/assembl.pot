@@ -1113,7 +1113,7 @@ msgid "You don't have the permission to do this."
 msgstr ""
 
 #: assembl/static/js/app/views/ideaPanel.js:43
-msgid "Detailled information about the currently selected idea in the Table of ideas"
+msgid "Detailed information about the currently selected idea in the Table of ideas"
 msgstr ""
 
 #: assembl/static/js/app/views/ideaPanel.js:227
