@@ -784,7 +784,7 @@ msgid ""
 "contents. Clicking on a topic will filter the conversation to only show "
 "messages that are related to this topic."
 msgstr ""
-"Puede encontrar los temas que se están discutiendo actualmente en esta tabla"
+"Puede encontrar los temas que se están conversando actualmente en esta tabla"
 " de contenido. Al hacer clic en un tema, se filtrará la conversación para "
 "mostrar solo los mensajes relacionados con este tema."
 
@@ -1512,8 +1512,8 @@ msgstr ""
 #, python-format
 msgid "Discuss idea %s"
 msgid_plural "Discuss ideas: %s"
-msgstr[0] "Discutir idea: %s"
-msgstr[1] "Discutir ideas: %s"
+msgstr[0] "Conversando sobre idea: %s"
+msgstr[1] "Conversando sobre ideas: %s"
 
 #: assembl/static/js/app/views/postFilters.js:227
 #: assembl/static/js/app/views/postFilters.js:267
