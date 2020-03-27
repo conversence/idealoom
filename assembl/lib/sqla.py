@@ -1298,6 +1298,7 @@ class BaseOps(object):
     def _do_update_from_json(
             self, json, parse_def, context,
             duplicate_handling=None, object_importer=None):
+        from .history_mixin import TombstonableMixin
         is_creating = self.id is None
         # Note: maybe pass as argument, and distinguish case of recasting
         # Special case of recasts
@@ -1478,15 +1479,15 @@ class BaseOps(object):
                             remote = remote_columns[0]
                             if remote.nullable:
                                 # TODO: check update permissions on that object.
-                                for inst in missing:
+                                for inst in remaining_instances:
                                     setattr(inst, remote.key, None)
                             else:
                                 for inst in remaining_instances:
                                     if inspect(inst).pending:
                                         self.db.expunge(inst)
                                     elif not inst.user_can(
-                                            user_id, CrudPermissions.DELETE,
-                                            permissions):
+                                            context.get_user_id(), CrudPermissions.DELETE,
+                                            context.get_permissions()):
                                         raise HTTPUnauthorized(
                                             "Cannot delete object %s", inst.uri())
                                     else:
