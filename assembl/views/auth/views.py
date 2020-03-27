@@ -1027,38 +1027,38 @@ def send_confirmation_email(request, email, immediate=False):
     mailer = get_mailer(request)
     localizer = request.localizer
     confirm_what = localizer.translate(_('email'))
-    subject = localizer.translate(_("Please confirm your {confirm_what} with {assembl}"))
+    subject = localizer.translate(_("Please confirm your {confirm_what} with {idealoom}"))
     if isinstance(email.profile, User) and not email.profile.verified:
         confirm_what = localizer.translate(_('account'))
-        text_message = localizer.translate(_(u"""Hello, {name}, and welcome to {assembl}!
+        text_message = localizer.translate(_(u"""Hello, {name}, and welcome to {idealoom}!
 
 Please confirm your email address &lt;{email}&gt; and complete your registration by clicking the link below.
 <{confirm_url}>
 
 Best regards,
-The {assembl} Team"""))
-        html_message = localizer.translate(_(u"""<p>Hello, {name}, and welcome to {assembl}!</p>
+The {idealoom} Team"""))
+        html_message = localizer.translate(_(u"""<p>Hello, {name}, and welcome to {idealoom}!</p>
 <p>Please <a href="{confirm_url}">click here to confirm your email address</a>
 &lt;{email}&gt; and complete your registration.</p>
-<p>Best regards,<br />The {assembl} Team</p>"""))
+<p>Best regards,<br />The {idealoom} Team</p>"""))
     else:
         text_message = localizer.translate(_(u"""Hello, {name}!
 
-Please confirm your new email address <{email}> on your {assembl} account by clicking the link below.
+Please confirm your new email address <{email}> on your {idealoom} account by clicking the link below.
 <{confirm_url}>
 
 Best regards,
-The {assembl} Team"""))
+The {idealoom} Team"""))
         html_message = localizer.translate(_(u"""<p>Hello, {name}!</p>
 <p>Please <a href="{confirm_url}">click here to confirm your new email address</a>
-&lt;{email}&gt; on your {assembl} account.</p>
-<p>Best regards,<br />The {assembl} Team</p>"""))
+&lt;{email}&gt; on your {idealoom} account.</p>
+<p>Best regards,<br />The {idealoom} Team</p>"""))
 
     from assembl.auth.password import email_token
     data = dict(
         name=email.profile.name,
         email=email.email,
-        assembl=config.get("platform_name"),
+        idealoom=config.get("platform_name"),
         confirm_what=confirm_what,
         confirm_url=maybe_contextual_route(
             request, 'user_confirm_email',
@@ -1083,7 +1083,7 @@ def send_change_password_email(
     mailer = get_mailer(request)
     localizer = request.localizer
     data = dict(
-        assembl=config.get("platform_name"), name=profile.name,
+        idealoom=config.get("platform_name"), name=profile.name,
         confirm_url=maybe_contextual_route(
             request,
             'welcome' if welcome else 'do_password_change',
@@ -1108,20 +1108,20 @@ def send_change_password_email(
     if text_body is None or html_body is not None:
         # if text_body and no html_body, html_body remains None.
         html_body = html_body or localizer.translate(_(u"""<p>Hello, {name}!</p>
-<p>We have received a request to change the password on your {assembl} account.
+<p>We have received a request to change the password on your {idealoom} account.
 Please <a href="{confirm_url}">click here to confirm your password change</a>.</p>
 <p>If you did not ask to reset your password please disregard this email.</p>
-<p>Best regards,<br />The {assembl} Team</p>
+<p>Best regards,<br />The {idealoom} Team</p>
 """))
     text_body = text_body or localizer.translate(_(u"""Hello, {name}!
-We have received a request to change the password on your {assembl} account.
+We have received a request to change the password on your {idealoom} account.
 To confirm your password change please click on the link below.
 <{confirm_url}>
 
 If you did not ask to reset your password please disregard this email.
 
 Best regards,
-The {assembl} Team
+The {idealoom} Team
 """))
     message = Message(
         subject=subject,
