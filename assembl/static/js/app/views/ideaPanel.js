@@ -40,7 +40,7 @@ class IdeaPanel extends BasePanel.extend({
   gridSize: BasePanel.prototype.IDEA_PANEL_GRID_SIZE,
   minWidth: 295,
   ideaPanelOpensAutomatically: true,
-  tooltip: i18n.gettext('Detailled information about the currently selected idea in the Table of ideas'),
+  tooltip: i18n.gettext('Detailed information about the currently selected idea in the Table of ideas'),
   panelType: PanelSpecTypes.IDEA_PANEL,
   ui: {
     'postIt': '.postitlist',
