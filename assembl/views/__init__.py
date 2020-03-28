@@ -30,7 +30,7 @@ from ..lib import config
 from ..lib.frontend_urls import FrontendUrls
 from ..lib.locale import get_language, get_country
 from ..lib.utils import get_global_base_url
-from ..lib.raven_client import capture_exception
+from ..lib.raven_client import capture_exception, flush
 from ..auth import R_PARTICIPANT
 
 log = logging.getLogger(__name__)
@@ -461,6 +461,7 @@ def error_view(exc, request):
     # from traceback import format_exc
     from datetime import datetime
     capture_exception(getattr(request, "exc_info", None))
+    flush()  # make sure it got to sentry
     raise HTTPInternalServerError(
         explanation="Sorry, IdeaLoom had an internal issue and you have to reload. Please send this to a discussion administrator.",
         detail=datetime.utcnow().isoformat()+"\n"+repr(request.exception))

@@ -4,7 +4,7 @@ from future import standard_library
 standard_library.install_aliases()
 from configparser import ConfigParser
 from sentry_sdk import (
-    init as sentry_init, capture_message, capture_exception, configure_scope)
+    init as sentry_init, capture_message, capture_exception, configure_scope, Hub)
 from sentry_sdk.integrations.pyramid import PyramidIntegration
 
 
@@ -17,6 +17,12 @@ def sentry_context(user_id=None, **kwargs):
                 if v is None:
                     continue
                 scope.set_extra(k, v)
+
+
+def flush(timeout=2.0):
+    client = Hub.current.client
+    if client is not None:
+        client.flush(timeout=timeout)
 
 
 def setup_raven(settings, settings_file=None):
