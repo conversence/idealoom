@@ -450,7 +450,7 @@ class MessageList extends BaseMessageList.extend({
       viewStyle = this.ViewStyles.RECENTLY_ACTIVE_THREADS;
     }
     // Do we need still need this code ?
-    else if (Ctx.getCurrentInterfaceType() === Ctx.InterfaceTypes.SIMPLE) {
+    else if (!this.expertViewIsAvailable) {
       if (Ctx.getCurrentUser().isUnknownUser()) {
         viewStyle = this.ViewStyles.RECENTLY_ACTIVE_THREADS;
       }
