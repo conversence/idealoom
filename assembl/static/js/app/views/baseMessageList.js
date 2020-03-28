@@ -202,6 +202,11 @@ return cls.extend({
       css_class: MESSAGE_LIST_VIEW_STYLES_CLASS_PREFIX + "newmessages",
       label: i18n.gettext('Chronological threads + jump to oldest unread message')
     },
+    CHRONOLOGICAL: {
+      id: "chronological",
+      css_class: MESSAGE_LIST_VIEW_STYLES_CLASS_PREFIX + "chronological",
+      label: i18n.gettext('Oldest messages first')
+    },
     REVERSE_CHRONOLOGICAL: {
       id: "reverse_chronological",
       css_class: MESSAGE_LIST_VIEW_STYLES_CLASS_PREFIX + "activityfeed",
@@ -1199,6 +1204,10 @@ return cls.extend({
       sortFunction = function(data) {
         return Date.now() - Date.parse(data.object.get('date'));
       }
+    } else if (this.currentViewStyle === this.ViewStyles.POPULARITY) {
+      sortFunction = function(data) {
+        return [-data.like_count, Date.now() - Date.parse(data.object.get('date'))];
+      }
     } else {
       sortFunction = function(data) {
         return data.object.get('date');
@@ -1729,6 +1738,9 @@ return cls.extend({
       else if (viewStyle === this.ViewStyles.REVERSE_CHRONOLOGICAL) {
         this.currentViewStyle = viewStyle;
         this.currentQuery.setView(this.currentQuery.availableViews.REVERSE_CHRONOLOGICAL);
+      } else if (viewStyle === this.ViewStyles.CHRONOLOGICAL) {
+        this.currentViewStyle = viewStyle;
+        this.currentQuery.setView(this.currentQuery.availableViews.CHRONOLOGICAL);
       } else if (viewStyle === this.ViewStyles.POPULARITY) {
         this.currentViewStyle = viewStyle;
         this.currentQuery.setView(this.currentQuery.availableViews.POPULARITY);
