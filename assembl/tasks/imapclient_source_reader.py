@@ -1,13 +1,14 @@
 import logging
 from datetime import datetime, timedelta
-from imaplib import IMAP4
 
 from imapclient import IMAPClient
+from imapclient.exceptions import IMAPClientAbortError, IMAPClientError
 from sqlalchemy.orm import undefer
 
 import ssl
 import certifi
 
+from assembl.lib.raven_client import capture_exception
 from assembl.models import ContentSource, Post, AbstractMailbox, ImportedPost, Email
 from .source_reader import (
     ReaderStatus, SourceReader, ReaderError, ClientError, IrrecoverableError)
@@ -26,6 +27,7 @@ class IMAPReader(SourceReader):
         self.selected_folder = False
         self.mailbox = None
         self.idling = False
+        self.aborted = False
         log.disabled = False
 
     def login(self):
@@ -46,13 +48,18 @@ class IMAPReader(SourceReader):
                 mailbox.starttls(context)
             if b'IDLE' in capabilities:
                 self.can_push = True
+            log.debug("login")
             mailbox.login(self.source.username, self.source.password)
             mailbox.select_folder(self.source.folder)
             self.selected_folder = True
+            self.aborted = False
             self.mailbox = mailbox
-        except IMAP4.abort as e:
+        except IMAPClientAbortError as e:
+            capture_exception(e)
+            self.aborted = True
             raise IrrecoverableError(e)
-        except IMAP4.error as e:
+        except IMAPClientError as e:
+            capture_exception(e)
             raise ClientError(e)
 
     def wait_for_push(self):
@@ -70,9 +77,10 @@ class IMAPReader(SourceReader):
                 elapsed = datetime.now() - start_time
                 timeout = max(
                     1, int((self.max_idle_period - elapsed).total_seconds()))
+                log.debug("idle_check")
                 resps = self.mailbox.idle_check(timeout)
                 if not resps:
-                    # No "hello, possibly a timeout"
+                    log.debug("timeout?")
                     break
                 for resp in resps:
                     if (resp[0] == b'OK' and resp[1] == b'Still here'):
@@ -84,8 +92,13 @@ class IMAPReader(SourceReader):
             if found_emails:
                 self.process_email_ids(found_emails)
             self.set_status(ReaderStatus.WAIT_FOR_PUSH)
-        except (IMAP4.abort, IMAP4.error) as e:
+        except IMAPClientAbortError as e:
+            capture_exception(e)
+            self.aborted = True
             raise ClientError(e)
+        except IMAPClientError as e:
+            capture_exception(e)
+            raise ReaderError(e)
         except AssertionError as e:
             # Case where we're closing from another thread
             pass
@@ -96,10 +109,12 @@ class IMAPReader(SourceReader):
                 ReaderStatus.SHUTDOWN):
             try:
                 self.mailbox.idle_done()
-            except (IMAP4.abort, IMAP4.error) as e:
-                log.warning(str(e))
-                # Maybe we ended from another thread
-                pass
+            except IMAPClientAbortError as e:
+                capture_exception(e)
+                self.aborted = True
+                raise ClientError(e)
+            except IMAPClientError as e:
+                console.warning(e)
             finally:
                 self.idling = False
         super(IMAPReader, self).end_wait_for_push()
@@ -115,17 +130,30 @@ class IMAPReader(SourceReader):
         if self.selected_folder:
             try:
                 self.mailbox.close_folder()
-            except (IMAP4.abort, IMAP4.error) as e:
+            except IMAPClientAbortError as e:
+                capture_exception(e)
+                self.aborted = True
                 exc = ClientError(e)
+            except IMAPClientError as e:
+                capture_exception(e)
+                exc = ReaderError(e)
             finally:
                 self.selected_folder = False
         if self.mailbox:
-            try:
-                self.mailbox.logout()
-            except (IMAP4.abort, IMAP4.error) as e:
-                exc = ClientError(e)
-            finally:
-                self.mailbox = None
+            if not self.aborted:
+                try:
+                    log.debug("logout")
+                    self.mailbox.logout()
+                except IMAPClientAbortError as e:
+                    capture_exception(e)
+                    self.aborted = True
+                    exc = ClientError(e)
+                except IMAPClientError as e:
+                    capture_exception(e)
+                    exc = ReaderError(e)
+                finally:
+                    self.mailbox = None
+            self.mailbox = None
         if exc is not None:
             raise exc
 
@@ -152,8 +180,13 @@ class IMAPReader(SourceReader):
                 self.source.db.commit()
             finally:
                 self.source = ContentSource.get(self.source.id)
-        except (IMAP4.abort, IMAP4.error) as e:
-            raise ClientError(e)
+            except IMAPClientAbortError as e:
+                capture_exception(e)
+                self.aborted = True
+                raise ClientError(e)
+            except IMAPClientError as e:
+                capture_exception(e)
+                raise ReaderError(e)
 
     def process_email_ids(self, email_ids):
         self.set_status(ReaderStatus.READING)
@@ -213,5 +246,10 @@ class IMAPReader(SourceReader):
                 log.debug("No IMAP messages to process")
             self.successful_read()
             self.set_status(ReaderStatus.PAUSED)
-        except (IMAP4.abort, IMAP4.error) as e:
+        except IMAPClientAbortError as e:
+            capture_exception(e)
+            self.aborted = True
             raise ClientError(e)
+        except IMAPClientError as e:
+            capture_exception(e)
+            raise ReaderError(e)
