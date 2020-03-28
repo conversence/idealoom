@@ -60,19 +60,27 @@ def save_synthesis(request):
     if not synthesis:
         raise HTTPBadRequest("Synthesis with id '%s' not found." % synthesis_id)
 
+    ctx = synthesis.get_instance_context(request=request)
     synthesis_data = json.loads(request.body)
     user_id = authenticated_userid(request)
     permissions = get_permissions(user_id, discussion.id, synthesis)
 
     for key in ('subject', 'introduction', 'conclusion'):
         if key in synthesis_data:
+            current = getattr(synthesis, key)
             ls_data = synthesis_data[key]
-            if ls_data is None:
-                continue
-            assert isinstance(ls_data, dict)
-            current = LangString.create_from_json(
-                ls_data, user_id, permissions=permissions)
-            setattr(synthesis, key, current)
+            subcontext = synthesis.get_collection_context(key, ctx)
+            if ls_data:
+                assert isinstance(ls_data, dict)
+            if current:
+                if ls_data:
+                    current.update_from_json(
+                        ls_data, context=subcontext, permissions=permissions)
+                else:
+                    current.delete()
+            elif ls_data:
+                current = LangString.create_from_json(ls_data, context=subcontext)
+                setattr(synthesis, key, current._instance)
 
     Synthesis.default_db.add(synthesis)
     Synthesis.default_db.flush()
