@@ -8,6 +8,7 @@ import Base from './base.js';
 import Ctx from '../common/context.js';
 import Idea from './idea.js';
 import i18n from '../utils/i18n.js';
+import LangString from './langstring.js';
 
 
 /**
@@ -48,9 +49,9 @@ class SynthesisModel extends Base.Model.extend({
    * @type {Object}
    */
   defaults: {
-    subject: i18n.gettext('Add a title'),
-    introduction: i18n.gettext('Add an introduction'),
-    conclusion: i18n.gettext('Add a conclusion'),
+    subject: null,
+    introduction: null,
+    conclusion: null,
     ideas: [],
     published_in_post: null
   }
@@ -75,6 +76,21 @@ class SynthesisModel extends Base.Model.extend({
         this.ideasCollection.reset(this.get("ideas"), {parse: true});
     }
     return ob;
+  }
+
+  parse(resp, options) {
+    if (resp.ok !== true) {
+      if (resp.introduction != null) {
+        resp.introduction = new LangString.Model(resp.introduction, {parse: true});
+      }
+      if (resp.subject != null) {
+        resp.subject = new LangString.Model(resp.subject, {parse: true});
+      }
+      if (resp.conclusion != null) {
+        resp.conclusion = new LangString.Model(resp.conclusion, {parse: true});
+      }
+    }
+    return super.parse(resp, options);
   }
 
   getIdeasCollection() {

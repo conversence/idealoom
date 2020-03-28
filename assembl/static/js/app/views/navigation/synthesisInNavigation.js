@@ -43,7 +43,7 @@ class SynthesisItem extends LoaderView.extend({
     }
     return {
       id: this.model.get('published_in_post'),
-      subject: this.model.get('subject'),
+      subject: this.model.get('subject').bestValue(this.translationData),
       date: Ctx.formatDate(this.model.get('created'))
     };
   }

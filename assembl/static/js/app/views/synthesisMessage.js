@@ -3,6 +3,7 @@
  * @module app.views.synthesisMessage
  */
 
+import Promise from "bluebird";
 import Ctx from '../common/context.js';
 
 import MessageView from './message.js';
@@ -34,8 +35,8 @@ class SynthesisMessageView extends MessageView.extend({
    * @type {}
    */
   transformDataBeforeRender(data) {
-    data['subject'] = '';
-    data['body'] = '';
+    data['subject'] = new LangString.Model.Empty();
+    data['body'] = new LangString.Model.Empty();
     if (this.viewStyle == this.availableMessageViewStyles.PREVIEW) {
       data['bodyFormat'] = "text/plain";
     }
@@ -48,23 +49,26 @@ class SynthesisMessageView extends MessageView.extend({
    * @type {}
    */
   postRender() {
-    var that = this;
-    var body;
+    const that = this;
     var collectionManager = new CollectionManager();
 
-    collectionManager.getAllSynthesisCollectionPromise()
-      .then(function(allSynthesisCollection) {
-        var synthesis = allSynthesisCollection.get(that.synthesisId);
+    Promise.join(
+      collectionManager.getAllSynthesisCollectionPromise(),
+      collectionManager.getUserLanguagePreferencesPromise(Ctx),
+        (allSynthesisCollection, translationData) => {
+        const synthesis = allSynthesisCollection.get(that.synthesisId);
         if (!synthesis) {
           throw Error("BUG: Could not get synthesis after post. Maybe too early.")
         }
 
-        that.$('.message-subject').html(synthesis.get('subject'));
+        const subject = synthesis.get('subject').bestValue(translationData);
+        that.$('.message-subject').html(subject);
         if (that.viewStyle == that.availableMessageViewStyles.PREVIEW) {
           //Strip HTML from preview
           //bodyFormat = "text/plain";
 
-          body = MessageView.prototype.generateBodyPreview(synthesis.get('introduction'));
+          const introduction = synthesis.get('introduction').bestValue(translationData);
+          const body = MessageView.prototype.generateBodyPreview(introduction);
           that.$('.message-body > p').empty().html(body);
         }
         else {
