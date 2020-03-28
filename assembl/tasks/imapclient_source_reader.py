@@ -180,13 +180,13 @@ class IMAPReader(SourceReader):
                 self.source.db.commit()
             finally:
                 self.source = ContentSource.get(self.source.id)
-            except IMAPClientAbortError as e:
-                capture_exception(e)
-                self.aborted = True
-                raise ClientError(e)
-            except IMAPClientError as e:
-                capture_exception(e)
-                raise ReaderError(e)
+        except IMAPClientAbortError as e:
+            capture_exception(e)
+            self.aborted = True
+            raise ClientError(e)
+        except IMAPClientError as e:
+            capture_exception(e)
+            raise ReaderError(e)
 
     def process_email_ids(self, email_ids):
         self.set_status(ReaderStatus.READING)
