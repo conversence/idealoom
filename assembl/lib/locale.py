@@ -116,6 +116,13 @@ def strip_country(locale):
     return locale
 
 
+def strip_most_countries(locale):
+    base = strip_country(locale)
+    if base in ('zh', 'pt'):
+        return locale
+    return base
+
+
 def locale_ancestry(locale):
     locale = locale.split("_")
     return ["_".join(locale[:i]) for i in range(len(locale), 0, -1)]

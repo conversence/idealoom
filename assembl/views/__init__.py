@@ -28,7 +28,7 @@ from lxml import html
 from ..lib.json import json_renderer_factory
 from ..lib import config
 from ..lib.frontend_urls import FrontendUrls
-from ..lib.locale import get_language, get_country
+from ..lib.locale import get_language, get_country, strip_most_countries
 from ..lib.utils import get_global_base_url
 from ..lib.raven_client import capture_exception, flush
 from ..auth import R_PARTICIPANT
@@ -257,7 +257,7 @@ def get_default_context(request, **kwargs):
     if discussion and discussion.help_url:
         help_url = discussion.help_url
     if help_url and "%s" in help_url:
-        help_url = help_url % localizer.locale_name
+        help_url = help_url % strip_most_countries(localizer.locale_name)
 
     first_login_after_auto_subscribe_to_notifications = False
     if (user and discussion and discussion.id and user.is_first_visit
