@@ -5,6 +5,7 @@
 import i18n from '../i18n.js';
 
 import Ctx from '../../common/context.js';
+import hopscotch from 'hopscotch';
 import $ from 'jquery';
 var AppTours = [
   {
