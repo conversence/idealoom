@@ -1,7 +1,7 @@
 -e git+https://github.com/conversence/sockjs.git@tick_heartbeat#egg=sockjs
 cchardet==2.1.4
 aiohttp==3.6.2
-aiocontextvars==2.4 ; python_version < '3.7'
+aiocontextvars==0.2.2 ; python_version < '3.7'
 # aiohttp-cors==0.7.0
 
 # Those chrouter reqs repeat requirements in requirements.in, keep in sync.
