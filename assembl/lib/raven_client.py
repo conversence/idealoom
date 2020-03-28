@@ -6,6 +6,8 @@ from configparser import ConfigParser
 from sentry_sdk import (
     init as sentry_init, capture_message, capture_exception, configure_scope, Hub)
 from sentry_sdk.integrations.pyramid import PyramidIntegration
+from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+from sentry_sdk.integrations.redis import RedisIntegration
 
 
 def sentry_context(user_id=None, **kwargs):
@@ -25,7 +27,7 @@ def flush(timeout=2.0):
         client.flush(timeout=timeout)
 
 
-def setup_raven(settings, settings_file=None):
+def setup_raven(settings, settings_file=None, use_async=False, celery=False):
     """Setup raven client.
 
     Sentry is automatically setup in assembl,
@@ -36,10 +38,19 @@ def setup_raven(settings, settings_file=None):
     else:
         raven_url = settings.get('raven_url', '')
     if raven_url and len(raven_url) > 12:
-        sentry_init(
-            raven_url,
-            integrations=[PyramidIntegration()]
-        )
+        integrations = integrations=[
+            PyramidIntegration(),
+            SqlalchemyIntegration(),
+            RedisIntegration(),
+        ]
+        if use_async:
+            from sentry_sdk.integrations.aiohttp import AioHttpIntegration
+            integrations.append(AioHttpIntegration())
+        if celery:
+            from sentry_sdk.integrations.celery import CeleryIntegration
+            integrations.append(CeleryIntegration())
+
+        sentry_init(raven_url, integrations = integrations)
 
 
 def includeme(config):

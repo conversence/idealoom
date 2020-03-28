@@ -335,7 +335,7 @@ if __name__ == '__main__':
     server_host = settings.get(SECTION, 'public_hostname')
     server_url = "%s://%s:%d" % (server_protocol, server_host, server_port)
 
-    setup_raven(settings)
+    setup_raven(settings, use_async=True)
 
     for socket_name in (in_socket, out_socket):
         if socket_name.startswith('ipc://'):

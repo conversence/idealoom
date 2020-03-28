@@ -117,7 +117,7 @@ class CeleryWithConfig(Celery):
         config.read(settings_file)
         registry = getGlobalSiteManager()
         registry.settings = settings
-        setup_raven(settings, settings_file)
+        setup_raven(settings, settings_file, celery=True)
         set_config(settings)
         configure_engine(settings, True)
         if settings.get('celery_tasks_debug_signal', False):
