@@ -51,7 +51,6 @@ circus__autostart_uwsgi = false
 circus__webapp_port = 8119
 uwsgi__processes = 4
 web_analytics_piwik_script =
-filter:raven__dsn =
 raven_url =
 handler_sentry__dsn =
 saml_country = CA

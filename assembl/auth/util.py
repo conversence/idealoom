@@ -17,6 +17,7 @@ from pyramid.authentication import SessionAuthenticationPolicy
 
 from assembl.lib.locale import _
 from ..lib.sqla import get_session_maker
+from ..lib.raven_client import sentry_context
 from . import (
     R_SYSADMIN, P_READ, R_OWNER, P_SYSADMIN, SYSTEM_ROLES, ASSEMBL_PERMISSIONS)
 from .password import verify_data_token, Validity
@@ -346,15 +347,10 @@ def authentication_callback(user_id, request):
     "This is how pyramid knows the user's permissions"
     connection = User.default_db.connection()
     connection.info['userid'] = user_id
-    discussion_id = request.discussion_id
     # this is a good time to tell raven about the user
-    from ..lib.raven_client import Raven
-    if Raven:
-        if user_id:
-            Raven.user_context({'user_id': user_id})
-        if discussion_id:
-            Raven.context.merge({'discussion_id': discussion_id})
-
+    sentry_context(
+        user_id=user_id,
+        discussion_id=request.discussion_id)
     # Check that the user exists
     if not request.user:
         return None
