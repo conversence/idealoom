@@ -1064,7 +1064,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
         links = self.db.query(IdeaLink).filter_by(
             tombstone_date=None).join(Idea, IdeaLink.source_id==Idea.id).filter(
             Idea.discussion_id==self.id).all()
-        G = pygraphviz.AGraph(directed=True)
+        G = pygraphviz.AGraph(directed=True, overlap=False)
         # G.graph_attr['overlap']='prism'
         G.node_attr['penwidth']=0
         G.node_attr['shape']='rect'

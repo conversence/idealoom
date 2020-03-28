@@ -933,7 +933,7 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
         from colour import Color
         from datetime import datetime
         from assembl.models import Idea, IdeaLink, RootIdea
-        G = pygraphviz.AGraph(directed=True)
+        G = pygraphviz.AGraph(directed=True, overlap=False)
         # G.graph_attr['overlap']='prism'
         G.node_attr['penwidth']=0
         G.node_attr['shape']='rect'
