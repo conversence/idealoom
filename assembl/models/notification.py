@@ -49,6 +49,7 @@ from .auth import (
 from .permissions import UserTemplate
 from .discussion import Discussion
 from .generic import Content
+from .auth import UserLanguagePreferenceCollection
 from .post import Post, SynthesisPost, PublicationStates
 from assembl.semantic.virtuoso_mapping import QuadMapPatternS
 from assembl.semantic.namespaces import ASSEMBL
@@ -222,6 +223,11 @@ class NotificationSubscription(DiscussionBoundBase, OriginMixin):
 
     def get_discussion_id(self):
         return self.discussion_id
+
+    def get_language_preferences(self):
+        if getattr(self, '_lang_pref', None) is None:
+            self._lang_pref = UserLanguagePreferenceCollection(self.user_id)
+        return self._lang_pref
 
     def class_description(self):
         return self.type.description
@@ -952,12 +958,16 @@ class Notification(Base):
 
     @classmethod
     def get_css_paths(cls, discussion):
-        from ..views import get_theme_info, get_theme_base_path
+        from ..views import get_theme_info
         (theme_name, theme_relative_path) = get_theme_info(discussion)
-        assembl_css_path = os.path.normpath(os.path.join(get_theme_base_path(), theme_relative_path, 'assembl_notifications.css'))
+        assembl_css_path = os.path.normpath(os.path.join(
+            os.path.dirname(os.path.dirname(__file__)),
+            "static", "js", "build", f'theme_{theme_name}_notifications.css'))
         assembl_css = open(assembl_css_path)
         assert assembl_css
-        ink_css_path = os.path.normpath(os.path.join(os.path.abspath(__file__), '..' , '..', 'static', 'js', 'bower', 'ink', 'css', 'ink.css'))
+        ink_css_path = os.path.normpath(os.path.join(
+            os.path.dirname(os.path.dirname(__file__)),
+            'static', 'js', 'bower', 'ink', 'css', 'ink.css'))
         ink_css = open(ink_css_path)
         assert ink_css
         return (assembl_css, ink_css)
@@ -1068,11 +1078,12 @@ class NotificationOnPostCreated(NotificationOnPost):
     def get_notification_subject(self):
         loc = self.get_localizer()
         subject = "[" + self.first_matching_subscription.discussion.topic + "] "
+        langPrefs = self.first_matching_subscription.get_language_preferences()
         if isinstance(self.post, SynthesisPost):
             subject += loc.translate(_("SYNTHESIS: ")) \
-                + (self.post.publishes_synthesis.subject or "")
+                + (self.post.publishes_synthesis.subject.best_lang(langPrefs).value or "")
         else:
-            subject += (self.post.subject.first_original().value or "")
+            subject += (self.post.subject.best_lang(langPrefs).value or "")
         return subject
 
     def render_to_email_html_part(self):
