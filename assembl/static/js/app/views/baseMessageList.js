@@ -497,8 +497,9 @@ return cls.extend({
       returnedDataOffsets.offsetEnd = (numMessages - 1);
     }
     else {
-      if (visitorData.visitorViewData[visitorData.visitorOrderLookupTable[requestedOffsets.offsetEnd]]['last_ancestor_id'] === null) {
-        returnedDataOffsets.offsetEnd = requestedOffsets.offsetEnd;
+      const offsetEnd = requestedOffsets.offsetEnd || numMessages - 1;
+      if (visitorData.visitorViewData[visitorData.visitorOrderLookupTable[offsetEnd]]['last_ancestor_id'] === null) {
+        returnedDataOffsets.offsetEnd = offsetEnd;
       }
       else {
         //If the requested offsetEnd isn't a root, find next root message, and stop just
@@ -1757,7 +1758,13 @@ return cls.extend({
         this.storedMessageListConfig.viewStyleId = viewStyle.id;
         Ctx.DEPRECATEDsetMessageListConfigToStorage(this.storedMessageListConfig);
       }
-
+      if (this.currentQuery.isQueryValid()) {
+        this.currentQuery.invalidateResults();
+        this._cachedVisitorDataPromise = undefined;
+        this.showMessages({_offsetStart: 0}).then(()=>{
+            this.render();
+        })
+      }
       //console.log("setViewStyle finished, currentViewStyle:", this.currentViewStyle, "stored viewStyleId: ", this.storedMessageListConfig.viewStyleId);
     },
 
