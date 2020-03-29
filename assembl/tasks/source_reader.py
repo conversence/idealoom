@@ -119,7 +119,7 @@ class ReaderError(RuntimeError):
     pass
 
 
-class ClientError(ReaderError):
+class ClientError(RuntimeError):
     status = ReaderStatus.CLIENT_ERROR
     pass
 

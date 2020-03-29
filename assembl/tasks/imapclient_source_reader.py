@@ -2,7 +2,8 @@ import logging
 from datetime import datetime, timedelta
 
 from imapclient import IMAPClient
-from imapclient.exceptions import IMAPClientAbortError, IMAPClientError
+from imapclient.exceptions import (
+    IMAPClientAbortError, IMAPClientError, ProtocolError)
 from sqlalchemy.orm import undefer
 
 import ssl
@@ -54,7 +55,7 @@ class IMAPReader(SourceReader):
             self.selected_folder = True
             self.aborted = False
             self.mailbox = mailbox
-        except IMAPClientAbortError as e:
+        except (IMAPClientAbortError, ProtocolError) as e:
             capture_exception(e)
             self.aborted = True
             raise IrrecoverableError(e)
@@ -92,7 +93,7 @@ class IMAPReader(SourceReader):
             if found_emails:
                 self.process_email_ids(found_emails)
             self.set_status(ReaderStatus.WAIT_FOR_PUSH)
-        except IMAPClientAbortError as e:
+        except (IMAPClientAbortError, ProtocolError) as e:
             capture_exception(e)
             self.aborted = True
             raise ClientError(e)
@@ -109,12 +110,12 @@ class IMAPReader(SourceReader):
                 ReaderStatus.SHUTDOWN):
             try:
                 self.mailbox.idle_done()
-            except IMAPClientAbortError as e:
+            except (IMAPClientAbortError, ProtocolError) as e:
                 capture_exception(e)
                 self.aborted = True
                 raise ClientError(e)
             except IMAPClientError as e:
-                console.warning(e)
+                log.warning(e)
             finally:
                 self.idling = False
         super(IMAPReader, self).end_wait_for_push()
@@ -130,7 +131,7 @@ class IMAPReader(SourceReader):
         if self.selected_folder:
             try:
                 self.mailbox.close_folder()
-            except IMAPClientAbortError as e:
+            except (IMAPClientAbortError, ProtocolError) as e:
                 capture_exception(e)
                 self.aborted = True
                 exc = ClientError(e)
@@ -144,7 +145,7 @@ class IMAPReader(SourceReader):
                 try:
                     log.debug("logout")
                     self.mailbox.logout()
-                except IMAPClientAbortError as e:
+                except (IMAPClientAbortError, ProtocolError) as e:
                     capture_exception(e)
                     self.aborted = True
                     exc = ClientError(e)
@@ -180,7 +181,7 @@ class IMAPReader(SourceReader):
                 self.source.db.commit()
             finally:
                 self.source = ContentSource.get(self.source.id)
-        except IMAPClientAbortError as e:
+        except (IMAPClientAbortError, ProtocolError) as e:
             capture_exception(e)
             self.aborted = True
             raise ClientError(e)
@@ -246,7 +247,7 @@ class IMAPReader(SourceReader):
                 log.debug("No IMAP messages to process")
             self.successful_read()
             self.set_status(ReaderStatus.PAUSED)
-        except IMAPClientAbortError as e:
+        except (IMAPClientAbortError, ProtocolError) as e:
             capture_exception(e)
             self.aborted = True
             raise ClientError(e)
