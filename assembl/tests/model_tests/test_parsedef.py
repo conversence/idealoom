@@ -63,3 +63,19 @@ def test_load_mailbox(
         test_adminuser_webrequest, discussion, jack_layton_mailbox):
     _test_load_fixture(
         test_adminuser_webrequest, discussion, jack_layton_mailbox)
+
+
+def test_translate(test_adminuser_webrequest, discussion, langstring_body, fr_langstring_entry):
+    request = test_adminuser_webrequest
+    request.matchdict = {'discussion_slug': discussion.slug}
+    json = langstring_body.generic_json(permissions=(P_SYSADMIN, ))
+    json['entries'].insert(1, {
+        "@type": "LangStringEntry",
+        "@language": "fr",
+        "value": "La traduction française"
+    })
+    request.populate()
+    context = langstring_body.get_instance_context(request=request)
+    langstring_body.update_from_json(json, context=context)
+    print(langstring_body.__dict__)
+    assert len(langstring_body.entries)==2
