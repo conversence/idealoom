@@ -255,6 +255,15 @@ def save_idea(request):
             current = getattr(idea, attr_name)
             ls_data = idea_data[key]
             # TODO: handle legacy string instance?
+            if isinstance(ls_data, str):
+                tr_service = discussion.translation_service()
+                locale = tr_service.identify(ls_data)[0]
+                ls_data = {
+                    '@type': 'LangString',
+                    'entries': [{
+                        '@type': 'LangStringEntry',
+                        '@language': locale,
+                        'value': ls_data}]}
             subcontext = idea.get_collection_context(key, context)
             if current:
                 if ls_data:
