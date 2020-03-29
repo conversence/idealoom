@@ -495,16 +495,31 @@ class IdeaModel extends Base.Model.extend({
    */
   addSegmentAsChild(segment) {
     delete segment.attributes.highlights;
-    var data = {
-      shortTitle: segment.getQuote().substr(0, 50),
-      longTitle: segment.getQuote(),
-      parentId: this.getId(),
-      order: this.getOrderForNewChild()
-    };
-    var onSuccess = function(idea) {
-      idea.addSegment(segment);
-    };
-    return this.collection.create(data, { success: onSuccess });
+    return segment.getAssociatedPostPromise().then((post)=>{
+        let locale = post.get('body').original().get('@language');
+        locale = (locale == 'und') ? null : locale;
+        const data = {
+          shortTitle: new LangString.Model({
+            entries: new LangString.EntryCollection([
+                new LangString.EntryModel({
+                    value: segment.getQuote().substr(0, 50),
+                    "@language": locale
+                })])}),
+          longTitle: new LangString.Model({
+            entries: new LangString.EntryCollection([
+                new LangString.EntryModel({
+                    value: segment.getQuote(),
+                    "@language": locale
+                })])}),
+          parentId: this.getId(),
+          order: this.getOrderForNewChild()
+        };
+        return this.collection.create(data, { success: (idea)=> {
+          idea.addSegment(segment);
+          return idea;
+    } });
+    });
+
   }
 
   /**

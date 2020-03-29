@@ -488,8 +488,9 @@ class IdeaInIdeaListView extends Marionette.View.extend({
     if (segment) {
       if (isDraggedBelow) {
         // Add as a child idea
-        var newIdea = this.model.addSegmentAsChild(segment);
-        this._groupContent.setCurrentIdea(newIdea);
+        this.model.addSegmentAsChild(segment).then((newIdea)=>{
+            this._groupContent.setCurrentIdea(newIdea);
+        })
       } else {
         // Add to the current idea
         this.model.addSegment(segment);

@@ -1539,8 +1539,9 @@ return cls.extend({
                         "We should probably find out if the group is the same as the origin, and lock ONLY in that case");
                     that.getPanelWrapper().autoLockPanel();
 
-                    var newIdea = Ctx.currentAnnotationNewIdeaParentIdea.addSegmentAsChild(segment);
-                    that.getContainingGroup().setCurrentIdea(newIdea);
+                    Ctx.currentAnnotationNewIdeaParentIdea.addSegmentAsChild(segment).then((newIdea)=>{
+                        that.getContainingGroup().setCurrentIdea(newIdea);
+                    })
                   }
                   else {
                     segment.save(null, {
