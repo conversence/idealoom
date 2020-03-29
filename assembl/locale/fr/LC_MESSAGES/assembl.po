@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: assembl 0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2020-03-28 08:51-0400\n"
+"POT-Creation-Date: 2020-03-29 14:42-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Marc-Antoine Parent <maparent@acm.org>, 2016\n"
 "Language: fr\n"
@@ -19,20 +19,20 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.8.0\n"
 
-#: assembl/auth/util.py:270
+#: assembl/auth/util.py:271
 msgid "Your session has expired, you need to login again"
 msgstr "Votre session est échue, vous devez vous reconnecter"
 
-#: assembl/auth/util.py:640
+#: assembl/auth/util.py:636
 msgid "The CSV file must have two columns"
 msgstr "Le fichier CSV doit avoir deux colonnes"
 
-#: assembl/auth/util.py:647
+#: assembl/auth/util.py:643
 #, python-format
 msgid "Not an email: <%s> at line %d"
 msgstr "Pas un courriel: <%s> à la ligne %d"
 
-#: assembl/auth/util.py:650
+#: assembl/auth/util.py:646
 #, python-format
 msgid "Name too short: <%s> at line %d"
 msgstr "Nom trop court: <%s> à la ligne %d"
@@ -725,16 +725,16 @@ msgstr "Sauter"
 msgid "Close"
 msgstr "Fermer"
 
-#: assembl/static/js/app/utils/tours/appTours.js:18
+#: assembl/static/js/app/utils/tours/appTours.js:19
 #: assembl/templates/views/helperDebate.tmpl:3
 msgid "Welcome!"
 msgstr "Bienvenue!"
 
-#: assembl/static/js/app/utils/tours/appTours.js:20
+#: assembl/static/js/app/utils/tours/appTours.js:21
 msgid "Thank you"
 msgstr "Merci"
 
-#: assembl/static/js/app/utils/tours/appTours.js:22
+#: assembl/static/js/app/utils/tours/appTours.js:23
 #, python-format
 msgid ""
 "Welcome to this discussion. We’ve created series of hints to help you get"
@@ -743,11 +743,11 @@ msgstr ""
 "Bienvenue sur la discussion ! Nous vous avons préparé une série d’aides "
 "pour vous aider à rejoindre les échanges en cours sur %s."
 
-#: assembl/static/js/app/utils/tours/appTours.js:37
+#: assembl/static/js/app/utils/tours/appTours.js:38
 msgid "Join the discussion"
 msgstr "Rejoindre la discussion"
 
-#: assembl/static/js/app/utils/tours/appTours.js:38
+#: assembl/static/js/app/utils/tours/appTours.js:39
 msgid ""
 "This is the conversation panel, where the discussion takes place. You can"
 " reply to messages directly, or start a new topic by clicking ‘Start a "
@@ -757,11 +757,11 @@ msgstr ""
 "répondre à chaque message ou lancer un nouveau sujet de discussion tout "
 "en bas du panneau."
 
-#: assembl/static/js/app/utils/tours/appTours.js:64
+#: assembl/static/js/app/utils/tours/appTours.js:65
 msgid "Customize your view"
 msgstr "Choisissez votre vue"
 
-#: assembl/static/js/app/utils/tours/appTours.js:65
+#: assembl/static/js/app/utils/tours/appTours.js:66
 msgid ""
 "You can view the discussion in many different ways using the filters at "
 "the top."
@@ -769,11 +769,11 @@ msgstr ""
 "Vous pouvez voir les discussions selon différents modes en choisissant "
 "les filtres proposés."
 
-#: assembl/static/js/app/utils/tours/appTours.js:91
+#: assembl/static/js/app/utils/tours/appTours.js:92
 msgid "Spot relevant quotes on each idea"
 msgstr "Repérez en un clin d’oeil les citations éclairantes sur chaque idée"
 
-#: assembl/static/js/app/utils/tours/appTours.js:92
+#: assembl/static/js/app/utils/tours/appTours.js:93
 msgid ""
 "Excerpts from messages are harvested and are organized to help you find "
 "relevant contributions on this idea."
@@ -781,11 +781,11 @@ msgstr ""
 "Chacun de ces post-it recense l’extrait d’un message jugé "
 "particulièrement éclairant."
 
-#: assembl/static/js/app/utils/tours/appTours.js:107
+#: assembl/static/js/app/utils/tours/appTours.js:108
 msgid "Explore one of these topics"
 msgstr "Utilisez cette table des idées comme outil de navigation"
 
-#: assembl/static/js/app/utils/tours/appTours.js:108
+#: assembl/static/js/app/utils/tours/appTours.js:109
 msgid ""
 "You can find the topics that are currently being discussed in this table "
 "of contents. Clicking on a topic will filter the conversation to only "
@@ -796,11 +796,11 @@ msgstr ""
 " messages échangés par la communauté mentionnant ce thème et ses sous-"
 "thèmes."
 
-#: assembl/static/js/app/utils/tours/appTours.js:119
+#: assembl/static/js/app/utils/tours/appTours.js:120
 msgid "Catch up on what’s been said"
 msgstr "Ayez un aperçu rapide de l’état de la discussion"
 
-#: assembl/static/js/app/utils/tours/appTours.js:121
+#: assembl/static/js/app/utils/tours/appTours.js:122
 msgid ""
 "Periodically an executive summary of the discussion is created to give "
 "you a quick overview of what was said since the last executive summary"
@@ -808,11 +808,11 @@ msgstr ""
 "À périodes régulières, une synthèse de la discussion est produite "
 "résumant ce qui a évolué dans le débat sur la dernière période."
 
-#: assembl/static/js/app/utils/tours/appTours.js:131
+#: assembl/static/js/app/utils/tours/appTours.js:132
 msgid "DISABLED"
 msgstr "DÉSACTIVÉ"
 
-#: assembl/static/js/app/utils/tours/appTours.js:133
+#: assembl/static/js/app/utils/tours/appTours.js:134
 msgid ""
 "Find the different syntheses produced since the beginning of the "
 "discussion"
@@ -820,11 +820,11 @@ msgstr ""
 "Découvrez les synthèses de la discussion résumant l’évolution du débat "
 "depuis le début."
 
-#: assembl/static/js/app/utils/tours/appTours.js:143
+#: assembl/static/js/app/utils/tours/appTours.js:144
 msgid "Catch up on the evolution"
 msgstr "Ayez un aperçu rapide de l’état de la discussion"
 
-#: assembl/static/js/app/utils/tours/appTours.js:145
+#: assembl/static/js/app/utils/tours/appTours.js:146
 msgid ""
 "The facilitator of the discussion has written this synthesis to help you "
 "get on board of the discussion. Enjoy reading!"
@@ -833,11 +833,11 @@ msgstr ""
 "comprendre ce qu’il s’est dit et à contribuer à votre tour. Bonne lecture"
 " !"
 
-#: assembl/static/js/app/utils/tours/appTours.js:155
+#: assembl/static/js/app/utils/tours/appTours.js:156
 msgid "Dig more on an interesting idea and post your contribution"
 msgstr "Explorez l’idée qui vous intéresse et apportez votre contribution"
 
-#: assembl/static/js/app/utils/tours/appTours.js:157
+#: assembl/static/js/app/utils/tours/appTours.js:158
 msgid ""
 "You can click on this idea to see current discussions happening on it. "
 "You would be able to start contributing on this idea from there."
@@ -845,11 +845,11 @@ msgstr ""
 "Vous pouvez cliquer sur cette idée pour découvrir les échanges en cours "
 "sur celle-ci. Vous pourrez ensuite y contribuer."
 
-#: assembl/static/js/app/utils/tours/appTours.js:170
+#: assembl/static/js/app/utils/tours/appTours.js:171
 msgid "Stay informed"
 msgstr "Restez informés"
 
-#: assembl/static/js/app/utils/tours/appTours.js:171
+#: assembl/static/js/app/utils/tours/appTours.js:172
 msgid ""
 "Notifications are set to go to your email. If you aren’t receiving them, "
 "make sure to check your spam folder! You can update your notification "
@@ -927,38 +927,38 @@ msgstr "Messages récents en premier"
 msgid "Most popular messages first"
 msgstr "Messages les plus populaires en premier"
 
-#: assembl/static/js/app/views/baseMessageList.js:698
+#: assembl/static/js/app/views/baseMessageList.js:699
 msgid "No messages"
 msgstr "Pas de messages"
 
-#: assembl/static/js/app/views/baseMessageList.js:1052
+#: assembl/static/js/app/views/baseMessageList.js:1053
 #: assembl/static/js/app/views/messageSend.js:251
 #: assembl/templates/do_password_change.jinja2:30
 #: assembl/templates/request_password_change.jinja2:28
 msgid "Send"
 msgstr "Envoyer"
 
-#: assembl/static/js/app/views/baseMessageList.js:1053
+#: assembl/static/js/app/views/baseMessageList.js:1054
 msgid "Subject"
 msgstr "Sujet"
 
-#: assembl/static/js/app/views/baseMessageList.js:1054
+#: assembl/static/js/app/views/baseMessageList.js:1055
 msgid "Add a subject above and start a new topic here"
 msgstr "Rédigez le contenu de votre nouveau message"
 
-#: assembl/static/js/app/views/baseMessageList.js:1055
+#: assembl/static/js/app/views/baseMessageList.js:1056
 msgid "You need to type a comment first..."
 msgstr "Vous devez d’abord écrire un commentaire..."
 
-#: assembl/static/js/app/views/baseMessageList.js:1056
+#: assembl/static/js/app/views/baseMessageList.js:1057
 msgid "You need to set a subject to add a new topic..."
 msgstr "Vous devez ajouter un titre pour lancer un sujet de discussion..."
 
-#: assembl/static/js/app/views/baseMessageList.js:1563
+#: assembl/static/js/app/views/baseMessageList.js:1565
 msgid "Send to clipboard"
 msgstr "Ajouter au presse-papier"
 
-#: assembl/static/js/app/views/baseMessageList.js:1565
+#: assembl/static/js/app/views/baseMessageList.js:1567
 #: assembl/static/js/app/views/confirmModal.js:29
 #: assembl/static/js/app/views/messageSend.js:250
 #: assembl/templates/styleguide/components/Dialogs.jinja2:119
@@ -975,32 +975,32 @@ msgstr "Ajouter au presse-papier"
 msgid "Cancel"
 msgstr "Annuler"
 
-#: assembl/static/js/app/views/baseMessageList.js:1569
+#: assembl/static/js/app/views/baseMessageList.js:1571
 msgid "You can drag the segment below directly to the table of ideas"
 msgstr ""
 "Vous pouvez glisser l’extrait ci-dessous directement sur la table des "
 "idées"
 
-#: assembl/static/js/app/views/baseMessageList.js:1570
+#: assembl/static/js/app/views/baseMessageList.js:1572
 msgid "You can also copy-paste from the text in the zone below"
 msgstr ""
 "Vous pouvez également copier-coller à partir du texte dans la zone ci-"
 "dessous"
 
-#: assembl/static/js/app/views/baseMessageList.js:1614
+#: assembl/static/js/app/views/baseMessageList.js:1616
 #, python-format
 msgid ""
 "This extract was organized in the idea \" %s \" by the facilitator of the"
 " debate"
 msgstr "Cet extrait extract a été classé dans l’idée \" %s \" par un modérateur"
 
-#: assembl/static/js/app/views/baseMessageList.js:1617
+#: assembl/static/js/app/views/baseMessageList.js:1619
 msgid "This extract is in a harvester's clipboard and hasn' been sorted yet."
 msgstr ""
 "Cet extrait se trouve dans le presse-papier du facilitateur du débat et "
 "n’a pas encore été organisé."
 
-#: assembl/static/js/app/views/baseMessageList.js:2283
+#: assembl/static/js/app/views/baseMessageList.js:2291
 #, python-format
 msgid "%d new message has been posted.  Click here to refresh"
 msgid_plural "%d new messages have been posted.  Click here to refresh"
@@ -1675,64 +1675,72 @@ msgid "Only include messages that are not found in any idea."
 msgstr "N’inclure que des messages qui ne se trouvent liés à aucune idée"
 
 #: assembl/static/js/app/views/postFilters.js:437
+msgid "Messages that were not harvested"
+msgstr "Messages qui n'ont pas été attrapés"
+
+#: assembl/static/js/app/views/postFilters.js:440
+msgid "Only include messages that were not harvested."
+msgstr "N'inclure que les messages qui n'ont pas été attrapés"
+
+#: assembl/static/js/app/views/postFilters.js:457
 msgid "Synthesis messages"
 msgstr "Synthèses"
 
-#: assembl/static/js/app/views/postFilters.js:440
+#: assembl/static/js/app/views/postFilters.js:460
 msgid "Only include messages that represent a synthesis of the discussion."
 msgstr "N’inclure que des messages qui représentent une synthèse de la discussion"
 
-#: assembl/static/js/app/views/postFilters.js:458
+#: assembl/static/js/app/views/postFilters.js:478
 msgid "Have unread value"
 msgstr "A la valeur non-lu"
 
-#: assembl/static/js/app/views/postFilters.js:464
+#: assembl/static/js/app/views/postFilters.js:484
 msgid "You haven't read yet"
 msgstr "N’ont pas été lus"
 
-#: assembl/static/js/app/views/postFilters.js:466
+#: assembl/static/js/app/views/postFilters.js:486
 msgid "You've already read"
 msgstr "Vous avez déjà lu"
 
-#: assembl/static/js/app/views/postFilters.js:490
+#: assembl/static/js/app/views/postFilters.js:510
 msgid "Unread messages"
 msgstr "Messages non-lus"
 
-#: assembl/static/js/app/views/postFilters.js:493
+#: assembl/static/js/app/views/postFilters.js:513
 msgid "Only include messages you haven't read yet, or you manually marked unread."
 msgstr ""
 "N'inclure que les messages que je n’ai pas lu et ceux que j’ai marqué "
 "\"Non-lus\""
 
-#: assembl/static/js/app/views/postFilters.js:509
+#: assembl/static/js/app/views/postFilters.js:529
 msgid "Read messages"
 msgstr "Messages lus"
 
-#: assembl/static/js/app/views/postFilters.js:512
+#: assembl/static/js/app/views/postFilters.js:532
 msgid "Only include messages that have previously been marked read."
 msgstr "N'inclure que les messages que j’ai marqué \"Lu\""
 
-#: assembl/static/js/app/views/postFilters.js:536
+#: assembl/static/js/app/views/postFilters.js:556
 msgid "Messages with text..."
 msgstr "Messages contenant..."
 
-#: assembl/static/js/app/views/postFilters.js:540
+#: assembl/static/js/app/views/postFilters.js:560
 msgid "Only include posts containing certain keywords."
 msgstr "N'inclure que les messages contenant certains mots-clés."
 
-#: assembl/static/js/app/views/postFilters.js:543
+#: assembl/static/js/app/views/postFilters.js:563
 msgid "Search for keywords"
 msgstr "Chercher des mots-clés"
 
-#: assembl/static/js/app/views/postFilters.js:580
+#: assembl/static/js/app/views/postFilters.js:600
 msgid "Messages posted after..."
 msgstr "Messages envoyés après..."
 
-#: assembl/static/js/app/views/postFilters.js:586
+#: assembl/static/js/app/views/postFilters.js:606
 msgid "Only include posts created after a given date."
 msgstr "N'inclure que les messages créés depuis une date donnée."
 
-#: assembl/static/js/app/views/postFilters.js:590
+#: assembl/static/js/app/views/postFilters.js:610
 msgid ""
 "Please type a date. The filter will then show only posts which have been "
 "created after this date. Example: 2015-01-01"
@@ -1740,15 +1748,15 @@ msgstr ""
 "Veuillez écrire une date. Le filtre ne montrera ensuite que les messages "
 "qui ont été créés après cette date. Par exemple: 2015-01-01"
 
-#: assembl/static/js/app/views/postFilters.js:618
+#: assembl/static/js/app/views/postFilters.js:638
 msgid "Messages posted before..."
 msgstr "Messages envoyés avant..."
 
-#: assembl/static/js/app/views/postFilters.js:633
+#: assembl/static/js/app/views/postFilters.js:653
 msgid "Only include posts created before a given date."
 msgstr "N’inclure que les messages créés avant une date donnée."
 
-#: assembl/static/js/app/views/postFilters.js:637
+#: assembl/static/js/app/views/postFilters.js:657
 msgid ""
 "Please type a date. The filter will then show only posts which have been "
 "created before this date. Example: 2015-01-01"
@@ -1756,20 +1764,20 @@ msgstr ""
 "Veuillez écrire une date. Le filtre ne montrera ensuite que les messages "
 "qui ont été créés avant cette date. Par exemple: 2015-01-01"
 
-#: assembl/static/js/app/views/postFilters.js:671
+#: assembl/static/js/app/views/postFilters.js:691
 #, python-format
 msgid "Messages posted since the last synthesis (%s)"
 msgstr "Messages envoyés depuis la dernière synthèse (%s)"
 
-#: assembl/static/js/app/views/postFilters.js:675
+#: assembl/static/js/app/views/postFilters.js:695
 msgid "Only include posts created after the last synthesis."
 msgstr "N'inclure que les messages créés depuis la dernière synthèse."
 
-#: assembl/static/js/app/views/postFilters.js:693
+#: assembl/static/js/app/views/postFilters.js:713
 msgid "Deleted messages"
 msgstr "Messages supprimés"
 
-#: assembl/static/js/app/views/postFilters.js:696
+#: assembl/static/js/app/views/postFilters.js:716
 msgid ""
 "Only include messages that have been deleted (by their author or by an "
 "administrator), and their ancestors."
@@ -1777,11 +1785,11 @@ msgstr ""
 "N'inclure que les messages qui ont été supprimés (par leur auteur ou par "
 "un administrateur), et leurs ancêtres."
 
-#: assembl/static/js/app/views/postFilters.js:728
+#: assembl/static/js/app/views/postFilters.js:748
 msgid "Show also deleted messages"
 msgstr "Afficher aussi les messages supprimés"
 
-#: assembl/static/js/app/views/postFilters.js:731
+#: assembl/static/js/app/views/postFilters.js:751
 msgid ""
 "Also include messages that have been deleted (by their author or by an "
 "administrator)."
@@ -4664,17 +4672,17 @@ msgstr "Accepter"
 msgid "No file given."
 msgstr "Pas de fichier envoyé."
 
-#: assembl/views/api/post.py:176
+#: assembl/views/api/post.py:177
 msgid "Getting orphan posts of a specific idea isn't supported."
 msgstr ""
 "Il n’est pas possible d’obtenir les messages orphelins d’une idée "
 "spécifique."
 
-#: assembl/views/api/post.py:285
+#: assembl/views/api/post.py:290
 msgid "You must be logged in to view which posts are read"
 msgstr "Vous devez être connecté pour voir quels messages ont été lus"
 
-#: assembl/views/api/post.py:516
+#: assembl/views/api/post.py:521
 msgid "Your message is empty"
 msgstr "Votre message est vide"
 
