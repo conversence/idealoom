@@ -2473,7 +2473,7 @@ msgstr "Cuentas"
 
 #: assembl/templates/admin/discussion_permissions.jinja2:10
 msgid "Discussion "
-msgstr "Discusión"
+msgstr "Conversación"
 
 #: assembl/templates/admin/discussion_permissions.jinja2:11
 msgid "Role permissions:"
@@ -3326,7 +3326,7 @@ msgstr "Panel de ideas"
 #: assembl/templates/views/create-group.tmpl:83
 #: assembl/templates/views/navigation.tmpl:11
 msgid "Discussion"
-msgstr "Discusión"
+msgstr "Conversación"
 
 #: assembl/templates/views/defaultNotification.tmpl:7
 msgid "Auto-subscribe users to default notifications when they register"
