@@ -39,7 +39,7 @@ from assembl.models import (
     Post, LocalPost, SynthesisPost,
     Synthesis, Discussion, Content, Idea, ViewPost, User,
     IdeaRelatedPostLink, AgentProfile, LikedPost, LangString,
-    LanguagePreferenceCollection, LangStringEntry)
+    LanguagePreferenceCollection, LangStringEntry, Extract)
 from assembl.models.post import deleted_publication_states
 from assembl.lib.raven_client import capture_message
 
@@ -129,6 +129,7 @@ def get_posts(request):
     view_def = request.GET.get('view') or 'default'
 
     only_synthesis = request.GET.get('only_synthesis')
+    not_harvested = request.GET.get('not_harvested')
 
     post_author_id = request.GET.get('post_author')
     if post_author_id:
@@ -246,6 +247,10 @@ def get_posts(request):
         locales = request.GET.getall('locale')
         posts, rank = add_text_search(
             posts, (PostClass.body_id,), keywords, locales, order == 'score')
+
+    if not_harvested:
+        # TODO: Add a flag for harvesting that does not result in extracts
+        posts = posts.outerjoin(Extract).filter(Extract.id == None)
 
     # Post read/unread management
     is_unread = request.GET.get('is_unread')

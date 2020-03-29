@@ -423,6 +423,26 @@ class FilterPostIsOrphan extends AbstractFilterBooleanValue {
 }
 
 
+class FilterPostNotHarvested extends AbstractFilterBooleanValue {
+    getId() {
+      return 'not_harvested';
+    }
+    getImplicitValuePromise() {
+      return Promise.resolve(true);
+    }
+    getServerParam() {
+      return 'not_harvested';
+    }
+    getLabelPromise() {
+      return Promise.resolve(i18n.gettext('Messages that were not harvested'));
+    }
+    getHelpText() {
+      return i18n.gettext('Only include messages that were not harvested.');
+    }
+}
+
+
+
 class FilterPostIsSynthesis extends AbstractFilterBooleanValue {
     getId() {
       return 'only_synthesis_posts';
@@ -754,6 +774,7 @@ var availableFilters = {
     POST_IS_DESCENDENT_OF_POST: FilterPostIsDescendentOfPost,
     POST_IS_DESCENDENT_OR_ANCESTOR_OF_POST: FilterPostIsDescendentOrAncestorOfPost,
     POST_IS_ORPHAN: FilterPostIsOrphan,
+    POST_NOT_HARVESTED: FilterPostNotHarvested,
     POST_IS_SYNTHESIS: FilterPostIsSynthesis,
     POST_HAS_TEXT: FilterPostHasText,
     POST_IS_UNREAD: FilterPostIsUnread,
