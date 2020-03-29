@@ -179,6 +179,10 @@ msgid ""
 "social-auth backend. Participants will be auto-logged in to that server, and"
 " discussion auto-subscription will require an account from this backend."
 msgstr ""
+"Un servidor de autenticación principal para esta discusión, definido como un"
+" backend python-social-auth. Los participantes iniciarán sesión "
+"automáticamente en ese servidor, y la suscripción automática de discusión "
+"requerirá una cuenta de este servidor."
 
 #: assembl/models/preferences.py:576
 msgid "Allow access to moderated text"
@@ -294,6 +298,8 @@ msgid ""
 "A JSON specification of Catalyst visualizations to show in the navigation "
 "section"
 msgstr ""
+"Una especificación JSON de visualizaciones de Catalyst para mostrar en la "
+"sección de navegación"
 
 #: assembl/models/preferences.py:829
 msgid "Catalyst translations"
@@ -388,8 +394,8 @@ msgid_plural ""
 msgstr[0] ""
 "debe solicitar a un administrador de conversación lo siguiente papel: %s"
 msgstr[1] ""
-"debe solicitar a un administrador de conversación uno de los siguientes papels:"
-" %s"
+"debe solicitar a un administrador de conversación uno de los siguientes "
+"papels: %s"
 
 #: assembl/static/js/app/models/agents.js:166
 msgid "the administrator has closed this discussion to all contributions"
@@ -466,6 +472,8 @@ msgid ""
 "invalid extract: the extract must have a valid idPost (here %s) or a valid "
 "uri (here %s)"
 msgstr ""
+"extracto no válido: el extracto debe tener un idPost válido (aquí %s) o un "
+"uri válido (aquí %s)"
 
 #: assembl/static/js/app/models/segment.js:131
 msgid "invalid created: "
@@ -753,8 +761,8 @@ msgid ""
 "You can view the discussion in many different ways using the filters at the "
 "top."
 msgstr ""
-"Puede ver la conversación de muchas maneras diferentes utilizando los filtros "
-"en la parte superior."
+"Puede ver la conversación de muchas maneras diferentes utilizando los "
+"filtros en la parte superior."
 
 #: assembl/static/js/app/utils/tours/appTours.js:91
 msgid "Spot relevant quotes on each idea"
@@ -791,8 +799,9 @@ msgid ""
 "Periodically an executive summary of the discussion is created to give you a"
 " quick overview of what was said since the last executive summary"
 msgstr ""
-"Periódicamente se crea un resumen ejecutivo de la conversación para darle una "
-"visión general rápida de lo que se dijo desde el último resumen ejecutivo"
+"Periódicamente se crea un resumen ejecutivo de la conversación para darle "
+"una visión general rápida de lo que se dijo desde el último resumen "
+"ejecutivo"
 
 #: assembl/static/js/app/utils/tours/appTours.js:131
 msgid "DISABLED"
@@ -802,7 +811,8 @@ msgstr "DISCAPACITADO"
 msgid ""
 "Find the different syntheses produced since the beginning of the discussion"
 msgstr ""
-"Encuentra las diferentes síntesis producidas desde el inicio de la conversación"
+"Encuentra las diferentes síntesis producidas desde el inicio de la "
+"conversación"
 
 #: assembl/static/js/app/utils/tours/appTours.js:143
 msgid "Catch up on the evolution"
@@ -1034,6 +1044,8 @@ msgid ""
 "Please be aware that comments below will be imported into a discussion found"
 " at "
 msgstr ""
+"Tenga en cuenta que los comentarios a continuación se importarán en una "
+"discusión que se encuentra en"
 
 #: assembl/static/js/app/views/facebookViews.js:298
 msgid ""
@@ -1654,7 +1666,8 @@ msgstr "Mensajes de síntesis"
 
 #: assembl/static/js/app/views/postFilters.js:440
 msgid "Only include messages that represent a synthesis of the discussion."
-msgstr "Solo incluye mensajes que representen una síntesis de la conversación."
+msgstr ""
+"Solo incluye mensajes que representen una síntesis de la conversación."
 
 #: assembl/static/js/app/views/postFilters.js:458
 msgid "Have unread value"
@@ -1917,7 +1930,8 @@ msgid "%d participant has contributed since the beginning of the discussion"
 msgid_plural ""
 "%d participants have contributed since the beginning of the discussion"
 msgstr[0] "%d participante ha contribuido desde el inicio de la conversación"
-msgstr[1] "%d participantes han contribuido desde el inicio de la conversación"
+msgstr[1] ""
+"%d participantes han contribuido desde el inicio de la conversación"
 
 #: assembl/static/js/app/views/statistics.js:1086
 msgid "Contributors active recently"
@@ -2516,9 +2530,9 @@ msgid ""
 "message\", send one yourself, explaining how to reset password."
 msgstr ""
 "El mensaje de invitación no se enviará a los usuarios existentes, incluso si"
-" se crea en otra conversación. Si no recibe %(platform_name)s para \"Enviar un "
-"mensaje de invitación\", envíelo usted mismo y explique cómo restablecer la "
-"contraseña."
+" se crea en otra conversación. Si no recibe %(platform_name)s para \"Enviar "
+"un mensaje de invitación\", envíelo usted mismo y explique cómo restablecer "
+"la contraseña."
 
 #: assembl/templates/admin/discussion_permissions.jinja2:101
 msgid "Role"
@@ -2633,9 +2647,9 @@ msgid ""
 "discussion %(discussionLink)s.  Specifically, you currently receive a "
 "notification when:"
 msgstr ""
-"Está recibiendo esto porque está %(notificationConfigLink)s en la conversación "
-"%(discussionLink)s. Específicamente, actualmente recibe una notificación "
-"cuando:"
+"Está recibiendo esto porque está %(notificationConfigLink)s en la "
+"conversación %(discussionLink)s. Específicamente, actualmente recibe una "
+"notificación cuando:"
 
 #: assembl/templates/notifications/html_mail.jinja2:80
 #: assembl/templates/views/userSubscriber.tmpl:11
@@ -3252,6 +3266,8 @@ msgid ""
 "Click on the button, where you had dragged it in your browser, to activate "
 "web annotation."
 msgstr ""
+"Haga clic en el botón, donde lo había arrastrado en su navegador, para "
+"activar la anotación web."
 
 #: assembl/templates/views/bookmarket.tmpl:28
 msgid "I understand"
@@ -3472,6 +3488,8 @@ msgid ""
 "This field is an e-mail address, and is mandatory: it will be the value of "
 "notification emails' From field"
 msgstr ""
+"Este campo es una dirección de correo electrónico y es obligatorio: será el "
+"valor de los campos de correo electrónico de notificación."
 
 #: assembl/templates/views/emailSource.tmpl:22
 msgid "Post email address"
@@ -3689,8 +3707,8 @@ msgid ""
 "Stay informed and up to date with the evolution of the discussion and "
 "receive notifications when:"
 msgstr ""
-"Manténgase informado y actualizado con la evolución de la conversación y reciba"
-" notificaciones cuando:"
+"Manténgase informado y actualizado con la evolución de la conversación y "
+"reciba notificaciones cuando:"
 
 #: assembl/templates/views/firstPost.tmpl:19
 #: assembl/templates/views/joinDiscussion.tmpl:19
@@ -3979,8 +3997,8 @@ msgid ""
 "Choose an idea in the Table of ideas to explore the discussion or close this"
 " panel as you will have open"
 msgstr ""
-"Elija una idea en la Tabla de ideas para explorar la conversación o cierre este"
-" panel ya que tendrá abierto"
+"Elija una idea en la Tabla de ideas para explorar la conversación o cierre "
+"este panel ya que tendrá abierto"
 
 #: assembl/templates/views/instigator.tmpl:6
 #: assembl/templates/views/instigator.tmpl:8
