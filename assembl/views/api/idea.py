@@ -264,6 +264,10 @@ def save_idea(request):
                         '@type': 'LangStringEntry',
                         '@language': locale,
                         'value': ls_data}]}
+            elif isinstance(ls_data, dict):
+                for e in ls_data['entries']:
+                    if e['@language'] == 'und':
+                        e['@language'] = tr_service.identify(e['value'])[0]
             subcontext = idea.get_collection_context(key, context)
             if current:
                 if ls_data:
