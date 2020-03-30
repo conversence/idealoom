@@ -1602,18 +1602,19 @@ class IdeaLink(HistoryMixinWithOrigin, DiscussionBoundBase):
         from ..semantic.namespaces import RDFS, IDEA
         ontology = get_inference_store()
         my_type = self.rdf_type_url
-        props = ontology.ontology.subjects(RDFS.domain, my_type)
-        result = {}
-        for prop in props:
-            # bug: why doesn't to_symbol work?
-            name = ontology.context._prefixes[str(prop)]
-            for superp in ontology.getDirectSuperProperties(prop):
-                if superp == IDEA.source_idea:
-                    result[name] = Idea.uri_generic(self.target_id)
-                    break
-                elif superp == IDEA.target_idea:
-                    result[name] = Idea.uri_generic(self.source_id)
-                    break
+        for atype in chain([my_type], ontology.getDirectSuperClasses(my_type)):
+            props = ontology.ontology.subjects(RDFS.domain, atype)
+            result = {}
+            for prop in props:
+                # bug: why doesn't to_symbol work?
+                name = ontology.context._prefixes[str(prop)]
+                for superp in ontology.getDirectSuperProperties(prop):
+                    if superp == IDEA.source_idea:
+                        result[name] = Idea.uri_generic(self.target_id)
+                        break
+                    elif superp == IDEA.target_idea:
+                        result[name] = Idea.uri_generic(self.source_id)
+                        break
         return result
 
     def copy(self, tombstone=None, db=None, **kwargs):
