@@ -7,7 +7,8 @@ import simplejson as json
 
 from assembl.auth import (P_READ, P_EDIT_SYNTHESIS, CrudPermissions)
 from assembl.models import (
-    Discussion, Idea, SubGraphIdeaAssociation, Synthesis)
+    Discussion, Idea, SubGraphIdeaAssociation, Synthesis,
+    LanguagePreferenceCollection)
 from ..traversal import InstanceContext, CollectionContext
 from . import check_permissions
 
@@ -106,5 +107,6 @@ def html_export(request):
     from pyramid_jinja2 import IJinja2Environment
     jinja_env = request.registry.queryUtility(
         IJinja2Environment, name='.jinja2')
-    return Response(request.context._instance.as_html(jinja_env),
+    lang_prefs = LanguagePreferenceCollection.getCurrent(request)
+    return Response(request.context._instance.as_html(jinja_env, lang_prefs),
                     content_type='text/html', charset="utf-8")
