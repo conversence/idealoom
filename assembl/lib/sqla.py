@@ -854,6 +854,7 @@ class BaseOps(object):
                     update_dict = update_dict()
                 assert isinstance(update_dict, dict)
                 result.update(update_dict)
+                continue
             elif spec is False:
                 known.add(name)
                 continue
