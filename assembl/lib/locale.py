@@ -132,6 +132,14 @@ def create_mt_code(source_code, target_code):
     return "-x-mtfrom-".join((target_code, source_code))
 
 
+def split_mt_code(locale):
+    parts = locale.split("-x-mtfrom-")
+    if len(parts) < 2:
+        parts.append(None)
+    assert len(parts) == 2
+    return parts
+
+
 _rtl_locales = {"ar", "dv", "ha", "he", "fa", "ps", "ur", "yi"}
 
 def is_rtl(locale):

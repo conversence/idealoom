@@ -28,7 +28,7 @@
         "entries": true
     },
     "LangStringEntry": {
-        "@language": "locale",
+        "@language": "&set_locale_code",
         "error_code": false,
         "value": true
     },

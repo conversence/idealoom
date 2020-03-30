@@ -25,7 +25,8 @@ from . import Base, TombstonableMixin, CrudOperation
 from .import_records import ImportRecord
 from ..lib import config
 from ..lib.abc import classproperty
-from ..lib.locale import locale_ancestry, create_mt_code, locale_compatible
+from ..lib.locale import (
+    locale_ancestry, create_mt_code, locale_compatible, split_mt_code)
 from ..auth import CrudPermissions, P_READ, P_ADMIN_DISC, P_SYSADMIN
 
 
@@ -771,11 +772,28 @@ class LangStringEntry(TombstonableMixin, Base):
             value))
 
     @property
+    def mt_trans_of_locale(self):
+        if self.mt_trans_of_id:
+            return self.self.mt_trans_of.locale
+
+    @property
     def locale_code(self):
         if self.mt_trans_of_id:
-            return create_mt_code(self.mt_trans_of.locale, self.locale)
+            return create_mt_code(self.mt_trans_of_locale, self.locale)
         else:
             return self.locale
+
+    def set_locale_code(self, locale):
+        base, trans = split_mt_code(locale)
+        my_trans = self.mt_trans_of_locale
+        if trans:
+            assert trans == my_trans
+        elif my_trans:
+            # clearing translation status
+            self.mt_trans_of_id = None
+            self.error_code = None
+            self.error_count = 0
+        self.locale = base
 
     @property
     def locale_identification_data_json(self):
