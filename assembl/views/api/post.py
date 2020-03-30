@@ -604,6 +604,10 @@ def create_post(request):
     else:
         new_post = LocalPost(**post_constructor_args)
     new_post.guess_languages()
+    service = discussion.translation_service()
+    if service.canTranslate is not None:
+        # pre-translate in discussion languages
+        translate_content(new_post, service=service)
 
     discussion.db.add(new_post)
     discussion.db.flush()
