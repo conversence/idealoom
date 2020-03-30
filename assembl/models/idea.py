@@ -1602,9 +1602,9 @@ class IdeaLink(HistoryMixinWithOrigin, DiscussionBoundBase):
         from ..semantic.namespaces import RDFS, IDEA
         ontology = get_inference_store()
         my_type = self.rdf_type_url
+        result = {}
         for atype in chain([my_type], ontology.getDirectSuperClasses(my_type)):
             props = ontology.ontology.subjects(RDFS.domain, atype)
-            result = {}
             for prop in props:
                 # bug: why doesn't to_symbol work?
                 name = ontology.context._prefixes[str(prop)]
