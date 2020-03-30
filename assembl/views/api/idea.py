@@ -316,7 +316,7 @@ def save_idea(request):
                     link.order = order
                     link.source = parent
                 else:
-                    link = IdeaLink(source=source, target=idea, order=order)
+                    link = IdeaLink(source=parent, target=idea, order=order)
                     db.add(link)
                 db.expire(parent, ['target_links'])
                 order += 1.0
