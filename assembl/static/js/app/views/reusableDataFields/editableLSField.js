@@ -63,6 +63,8 @@ class EditableLSField extends EditableField {
       ls.get("entries").add(lse);
     } else {
       lse.set('value', text);
+      lse.set('@language', Ctx.getLocale()); // i.e. clear translation status
+      lse.set('error_code', undefined);
     }
     attrs[this.modelProp] = ls;
     this.model.save(attrs, {
