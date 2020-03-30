@@ -182,7 +182,8 @@
         "@type": "rdf_type",
         "link_order": "order",
         "target_idea": "source",
-        "source_idea": "target"
+        "source_idea": "target",
+        "@update": "derived_sub_properties"
     },
     "Map": {
         "in_conversation": "discussion",

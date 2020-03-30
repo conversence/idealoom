@@ -848,6 +848,12 @@ class BaseOps(object):
             vals = None
             if name == "_default":
                 continue
+            if name == "@update":
+                update_dict = getattr(self, spec)
+                if pyinspect.ismethod(update_dict):
+                    update_dict = update_dict()
+                assert isinstance(update_dict, dict)
+                result.update(update_dict)
             elif spec is False:
                 known.add(name)
                 continue
