@@ -774,7 +774,7 @@ class LangStringEntry(TombstonableMixin, Base):
     @property
     def mt_trans_of_locale(self):
         if self.mt_trans_of_id:
-            return self.self.mt_trans_of.locale
+            return self.mt_trans_of.locale
 
     @property
     def locale_code(self):
