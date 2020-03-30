@@ -618,6 +618,11 @@ class DeeplTranslationService(AbstractTranslationService):
                 self._known_locales = self.known_locales_cls
         return self._known_locales or self.known_locales_cls
 
+    @classmethod
+    def target_locale_labels_cls(cls, target_locale):
+        return cls.target_locale_labels_for_locales(
+            cls.known_locales_cls, target_locale)
+
     def translate(self, text, target, is_html=False, source=None, db=None):
         if not text:
             return text, LocaleLabel.NON_LINGUISTIC
