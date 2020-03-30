@@ -590,6 +590,17 @@ class LangString(Base):
         # or first entry
         return self.entries[0]
 
+    def safe_best_entry_in_request(self):
+        from .auth import LanguagePreferenceCollection
+        from pyramid.threadlocal import get_current_request
+        req = get_current_request()
+        # Use only when a request is in context, eg view_def
+        if req:
+            return self.best_lang(
+                LanguagePreferenceCollection.getCurrent(), False)
+        else:
+            return self.first_original()
+
     def best_entry_in_request(self):
         from .auth import LanguagePreferenceCollection
         # Use only when a request is in context, eg view_def

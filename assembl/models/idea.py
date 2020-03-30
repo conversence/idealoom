@@ -144,9 +144,9 @@ class WordCountVisitor(IdeaVisitor):
             titles = set()
             # TODO maparent: Group langstrings by language.
             for content in query:
-                body = content.body.first_original().value
+                body = content.body.safe_best_entry_in_request().value
                 self.counter.add_text(self.cleantext(body), 0.5)
-                title = content.subject.first_original().value
+                title = content.subject.safe_best_entry_in_request().value
                 title = self.cleantext(title)
                 if title not in titles:
                     self.counter.add_text(title)
@@ -213,19 +213,19 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
     @property
     def definition(self):
         if self.description_id:
-            return self.description.first_original().value
+            return self.description.safe_best_entry_in_request().value
         return ""
 
     @property
     def long_title(self):
         if self.synthesis_title_id:
-            return self.synthesis_title.first_original().value
+            return self.synthesis_title.safe_best_entry_in_request().value
         return ""
 
     @property
     def short_title(self):
         if self.title_id:
-            return self.title.first_original().value
+            return self.title.safe_best_entry_in_request().value
         return ""
 
     discussion_id = Column(Integer, ForeignKey(
