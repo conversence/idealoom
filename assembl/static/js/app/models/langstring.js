@@ -427,7 +427,7 @@ class LangString extends Base.Model.extend({
    */
   forLanguage(lang) {
     return this.get("entries").models.find(function (lse) {
-      return lse.get("@language") == lang;
+      return lse.getBaseLocale() == lang;
     });
   }
 
