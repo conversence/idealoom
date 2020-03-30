@@ -29,7 +29,8 @@ from .. import (
     get_default_context as base_default_context,
     get_css_links, get_js_links)
 from assembl.lib.frontend_urls import FrontendUrls
-from assembl.nlp.translation_service import DummyGoogleTranslationService
+from assembl.nlp.translation_service import (
+    DummyGoogleTranslationService, LanguageIdentificationService)
 from ..auth.views import get_social_autologin
 
 
@@ -196,17 +197,22 @@ def home_view(request):
     target_locale = strip_country(locale)
 
     translation_service_data = {}
-    try:
-        service = discussion.translation_service()
-        if service.canTranslate is not None:
-            translation_service_data = service.serviceData()
-    except:
-        pass
+    service = discussion.translation_service()
+    if service.canTranslate is not None:
+        translation_service_data = service.serviceData()
+        locale_labels = json.dumps(
+            service.target_locale_labels_cls(target_locale))
+    else:
+        locales = discussion.discussion_locales
+        labels = LanguageIdentificationService.target_locale_labels_for_locales(
+            locales, target_locale)
+        locale_labels = json.dumps(labels)
+    context['translation_locale_names_json'] = locale_labels
     context['translation_service_data_json'] = json.dumps(
         translation_service_data)
     locale_labels = json.dumps(
         DummyGoogleTranslationService.target_locale_labels_cls(target_locale))
-    context['translation_locale_names_json'] = locale_labels
+    context['locale_names_json'] = locale_labels
 
     context['preferences_json'] = json.dumps(dict(preferences))
     role_names = [x for (x,) in session.query(Role.name).all()]
@@ -243,6 +249,7 @@ def frontend_test_view(request):
     locale_labels = json.dumps(
         DummyGoogleTranslationService.target_locale_labels_cls(target_locale))
     context['translation_locale_names_json'] = locale_labels
+    context['locale_names_json'] = locale_labels
     context['translation_service_data_json'] = '{}'
     context['preferences_json'] = json.dumps(
         discussion.preferences.safe_values_json(request.base_permissions))

@@ -2023,7 +2023,7 @@ class MessageView extends LoaderView.extend({
     var preference = preferences.getPreferenceForLocale(locale);
 
     //Dict cache of locale -> full name
-    this.langCache = Ctx.getLocaleToLanguageNameCache();
+    this.langCache = Ctx.getTranslationLocaleToLanguageNameCache();
 
     //User language preferences
     this.translationData = translationData;

@@ -81,6 +81,7 @@ def base_admin_view(request):
     locale_labels = json.dumps(
         DummyGoogleTranslationService.target_locale_labels_cls(target_locale))
     context['translation_locale_names_json'] = locale_labels
+    context['locale_names_json'] = locale_labels
 
     role_names = [x for (x,) in session.query(Role.name).all()]
     permission_names = [x for (x,) in session.query(Permission.name).all()]

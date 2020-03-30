@@ -79,6 +79,13 @@ class LanguageIdentificationService(object):
         if base in self.known_locales:
             return base
 
+    @classmethod
+    def target_locale_labels_for_locales(cls, locales, target_locale):
+        return LocaleLabel.names_of_locales_in_locale(
+            [strip_country(cls.asPosixLocale(loc)) for loc in locales] +
+            LocaleLabel.SPECIAL_LOCALES,
+            target_locale)
+
     idiosyncrasies = {"zh-tw": "zh_Hant_TW", "zh-cn": "zh_Hans_CN"}
 
     @classmethod
@@ -191,13 +198,6 @@ class AbstractTranslationService(LanguageIdentificationService):
 
     def target_locales(self):
         return ()
-
-    @classmethod
-    def target_locale_labels_for_locales(cls, locales, target_locale):
-        return LocaleLabel.names_of_locales_in_locale(
-            [strip_country(cls.asPosixLocale(loc)) for loc in locales] +
-            LocaleLabel.SPECIAL_LOCALES,
-            target_locale)
 
     def target_locale_labels(self, target_locale):
         return self.target_locale_labels_for_locales(

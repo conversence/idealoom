@@ -1891,7 +1891,7 @@ Context.prototype = {
 
   /**
    * Cache of the locale to locale-name. The language names will be sent from the back-end in the language of the interface.
-   * Found from the <script id="translation-locale-names"></script>
+   * Found from the <script id="locale-names"></script>
    * eg. Interface language: EN
    * eg. {"fr": "French"}
    * eg. Interface language FR
@@ -1905,8 +1905,29 @@ Context.prototype = {
       return this._localeToLangNameCache;
     }
 
-    this._localeToLangNameCache = this.getJsonFromScriptTag('translation-locale-names');
+    this._localeToLangNameCache = this.getJsonFromScriptTag('locale-names');
     return this._localeToLangNameCache;
+  },
+
+
+  /**
+   * Cache of the locale to locale-name available in the discussion. The language names will be sent from the back-end in the language of the interface.
+   * Found from the <script id="translation-locale-names"></script>
+   * eg. Interface language: EN
+   * eg. {"fr": "French"}
+   * eg. Interface language FR
+   * eg. {"fr": "Francais"}
+   * @returns {object}  Language cache
+   * @function app.common.context.Context.getTranslationLocaleToLanguageNameCache
+   */
+  getTranslationLocaleToLanguageNameCache: function(){
+    //The cache is only read once for efficiency
+    if ( this._translationLocaleToLangNameCache ) {
+      return this._translationLocaleToLangNameCache;
+    }
+
+    this._translationLocaleToLangNameCache = this.getJsonFromScriptTag('translation-locale-names');
+    return this._translationLocaleToLangNameCache;
   },
 
   _hiddenTargetLocales: ['und', 'mul', 'zxx'],
@@ -1914,7 +1935,7 @@ Context.prototype = {
     if (this._localesAsSortedList === undefined) {
       var hiddenTargetLocales = this._hiddenTargetLocales;
 
-      var localeList = _.mapObject(this.getLocaleToLanguageNameCache(), function(name, loc) {
+      var localeList = _.mapObject(this.getTranslationLocaleToLanguageNameCache(), function(name, loc) {
       return [loc, name];
   });
 
