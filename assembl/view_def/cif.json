@@ -164,8 +164,8 @@
     },
     "GenericIdeaNode": {
         "created": "creation_date",
-        "description": ":extended",
-        "title": ":extended",
+        "description": "definition",
+        "title": "short_title",
         "last_modified": true,
         "in_conversation": "discussion",
         "has_container": "discussion",
