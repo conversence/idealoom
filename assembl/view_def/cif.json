@@ -164,6 +164,7 @@
     },
     "GenericIdeaNode": {
         "created": "creation_date",
+        "@type": "rdf_type",
         "description": "definition",
         "title": "short_title",
         "last_modified": true,
@@ -178,6 +179,7 @@
     },
     "DirectedIdeaRelation": {
         "in_conversation": "&get_discussion",
+        "@type": "rdf_type",
         "link_order": "order",
         "target_idea": "source",
         "source_idea": "target"
