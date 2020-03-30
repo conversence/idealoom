@@ -14,6 +14,7 @@ class EditableField extends Marionette.View.extend({
 
   events: {
     'blur': 'onBlur',
+    'focus': 'onFocus',
     'keydown': 'onKeyDown'
   }
 }) {
@@ -24,6 +25,7 @@ class EditableField extends Marionette.View.extend({
     this.modelProp = (_.has(options, 'modelProp')) ? options.modelProp : null;
     this.placeholder = (_.has(options, 'placeholder')) ? options.placeholder : null;
     this.focus = (_.has(options, 'focus')) ? options.focus : null;
+    self.editing = false;
 
     if (this.model === null) {
       throw new Error('EditableField needs a model');
@@ -73,6 +75,19 @@ class EditableField extends Marionette.View.extend({
     this.view.trigger('EditableField:render');
   }
 
+  onFocus(ev) {
+    if (this.canEdit) {
+        this.editing = true;
+        var data = Ctx.stripHtml(ev.currentTarget.textContent);
+        data = $.trim(data);
+        const value = this.getTextValue();
+        if (value != data) {
+            // mostly because of LSField
+            ev.currentTarget.textContent = value;
+        }
+    }
+  }
+
   onBlur(ev) {
     if (this.canEdit) {
       this.focus = false;
@@ -88,6 +103,7 @@ class EditableField extends Marionette.View.extend({
           this.setTextValue(data);
         }
       }
+      this.editing = false;
     }
   }
 
