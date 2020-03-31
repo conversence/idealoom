@@ -1379,10 +1379,10 @@ def chgrp_rec(path, group, use_sudo=False, upto=None):
         path = "/".join(parts[:i])
         if path == upto:
             break
-        if not commmand('chgrp {group} {path}'.format(group=group, path=path),
+        if not command('chgrp {group} {path}'.format(group=group, path=path),
                         warn_only=True).succeeded:
             break
-        if not commmand('chmod g+x {path}'.format(path=path),
+        if not command('chmod g+x {path}'.format(path=path),
                         warn_only=True).succeeded:
             break
         success = True
