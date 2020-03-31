@@ -589,7 +589,7 @@ def filter_autostart_processes(processes):
 def app_majorupdate():
     "This update is so major that assembl needs to be put in maintenance mode. Only for production."
     execute(database_dump)
-    execute(updatemaincode)
+    execute(updatemaincode_and_setup)
     execute(app_update_dependencies)
     execute(app_compile_nodbupdate)
     maintenance_mode_start()
@@ -835,6 +835,7 @@ def bootstrap_from_checkout():
     execute(updatemaincode)
     execute(build_virtualenv)
     execute(app_update_dependencies)
+    execute(pip_develop)
     execute(app_setup)
     execute(check_and_create_database_user)
     execute(app_compile_nodbupdate)
@@ -881,7 +882,21 @@ def updatemaincode():
         run('git checkout %s' % env.gitbranch)
         run('git pull %s %s' % (env.gitrepo, env.gitbranch))
         run('git submodule update --init')
+
+
+@task
+def pip_develop():
+    """
+    develop the current environment.
+    """
+    # make sure you've run install -r requirements at least once
+    with cd(join(env.projectpath)):
         venvcmd('pip install -e ./')
+
+
+def updatemaincode_and_setup():
+    updatemaincode()
+    pip_develop()
 
 
 def app_setup():
@@ -898,7 +913,7 @@ def app_fullupdate():
     You need internet connectivity, and can't run this on a branch.
     """
     execute(database_dump)
-    execute(updatemaincode)
+    execute(updatemaincode_and_setup)
     execute(app_compile)
 
 
@@ -910,7 +925,7 @@ def app_update():
     run this on a branch.
     """
     execute(database_dump)
-    execute(updatemaincode)
+    execute(updatemaincode_and_setup)
     execute(app_compile_noupdate)
 
 
