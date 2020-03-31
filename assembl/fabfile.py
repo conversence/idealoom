@@ -1371,18 +1371,19 @@ def install_fail2ban():
         sudo('apt-get install -y fail2ban')
 
 
-def chgrp_rec(path, group, upto=None):
+def chgrp_rec(path, group, use_sudo=False, upto=None):
+    command = sudo if use_sudo else run
     parts = path.split("/")
     success = False
     for i in range(len(parts), 1, -1):
         path = "/".join(parts[:i])
         if path == upto:
             break
-        if not run('chgrp {group} {path}'.format(group=group, path=path),
-                   warn_only=True).succeeded:
+        if not commmand('chgrp {group} {path}'.format(group=group, path=path),
+                        warn_only=True).succeeded:
             break
-        if not run('chmod g+x {path}'.format(path=path),
-                   warn_only=True).succeeded:
+        if not commmand('chmod g+x {path}'.format(path=path),
+                        warn_only=True).succeeded:
             break
         success = True
     assert success  # At least the full path
@@ -1391,9 +1392,11 @@ def chgrp_rec(path, group, upto=None):
 @task
 def set_file_permissions():
     """Set file permissions for an isolated platform environment"""
+    if not as_bool(env.make_project_web_visible):
+        return
     webgrp = '_www' if env.mac else 'www-data'
-    user_in_webgrp = webgrp in run('groups', quiet=True).split()
-    if as_bool(env.add_user_to_webgroup) and not user_in_webgrp:
+    user_not_in_webgrp = webgrp not in run('groups', quiet=True).split()
+    if as_bool(env.add_user_to_webgroup) and user_not_in_webgrp:
         # This should cover most cases.
         if env.mac:
             sudo('dseditgroup -o edit -a {user} -t user {webgrp}'.format(
@@ -1414,15 +1417,15 @@ def set_file_permissions():
         code_path = code_root()
         run('chmod -R o-rwx ' + project_path, warn_only=True)
         run('chmod -R g-rw ' + project_path, warn_only=True)
-        chgrp_rec(project_path, webgrp)
-        chgrp_rec(upload_dir, webgrp, project_path)
+        chgrp_rec(project_path, webgrp, user_not_in_webgrp)
+        chgrp_rec(upload_dir, webgrp, user_not_in_webgrp, project_path)
 
         if not (code_path.startswith(project_path)):
             run('chmod -R o-rwx ' + code_path)
             run('chmod -R g-rw ' + code_path)
-            chgrp_rec(code_path, webgrp)
+            chgrp_rec(code_path, webgrp, user_not_in_webgrp)
 
-        command = run if user_in_webgrp else sudo
+        command = sudo if user_not_in_webgrp else run
         command('chgrp {webgrp} . {path}/var {path}/var/run'.format(webgrp=webgrp, path=project_path))
         command('chgrp -R {webgrp} {path}/assembl/static'.format(webgrp=webgrp, path=code_path))
         command('chgrp -R {webgrp} {uploads}'.format(webgrp=webgrp, uploads=upload_dir))

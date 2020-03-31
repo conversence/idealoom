@@ -27,6 +27,7 @@ _can_test = true
 accept_secure_connection = false
 require_secure_connection = false
 add_user_to_webgroup = false
+make_project_web_visible = false
 
 # If not proxied by nginx or something, public_port in app:main needs to match
 # this value
