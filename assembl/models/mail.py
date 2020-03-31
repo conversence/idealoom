@@ -7,7 +7,7 @@ import mailbox
 import re
 import smtplib
 import os
-from cgi import escape as html_escape
+from html import escape as html_escape
 from collections import defaultdict
 from email.header import decode_header as decode_email_header, Header
 from email.mime.multipart import MIMEMultipart
