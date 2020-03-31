@@ -1393,6 +1393,7 @@ def set_file_permissions():
     """Set file permissions for an isolated platform environment"""
     webgrp = '_www' if env.mac else 'www-data'
     # This should cover most cases.
+    # TODO: Don't alter groups of a dev user, but sudo the chgrp command
     if webgrp not in run('groups').split():
         if env.mac:
             sudo('dseditgroup -o edit -a {user} -t user {webgrp}'.format(
