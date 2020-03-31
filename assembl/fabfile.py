@@ -1392,9 +1392,9 @@ def chgrp_rec(path, group, upto=None):
 def set_file_permissions():
     """Set file permissions for an isolated platform environment"""
     webgrp = '_www' if env.mac else 'www-data'
-    # This should cover most cases.
-    # TODO: Don't alter groups of a dev user, but sudo the chgrp command
-    if webgrp not in run('groups').split():
+    user_in_webgrp = webgrp in run('groups', quiet=True).split()
+    if as_bool(env.add_user_to_webgroup) and not user_in_webgrp:
+        # This should cover most cases.
         if env.mac:
             sudo('dseditgroup -o edit -a {user} -t user {webgrp}'.format(
                 webgrp=webgrp, user=env.user))
@@ -1405,6 +1405,9 @@ def set_file_permissions():
             assert usermod_path, "usermod should be part of your path"
             sudo('{usermod} -a -G {webgrp} {user}'.format(
                 usermod=usermod_path, webgrp=webgrp, user=env.user))
+        print(red(f"We added your user to the web group {webgrp}. "
+                  "You will have to logout, login and repeat the procedure."))
+        exit(1)
     with cd(env.projectpath):
         upload_dir = get_upload_dir()
         project_path = env.projectpath
@@ -1419,9 +1422,10 @@ def set_file_permissions():
             run('chmod -R g-rw ' + code_path)
             chgrp_rec(code_path, webgrp)
 
-        run('chgrp {webgrp} . {path}/var {path}/var/run'.format(webgrp=webgrp, path=project_path))
-        run('chgrp -R {webgrp} {path}/assembl/static'.format(webgrp=webgrp, path=code_path))
-        run('chgrp -R {webgrp} {uploads}'.format(webgrp=webgrp, uploads=upload_dir))
+        command = run if user_in_webgrp else sudo
+        command('chgrp {webgrp} . {path}/var {path}/var/run'.format(webgrp=webgrp, path=project_path))
+        command('chgrp -R {webgrp} {path}/assembl/static'.format(webgrp=webgrp, path=code_path))
+        command('chgrp -R {webgrp} {uploads}'.format(webgrp=webgrp, uploads=upload_dir))
         run('chmod -R g+rxs {path}/var/run'.format(path=project_path))
         run('chmod -R g+rxs ' + upload_dir)
         run('find {path}/assembl/static -type d -print0 |xargs -0 chmod g+rxs'.format(path=code_path))
