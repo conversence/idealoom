@@ -1,4 +1,4 @@
-Installing IdeaLoom
+build_virtualenvbuild_virtualenvInstalling IdeaLoom
 ===================
 
 Prerequisites
@@ -31,12 +31,10 @@ On mac, install Homebrew by following the instructions at http://brew.sh ; or si
 
 Make sure `/usr/local/bin` is in your `$PATH`.
 
-Install fabric and a SSH server
+Install python a SSH server
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-You need fabric 1.5.1 and a SSH server installed.
-Fab should be able to ssh into the target server, even if it's localhost. Fab will repeatedly ask for the login password, unless you set up ``ssh-agent`` on your host and ``~/.ssh/authorized_keys`` on the target server.
-
+You need python (3.6+) and a SSH server installed.
 Here is how to install the ssh server on Mac and on Ubuntu.
 
 On Mac
@@ -46,7 +44,7 @@ Install the homebrew python and fabric:
 
 .. code:: sh
 
-    brew install python fabric
+    brew install python
 
 MacOS has a SSH server installed. To activate it, go to System Preferences in the Apple Menu, then to the Sharing tab. Ensure the "Remote login" checkbox is active.
 
@@ -57,7 +55,7 @@ You can get all that you need to bootstrap with:
 
 .. code:: sh
 
-    apt-get install fabric git openssh-server sudo
+    apt-get install python3 git openssh-server sudo
 
 Setting up a production user
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -127,6 +125,10 @@ Installing from source
 
     git clone https://github.com/conversence/idealoom.git
     cd idealoom
+    python3 -mvirtualenv -p /usr/bin/python3 venv
+    source ./venv/bin/activate
+    pip install Fabric3 future cython
+    fab -f assembl/fabfile.py -c assembl/configs/develop.rc bootstrap_from_checkout
 
 Ontology Submodule
 ++++++++++++++++++
