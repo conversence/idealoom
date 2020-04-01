@@ -35,7 +35,7 @@ from .generic import Content
 from .post import Post
 from .auth import AgentProfile
 from ..auth import (
-    CrudPermissions, P_READ, P_EDIT_IDEA,
+    CrudPermissions, P_READ, P_EDIT_IDEA, P_ASSOCIATE_EXTRACT,
     P_EDIT_EXTRACT, P_ADD_IDEA, P_ADD_EXTRACT)
 from ..semantic.namespaces import (
     CATALYST, ASSEMBL, DCTERMS, OA, QUADNAMES, RDF, SIOC)
@@ -58,10 +58,12 @@ class IdeaContentLink(DiscussionBoundBase, OriginMixin):
 
     # This is nullable, because in the case of extracts, the idea can be
     # attached later.
-    idea_id = Column(Integer, ForeignKey(Idea.id),
-                     nullable=True, index=True)
-    idea = relationship(Idea, active_history=True,
-        backref="idea_content_links")
+    idea_id = Column(Integer, ForeignKey(
+            Idea.id, ondelete="CASCADE", onupdate="CASCADE"),
+        nullable=False, index=True)
+    idea = relationship(
+        Idea, active_history=True, backref=backref(
+            "idea_content_links", passive_deletes=True))
 
     content_id = Column(Integer, ForeignKey(
         'content.id', ondelete="CASCADE", onupdate="CASCADE"),
@@ -80,7 +82,10 @@ class IdeaContentLink(DiscussionBoundBase, OriginMixin):
 
     creator = relationship(
         AgentProfile, foreign_keys=[creator_id], backref=backref(
-            'extracts_created', cascade="all")) # do not delete orphan
+            'idealinks_created', cascade="all")) # do not delete orphan
+
+    extract_id = Column(Integer, ForeignKey(
+        'extract.id', ondelete='CASCADE', onupdate='CASCADE'), index=True)
 
     __mapper_args__ = {
         'polymorphic_identity': 'assembl:relatedToIdea',
@@ -143,12 +148,6 @@ class IdeaContentPositiveLink(IdeaContentLink):
     A normal link between an idea and a Content.
     Such links should be traversed.
     """
-    __tablename__ = 'idea_content_positive_link'
-
-    id = Column(Integer, ForeignKey(
-        'idea_content_link.id',
-        ondelete='CASCADE', onupdate='CASCADE'
-    ), primary_key=True)
 
     @classmethod
     def special_quad_patterns(cls, alias_maker, discussion_id):
@@ -169,12 +168,6 @@ class IdeaContentWidgetLink(IdeaContentPositiveLink):
     A link between an idea and a Content limited to a widget view.
     Such links should be traversed.
     """
-    __tablename__ = 'idea_content_widget_link'
-
-    id = Column(Integer, ForeignKey(
-        'idea_content_positive_link.id',
-        ondelete='CASCADE', onupdate='CASCADE'
-    ), primary_key=True)
 
     __mapper_args__ = {
         'polymorphic_identity': 'assembl:postHiddenLinkedToIdea',
@@ -190,12 +183,6 @@ class IdeaRelatedPostLink(IdeaContentPositiveLink):
     A post that is relevant, as a whole, to an idea, without having a specific
     extract harvested.
     """
-    __tablename__ = 'idea_related_post_link'
-
-    id = Column(Integer, ForeignKey(
-        'idea_content_positive_link.id',
-        ondelete='CASCADE', onupdate='CASCADE'
-    ), primary_key=True)
 
     @classmethod
     def special_quad_patterns(cls, alias_maker, discussion_id):
@@ -211,7 +198,31 @@ class IdeaRelatedPostLink(IdeaContentPositiveLink):
     }
 
 
-class Extract(IdeaContentPositiveLink):
+class IdeaExtractLink(IdeaRelatedPostLink):
+    """
+    A post that is relevant, to an idea through a harvested extract
+    """
+
+    extract = relationship("Extract", backref=backref(
+        "idea_content_links", passive_deletes=True))
+
+    @classmethod
+    def special_quad_patterns(cls, alias_maker, discussion_id):
+        return [QuadMapPatternS(
+            Content.iri_class().apply(cls.content_id),
+            ASSEMBL.postExtractRelatedToIdea,
+            Idea.iri_class().apply(cls.idea_id),
+            name=QUADNAMES.assembl_postRelatedToIdea,
+            conditions=(cls.idea_id != None,))]
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'assembl:postExtractRelatedToIdea',
+    }
+
+    crud_permissions = CrudPermissions(
+            P_ASSOCIATE_EXTRACT, P_READ, P_ASSOCIATE_EXTRACT, P_ASSOCIATE_EXTRACT)
+
+class Extract(DiscussionBoundBase, OriginMixin):
     """
     An extracted part of a Content. A quotation to be referenced by an `Idea`.
     """
@@ -225,11 +236,8 @@ class Extract(IdeaContentPositiveLink):
         get_global_base_url() + '/data/SpecificResource/%d', None,
         ('id', Integer, False))
 
-    id = Column(Integer, ForeignKey(
-            'idea_content_positive_link.id',
-            ondelete='CASCADE', onupdate='CASCADE'
-        ), primary_key=True, info= {
-            'rdf': QuadMapPatternS(None, ASSEMBL.db_id)})
+    id = Column(Integer, primary_key=True,
+                info={'rdf': QuadMapPatternS(None, ASSEMBL.db_id)})
 
     graph_iri_class = PatternIriClass(
         QUADNAMES.ExcerptGraph_iri,
@@ -240,7 +248,7 @@ class Extract(IdeaContentPositiveLink):
     annotation_text = Column(UnicodeText)
 
     # info={'rdf': QuadMapPatternS(None, OA.hasBody)})
-
+    # TODO: Maybe drop this column and use the content???
     discussion_id = Column(Integer, ForeignKey(
         'discussion.id', ondelete="CASCADE", onupdate="CASCADE"),
         nullable=False, index=True,
@@ -248,6 +256,22 @@ class Extract(IdeaContentPositiveLink):
     discussion = relationship(
         Discussion, backref=backref('extracts', cascade="all, delete-orphan"),
         info={'rdf': QuadMapPatternS(None, ASSEMBL.in_conversation)})
+
+    content_id = Column(Integer, ForeignKey(
+        'content.id', ondelete="CASCADE", onupdate="CASCADE"),
+        nullable=False, index=True)
+    content = relationship(Content, backref=backref(
+        'extracts_of_content', cascade="all, delete-orphan"))
+
+    creator_id = Column(
+        Integer,
+        ForeignKey('agent_profile.id'),
+        nullable=False,
+        info={'rdf': QuadMapPatternS(None, SIOC.has_creator)}
+    )
+    creator = relationship(
+        AgentProfile, foreign_keys=[creator_id], backref=backref(
+            'extracts_created', cascade="all")) # do not delete orphan
 
     important = Column(Boolean, server_default='0')
     external_url = Column(URLString)
@@ -343,25 +367,15 @@ class Extract(IdeaContentPositiveLink):
             #     conditions=(cls.idea_id != None,)),
             ]
 
-    owner_id = Column(
-        Integer,
-        ForeignKey('agent_profile.id'),
-        nullable=False,
-    )
-
-    owner = relationship(
-        AgentProfile, foreign_keys=[owner_id], backref='extracts_owned')
-
     attributed_to = relationship(
         AgentProfile, foreign_keys=[attributed_to_id],
         backref='extracts_attributed')
 
     extract_source = relationship(Content, backref="extracts")
-    extract_ideas = relationship(Idea, backref="extracts")
+    # extract_ideas = relationship(
+    #     Idea, secondary="idea_content_link",
+    #     backref="extracts")
 
-    __mapper_args__ = {
-        'polymorphic_identity': 'assembl:postExtractRelatedToIdea',
-    }
     @property
     def target(self):
         retval = {
@@ -383,8 +397,8 @@ class Extract(IdeaContentPositiveLink):
         return r[:-1] + body[:20] + ">"
 
     def populate_from_context(self, context):
-        if not(self.owner or self.owner_id):
-            self.owner_id = context.get_user_id()
+        if not(self.creator or self.creator_id):
+            self.creator_id = context.get_user_id()
         super(Extract, self).populate_from_context(context)
 
     def get_target(self):
@@ -468,22 +482,17 @@ class Extract(IdeaContentPositiveLink):
                 alias = alias_maker.alias_from_class(cls)
             else:
                 alias = cls
-        return (query, alias.owner_id == user_id)
+        return (query, alias.creator_id == user_id)
 
     crud_permissions = CrudPermissions(
             P_ADD_EXTRACT, P_READ, P_EDIT_EXTRACT, P_EDIT_EXTRACT)
+
 
 class IdeaContentNegativeLink(IdeaContentLink):
     """
     A negative link between an idea and a Content.  Such links mean that
     a transitive context should be considered broken.  Used for thread breaking
     """
-    __tablename__ = 'idea_content_negative_link'
-
-    id = Column(Integer, ForeignKey(
-        'idea_content_link.id',
-        ondelete='CASCADE', onupdate='CASCADE'
-    ), nullable=False, primary_key=True)
 
     __mapper_args__ = {
         'polymorphic_identity': 'assembl:postDelinkedToIdea_abstract',
@@ -496,12 +505,6 @@ class IdeaThreadContextBreakLink(IdeaContentNegativeLink):
     It indicates that from this point on in the thread, this idea is no longer
     discussed.
     """
-    __tablename__ = 'idea_thread_context_break_link'
-
-    id = Column(Integer, ForeignKey(
-        'idea_content_negative_link.id',
-        ondelete='CASCADE', onupdate='CASCADE'
-    ), primary_key=True)
 
     __mapper_args__ = {
         'polymorphic_identity': 'assembl:postDelinkedToIdea',
@@ -749,3 +752,7 @@ class TextFragmentIdentifier(AnnotationSelector):
             except:
                 pass
         return None
+
+
+Idea.extracts = relationship(
+    Extract, secondary=IdeaContentLink.__table__)

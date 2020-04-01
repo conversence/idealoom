@@ -425,6 +425,10 @@
     "IdeaRelatedPostLink": {
         "@extends": "IdeaContentPositiveLink"
     },
+    "IdeaExtractLink": {
+        "@extends": "IdeaRelatedPostLink",
+        "idExcerpt": "extract"
+    },
     "IdeaContentNegativeLink": {
         "@extends": "IdeaContentLink"
     },
@@ -432,14 +436,15 @@
         "@extends": "IdeaContentNegativeLink"
     },
     "Excerpt": {
-        "@extends": "IdeaContentPositiveLink",
+        "idPost": "content",
+        "created": "creation_date",
+        "idCreator": "creator",
+        "ideaLinks": "idea_content_links:partial",
         "target": true,
         "important": true,
         "annotator_schema_version": "'\"v1.0\"",
-        "owner": true,
         "attributed_to": true,
         "quote": true,
-        "order": true,
         "discussion": false,
         "external_url": true,
         "ranges": ["selectors:default"],

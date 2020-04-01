@@ -285,6 +285,10 @@
     "IdeaRelatedPostLink": {
         "@extends": "IdeaContentPositiveLink"
     },
+    "IdeaExtractLink": {
+        "@extends": "IdeaRelatedPostLink",
+        "idExcerpt": "extract"
+    },
     "IdeaContentNegativeLink": {
         "@extends": "IdeaContentLink"
     },
@@ -292,18 +296,14 @@
         "@extends": "IdeaContentNegativeLink"
     },
     "Excerpt": {
-        "@extends": "IdeaContentPositiveLink",
-        "idIdea": "idea",
         "idPost": "content",
-        "target": true,
         "created": "creation_date",
         "idCreator": "creator",
+        "target": true,
         "important": true,
         "annotator_schema_version": "'\"v1.0\"",
-        "owner": true,
         "attributed_to": true,
         "quote": true,
-        "order": true,
         "discussion": false,
         "ranges": ["selectors:"],
         "text": "annotation_text"

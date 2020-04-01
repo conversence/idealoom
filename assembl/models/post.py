@@ -500,6 +500,7 @@ class Post(Content):
         from pyramid.threadlocal import get_current_request
         from .idea_content_link import IdeaContentLink
         from .idea import Idea
+        from .idea_content_link import Extract
         icl_polymap = IdeaContentLink.__mapper__.polymorphic_map
         request = get_current_request()
         if getattr(request, "_idea_content_link_cache2", None) is None:
@@ -508,7 +509,7 @@ class Post(Content):
                 co = with_polymorphic(Content, Content)
                 request._idea_content_link_cache1 = {x[0]: x for x in self.db.query(
                     icl.id, icl.idea_id, icl.content_id, icl.creator_id, icl.type,
-                    icl.creation_date).join(co).filter(
+                    icl.creation_date, icl.extract_id).join(co).filter(
                     co.discussion_id == self.discussion_id)}
             request._idea_content_link_cache2 = {}
 
@@ -523,7 +524,8 @@ class Post(Content):
                     "idPost": Content.uri_generic(data[2]),
                     "idCreator": AgentProfile.uri_generic(data[3]),
                     "@type": icl_polymap[data[4]].class_.external_typename(),
-                    "created": data[5].isoformat() + "Z"
+                    "created": data[5].isoformat() + "Z",
+                    "idExcerpt": Extract.uri_generic(data[6]) if data[6] else None,
                 }
             return request._idea_content_link_cache2[id]
         icls = [icl_representation(int(id)) for id in

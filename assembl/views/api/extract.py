@@ -15,7 +15,7 @@ from assembl.auth import (
     P_READ, P_ADD_EXTRACT, P_EDIT_EXTRACT, P_ASSOCIATE_EXTRACT)
 from assembl.auth.util import get_permissions
 from assembl.models import (
-    AgentProfile, Extract, TextFragmentIdentifier,
+    AgentProfile, Extract, TextFragmentIdentifier, IdeaExtractLink,
     AnnotatorSource, Post, Webpage, Idea, AnnotationSelector)
 from assembl.auth.util import user_has_permission
 from assembl.lib.web_token import decode_token
@@ -79,7 +79,7 @@ def _get_extracts_real(request, view_def='default', ids=None, user_id=None):
         all_extracts = all_extracts.filter(Extract.id.in_(ids))
 
     all_extracts = all_extracts.options(joinedload_all(
-        Extract.content))
+        Extract.idea_content_links))
     all_extracts = all_extracts.options(
         joinedload_all(Extract.selectors).joinedload(
             AnnotationSelector.extract, innerjoin=True))
@@ -91,7 +91,7 @@ def _get_extracts_real(request, view_def='default', ids=None, user_id=None):
 
 @extracts.get(permission=P_READ)
 def get_extracts(request):
-    view_def = request.GET.get('view')
+    view_def = request.GET.get('view', 'default')
     ids = request.GET.getall('ids')
 
     return _get_extracts_real(
@@ -162,27 +162,35 @@ def post_extract(request):
             db.add(content)
     extract_body = extract_data.get('quote', None)
 
-    idea_id = extract_data.get('idIdea', None)
-    if idea_id:
-        idea = Idea.get_instance(idea_id)
-        if(idea.discussion.id != discussion.id):
-            raise HTTPBadRequest(
-                "Extract from discussion %s cannot be associated with an idea from a different discussion." % extract.get_discussion_id())
-        if not idea.has_permission_req(P_ASSOCIATE_EXTRACT):
-            raise HTTPForbidden("Cannot associate extact with this idea")
-    else:
-        idea = None
-
     new_extract = Extract(
         creator_id=user_id,
-        owner_id=user_id,
         discussion=discussion,
-        idea=idea,
         important=important,
         annotation_text=annotation_text,
         content=content
     )
     db.add(new_extract)
+
+    icls = extract_data.get('ideaLinks', [])
+    if icls and P_ASSOCIATE_EXTRACT not in permissions:
+        raise HTTPForbidden()
+
+    for icl in icls:
+        # TODO: Check idCreator matches if present
+        idea_id = icl.get("idIdea", None)
+        if not idea_id:
+            raise HTTPBadRequest("idea_content_link without idIdea")
+        idea = Idea.get_instance(idea_id)
+        if(idea.discussion.id != discussion.id):
+            raise HTTPBadRequest(
+                "Extract from discussion %s cannot be associated with an idea from a different discussion." % extract.get_discussion_id())
+        link = IdeaExtractLink(
+            creator_id=user_id,
+            content=content,
+            idea=idea,
+            extract=new_extract
+        )
+        db.add(link)
 
     for range_data in extract_data.get('ranges', []):
         range = TextFragmentIdentifier(
@@ -227,20 +235,43 @@ def put_extract(request):
 
     updated_extract_data = json.loads(request.body)
 
-    extract.owner_id = user_id or AgentProfile.get_database_id(extract.owner_id)
-    extract.order = updated_extract_data.get('order', extract.order)
+    extract.creator_id = user_id or AgentProfile.get_database_id(extract.creator_id)
+    # extract.order = updated_extract_data.get('order', extract.order)
     extract.important = updated_extract_data.get('important', extract.important)
-    idea_id = updated_extract_data.get('idIdea', None)
-    if idea_id:
-        idea = Idea.get_instance(idea_id)
-        if(idea.discussion != extract.discussion):
-            raise HTTPBadRequest(
-                "Extract from discussion %s cannot be associated with an idea from a different discussion." % extract.get_discussion_id())
-        if not idea.has_permission_req(P_ASSOCIATE_EXTRACT):
-            raise HTTPForbidden("Cannot associate extact with this idea")
-        extract.idea = idea
-    else:
-        extract.idea = None
+
+    icls = updated_extract_data.get('ideaLinks', None)
+    change_icls = False
+    if icls:
+        existing = set(extract.idea_content_links)
+        for icl in icls:
+            # TODO: Check idCreator matches if present
+            idea_id = icl.get("idIdea", None)
+            if not idea_id:
+                raise HTTPBadRequest("idea_content_link without idIdea")
+            idea = Idea.get_instance(idea_id)
+            if(idea.discussion.id != discussion.id):
+                raise HTTPBadRequest(
+                    "Extract from discussion %s cannot be associated with an idea from a different discussion." % extract.get_discussion_id())
+            if '@id' in icl:
+                icl = IdeaExtractLink.get_instance(icl['@id'])
+                if icl.idea_id != idea.id:
+                    icl.idea_id = idea.id
+                    change_icls = True
+                existing.remove(icl)
+            else:
+                link = IdeaExtractLink(
+                    creator_id=user_id,
+                    idea=idea,
+                    content_id=extract.content_id,
+                    extract=extract
+                )
+                extract.db.add(link)
+                change_icls = True
+        for icl in existing:
+            icl.delete()
+            change_icls = True
+    if change_icls and P_ASSOCIATE_EXTRACT not in permissions:
+        raise HTTPForbidden()
 
     Extract.default_db.add(extract)
     #TODO: Merge ranges. Sigh.

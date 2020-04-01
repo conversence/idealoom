@@ -37,9 +37,7 @@ def test_extracts(discussion, participant1_user, reply_post_2, test_app,
         "name": user.name,
         "@type": User.external_typename()}
     extract_data = {
-        "idIdea": None,
         "creator": extract_user,
-        "owner": extract_user,
         "text": "Let's lower taxes to fav",
         "creationDate": 1376573216160,
         "target": {
@@ -78,19 +76,23 @@ def test_extracts(discussion, participant1_user, reply_post_2, test_app,
     extracts = json.loads(res.body)
     assert len(extracts) == 2
     assert extract_id in [e['@id'] for e in extracts]
-    
+
     #Update (PUT)
     #TODO:  We should test this field by field
     url = base_url + "/" + quote_plus(extract_id)
     modified_extract_data = extract_data.copy()
-    modified_extract_data["idIdea"] = subidea_1_1.uri()
+    modified_extract_data["ideaLinks"] = [
+        {
+            "idIdea": subidea_1_1.uri()
+        }
+    ]
     res = test_app.put(url, json.dumps(modified_extract_data))
     assert res.status_code == 200
     discussion.db.flush()
     res = test_app.get(url)
     assert res.status_code == 200
     extract_json = json.loads(res.body)
-    assert extract_json['idIdea'] == subidea_1_1.uri()
+    assert extract_json['ideaLinks'][0]['idIdea'] == subidea_1_1.uri()
 
     # Delete
     res = test_app.delete(base_url + "/" + quote_plus(extract_id))
@@ -443,9 +445,7 @@ def test_api_get_posts_from_idea(
         "name": user.name,
         "@type": User.external_typename()}
     base_extract_data = {
-        "idIdea": None,
         "creator": extract_user,
-        "owner": extract_user,
         "text": "Let's lower taxes to fav",
         "creationDate": 1376573216160,
         "target": {
@@ -455,7 +455,11 @@ def test_api_get_posts_from_idea(
     }
     # Create extract
     extract_data = base_extract_data.copy()
-    extract_data["idIdea"] = subidea_1_1.uri()
+    extract_data["ideaLinks"] = [
+        {
+            "idIdea": subidea_1_1.uri()
+        }
+    ]
     extract_data["target"]['@id'] = reply_post_1.uri()
     res = test_app.post(base_extract_url, json.dumps(extract_data))
     assert res.status_code == 200
@@ -478,7 +482,11 @@ def test_api_get_posts_from_idea(
 
     # Create second extract to same post and idea
     extract_data = base_extract_data.copy()
-    extract_data["idIdea"] = subidea_1_1.uri()
+    extract_data["ideaLinks"] = [
+        {
+            "idIdea": subidea_1_1.uri()
+        }
+    ]
     extract_data["target"]['@id'] = reply_post_1.uri()
     extract_data["text"] = "Let's lower taxes to fav 2",
     res = test_app.post(base_extract_url, json.dumps(extract_data))
@@ -497,7 +505,11 @@ def test_api_get_posts_from_idea(
 
     # Create extract from parent idea to leaf message
     extract_data = base_extract_data.copy()
-    extract_data["idIdea"] = subidea_1.uri()
+    extract_data["ideaLinks"] = [
+        {
+            "idIdea": subidea_1.uri()
+        }
+    ]
     extract_data["target"]['@id'] = reply_post_2.uri()
     extract_data["text"] = "Let's lower taxes to fav 3",
     res = test_app.post(base_extract_url, json.dumps(extract_data))

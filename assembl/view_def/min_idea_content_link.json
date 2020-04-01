@@ -19,13 +19,14 @@
     "IdeaRelatedPostLink": {
         "@extends": "IdeaContentPositiveLink"
     },
+    "IdeaExtractLink": {
+        "@extends": "IdeaRelatedPostLink",
+        "idExcerpt": "extract"
+    },
     "IdeaContentNegativeLink": {
         "@extends": "IdeaContentLink"
     },
     "IdeaThreadContextBreakLink": {
         "@extends": "IdeaContentNegativeLink"
-    },
-    "Excerpt": {
-        "@extends": "IdeaContentPositiveLink"
     }
 }

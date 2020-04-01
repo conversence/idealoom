@@ -309,6 +309,10 @@
     "IdeaRelatedPostLink": {
         "@extends": "IdeaContentPositiveLink"
     },
+    "IdeaExtractLink": {
+        "@extends": "IdeaRelatedPostLink",
+        "idExcerpt": "extract"
+    },
     "IdeaContentNegativeLink": {
         "@extends": "IdeaContentLink"
     },
@@ -316,7 +320,9 @@
         "@extends": "IdeaContentNegativeLink"
     },
     "Excerpt": {
-        "@extends": "IdeaContentPositiveLink",
+        "idPost": "content",
+        "created": "creation_date",
+        "idCreator": "creator",
         "discussion": false,
         "quote": false,
         "attributed_to": true,

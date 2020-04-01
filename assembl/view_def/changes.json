@@ -234,17 +234,20 @@
         "ideas": [":partial"],
         "idea_links": [":partial"]
     },
-    "Excerpt": {
+    "IdeaExtractLink": {
         "idIdea": "idea",
+        "idPost": "content",
+        "idCreator": "creator",
+        "idExcerpt": "extract"
+    },
+    "Excerpt": {
         "idPost": "content",
         "target": true,
         "created": "creation_date",
         "idCreator": "creator",
         "attributed_to": true,
         "important": true,
-        "owner": true,
         "quote": true,
-        "order": true,
         "discussion": false,
         "external_url": true,
         "ranges": ["selectors:partial"],

@@ -803,14 +803,13 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
         from .generic import Content
         from .post import Post
         from .action import ViewPost
-        from .idea_content_link import Extract
+        from .idea_content_link import Extract, IdeaContentLink
         from .announcement import Announcement
         from .attachment import Attachment
         from .idea import IdeaLocalUserRole, Idea
 
         post = with_polymorphic(Post, [Post])
         attachment = with_polymorphic(Attachment, [Attachment])
-        extract = with_polymorphic(Extract, [Extract])
         db = self.db
         queries = [
             db.query(LocalUserRole.profile_id.label('user_id')).filter(
@@ -819,12 +818,14 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
                 Idea.discussion_id == self.id),
             db.query(post.creator_id.label('user_id')).filter(
                 post.discussion_id == self.id),
-            db.query(extract.creator_id.label('user_id')).filter(
-                extract.discussion_id == self.id),
-            db.query(extract.owner_id.label('user_id')).filter(
-                extract.discussion_id == self.id),
-            db.query(extract.attributed_to_id.label('user_id')).filter(
-                extract.discussion_id == self.id),
+            db.query(Extract.creator_id.label('user_id')).filter(
+                Extract.discussion_id == self.id),
+            db.query(Extract.creator_id.label('user_id')).filter(
+                Extract.discussion_id == self.id),
+            db.query(Extract.attributed_to_id.label('user_id')).filter(
+                Extract.discussion_id == self.id),
+            db.query(IdeaContentLink.creator_id.label('user_id')).join(Content).filter(
+                Content.discussion_id == self.id),
             db.query(Announcement.creator_id.label('user_id')).filter(
                 Announcement.discussion_id == self.id),
             db.query(attachment.creator_id.label('user_id')).filter(

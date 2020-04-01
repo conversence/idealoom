@@ -297,6 +297,7 @@ from .idea_content_link import (
     IdeaContentWidgetLink,
     IdeaRelatedPostLink,
     IdeaThreadContextBreakLink,
+    IdeaExtractLink,
     AnnotationSelector,
     TextFragmentIdentifier,
 )

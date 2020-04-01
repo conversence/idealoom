@@ -109,6 +109,10 @@
     "IdeaRelatedPostLink": {
         "@extends": "IdeaContentPositiveLink"
     },
+    "IdeaExtractLink": {
+        "@extends": "IdeaRelatedPostLink",
+        "idExcerpt": "extract"
+    },
     "IdeaContentNegativeLink": {
         "@extends": "IdeaContentLink"
     },
@@ -116,7 +120,9 @@
         "@extends": "IdeaContentNegativeLink"
     },
     "Excerpt": {
-        "@extends": "IdeaContentPositiveLink",
+        "idPost": "content",
+        "created": "creation_date",
+        "idCreator": "creator",
         "target": "self:webannotation2",
         "body": "self:webannotation3",
         "type": "'\"Annotation\""

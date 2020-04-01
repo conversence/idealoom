@@ -203,6 +203,8 @@ class AgentProfile(Base):
             post.creator_id = self.id
         for extract in other_profile.extracts_created[:]:
             extract.creator = self
+        for idea_link in other_profile.idealinks_created[:]:
+            idea_link.creator = self
         for attachment in other_profile.attachments[:]:
             attachment.creator = self
         from .action import Action

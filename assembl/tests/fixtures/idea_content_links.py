@@ -120,19 +120,26 @@ def extract_post_1_to_subidea_1_1(
         subidea_1_1, discussion, test_session):
     """ Links reply_post_1 to subidea_1_1 """
 
-    from assembl.models import Extract
+    from assembl.models import Extract, IdeaExtractLink
     e = Extract(
         annotation_text=u"body",
         creator=participant2_user,
-        owner=participant2_user,
         content=reply_post_1,
-        idea_id=subidea_1_1.id,  # strange bug: Using idea directly fails
+        # idea_id=subidea_1_1.id,  # strange bug: Using idea directly fails
         discussion=discussion)
+    l = IdeaExtractLink(
+            creator=participant2_user,
+            content=reply_post_1,
+            idea_id=subidea_1_1.id,
+            extract=e
+        )
     test_session.add(e)
+    test_session.add(l)
     test_session.flush()
 
     def fin():
         print("finalizer extract_post_1_to_subidea_1_1")
+        test_session.delete(l)
         test_session.delete(e)
         test_session.flush()
     request.addfinalizer(fin)
