@@ -116,7 +116,7 @@ def post_extract(request):
             if token:
                 user_id = token['userId']
         user_id = user_id or Everyone
-        permissions = get_permissions(user_id, discussion_id)
+        permissions = get_permissions(user_id, discussion.id)
     else:
         permissions = request.permissions
     if P_ADD_EXTRACT not in permissions:
