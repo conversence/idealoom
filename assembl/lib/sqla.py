@@ -1830,7 +1830,7 @@ class BaseOps(object):
         nullables = []
         related_objects = set()
         for reln in relations:
-            if reln.direction == ONETOMANY:
+            if reln.direction in (ONETOMANY, MANYTOMANY):
                 continue
             if reln.viewonly:
                 continue
