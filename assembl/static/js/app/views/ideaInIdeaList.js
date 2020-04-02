@@ -500,6 +500,7 @@ class IdeaInIdeaListView extends Marionette.View.extend({
       return;
     }
 
+    // is this even working?
     var annotation = Ctx.getDraggedAnnotation();
     if (annotation) {
       if (isDraggedBelow) {

@@ -1603,41 +1603,45 @@ return cls.extend({
     });
 
     this.annotator.subscribe('annotationViewerTextField', function(field, annotation) {
-          var collectionManager = new CollectionManager();
+      var collectionManager = new CollectionManager();
 
-          var id = annotation['@id'];
-          if (id === undefined) {
-            // this happens when the user has just released the mouse button after having selected text (the extract has not been created yet: the user has not clicked on the "Add to clipboard" button, nor has he dragged the selection to an idea).
-            // console.log("Missing @id, probably a new annotation", annotation);
-            // Instead of showing a bubble with "No comment" text in it, we remove the bubble
-            $(field).parents(".annotator-outer").remove();
-            return;
-          }
+      var id = annotation['@id'];
+      if (id === undefined) {
+        // this happens when the user has just released the mouse button after having selected text (the extract has not been created yet: the user has not clicked on the "Add to clipboard" button, nor has he dragged the selection to an idea).
+        // console.log("Missing @id, probably a new annotation", annotation);
+        // Instead of showing a bubble with "No comment" text in it, we remove the bubble
+        $(field).parents(".annotator-outer").remove();
+        return;
+      }
 
-          //$(field).html("THIS IS A TEST");
-          //console.log(annotation);
-          Promise.join(
-            collectionManager.getAllExtractsCollectionPromise(),
-            collectionManager.getUserLanguagePreferencesPromise(Ctx),
-            function(extracts, langPrefs) {
-            return extracts.get(id).getAssociatedIdeaPromise().then(function(idea) {
-              var txt = '';
-              if (idea) {
-                txt = i18n.sprintf(i18n.gettext('This extract was organized in the idea " %s " by the facilitator of the debate'), idea.getShortTitleDisplayText(langPrefs));
-              }
-              else {
-                txt = i18n.gettext('This extract is in a harvester\'s clipboard and hasn\' been sorted yet.');
-              }
-
+      //$(field).html("THIS IS A TEST");
+      //console.log(annotation);
+      Promise.join(
+        collectionManager.getAllExtractsCollectionPromise(),
+        collectionManager.getUserLanguagePreferencesPromise(Ctx),
+        function(extracts, langPrefs) {
+          const extract = extracts.get(id);
+          const numIdeas = extract.getNumLinkedIdeas();
+          if (numIdeas == 0) {
+            const txt = i18n.gettext('This extract is in a harvester\'s clipboard and hasn\' been sorted yet.');
+            setTimeout(function(){
+              $(field).html(txt);
+            }, 100);
+          } else {
+            extract.getLatestAssociatedIdeaPromise().then((idea)=>{
+              const title = idea.getShortTitleDisplayText(langPrefs);
+              let txt;
+              if (numIdeas == 1)
+                  txt = i18n.sprintf(i18n.gettext('This extract was organized in the idea " %s " by the facilitator of the debate'), title);
+              else
+                  txt = i18n.sprintf(i18n.gettext('This extract was organized in %d ideas, most lately " %s ", by the facilitator of the debate'), title);
               setTimeout(function(){
-                    $(field).html(txt);
-                }, 100);
-
+                  $(field).html(txt);
+              }, 100);
             });
-
-          });
-
+          }
         });
+    });
 
     //FIXME: I do not why but between the init and when the annotation is shown there is a duplicate DOM created
     this.annotator.subscribe('annotationViewerShown', function(viewer, annotation) {

@@ -201,9 +201,10 @@ class MessageModel extends Base.Model.extend({
               var ret = [];
 
               _.each(extracts, function(extract) {
+                const annotation = _.clone(extract.attributes);
                 //Why this next line?  Benoitg-2014-10-03
-                extract.attributes.ranges = extract.attributes._ranges;
-                ret.push(_.clone(extract.attributes));
+                annotation.ranges = extract.attributes._ranges;
+                ret.push(annotation);
               });
 
               return ret;

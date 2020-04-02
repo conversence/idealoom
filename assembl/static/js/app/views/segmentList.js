@@ -150,13 +150,18 @@ class SegmentView extends Marionette.View.extend({
         }
       });
     } else {
-      this.model.save('idIdea', null, {
-        success: function(model, resp) {
-                },
-        error: function(model, resp) {
-          console.error('ERROR: onCloseButtonClick', resp);
-        }
-      });
+      // handled in ideaPanel
+      // if (!this.viewedInIdeaId) {
+      //   console.error("no viewedInIdeaId?")
+      //   return;
+      // }
+      // const link = this.model.linkedToIdea(this.viewedInIdeaId);
+      // link.destroy({
+      //   success: function(model, resp) {},
+      //   error: function(model, resp) {
+      //     console.error('ERROR: onCloseButtonClick', resp);
+      //   }
+      // });
     }
   }
 
@@ -205,14 +210,14 @@ class SegmentListView extends Marionette.CollectionView.extend({
 
 class Clipboard extends Backbone.Subset.extend({
   name: 'Clipboard',
-  liveupdate_keys: ['idIdea']
+  liveupdate_keys: ['ideaLinks']
 }) {
   beforeInitialize(models, options) {
     this.currentUserId = options.currentUserId;
   }
 
   sieve(extract) {
-    return extract.get('idIdea') == null;
+    return extract.getNumLinkedIdeas() == 0;
   }
 
   comparator(e1, e2) {
@@ -229,14 +234,14 @@ class Clipboard extends Backbone.Subset.extend({
 
 class IdeaSegmentListSubset extends Backbone.Subset.extend({
   name: 'IdeaSegmentList',
-  liveupdate_keys: ['idIdea']
+  liveupdate_keys: ['ideaLinks']
 }) {
   beforeInitialize(models, options) {
     this.ideaId = options.ideaId;
   }
 
   sieve(extract) {
-    return extract.get('idIdea') == this.ideaId;
+    return extract.linkedToIdea(this.ideaId);
   }
 
   comparator(segment) {
@@ -374,7 +379,7 @@ class SegmentListPanel extends BasePanel.extend({
               delete segment.attributes.highlights;
 
               allExtractsCollection.add(segment, {merge: true});
-              segment.save('idIdea', null);
+              segment.save();
             });
   }
 

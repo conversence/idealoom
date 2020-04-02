@@ -231,7 +231,7 @@ class BaseCollection extends Backbone.Collection {
         }
 
         if (parse) {
-          that.set(that.parse(json, {parse}));
+          that.set(that.parse(json, {parse}), {parse});
         } else {
           that.reset(json);
         }

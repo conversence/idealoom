@@ -68,18 +68,23 @@ class IdeaClassificationView extends LoaderView.extend({
         that.langPrefs = langPrefs;
         var ideaAncestry = that.idea.getAncestry();
         that.ideaAncestry = that.createIdeaNameCollection(ideaAncestry);
-        return idea.collection.collectionManager.getAllExtractsCollectionPromise(
-        ).then(function(extracts){
-          if (_.isEmpty(extracts)) {
-            that.extract = null;
-          }
-          else {
-            //An extract IS an IdeaContentLink type
-            that.extract = extracts.get(that.model.get("@id"));
-          }
+        const idExcerpt = that.model.get("idExcerpt")
+        if (idExcerpt) {
+            return idea.collection.collectionManager.getAllExtractsCollectionPromise(
+            ).then(function(extracts){
+              that.extract = extracts.get(idExcerpt);
+              return that.extract.getCreatorModelPromise().then((creator)=>{
+                that.extractHarvester = creator;
+                that.canRender = true;
+                that.onEndInitialization();
+              })
+            });
+        } else {
+          that.extractHarvester = null;
+          that.extract = null;
           that.canRender = true;
           that.onEndInitialization();
-        });
+        }
       }).error(function(e){
         console.error(e.statusText);
         //Render yourself in an ErrorView.
@@ -195,6 +200,7 @@ class DirectExtractView extends IdeaClassificationView.extend({
 
     return {
       harvester: this.user.get('name'),
+      extractHarvester: this.extractHarvester.get('name'),
       extractText: this.extract.getQuote(),
       postAuthor: this.postCreator.get('name')
     }
@@ -235,6 +241,7 @@ class IndirectExtractView extends IdeaClassificationView.extend({
 
     return {
       harvester: this.user.get('name'),
+      extractHarvester: this.extractHarvester.get('name'),
       extractText: this.extract.getQuote(),
       postAuthor: this.postCreator.get('name')
     }
@@ -283,7 +290,7 @@ class IdeaShowingMessageCollectionViewBody extends Marionette.CollectionView.ext
         return DirectMessageView;
       }
 
-      if (item.get('@type') === Types.EXTRACT) {
+      if (item.get('@type') === Types.IDEA_EXTRACT_LINK) {
         return DirectExtractView;
       }
       else {
@@ -296,7 +303,7 @@ class IdeaShowingMessageCollectionViewBody extends Marionette.CollectionView.ext
         return IndirectMessageView;
       }
 
-      if (item.get('@type') === Types.EXTRACT) {
+      if (item.get('@type') === Types.IDEA_EXTRACT_LINK) {
         return IndirectExtractView;
       }
       else {

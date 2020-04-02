@@ -13,18 +13,20 @@ var FirstIdeaToShowVisitor = function(extractsCollection) {
 
 FirstIdeaToShowVisitor.prototype = new Visitor();
 
-FirstIdeaToShowVisitor.prototype.visit = function(object) {
+FirstIdeaToShowVisitor.prototype.visit = function(idea) {
+  const ideaId = idea.getId();
   if (this.ideaWithExtract !== undefined) {
     return false;
   }
 
-  if (this.extractsCollection.where({idIdea: object.getId(), important: true }).length > 0) {
-    this.ideaWithExtract = object;
+  if (this.extractsCollection.find((extract) =>
+        extract.get("important") || extract.linkedToIdea(ideaId))) {
+    this.ideaWithExtract = idea;
     return false;
   }
 
-  if (this.firstIdea === undefined && !object.isRootIdea()) {
-    this.firstIdea = object;
+  if (this.firstIdea === undefined && !idea.isRootIdea()) {
+    this.firstIdea = idea;
   }
 
   return true;

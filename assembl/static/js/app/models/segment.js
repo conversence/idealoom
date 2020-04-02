@@ -11,6 +11,7 @@ import Ctx from '../common/context.js';
 import Agents from './agents.js';
 import AnnotatorF from 'annotator/annotator-full.js';
 import Message from './message.js';
+import ideaContentLink from './ideaContentLink.js';
 import Types from '../utils/types.js';
 import i18n from '../utils/i18n.js';
 
@@ -36,7 +37,7 @@ class SegmentModel extends Base.Model.extend({
     text: '',
     quote: '',
     idPost: null,
-    idIdea: null,
+    ideaLinks: null,
     created: null,
     idCreator: null,
     important: false,
@@ -49,12 +50,13 @@ class SegmentModel extends Base.Model.extend({
    * @init
    */
   initialize() {
-    if (this.attributes.created) {
-      this.attributes.created = this.attributes.created;
-    }
-
     if (!this.get('created')) {
       this.set('created', Ctx.getCurrentTime());
+    }
+
+    if (!this.get('ideaLinks')) {
+      this.set('ideaLinks', new ideaContentLink.Collection(
+        [], {url: this.getIdeaLinkUrl()}));
     }
 
     var ranges = this.attributes.ranges;
@@ -74,33 +76,50 @@ class SegmentModel extends Base.Model.extend({
     // We need to create a copy 'cause annotator destroy all ranges
     // once it creates the highlight
     this.attributes._ranges = _ranges;
-    var that = this;
-
-    this.listenTo(this, "change:idIdea", function() {
-      that.collection.collectionManager.getAllIdeasCollectionPromise()
-                .done(function(allIdeasCollection) {
-        var previousIdea;
-        var idea;
-
-        if (that.previous("idIdea") !== null) {
-          previousIdea = allIdeasCollection.get(that.previous("idIdea"));
-
-          //console.log("Segment:initialize:triggering idea change (previous idea)");
-          previousIdea.trigger('change');
-        }
-
-        if (that.get('idIdea') !== null) {
-
-          idea = allIdeasCollection.get(that.get('idIdea'));
-
-          //console.log("Segment:initialize:triggering idea change (new idea)");
-          idea.trigger('change');
-        }
+    const links = this.get("ideaLinks");
+    const updateFn = (icl, coll) => {
+      const cm = (this.collection) ? this.collection.collectionManager : coll.collectionManager;
+      cm.getAllIdeasCollectionPromise().then((allIdeasCollection) => {
+        const idea = allIdeasCollection.get(icl.get("idIdea"));
+        idea.trigger('change', idea);
+        this.trigger('change:ideaLinks', this);
       });
-    })
+    }
+    this.listenTo(links, "remove destroy add change:idIdea", updateFn);
+    this.listenTo(this, "change:ideaLinks", (seg, newIL, options)=>{
+      if (newIL) {
+        const oldIL = seg._previousAttributes.ideaLinks || seg.get("ideaLinks");
+        if (oldIL != newIL) {
+          this.stopListening(oldIL);
+          this.listenTo(newIL, "remove destroy add change:idIdea", updateFn);
+        }
+      }
+    });
 
     // cleaning
     delete this.attributes.highlights;
+  }
+
+  getIdeaLinkUrl() {
+    const id = this.getNumericId();
+    if (id)
+      return Ctx.getApiV2DiscussionUrl(`extracts/${id}/idea_content_links`);
+    else
+      return Ctx.getApiV2DiscussionUrl('idea_content_links');
+  }
+
+  parse(rawModel, options) {
+    rawModel.ideaLinks = new ideaContentLink.Collection(
+      rawModel.ideaLinks, {parse: true, url: this.getIdeaLinkUrl()});
+    return rawModel;
+  }
+
+  linkedToIdea(ideaId) {
+    const link = this.get("ideaLinks").find((link)=> link.get("idIdea") == ideaId);
+    if (link) {
+      link.urlRoot = this.getIdeaLinkUrl();
+    }
+    return link;
   }
 
   /**
@@ -131,10 +150,6 @@ class SegmentModel extends Base.Model.extend({
       return i18n.gettext('invalid created: ') + attrs.created;
     }
 
-    if (attrs.idIdea !== null && typeof attrs.idIdea !== 'string') {
-      return i18n.gettext('invalid idIdea: ') + attrs.idIdea;
-    }
-
     if (attrs.idCreator === null || typeof attrs.idCreator !== 'string') {
       return i18n.gettext('invalid idCreator: ') + attrs.idCreator;
     }
@@ -143,15 +158,33 @@ class SegmentModel extends Base.Model.extend({
   /** Return a promise for the Post the segments is associated to, if any
    * @returns {$.Defered.Promise}
    */
-  getAssociatedIdeaPromise() {
-    var that = this;
-    var idIdea = this.get('idIdea');
-    if (idIdea) {
-      return this.collection.collectionManager.getAllIdeasCollectionPromise().then(function(allIdeasCollection) {
-        return allIdeasCollection.get(idIdea);
+  getAssociatedIdeasPromise() {
+    const ideaLinks = this.get('ideaLinks');
+    if (ideaLinks) {
+      return this.collection.collectionManager.getAllIdeasCollectionPromise().then((allIdeasCollection) => {
+        return ideaLinks.map((ideaLink)=>
+          allIdeasCollection.get(ideaLink.get("idIdea"))).filter((i) => i != undefined);
       });
+    } else {
+      return Promise.resolve(null);
     }
-    else {
+  }
+
+  getLatestLink() {
+    const links = this.get("ideaLinks");
+    if (links.length) {
+      const byDate = links.sortBy("created");
+      return byDate[byDate.length-1];
+    }
+  }
+
+  getLatestAssociatedIdeaPromise() {
+    const latestLink = this.getLatestLink();
+    if (latestLink) {
+      return this.collection.collectionManager.getAllIdeasCollectionPromise().then((allIdeasCollection) => {
+        return allIdeasCollection.get(latestLink.get("idIdea"));
+      });
+    } else {
       return Promise.resolve(null);
     }
   }
@@ -175,6 +208,27 @@ class SegmentModel extends Base.Model.extend({
     if (target && target['@type'] == 'Webpage') {
       return target.title;
     }
+  }
+
+  getNumLinkedIdeas() {
+    const links = this.get("ideaLinks");
+    if (links) {
+        return links.models.length;
+    }
+    return 0;
+  }
+
+  addIdeaLink(ideaId) {
+    const links = this.get("ideaLinks");
+    const link = new ideaContentLink.Model({
+      idPost: this.get("idPost"),
+      idIdea: ideaId,
+      idExcerpt: this.getId(),
+      idCreator: this.get("idCreator"),
+    });
+    link.urlRoot = this.getIdeaLinkUrl();
+    links.add(link);
+    return link;
   }
 
   /**
@@ -217,13 +271,22 @@ class SegmentModel extends Base.Model.extend({
    */
   getCreatorFromUsersCollection(usersCollection) {
     var creatorId = this.get('idCreator');
-    var creator = usersCollection.getById(creatorId);
     if (!creatorId) {
       throw new Error("A segment cannot have an empty creator");
     }
-
+    var creator = usersCollection.getById(creatorId);
     return creator;
   }
+
+    /**
+     * Returns the segment creator model promise
+     * @returns {Promise}
+     * @function app.models.segment.SegmentModel.getCreatorModelPromise
+     */
+    getCreatorModelPromise() {
+        return this.collection.collectionManager.getAllUsersCollectionPromise()
+            .then((users) => this.getCreatorFromUsersCollection(users));
+    }
 
   /**
    * Alias for `.get('quote') || .get('text')`
@@ -283,20 +346,26 @@ class SegmentCollection extends Base.Collection.extend({
    * @returns {Segment}
    */
   addAnnotationAsExtract(annotation, idIdea) {
-    var that = this;
-    var idPost = Ctx.getPostIdFromAnnotation(annotation);
+    const idPost = Ctx.getPostIdFromAnnotation(annotation);
+    const idCreator = Ctx.getCurrentUser().getId();
 
     //console.log("addAnnotationAsExtract called");
-
+    const links = new ideaContentLink.Collection(); // no url yet
+    links.collectionManager = this.collectionManager;
     var segment = new SegmentModel({
       target: { "@id": idPost, "@type": Types.EMAIL },
       text: annotation.text,
       quote: annotation.quote,
-      idCreator: Ctx.getCurrentUser().getId(),
+      idCreator,
       ranges: annotation.ranges,
       idPost: idPost,
-      idIdea: idIdea
+      ideaLinks: links
     });
+    if (idIdea) {
+      links.add(new ideaContentLink.Model({
+          idPost, idIdea, idCreator
+      }));
+    }
 
     if (segment.isValid()) {
       delete segment.attributes.highlights;
@@ -308,6 +377,25 @@ class SegmentCollection extends Base.Collection.extend({
 
     return segment;
   }
+
+  updateFromSocket(item) {
+    if (item['@type'] == Types.EXTRACT) {
+      super.updateFromSocket(item);
+    } else if (item['@type'] == Types.IDEA_EXTRACT_LINK) {
+      const excerptId = item['idExcerpt'];
+      // can be null if tombstone
+      if (excerptId) {
+        const excerpt = this.get(excerptId);
+        if (!excerpt) {
+          console.error("where is the excerpt?");
+          return;
+        }
+        const icl_coll = excerpt.get('ideaLinks');
+        icl_coll.updateFromSocket(item);
+      }
+    }
+  }
+
 }
 
 export default {

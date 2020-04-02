@@ -606,18 +606,7 @@ class IdeaPanel extends BasePanel.extend({
    */
   addSegment(segment) {
     delete segment.attributes.highlights;
-
-    var id = this.model.getId();
-    var that = this;
-    segment.save('idIdea', id, {
-      success: function(model, resp) {
-        //console.log('SUCCESS: addSegment', resp);
-        that.extractListView.render();
-      },
-      error: function(model, resp) {
-        console.error('ERROR: addSegment', resp);
-      }
-    });
+    this.model.addSegment(segment);
   }
 
   /**
@@ -625,24 +614,17 @@ class IdeaPanel extends BasePanel.extend({
    * @param {Segment} segment
    */
   showSegment(segment) {
-    var that = this;
-    var selector = Ctx.format('.box[data-segmentid={0}]', segment.cid);
-    var idIdea = segment.get('idIdea');
-    var box;
-    var collectionManager = new CollectionManager();
-
-    collectionManager.getAllIdeasCollectionPromise()
-            .then(function(allIdeasCollection) {
-              var idea = allIdeasCollection.get(idIdea);
+    const selector = Ctx.format('.box[data-segmentid={0}]', segment.cid);
+    segment.getLatestAssociatedIdeaPromise().then((idea) => {
               if (!idea) {
                 return;
               }
 
-              that.setIdeaModel(idea);
-              box = that.$(selector);
+              this.setIdeaModel(idea);
+              const box = this.$(selector);
 
               if (box.length) {
-                var panelBody = that.$('.panel-body');
+                var panelBody = this.$('.panel-body');
                 var panelOffset = panelBody.offset().top;
                 var offset = box.offset().top;
 
@@ -1005,28 +987,23 @@ class IdeaPanel extends BasePanel.extend({
   }
 
   onSegmentCloseButtonClick(ev) {
-    var cid = ev.currentTarget.getAttribute('data-segmentid');
-    var collectionManager = new CollectionManager();
-    collectionManager.getAllExtractsCollectionPromise().done(
-            function(allExtractsCollection) {
-              var segment = allExtractsCollection.get(cid);
-
-              if (segment) {
-                segment.save('idIdea', null);
-              }
-            });
+    const cid = ev.currentTarget.getAttribute('data-segmentid');
+    const segment = this.extractListSubset.parent.get(cid);
+    const ideaId = this.model.getId();
+    const link = segment.linkedToIdea(ideaId);
+    if (link)
+        link.destroy();
   }
 
   onClearAllClick(ev) {
-    var ok = confirm(i18n.gettext('Confirm that you want to send all extracts back to the clipboard.'));
+    const ok = confirm(i18n.gettext('Confirm that you want to send all extracts back to the clipboard.'));
+    const ideaId = this.model.getId();
     if (ok) {
       // Clone first, because the operation removes extracts from the subset.
-      var models = _.clone(this.extractListSubset.models)
+      const models = _.clone(this.extractListSubset.models)
       _.each(models, function(extract) {
-        extract.set('idIdea', null);
-      });
-      _.each(models, function(extract) {
-        extract.save();
+        const link = extract.linkedToIdea(ideaId);
+        link.destroy();
       });
     }
   }

@@ -342,6 +342,10 @@ class CollectionManager extends Marionette.Object.extend({
       case Types.IDEA_LINK:
         return this.getAllIdeaLinksCollectionPromise();
 
+      case Types.IDEA_EXTRACT_LINK:
+        // special case
+        return this.getAllExtractsCollectionPromise();
+
       case Types.POST:
         return this.getAllMessageStructureCollectionPromise();
 
@@ -774,7 +778,8 @@ class CollectionManager extends Marionette.Object.extend({
 
     this._allExtractsCollection = new Segment.Collection();
     this._allExtractsCollection.collectionManager = this;
-    this._allExtractsCollectionPromise = Promise.resolve(this._allExtractsCollection.fetchFromScriptTag('extracts-json'))
+    this._allExtractsCollectionPromise = Promise.resolve(
+        this._allExtractsCollection.fetchFromScriptTag('extracts-json', true))
         .thenReturn(this._allExtractsCollection)
             .catch(function(e) {
               Raven.captureException(e);
@@ -1209,13 +1214,7 @@ class CollectionManager extends Marionette.Object.extend({
     var id = messageModel.id;
 
     var ideaContentLinks = messageModel.getIdeaContentLinks();
-
-    var validIcls = _.filter(ideaContentLinks, function(icl){
-      return ( (icl) && (_.has(icl, 'idIdea')) && (icl['idIdea'] !== null) );
-    });
-
-    //Could be an empty collection
-    var tmp = new IdeaContentLink.Collection(validIcls, {message: messageModel});
+    var tmp = new IdeaContentLink.Collection(ideaContentLinks, {message: messageModel});
     tmp.collectionManager = this;
     return tmp;
   }

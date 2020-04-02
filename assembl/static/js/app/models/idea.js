@@ -426,10 +426,11 @@ class IdeaModel extends Base.Model.extend({
    * @function app.models.idea.IdeaModel.getExtractsPromise
    */
   getExtractsPromise() {
-    var that = this;
+    const id = this.getId();
     return this.collection.collectionManager.getAllExtractsCollectionPromise()
             .then(function(allExtractsCollection) {
-              return Promise.resolve(allExtractsCollection.where({idIdea: that.getId()}))
+              return Promise.resolve(allExtractsCollection.filter((extract) =>
+                        extract.linkedToIdea(id)))
                     .catch(function(e) {
                       console.error(e.statusText);
                     });
@@ -478,7 +479,8 @@ class IdeaModel extends Base.Model.extend({
    * @function app.models.idea.IdeaModel.addSegment
    */
   addSegment(segment) {
-    segment.save('idIdea', this.getId(), {
+    const link = segment.addIdeaLink(this.getId());
+    link.save({}, {
       success: function(model, resp) {
             },
       error: function(model, resp) {
@@ -515,11 +517,18 @@ class IdeaModel extends Base.Model.extend({
           order: this.getOrderForNewChild()
         };
         return this.collection.create(data, { success: (idea)=> {
-          idea.addSegment(segment);
+          // save segment first
+          segment.save(null, {success: (segment)=>{
+            // then add it to idea
+            idea.addSegment(segment);
+          }, error: (segment, resp) => {
+             console.error('ERROR: add segment to idea', resp);
+          }});
           return idea;
-    } });
+        }, error: (segment, resp) => {
+          console.error('ERROR: create segment', resp);
+        }});
     });
-
   }
 
   /**

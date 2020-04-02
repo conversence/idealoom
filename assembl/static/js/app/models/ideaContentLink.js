@@ -53,9 +53,8 @@ class IdeaContentLinkModel extends Base.Model.extend({
     defaults: {
         idIdea: null,
         idPost: null,
-        created: null,
         idCreator: null,
-        created: null
+        idExcerpt: null,
     }
 }) {
     /**
@@ -175,7 +174,7 @@ class Collection extends Base.Collection.extend({
     /**
      * @member {string} app.models.ideaContentLink.Collection.url
      */
-    url: Ctx.getApiV2DiscussionUrl('idea_content_link'),
+    url: Ctx.getApiV2DiscussionUrl('idea_content_links'),
 
     /**
      * The model
@@ -187,7 +186,9 @@ class Collection extends Base.Collection.extend({
      * @member {string} app.models.ideaContentLink.Collection.initialize
      */
     initialize(attrs, options) {
-        this.messageModel = options.message || {};
+        const _options = options || {};
+        this.messageModel = _options.message || {};
+        this.url = _options.url || Object.getPrototypeOf(this).url;
         Base.Collection.prototype.initialize.call(this, attrs, options);
     }
 

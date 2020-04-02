@@ -20,6 +20,7 @@ var Types = {
   IDEA_CONTENT_POSITIVE_LINK: 'IdeaContentPositiveLink',
   IDEA_CONTENT_NEGATIVE_LINK: 'IdeaContentNegativeLink',
   IDEA_RELATED_POST_LINK: 'IdeaRelatedPostLink',
+  IDEA_EXTRACT_LINK: 'IdeaExtractLink',
   IDEA_THREAD_CONTEXT_BREAK_LINK: 'IdeaThreadContextBreakLink',
   CONTENT: 'SPost',
   POST: 'Post',

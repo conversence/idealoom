@@ -1098,18 +1098,11 @@ class MessageView extends LoaderView.extend({
       if (that.annotationsToLoad === undefined) {
         // Is this the right permission to see the clipboard?
         if (!that.canShowAnnotations()) {
-          filter = function(extract) {
-            return extract.idIdea;
-          }
-        }
-        else {
-          filter = function() {
-            return true;
-          };
+          annotations = annotations.filter((extract)=>extract.getNumLinkedIdeas());
         }
 
-        _.each(annotations, function(annotation) {
-          if (filter(annotation) && !(annotation['@id'] in that.loadedAnnotations)) {
+        _.each(annotations, (annotation) => {
+          if (!(annotation['@id'] in that.loadedAnnotations)) {
             annotationsToLoad.push(annotation);
           }
         });
@@ -1185,69 +1178,66 @@ class MessageView extends LoaderView.extend({
    * @param  {annotation} annotation
    */
   showSegmentByAnnotation(annotation) {
-    var that = this;
-    var currentIdea = this.messageListView.getGroupState().get('currentIdea');
-    var collectionManager = new CollectionManager();
-    if (annotation.idIdea == null || (
-        currentIdea != null && currentIdea.id == annotation.idIdea))
-      return;
+    const that = this;
+    const currentIdea = this.messageListView.getGroupState().get('currentIdea');
+    const collectionManager = new CollectionManager();
+    collectionManager.getAllExtractsCollectionPromise().then((allExtractsCollection)=>{
+        const segment = allExtractsCollection.getByAnnotation(annotation);
+        if (!segment) {
+          console.error("message::showSegmentByAnnotation(): the extract doesn't exist");
+          return;
+        }
+        const currentLink = (currentIdea) ? segment.linkedToIdea(currentIdea.getId()) : null;
+        
+        if (currentLink)
+          return;
 
-    class Modal extends Backbone.Modal.extend({
-      template: _.template($('#tmpl-showSegmentByAnnotation').html()),
-      className: 'generic-modal popin-wrapper modal-showSegment',
-      cancelEl: '.js_close',
-      keyControl: false,
-
-      events: {
-              'click .js_redirectIdea': 'redirectToIdea',
+        if (segment.getNumLinkedIdeas() == 0) {
+            if (that.messageListView.getContainingGroup().findViewByType(PanelSpecTypes.CLIPBOARD)) {
+              //FIXME:  We don't want to affect every panel, only the one in the current group
+              //FIXME:  Nothing listens to this anymore
+              console.error("FIXME:  Nothing listens to DEPRECATEDsegmentList:showSegment anymore");
+              IdeaLoom.other_vent.trigger('DEPRECATEDsegmentList:showSegment', segment);
             }
-    }) {
-      initialize() {
-        this.$('.bbm-modal').addClass('popin');
-      }
+            else {
+              console.log("TODO:  NOT implemented yet.  Should pop panel in a lightbox.  See example at the end of Modal object in navigation.js ");
+            }
+            return;
+        }
 
-      redirectToIdea() {
-        var self = this;
+        class Modal extends Backbone.Modal.extend({
+          template: _.template($('#tmpl-showSegmentByAnnotation').html()),
+          className: 'generic-modal popin-wrapper modal-showSegment',
+          cancelEl: '.js_close',
+          keyControl: false,
 
-        Promise.join(collectionManager.getAllExtractsCollectionPromise(),
-            collectionManager.getAllIdeasCollectionPromise(),
-                    function(allExtractsCollection, allIdeasCollection) {
+          events: {
+                  'click .js_redirectIdea': 'redirectToIdea',
+                }
+        }) {
+          initialize() {
+            this.$('.bbm-modal').addClass('popin');
+          }
 
-                      var segment = allExtractsCollection.getByAnnotation(annotation);
-                      if (!segment) {
-                        console.error("message::showSegmentByAnnotation(): the extract doesn't exist");
-                        return;
-                      }
+          redirectToIdea() {
+            segment.getLatestAssociatedIdeaPromise().then((idea)=>{
+                if (that.messageListView.getContainingGroup().findViewByType(PanelSpecTypes.IDEA_PANEL)) {
+                  //FIXME:  Even this isn't proper behaviour.  Maybe we should just pop a panel systematically in this case.
+                  that.messageListView.getContainingGroup().setCurrentIdea(idea, false, "from_annotation");
+                  IdeaLoom.other_vent.trigger('DEPRECATEDideaPanel:showSegment', segment);
+                }
+                else {
+                  console.log("TODO:  NOT implemented yet.  Should pop panel in a lightbox.  See example at the end of Modal object in navigation.js ");
+                }
+                this.destroy();
+            })
+          }
+        }
 
-                      if (segment.get('idIdea')) {
-                        if (that.messageListView.getContainingGroup().findViewByType(PanelSpecTypes.IDEA_PANEL)) {
-                          //FIXME:  Even this isn't proper behaviour.  Maybe we should just pop a panel systematically in this case.
-                          that.messageListView.getContainingGroup().setCurrentIdea(allIdeasCollection.get(annotation.idIdea), false, "from_annotation");
-                          IdeaLoom.other_vent.trigger('DEPRECATEDideaPanel:showSegment', segment);
-                        }
-                        else {
-                          console.log("TODO:  NOT implemented yet.  Should pop panel in a lightbox.  See example at the end of Modal object in navigation.js ");
-                        }
-                      } else {
-                        if (that.messageListView.getContainingGroup().findViewByType(PanelSpecTypes.CLIPBOARD)) {
-                          //FIXME:  We don't want to affect every panel, only the one in the current group
-                          //FIXME:  Nothing listens to this anymore
-                          console.error("FIXME:  Nothing listens to DEPRECATEDsegmentList:showSegment anymore");
-                          IdeaLoom.other_vent.trigger('DEPRECATEDsegmentList:showSegment', segment);
-                        }
-                        else {
-                          console.log("TODO:  NOT implemented yet.  Should pop panel in a lightbox.  See example at the end of Modal object in navigation.js ");
-                        }
-                      }
+        const modal = new Modal();
 
-                      self.destroy();
-                    });
-      }
-    }
-
-    var modal = new Modal();
-
-    $('#slider').html(modal.render().el);
+        $('#slider').html(modal.render().el);
+    });
   }
 
   /**
