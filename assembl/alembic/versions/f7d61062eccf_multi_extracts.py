@@ -40,7 +40,7 @@ def upgrade(pyramid_env):
         op.add_column(
             'idea_content_link',
             sa.Column('extract_id', sa.Integer, sa.ForeignKey(
-                'extract.id', ondelete='CASCADE', onupdate='CASCADE')), index=True)
+                'extract.id', ondelete='CASCADE', onupdate='CASCADE'), index=True))
         op.add_column(
             'extract',
             sa.Column(
