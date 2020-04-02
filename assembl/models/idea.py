@@ -796,15 +796,16 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
 
     def get_synthesis_contributors(self, id_only=True):
         # author of important extracts
-        from .idea_content_link import Extract
+        from .idea_content_link import Extract, IdeaExtractLink
         from .post import Post
         from .generic import Content
         from sqlalchemy.sql.functions import count
         subquery = self.get_descendants_query()
         query = self.db.query(
             Post.creator_id
+            ).join(IdeaExtractLink
             ).join(Extract
-            ).join(subquery, Extract.idea_id == subquery.c.id
+            ).join(subquery, IdeaExtractLink.idea_id == subquery.c.id
             ).filter(Extract.important == True
             ).group_by(Post.creator_id
             ).order_by(count(Extract.id).desc())

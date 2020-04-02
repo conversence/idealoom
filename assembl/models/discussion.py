@@ -857,9 +857,9 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
         return frontendUrls.get_discussion_url()
 
     def get_bound_extracts(self):
-        from .idea_content_link import Extract
-        return self.db.query(Extract).filter(
-            Extract.discussion==self, Extract.idea != None)
+        from .idea_content_link import Extract, IdeaExtractLink
+        return self.db.query(Extract).join(IdeaExtractLink).filter(
+            Extract.discussion==self)
 
     def get_extract_graphs_cif(self):
         from .idea import Idea

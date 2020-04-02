@@ -13,7 +13,7 @@ from sqlalchemy.orm import (joinedload, subqueryload, undefer)
 
 from assembl.lib.parsedatetime import parse_datetime
 from assembl.models import (
-    Idea, RootIdea, IdeaLink, Discussion,
+    Idea, RootIdea, IdeaLink, Discussion, IdeaExtractLink,
     Extract, SubGraphIdeaAssociation, LangString)
 from assembl.auth import (
     CrudPermissions, P_READ, P_ADD_IDEA, P_EDIT_IDEA, P_READ_IDEA,
@@ -381,8 +381,8 @@ def get_idea_extracts(request):
     if not idea:
         raise HTTPNotFound("Idea with id '%s' not found." % idea_id)
 
-    extracts = Extract.default_db.query(Extract).filter(
-        Extract.idea_id == idea.id
+    extracts = Extract.default_db.query(Extract).join(IdeaExtractLink).filter(
+        IdeaExtractLink.idea_id == idea.id
     ).order_by(Extract.order.desc())
 
     return [extract.generic_json(view_def, user_id, permissions)
