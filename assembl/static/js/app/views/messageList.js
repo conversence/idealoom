@@ -42,8 +42,8 @@ class MessageList extends BaseMessageList.extend({
   // basic, may receive idea offset.
   minWidth: 450,
 
-  debugPaging: false,
-  debugScrollLogging: false,
+  //debugPaging: false,
+  //debugScrollLogging: false,
   _renderId: 0,
 
   ui: {
@@ -268,10 +268,6 @@ class MessageList extends BaseMessageList.extend({
    */
   getMinWidthWithOffset(offset) {
     return this.minWidth + offset;
-  }
-
-  getCurrentViewPortBottom() {
-    return this.getCurrentViewPortTop() + this.ui.panelBody.height() - this.ui.stickyBar.height();
   }
 
   renderMessageListHeader() {

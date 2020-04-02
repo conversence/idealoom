@@ -39,6 +39,13 @@ MORE_PAGES_NUMBER = 20;
 
 var SLOW_WORKER_DELAY_VALUE = 20;
 
+/** How often to compute message read statistics from scrolling */
+const SCROLL_VECTOR_MEASUREMENT_INTERVAL = 1000;
+
+const ATTENTION_UPDATE_INITIAL = "INITIAL";
+const ATTENTION_UPDATE_INTERIM = "INTERIM";
+const ATTENTION_UPDATE_FINAL = "FINAL";
+const ATTENTION_UPDATE_NONE = "NONE";
 /**
  * A mixin for message list behaviour. Logic here, UI in subclasses.
  * Note: implementing the mixin as a class->class functor is inspired by
@@ -51,7 +58,7 @@ return cls.extend({
     cls.apply(this, arguments);
   },
 
-  // define in subclass
+  // Can be overriden in subclass
   debugPaging: false,
   debugScrollLogging: false,
   _renderId: 0,
@@ -76,8 +83,11 @@ return cls.extend({
     var d = new Date();
     this.renderIsComplete = false;
     this.showMessageByIdInProgress = false;
-    this.scrollLoggerPreviousScrolltop = 0;
-    this.scrollLoggerPreviousTimestamp = d.getTime() ;
+    this.scrollLoggerVectorStack = [{
+      timeStamp: d.getTime(),
+      scrollTop: 0
+    }];
+    this.scrollLoggerMessages = {};
     this.renderedMessageViewsCurrent = {};
     this._renderedMessageFamilyViews = [];
     this._nbPendingMessage = 0;
@@ -1866,8 +1876,8 @@ return cls.extend({
    * @param {string} id
    * @return{boolean} true or false
    */
-  isMessageOnscreen: function(resultMessageIdCollection, visitorData, id) {
-      //console.log("isMessageOnscreen called for ", id, "Offsets are:", this._offsetStart, this._offsetEnd)
+  isMessageInView: function(resultMessageIdCollection, visitorData, id) {
+      //console.log("isMessageInView called for ", id, "Offsets are:", this._offsetStart, this._offsetEnd)
       if (this._offsetStart === undefined || this._offsetEnd === undefined) {
         //console.log("The messagelist hasn't displayed any messages yet");
         return false;
@@ -2143,7 +2153,7 @@ return cls.extend({
             return;
           }
 
-          if (messageIsInFilter && !that.isMessageOnscreen(resultMessageIdCollection, visitorData, id)) {
+          if (messageIsInFilter && !that.isMessageInView(resultMessageIdCollection, visitorData, id)) {
             if (shouldRecurse) {
               var success = function() {
                       if (debug) {
@@ -2228,54 +2238,12 @@ return cls.extend({
   },
 
   getCurrentViewPortBottom: function() {
-    return this.getCurrentViewPortTop() + this.ui.panelBody.height();
-  },
-
-  checkMessagesOnscreen: function(resultMessageIdCollection, visitorData) {
-    var that = this;
-    var messageDoms = this.getOnScreenMessagesSelectors(resultMessageIdCollection, visitorData);
-    var currentScrolltop = this.ui.panelBody.scrollTop();
-    var currentViewPortTop = this.getCurrentViewPortTop();
-    var currentViewPortBottom = this.getCurrentViewPortBottom();
-    if (this.debugScrollLogging) {
-      //console.log(messageDoms);
-      //console.log("checkMessagesOnscreen(): currentScrolltop", currentScrolltop, "currentViewPortTop", currentViewPortTop, "currentViewPortBottom", currentViewPortBottom);
+    let height = this.getCurrentViewPortTop() + this.ui.panelBody.height();
+    let stickyBarHeight = this.ui.stickyBar.height();
+    if (stickyBarHeight) {
+      height = height - stickyBarHeight;
     }
-
-    _.each(messageDoms, function(messageSelector) {
-      if (!messageSelector || messageSelector.length == 0)
-        return;
-      var messageTop = messageSelector.offset().top;
-      var messageBottom = messageTop + messageSelector.height();
-      var messageHeight = messageBottom - messageTop;
-      var heightAboveViewPort = currentViewPortTop - messageTop;
-      var heightBelowViewPort = messageBottom - currentViewPortBottom;
-
-      var //15px message padding bottom
-      messageWhiteSpaceRatio = (messageSelector.find(".js_messageHeader").height() + messageSelector.find(".js_messageBottomMenu").height() - 15) / messageHeight;
-
-      var ratioOnscreen;
-      if (heightAboveViewPort < 0) {
-        heightAboveViewPort = 0;
-      }
-      else if (heightAboveViewPort > messageHeight) {
-        heightAboveViewPort = messageHeight;
-      }
-
-      if (heightBelowViewPort < 0) {
-        heightBelowViewPort = 0;
-      }
-      else if (heightBelowViewPort > messageHeight) {
-        heightBelowViewPort = messageHeight;
-      }
-
-      ratioOnscreen = (messageHeight - heightAboveViewPort - heightBelowViewPort) / messageHeight;
-
-      //console.log("message heightAboveViewPort ", heightAboveViewPort, "heightBelowViewPort",heightBelowViewPort );
-      if (that.debugScrollLogging) {
-        console.log("message % on screen: ", ratioOnscreen * 100, "messageWhiteSpaceRatio", messageWhiteSpaceRatio);
-      }
-    });
+    return height;
   },
 
   /**
@@ -2329,10 +2297,252 @@ return cls.extend({
   invalidateQuery: function() {
     this.currentQuery.invalidateResults();
   },
+  /**
+   * Return the subset of scroll log stack  entries applicable to the timestamps 
+   * of a specific message in the message scroll log
+   * @param {*} startTimestamp 
+   * @param {*} endTimestamp 
+   */
+  getScrollVectorsForTimeRange: function (startTimestamp, endTimestamp) {
+    var that = this;
+    function checkApplicability(vector, index, arr) {
+      return (
+        vector.timeStamp <= endTimestamp &&
+        (vector.timeStamp >= startTimestamp ||
+          arr[index + 1].timeStamp >= startTimestamp) //We also want the scroll that brought the message onscreen, so we peek ahead...
+      );
+    }
+    let applicableVectors = that.scrollLoggerVectorStack.filter(checkApplicability);
+    return applicableVectors;
+  },
+  /**
+   * Computes which messages are currently onscreen, and in which proportion
+   * @param {*} resultMessageIdCollection 
+   * @param {*} visitorData 
+   */
+  checkMessagesOnscreen: function (resultMessageIdCollection, visitorData) {
+    var that = this;
+    var messageDoms = this.getOnScreenMessagesSelectors(resultMessageIdCollection, visitorData);
+    var currentScrollTop = this.ui.panelBody.scrollTop();
+    var currentViewPortTop = this.getCurrentViewPortTop();
+    var currentViewPortBottom = this.getCurrentViewPortBottom();
+    if (this.debugScrollLogging) {
+      //console.log(messageDoms);
+      console.log("checkMessagesOnscreen(): currentScrollTop", currentScrollTop, "currentViewPortTop", currentViewPortTop, "currentViewPortBottom", currentViewPortBottom);
+    }
+    if (!currentScrollTop ||
+      !currentViewPortTop ||
+      !currentViewPortBottom) {
+      throw new Error("Unable to compute viewport dimensions")
+    }
+    let latestVectorAtStart = that.scrollLoggerVectorStack[that.scrollLoggerVectorStack.length - 1];
+    _.each(messageDoms, function (messageSelector) {
+      if (!messageSelector || messageSelector.length == 0)
+        return;
+      let messageId = messageSelector[0].id;
+            // TODO: Consider using the height of the message body, which would give more accurate values for most assumptions, at the cost of completely ignoring whitespace.
+      let messageTop = messageSelector.offset().top;
+      let messageHeight = messageSelector.height();
+      let messageWidth = messageSelector.width();
+      let messageBottom = messageTop + messageHeight;
+
+      if (!messageTop ||
+        !messageHeight ||
+        !messageBottom ||
+        !messageWidth) {
+        console.log("TODO:  Unable to compute message dimensions. Need to handle case when thread has been collapsed");
+        //throw new Error("checkMessagesOnscreen(): Unable to compute message dimensions.");
+      }
+      //console.log(messageTop, messageBottom);
+
+      let topDistanceAboveViewPort = currentViewPortTop - messageTop;
+      let bottomDistanceBelowViewPort = messageBottom - currentViewPortBottom;
+
+      let //15px message padding bottom
+        messageWhiteSpaceRatio = (messageSelector.find(".js_messageHeader").height() + messageSelector.find(".js_messageBottomMenu").height() - 15) / messageHeight;
+
+      let ratioOnscreen;
+      let ratioAboveViewPort;
+      let ratioBelowViewPort;
+
+      if (topDistanceAboveViewPort < 0) {
+        ratioAboveViewPort = 0;
+      }
+      else {
+        ratioAboveViewPort = Math.min(
+          topDistanceAboveViewPort / messageHeight,
+          1
+        );
+      }
+
+      if (bottomDistanceBelowViewPort < 0) {
+        ratioBelowViewPort = 0;
+      }
+      else {
+        ratioBelowViewPort = Math.min(
+          bottomDistanceBelowViewPort / messageHeight,
+          1
+        );
+      }
+
+      ratioOnscreen = 1 - ratioAboveViewPort - ratioBelowViewPort;
+
+      /*console.log(
+        "message topDistanceAboveViewPort ", topDistanceAboveViewPort, "\nbottomDistanceBelowViewPort",bottomDistanceBelowViewPort,
+        "\nmessageHeight", messageHeight,
+        "\nratioAboveViewPort", ratioAboveViewPort,
+        "\nratioBelowViewPort", ratioBelowViewPort,
+        "\nratioOnscreen", ratioOnscreen );*/
+      let updateType;
+
+      let existingLog = that.scrollLoggerMessages[messageId];
+      if (!existingLog) {
+        if (ratioOnscreen > 0) {
+          updateType = ATTENTION_UPDATE_INITIAL;
+        }
+        else {
+          updateType = ATTENTION_UPDATE_NONE;
+        }
+      }
+      else {
+        if (ratioOnscreen > 0) {
+          updateType = ATTENTION_UPDATE_INTERIM;
+        }
+        else {
+          updateType = ATTENTION_UPDATE_FINAL;
+        }
+      }
+      if (updateType !== ATTENTION_UPDATE_NONE) {
+
+        let timeStampFirstOnscreen = updateType === ATTENTION_UPDATE_INITIAL ? latestVectorAtStart.timeStamp : existingLog.timeStampFirstOnscreen;
+        let timeStampLastOnscreen = updateType !== ATTENTION_UPDATE_INITIAL ? latestVectorAtStart.timeStamp : timeStampFirstOnscreen;
+        let durationOnscreen = timeStampLastOnscreen - timeStampFirstOnscreen;
+        that.scrollLoggerMessages[messageId] = {
+          updateType: updateType,
+          timeStampFirstOnscreen: timeStampFirstOnscreen,
+          durationOnscreen: durationOnscreen,
+          //An update with the same updateid replaces the previous one
+          updateId: messageId + "_" + timeStampFirstOnscreen
+        };
+
+        let vectors = that.getScrollVectorsForTimeRange(timeStampFirstOnscreen, timeStampLastOnscreen);
+        that.processScrollVectors(vectors, messageSelector);
+
+        if (that.debugScrollLogging) {
+          console.log("Mock-wrote new log for message", messageId, ": ", that.scrollLoggerMessages[messageId]);
+        }
+      }
+
+      /*if (that.debugScrollLogging && ratioOnscreen > 0) {
+        console.log("message", messageId, " % on screen: ", ratioOnscreen * 100, "messageWhiteSpaceRatio", messageWhiteSpaceRatio);
+      }*/
+    });
+    let oldestMessageInLogTimeStamp;
+    _.each(that.scrollLoggerMessages, function (log, id) {
+      if (log.updateType === ATTENTION_UPDATE_FINAL) {
+        if (that.debugScrollLogging) {
+          console.log("message", id, " processed FINAL update, deleting from log...");
+        }
+        delete that.scrollLoggerMessages[id];
+      }
+      else {
+        if (!log.timeStampFirstOnscreen) {
+          throw new Error("timeStampFirstOnscreen is invalid");
+        }
+        if (!oldestMessageInLogTimeStamp ||
+          log.timeStampFirstOnscreen < oldestMessageInLogTimeStamp) {
+          oldestMessageInLogTimeStamp = log.timeStampFirstOnscreen;
+        }
+      }
+    });
+    that.pruneOldScrollVectors(oldestMessageInLogTimeStamp);
+  },
 
   /**
-   * WARNING, this is a jquery handler, not a backbone one
-   * Processes the scroll events to ultimately generate analytics
+   * Prune all scroll event older than the last one PRIOR to the
+   * timestamp provided
+   * @param {*} timeStamp 
+   */
+  pruneOldScrollVectors: function (timeStamp) {
+    let that = this;
+
+    if (!timeStamp) {
+      throw new Error("pruneOldScrollVectors: missing of invalid timestamp");
+    }
+    let firstNewerVectorIndex = that.scrollLoggerVectorStack.findIndex(vector => {
+      if (vector.timeStamp === undefined) {
+        throw new Error("pruneOldScrollVectors: Unable to process vector")
+      }
+      return vector.timeStamp >= timeStamp;
+    });
+
+    //console.log("firstNewerVectorIndex ", firstNewerVectorIndex, "newer than", timeStamp);
+    let lastIndexToKeep = firstNewerVectorIndex - 1; //We also need the vector that brought the message onscreen, which is just before the one when the message was detected onscreen.
+    if (lastIndexToKeep >= 0) {
+      //console.log("pruning vectors indexes  0 to ", lastIndexToKeep);
+      that.scrollLoggerVectorStack.splice(0, lastIndexToKeep + 1)
+    }
+  },
+
+  processScrollVectors: function (vectors, messageSelector) {
+    let that = this;
+
+    let CURRENT_FONT_SIZE_PX = parseFloat(messageSelector.find(".message-body").first().css("font-size"));
+    if (!CURRENT_FONT_SIZE_PX) {
+      throw new Error("Unable to detemine current font size");
+    }
+
+    //Note:  After testing, the width() (a jquery function) is the proper
+    // content width, as a float, excluding padding and margins.
+    let messageTextWidth = messageSelector.width();
+
+    let //Character per line:  normally between 45 to 75, 66 is considered ideal.
+      //Average character per line = div width / font size in px*0.4
+      CURRENT_CHARACTERS_PER_LINE = messageTextWidth / (CURRENT_FONT_SIZE_PX * 0.4);
+
+    let //(gotcha:  ideally substract non-character size of message, but still count header)
+      ESTIMATED_LINE_HEIGHT = 1.5 * CURRENT_FONT_SIZE_PX;
+
+    let //Character per word: 5.1 average for english language + 1 space => multipy WPM*5 to get CPM
+      CARACTERS_PER_WORD = 5.1 + 1;
+
+    let WORDS_PER_LINE = CURRENT_CHARACTERS_PER_LINE / CARACTERS_PER_WORD;
+    if (false && that.debugScrollLogging) {
+      console.log("CURRENT_FONT_SIZE_PX", CURRENT_FONT_SIZE_PX);
+      console.log("messageTextWidth", messageTextWidth);
+      console.log("CURRENT_CHARACTERS_PER_LINE", CURRENT_CHARACTERS_PER_LINE);
+      console.log("ESTIMATED_LINE_HEIGHT", ESTIMATED_LINE_HEIGHT);
+      console.log("CARACTERS_PER_WORD", CARACTERS_PER_WORD);
+      console.log("WORDS_PER_LINE", WORDS_PER_LINE);
+      console.log("CURRENT_FONT_SIZE_PX", CURRENT_FONT_SIZE_PX);
+    }
+
+    let previousVector = undefined;
+    vectors.forEach(vector => {
+      if (previousVector) {
+        let distance = vector.scrollTop - previousVector.scrollTop;
+        let scrollLines = distance / ESTIMATED_LINE_HEIGHT;
+        let elapsedMilliseconds = vector.timeStamp - previousVector.timeStamp;
+        let scrollLinesPerMinute = scrollLines / elapsedMilliseconds * 1000 * 60;
+        let scrollWordsPerMinute = scrollLinesPerMinute * WORDS_PER_LINE;
+        if (false && that.debugScrollLogging) {
+          console.log("scrollLines", scrollLines);
+          console.log("scrollLinesPerMinute", scrollLinesPerMinute);
+          console.log("Distance scrolled: ", distance, " px in ", elapsedMilliseconds, " ms , scrollWordsPerMinute: ", scrollWordsPerMinute);
+        }
+      }
+      previousVector = vector;
+    });
+
+
+  },
+
+  /**
+   * Processes the scroll events to ultimately generate message reading
+   * analytics
+   * 
+   * WARNING, this is a jquery handler, NOT a backbone one
+   *
    * @event
    * @param ev: The jquery event, with the view as ev.data
    */
@@ -2341,51 +2551,16 @@ return cls.extend({
       //this isn't our own scroll handler
       return;
     }
-    var that = ev.data;
+    let that = ev.data;
 
-    var //alert("scroll");
-    CURRENT_FONT_SIZE_PX = 13;
+    let currentScrollTop = that.ui.panelBody.scrollTop();
+    let d = new Date();
+    let currentTimeStamp = d.getTime();
 
-    var //Approximate using messagelist width - 2 * (messageList padding + messageFamily padding, messageFamily margin, message margin.
-    //This is only a good estimation for flat viewss
-    averageMessageWidth = that.ui.messageList.width() - 2 * (20 + 6 + 6 + 10);
-
-    var //Character per line:  normally between 45 to 75, 66 is considered ideal.
-    //Average character per line = div width / font size in px*0.4
-    CURRENT_CHARACTERS_PER_LINE = averageMessageWidth / (CURRENT_FONT_SIZE_PX * 0.4);
-
-    var //(gotcha:  ideally substract non-character size of message, but still count header)
-    ESTIMATED_LINE_HEIGHT = 1.5 * CURRENT_FONT_SIZE_PX;
-
-    var //Character per word: 5.1 average for english language + 1 space => multipy WPM*5 to get CPM
-    LINE_CARACTERS_PER_WORD = 5.1 + 1;
-
-    var WORDS_PER_LINE = CURRENT_CHARACTERS_PER_LINE / LINE_CARACTERS_PER_WORD;
-    var currentScrolltop = that.ui.panelBody.scrollTop();
-    var d = new Date();
-    var currentTimeStamp = d.getTime();
-    var distance = currentScrolltop - that.scrollLoggerPreviousScrolltop;
-    var elapsedMilliseconds = currentTimeStamp - that.scrollLoggerPreviousTimestamp;
-    var scrollLines = distance / ESTIMATED_LINE_HEIGHT;
-    var scrollLinesPerMinute = scrollLines / elapsedMilliseconds * 1000 * 60;
-    var scrollWordsPerMinute = scrollLinesPerMinute * WORDS_PER_LINE;
-
-    if (that.debugScrollLogging) {
-      /*console.log("CURRENT_FONT_SIZE_PX", CURRENT_FONT_SIZE_PX);
-        console.log("averageMessageWidth", averageMessageWidth);
-        console.log("CURRENT_CHARACTERS_PER_LINE", CURRENT_CHARACTERS_PER_LINE);
-        console.log("ESTIMATED_LINE_HEIGHT", ESTIMATED_LINE_HEIGHT);
-        console.log("LINE_CARACTERS_PER_WORD", LINE_CARACTERS_PER_WORD);
-        console.log("WORDS_PER_LINE", WORDS_PER_LINE);
-        console.log("CURRENT_FONT_SIZE_PX", CURRENT_FONT_SIZE_PX);
-        console.log("scrollLines", scrollLines);
-        console.log("scrollLinesPerMinute", scrollLinesPerMinute);
-       */
-      console.log("Distance: ", distance, "px, scrollWordsPerMinute: ", scrollWordsPerMinute);
-    }
-
-    that.scrollLoggerPreviousScrolltop = currentScrolltop;
-    that.scrollLoggerPreviousTimestamp = currentTimeStamp;
+    that.scrollLoggerVectorStack.push({
+      timeStamp: currentTimeStamp,
+      scrollTop: currentScrollTop
+      });
     Promise.join(
         that.currentQuery.getResultMessageIdCollectionPromise(), that.getVisitorDataPromise(),
         function(resultMessageIdCollection, visitorData) {
@@ -2393,7 +2568,7 @@ return cls.extend({
             that.checkMessagesOnscreen(resultMessageIdCollection, visitorData);
           }
         });
-  }, 1000)
+  }, SCROLL_VECTOR_MEASUREMENT_INTERVAL, false)
 
 });
 };
