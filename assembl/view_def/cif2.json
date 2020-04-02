@@ -9,7 +9,7 @@
         "@type": "'\"SpecificResource\"",
         "hasSource": "content",
         "hasSelector": "selectors",
-        "resourceExpressesIdea": "idea"
+        "resourceExpressesIdea": "&first_linked_idea"
     },
     "Agent": {
         "fname": "name"

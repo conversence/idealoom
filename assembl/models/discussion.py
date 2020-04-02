@@ -864,7 +864,8 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
     def get_extract_graphs_cif(self):
         from .idea import Idea
         for e in self.get_bound_extracts():
-            yield e.extract_graph_json()
+            for graph in e.extract_graph_json():
+                yield graph
 
     def get_discussion_graph_cif(self):
         from .post import Post

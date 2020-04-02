@@ -211,6 +211,9 @@
     "IdeaRelatedPostLink": {
         "@extends": "IdeaContentPositiveLink"
     },
+    "IdeaExtractLink": {
+        "@extends": "IdeaRelatedPostLink"
+    },
     "IdeaContentNegativeLink": {
         "@extends": "IdeaContentLink"
     },
@@ -218,7 +221,9 @@
         "@extends": "IdeaContentNegativeLink"
     },
     "Excerpt": {
-        "@extends": "IdeaContentPositiveLink",
+        "idPost": "content",
+        "created": "creation_date",
+        "idCreator": "creator",
         "hasBody": "&local_uri_as_graph",
         "hasTarget": "&local_uri_as_resource",
         "relevantToConversation": "discussion"

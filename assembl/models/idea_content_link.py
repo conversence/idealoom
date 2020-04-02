@@ -297,22 +297,24 @@ class Extract(DiscussionBoundBase, OriginMixin):
                     for tfi in  self.selectors), [])
 
     def extract_graph_json(self):
-        return {
+        return [{
             "@graph": [
                 {
-                    "expressesIdea": Idea.uri_generic(self.idea_id),
+                    "expressesIdea": Idea.uri_generic(icl.idea_id),
                     "@id": self.local_uri_as_resource()
                 }
             ],
             "@id": self.local_uri_as_graph()
-        }
+        } for icl in self.idea_content_links]
+
+    def first_linked_idea(self):
+        if self.idea_content_links:
+            return self.idea_content_links[0].idea
 
     def extract_graph_json_wrap(self):
         return {
             "@context": [context_url, {'local': get_global_base_url()}],
-            "@graph": [
-                self.extract_graph_json()
-            ]
+            "@graph": self.extract_graph_json()
         }
 
     def extract_graph_json_wrap_flat(self):
