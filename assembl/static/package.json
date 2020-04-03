@@ -16,6 +16,7 @@
     "url": "git://github.com/assembl/assembl.git"
   },
   "scripts": {
+    "pretty": "prettier --write \"./js/app/**/*.js\"",
     "test": "npm run wd && npm run cover",
     "start": "mochify --watch",
     "wd": "mochify --wd",
@@ -88,6 +89,7 @@
     "fixtures": "0.0.2",
     "html-webpack-harddisk-plugin": "^1.0",
     "html-webpack-plugin": "^3.2.0",
+    "husky": "~4.2",
     "imports-loader": "~0.8",
     "jsdoc-rst-template": "git+https://github.com/assembl/jsdoc-rst-template.git",
     "lebab": "^3.1",
@@ -102,8 +104,8 @@
     "pegjs-loader": "~0.5",
     "po2json": "~1.0.0-alpha",
     "postcss": "~7.0",
-    "prettier-eslint": "~9.0",
-    "prettier-eslint-cli": "~5.0",
+    "prettier": "2.0.2",
+    "pretty-quick": "2.0.1",
     "resolve-url-loader": "~3",
     "sass-loader": "~8.0",
     "sinon": "~8.0",
