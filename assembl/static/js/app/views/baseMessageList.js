@@ -54,9 +54,10 @@ const ATTENTION_UPDATE_NONE = "NONE";
  */
 var BaseMessageListMixin = function(cls) {
 return cls.extend({
-  constructor: function BaseMessageListMixin() {
-    cls.apply(this, arguments);
-  },
+  // this mysteriously stopped working with @babel/preset-env 7.9
+  // constructor: function BaseMessageListMixin() {
+  //   cls.apply(this, arguments);
+  // },
 
   // Can be overriden in subclass
   debugPaging: false,
@@ -146,12 +147,14 @@ return cls.extend({
   // OVERRIDE
   onBeforeRender: function() {
     //Save some state from the previous render
-    this.saveMessagesInProgress();
-    this._clearPostRenderSlowCallbacksCallbackProcessing();
-    this._previousScrollTarget = this.getPreviousScrollTarget();
+    if (this.$el) {
+        this.saveMessagesInProgress();
+        this._clearPostRenderSlowCallbacksCallbackProcessing();
+        this._previousScrollTarget = this.getPreviousScrollTarget();
 
-    //Cleanup
-    Ctx.removeCurrentlyDisplayedTooltips(this.$el);
+        //Cleanup
+        Ctx.removeCurrentlyDisplayedTooltips(this.$el);
+    }
 
     if (this.currentQuery.isQueryValid()) {
       this.setLoading(false);
