@@ -58,7 +58,7 @@
     "regenerator-runtime": "~0.13",
     "select2": "~4.0",
     "sockjs-client": "~1.4",
-    "underscore": "^1.9"
+    "underscore": "^1.10"
   },
   "devDependencies": {
     "@babel/core": "^7.8",
