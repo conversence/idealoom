@@ -372,13 +372,15 @@ Widget.showing_ideas = relationship(
     Idea, viewonly=True, secondary=IdeaWidgetLink.__table__,
     primaryjoin=((Widget.id == IdeaWidgetLink.widget_id)
                  & IdeaShowingWidgetLink.polymorphic_filter()),
-    secondaryjoin=IdeaWidgetLink.idea_id == Idea.id)
+    secondaryjoin=IdeaWidgetLink.idea_id == Idea.id,
+    info={"backref": "Idea.showing_widget"})
 # explicit backref
 Idea.showing_widget = relationship(
     Widget, viewonly=True, secondary=IdeaWidgetLink.__table__,
     secondaryjoin=((Widget.id == IdeaWidgetLink.widget_id)
                    & IdeaShowingWidgetLink.polymorphic_filter()),
-    primaryjoin=IdeaWidgetLink.idea_id == Idea.id)
+    primaryjoin=IdeaWidgetLink.idea_id == Idea.id,
+    info={"backref": Widget.showing_ideas})
 
 
 Idea.active_showing_widget_links = relationship(
@@ -1038,25 +1040,29 @@ VotingWidget.votable_ideas = relationship(
     Idea, viewonly=True, secondary=VotableIdeaWidgetLink.__table__,
     primaryjoin=((VotingWidget.id == VotableIdeaWidgetLink.widget_id)
                  & VotableIdeaWidgetLink.polymorphic_filter()),
-    secondaryjoin=VotableIdeaWidgetLink.idea_id == Idea.id)
+    secondaryjoin=VotableIdeaWidgetLink.idea_id == Idea.id,
+    info={"backref": "Idea.votable_by_widget"})
 # explicit backref
 Idea.votable_by_widget = relationship(
     VotingWidget, viewonly=True, secondary=VotableIdeaWidgetLink.__table__,
     secondaryjoin=((VotingWidget.id == VotableIdeaWidgetLink.widget_id)
                    & VotableIdeaWidgetLink.polymorphic_filter()),
-    primaryjoin=VotableIdeaWidgetLink.idea_id == Idea.id)
+    primaryjoin=VotableIdeaWidgetLink.idea_id == Idea.id,
+    info={"backref": VotingWidget.votable_ideas})
 
 VotingWidget.voted_ideas = relationship(
     Idea, viewonly=True, secondary=VotedIdeaWidgetLink.__table__,
     primaryjoin=((VotingWidget.id == VotedIdeaWidgetLink.widget_id)
                  & VotedIdeaWidgetLink.polymorphic_filter()),
-    secondaryjoin=VotedIdeaWidgetLink.idea_id == Idea.id)
+    secondaryjoin=VotedIdeaWidgetLink.idea_id == Idea.id,
+    info={"backref": "Idea.voted_by_widget"})
 # explicit backref
 Idea.voted_by_widget = relationship(
     VotingWidget, viewonly=True, secondary=VotedIdeaWidgetLink.__table__,
     secondaryjoin=((VotingWidget.id == VotedIdeaWidgetLink.widget_id)
                    & VotedIdeaWidgetLink.polymorphic_filter()),
-    primaryjoin=VotedIdeaWidgetLink.idea_id == Idea.id)
+    primaryjoin=VotedIdeaWidgetLink.idea_id == Idea.id,
+    info={"backref": VotingWidget.voted_ideas})
 
 
 VotingWidget.criteria = relationship(
@@ -1064,11 +1070,13 @@ VotingWidget.criteria = relationship(
     viewonly=True, secondary=VotingCriterionWidgetLink.__table__,
     primaryjoin=((VotingWidget.id == VotingCriterionWidgetLink.widget_id)
                  & VotingCriterionWidgetLink.polymorphic_filter()),
-    secondaryjoin=VotingCriterionWidgetLink.idea_id == Idea.id)
+    secondaryjoin=VotingCriterionWidgetLink.idea_id == Idea.id,
+    info={"backref": "Idea.criterion_of_widget"})
 # explicit backref
 Idea.criterion_of_widget = relationship(
     VotingWidget,
     viewonly=True, secondary=VotingCriterionWidgetLink.__table__,
     secondaryjoin=((VotingWidget.id == VotingCriterionWidgetLink.widget_id)
                    & VotingCriterionWidgetLink.polymorphic_filter()),
-    primaryjoin=VotingCriterionWidgetLink.idea_id == Idea.id)
+    primaryjoin=VotingCriterionWidgetLink.idea_id == Idea.id,
+    info={"backref": VotingWidget.criteria})

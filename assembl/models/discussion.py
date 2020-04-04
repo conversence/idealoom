@@ -786,7 +786,8 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
         User, viewonly=True, secondary=LocalUserRole.__table__,
         primaryjoin="LocalUserRole.discussion_id == Discussion.id",
         secondaryjoin=((LocalUserRole.profile_id == User.id)
-            & (LocalUserRole.requested == False)))
+            & (LocalUserRole.requested == False)),
+        info={"backref": "User.involved_in_discussion"})
 
     # The list of praticipants actually subscribed to the discussion
     # backref is participant_in_discussion, below
@@ -796,7 +797,8 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
             ((LocalUserRole.role_id == Role.id) & (Role.name == R_PARTICIPANT))),
         primaryjoin="LocalUserRole.discussion_id == Discussion.id",
         secondaryjoin=((LocalUserRole.profile_id == User.id)
-            & (LocalUserRole.requested == False)))
+            & (LocalUserRole.requested == False)),
+        info={"backref": "User.participant_in_discussion"})
 
     def get_participants_query(self, ids_only=False, include_readers=False, current_user=None):
         from .auth import AgentProfile
@@ -1188,7 +1190,8 @@ User.involved_in_discussion = relationship(
         Discussion, viewonly=True, secondary=LocalUserRole.__table__,
         secondaryjoin="LocalUserRole.discussion_id == Discussion.id",
         primaryjoin=((LocalUserRole.profile_id == User.id)
-            & (LocalUserRole.requested == False)))
+            & (LocalUserRole.requested == False)),
+        info={"backref": Discussion.all_participants})
 
 # explicit backref to Discussion.simple_participants
 User.participant_in_discussion = relationship(
@@ -1197,7 +1200,8 @@ User.participant_in_discussion = relationship(
             ((LocalUserRole.role_id == Role.id) & (Role.name == R_PARTICIPANT))),
         secondaryjoin="LocalUserRole.discussion_id == Discussion.id",
         primaryjoin=((LocalUserRole.profile_id == User.id)
-            & (LocalUserRole.requested == False)))
+            & (LocalUserRole.requested == False)),
+        info={"backref": Discussion.simple_participants})
 
 
 def slugify_topic_if_slug_is_empty(discussion, topic, oldvalue, initiator):

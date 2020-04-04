@@ -11,6 +11,7 @@ import logging
 from future.utils import string_types, as_native_str
 from sqlalchemy.orm import aliased
 from sqlalchemy.orm.attributes import InstrumentedAttribute
+from sqlalchemy.orm.properties import RelationshipProperty
 from sqlalchemy.sql.expression import and_
 from sqlalchemy.inspection import inspect as sqlainspect
 from sqlalchemy.exc import InvalidRequestError
@@ -881,6 +882,17 @@ class RelationCollectionDefinition(AbstractCollectionDefinition):
             # TODO: How to chose?
             self.back_relation = back_properties.pop()
             self.owner_class = self.back_relation.mapper.class_
+        elif relationship.info.get('backref', None):
+            back_ref = relationship.info['backref']
+            if isinstance(back_ref, InstrumentedAttribute):
+                back_ref = back_ref.class_.__mapper__.relationships.get(back_ref.key)
+            if isinstance(back_ref, str):
+                # TODO: This is probably doable with SQLA machinery...
+                cl_name, reln_name = back_ref.split(".", 1)
+                if cl_name == self.collection_class.__name__:
+                    back_ref = self.collection_class.__mapper__.relationships.get(reln_name, None)
+            if isinstance(back_ref, RelationshipProperty):
+                self.back_relation = back_ref
 
     def decorate_query(
             self, query, owner_alias, coll_alias, parent_instance, ctx):

@@ -51,7 +51,7 @@ from .uriref import URIRefDb
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..auth import (
     CrudPermissions, P_READ, P_ADMIN_DISC, P_EDIT_IDEA, P_SYSADMIN,
-    P_ADD_IDEA, P_ASSOCIATE_IDEA, P_READ_IDEA, R_OWNER, MAYBE)
+    P_ADD_IDEA, P_ASSOCIATE_IDEA, P_READ_IDEA, R_OWNER, MAYBE, Everyone)
 from .permissions import (
     AbstractLocalUserRole, Role, Permission)
 from .langstrings import LangString, LangStringEntry
@@ -1682,7 +1682,8 @@ class IdeaLink(HistoryMixinWithOrigin, DiscussionBoundBase):
         primaryjoin=(source_id == Idea.id),
         # secondaryjoin=(Idea.discussion_id == Discussion.id),
         # backref is Discussion.idea_links below
-        info={'rdf': QuadMapPatternS(None, ASSEMBL.in_conversation)}
+        info={'rdf': QuadMapPatternS(None, ASSEMBL.in_conversation),
+              'backref': 'Discussion.idea_links'}
     )
 
     discussion_ts = relationship(
@@ -1692,7 +1693,8 @@ class IdeaLink(HistoryMixinWithOrigin, DiscussionBoundBase):
         secondary=Idea.__table__,
         primaryjoin=(source_id == Idea.id),
         # backref is Discussion.idea_links_ts below
-        info={'rdf': QuadMapPatternS(None, ASSEMBL.in_conversation)}
+        info={'rdf': QuadMapPatternS(None, ASSEMBL.in_conversation),
+              'backref': 'Discussion.idea_links_ts'}
     )
 
 
@@ -1704,14 +1706,16 @@ Discussion.idea_links = relationship(
     primaryjoin=(Idea.discussion_id == Discussion.id),
     secondaryjoin="""and_(IdeaLink.source_id==Idea.id,
                      Idea.tombstone_date == None,
-                     IdeaLink.tombstone_date == None)""")
+                     IdeaLink.tombstone_date == None)""",
+    info={'backref': IdeaLink.discussion})
 
 # explicit backref to IdeaLink.discussion_ts
 Discussion.idea_links_ts = relationship(
     IdeaLink,
     viewonly=True,
     secondary=Idea.__table__,
-    secondaryjoin=(IdeaLink.source_id == Idea.id)
+    secondaryjoin=(IdeaLink.source_id == Idea.id),
+    info={'backref': IdeaLink.discussion_ts}
 )
 
 

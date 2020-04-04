@@ -1028,11 +1028,13 @@ class Notification(Base):
 
 User.notifications = relationship(
     Notification, viewonly=True,
-    secondary=NotificationSubscription.__mapper__.mapped_table)
+    secondary=NotificationSubscription.__mapper__.mapped_table,
+    info={"backref": "Notification.owner"})
 # explicit backref on view_only
 Notification.owner = relationship(
     User, viewonly=True,
-    secondary=NotificationSubscription.__mapper__.mapped_table)
+    secondary=NotificationSubscription.__mapper__.mapped_table,
+    info={"backref": User.notifications})
 
 
 class NotificationOnPost(Notification):
