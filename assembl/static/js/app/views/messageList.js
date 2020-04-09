@@ -497,7 +497,7 @@ class MessageList extends BaseMessageList.extend({
                             //the top element and scroll does not propagate
                             that.$(".panel-body").scroll(
                                 that,
-                                that.scrollLogger
+                                that.logScroll
                             );
                         });
                     }

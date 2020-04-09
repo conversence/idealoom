@@ -207,7 +207,7 @@ class TourManager extends Marionette.Object.extend({
         if (step.stepOnShow !== undefined) {
             step.stepOnShow();
         }
-        //that.$(".panel-body").scroll(that, that.scrollLogger);
+        //that.$(".panel-body").scroll(that, that.logScroll);
     }
 
     checkForLastStep() {
