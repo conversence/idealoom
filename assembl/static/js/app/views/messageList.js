@@ -16,7 +16,7 @@ import Announcements from './announcements.js';
 import MessageSendView from './messageSend.js';
 import PanelSpecTypes from '../utils/panelSpecTypes.js';
 import BasePanel from './basePanel.js';
-import BaseMessageListMixin from './baseMessageList.js';
+import BaseMessageListMixinFactory from './baseMessageList.js';
 import CollectionManager from '../common/collectionManager.js';
 import Widget from '../models/widget.js';
 import Promise from 'bluebird';
@@ -26,7 +26,7 @@ import Promise from 'bluebird';
  * @extends app.views.basePanel.BasePanel
  * @extends app.views.baseMessageList.BaseMessageListMixin
  */
-var BaseMessageList = BaseMessageListMixin(BasePanel);
+const BaseMessageList = BaseMessageListMixinFactory(BasePanel);
 
 /**
  * @class app.views.messageList.MessageList

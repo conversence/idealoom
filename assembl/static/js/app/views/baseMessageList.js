@@ -56,13 +56,9 @@ const ATTENTION_UPDATE_NONE = "NONE";
  * http://justinfagnani.com/2015/12/21/real-mixins-with-javascript-classes/
  * @class app.views.baseMessageList.BaseMessageListMixin
  */
-var BaseMessageListMixin = function(cls) {
-return cls.extend({
-  // this mysteriously stopped working with @babel/preset-env 7.9
-  // constructor: function BaseMessageListMixin() {
-  //   cls.apply(this, arguments);
-  // },
+function BaseMessageListMixinFactory(cls) {
 
+class BaseMessageListMixin extends cls.extend({
   // Can be overriden in subclass
   debugPaging: false,
   debugScrollLogging: true,
@@ -79,8 +75,106 @@ return cls.extend({
     contentPending: '.real-time-updates',
   },
 
+  // Also make sure you define or inherit getGroupState, getContainingGroup
+
+  ViewStyles: {
+    RECENTLY_ACTIVE_THREADS: {
+      id: "recent_active_threads",
+      css_class: MESSAGE_LIST_VIEW_STYLES_CLASS_PREFIX + "recent_active_threads",
+      label: i18n.gettext('Recently active threads')
+  },
+    RECENT_THREAD_STARTERS: {
+      id: "recent_thread_starters",
+      css_class: MESSAGE_LIST_VIEW_STYLES_CLASS_PREFIX + "recent_threads_starters",
+      label: i18n.gettext('Recently started threads')
+  },
+    THREADED: {
+      id: "threaded",
+      css_class: MESSAGE_LIST_VIEW_STYLES_CLASS_PREFIX + "threaded",
+      label: i18n.gettext('Chronological threads')
+  },
+    NEW_MESSAGES: {
+      id: "new_messages",
+      css_class: MESSAGE_LIST_VIEW_STYLES_CLASS_PREFIX + "newmessages",
+      label: i18n.gettext('Chronological threads + jump to oldest unread message')
+  },
+    CHRONOLOGICAL: {
+      id: "chronological",
+      css_class: MESSAGE_LIST_VIEW_STYLES_CLASS_PREFIX + "chronological",
+      label: i18n.gettext('Oldest messages first')
+  },
+    REVERSE_CHRONOLOGICAL: {
+      id: "reverse_chronological",
+      css_class: MESSAGE_LIST_VIEW_STYLES_CLASS_PREFIX + "activityfeed",
+      label: i18n.gettext('Newest messages first')
+  },
+    POPULARITY: {
+      id: "popularity",
+      css_class: MESSAGE_LIST_VIEW_STYLES_CLASS_PREFIX + "popularmessages",
+      label: i18n.gettext('Most popular messages first')
+    },
+    /*
+    CHRONOLOGICAL: {
+      id: "chronological",
+      css_class: MESSAGE_LIST_VIEW_STYLES_CLASS_PREFIX + "chronological",
+      label: i18n.gettext('Oldest first')
+    }*/
+  },
+
+  currentViewStyle: null,
+
+  /**
+   * If there were any render requests inhibited while rendering was
+   * processed
+   */
+  numRenderInhibitedDuringRendering: 0,
+
+  storedMessageListConfig: Ctx.DEPRECATEDgetMessageListConfigFromStorage(),
+
+  /**
+   * The collapse/expand flag
+   * @type {boolean}
+   */
+  collapsed: false,
+
+  /**
+   * Stores the first offset of messages currently onscreen
+   *
+   * @type {number}
+   */
+  offsetStart: undefined,
+
+  /**
+   * Stores the last offset of messages currently onscreen
+   * @type {number}
+   */
+  offsetEnd: undefined,
+
+  /**
+   * The annotator reference
+   * @type {Annotator}
+   */
+  annotator: null,
+
+  /**
+   * The current server-side query applied to messages
+   * @type {Object}
+   */
+  currentQuery: null,
+
+  annotator_config: {
+        externals: {
+          "jQuery": static_url + "/node_modules/jquery/dist/jquery.min.js",
+          "styles": static_url + "/js/build/annotator_ext.css"
+        }
+      },
+}) {
+  constructor() {
+    super(...arguments);
+  }
+
   // Override
-  initialize: function(options) {
+  initialize(options) {
     //console.log("messageList::initialize()");
     cls.prototype.initialize.apply(this, arguments);
     var that = this;
@@ -127,29 +221,29 @@ return cls.extend({
       }
       );
     }
-  },
+  }
 
   // Override
-  showAnnouncement: function(announcement) {
-  },
+  showAnnouncement(announcement) {
+  }
 
   // Override
-  showTopPostBox: function(options) {
-  },
+  showTopPostBox(options) {
+  }
 
   /**
    * Synchronizes the panel with the currently selected idea (possibly none)
    * override in subclass
    */
-  syncWithCurrentIdea: function() {
-  },
+  syncWithCurrentIdea() {
+  }
 
   // OVERRIDE
-  renderMessageListHeader: function() {
-  },
+  renderMessageListHeader() {
+  }
 
   // OVERRIDE
-  onBeforeRender: function() {
+  onBeforeRender() {
     //Save some state from the previous render
     if (this.$el) {
         this.saveMessagesInProgress();
@@ -168,10 +262,10 @@ return cls.extend({
 
       //We will sync with current idea in onRender
     }
-  },
+  }
 
   // OVERRIDE
-  onRender: function() {
+  onRender() {
     this.renderIsComplete = false;  //only showMessages should set this false
     this._renderId++;
     if (Ctx.debugRender) {
@@ -184,89 +278,34 @@ return cls.extend({
 
     //FIXME once marionettization is complete
     //console.log("messageList onRender() this.newTopicView:", this.newTopicView);
-  },
+  }
 
   // OVERRIDE
-  isInPrintableView: function() {
+  isInPrintableView() {
     return false;
-  },
+  }
 
   // OVERRIDE
-  toggleFilterByPostId: function(postId) {
+  toggleFilterByPostId(postId) {
     // Noop locally
-  },
-
-  // Also make sure you define or inherit getGroupState, getContainingGroup
-
-  ViewStyles: {
-    RECENTLY_ACTIVE_THREADS: {
-      id: "recent_active_threads",
-      css_class: MESSAGE_LIST_VIEW_STYLES_CLASS_PREFIX + "recent_active_threads",
-      label: i18n.gettext('Recently active threads')
-    },
-    RECENT_THREAD_STARTERS: {
-      id: "recent_thread_starters",
-      css_class: MESSAGE_LIST_VIEW_STYLES_CLASS_PREFIX + "recent_threads_starters",
-      label: i18n.gettext('Recently started threads')
-    },
-    THREADED: {
-      id: "threaded",
-      css_class: MESSAGE_LIST_VIEW_STYLES_CLASS_PREFIX + "threaded",
-      label: i18n.gettext('Chronological threads')
-    },
-    NEW_MESSAGES: {
-      id: "new_messages",
-      css_class: MESSAGE_LIST_VIEW_STYLES_CLASS_PREFIX + "newmessages",
-      label: i18n.gettext('Chronological threads + jump to oldest unread message')
-    },
-    CHRONOLOGICAL: {
-      id: "chronological",
-      css_class: MESSAGE_LIST_VIEW_STYLES_CLASS_PREFIX + "chronological",
-      label: i18n.gettext('Oldest messages first')
-    },
-    REVERSE_CHRONOLOGICAL: {
-      id: "reverse_chronological",
-      css_class: MESSAGE_LIST_VIEW_STYLES_CLASS_PREFIX + "activityfeed",
-      label: i18n.gettext('Newest messages first')
-    },
-    POPULARITY: {
-      id: "popularity",
-      css_class: MESSAGE_LIST_VIEW_STYLES_CLASS_PREFIX + "popularmessages",
-      label: i18n.gettext('Most popular messages first')
-    }/*,
-    CHRONOLOGICAL: {
-      id: "chronological",
-      css_class: MESSAGE_LIST_VIEW_STYLES_CLASS_PREFIX + "chronological",
-      label: i18n.gettext('Oldest first')
-    }*/
-  },
-
-  currentViewStyle: null,
+  }
 
   /**
    * Is the view style a non-flat view
    */
-  isViewStyleThreadedType: function(viewStyle) {
+  isViewStyleThreadedType(viewStyle) {
       return viewStyle === this.ViewStyles.THREADED ||
              viewStyle === this.ViewStyles.NEW_MESSAGES ||
              viewStyle === this.ViewStyles.RECENTLY_ACTIVE_THREADS ||
              viewStyle === this.ViewStyles.RECENT_THREAD_STARTERS;
-    },
+  }
 
-  isCurrentViewStyleThreadedType: function() {
+  isCurrentViewStyleThreadedType() {
       return this.isViewStyleThreadedType(this.currentViewStyle);
-    },
-
-  /**
-   * If there were any render requests inhibited while rendering was
-   * processed
-   */
-  numRenderInhibitedDuringRendering: 0,
-
-  storedMessageListConfig: Ctx.DEPRECATEDgetMessageListConfigFromStorage(),
+  }
 
   /* Saves in local storage the unfinished messages that a user has started typing */
-  saveMessagesInProgress: function() {
+  saveMessagesInProgress() {
     if (this.newTopicView !== undefined) {
       this.newTopicView.savePartialMessage();
     }
@@ -289,59 +328,28 @@ return cls.extend({
         // this was the newTopicView
       }
     });
-  },
+  }
 
   /**
    * get a view style definition by id
    * @param {viewStyle.id} viewStyleId
    * @returns {viewStyle | undefined}
    */
-  getViewStyleDefById: function(viewStyleId) {
+  getViewStyleDefById(viewStyleId) {
     var retval = _.find(this.ViewStyles, function(viewStyle) {
       return viewStyle.id === viewStyleId;
     });
     return retval;
-  },
+  }
 
-  ideaChanged: function() {
+  ideaChanged() {
     var that = this;
     this.getPanelWrapper().filterThroughPanelLock(
             function() {
               that.syncWithCurrentIdea();
             }, 'syncWithCurrentIdea');
-  },
+  }
 
-
-  /**
-   * The collapse/expand flag
-   * @type {boolean}
-   */
-  collapsed: false,
-
-  /**
-   * Stores the first offset of messages currently onscreen
-   *
-   * @type {number}
-   */
-  offsetStart: undefined,
-
-  /**
-   * Stores the last offset of messages currently onscreen
-   * @type {number}
-   */
-  offsetEnd: undefined,
-
-  /**
-   * The annotator reference
-   * @type {Annotator}
-   */
-  annotator: null,
-
-  /**
-   * The current server-side query applied to messages
-   * @type {Object}
-   */
-  currentQuery: null,
 
   /**
    * This code is used to store the scroll position before the entire message 
@@ -351,7 +359,7 @@ return cls.extend({
    * Note:  this.renderedMEssageViewsCurrent must not have been
    * for this function to work.
    */
-  getPreviousScrollTarget: function() {
+  getPreviousScrollTarget() {
     var panelOffset = null;
     var panelScrollTop = 0;
     var messageViewScrolledInto = null;
@@ -416,9 +424,9 @@ return cls.extend({
     }
 
     return retval;
-  },
+  }
 
-  scrollToPreviousScrollTarget: function(retrying) {
+  scrollToPreviousScrollTarget(retrying) {
     var previousScrollTarget = this._previousScrollTarget;
     var debug = false;
     var that = this;
@@ -457,13 +465,13 @@ return cls.extend({
         scrollUtils.scrollToElementAndWatch(message, undefined, previousScrollTarget.innerOffset, false);
       }
     }
-  },
+  }
 
   /**
    * Calculate the offsets of messages actually displayed from a request
    * @returns The actual offset array
    */
-  calculateMessagesOffsets: function(visitorData, requestedOffsets) {
+  calculateMessagesOffsets(visitorData, requestedOffsets) {
     var returnedDataOffsets = {};
     var len = _.size(visitorData.visitorOrderLookupTable);
 
@@ -486,9 +494,9 @@ return cls.extend({
     }
 
     return returnedDataOffsets;
-  },
+  }
 
-  _calculateThreadedMessagesOffsets: function(visitorData, requestedOffsets) {
+  _calculateThreadedMessagesOffsets(visitorData, requestedOffsets) {
     var returnedDataOffsets = {};
     var numMessages = visitorData.visitorOrderLookupTable.length;
 
@@ -537,21 +545,21 @@ return cls.extend({
     }
 
     return returnedDataOffsets;
-  },
+  }
 
   /**
    * @param messageId of the message that we want onscreen
    * @returns {} requetedOffset structure
    */
-  calculateRequestedOffsetToShowMessage: function(messageId, visitorData, resultMessageIdCollection) {
+  calculateRequestedOffsetToShowMessage(messageId, visitorData, resultMessageIdCollection) {
     return this.calculateRequestedOffsetToShowOffset(this.getMessageOffset(messageId, visitorData, resultMessageIdCollection));
-  },
+  }
 
   /**
    * @param messageOffset of the message that we want onscreen
    * @returns {} requetedOffset structure
    */
-  calculateRequestedOffsetToShowOffset: function(messageOffset) {
+  calculateRequestedOffsetToShowOffset(messageOffset) {
     var requestedOffsets = {};
     var requestedOffsets;
 
@@ -589,20 +597,20 @@ return cls.extend({
     }
 
     return requestedOffsets;
-  },
+  }
 
   /** Essentially the default value of showMessages.
    * Whoever first calls it will get this as the first value of the messagelist upon render */
-  requestMessages: function(requestedOffsets) {
+  requestMessages(requestedOffsets) {
     this._requestedOffsets = requestedOffsets;
-  },
+  }
 
   /**
    * Get the message ids to show, or shown onscreen for a specific
    * offset
    * @returns list of message ids, in the order they are shown onscreen
    * */
-  getMessageIdsToShow: function(resultMessageIdCollection, visitorData, requestedOffsets) {
+  getMessageIdsToShow(resultMessageIdCollection, visitorData, requestedOffsets) {
     var messageIdsToShow = [];
     var returnedOffsets = this.calculateMessagesOffsets(visitorData, requestedOffsets);
 
@@ -621,7 +629,7 @@ return cls.extend({
     }
 
     return messageIdsToShow;
-  },
+  }
 
   /**
    * Load the new batch of messages according to the requested `offsetStart`
@@ -631,7 +639,7 @@ return cls.extend({
    * 
    * @returns a Promise to true, resolved when done
    */
-  showMessages: function(requestedOffsets) {
+  showMessages(requestedOffsets) {
     var that = this;
     var views_promise;
     var offsets;
@@ -765,7 +773,7 @@ return cls.extend({
       }
 
     });
-  },
+  }
 
   /**
    * Used for processing costly operations that needs to happen after
@@ -773,15 +781,15 @@ return cls.extend({
    *
    * It will be processed with a delay between each call to avoid locaking the browser
    */
-  requestPostRenderSlowCallback: function(callback) {
+  requestPostRenderSlowCallback(callback) {
     this._postRenderSlowCallbackStack.push(callback);
 
-  },
+  }
 
   /**
    * The worker
    */
-  _postRenderSlowCallbackWorker: function(messageListView) {
+  _postRenderSlowCallbackWorker(messageListView) {
     var that = this;
 
     //console.log("_postRenderSlowCallbackWorker fired, stack length: ", this._postRenderSlowCallbackStack.length)
@@ -800,31 +808,31 @@ return cls.extend({
     this._postRenderSlowCallbackWorkerInterval = setTimeout(function() {
       that._postRenderSlowCallbackWorker();
     }, SLOW_WORKER_DELAY_VALUE)
-  },
+  }
 
   /**
    *
    */
-  _startPostRenderSlowCallbackProcessing: function() {
+  _startPostRenderSlowCallbackProcessing() {
     var that = this;
     this._postRenderSlowCallbackWorkerInterval = setTimeout(function() {
       that._postRenderSlowCallbackWorker();
     }, SLOW_WORKER_DELAY_VALUE);
-  },
+  }
   /**
    * Stops processing and clears the queue
    */
-  _clearPostRenderSlowCallbacksCallbackProcessing: function() {
+  _clearPostRenderSlowCallbacksCallbackProcessing() {
     clearTimeout(this._postRenderSlowCallbackWorkerInterval);
     this._postRenderSlowCallbackStack = [];
-  },
+  }
 
   /**
    * Re-init Annotator.  Needs to be done for all messages when any
    * single message has been re-rendered.  Otherwise, the annotations
    * will not be shown.
    */
-  _doAnnotatorRefresh: function() {
+  _doAnnotatorRefresh() {
     if (Ctx.debugAnnotator) {
       console.log("messageList:_doAnnotatorRefresh() called for " + _.size(this.renderedMessageViewsCurrent) + " messages on render id ", _.clone(this._renderId));
     }
@@ -837,10 +845,10 @@ return cls.extend({
         messageView.loadAnnotations();
       });
     }
-  },
+  }
 
   // each fully-displayed message asks the messageList for an anotator refresh, so to avoid doing it too often, we use a throttled version of the requestAnnotatorRefresh() method
-  doAnnotatorRefreshDebounced: function() {
+  doAnnotatorRefreshDebounced() {
     var that = this;
     if (this._debouncedRefresh === undefined) {
       this._debouncedRefresh = _.debounce(_.bind(this._doAnnotatorRefresh, this), 100);
@@ -850,7 +858,7 @@ return cls.extend({
       console.log("messageList:doAnnotatorRefreshDebounced called for render id ", _.clone(this._renderId));
     }
     this._debouncedRefresh();
-  },
+  }
 
   /**
    * Should be called by a messageview anytime it has annotations and has
@@ -858,7 +866,7 @@ return cls.extend({
    * This method is redefined in initialize() as a throttled version of itself.
    * Each fully-displayed message calls explicitly this method (in message::onRender()). (TODO?: Use events instead)
    */
-  requestAnnotatorRefresh: function() {
+  requestAnnotatorRefresh() {
     if ( !this.annotatorIsEnabled ){
       return;
     }
@@ -869,19 +877,19 @@ return cls.extend({
       this.doAnnotatorRefreshDebounced();
     }
 
-  },
+  }
 
   /**
    * Suspends annotator refresh during initial render
    */
-  suspendAnnotatorRefresh: function() {
+  suspendAnnotatorRefresh() {
     this.annotatorRefreshSuspended = true;
-  },
+  }
   /**
    * Will call a refresh synchronously if any refresh was requested
    * while suspended
    */
-  resumeAnnotatorRefresh: function() {
+  resumeAnnotatorRefresh() {
     this.annotatorRefreshSuspended = false;
     if (this.annotatorRefreshRequested === true) {
       if (Ctx.debugAnnotator) {
@@ -889,12 +897,12 @@ return cls.extend({
       }
       this._doAnnotatorRefresh();
     }
-  },
+  }
 
   /**
    * Show the next bunch of messages to be displayed.
    */
-  showNextMessages: function() {
+  showNextMessages() {
     var requestedOffsets = {};
     this.$el.find('.js_messageList-loadmoreloader').removeClass('hidden');
     this.ui.bottomArea.addClass('hidden');
@@ -902,12 +910,12 @@ return cls.extend({
 
     //console.log("showNextMessages calling showMessages");
     this.showMessages(requestedOffsets);
-  },
+  }
 
   /**
    * Show the previous bunch of messages to be displayed
    */
-  showPreviousMessages: function() {
+  showPreviousMessages() {
     var requestedOffsets = {};
     this.$el.find('.js_messageList-loadprevloader').removeClass('hidden');
     this.ui.topArea.addClass('hidden');
@@ -915,12 +923,12 @@ return cls.extend({
 
     //console.log("showPreviousMessages calling showMessages");
     this.showMessages(requestedOffsets);
-  },
+  }
 
   /**
    * Show all messages on screen, regardless of the time it will take.
    */
-  showAllMessagesAtOnce: function() {
+  showAllMessagesAtOnce() {
       var that = this;
       this.$el.find('.js_messageList-loadmoreloader').removeClass('hidden');
       this.ui.bottomArea.addClass('hidden');
@@ -933,13 +941,13 @@ return cls.extend({
         //console.log("showAllMessages calling showMessages");
         that.showMessages(requestedOffsets);
       });
-    },
+  }
 
   /**
    * Get the requested offsets when scrolling down
    * @private
    */
-  getNextMessagesRequestedOffsets: function() {
+  getNextMessagesRequestedOffsets() {
     var retval = {};
 
     retval.offsetEnd = this._offsetEnd + MORE_PAGES_NUMBER;
@@ -953,13 +961,13 @@ return cls.extend({
 
     retval['scrollTransitionWasAtOffset'] = this._offsetEnd;
     return retval;
-  },
+  }
 
   /**
    * Get the requested offsets when scrolling up
    * @private
    */
-  getPreviousMessagesRequestedOffsets: function() {
+  getPreviousMessagesRequestedOffsets() {
     var messagesInDisplay;
     var retval = {};
 
@@ -977,13 +985,13 @@ return cls.extend({
 
     retval.scrollTransitionWasAtOffset = this._offsetStart;
     return retval;
-  },
+  }
 
   /**
    * @returns {number} returns the current number of messages displayed
    * in the message list
    */
-  getCurrentNumberOfMessagesDisplayed: function() {
+  getCurrentNumberOfMessagesDisplayed() {
     var ret = 0;
     /*
      * This recursively calculates the number of children for every
@@ -997,9 +1005,9 @@ return cls.extend({
      */
     ret = _.size(this.renderedMessageViewsCurrent);
     return ret;
-  },
+  }
 
-  serializeData: function() {
+  serializeData() {
     return {
       Ctx: Ctx,
 
@@ -1008,9 +1016,9 @@ return cls.extend({
       collapsed: this.collapsed,
       canPost: Ctx.getCurrentUser().can(Permissions.ADD_POST),
     };
-  },
+  }
 
-  isMessageIdInResults: function(messageId, resultMessageIdList) {
+  isMessageIdInResults(messageId, resultMessageIdList) {
       //console.log("isMessageIdInResults called with ", messageId, resultMessageIdList)
       if (!resultMessageIdList) {
         throw new Error("isMessageIdInResults():  resultMessageIdList needs to be provided");
@@ -1019,7 +1027,7 @@ return cls.extend({
       return undefined != _.find(resultMessageIdList, function(resultMessageId) {
         return messageId === resultMessageId;
       });
-    },
+  }
 
   /**
    * Retrieves the first new message id (if any) for the current user
@@ -1029,7 +1037,7 @@ return cls.extend({
    * 
    * @returns Message.Model or undefined
    */
-  findFirstUnreadMessageId: function(visitorData, messageCollection, resultMessageIdCollection) {
+  findFirstUnreadMessageId(visitorData, messageCollection, resultMessageIdCollection) {
     var that = this;
     return _.find(visitorData.visitorOrderLookupTable, function(messageId) {
       var is_new = messageCollection.get(messageId).get('read') === false;
@@ -1037,13 +1045,13 @@ return cls.extend({
       //console.log(is_new, messageCollection.get(messageId));
       return is_new && that.isMessageIdInResults(messageId, resultMessageIdCollection);
     });
-  },
+  }
 
   /**
    * The actual rendering for the render function
    * @returns {views.Message}
    */
-  render_real: function() {
+  render_real() {
     var that = this;
     var views = [];
     var renderId = _.clone(this._renderId);
@@ -1140,13 +1148,13 @@ return cls.extend({
           that._startPostRenderSlowCallbackProcessing();
         })
     return this;
-  },
+  }
 
-  onBeforeDestroy: function() {
+  onBeforeDestroy() {
     this.saveMessagesInProgress();
-  },
+  }
 
-  arraysEqual: function(arr1, arr2) {
+  arraysEqual(arr1, arr2) {
     if(arr1.length !== arr2.length)
         return false;
     for(var i = arr1.length; i--;) {
@@ -1155,7 +1163,7 @@ return cls.extend({
     }
 
     return true;
-  },
+  }
 
   /**
    * @returns {object}:
@@ -1164,7 +1172,7 @@ return cls.extend({
         visitorRootMessagesToDisplay: visitorRootMessagesToDisplay
       (See documentation below)
    */
-  _generateVisitorData: function(messageStructureCollection, resultMessageIdCollection) {
+  _generateVisitorData(messageStructureCollection, resultMessageIdCollection) {
     /**
      * The array generated by MessageRenderVisitor's data_by_object
      * when visiting the message tree
@@ -1247,9 +1255,9 @@ return cls.extend({
       visitorOrderLookupTable: visitorOrderLookupTable,
       visitorRootMessagesToDisplay: visitorRootMessagesToDisplay
     };
-  },
+  }
 
-  getVisitorDataPromise: function() {
+  getVisitorDataPromise() {
     var that = this;
     var collectionManager = new CollectionManager();
 
@@ -1279,15 +1287,15 @@ return cls.extend({
         return Promise.reject("View was already destroyed");
       }
     });
-  },
+  }
 
 
 
-  onSetDefaultMessageStyle: function(defaultMessageStyle) {
+  onSetDefaultMessageStyle(defaultMessageStyle) {
       this.defaultMessageStyle = defaultMessageStyle;
-    },
+  }
 
-  clearRenderedMessages: function() {
+  clearRenderedMessages() {
     //console.log("clearRenderedMessages called");
     _.each(this._renderedMessageFamilyViews, function(messageFamily) {
       //MessageFamily is a Marionette view called from a non-marionette context,
@@ -1296,11 +1304,11 @@ return cls.extend({
     });
     this._renderedMessageFamilyViews = [];
     this.renderedMessageViewsCurrent = {};
-  },
+  }
 
-  onDestroy: function() {
+  onDestroy() {
     this.clearRenderedMessages();
-  },
+  }
 
   /**
    * Return a list with all views already rendered for a flat view
@@ -1310,7 +1318,7 @@ return cls.extend({
    * from requestedOffsets
    * @returns {HTMLDivElement[]}
    */
-  getRenderedMessagesFlatPromise: function(requestedIds) {
+  getRenderedMessagesFlatPromise(requestedIds) {
     var that = this;
     var view;
     var collectionManager = new CollectionManager();
@@ -1348,7 +1356,7 @@ return cls.extend({
               //console.log("getRenderedMessagesFlatPromise():  Resolving promise with:",list);
               return Promise.resolve(list);
             });
-  },
+  }
 
   /**
    * Return a list with all views already rendered for threaded views
@@ -1359,7 +1367,7 @@ return cls.extend({
    * @param {string[]} messageIdsToShow messageIds of the message to show (those in the offset range)
    * @returns {jquery.promise}
    */
-  getRenderedMessagesThreadedPromise: function(sibblings, level, visitorData, messageIdsToShow) {
+  getRenderedMessagesThreadedPromise(sibblings, level, visitorData, messageIdsToShow) {
     var that = this;
     var list = [];
     var i = 0;
@@ -1511,19 +1519,12 @@ return cls.extend({
       }
       return Promise.resolve(list);
     });
-  },
-
-  annotator_config: {
-        externals: {
-          "jQuery": static_url + "/node_modules/jquery/dist/jquery.min.js",
-          "styles": static_url + "/js/build/annotator_ext.css"
-        }
-      },
+  }
 
   /**
    * Inits the annotator instance
    */
-  initAnnotator: function() {
+  initAnnotator() {
     var that = this;
 
     this.destroyAnnotator();
@@ -1562,10 +1563,10 @@ return cls.extend({
                   }
                   else {
                     segment.save(null, {
-                      success: function(model, resp) {
+                      success(model, resp) {
                         that.trigger("annotator:success", that.annotator);
                       },
-                      error: function(model, resp) {
+                      error(model, resp) {
                         console.error('ERROR: initAnnotator', resp);
                       }
                     });
@@ -1672,12 +1673,12 @@ return cls.extend({
       that.trigger("annotator:initComplete", that.annotator);
     }, 10);
 
-  },
+  }
 
   /**
    * destroy the current annotator instance and remove all listeners
    */
-  destroyAnnotator: function() {
+  destroyAnnotator() {
     if (!this.annotator) {
       return;
     }
@@ -1691,19 +1692,19 @@ return cls.extend({
 
     this.annotator.destroy();
     this.annotator = null;
-  },
+  }
 
   /**
    * @event
    * Shows all messages (clears all filters)
    */
-  showAllMessages: function() {
+  showAllMessages() {
     //console.log("messageList:showAllMessages() called");
     this.currentQuery.clearAllFilters();
     this.render();
-  },
+  }
 
-  getTargetMessageViewStyleFromMessageListConfig: function(messageView) {
+  getTargetMessageViewStyleFromMessageListConfig(messageView) {
     var defaultMessageStyle;
     var targetMessageViewStyle;
 
@@ -1732,15 +1733,15 @@ return cls.extend({
     }
 
     return targetMessageViewStyle;
-  },
+  }
 
-  constrainViewStyle: function(viewStyle) {
+  constrainViewStyle(viewStyle) {
     if (!viewStyle) {
       //If invalid, set global default
       viewStyle = this.ViewStyles.RECENTLY_ACTIVE_THREADS;
     }
     return viewStyle;
-  },
+  }
 
   /**
    * @event
@@ -1749,7 +1750,7 @@ return cls.extend({
    * Does NOT re-render
    *
    */
-  setViewStyle: function(viewStyle, DEPRECATED_skip_storage) {
+  setViewStyle(viewStyle, DEPRECATED_skip_storage) {
       //console.log("setViewStyle called with: ", viewStyle, "interface type: ", Ctx.getCurrentInterfaceType(), "current user is unknown?:", Ctx.getCurrentUser().isUnknownUser());
 
       viewStyle = this.constrainViewStyle(viewStyle);
@@ -1788,19 +1789,19 @@ return cls.extend({
         })
       }
       //console.log("setViewStyle finished, currentViewStyle:", this.currentViewStyle, "stored viewStyleId: ", this.storedMessageListConfig.viewStyleId);
-    },
+  }
 
-  onSetIndividualMessageViewStyleForMessageListViewStyle: function(messageViewStyle) {
+  onSetIndividualMessageViewStyleForMessageListViewStyle(messageViewStyle) {
     //console.log("messageList::onSetIndividualMessageViewStyleForMessageListViewStyle()");
     this.setIndividualMessageViewStyleForMessageListViewStyle(messageViewStyle);
-  },
+  }
 
   /**
    * @event
    * Set the default messageView, re-renders messages if the view doesn't match
    * @param messageViewStyle: (ex:  preview, title only, etc.)
    */
-  setIndividualMessageViewStyleForMessageListViewStyle: function(messageViewStyle) {
+  setIndividualMessageViewStyleForMessageListViewStyle(messageViewStyle) {
     // ex: Chronological, Threaded, etc.
     var that = this;
 
@@ -1816,11 +1817,11 @@ return cls.extend({
       this.storedMessageListConfig.messageStyleId = messageViewStyle.id;
       Ctx.DEPRECATEDsetMessageListConfigToStorage(this.storedMessageListConfig);
     }
-  },
+  }
 
   /** Returns a list of message id in order of traversal.
    * Return -1 if message not found */
-  getResultThreadedTraversalOrder: function(messageId, visitorOrderLookupTable, resultMessageIdCollection) {
+  getResultThreadedTraversalOrder(messageId, visitorOrderLookupTable, resultMessageIdCollection) {
     var that = this;
     var retval = -1;
     _.every(visitorOrderLookupTable, function(visitorMessageId) {
@@ -1837,13 +1838,13 @@ return cls.extend({
       }
     });
     return retval;
-  },
+  }
   /** Return the message offset in the current view, in the set of filtered
    * messages
    * @param {string} messageId
    * @returns {Integer} callback: The message offest if message is found
    */
-  getMessageOffset: function(messageId, visitorData, resultMessageIdCollection) {
+  getMessageOffset(messageId, visitorData, resultMessageIdCollection) {
       var messageOffset;
       if (this.isCurrentViewStyleThreadedType()) {
         try {
@@ -1877,7 +1878,7 @@ return cls.extend({
 
       //console.log("getMessageOffset returning", messageOffset, " for message id", messageId);
       return messageOffset;
-    },
+  }
 
   /**
    * Is the message currently onscreen (in the set of filtered messages
@@ -1887,7 +1888,7 @@ return cls.extend({
    * @param {string} id
    * @return{boolean} true or false
    */
-  isMessageInView: function(resultMessageIdCollection, visitorData, id) {
+  isMessageInView(resultMessageIdCollection, visitorData, id) {
       //console.log("isMessageInView called for ", id, "Offsets are:", this._offsetStart, this._offsetEnd)
       if (this._offsetStart === undefined || this._offsetEnd === undefined) {
         //console.log("The messagelist hasn't displayed any messages yet");
@@ -1903,12 +1904,12 @@ return cls.extend({
           });
 
       return _.contains(messagesOnScreenIds, id);
-    },
+  }
 
   /**
    * @return:  A list of jquery selectors
    */
-  getOnScreenMessagesSelectors: function(resultMessageIdCollection, visitorData) {
+  getOnScreenMessagesSelectors(resultMessageIdCollection, visitorData) {
     if (this._offsetStart === undefined || this._offsetEnd === undefined) {
       throw new Error("The messagelist hasn't displayed any messages yet");
     }
@@ -1930,21 +1931,21 @@ return cls.extend({
       messagesOnScreenJquerySelectors.push(selector);
     });
     return messagesOnScreenJquerySelectors;
-  },
+  }
 
 
   /**
    * Get a jquery selector for a specific message id
    */
-  getMessageSelector: function(messageId) {
+  getMessageSelector(messageId) {
       var selector = Ctx.format('[id="message-{0}"]', messageId);
       return this.$(selector);
-    },
+  }
 
   /** scrolls to a specific message, retrying untill relevent renders
    * are complete
    */
-  scrollToMessage: function(messageModel, shouldHighlightMessageSelected, shouldOpenMessageSelected, callback, failedCallback, recursionDepth, originalRenderId) {
+  scrollToMessage(messageModel, shouldHighlightMessageSelected, shouldOpenMessageSelected, callback, failedCallback, recursionDepth, originalRenderId) {
     var that = this;
 
     var //Stop after ~30 seconds
@@ -2082,7 +2083,7 @@ return cls.extend({
         this._scrollToMessageInProgressId = false;
       });
     }
-  },
+  }
 
   /**
    * Highlights the message by the given id
@@ -2090,7 +2091,7 @@ return cls.extend({
    * @param {Function} [callback] Optional: The callback function to call if message is found
    * @param {boolean} shouldHighlightMessageSelected: defaults to true
    */
-  showMessageById: function(id, callback, shouldHighlightMessageSelected, shouldOpenMessageSelected, shouldRecurseMaxMoreTimes, originalRenderId) {
+  showMessageById(id, callback, shouldHighlightMessageSelected, shouldOpenMessageSelected, shouldRecurseMaxMoreTimes, originalRenderId) {
     var that = this;
     var collectionManager = new CollectionManager();
     var shouldRecurse;
@@ -2233,29 +2234,29 @@ return cls.extend({
           console.error("showMessageById: promises failed.");
           that.showMessageByIdInProgress = false;
         });
-  },
+  }
 
-  scrollToTopPostBox: function() {
+  scrollToTopPostBox() {
     //console.log(scrollToTopPostBox());
     scrollUtils.scrollToElementAndWatch(this.$('.messagelist-replybox'));
     if (Ctx.debugRender) {
       console.log("MessageList:scrollToTopPostBox() stealing browser focus");
     }
     this.$('.messageSend-subject').focus();
-  },
+  }
 
-  getCurrentViewPortTop: function() {
+  getCurrentViewPortTop() {
     return this.ui.panelBody.offset().top;
-  },
+  }
 
-  getCurrentViewPortBottom: function() {
+  getCurrentViewPortBottom() {
     let height = this.getCurrentViewPortTop() + this.ui.panelBody.height();
     let stickyBarHeight = this.ui.stickyBar.height();
     if (stickyBarHeight) {
       height = height - stickyBarHeight;
     }
     return height;
-  },
+  }
 
   /**
    * Shows the number of pending messages added through the socket
@@ -2263,7 +2264,7 @@ return cls.extend({
    *
    * @param      {number}  nbMessage  The number of new messages
    */
-  showPendingMessages: function(nbMessage) {
+  showPendingMessages(nbMessage) {
       this._originalDocumentTitle = document.querySelector('#discussion-topic').value;
       document.title = ' (' + nbMessage + ') ' + this._originalDocumentTitle;
 
@@ -2276,25 +2277,25 @@ return cls.extend({
         this.ui.pendingMessage.html(msg);
         this.ui.contentPending.removeClass('hidden').slideDown('slow');
       }
-    },
+  }
 
-  resetPendingMessages: function(allMessageStructureCollection) {
+  resetPendingMessages(allMessageStructureCollection) {
     this.nbPendingMessage = 0;
     this._initialLenAllMessageStructureCollection = allMessageStructureCollection.length;
     if (this._originalDocumentTitle) {
       document.title = this._originalDocumentTitle;
     }
-  },
+  }
 
-  addPendingMessage: function(message, messageCollection) {
+  addPendingMessage(message, messageCollection) {
     this.nbPendingMessage += 1;
     this.showPendingMessages(this.nbPendingMessage);
-  },
+  }
 
   /**
    * @returns A promise
    */
-  loadPendingMessages: function() {
+  loadPendingMessages() {
     var that = this;
     var collectionManager = new CollectionManager();
     return collectionManager.getAllMessageStructureCollectionPromise()
@@ -2303,18 +2304,18 @@ return cls.extend({
         that.invalidateQuery();
         that.render();
       });
-  },
+  }
 
-  invalidateQuery: function() {
+  invalidateQuery() {
     this.currentQuery.invalidateResults();
-  },
+  }
   /**
    * Return the subset of scroll log stack  entries applicable to the timestamps 
    * of a specific message in the message scroll log
    * @param {*} timeStampFirstOnscreen
    * @param {*} timeStampLastOnscreen
    */
-  getScrollVectorsForTimeRange: function (timeStampFirstOnscreen, timeStampLastOnscreen) {
+  getScrollVectorsForTimeRange(timeStampFirstOnscreen, timeStampLastOnscreen) {
     var that = this;
     function checkApplicability(vector, index, arr) {
       return (
@@ -2325,8 +2326,8 @@ return cls.extend({
     }
     let applicableVectors = that.scrollLoggerVectorStack.filter(checkApplicability);
     return applicableVectors;
-  },
-  getViewportGeometry: function () {
+  }
+  getViewportGeometry() {
     let currentViewPortTop = this.getCurrentViewPortTop();
     let currentViewPortBottom = this.getCurrentViewPortBottom();
     if (!currentViewPortTop ||
@@ -2339,8 +2340,8 @@ return cls.extend({
       currentViewPortBottom,
       viewportHeight
     }
-  },
-  getMessageGeometry: function (messageSelector, overrideMessageTop) {
+  }
+  getMessageGeometry(messageSelector, overrideMessageTop) {
     if (!messageSelector || messageSelector.length == 0) {
       throw new Error("getMessageGeometry(): messageSelector is invalid")
     }
@@ -2367,7 +2368,7 @@ return cls.extend({
       messageBottom,
       messageWidth
     }
-  },
+  }
 
   /**
    * @typedef {messageVsViewportGeometry} 
@@ -2384,7 +2385,7 @@ return cls.extend({
    * @param {*} viewportGeometry 
    * @return {messageVsViewportGeometry}
    */
-  getMessageVsViewportGeometry: function (messageGeometry, viewportGeometry) {
+  getMessageVsViewportGeometry(messageGeometry, viewportGeometry) {
     const { messageTop,
       messageHeight,
       messageWidth,
@@ -2442,14 +2443,14 @@ return cls.extend({
       msgVsViewportRatio,
       msgScrollableDistance
     }
-  },
+  }
 
   /**
    * Computes which messages are currently onscreen
    * @param {*} resultMessageIdCollection 
    * @param {*} visitorData 
    */
-  checkMessagesOnscreen: function (resultMessageIdCollection, visitorData) {
+  checkMessagesOnscreen(resultMessageIdCollection, visitorData) {
     let that = this;
     let messageDoms = this.getOnScreenMessagesSelectors(resultMessageIdCollection, visitorData);
 
@@ -2569,14 +2570,14 @@ return cls.extend({
       }
     });
     that.pruneOldScrollVectors(oldestMessageInLogTimeStamp);
-  },
+  }
 
   /**
    * Prune all scroll event older than the last one PRIOR to the
    * timestamp provided
    * @param {*} timeStamp 
    */
-  pruneOldScrollVectors: function (timeStamp) {
+  pruneOldScrollVectors(timeStamp) {
     let that = this;
 
     if (!timeStamp) {
@@ -2595,13 +2596,13 @@ return cls.extend({
       //console.log("pruning vectors indexes  0 to ", lastIndexToKeep);
       that.scrollLoggerVectorStack.splice(0, lastIndexToKeep + 1)
     }
-  },
+  }
   /**
    * @param {*} scrollLoggerMessageInfo The attention information last logged about the message 
    * @param {*} vectors 
    * @param {*} messageSelector 
    */
-  processScrollVectors: function (scrollLoggerMessageInfo, vectors, messageSelector, viewportGeometry) {
+  processScrollVectors(scrollLoggerMessageInfo, vectors, messageSelector, viewportGeometry) {
     let that = this;
     //TODO: While unlikely the height has changed spotaneously during scroll, it is very possible that a message has been expanded from preview, or that the thread branch has been collapsed.  The scroll vectors do not log this.  To fix  "properly", we would need to timestamp individual message size change.  A quick and more realistic improvement would be to immediately force a final update when the message changed geometry, and prune it's history.  It could be done during checkMessagesOnscreen.
 
@@ -2771,7 +2772,7 @@ return cls.extend({
       return acc;
     };
     return vectors.reduce(reducer, initialAccumulator);
-  },
+  }
 
   /**
    * Processes the scroll events to ultimately generate message reading
@@ -2782,7 +2783,7 @@ return cls.extend({
    * @event
    * @param ev: The jquery event, with the view as ev.data
    */
-  scrollLogger: _.debounce(function (ev) {
+  scrollLogger_base(ev) {
     if (!ev.data) {
       //this isn't our own scroll handler
       return;
@@ -2804,9 +2805,14 @@ return cls.extend({
           that.checkMessagesOnscreen(resultMessageIdCollection, visitorData);
         }
       });
-  }, SCROLL_VECTOR_MEASUREMENT_INTERVAL, false)
+  }
+}
 
-});
-};
+BaseMessageListMixin.scrollLogger = _.debounce(
+    BaseMessageListMixin.scrollLogger_base,
+    SCROLL_VECTOR_MEASUREMENT_INTERVAL, false);
 
-export default BaseMessageListMixin;
+return BaseMessageListMixin;
+}
+
+export default BaseMessageListMixinFactory;
