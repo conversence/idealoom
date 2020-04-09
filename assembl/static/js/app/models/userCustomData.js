@@ -3,9 +3,9 @@
  * @module app.models.userCustomData
  */
 
-import Backbone from 'backbone';
+import Backbone from "backbone";
 
-import Ctx from '../common/context.js';
+import Ctx from "../common/context.js";
 
 // We do not use Base.Model.extend(), because we want to keep Backbone's default behaviour with model urls
 /**
@@ -15,9 +15,9 @@ import Ctx from '../common/context.js';
  * @extends Backbone.Model
  */
 class UserCustomDataModel extends Backbone.Model.extend({
-  urlRoot: Ctx.getApiV2DiscussionUrl('user_ns_kv')
+    urlRoot: Ctx.getApiV2DiscussionUrl("user_ns_kv"),
 }) {}
 
 export default {
-  Model: UserCustomDataModel
+    Model: UserCustomDataModel,
 };

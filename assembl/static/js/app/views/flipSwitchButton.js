@@ -1,47 +1,45 @@
 /**
- * 
+ *
  * @module app.views.flipSwitchButton
  */
 
-import Marionette from 'backbone.marionette';
+import Marionette from "backbone.marionette";
 
 class FlipSwitchButton extends Marionette.View.extend({
-  template: '#tmpl-flipSwitchButton',
-  className: 'flipSwitchButton',
+    template: "#tmpl-flipSwitchButton",
+    className: "flipSwitchButton",
 
-  ui: {
-    toggleButton: '.js_toggleButton'
-  },
+    ui: {
+        toggleButton: ".js_toggleButton",
+    },
 
-  events: {
-    'click @ui.toggleButton': 'onToggle'
-  },
+    events: {
+        "click @ui.toggleButton": "onToggle",
+    },
 
-  modelEvents: {
-    'change:isOn': 'updateState' // this is the same as writing this.listenTo(this.model, 'change:isOn', this.updateState); in the initialize() method
-  }
+    modelEvents: {
+        "change:isOn": "updateState", // this is the same as writing this.listenTo(this.model, 'change:isOn', this.updateState); in the initialize() method
+    },
 }) {
-  // the serializeData() method is not needed because model attributes are sent automatically to the template
+    // the serializeData() method is not needed because model attributes are sent automatically to the template
 
-  onToggle() {
-    this.model.set('isOn', !this.model.get('isOn'));
+    onToggle() {
+        this.model.set("isOn", !this.model.get("isOn"));
 
-    //this.updateState(); // will be done automatically thanks to modelEvents
-  }
-
-  // does a smooth re-render (so that CSS animations are shown)
-  updateState() {
-    console.log("flipSwitchButton::updateState()");
-    if (this.model.get('isOn'))
-    {
-      this.ui.toggleButton.removeClass("flipswitch-no");
-      this.ui.toggleButton.addClass("flipswitch-yes");
+        //this.updateState(); // will be done automatically thanks to modelEvents
     }
-    else {
-      this.ui.toggleButton.removeClass("flipswitch-yes");
-      this.ui.toggleButton.addClass("flipswitch-no");
+
+    // does a smooth re-render (so that CSS animations are shown)
+    updateState() {
+        console.log("flipSwitchButton::updateState()");
+        if (this.model.get("isOn")) {
+            this.ui.toggleButton.removeClass("flipswitch-no");
+            this.ui.toggleButton.addClass("flipswitch-yes");
+        } else {
+            this.ui.toggleButton.removeClass("flipswitch-yes");
+            this.ui.toggleButton.addClass("flipswitch-no");
+        }
     }
-  }
 }
 
 export default FlipSwitchButton;

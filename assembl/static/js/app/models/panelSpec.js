@@ -3,9 +3,9 @@
  * @module app.models.panelSpec
  */
 
-import Base from './base.js';
+import Base from "./base.js";
 
-import PanelSpecTypes from '../utils/panelSpecTypes.js';
+import PanelSpecTypes from "../utils/panelSpecTypes.js";
 
 /**
  * Panel specification model
@@ -14,43 +14,42 @@ import PanelSpecTypes from '../utils/panelSpecTypes.js';
  */
 
 class PanelSpecModel extends Base.Model.extend({
-  defaults: {
-    type: '',
-    hidden: false,
-    locked: false,
-    minWidth:40
-  }
+    defaults: {
+        type: "",
+        hidden: false,
+        locked: false,
+        minWidth: 40,
+    },
 }) {
-  /** This returns undefined if the model is valid */
-  validate(attributes, options) {
-    var viewsFactory = require('../objects/viewsFactory.js').default;
-    if (viewsFactory === undefined) {
-      throw new Error("You must define viewsFactory to run validation");
+    /** This returns undefined if the model is valid */
+    validate(attributes, options) {
+        var viewsFactory = require("../objects/viewsFactory.js").default;
+        if (viewsFactory === undefined) {
+            throw new Error("You must define viewsFactory to run validation");
+        }
+
+        var view;
+        try {
+            view = viewsFactory.byPanelSpec(this);
+            if (view === undefined) {
+                return "The view is undefined";
+            }
+        } catch (err) {
+            return "An exception was thrown trying to create the view for this panelSpec";
+        }
+
+        //Everything ok
     }
 
-    var view;
-    try {
-      view = viewsFactory.byPanelSpec(this);
-      if (view === undefined) {
-        return "The view is undefined";
-      }
-    }
-    catch (err) {
-      return "An exception was thrown trying to create the view for this panelSpec";
-    }
-
-    //Everything ok
-  }
-
-  /**
+    /**
    @returns an instance of PanelSpecType, or throws an exception
    */
-  getPanelSpecType(psType) {
-      return PanelSpecTypes.getByRawId(this.get('type'));
+    getPanelSpecType(psType) {
+        return PanelSpecTypes.getByRawId(this.get("type"));
     }
 
-  isOfType(psType) {
-      return PanelSpecTypes.getByRawId(this.get('type')) == psType;
+    isOfType(psType) {
+        return PanelSpecTypes.getByRawId(this.get("type")) == psType;
     }
 }
 
@@ -61,24 +60,24 @@ class PanelSpecModel extends Base.Model.extend({
  */
 
 class PanelSpecs extends Base.Collection.extend({
-  model: PanelSpecModel
+    model: PanelSpecModel,
 }) {
-  validate(attributes, options) {
-    var invalid = [];
-    this.each(function(panelSpec) {
-      if (!panelSpec.isValid()) {
-        invalid.push(panelSpec);
-      }
-    });
-    if (invalid.length) {
-      this.remove(invalid);
-    }
+    validate(attributes, options) {
+        var invalid = [];
+        this.each(function (panelSpec) {
+            if (!panelSpec.isValid()) {
+                invalid.push(panelSpec);
+            }
+        });
+        if (invalid.length) {
+            this.remove(invalid);
+        }
 
-    return (this.length > 0);
-  }
+        return this.length > 0;
+    }
 }
 
 export default {
-  Model: PanelSpecModel,
-  Collection: PanelSpecs
+    Model: PanelSpecModel,
+    Collection: PanelSpecs,
 };

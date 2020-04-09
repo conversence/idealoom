@@ -1,51 +1,51 @@
 /**
- * 
+ *
  * @module app.views.messageTranslationQuestion
  */
-import Marionette from 'backbone.marionette';
+import Marionette from "backbone.marionette";
 
-import Backbone from 'backbone';
-import Ctx from '../common/context.js';
-import CollectionManager from '../common/collectionManager.js';
-import i18n from '../utils/i18n.js';
-import _ from 'underscore';
-import $ from 'jquery';
-import Types from '../utils/types.js';
-import Growl from '../utils/growl.js';
-import LangString from '../models/langstring.js';
-import LoaderView from './loaderView.js';
-import LanguagePreference from '../models/languagePreference.js';
+import Backbone from "backbone";
+import Ctx from "../common/context.js";
+import CollectionManager from "../common/collectionManager.js";
+import i18n from "../utils/i18n.js";
+import _ from "underscore";
+import $ from "jquery";
+import Types from "../utils/types.js";
+import Growl from "../utils/growl.js";
+import LangString from "../models/langstring.js";
+import LoaderView from "./loaderView.js";
+import LanguagePreference from "../models/languagePreference.js";
 
 /**
  * Date: Jan 14, 2016
  * Assumption: Currently, we are NOT showing the translation view if the SUBJECT of a message and only
- * the subject of the message is translated. Rather 'gung ho', but this is the reality. 
+ * the subject of the message is translated. Rather 'gung ho', but this is the reality.
  */
 
 var userTranslationStates = {
-    CONFIRM: 'confirm',
-    DENY: 'deny',
-    CANCEL: 'cancel'
+    CONFIRM: "confirm",
+    DENY: "deny",
+    CANCEL: "cancel",
 };
 
 /*
     Callback function upon successfully setting a language preference;
     Used in both Views in this file.
  */
-var processConfirmLanguagePreferences = function(messageView){
+var processConfirmLanguagePreferences = function (messageView) {
     var cm = new CollectionManager();
 
     //Remove silent, remove messageListView.render()
-    if (!messageView.isDestroyed()){
-        messageView.closeTranslationView(function(){
+    if (!messageView.isDestroyed()) {
+        messageView.closeTranslationView(function () {
             cm.getAllMessageStructureCollectionPromise()
-                .then(function(messageStructures){
+                .then(function (messageStructures) {
                     return messageStructures.fetch();
                 })
-                .then(function(messages){
+                .then(function (messages) {
                     //Do not need to do anything else. The re-fetching of messages will cause the
                     //messagelist to re-render itself.
-                    if (!messageView.isDestroyed()){
+                    if (!messageView.isDestroyed()) {
                         messageView.resetTranslationState();
                         messageView.render(); // This is questionable.
                     }
@@ -55,22 +55,22 @@ var processConfirmLanguagePreferences = function(messageView){
 };
 
 class LanguageSelectionView extends Marionette.View.extend({
-    template: '#tmpl-message_translation_question_selection',
+    template: "#tmpl-message_translation_question_selection",
 
     ui: {
         selectedLanguage: ".js_translate-to-language",
         confirm: ".js_translation-confirm",
-        cancel: ".js_translation-cancel"
+        cancel: ".js_translation-cancel",
     },
 
     events: {
         "click @ui.confirm": "onConfirmClick",
-        "click @ui.cancel": "onCancelClick"
-    }
+        "click @ui.cancel": "onCancelClick",
+    },
 }) {
     initialize(options) {
-        this.parentView = options.questionView,
-        this.messageView = this.parentView.messageView;
+        (this.parentView = options.questionView),
+            (this.messageView = this.parentView.messageView);
         this.languagePreferences = this.parentView.languagePreferences;
         this.translatedTo = this.parentView.translatedTo;
         this.translatedFrom = this.parentView.translatedFrom;
@@ -81,7 +81,9 @@ class LanguageSelectionView extends Marionette.View.extend({
     nameOfLocale(locale) {
         var name = this.langCache[locale];
         if (name === undefined) {
-            console.error("The language " + locale + " is not a part of the locale cache!");
+            console.error(
+                "The language " + locale + " is not a part of the locale cache!"
+            );
             return locale;
         }
         return name;
@@ -96,21 +98,19 @@ class LanguageSelectionView extends Marionette.View.extend({
             Growl.showBottomGrowl(
                 Growl.GrowlReason.ERROR,
                 i18n.gettext("Please select a language.")
-            ); 
-            return; 
-        }
-
-        else if (preferredLanguageTo.length > 1) {
+            );
+            return;
+        } else if (preferredLanguageTo.length > 1) {
             Growl.showBottomGrowl(
                 Growl.GrowlReason.ERROR,
                 i18n.gettext("You cannot select more than one language")
             );
             return;
-        }
-
-        else {
+        } else {
             this.parentView.preferredTarget = preferredLanguageTo[0];
-            this.parentView.updateLanguagePreference(userTranslationStates.CONFIRM);
+            this.parentView.updateLanguagePreference(
+                userTranslationStates.CONFIRM
+            );
         }
     }
 
@@ -122,37 +122,43 @@ class LanguageSelectionView extends Marionette.View.extend({
         return {
             supportedLanguages: Ctx.localesAsSortedList(),
             translatedTo: this.translatedTo,
-            question: i18n.sprintf(i18n.gettext("Select the language you wish to translate %s to:"),
-                this.nameOfLocale(LangString.LocaleUtils.stripCountry(this.translatedFrom))),
+            question: i18n.sprintf(
+                i18n.gettext(
+                    "Select the language you wish to translate %s to:"
+                ),
+                this.nameOfLocale(
+                    LangString.LocaleUtils.stripCountry(this.translatedFrom)
+                )
+            ),
             translatedTo: this.translatedTo,
-            translatedFrom: this.translatedFrom
+            translatedFrom: this.translatedFrom,
         };
     }
 }
 
 class TranslationView extends LoaderView.extend({
-    template: '#tmpl-message_translation_question',
+    template: "#tmpl-message_translation_question",
 
     ui: {
-        langChoiceConfirm: '.js_language-of-choice-confirm',
-        langChoiceDeny: '.js_language-of-choice-deny',
-        hideQuestion: '.js_hide-translation-question',
-        
-        revealLanguages: '.js_language-of-choice-more',
+        langChoiceConfirm: ".js_language-of-choice-confirm",
+        langChoiceDeny: ".js_language-of-choice-deny",
+        hideQuestion: ".js_hide-translation-question",
+
+        revealLanguages: ".js_language-of-choice-more",
         // revealLanguagesRegion: '.js_translation-reveal-more'
     },
 
     events: {
-        'click @ui.langChoiceConfirm': 'updateLanguagePreferenceConfirm',
-        'click @ui.langChoiceDeny': 'updateLanguagePreferenceDeny',
-        'click @ui.hideQuestion': 'onHideQuestionClick',
+        "click @ui.langChoiceConfirm": "updateLanguagePreferenceConfirm",
+        "click @ui.langChoiceDeny": "updateLanguagePreferenceDeny",
+        "click @ui.hideQuestion": "onHideQuestionClick",
 
-        'click @ui.revealLanguages': "onLanguageRevealClick"
+        "click @ui.revealLanguages": "onLanguageRevealClick",
     },
 
     regions: {
-        selectLanguage: ".js_translation-reveal-more"
-    }
+        selectLanguage: ".js_translation-reveal-more",
+    },
 }) {
     initialize(options) {
         this.setLoading(true);
@@ -165,37 +171,44 @@ class TranslationView extends LoaderView.extend({
         var cm = new CollectionManager();
         var that = this;
 
-        cm.getUserLanguagePreferencesPromise(Ctx)
-            .then(function(preferences){
-                if (!that.isDestroyed()){
-                    var translationData = that.messageView.translationData || preferences.getTranslationData();
-                    that.langCache = that.messageView.langCache; //For reference
-                    var body = that.message.get('body') || LangString.Model.empty;
-                    var bestSuggestedTranslation = body.best(translationData);
-                    var original = body.original();
-                    var originalLocale = original.getLocaleValue();
-                    var translatedFromLocale = bestSuggestedTranslation.getTranslatedFromLocale();
-                    var translatedTo = bestSuggestedTranslation.getBaseLocale();
-                    var prefsForLocale = translationData.getPreferenceForLocale(originalLocale);
-                    var preferredTarget = prefsForLocale ? prefsForLocale.get("translate_to_name") : Ctx.getLocale();
-                    if ( !(translatedFromLocale) ){
-                        translatedFromLocale = translatedTo;
-                    }
-                    that.originalLocale = originalLocale;
-                    that.translatedTo = translatedTo;
-                    that.translatedFrom = translatedFromLocale;
-                    that.preferredTarget = preferredTarget;
-                    that.languagePreferences = preferences; //Should be sorted already
-                    that.setLoading(false);
-                    that.render();
+        cm.getUserLanguagePreferencesPromise(Ctx).then(function (preferences) {
+            if (!that.isDestroyed()) {
+                var translationData =
+                    that.messageView.translationData ||
+                    preferences.getTranslationData();
+                that.langCache = that.messageView.langCache; //For reference
+                var body = that.message.get("body") || LangString.Model.empty;
+                var bestSuggestedTranslation = body.best(translationData);
+                var original = body.original();
+                var originalLocale = original.getLocaleValue();
+                var translatedFromLocale = bestSuggestedTranslation.getTranslatedFromLocale();
+                var translatedTo = bestSuggestedTranslation.getBaseLocale();
+                var prefsForLocale = translationData.getPreferenceForLocale(
+                    originalLocale
+                );
+                var preferredTarget = prefsForLocale
+                    ? prefsForLocale.get("translate_to_name")
+                    : Ctx.getLocale();
+                if (!translatedFromLocale) {
+                    translatedFromLocale = translatedTo;
                 }
-            });
+                that.originalLocale = originalLocale;
+                that.translatedTo = translatedTo;
+                that.translatedFrom = translatedFromLocale;
+                that.preferredTarget = preferredTarget;
+                that.languagePreferences = preferences; //Should be sorted already
+                that.setLoading(false);
+                that.render();
+            }
+        });
     }
 
     nameOfLocale(locale) {
         var name = this.langCache[locale];
         if (name === undefined) {
-            console.error("The language " + locale + " is not a part of the locale cache!");
+            console.error(
+                "The language " + locale + " is not a part of the locale cache!"
+            );
             return locale;
         }
         return name;
@@ -210,9 +223,11 @@ class TranslationView extends LoaderView.extend({
                 this.originalLocale,
                 this.preferredTarget,
                 {
-                    success: function(model, resp, options){
-                        return processConfirmLanguagePreferences(that.messageView);   
-                    }
+                    success: function (model, resp, options) {
+                        return processConfirmLanguagePreferences(
+                            that.messageView
+                        );
+                    },
                 }
             );
         }
@@ -223,9 +238,11 @@ class TranslationView extends LoaderView.extend({
                 this.originalLocale,
                 null,
                 {
-                    success: function(model, resp, options){
-                        return processConfirmLanguagePreferences(that.messageView);
-                    }
+                    success: function (model, resp, options) {
+                        return processConfirmLanguagePreferences(
+                            that.messageView
+                        );
+                    },
                 }
             );
         }
@@ -241,13 +258,15 @@ class TranslationView extends LoaderView.extend({
 
     onLanguageRevealClick(ev) {
         if (!this.moreLanguagesViewShown) {
-            this.showChildView('selectLanguage', new LanguageSelectionView({
-                messageModel: this.message,
-                questionView: this
-            }));
+            this.showChildView(
+                "selectLanguage",
+                new LanguageSelectionView({
+                    messageModel: this.message,
+                    questionView: this,
+                })
+            );
             this.moreLanguagesViewShown = true;
-        }
-        else {
+        } else {
             this.onLanguageSelectedCancelClick();
         }
     }
@@ -258,7 +277,7 @@ class TranslationView extends LoaderView.extend({
         fuck using events to trigger this. Child explicitly calls this.
      */
     onLanguageSelectedCancelClick() {
-        this.getRegion('selectLanguage').empty();
+        this.getRegion("selectLanguage").empty();
         this.moreLanguagesViewShown = false;
     }
 
@@ -268,7 +287,7 @@ class TranslationView extends LoaderView.extend({
      */
     onHideQuestionClick(e) {
         var that = this;
-        this.messageView.closeTranslationView(function(){
+        this.messageView.closeTranslationView(function () {
             console.log("The message is hidden by now");
         });
     }
@@ -282,8 +301,15 @@ class TranslationView extends LoaderView.extend({
             if (this.preferredTarget) {
                 translationQuestion = i18n.sprintf(
                     i18n.gettext("Translate all messages from %s to %s?"),
-                    this.nameOfLocale(LangString.LocaleUtils.stripCountry(this.originalLocale)),
-                    this.nameOfLocale(LangString.LocaleUtils.stripCountry(this.preferredTarget)));
+                    this.nameOfLocale(
+                        LangString.LocaleUtils.stripCountry(this.originalLocale)
+                    ),
+                    this.nameOfLocale(
+                        LangString.LocaleUtils.stripCountry(
+                            this.preferredTarget
+                        )
+                    )
+                );
                 // yesAnswer = i18n.sprintf(
                 //     i18n.gettext("Yes, translate all messages to %s"),
                 //     this.nameOfLocale(this.preferredTarget));
@@ -293,7 +319,10 @@ class TranslationView extends LoaderView.extend({
             } else {
                 translationQuestion = i18n.sprintf(
                     i18n.gettext("Keep %s messages untranslated?"),
-                    this.nameOfLocale(LangString.LocaleUtils.stripCountry(this.originalLocale)));
+                    this.nameOfLocale(
+                        LangString.LocaleUtils.stripCountry(this.originalLocale)
+                    )
+                );
                 // noAnswer = i18n.sprintf(
                 //     i18n.gettext("Yes, keep them untranslated"));
             }
@@ -310,7 +339,8 @@ class TranslationView extends LoaderView.extend({
                 originalLocale: this.originalLocale,
                 translatedFromLocale: this.translatedFrom,
                 translatedTo: this.translatedTo,
-                forceTranslationQuestion: this.messageView.forceTranslationQuestion
+                forceTranslationQuestion: this.messageView
+                    .forceTranslationQuestion,
             };
         }
     }

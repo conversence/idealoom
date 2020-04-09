@@ -1,9 +1,9 @@
 /**
- * 
+ *
  * @module app.utils.genieEffect
  */
-import $ from 'jquery';
-import Promise from 'bluebird';
+import $ from "jquery";
+import Promise from "bluebird";
 
 /**
  * Creates a genie effect using CSS3 properties
@@ -15,33 +15,45 @@ import Promise from 'bluebird';
  * @returns Promise              Use promise to run a callback
  */
 
-var _isNumber = function(obj) { return !isNaN(parseFloat(obj)); };
+var _isNumber = function (obj) {
+    return !isNaN(parseFloat(obj));
+};
 
-var effect = function($source, $target, duration, delayTime){
+var effect = function ($source, $target, duration, delayTime) {
     if (!($source.jquery || $target.jquery)) {
-        throw new Error("The genie effect was NOT passed a jquery object", $source, $target);
+        throw new Error(
+            "The genie effect was NOT passed a jquery object",
+            $source,
+            $target
+        );
         return;
     }
 
-    if (!(_isNumber(duration) )) {
-        throw new Error("The genie effect's duration MUST be a Number type", duration);
+    if (!_isNumber(duration)) {
+        throw new Error(
+            "The genie effect's duration MUST be a Number type",
+            duration
+        );
         return;
     }
 
-    if ( (delayTime !== undefined) && (!(_isNumber(delayTime))) ){
-        throw new Error("The genie effect's delayTime MUST be a Number type", delayTime);
+    if (delayTime !== undefined && !_isNumber(delayTime)) {
+        throw new Error(
+            "The genie effect's delayTime MUST be a Number type",
+            delayTime
+        );
         return;
     }
 
-    var t = duration/1000;
-    var dt = delayTime || duration * 1.50;
-    var genieEffect= {
+    var t = duration / 1000;
+    var dt = delayTime || duration * 1.5;
+    var genieEffect = {
         "-ms-transition": "all " + t + "s", //0.25s
         "-webkit-transition": "all " + t + "s", //0.25s
         "-moz-transition": "all " + t + "s", //0.25s
         "-o-transition": "all " + t + "s", //0.25s
-        "transition": "all " + t + "s", //0.25s
-    }
+        transition: "all " + t + "s", //0.25s
+    };
 
     var targetHeight = $target.height();
     var targetWidth = $target.width();
@@ -64,7 +76,7 @@ var effect = function($source, $target, duration, delayTime){
 
     var percent = 30;
 
-    var num = percent/100;
+    var num = percent / 100;
     var factor = num + 1;
 
     var genieAnimation = {
@@ -72,73 +84,68 @@ var effect = function($source, $target, duration, delayTime){
         "-webkit-transform": "perspective(370px) scale(0)  srotateX(45deg)",
         "-moz-transform": "perspective(370px) scale(0)  rotateX(45deg)",
         "-o-transform": "perspective(370px) scale(0)  rotateX(45deg)",
-        "transform": "perspective(370px) scale(0) rotateX(45deg)"
+        transform: "perspective(370px) scale(0) rotateX(45deg)",
     };
     //Check who is on top
-    if ((targetOffset.top - sourceOffset.top) < 0) {
+    if (targetOffset.top - sourceOffset.top < 0) {
         //Target is above
-        diffY =  sourceOffset.top - (targetOffset.top + (targetHeight*0.5) );
-        diffY = -1*diffY;
-    }
-    else if ( (targetOffset.top - sourceOffset.top) > 0 ) {
+        diffY = sourceOffset.top - (targetOffset.top + targetHeight * 0.5);
+        diffY = -1 * diffY;
+    } else if (targetOffset.top - sourceOffset.top > 0) {
         //Target is below
-        diffY = targetOffset.top + (targetHeight*0.5) - sourceOffset.height;
-    }
-    else {
+        diffY = targetOffset.top + targetHeight * 0.5 - sourceOffset.height;
+    } else {
         //Same level
         diffY = 0;
     }
 
     //Check who is on left
-    if ( (targetOffset.left - sourceOffset.left) > 0) {
+    if (targetOffset.left - sourceOffset.left > 0) {
         //Target is on the right
-        diffX =  sourceOffset.left - (targetOffset.left + (0.5*targetWidth));
-        diffX = -1*diffX;
-    }
-    else if ( (targetOffset.left - sourceOffset.left) < 0 ){
+        diffX = sourceOffset.left - (targetOffset.left + 0.5 * targetWidth);
+        diffX = -1 * diffX;
+    } else if (targetOffset.left - sourceOffset.left < 0) {
         //target is on the left
-        diffX = targetOffset.left + (targetWidth*0.5) - sourceOffset.left;
-    }
-    else {
+        diffX = targetOffset.left + targetWidth * 0.5 - sourceOffset.left;
+    } else {
         //Same level
         diffX = 0;
     }
 
-    var origin = diffX + 'px ' + diffY + 'px'; //That space is very important in 'px '
+    var origin = diffX + "px " + diffY + "px"; //That space is very important in 'px '
 
     // console.log("[Genie Effect] origin is: ", origin);
 
     $source.css(genieEffect);
     $source.css({
-        transformOrigin: origin
+        transformOrigin: origin,
     });
     // $source.toggleClass("toggle-genie");
     $source.css(genieAnimation);
     return Promise.delay(dt);
 };
 
-var effect2 = function($source, $target, duration, delayTime){
+var effect2 = function ($source, $target, duration, delayTime) {
     var targetHeight = $target.height();
     var targetWidth = $target.width();
     var targetOffset = $target.offset();
     var sourceOffset = $source.offset();
-    var diffX = sourceOffset.left - targetOffset.left - targetWidth*0.5;
-    var diffY = sourceOffset.top - targetOffset.top - targetHeight*0.5;
-    var origin = -diffX + 'px' + -diffY + 'px';
+    var diffX = sourceOffset.left - targetOffset.left - targetWidth * 0.5;
+    var diffY = sourceOffset.top - targetOffset.top - targetHeight * 0.5;
+    var origin = -diffX + "px" + -diffY + "px";
 
     console.log("[Genie Effect] origin is: ", origin);
 
     $source.addClass("genie-effect");
     $source.css({
-        transformOrigin: origin
+        transformOrigin: origin,
     });
     $source.toggleClass("hide-genie");
     // $source.css(genieAnimation);
     return Promise.delay(delayTime);
 };
 
-
 export default {
     geniefy: effect,
-    geniefy2: effect2 
-}
+    geniefy2: effect2,
+};

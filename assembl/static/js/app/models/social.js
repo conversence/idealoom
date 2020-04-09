@@ -3,15 +3,15 @@
  * @module app.models.social
  */
 
-import $ from 'jquery';
-import Base from './base.js';
-import Ctx from '../common/context.js';
-import i18n from '../utils/i18n.js';
-import Agents from './agents.js';
-import Moment from 'moment';
+import $ from "jquery";
+import Base from "./base.js";
+import Ctx from "../common/context.js";
+import i18n from "../utils/i18n.js";
+import Agents from "./agents.js";
+import Moment from "moment";
 
-var tokenTimeManager = function() {
-  this.minTime = new Moment('0001-01-01T00:00:00Z').utc() //datetime.min in python
+var tokenTimeManager = function () {
+    this.minTime = new Moment("0001-01-01T00:00:00Z").utc(); //datetime.min in python
 };
 
 tokenTimeManager.prototype = {
@@ -20,15 +20,15 @@ tokenTimeManager.prototype = {
      * ISO 8601 string to a UTC timezone.
      * If string has a timezone, regardless of whether it is UTC
      * or not, it will be returned.
-     * @param  {string} e ISO 8601 
+     * @param  {string} e ISO 8601
      * @returns {string}   ISO 8601 with timezone (UTC if possible)
-     */ 
-    processTimeToUTC: function(e){
-        if (/[Z]$|([+-]\d{2}:\d{2})$/.test(e) ) {
+     */
+
+    processTimeToUTC: function (e) {
+        if (/[Z]$|([+-]\d{2}:\d{2})$/.test(e)) {
             return e;
-        }
-        else {
-            return e + 'Z'; //Z: ISO 8601 UTC Timezone
+        } else {
+            return e + "Z"; //Z: ISO 8601 UTC Timezone
         }
     },
     /**
@@ -36,14 +36,13 @@ tokenTimeManager.prototype = {
      * @param  {Moment}  t [Time to compare]
      * @returns {boolean}   []
      */
-    isMinTime: function(t){
-        var tmp; 
-        if (!Moment.isMoment(t)){
-            tmp = Moment(t).utc();            
-        }
-        else tmp = t;
+    isMinTime: function (t) {
+        var tmp;
+        if (!Moment.isMoment(t)) {
+            tmp = Moment(t).utc();
+        } else tmp = t;
         return this.minTime.isSame(tmp);
-  }
+    },
 };
 
 /**
@@ -61,49 +60,50 @@ class FacebookAccessToken extends Base.Model.extend({
         token_type: null,
         object_name: null,
         object_fb_id: null,
-        '@view': null,
-        '@type': null
-    }
+        "@view": null,
+        "@type": null,
+    },
 }) {
     urlRoot() {
-         var fbId = Ctx.getCurrentUserFacebookAccountId();
-         if (!fbId) {
-             throw new Error("There is no Facebook Account for this user");
-         }
-         else {
-             var route = Ctx.getApiV2DiscussionUrl('/all_users/current/accounts/') +
-                 Ctx.extractId(fbId) + "/access_tokens";
-             return route;
-         }
-     }
+        var fbId = Ctx.getCurrentUserFacebookAccountId();
+        if (!fbId) {
+            throw new Error("There is no Facebook Account for this user");
+        } else {
+            var route =
+                Ctx.getApiV2DiscussionUrl("/all_users/current/accounts/") +
+                Ctx.extractId(fbId) +
+                "/access_tokens";
+            return route;
+        }
+    }
 
     isExpired() {
-        var t = new tokenTimeManager().processTimeToUTC(this.get('expiration'));
+        var t = new tokenTimeManager().processTimeToUTC(this.get("expiration"));
         var d = new Moment(t).utc();
         var now = new Moment.utc();
         return now.isAfter(d);
     }
 
     isMinimumTime() {
-        return new Time().isMinTime(this.get('expiration'));
+        return new Time().isMinTime(this.get("expiration"));
     }
 
     isInfiniteToken() {
         //Backend will return a property, is_infinite_token
-        return this.get('is_infinite_token') === false;
+        return this.get("is_infinite_token") === false;
     }
 
     isUserToken() {
-        return this.get('token_type') === 'user';
+        return this.get("token_type") === "user";
     }
 
     isPageToken() {
-        return this.get('token_type') === 'page';
+        return this.get("token_type") === "page";
     }
 
     isGroupToken() {
-        return this.get('token_type') === 'group';
-  }
+        return this.get("token_type") === "group";
+    }
 }
 
 /**
@@ -115,40 +115,44 @@ class FacebookAccessToken extends Base.Model.extend({
 class FacebookAccessTokens extends Base.Collection.extend({
     //Things to add: Promise function to get the agent model
     //represented by this model.
-    model: FacebookAccessToken
+    model: FacebookAccessToken,
 }) {
     url() {
-      var fbId = Ctx.getCurrentUserFacebookAccountId();
-      if (!fbId) {
-        throw new Error("There is no Facebook Account for this user");
-      }
-      else {
-        var route = Ctx.getApiV2DiscussionUrl('/all_users/current/accounts/') +
-            Ctx.extractId(fbId) + "/access_tokens";
-        return route;
-      }
+        var fbId = Ctx.getCurrentUserFacebookAccountId();
+        if (!fbId) {
+            throw new Error("There is no Facebook Account for this user");
+        } else {
+            var route =
+                Ctx.getApiV2DiscussionUrl("/all_users/current/accounts/") +
+                Ctx.extractId(fbId) +
+                "/access_tokens";
+            return route;
+        }
     }
 
     getUserToken() {
-      var tmp = this.find(function(model) { return model.isUserToken(); });
-      if (!tmp) return null;
-      else return tmp;
+        var tmp = this.find(function (model) {
+            return model.isUserToken();
+        });
+        if (!tmp) return null;
+        else return tmp;
     }
 
     hasUserToken() {
-      var tmp = this.find(function(model) { return model.isUserToken(); });
-      if (!tmp) return false;
-      else return true;
+        var tmp = this.find(function (model) {
+            return model.isUserToken();
+        });
+        if (!tmp) return false;
+        else return true;
     }
 }
 
 export default {
-  Facebook: {
-    Token: {
-      Model: FacebookAccessToken,
-      Collection: FacebookAccessTokens,
-      Time: tokenTimeManager
-    } 
-  }
-}
-
+    Facebook: {
+        Token: {
+            Model: FacebookAccessToken,
+            Collection: FacebookAccessTokens,
+            Time: tokenTimeManager,
+        },
+    },
+};

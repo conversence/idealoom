@@ -3,11 +3,10 @@
  * @module app.models.partners
  */
 
-import $ from 'jquery';
-import Base from './base.js';
-import i18n from '../utils/i18n.js';
-import Ctx from '../common/context.js';
-
+import $ from "jquery";
+import Base from "./base.js";
+import i18n from "../utils/i18n.js";
+import Ctx from "../common/context.js";
 
 /**
  * Partner model
@@ -16,30 +15,29 @@ import Ctx from '../common/context.js';
  * @extends app.models.base.BaseModel
  */
 class PartnerOrganizationModel extends Base.Model.extend({
- /**
-  * @type {string}
-  */
- urlRoot: Ctx.getApiV2DiscussionUrl('partner_organizations'),
+    /**
+     * @type {string}
+     */
+    urlRoot: Ctx.getApiV2DiscussionUrl("partner_organizations"),
 
- /**
-  * Defaults
-  * @type {Object}
-  */
+    /**
+     * Defaults
+     * @type {Object}
+     */
 
- defaults: {
-   name: '',
-   description: '',
-   homepage: '',
-   logo: '',
-   is_initiator: false
- }
+    defaults: {
+        name: "",
+        description: "",
+        homepage: "",
+        logo: "",
+        is_initiator: false,
+    },
 }) {
- validate(attrs, options) {
-   /**
-    * check typeof variable
-    * */
-    
- }
+    validate(attrs, options) {
+        /**
+         * check typeof variable
+         * */
+    }
 }
 
 /**
@@ -48,19 +46,19 @@ class PartnerOrganizationModel extends Base.Model.extend({
  * @extends app.models.base.BaseCollection
  */
 class PartnerOrganizationCollection extends Base.Collection.extend({
- /**
-  * @type {string}
-  */
- url: Ctx.getApiV2DiscussionUrl('partner_organizations'),
+    /**
+     * @type {string}
+     */
+    url: Ctx.getApiV2DiscussionUrl("partner_organizations"),
 
- /**
-  * The model
-  * @type {PartnerOrganizationModel}
-  */
- model: PartnerOrganizationModel
+    /**
+     * The model
+     * @type {PartnerOrganizationModel}
+     */
+    model: PartnerOrganizationModel,
 }) {}
 
 export default {
-  Model: PartnerOrganizationModel,
-  Collection: PartnerOrganizationCollection
+    Model: PartnerOrganizationModel,
+    Collection: PartnerOrganizationCollection,
 };

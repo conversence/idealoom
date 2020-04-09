@@ -2,21 +2,21 @@
  * The link between an idea and a message.
  * @module app.models.ideaContentLink
  */
-import Marionette from 'backbone.marionette';
-import Backbone from 'backbone';
-import _ from 'underscore';
-import $ from 'jquery';
-import Promise from 'bluebird';
-import Moment from 'moment';
+import Marionette from "backbone.marionette";
+import Backbone from "backbone";
+import _ from "underscore";
+import $ from "jquery";
+import Promise from "bluebird";
+import Moment from "moment";
 
-import i18n from '../utils/i18n.js';
-import Types from '../utils/types.js';
-import Base from './base.js';
-import Ctx from '../common/context.js';
+import i18n from "../utils/i18n.js";
+import Types from "../utils/types.js";
+import Base from "./base.js";
+import Ctx from "../common/context.js";
 /**
  * @function app.models.ideaContentLink.IdeaContentLinkTypeRank
  */
-var IdeaContentLinkTypeRank = function() {
+var IdeaContentLinkTypeRank = function () {
     var IDEA_RELATED_POST_LINK = Types.IDEA_RELATED_POST_LINK;
     var EXTRACT = Types.EXTRACT;
     this._ranks = {};
@@ -24,14 +24,13 @@ var IdeaContentLinkTypeRank = function() {
     this._ranks[EXTRACT] = 1;
 };
 IdeaContentLinkTypeRank.prototype = {
-    getRank: function(t){
+    getRank: function (t) {
         if (this._ranks[t]) {
             return this._ranks[t];
-        }
-        else {
+        } else {
             return null;
         }
-    }
+    },
 };
 
 /**
@@ -55,7 +54,7 @@ class IdeaContentLinkModel extends Base.Model.extend({
         idPost: null,
         idCreator: null,
         idExcerpt: null,
-    }
+    },
 }) {
     /**
      * Returns the post creator model promise
@@ -64,18 +63,26 @@ class IdeaContentLinkModel extends Base.Model.extend({
      */
     getPostCreatorModelPromise() {
         var that = this;
-        var messageId = this.get('idPost');
-        return this.collection.collectionManager.getMessageFullModelPromise(messageId)
-            .then(function(messageModel){
-                var postCreatorId = messageModel.get('idCreator');
-                return Promise.join(postCreatorId, that.collection.collectionManager.getAllUsersCollectionPromise(),
-                    function(postCreatorId, users) {
+        var messageId = this.get("idPost");
+        return this.collection.collectionManager
+            .getMessageFullModelPromise(messageId)
+            .then(function (messageModel) {
+                var postCreatorId = messageModel.get("idCreator");
+                return Promise.join(
+                    postCreatorId,
+                    that.collection.collectionManager.getAllUsersCollectionPromise(),
+                    function (postCreatorId, users) {
                         var u = users.get(postCreatorId);
-                        if (!u){
-                            throw new Error("[ideaContentLink] user with id " + that.get('idCreator') + " was not found");
+                        if (!u) {
+                            throw new Error(
+                                "[ideaContentLink] user with id " +
+                                    that.get("idCreator") +
+                                    " was not found"
+                            );
                         }
                         return Promise.resolve(u);
-                    }); 
+                    }
+                );
             });
     }
 
@@ -86,15 +93,20 @@ class IdeaContentLinkModel extends Base.Model.extend({
      */
     getLinkCreatorModelPromise() {
         var that = this;
-        return this.collection.collectionManager.getAllUsersCollectionPromise()
-            .then(function(users){
-                var u = users.get(that.get('idCreator'));
+        return this.collection.collectionManager
+            .getAllUsersCollectionPromise()
+            .then(function (users) {
+                var u = users.get(that.get("idCreator"));
                 if (!u) {
-                    throw new Error("[ideaContentLink] user with id " + that.get('idCreator') + " was not found");
+                    throw new Error(
+                        "[ideaContentLink] user with id " +
+                            that.get("idCreator") +
+                            " was not found"
+                    );
                 }
                 return Promise.resolve(u);
             })
-            .error(function(e){
+            .error(function (e) {
                 console.error(e.statusText);
             });
     }
@@ -106,17 +118,22 @@ class IdeaContentLinkModel extends Base.Model.extend({
      */
     getMessageStructurePromise() {
         var that = this;
-        return this.collection.collectionManager.getAllMessageStructureCollectionPromise()
-            .then(function(messages){
-                var m = messages.find(function(message){
-                    return message.id === that.get('idPost');
+        return this.collection.collectionManager
+            .getAllMessageStructureCollectionPromise()
+            .then(function (messages) {
+                var m = messages.find(function (message) {
+                    return message.id === that.get("idPost");
                 });
                 if (!m) {
-                    throw new Error("[ideaContentLink] message with id " + that.get('idPost') + " was not found");
+                    throw new Error(
+                        "[ideaContentLink] message with id " +
+                            that.get("idPost") +
+                            " was not found"
+                    );
                 }
                 return Promise.resolve(m);
             })
-            .error(function(e){
+            .error(function (e) {
                 console.error(e.statusText);
             });
     }
@@ -128,19 +145,24 @@ class IdeaContentLinkModel extends Base.Model.extend({
      */
     getIdeaModelPromise() {
         var that = this;
-        return this.collection.collectionManager.getAllIdeasCollectionPromise()
-            .then(function(ideas){
-                var i = ideas.find(function(idea){
-                    return idea.id === that.get('idIdea');
+        return this.collection.collectionManager
+            .getAllIdeasCollectionPromise()
+            .then(function (ideas) {
+                var i = ideas.find(function (idea) {
+                    return idea.id === that.get("idIdea");
                 });
 
                 if (!i) {
-                    throw new Error("[ideaContentLink] idea with id " + that.get('idIdea') + " was not found");
+                    throw new Error(
+                        "[ideaContentLink] idea with id " +
+                            that.get("idIdea") +
+                            " was not found"
+                    );
                 }
 
                 return Promise.resolve(i);
             })
-            .error(function(e){
+            .error(function (e) {
                 console.error(e.statusText);
             });
     }
@@ -151,7 +173,7 @@ class IdeaContentLinkModel extends Base.Model.extend({
      * @function app.models.ideaContentLink.IdeaContentLinkModel.isDirect
      */
     isDirect() {
-        return this.get('idPost') === this.collection.messageModel.id;
+        return this.get("idPost") === this.collection.messageModel.id;
     }
 
     /**
@@ -159,7 +181,7 @@ class IdeaContentLinkModel extends Base.Model.extend({
      * @function app.models.ideaContentLink.IdeaContentLinkModel.getCreationDate
      */
     getCreationDate() {
-        return this.get('created');
+        return this.get("created");
     }
 }
 
@@ -174,13 +196,13 @@ class Collection extends Base.Collection.extend({
     /**
      * @member {string} app.models.ideaContentLink.Collection.url
      */
-    url: Ctx.getApiV2DiscussionUrl('idea_content_links'),
+    url: Ctx.getApiV2DiscussionUrl("idea_content_links"),
 
     /**
      * The model
      * @type {IdeaContentLinkModel}
      */
-    model: IdeaContentLinkModel
+    model: IdeaContentLinkModel,
 }) {
     /**
      * @member {string} app.models.ideaContentLink.Collection.initialize
@@ -199,32 +221,43 @@ class Collection extends Base.Collection.extend({
      * @function app.models.ideaContentLink.Collection.comparator
      */
     comparator(one, two) {
-        function sortByDate(one, two){
+        function sortByDate(one, two) {
             var d1 = Moment(one.getCreationDate());
             var d2 = Moment(one.getCreationDate());
 
-            if (d1.isBefore(d2)) {return -1;}
-            if (d2.isBefore(d1)) {return 1;}
-            else {return 0;}
+            if (d1.isBefore(d2)) {
+                return -1;
+            }
+            if (d2.isBefore(d1)) {
+                return 1;
+            } else {
+                return 0;
+            }
         }
-        function sortByType(one, two){
-            var t1 = one.get('@type');
-            var t2 = two.get('@type');
+        function sortByType(one, two) {
+            var t1 = one.get("@type");
+            var t2 = two.get("@type");
             var ranker = new IdeaContentLinkTypeRank();
             var rank1 = ranker.getRank(t1);
             var rank2 = ranker.getRank(t2);
 
-            if (rank1 < rank2) { return -1; }
-            if (rank2 < rank1) { return 1; }
-            else {
+            if (rank1 < rank2) {
+                return -1;
+            }
+            if (rank2 < rank1) {
+                return 1;
+            } else {
                 return sortByDate(one, two);
             }
         }
         var isDirect1 = one.isDirect();
         var isDirect2 = two.isDirect();
-        if (isDirect1 && !isDirect2) { return -1;}
-        if (!isDirect1 && isDirect2) { return 1; }
-        else {
+        if (isDirect1 && !isDirect2) {
+            return -1;
+        }
+        if (!isDirect1 && isDirect2) {
+            return 1;
+        } else {
             return sortByType(one, two);
         }
     }
@@ -239,44 +272,52 @@ class Collection extends Base.Collection.extend({
         return Promise.join(
             this.collectionManager.getAllIdeasCollectionPromise(),
             this.collectionManager.getUserLanguagePreferencesPromise(Ctx),
-            function(ideas, userPrefs) {
-                var usableIdeaContentLinks = that.filter(function(icl) {
-                    if (icl){
-                        return icl.get('idIdea') !== null;
-                    }
-                    else {
+            function (ideas, userPrefs) {
+                var usableIdeaContentLinks = that.filter(function (icl) {
+                    if (icl) {
+                        return icl.get("idIdea") !== null;
+                    } else {
                         return false;
                     }
                 });
-                var m = _.map(usableIdeaContentLinks, function(ideaContentLink) {
-                    var idIdea = ideaContentLink.get('idIdea');
+                var m = _.map(usableIdeaContentLinks, function (
+                    ideaContentLink
+                ) {
+                    var idIdea = ideaContentLink.get("idIdea");
                     var ideaModel = ideas.get(idIdea);
-                    if (!ideaModel){
-                      return i18n.gettext("(hidden idea)");
+                    if (!ideaModel) {
+                        return i18n.gettext("(hidden idea)");
                     }
                     return ideaModel.getShortTitleDisplayText(userPrefs);
                 });
                 //A cache of the name, and sort order of the name of the idea
                 var cache = {};
-                _.each(m, function(name, index, collection){
-                    if (!_.has(cache, name)){
+                _.each(m, function (name, index, collection) {
+                    if (!_.has(cache, name)) {
                         cache[name] = index;
                     }
                 });
                 var sorted = _.chain(cache)
-                              .pairs()
-                              .sortBy(function(val){return val[1]; })
-                              .map(function(val){return val[0]; })
-                              .value();
+                    .pairs()
+                    .sortBy(function (val) {
+                        return val[1];
+                    })
+                    .map(function (val) {
+                        return val[0];
+                    })
+                    .value();
                 return Promise.resolve(sorted);
-            })
-            .error(function(e){
-                console.error("[IdeaContentLink] Error in getting idea names: ", e.statusText);
-            });
+            }
+        ).error(function (e) {
+            console.error(
+                "[IdeaContentLink] Error in getting idea names: ",
+                e.statusText
+            );
+        });
     }
 }
 
 export default {
     Model: IdeaContentLinkModel,
-    Collection: Collection
-}    
+    Collection: Collection,
+};

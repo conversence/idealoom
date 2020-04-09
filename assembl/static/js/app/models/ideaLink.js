@@ -2,10 +2,10 @@
  * The link between two ideas
  * @module app.models.ideaLink
  */
-import _ from 'underscore';
+import _ from "underscore";
 
-import Base from './base.js';
-import Ctx from '../common/context.js';
+import Base from "./base.js";
+import Ctx from "../common/context.js";
 
 /**
  * Idea link model
@@ -14,36 +14,36 @@ import Ctx from '../common/context.js';
  * @extends app.models.base.BaseModel
  */
 class IdeaLinkModel extends Base.Model.extend({
- /**
-  * Defaults
-  * @type {Object}
-  */
- defaults: {
-   source: '',
-   target: '',
-   original_uri: null,
-   is_tombstone: false,
-   subtype: "DirectedIdeaRelation",
-   order: 1
- }
+    /**
+     * Defaults
+     * @type {Object}
+     */
+    defaults: {
+        source: "",
+        target: "",
+        original_uri: null,
+        is_tombstone: false,
+        subtype: "DirectedIdeaRelation",
+        order: 1,
+    },
 }) {
- /**
-  * @function app.models.ideaLink.IdeaLinkModel.initialize
-  */
- initialize(obj) {
-   obj = obj || {};
-   var that = this;
- }
+    /**
+     * @function app.models.ideaLink.IdeaLinkModel.initialize
+     */
+    initialize(obj) {
+        obj = obj || {};
+        var that = this;
+    }
 
- /**
-  * Validate the model attributes
-  * @function app.models.ideaLink.IdeaLinkModel.validate
-  */
- validate(attrs, options) {
-   /**
-    * check typeof variable
-    * */
- }
+    /**
+     * Validate the model attributes
+     * @function app.models.ideaLink.IdeaLinkModel.validate
+     */
+    validate(attrs, options) {
+        /**
+         * check typeof variable
+         * */
+    }
 }
 
 /**
@@ -52,20 +52,19 @@ class IdeaLinkModel extends Base.Model.extend({
  * @extends app.models.base.BaseCollection
  */
 class IdeaLinkCollection extends Base.Collection.extend({
- /**
-  * The model
-  * @type {IdeaLinkModel}
-  */
- model: IdeaLinkModel,
+    /**
+     * The model
+     * @type {IdeaLinkModel}
+     */
+    model: IdeaLinkModel,
 
- /**
-  * @member {string} app.models.ideaLink.IdeaLinkCollection.url
-  */
- url: Ctx.getApiV2DiscussionUrl("idea_links")
+    /**
+     * @member {string} app.models.ideaLink.IdeaLinkCollection.url
+     */
+    url: Ctx.getApiV2DiscussionUrl("idea_links"),
 }) {}
 
 export default {
-  Model: IdeaLinkModel,
-  Collection: IdeaLinkCollection
+    Model: IdeaLinkModel,
+    Collection: IdeaLinkCollection,
 };
-

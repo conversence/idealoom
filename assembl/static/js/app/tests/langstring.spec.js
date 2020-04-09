@@ -1,22 +1,22 @@
 /**
- * 
+ *
  * @module app.tests.langstring.spec
  */
 /**
  * Load Ctx and set the env to test first. Revert back after all tests.
  */
 
-import Ctx from '../common/context.js';
+import Ctx from "../common/context.js";
 Ctx.setApplicationUnderTest();
 
-import _ from 'underscore';
-import LangString from '../models/langstring.js';
-import UserLanguagePreference from '../models/languagePreference.js';
-import userLanguagePreferencesJson from './fixtures/languagePreferences.json';
-import langstringEntriesJson from './fixtures/langstringEntry.json';
-import localsJson from './fixtures/languageLocales.json';
-import langstringJson from './fixtures/langstring.json';
-import { assert } from 'chai';
+import _ from "underscore";
+import LangString from "../models/langstring.js";
+import UserLanguagePreference from "../models/languagePreference.js";
+import userLanguagePreferencesJson from "./fixtures/languagePreferences.json";
+import langstringEntriesJson from "./fixtures/langstringEntry.json";
+import localsJson from "./fixtures/languageLocales.json";
+import langstringJson from "./fixtures/langstring.json";
+import { assert } from "chai";
 
 /**
  * These tests depends on the server to supply several peices of logic to the
@@ -26,152 +26,169 @@ import { assert } from 'chai';
  * from backend.
  */
 
-
-var clone = function(other){
-  return JSON.parse(JSON.stringify(other));
+var clone = function (other) {
+    return JSON.parse(JSON.stringify(other));
 };
 
-describe("Langstring Spec", function(){
-  var codes = localsJson;
+describe("Langstring Spec", function () {
+    var codes = localsJson;
 
-  after(function(){
-    if (Ctx) {
-      Ctx.setApplicationUnderProduction();
-    } else {
-      console.warn("Why is the scope in teardowns?");
-    }
-  });
-
-  describe("User Language Preference Spec", function(){
-    var ls_en;
-    var ls_fr;
-    var ls_en_fr_x;
-    var ls_fr_en_x;
-    var ulp_en_cookie;
-    var ulp_fr_cookie;
-    var ulp_en;
-    var ulp_fr;
-    var ulp_en_from_fr;
-    var ulp_fr_from_en;
-
-
-    beforeEach(function(){
-      Ctx._test_set_locale("en");
-
-        ls_en = clone(langstringJson);
-        ls_en.entries.push(langstringEntriesJson["en"]);
-
-        ls_fr = clone(langstringJson);
-        ls_fr.entries.push(langstringEntriesJson["fr"]);
-
-        ls_en_fr_x = clone(langstringJson);
-        ls_en_fr_x.entries.push(langstringEntriesJson["en"]);
-        ls_en_fr_x.entries.push(langstringEntriesJson["fr_from_en"]);
-
-        ls_fr_en_x = clone(langstringJson);
-        ls_fr_en_x.entries.push(langstringEntriesJson["fr"]);
-        ls_fr_en_x.entries.push(langstringEntriesJson["en_from_fr"]);
-
-
-        ulp_en_cookie = clone(userLanguagePreferencesJson["en_cookie"]);
-        ulp_fr_cookie = clone(userLanguagePreferencesJson["fr_cookie"]);
-        ulp_en_from_fr = clone(userLanguagePreferencesJson["en_from_fr"]);
-        ulp_fr_from_en = clone(userLanguagePreferencesJson["fr_from_en"]);
-        ulp_en = clone(userLanguagePreferencesJson["en"]);
-        ulp_fr = clone(userLanguagePreferencesJson["fr"]);
-
+    after(function () {
+        if (Ctx) {
+            Ctx.setApplicationUnderProduction();
+        } else {
+            console.warn("Why is the scope in teardowns?");
+        }
     });
 
-    describe("No User Language Spec", function(){
+    describe("User Language Preference Spec", function () {
+        var ls_en;
+        var ls_fr;
+        var ls_en_fr_x;
+        var ls_fr_en_x;
+        var ulp_en_cookie;
+        var ulp_fr_cookie;
+        var ulp_en;
+        var ulp_fr;
+        var ulp_en_from_fr;
+        var ulp_fr_from_en;
 
-      var ulp; 
+        beforeEach(function () {
+            Ctx._test_set_locale("en");
 
-      beforeEach("Set up disconnected user language preference", function(){
-        Ctx._test_set_locale("en");
-        ulp = new UserLanguagePreference.DisconnectedUserCollection();
-      });
+            ls_en = clone(langstringJson);
+            ls_en.entries.push(langstringEntriesJson["en"]);
 
-      it("A disconnected user with 'en' locale, and an 'en' langstring entry only", function(){
-          var e = clone(ls_en);
-          var langstring = new LangString.Model(e, {parse: true});
-          var best = langstring.best(ulp);
-          assert.isFalse(best.isMachineTranslation(), "The entry was machine translated");
-          assert.strictEqual(best.getLocaleValue(), codes["en"]);
-      });
+            ls_fr = clone(langstringJson);
+            ls_fr.entries.push(langstringEntriesJson["fr"]);
 
-      it("A disconnected user with 'fr' locale, and an 'en & fr-x-mtfrom-en' locales", function(){
-          
-          Ctx._test_set_locale("fr");
-          var e = clone(ls_en_fr_x);
-          var langstring = new LangString.Model(e, {parse: true});
-          var best = langstring.best(ulp);
-          assert.isTrue(best.isMachineTranslation(), "The entry is machine translated");
-          assert.strictEqual(best.getLocaleValue(), codes["fr_from_en"]);
-      });
+            ls_en_fr_x = clone(langstringJson);
+            ls_en_fr_x.entries.push(langstringEntriesJson["en"]);
+            ls_en_fr_x.entries.push(langstringEntriesJson["fr_from_en"]);
+
+            ls_fr_en_x = clone(langstringJson);
+            ls_fr_en_x.entries.push(langstringEntriesJson["fr"]);
+            ls_fr_en_x.entries.push(langstringEntriesJson["en_from_fr"]);
+
+            ulp_en_cookie = clone(userLanguagePreferencesJson["en_cookie"]);
+            ulp_fr_cookie = clone(userLanguagePreferencesJson["fr_cookie"]);
+            ulp_en_from_fr = clone(userLanguagePreferencesJson["en_from_fr"]);
+            ulp_fr_from_en = clone(userLanguagePreferencesJson["fr_from_en"]);
+            ulp_en = clone(userLanguagePreferencesJson["en"]);
+            ulp_fr = clone(userLanguagePreferencesJson["fr"]);
+        });
+
+        describe("No User Language Spec", function () {
+            var ulp;
+
+            beforeEach(
+                "Set up disconnected user language preference",
+                function () {
+                    Ctx._test_set_locale("en");
+                    ulp = new UserLanguagePreference.DisconnectedUserCollection();
+                }
+            );
+
+            it("A disconnected user with 'en' locale, and an 'en' langstring entry only", function () {
+                var e = clone(ls_en);
+                var langstring = new LangString.Model(e, { parse: true });
+                var best = langstring.best(ulp);
+                assert.isFalse(
+                    best.isMachineTranslation(),
+                    "The entry was machine translated"
+                );
+                assert.strictEqual(best.getLocaleValue(), codes["en"]);
+            });
+
+            it("A disconnected user with 'fr' locale, and an 'en & fr-x-mtfrom-en' locales", function () {
+                Ctx._test_set_locale("fr");
+                var e = clone(ls_en_fr_x);
+                var langstring = new LangString.Model(e, { parse: true });
+                var best = langstring.best(ulp);
+                assert.isTrue(
+                    best.isMachineTranslation(),
+                    "The entry is machine translated"
+                );
+                assert.strictEqual(best.getLocaleValue(), codes["fr_from_en"]);
+            });
+        });
+
+        describe("Cookie Language Spec", function () {
+            var ulp;
+
+            beforeEach(function () {
+                Ctx._test_set_locale("en");
+            });
+
+            it("An 'en' user language preference with an 'en' langstring", function () {
+                ulp = new UserLanguagePreference.Collection([ulp_en_cookie]);
+                var e = clone(ls_en);
+                var langstring = new LangString.Model(e, { parse: true });
+                var best = langstring.best(ulp);
+                assert.isFalse(
+                    best.isMachineTranslation(),
+                    "The entry is not machine translated"
+                );
+                assert.strictEqual(best.getLocaleValue(), codes["en"]);
+            });
+
+            it("An 'fr' user language preference with 'en and fr-x-mtfrom-en' langstring", function () {
+                Ctx._test_set_locale("fr");
+                ulp = new UserLanguagePreference.Collection([ulp_fr_cookie]);
+                var e = clone(ls_en_fr_x);
+                var langstring = new LangString.Model(e, { parse: true });
+                var best = langstring.best(ulp);
+                assert.isTrue(
+                    best.isMachineTranslation(),
+                    "The entry is machine translated"
+                );
+                assert.strictEqual(best.getLocaleValue(), codes["fr_from_en"]);
+            });
+        });
+
+        describe("Explicit Language Spec", function () {
+            var ulp;
+
+            beforeEach(function () {
+                Ctx._test_set_locale("en");
+            });
+
+            it("An en-> fr user language preference with an 'en and fr-x-mtfrom-en' langstring", function () {
+                Ctx._test_set_locale("en");
+                ulp = new UserLanguagePreference.Collection([
+                    ulp_fr,
+                    ulp_fr_from_en,
+                ]);
+                var e = clone(ls_en_fr_x);
+                var langstring = new LangString.Model(e, { parse: true });
+                var best = langstring.best(ulp);
+                assert.isTrue(
+                    best.isMachineTranslation(),
+                    "The entry is machine translated"
+                );
+                assert.strictEqual(best.getLocaleValue(), codes["fr_from_en"]);
+            });
+
+            it(
+                "An 'en' preferred order 1 and an 'fr' preferred order 0, with " +
+                    "an 'fr and en-x-mtfrom-fr langstring'",
+                function () {
+                    Ctx._test_set_locale("en");
+                    var en = clone(ulp_en);
+                    var fr = clone(ulp_fr);
+                    en["preferred_order"] = 1;
+                    fr["preferred_order"] = 0;
+                    ulp = new UserLanguagePreference.Collection([en, fr]);
+                    var e = clone(ls_fr_en_x);
+                    var langstring = new LangString.Model(e, { parse: true });
+                    var best = langstring.best(ulp);
+                    assert.isFalse(
+                        best.isMachineTranslation(),
+                        "The entry is not machine translated"
+                    );
+                    assert.strictEqual(best.getLocaleValue(), codes["fr"]);
+                }
+            );
+        });
     });
-
-    describe("Cookie Language Spec", function(){
-
-      var ulp;
-
-      beforeEach(function(){
-        Ctx._test_set_locale("en");
-      });
-
-      it("An 'en' user language preference with an 'en' langstring", function(){
-        ulp = new UserLanguagePreference.Collection([ulp_en_cookie]);
-        var e = clone(ls_en);
-        var langstring = new LangString.Model(e, {parse: true});
-        var best = langstring.best(ulp);
-        assert.isFalse(best.isMachineTranslation(), "The entry is not machine translated");
-        assert.strictEqual(best.getLocaleValue(), codes["en"]);
-      });
-
-      it("An 'fr' user language preference with 'en and fr-x-mtfrom-en' langstring", function(){
-        Ctx._test_set_locale("fr");
-        ulp = new UserLanguagePreference.Collection([ulp_fr_cookie]);
-        var e = clone(ls_en_fr_x);
-        var langstring = new LangString.Model(e, {parse: true});
-        var best = langstring.best(ulp);
-        assert.isTrue(best.isMachineTranslation(), "The entry is machine translated");
-        assert.strictEqual(best.getLocaleValue(), codes["fr_from_en"]);
-      });
-    });
-
-    describe("Explicit Language Spec", function(){
-
-      var ulp;
-
-      beforeEach(function(){
-        Ctx._test_set_locale("en");
-      });
-
-      it("An en-> fr user language preference with an 'en and fr-x-mtfrom-en' langstring", function(){
-        Ctx._test_set_locale("en");
-        ulp = new UserLanguagePreference.Collection([ulp_fr, ulp_fr_from_en]);
-        var e = clone(ls_en_fr_x);
-        var langstring = new LangString.Model(e, {parse: true});
-        var best = langstring.best(ulp);
-        assert.isTrue(best.isMachineTranslation(), "The entry is machine translated");
-        assert.strictEqual(best.getLocaleValue(), codes["fr_from_en"]);        
-      });
-
-      it("An 'en' preferred order 1 and an 'fr' preferred order 0, with " +
-         "an 'fr and en-x-mtfrom-fr langstring'", function(){
-
-        Ctx._test_set_locale("en");
-        var en = clone(ulp_en);
-        var fr = clone(ulp_fr);
-        en['preferred_order'] = 1;
-        fr['preferred_order'] = 0;
-        ulp = new UserLanguagePreference.Collection([en, fr]);
-        var e = clone(ls_fr_en_x);
-        var langstring = new LangString.Model(e, {parse: true});
-        var best = langstring.best(ulp);
-        assert.isFalse(best.isMachineTranslation(), "The entry is not machine translated");
-        assert.strictEqual(best.getLocaleValue(), codes["fr"]); 
-      });
-
-    });
-  });
 });

@@ -2,9 +2,9 @@
  * An action done by a user.
  * @module app.models.actions
  */
-import Base from './base.js';
+import Base from "./base.js";
 
-import Ctx from '../common/context.js';
+import Ctx from "../common/context.js";
 
 /**
  * Action model
@@ -13,33 +13,33 @@ import Ctx from '../common/context.js';
  * @extends app.models.base.BaseModel
  */
 class actionModel extends Base.Model.extend({
- /**
-  * @member {string} app.models.actions.actionModel.urlRoot
-  */
- urlRoot: Ctx.getApiV2DiscussionUrl("/all_users/current/actions"),
+    /**
+     * @member {string} app.models.actions.actionModel.urlRoot
+     */
+    urlRoot: Ctx.getApiV2DiscussionUrl("/all_users/current/actions"),
 
- /**
-  * Defaults
-  * @type {Object}
-  */
- defaults: {
-   what: null,
-   user: null,
-   target_type: "Content",
-   '@id': null,
-   '@type': null,
-   '@view': null
- }
+    /**
+     * Defaults
+     * @type {Object}
+     */
+    defaults: {
+        what: null,
+        user: null,
+        target_type: "Content",
+        "@id": null,
+        "@type": null,
+        "@view": null,
+    },
 }) {
- /**
-  * Validate the model attributes
-  * @function app.models.actions.actionModel.validate
-  */
- validate(attrs, options) {
-   /**
-    * check typeof variable
-    * */
- }
+    /**
+     * Validate the model attributes
+     * @function app.models.actions.actionModel.validate
+     */
+    validate(attrs, options) {
+        /**
+         * check typeof variable
+         * */
+    }
 }
 
 /**
@@ -48,19 +48,19 @@ class actionModel extends Base.Model.extend({
  * @extends app.models.base.BaseCollection
  */
 class actionCollection extends Base.Collection.extend({
- /**
-  * @member {string} app.models.actions.actionCollection.url
-  */
- url: Ctx.getApiV2DiscussionUrl("/all_users/current/actions"),
+    /**
+     * @member {string} app.models.actions.actionCollection.url
+     */
+    url: Ctx.getApiV2DiscussionUrl("/all_users/current/actions"),
 
- /**
-  * The model
-  * @type {actionModel}
-  */
- model: actionModel
+    /**
+     * The model
+     * @type {actionModel}
+     */
+    model: actionModel,
 }) {}
 
 export default {
-  Model: actionModel,
-  Collection: actionCollection
+    Model: actionModel,
+    Collection: actionCollection,
 };
