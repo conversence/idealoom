@@ -12,7 +12,7 @@ import Permissions from "../utils/permissions.js";
 import Types from "../utils/types.js";
 import Roles from "../utils/roles.js";
 import i18n from "../utils/i18n.js";
-import Raven from "raven-js";
+import * as Sentry from "@sentry/browser";
 import Backbone from "backbone";
 import BackboneModal from "backbone.modal";
 
@@ -1383,11 +1383,10 @@ Context.prototype = {
             }
 
             onRender() {
-                Raven.captureMessage("Reload popup presented to the user", {
-                    tags: {
-                        url: this.model.get("url"),
-                        return_code: this.model.get("status"),
-                    },
+                Sentry.withScope(function (scope) {
+                    scope.setExtra("url", this.model.get("url"));
+                    scope.setExtra("status", this.model.get("status"));
+                    Sentry.captureMessage("Reload popup presented to the user");
                 });
             }
 

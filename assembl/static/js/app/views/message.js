@@ -5,7 +5,6 @@
 
 import Marionette from "backbone.marionette";
 
-import Raven from "raven-js";
 import Backbone from "backbone";
 import BackboneModal from "backbone.modal";
 import _ from "underscore";
@@ -1285,7 +1284,6 @@ class MessageView extends LoaderView.extend({
                     // Loading the annotations
                     if (annotationsToLoad.length) {
                         if (!that.annotator) {
-                            Raven.captureMessage("Missing annotation");
                             console.error("missing annotation", {
                                 tags: {
                                     messageId: that.id,

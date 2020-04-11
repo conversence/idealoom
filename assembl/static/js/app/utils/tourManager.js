@@ -4,6 +4,7 @@
  */
 
 import Marionette from "backbone.marionette";
+import * as Sentry from '@sentry/browser';
 
 import i18n from "./i18n.js";
 import TourModel from "../models/tour.js";
@@ -12,7 +13,6 @@ import _ from "underscore";
 import $ from "jquery";
 import AppTours from "./tours/appTours.js";
 import hopscotch from "hopscotch";
-import Raven from "raven-js";
 
 class TourManager extends Marionette.Object.extend({
     channelName: "tour",
@@ -114,9 +114,12 @@ class TourManager extends Marionette.Object.extend({
                     window.localStorage.getItem("toursSeen") || "{}"
                 );
             } catch (err) {
-                Raven.captureMessage("wrong toursSeen in localStorage", {
-                    extra: { error: err },
+                Sentry.addBreadcrumb({
+                  category: 'ui',
+                  message: 'wrong toursSeen in localStorage',
+                  level: 'info'
                 });
+                Sentry.captureException(err);
             }
             seen[tourName] = true;
             window.localStorage.setItem("toursSeen", JSON.stringify(seen));
@@ -150,10 +153,10 @@ class TourManager extends Marionette.Object.extend({
         }
         var tour = this.toursById[tourName];
         if (tour === undefined) {
-            Raven.captureMessage("Unknown tour", {
-                extra: { tour_name: tourName },
-            });
-            return;
+            Sentry.withScope((scope) => {
+                scope.setExtra("tour", tourName);
+                Sentry.captureMessage("Unknown tour");
+            })
         }
         if (this.isTourSeen(tourName)) {
             return;
@@ -196,7 +199,7 @@ class TourManager extends Marionette.Object.extend({
 
     onShow() {
         if (this.currentTour === undefined) {
-            Raven.captureMessage("onShow came after tour was cleared");
+            Sentry.captureMessage("onShow came after tour was cleared");
             this.currentTour = this.toursById[hopscotch.getCurrTour().name];
         }
         this.checkForLastStep();
@@ -224,7 +227,7 @@ class TourManager extends Marionette.Object.extend({
 
     afterLastStep() {
         if (this.currentTour === undefined) {
-            Raven.captureMessage("afterLastStep came after tour was cleared");
+            Sentry.captureMessage("afterLastStep came after tour was cleared");
             this.currentTour = this.toursById[hopscotch.getCurrTour().name];
         }
         if (this.currentTour.cleanup !== undefined) {
@@ -256,9 +259,10 @@ class TourManager extends Marionette.Object.extend({
                         tour.numErrors += 1;
                     }
                     if (tour.numErrors > 1) {
-                        Raven.captureMessage("Tour was not seen", {
-                            extra: { tour_name: tour.name },
-                        });
+                        Sentry.withScope((scope) => {
+                            scope.setExtra("tour", tour.name);
+                            Sentry.captureMessage("Tour was not seen");
+                        })
                         that.currentTour = that.getNextTour(true);
                     }
                     if (that.currentTour !== undefined) {

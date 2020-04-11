@@ -12,7 +12,7 @@ import IdeaLoom from "../app.js";
 import Promise from "bluebird";
 import Ctx from "../common/context.js";
 import i18n from "../utils/i18n.js";
-import Raven from "raven-js";
+import * as Sentry from "@sentry/browser";
 
 class AbstractDocumentView extends Marionette.View.extend({
     className: "embeddedFile",
@@ -137,11 +137,13 @@ class AbstractDocumentView extends Marionette.View.extend({
             var fileName = this.model.get("title");
             if (!fileName) {
                 if (sendError) {
-                    Raven.captureMessage(
-                        "[documents.js][onRenderOembedFail] A filename for the document " +
-                            "model could not be found. The model is defined here: " +
-                            JSON.stringify(this.model)
-                    );
+                    Sentry.withScope((scope) => {
+                        scope.setExtra("model", this.model.url());
+                        Sentry.captureMessage(
+                            "[documents.js][onRenderOembedFail] A filename for the document " +
+                                "model could not be found."
+                        );
+                    });
                 }
                 fileName = this.model.get("file").name;
             }

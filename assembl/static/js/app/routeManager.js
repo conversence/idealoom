@@ -38,6 +38,7 @@ import AdminIdeaPubFlow from "./views/admin/adminIdeaPubFlow.js";
 import FirstIdeaToShowVisitor from "./views/visitors/firstIdeaToShowVisitor.js";
 import i18n from "./utils/i18n.js";
 import Analytics from "./internal_modules/analytics/dispatcher.js";
+import * as Sentry from "@sentry/browser";
 import $ from "jquery";
 var QUERY_STRINGS = {
     source: ["notification", "share"],
@@ -455,8 +456,7 @@ class routeManager extends Marionette.Object {
     }
 
     sentryTest() {
-        var Raven = require("raven-js").default;
-        Raven.captureMessage(
+        Sentry.captureMessage(
             "This is a test, an uncaught non existent function call will follow."
         );
         //This crashes on purpose
@@ -484,7 +484,7 @@ class routeManager extends Marionette.Object {
             console.log(structure);
             this.restoreViews(false, structure);
         } catch (e) {
-            Raven.captureException(e);
+            Sentry.captureException(e);
             this.restoreViews(true);
         }
     }

@@ -5,7 +5,7 @@
 
 import Backbone from "backbone";
 
-import Raven from "raven-js";
+import * as Sentry from "@sentry/browser";
 import MessageRenderVisitor from "./visitors/messageRenderVisitor.js";
 import MessageRenderVisitorReSort from "./visitors/messageRenderVisitorReSort.js";
 import MessageFamilyView from "./messageFamily.js";
@@ -967,7 +967,7 @@ function BaseMessageListMixinFactory(cls) {
                 }
             ).catch(function (e) {
                 if (raven_url) {
-                    Raven.captureException(e);
+                    Sentry.captureException(e);
                 }
                 that.ui.messageFamilyList.add(
                     "<div class='error'>We are sorry, a technical error occured during rendering.</div>"
@@ -1668,43 +1668,35 @@ function BaseMessageListMixinFactory(cls) {
          * @returns {HTMLDivElement[]}
          */
         getRenderedMessagesFlatPromise(requestedIds) {
-            var that = this;
             var view;
             var collectionManager = new CollectionManager();
 
             return Promise.join(
                 this.currentQuery.getResultMessageStructureCollectionPromise(),
                 this.getVisitorDataPromise(),
-                function (messageStructureModels, visitorData) {
+                (messageStructureModels, visitorData) => {
                     var list = [];
-                    if (!that.isDestroyed()) {
-                        that.clearRenderedMessages();
-                        _.each(requestedIds, function (messageId) {
-                            var messageModel = undefined;
-
-                            Raven.context(
-                                {
-                                    extra: { messageId: messageId },
-                                },
-                                function () {
-                                    messageModel = messageStructureModels.get(
-                                        messageId
-                                    );
-                                    if (!messageModel) {
-                                        throw new Error(
-                                            "getRenderedMessagesFlatPromise: Unable to find message structure"
-                                        );
-                                    }
-                                }
+                    if (!this.isDestroyed()) {
+                        this.clearRenderedMessages();
+                        _.each(requestedIds, (messageId) => {
+                            const messageModel = messageStructureModels.get(
+                                messageId
                             );
-
+                            if (!messageModel) {
+                                Sentry.withScope((scope) => {
+                                    scope.setExtra("messageId", messageId);
+                                    throw new Error(
+                                        "getRenderedMessagesFlatPromise: Unable to find message structure"
+                                    );
+                                });
+                            }
                             view = new MessageFamilyView({
                                 model: messageModel,
-                                messageListView: that,
+                                messageListView: this,
                                 hasChildren: [],
                                 visitorData: visitorData,
                             });
-                            that._renderedMessageFamilyViews.push(view);
+                            this._renderedMessageFamilyViews.push(view);
                             list.push(view);
                         });
                     }
@@ -2358,9 +2350,13 @@ function BaseMessageListMixinFactory(cls) {
                     }
                 } catch (e) {
                     if (raven_url) {
-                        Raven.captureException(e, {
-                            messageId: messageId,
-                            visitorViewData: visitorData.visitorViewData,
+                        Sentry.withScope((scope) => {
+                            scope.setExtra("messageId", messageId);
+                            scope.setExtra(
+                                "visitorViewData",
+                                visitorData.visitorViewData
+                            );
+                            Sentry.captureException(e);
                         });
                     } else {
                         throw e;
@@ -2503,10 +2499,12 @@ function BaseMessageListMixinFactory(cls) {
             }
 
             if (recursionDepth === 0 && this._scrollToMessageInProgressId) {
-                Raven.captureMessage(
-                    "scrollToMessage():  a scrollToMessage was already in progress, aborting",
-                    { message_id: messageModel.id }
-                );
+                Sentry.withScope((scope) => {
+                    scope.setExtra("messageId", messageModel.id);
+                    Sentry.captureMessage(
+                        "scrollToMessage():  a scrollToMessage was already in progress, aborting"
+                    );
+                });
                 if (_.isFunction(failedCallback)) {
                     failedCallback();
                 }
@@ -2515,7 +2513,7 @@ function BaseMessageListMixinFactory(cls) {
             } else if (originalRenderId !== this._renderId) {
                 //This is a normal condition now
                 //console.log("scrollToMessage():  obsolete render, aborting for ", messageModel.id);
-                //Raven.captureMessage("scrollToMessage():  obsolete render, aborting", {message_id: messageModel.id})
+                //Sentry.captureMessage("scrollToMessage():  obsolete render, aborting", {message_id: messageModel.id})
                 if (this._scrollToMessageInProgressId === originalRenderId) {
                     this._scrollToMessageInProgressId = false;
                 }
@@ -2571,15 +2569,17 @@ function BaseMessageListMixinFactory(cls) {
                     // re-render. We may have to give it time
                     if (recursionDepth <= MAX_RETRIES) {
                         if (debug || recursionDepth >= 2) {
-                            Raven.captureMessage(
-                                "scrollToMessage():  Message still not found in the DOM, calling recursively",
-                                {
-                                    message_id: message.id,
-                                    selector: el,
-                                    next_call_recursion_depth:
-                                        recursionDepth + 1,
-                                }
-                            );
+                            Sentry.withScope((scope) => {
+                                scope.setExtra("messageId", message.id);
+                                scope.setExtra("selector", el);
+                                scope.setExtra(
+                                    "next_call_recursion_depth",
+                                    recursionDepth + 1
+                                );
+                                Sentry.captureMessage(
+                                    "scrollToMessage():  Message still not found in the DOM, calling recursively"
+                                );
+                            });
                             console.log(
                                 "scrollToMessage():  Message " +
                                     message.id +
@@ -2603,13 +2603,13 @@ function BaseMessageListMixinFactory(cls) {
                         }, RETRY_INTERVAL);
                     } else {
                         that._scrollToMessageInProgressId = false;
-                        Raven.captureMessage(
-                            "scrollToMessage():  scrollToMessage(): MAX_RETRIES has been reached",
-                            {
-                                message_id: messageModel.id,
-                                recursionDepth: recursionDepth,
-                            }
-                        );
+                        Sentry.withScope((scope) => {
+                            scope.setExtra("messageId", messageModel.id);
+                            scope.setExtra("recursionDepth", recursionDepth);
+                            Sentry.captureMessage(
+                                "scrollToMessage():  scrollToMessage(): MAX_RETRIES has been reached"
+                            );
+                        });
                         if (_.isFunction(failedCallback)) {
                             failedCallback();
                         }
@@ -2693,14 +2693,12 @@ function BaseMessageListMixinFactory(cls) {
                 shouldRecurseMaxMoreTimes === undefined
             ) {
                 this.showMessageByIdInProgress = false;
-                Raven.context(
-                    function () {
-                        throw new Error(
-                            "showMessageById():   a showMessageById was already in progress, aborting"
-                        );
-                    },
-                    { requested_message_id: id }
-                );
+                Sentry.withScope((scope) => {
+                    scope.setExtra("messageId", id);
+                    throw new Error(
+                        "showMessageById():   a showMessageById was already in progress, aborting"
+                    );
+                });
             }
 
             if (shouldRecurseMaxMoreTimes === undefined) {
@@ -2774,10 +2772,12 @@ function BaseMessageListMixinFactory(cls) {
                     var requestedOffsets;
 
                     if (originalRenderId !== that._renderId) {
-                        Raven.captureMessage(
-                            "showMessageById():  Unable to complete because a new render is in progress, restarting from scratch",
-                            { requested_message_id: id }
-                        );
+                        Sentry.withScope((scope) => {
+                            scope.setExtra("messageId", id);
+                            Sentry.captureMessage(
+                                "showMessageById():  Unable to complete because a new render is in progress, restarting from scratch"
+                            );
+                        });
                         that.showMessageByIdInProgress = false;
                         that.showMessageById(
                             id,
@@ -2838,14 +2838,12 @@ function BaseMessageListMixinFactory(cls) {
                             that.showMessages(requestedOffsets);
                         } else {
                             that.showMessageByIdInProgress = false;
-                            Raven.context(
-                                function () {
-                                    throw new Error(
-                                        "showMessageById():  Message is in query results but not in current page, and we are not allowed to recurse"
-                                    );
-                                },
-                                { requested_message_id: id }
-                            );
+                            Sentry.withScope((scope) => {
+                                scope.setExtra("messageId", id);
+                                throw new Error(
+                                    "showMessageById():  Message is in query results but not in current page, and we are not allowed to recurse"
+                                );
+                            });
                         }
 
                         return true;
@@ -2881,14 +2879,12 @@ function BaseMessageListMixinFactory(cls) {
                                 resultMessageIdCollection
                             );
                             that.showMessageByIdInProgress = false;
-                            Raven.context(
-                                function () {
-                                    throw new Error(
-                                        "showMessageById:  Message is not in query results, and we are not allowed to recurse"
-                                    );
-                                },
-                                { requested_message_id: id }
-                            );
+                            Sentry.withScope((scope) => {
+                                scope.setExtra("messageId", id);
+                                throw new Error(
+                                    "showMessageById:  Message is not in query results, and we are not allowed to recurse"
+                                );
+                            });
                         }
 
                         return true;

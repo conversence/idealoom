@@ -6,7 +6,7 @@
 import jQuery from "jquery";
 
 var $ = jQuery;
-import Raven from "raven-js";
+import * as Sentry from "@sentry/browser";
 
 var debugScrollUtils = false;
 
@@ -252,7 +252,7 @@ var scrollToElement = function (el, callback, margin, animate, watch) {
             }
         } catch (e) {
             if (raven_url) {
-                Raven.captureException(e);
+                Sentry.captureException(e);
             } else {
                 throw e;
             }

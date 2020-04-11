@@ -5,7 +5,7 @@
 
 import IdeaRenderVisitor from "./visitors/ideaRenderVisitor.js";
 
-import Raven from "raven-js";
+import * as Sentry from "@sentry/browser";
 import _ from "underscore";
 import $ from "jquery";
 import Marionette from "backbone.marionette";
@@ -411,7 +411,7 @@ class SynthesisPanel extends BasePanel.extend({
                 that.unblockPanel();
             },
             error: function (model, resp) {
-                Raven.captureMessage("Failed publishing synthesis!");
+                Sentry.captureMessage("Failed publishing synthesis!");
                 alert(i18n.gettext("Failed publishing synthesis!"));
                 that.model = new Synthesis.Model({ "@id": "next_synthesis" });
                 that.model.fetch();

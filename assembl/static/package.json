@@ -26,6 +26,8 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.9",
+    "@sentry/browser": "~5",
+    "@sentry/integrations": "~5",
     "backbone": "^1.4",
     "backbone-model-file-upload": "~1.0.0",
     "backbone.marionette": "^3.5.1",
@@ -56,7 +58,6 @@
     "linkifyjs": "~2.1",
     "moment": "~2.24",
     "path": "^0.12.7",
-    "raven-js": "~3.27",
     "regenerator-runtime": "~0.13",
     "select2": "~4.0",
     "sockjs-client": "~1.4",

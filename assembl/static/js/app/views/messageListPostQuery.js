@@ -9,7 +9,7 @@ import i18n from "../utils/i18n.js";
 import CollectionManager from "../common/collectionManager.js";
 import Promise from "bluebird";
 import Message from "../models/message.js";
-import Raven from "raven-js";
+import * as Sentry from "@sentry/browser";
 import _ from "underscore";
 
 /**
@@ -414,7 +414,7 @@ var PostQuery = function () {
                 .thenReturn(collection)
                 .catch(function (e) {
                     if (raven_url) {
-                        Raven.captureException(e);
+                        Sentry.captureException(e);
                     } else {
                         throw e;
                     }

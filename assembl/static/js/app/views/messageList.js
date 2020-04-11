@@ -495,10 +495,7 @@ class MessageList extends BaseMessageList.extend({
 
                             //This event cannot be bound in ui, because backbone binds to
                             //the top element and scroll does not propagate
-                            that.$(".panel-body").scroll(
-                                that,
-                                that.logScroll
-                            );
+                            that.$(".panel-body").scroll(that, that.logScroll);
                         });
                     }
                 }

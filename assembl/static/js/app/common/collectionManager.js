@@ -4,9 +4,9 @@
  */
 
 import Marionette from "backbone.marionette";
+import * as Sentry from "@sentry/browser";
 
 import Promise from "bluebird";
-import Raven from "raven-js";
 import $ from "jquery";
 import IdeaLoom from "../app.js";
 import Ctx from "./context.js";
@@ -391,7 +391,7 @@ class CollectionManager extends Marionette.Object.extend({
         )
             .thenReturn(this._allUsersCollection)
             .catch(function (e) {
-                Raven.captureException(e);
+                Sentry.captureException(e);
             });
 
         return this._allUsersCollectionPromise;
@@ -417,7 +417,7 @@ class CollectionManager extends Marionette.Object.extend({
         )
             .thenReturn(this._ideaPublicationFlow)
             .catch(function (e) {
-                Raven.captureException(e);
+                Sentry.captureException(e);
             });
 
         return this._ideaPublicationFlowPromise;
@@ -444,7 +444,7 @@ class CollectionManager extends Marionette.Object.extend({
                 return that._allMessageStructureCollection;
             })
             .catch(function (e) {
-                Raven.captureException(e);
+                Sentry.captureException(e);
             });
         return this._allMessageStructureCollectionPromise;
     }
@@ -720,7 +720,7 @@ class CollectionManager extends Marionette.Object.extend({
                     return that._waitingWorker.addRequest(id);
                 }
             } else {
-                Raven.captureMessage(
+                Sentry.captureMessage(
                     "Structure model not in allMessageStructureCollection",
                     { requested_message_id: id }
                 );
@@ -778,7 +778,7 @@ class CollectionManager extends Marionette.Object.extend({
         )
             .thenReturn(this._allSynthesisCollection)
             .catch(function (e) {
-                Raven.captureException(e);
+                Sentry.captureException(e);
             });
 
         return this._allSynthesisCollectionPromise;
@@ -802,7 +802,7 @@ class CollectionManager extends Marionette.Object.extend({
         )
             .thenReturn(this._allIdeasCollection)
             .catch(function (e) {
-                Raven.captureException(e);
+                Sentry.captureException(e);
             });
 
         return this._allIdeasCollectionPromise;
@@ -837,7 +837,7 @@ class CollectionManager extends Marionette.Object.extend({
         )
             .thenReturn(this._allIdeaLinksCollection)
             .catch(function (e) {
-                Raven.captureException(e);
+                Sentry.captureException(e);
             });
 
         return this._allIdeaLinksCollectionPromise;
@@ -863,7 +863,7 @@ class CollectionManager extends Marionette.Object.extend({
         )
             .thenReturn(this._allExtractsCollection)
             .catch(function (e) {
-                Raven.captureException(e);
+                Sentry.captureException(e);
             });
 
         return this._allExtractsCollectionPromise;
@@ -886,7 +886,7 @@ class CollectionManager extends Marionette.Object.extend({
         )
             .thenReturn(this._allPartnerOrganizationCollection)
             .catch(function (e) {
-                Raven.captureException(e);
+                Sentry.captureException(e);
             });
 
         return this._allPartnerOrganizationCollectionPromise;
@@ -909,7 +909,7 @@ class CollectionManager extends Marionette.Object.extend({
         )
             .thenReturn(this._allTimelineEventCollection)
             .catch(function (e) {
-                Raven.captureException(e);
+                Sentry.captureException(e);
             });
 
         return this._allTimelineEventCollectionPromise;
@@ -932,7 +932,7 @@ class CollectionManager extends Marionette.Object.extend({
         )
             .thenReturn(this._allAnnouncementCollection)
             .catch(function (e) {
-                Raven.captureException(e);
+                Sentry.captureException(e);
             });
 
         return this._allAnnouncementCollectionPromise;
@@ -956,7 +956,7 @@ class CollectionManager extends Marionette.Object.extend({
         )
             .thenReturn(this._allNotificationsDiscussionCollection)
             .catch(function (e) {
-                Raven.captureException(e);
+                Sentry.captureException(e);
             });
 
         return this._allNotificationsDiscussionCollectionPromise;
@@ -1121,7 +1121,7 @@ class CollectionManager extends Marionette.Object.extend({
         )
             .thenReturn(this._allLocalRoleCollection)
             .catch(function (e) {
-                Raven.captureException(e);
+                Sentry.captureException(e);
             });
 
         return this._allLocalRoleCollectionPromise;
@@ -1144,7 +1144,7 @@ class CollectionManager extends Marionette.Object.extend({
         )
             .thenReturn(this._myLocalRoleCollection)
             .catch(function (e) {
-                Raven.captureException(e);
+                Sentry.captureException(e);
             });
 
         return this._myLocalRoleCollectionPromise;
@@ -1169,7 +1169,7 @@ class CollectionManager extends Marionette.Object.extend({
                 return that._allIdeaPublicationStates;
             })
             .catch(function (e) {
-                Raven.captureException(e);
+                Sentry.captureException(e);
             });
 
         return this._allIdeaPublicationStatesPromise;
@@ -1186,7 +1186,7 @@ class CollectionManager extends Marionette.Object.extend({
         )
             .thenReturn(this._allDiscussionAcls)
             .catch(function (e) {
-                Raven.captureException(e);
+                Sentry.captureException(e);
             });
 
         return this._allDiscussionAclsPromise;
@@ -1203,7 +1203,7 @@ class CollectionManager extends Marionette.Object.extend({
         )
             .thenReturn(this._allPubStatePermissions)
             .catch(function (e) {
-                Raven.captureException(e);
+                Sentry.captureException(e);
             });
 
         return this._allPubStatePermissionsPromise;
@@ -1226,7 +1226,7 @@ class CollectionManager extends Marionette.Object.extend({
         )
             .thenReturn(this._allDiscussionModel)
             .catch(function (e) {
-                Raven.captureException(e);
+                Sentry.captureException(e);
             });
 
         return this._allDiscussionModelPromise;
@@ -1249,7 +1249,7 @@ class CollectionManager extends Marionette.Object.extend({
         )
             .thenReturn(this._allDiscussionSourceCollection)
             .catch(function (e) {
-                Raven.captureException(e);
+                Sentry.captureException(e);
             });
 
         return this._allDiscussionSourceCollectionPromise;
@@ -1272,7 +1272,7 @@ class CollectionManager extends Marionette.Object.extend({
         )
             .thenReturn(this._allDiscussionSourceCollection2)
             .catch(function (e) {
-                Raven.captureException(e);
+                Sentry.captureException(e);
             });
 
         return this._allDiscussionSourceCollection2Promise;
@@ -1295,7 +1295,7 @@ class CollectionManager extends Marionette.Object.extend({
         )
             .thenReturn(this._allFacebookAccessTokens)
             .catch(function (e) {
-                Raven.captureException(e);
+                Sentry.captureException(e);
             });
         return this._allFacebookAccessTokensPromise;
     }
@@ -1317,7 +1317,7 @@ class CollectionManager extends Marionette.Object.extend({
         )
             .thenReturn(this._allUserAccounts)
             .catch(function (e) {
-                Raven.captureException(e);
+                Sentry.captureException(e);
             });
         return this._allUserAccountsPromise;
     }
@@ -1340,7 +1340,7 @@ class CollectionManager extends Marionette.Object.extend({
             )
                 .thenReturn(this._allUserLanguagePreferences)
                 .catch(function (e) {
-                    Raven.captureException(e);
+                    Sentry.captureException(e);
                 });
         } else {
             this._allUserLanguagePreferences = new LanguagePreference.DisconnectedUserCollection();
@@ -1388,7 +1388,7 @@ class CollectionManager extends Marionette.Object.extend({
         )
             .thenReturn(this._allPublicationFlows)
             .catch(function (e) {
-                Raven.captureException(e);
+                Sentry.captureException(e);
             });
         return this._allPublicationFlowsPromise;
     }
@@ -1408,7 +1408,7 @@ class CollectionManager extends Marionette.Object.extend({
         this._allWidgetsPromise = Promise.resolve(this._allWidgets.fetch())
             .thenReturn(this._allWidgets)
             .catch(function (e) {
-                Raven.captureException(e);
+                Sentry.captureException(e);
             });
         return this._allWidgetsPromise;
     }
@@ -1470,7 +1470,7 @@ class CollectionManager extends Marionette.Object.extend({
         )
             .thenReturn(this._allDiscussionPreferences)
             .catch(function (e) {
-                Raven.captureException(e);
+                Sentry.captureException(e);
             });
         return this._allDiscussionPreferencesPromise;
     }
@@ -1492,7 +1492,7 @@ class CollectionManager extends Marionette.Object.extend({
         )
             .thenReturn(this._globalPreferences)
             .catch(function (e) {
-                Raven.captureException(e);
+                Sentry.captureException(e);
             });
         return this._globalPreferencesPromise;
     }
@@ -1516,7 +1516,7 @@ class CollectionManager extends Marionette.Object.extend({
         )
             .thenReturn(this._allUserPreferences)
             .catch(function (e) {
-                Raven.captureException(e);
+                Sentry.captureException(e);
             });
         return this._allUserPreferencesPromise;
     }
@@ -1533,7 +1533,7 @@ class CollectionManager extends Marionette.Object.extend({
         )
             .thenReturn(this._allNotificationsUserCollection)
             .catch(function (e) {
-                Raven.captureException(e);
+                Sentry.captureException(e);
             });
         return this._allNotificationsUserCollectionPromise;
     }

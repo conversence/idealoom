@@ -7,7 +7,6 @@ import Marionette from "backbone.marionette";
 
 import $ from "jquery";
 import classlist from "classlist-polyfill";
-import Raven from "raven-js";
 import Radio from "backbone.radio";
 import Types from "./utils/types.js";
 import _ from "underscore";
@@ -126,13 +125,10 @@ _.extend(Backbone.Marionette.View.prototype, {
     },
 
     listenTo: function (...args) {
-        var that = this;
         // Often, we listen on a promise in the initalizer. The view may already be dead.
-        Raven.context(function () {
-            if (that.isDestroyed()) {
-                throw new Error("listenTo on a destroyed view");
-            }
-        });
+        if (this.isDestroyed()) {
+            throw new Error("listenTo on a destroyed view");
+        }
 
         Object.getPrototypeOf(
             Backbone.Marionette.View.prototype
@@ -140,13 +136,10 @@ _.extend(Backbone.Marionette.View.prototype, {
     },
 
     listenToOnce: function (...args) {
-        var that = this;
         // Often, we listen on a promise in the initalizer. The view may already be dead.
-        Raven.context(function () {
-            if (that.isDestroyed()) {
-                throw new Error("listenToOnce on a destroyed view");
-            }
-        });
+        if (this.isDestroyed()) {
+            throw new Error("listenToOnce on a destroyed view");
+        }
 
         Object.getPrototypeOf(
             Backbone.Marionette.View.prototype

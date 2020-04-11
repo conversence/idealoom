@@ -5,7 +5,6 @@
 
 import Backbone from "backbone";
 
-import Raven from "raven-js";
 import _ from "underscore";
 import $ from "jquery";
 import Ctx from "../common/context.js";
