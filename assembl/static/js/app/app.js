@@ -10,6 +10,7 @@ import classlist from "classlist-polyfill";
 import Radio from "backbone.radio";
 import Types from "./utils/types.js";
 import _ from "underscore";
+import Growl from "./utils/growl.js";
 
 class RootView extends Marionette.View.extend({
     el: "body",
@@ -113,6 +114,14 @@ class AppClass extends Marionette.Application {
         link.rel = "shortcut icon";
         link.href = static_url + "/img/icon/infinite-1.png";
         document.getElementsByTagName("head")[0].appendChild(link);
+        const error_el = document.getElementById("flash-error");
+        if (error_el.textContent.length) {
+            Growl.showTopGrowl(Growl.GrowlReason.ERROR, error_el.textContent);
+        }
+        const message_el = document.getElementById("flash-message");
+        if (message_el.textContent.length) {
+            Growl.showTopGrowl(Growl.GrowlReason.SUCCESS, message_el.textContent);
+        }
     }
 }
 

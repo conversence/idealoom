@@ -39,7 +39,20 @@ var showBottomGrowl = function (growl_reason, msg, settings) {
     $.notify({ message: msg }, mergedSettings);
 };
 
+var showTopGrowl = function (growl_reason, msg, settings) {
+    var mergedSettings = _.extend(defaultGrowlSettings, {
+        type: growl_reason,
+        placement: {
+            from: "top",
+            align: "right",
+        },
+    });
+    mergedSettings = _.extend(mergedSettings, settings);
+    $.notify({ message: msg }, mergedSettings);
+};
+
 export default {
     GrowlReason: GrowlReason,
     showBottomGrowl: showBottomGrowl,
+    showTopGrowl: showTopGrowl,
 };

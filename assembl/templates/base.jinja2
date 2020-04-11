@@ -70,6 +70,8 @@
     <div id="slider"></div>
     <div id="tooltips"></div>
     <div id="popover-oembed" class="hidden"></div>
+    <div id="flash-error" class="hidden">{{ error|safe }}</div>
+    <div id="flash-message" class="hidden">{{ message|safe }}</div>
 
     {% include 'includes/javascript.jinja2' %}
     {% include 'includes/updatebrowser.jinja2' %}

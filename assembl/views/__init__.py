@@ -332,7 +332,7 @@ def get_default_context(request, **kwargs):
         kwargs['error'] = '<br />'.join(errors)
     messages = request.session.pop_flash('message')
     if messages:
-        kwargs['messages'] = '<br />'.join(messages)
+        kwargs['message'] = '<br />'.join(messages)
 
     (theme_name, theme_relative_path)=get_theme_info(discussion)
     return dict(
