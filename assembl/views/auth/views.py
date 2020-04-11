@@ -696,9 +696,9 @@ def user_confirm_email(request):
                 )) % (account.email,)
 
     if inferred_discussion:
+        request.session.flash(message, 'message')
         return HTTPFound(location=request.route_url(
-            'home', discussion_slug=inferred_discussion.slug,
-            _query=dict(message=message)))
+            'home', discussion_slug=inferred_discussion.slug))
     else:
         return HTTPFound(
             location=request.route_url('discussion_list'))
