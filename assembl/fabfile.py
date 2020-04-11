@@ -957,15 +957,16 @@ def update_node(force_reinstall=False):
     """
     Install node and npm to a known-good version
     """
-    node_version_cmd_regex = re.compile('^v10\.15\.1')
+    node_version = '10.20.0'
+    npm_version = '6.14.4'
     with settings(warn_only=True), hide('running', 'stdout'):
         node_version_cmd_result = venvcmd("node --version")
-    match = node_version_cmd_regex.match(node_version_cmd_result)
-    if not match or force_reinstall:
+    if force_reinstall or "v"+node_version not in node_version_cmd_result.split():
         print(cyan('Upgrading node'))
         #Because otherwise node may be busy
         circus_process_stop('dev:webpack')
-        venvcmd("nodeenv --node=10.15.1 --npm=6.4.1 --python-virtualenv assembl/static")
+        run("rm -rf "+join(env.venvpath, "lib/node_modules"))
+        venvcmd(f"nodeenv --node={node_version} --npm={npm_version} --python-virtualenv assembl/static")
         with cd(get_node_base_path()):
             venvcmd("npm install --no-save reinstall -g", chdir=False)
     else:
