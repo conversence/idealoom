@@ -20,7 +20,9 @@ if (raven_url.length) {
             }),
         ],
     });
-    Sentry.setUserContext({ user_id: Ctx.getCurrentUserId() });
+    const user_id = Ctx.getCurrentUserId();
+    if (user_id)
+        Sentry.setUser({ user_id });
     window.Sentry = Sentry;
 }
 
