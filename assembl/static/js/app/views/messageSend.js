@@ -759,9 +759,13 @@ class messageSendView extends LoaderView.extend({
         this._processHyperlinks();
     }
 
-    onChangeBody() {
-        this.ui.messageBody.autosize();
-        this.processHyperlinks();
+    onChangeBody(ev) {
+        if (ev.which == 13 && ev.altKey && event.shiftKey) {
+            this.onSendMessageButtonClick(ev);
+        } else {
+            this.ui.messageBody.autosize();
+            this.processHyperlinks();
+        }
     }
 
     showPopInFirstPost() {
