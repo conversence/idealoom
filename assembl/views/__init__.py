@@ -27,6 +27,7 @@ from lxml import html
 
 from ..lib.json import json_renderer_factory
 from ..lib import config
+from ..lib.clean_input import sanitize_text
 from ..lib.frontend_urls import FrontendUrls
 from ..lib.locale import get_language, get_country, strip_most_countries
 from ..lib.utils import get_global_base_url
@@ -331,6 +332,12 @@ def get_default_context(request, **kwargs):
     if errors:
         kwargs['error'] = '<br />'.join(errors)
     messages = request.session.pop_flash('message')
+    if not messages:
+        messages = request.GET.getall('message')
+        if messages:
+            # defend against xss
+            messages = [sanitize_text(m) for m in messages]
+            print(messages)
     if messages:
         kwargs['message'] = '<br />'.join(messages)
 
