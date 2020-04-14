@@ -254,9 +254,9 @@ class ActiveSocket(object):
                 await self.on_recv(msg)
                 log.debug("msg managed")
         except asyncio.CancelledError:
-            logger.info('cancelled')
+            log.info('cancelled')
         finally:
-            logger.info('closing websocket')
+            log.info('closing websocket')
             sock.close()
             await self.close()
 
