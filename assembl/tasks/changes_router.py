@@ -2,7 +2,6 @@
 database objects through ZeroMQ, and feeds them to browser clients
 through a websocket."""
 import signal
-import time
 import sys
 from os import makedirs, access, R_OK, W_OK
 from os.path import exists, dirname
@@ -10,7 +9,6 @@ import configparser
 from time import sleep
 from datetime import timedelta
 import logging
-import multiprocessing
 import logging.config
 from functools import partial
 
@@ -99,7 +97,7 @@ def setup_app(path, server_url, loop):
     # https://github.com/aio-libs/sockjs/issues/38
     name = 'changes'
     manager = sockjs.SessionManager(
-        name, app, ActiveSocket.sockjs_handler, loop,
+        name, app, ActiveSocket.sockjs_handler,
         heartbeat=10, timeout=timedelta(seconds=30))
     sockjs.add_endpoint(
         app, ActiveSocket.sockjs_handler,
@@ -260,9 +258,9 @@ class ActiveSocket(object):
                 await self.on_recv(msg)
                 log.debug("msg managed")
         except asyncio.CancelledError:
-            console.info('cancelled')
+            logger.info('cancelled')
         finally:
-            console.info('closing websocket')
+            logger.info('closing websocket')
             sock.close()
             await self.close()
 
