@@ -62,35 +62,142 @@ class ScrollLogger {
         };
     }
     getMessageGeometry(messageSelector, overrideMessageTop) {
-        if (!messageSelector || messageSelector.length == 0) {
+        const messageContentSelector = messageSelector
+            .find(".message-body")
+            .first();
+
+        if (!messageSelector || messageSelector.length !== 1) {
+            console.log(messageSelector);
             throw new Error("getMessageGeometry(): messageSelector is invalid");
         }
 
+        if (!messageContentSelector || messageContentSelector.length !== 1) {
+            console.log(messageContentSelector);
+            throw new Error(
+                "getMessageGeometry(): messageContentSelector is invalid"
+            );
+        }
+
+        const messageContentDom = messageContentSelector[0];
+        const messageDom = messageSelector[0];
+        if (messageContentDom.offsetParent.id !== messageSelector[0].id) {
+            console.log(messageContentDom.offsetParent, messageSelector);
+            throw new Error(
+                "getMessageGeometry(): the message content's offsetParent isn't the message. offset calculations wont work.  Most likely the CSS or HTML has changed"
+            );
+        }
+        //console.log(messageSelector, messageSelector.height(), messageDom.scrollHeight,  messageContentDom.style.marginTop, messageContentDom.style.marginTop, messageContentDom.style.borderTop);
         // TODO: Consider using the height of the message body, which would give more accurate values for most assumptions, at the cost of completely ignoring whitespace and title.
-        let messageTop = overrideMessageTop
+        const msgTop = overrideMessageTop
             ? overrideMessageTop
             : messageSelector.offset().top;
-        let messageHeight = messageSelector.height();
-        let messageWidth = messageSelector.width();
-        let messageBottom = messageTop + messageHeight;
-        if (!messageTop || !messageHeight || !messageBottom || !messageWidth) {
+        const messageContentOffsetTop = messageContentDom.offsetTop;
+        const msgContentTop = msgTop + messageContentOffsetTop;
+        const msgHeight = messageDom.scrollHeight;
+
+        const msgBottom = msgTop + msgHeight;
+        const msgContentHeight = messageContentDom.scrollHeight;
+        const msgWidth = messageSelector.width();
+        const msgContentBottom = msgContentTop + msgContentHeight;
+        if (
+            !msgContentTop ||
+            !msgContentHeight ||
+            !msgContentBottom ||
+            !msgWidth
+        ) {
             console.log(
                 "TODO:  Unable to compute message dimensions. Need to handle case when thread has been collapsed"
             );
             //throw new Error("checkMessagesOnscreen(): Unable to compute message dimensions.");
         }
+        const msgTopWhitespaceTop = msgTop;
+        const msgTopWhitespaceBottom = msgContentTop;
+        const msgTopWhitespaceHeight =
+            msgTopWhitespaceBottom - msgTopWhitespaceTop;
+        const msgBottomWhitespaceTop = msgContentBottom;
+        const msgBottomWhitespaceBottom = msgBottom;
+        const msgBottomWhitespaceHeight =
+            msgBottomWhitespaceBottom - msgBottomWhitespaceTop;
+
         /*
             let //15px message padding bottom
-          messageWhiteSpaceRatio = (messageSelector.find(".js_messageHeader").height() + messageSelector.find(".js_messageBottomMenu").height() - 15) / messageHeight;
+          messageWhiteSpaceRatio = (messageSelector.find(".js_messageHeader").height() + messageSelector.find(".js_messageContentBottomMenu").height() - 15) / msgContentHeight;
           */
-        return {
-            messageTop,
-            messageHeight,
-            messageBottom,
-            messageWidth,
+        const retVal = {
+            msgTop,
+            msgHeight,
+            msgBottom,
+            msgContentTop,
+            msgContentHeight,
+            msgContentBottom,
+            msgWidth,
+            msgTopWhitespaceTop,
+            msgTopWhitespaceBottom,
+            msgTopWhitespaceHeight,
+            msgBottomWhitespaceTop,
+            msgBottomWhitespaceBottom,
+            msgBottomWhitespaceHeight,
         };
+        //console.log(retVal);
+        return retVal;
     }
+    getContentVisibleFractions(viewportGeometry, contentTop, contentHeight) {
+        const {
+            currentViewPortTop,
+            currentViewPortBottom,
+            viewportHeight,
+        } = viewportGeometry;
+        /*console.log(
+            "getContentVisibleFractions(): ",
+            viewportGeometry,
+            contentTop,
+            contentHeight
+        );*/
+        if (!contentHeight) {
+            throw new Error("content has no height");
+        }
 
+        const contentBottom = contentTop + contentHeight;
+        let topDistanceAboveViewPort = currentViewPortTop - contentTop;
+        let bottomDistanceBelowViewPort = contentBottom - currentViewPortBottom;
+
+        let fractionInsideViewPort;
+        let fractionAboveViewPort;
+        let fractionBelowViewPort;
+
+        if (topDistanceAboveViewPort < 0) {
+            fractionAboveViewPort = 0;
+        } else {
+            fractionAboveViewPort = Math.min(
+                topDistanceAboveViewPort / contentHeight,
+                1
+            );
+        }
+
+        if (bottomDistanceBelowViewPort < 0) {
+            fractionBelowViewPort = 0;
+        } else {
+            fractionBelowViewPort = Math.min(
+                bottomDistanceBelowViewPort / contentHeight,
+                1
+            );
+        }
+
+        fractionInsideViewPort =
+            1 - fractionAboveViewPort - fractionBelowViewPort;
+        const contentVsViewportRatio = contentHeight / viewportHeight;
+        const viewportFractionCovered =
+            (fractionInsideViewPort * contentHeight) / viewportHeight;
+        const retVal = {
+            fractionAboveViewPort,
+            fractionBelowViewPort,
+            fractionInsideViewPort,
+            viewportFractionCovered,
+            contentVsViewportRatio,
+        };
+        //console.log(retVal);
+        return retVal;
+    }
     /**
      * @typedef {messageVsViewportGeometry}
      * @property {number} msgFractionAboveViewPort - Fraction, 0 to 1
@@ -98,7 +205,7 @@ class ScrollLogger {
      * @property {number} msgFractionInsideViewPort - Fraction, 0 to 1
      * @property {number} viewportFractionCoveredByMsg - Fraction, 0 to 1
      * @property {number} msgVsViewportRatio - Fraction, can be larger than 1
-     * @property {number} msgScrollableDistance - in px, >=0.  The distance one has to scroll for the message to enter and completely leavec the viewport
+     * @property {number} msgScrollableDistance - in px, >=0.  The distance one has to scroll for the message to enter and completely leave the viewport
      */
     /**
      *
@@ -108,62 +215,68 @@ class ScrollLogger {
      */
     getMessageVsViewportGeometry(messageGeometry, viewportGeometry) {
         const {
-            messageTop,
-            messageHeight,
-            messageWidth,
-            messageBottom,
+            msgTop,
+            msgHeight,
+            msgContentTop,
+            msgContentHeight,
+            msgTopWhitespaceTop,
+            msgTopWhitespaceHeight,
+            msgBottomWhitespaceTop,
+            msgBottomWhitespaceHeight,
         } = messageGeometry;
+        const { viewportHeight } = viewportGeometry;
+
         const {
-            currentViewPortTop,
-            currentViewPortBottom,
-            viewportHeight,
-        } = viewportGeometry;
+            fractionAboveViewPort: msgFractionAboveViewPort,
+            fractionBelowViewPort: msgFractionBelowViewPort,
+            fractionInsideViewPort: msgFractionInsideViewPort,
+            viewportFractionCovered: viewportFractionCoveredByMsg,
+            contentVsViewportRatio: msgVsViewportRatio,
+        } = this.getContentVisibleFractions(
+            viewportGeometry,
+            msgTop,
+            msgHeight
+        );
+        const {
+            fractionInsideViewPort: messageContentFractionInsideViewPort,
+            viewportFractionCovered: viewportFractionCoveredByMsgContent,
+        } = this.getContentVisibleFractions(
+            viewportGeometry,
+            msgContentTop,
+            msgContentHeight
+        );
+        const {
+            fractionInsideViewPort: wsTopFractionInsideViewPort,
+            viewportFractionCovered: wsTopviewportFractionCoveredByMsg,
+        } = this.getContentVisibleFractions(
+            viewportGeometry,
+            msgTopWhitespaceTop,
+            msgTopWhitespaceHeight
+        );
+        const {
+            fractionInsideViewPort: wsBottomFractionInsideViewPort,
+            viewportFractionCovered: wsBottomviewportFractionCoveredByMsg,
+        } = this.getContentVisibleFractions(
+            viewportGeometry,
+            msgBottomWhitespaceTop,
+            msgBottomWhitespaceHeight
+        );
+        const viewportFractionCoveredByMsgWhitespace =
+            wsTopviewportFractionCoveredByMsg + wsBottomFractionInsideViewPort;
+        const msgScrollableDistance = msgHeight + viewportHeight;
 
-        let topDistanceAboveViewPort = currentViewPortTop - messageTop;
-        let bottomDistanceBelowViewPort = messageBottom - currentViewPortBottom;
-
-        let msgFractionInsideViewPort;
-        let msgFractionAboveViewPort;
-        let msgFractionBelowViewPort;
-
-        if (topDistanceAboveViewPort < 0) {
-            msgFractionAboveViewPort = 0;
-        } else {
-            msgFractionAboveViewPort = Math.min(
-                topDistanceAboveViewPort / messageHeight,
-                1
-            );
-        }
-
-        if (bottomDistanceBelowViewPort < 0) {
-            msgFractionBelowViewPort = 0;
-        } else {
-            msgFractionBelowViewPort = Math.min(
-                bottomDistanceBelowViewPort / messageHeight,
-                1
-            );
-        }
-
-        msgFractionInsideViewPort =
-            1 - msgFractionAboveViewPort - msgFractionBelowViewPort;
-        const msgVsViewportRatio = messageHeight / viewportHeight;
-        const viewportFractionCoveredByMsg =
-            (msgFractionInsideViewPort * messageHeight) / viewportHeight;
-        const msgScrollableDistance = messageHeight + viewportHeight;
-        /*console.log(
-      "message topDistanceAboveViewPort ", topDistanceAboveViewPort, "\nbottomDistanceBelowViewPort",bottomDistanceBelowViewPort,
-      "\nmessageHeight", messageHeight,
-      "\nmsgFractionAboveViewPort", msgFractionAboveViewPort,
-      "\nmsgFractionBelowViewPort", msgFractionBelowViewPort,
-      "\nmsgFractionInsideViewPort", msgFractionInsideViewPort );*/
-        return {
+        const retVal = {
             msgFractionAboveViewPort,
             msgFractionBelowViewPort,
             msgFractionInsideViewPort,
+            viewportFractionCoveredByMsgWhitespace,
+            viewportFractionCoveredByMsgContent,
             viewportFractionCoveredByMsg,
             msgVsViewportRatio,
             msgScrollableDistance,
         };
+        //console.log(retVal);
+        return retVal;
     }
 
     /**
@@ -202,17 +315,13 @@ class ScrollLogger {
             let messageId = messageSelector[0].id;
             const messageGeometry = that.getMessageGeometry(messageSelector);
 
-            const {
-                messageTop,
-                messageHeight,
-                messageWidth,
-                messageBottom,
-            } = messageGeometry;
+            const { msgTop } = messageGeometry;
             const messageVsViewportGeometry = that.getMessageVsViewportGeometry(
                 messageGeometry,
                 viewportGeometry
             );
             const { msgFractionInsideViewPort } = messageVsViewportGeometry;
+
             let updateType;
 
             let existingLog = that.loggedMessages[messageId];
@@ -232,27 +341,27 @@ class ScrollLogger {
             if (updateType !== ATTENTION_UPDATE_NONE) {
                 let timeStampFirstOnscreen;
                 let timeStampLastOnscreen;
-                let messageTopWhenFirstOnscreen;
+                let msgTopWhenFirstOnscreen;
 
                 switch (updateType) {
                     case ATTENTION_UPDATE_INITIAL:
                         timeStampFirstOnscreen = latestVectorAtStart.timeStamp;
                         timeStampLastOnscreen = latestVectorAtStart.timeStamp;
-                        messageTopWhenFirstOnscreen = messageTop;
+                        msgTopWhenFirstOnscreen = msgTop;
                         break;
                     case ATTENTION_UPDATE_INTERIM:
                         timeStampFirstOnscreen =
                             existingLog.timeStampFirstOnscreen;
                         timeStampLastOnscreen = latestVectorAtStart.timeStamp;
-                        messageTopWhenFirstOnscreen =
-                            existingLog._internal.messageTopWhenFirstOnscreen;
+                        msgTopWhenFirstOnscreen =
+                            existingLog._internal.msgTopWhenFirstOnscreen;
                         break;
                     case ATTENTION_UPDATE_FINAL: //Basically, repeat last interim
                         timeStampFirstOnscreen =
                             existingLog.timeStampFirstOnscreen;
                         timeStampLastOnscreen = previousVectorAtStart.timeStamp;
-                        messageTopWhenFirstOnscreen =
-                            existingLog._internal.messageTopWhenFirstOnscreen;
+                        msgTopWhenFirstOnscreen =
+                            existingLog._internal.msgTopWhenFirstOnscreen;
                         break;
                     default:
                         throw new Error("Unknown update type");
@@ -268,7 +377,7 @@ class ScrollLogger {
                     updateType,
                     timeStampFirstOnscreen,
                     _internal: {
-                        messageTopWhenFirstOnscreen,
+                        msgTopWhenFirstOnscreen,
                     },
                 };
                 const vectorsInfo = that.processScrollVectors(
@@ -295,7 +404,7 @@ class ScrollLogger {
             }
 
             /*if (that.debugScrollLogging && msgFractionInsideViewPort > 0) {
-              console.log("message", messageId, " % on screen: ", msgFractionInsideViewPort * 100, "messageWhiteSpaceRatio", messageWhiteSpaceRatio);
+              console.log("message", messageId, " % on screen: ", msgFractionInsideViewPort * 100);
             }*/
         });
         let oldestMessageInLogTimeStamp;
@@ -321,6 +430,7 @@ class ScrollLogger {
                 }
             }
         });
+        console.log(oldestMessageInLogTimeStamp, that.loggedMessages);
         that.pruneOldScrollVectors(oldestMessageInLogTimeStamp);
     }
 
@@ -334,7 +444,7 @@ class ScrollLogger {
 
         if (!timeStamp) {
             throw new Error(
-                "pruneOldScrollVectors: missing of invalid timestamp"
+                "pruneOldScrollVectors: missing or invalid timestamp"
             );
         }
         let firstNewerVectorIndex = that.vectorStack.findIndex((vector) => {
@@ -353,6 +463,19 @@ class ScrollLogger {
             that.vectorStack.splice(0, lastIndexToKeep + 1);
         }
     }
+
+    /**
+     * Compute attention repartition for everything onscreen for a single scroll vector
+     * @param {*} vector 
+     * @returns {} Associative array of attention on each message in the log that is visible onscreeen.
+     */
+    computeAttentionRepartition(vector) {
+
+        const retVal = {};
+        console.log(retVal);
+        return retVal;
+    }
+
     /**
      * @param {*} scrollLoggerMessageInfo The attention information last logged about the message
      * @param {*} vectors
@@ -374,7 +497,7 @@ class ScrollLogger {
             throw new Error("Unable to detemine current font size");
         }
         const { viewportHeight } = viewportGeometry;
-        const { messageTopWhenFirstOnscreen } = scrollLoggerMessageInfo;
+        const { msgTopWhenFirstOnscreen } = scrollLoggerMessageInfo;
         //Estimate from scrool net distance.
         const fractionViewportCoveredByMessage = "TODO";
         //Note:  After testing, the width() (a jquery function) is the proper
@@ -451,15 +574,23 @@ class ScrollLogger {
                     throw new Error("Unable to compute scroll direction");
             }
         }
-
+        /**
+         * Compute the cumulative attention signals from each individual scroll
+         * event logged
+         *
+         * @param {*} acc Accumulator
+         * @param {*} vector
+         * @param {*} idx
+         * @param {*} vectors
+         */
         const reducer = (acc, vector, idx, vectors) => {
             if (idx !== 0) {
-                //Skip the first vector, as it's the one BEFORE the message was onscreen
+                //Skip the first vector, as it's the one BEFORE the message was onscreen.  We need it as a reference to establish speed.
 
-                let previousVector = vectors[idx - 1];
+                const previousVector = vectors[idx - 1];
                 //console.log("reducer()", idx, vector, previousVector);
 
-                let distancePx = vector.scrollTop - previousVector.scrollTop;
+                const distancePx = vector.scrollTop - previousVector.scrollTop;
 
                 /* START Recompose message geometry at prior to vector 
                 We only consider the geometry at the start of the scroll, 
@@ -468,11 +599,11 @@ class ScrollLogger {
                 const netDistanceScrolledSoFar =
                     acc.metrics.cumulativeUpDistancePx -
                     acc._internal.cumulativeDownDistancePx;
-                const messageTopAtStartOfVector =
-                    messageTopWhenFirstOnscreen - netDistanceScrolledSoFar;
+                const msgTopAtStartOfVector =
+                    msgTopWhenFirstOnscreen - netDistanceScrolledSoFar;
                 const messageGeometry = that.getMessageGeometry(
                     messageSelector,
-                    messageTopAtStartOfVector
+                    msgTopAtStartOfVector
                 );
 
                 const messageVsViewportGeometry = that.getMessageVsViewportGeometry(
@@ -485,11 +616,11 @@ class ScrollLogger {
                     msgScrollableDistance,
                 } = messageVsViewportGeometry;
                 /*console.log("netMove: ", netDistanceScrolledSoFar, 
-                  "messageTopWhenFirstOnscreen", messageTopWhenFirstOnscreen, "messageTopAtStartOfVector", messageTopAtStartOfVector, "msgFractionInsideViewPortAtStartOfVector:", msgFractionInsideViewPortAtStartOfVector);*/
+                  "msgTopWhenFirstOnscreen", msgTopWhenFirstOnscreen, "msgTopAtStartOfVector", msgTopAtStartOfVector, "msgFractionInsideViewPortAtStartOfVector:", msgFractionInsideViewPortAtStartOfVector);*/
                 /* END Recompose message geometry at prior to vector */
 
-                let previousDirection = acc._internal.lastValidDirection;
-                let direction = getDirection(distancePx);
+                const previousDirection = acc._internal.lastValidDirection;
+                const direction = getDirection(distancePx);
 
                 if (direction !== DIRECTION_NONE) {
                     //We actually moved
@@ -511,7 +642,7 @@ class ScrollLogger {
                         1 * viewportFractionCoveredByMsg;
                 }
 
-                let duration = vector.timeStamp - previousVector.timeStamp;
+                const duration = vector.timeStamp - previousVector.timeStamp;
                 acc.metrics.totalDurationMs += duration;
                 if (direction === DIRECTION_DOWN) {
                     acc._internal.cumulativeDownDistancePx += Math.abs(
@@ -540,12 +671,12 @@ class ScrollLogger {
                     acc.metrics.totalEffectiveFractionOfMessageScrolled += currEffectiveFractionOfMessageScrolled;
                     const fractionOfTotalUpScroll =
                         distancePx / acc._internal.cumulativeUpDistancePx;
-                    let scrollLines = distancePx / ESTIMATED_LINE_HEIGHT;
-                    let elapsedMilliseconds =
+                    const scrollLines = distancePx / ESTIMATED_LINE_HEIGHT;
+                    const elapsedMilliseconds =
                         vector.timeStamp - previousVector.timeStamp;
-                    let scrollLinesPerMinute =
+                    const scrollLinesPerMinute =
                         (scrollLines / elapsedMilliseconds) * 1000 * 60;
-                    let scrollWordsPerMinute =
+                    const scrollWordsPerMinute =
                         scrollLinesPerMinute * WORDS_PER_LINE;
                     if (acc.metrics.scrollUpAvgWPM) {
                         acc.metrics.scrollUpAvgWPM =
