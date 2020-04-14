@@ -7,7 +7,6 @@ from os import makedirs, access, R_OK, W_OK
 from os.path import exists, dirname
 import configparser
 from time import sleep
-from datetime import timedelta
 import logging
 import logging.config
 from functools import partial
@@ -97,8 +96,7 @@ def setup_app(path, server_url, loop):
     # https://github.com/aio-libs/sockjs/issues/38
     name = 'changes'
     manager = sockjs.SessionManager(
-        name, app, ActiveSocket.sockjs_handler,
-        heartbeat=10, timeout=timedelta(seconds=30))
+        name, app, ActiveSocket.sockjs_handler)
     sockjs.add_endpoint(
         app, ActiveSocket.sockjs_handler,
         name=name, prefix=path+"/", manager=manager)
@@ -119,8 +117,6 @@ class ActiveSocket(object):
 
     def __init__(self, session):
         self.session = session
-        # https://github.com/aio-libs/sockjs/issues/38
-        # session.timeout = timedelta(seconds=60)
         self.active_sockets[session.id] = self
         self.valid = True
 
@@ -316,7 +312,6 @@ if __name__ == '__main__':
 
     settings = configparser.ConfigParser({'changes_prefix': ''})
     settings.read(sys.argv[-1])
-
 
     in_socket = settings.get(SECTION, 'changes_socket')
     out_socket = settings.get(SECTION, 'changes_socket_out', fallback=in_socket + "p")
