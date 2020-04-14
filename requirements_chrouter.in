@@ -1,4 +1,4 @@
--e git+https://github.com/conversence/sockjs.git@tick_heartbeat#egg=sockjs
+-e git+https://github.com/conversence/sockjs.git@juanjoa#egg=sockjs
 cchardet==2.1.4
 aiohttp==3.6.2
 aiocontextvars==0.2.2 ; python_version < '3.7'
