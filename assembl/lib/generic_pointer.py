@@ -1,5 +1,7 @@
 from enum import Enum as pyEnum
 from collections import OrderedDict
+from inspect import isclass
+
 from sqlalchemy import Column, Integer, ForeignKey, Enum as sqlEnum
 from sqlalchemy.dialects.postgresql import ENUM
 from sqlalchemy.orm import attributes
@@ -78,7 +80,7 @@ class MyTypeMapper(TypeMapper):
     def value_to_class(self, value, base_class):
         if isinstance(value, string_types):
             return BaseTableEnum.__members__.get(value, None)
-        elif isinstance(value, type):
+        elif isclass(value):
             return value
         else:
             raise RuntimeError("Wrong value")

@@ -10,7 +10,7 @@ from builtins import str
 import itertools
 from collections import defaultdict
 import argparse
-from inspect import isabstract, signature
+from inspect import isabstract, signature, isclass
 import logging.config
 import traceback
 from functools import partial
@@ -199,7 +199,8 @@ def prefetch(session, discussion_id):
     from assembl.lib.sqla import class_registry
     from assembl.models import DiscussionBoundBase
     for name, cls in class_registry.items():
-        if issubclass(cls, DiscussionBoundBase) and not isabstract(cls):
+        if (isclass(cls) and issubclass(cls, DiscussionBoundBase)
+                and not isabstract(cls)):
             mapper = class_mapper(cls)
             undefers = [undefer(attr.key) for attr in mapper.iterate_properties
                         if getattr(attr, 'deferred', False)]
@@ -391,7 +392,7 @@ def delete_discussion(session, discussion_id):
     classes = DiscussionBoundBase._decl_class_registry.values()
     classes_by_table = defaultdict(list)
     for cls in classes:
-        if isinstance(cls, type):
+        if isclass(cls):
             classes_by_table[getattr(cls, '__table__', None)].append(cls)
     # Only direct subclass of abstract
 

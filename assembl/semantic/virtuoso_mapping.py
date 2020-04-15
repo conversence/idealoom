@@ -5,7 +5,7 @@
 from builtins import object
 from os import listdir, urandom
 from os.path import join
-from inspect import isabstract
+from inspect import isabstract, isclass
 import re
 from itertools import chain
 from base64 import urlsafe_b64encode, urlsafe_b64decode
@@ -13,7 +13,7 @@ import logging
 
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
-# from sqlalchemy.orm.properties import RelationshipProperty
+from sqlalchemy.orm.properties import RelationshipProperty
 from rdflib import Graph, ConjunctiveGraph, URIRef
 import simplejson as json
 
@@ -368,7 +368,8 @@ class AppQuadStorageManager(object):
             'exclusive' if exclusive else None)
         for cls in class_registry.values():
             # TODO: Take pattern's graph into account!
-            cpe.add_class(cls, gqm)
+            if isclass(cls):
+                cpe.add_class(cls, gqm)
         return gqm
 
     def create_storage(self, storage, discussion_id=None, exclusive=True,

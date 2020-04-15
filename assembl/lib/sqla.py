@@ -34,7 +34,7 @@ from sqlalchemy.exc import NoInspectionAvailable, OperationalError
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.ext.associationproxy import (
     AssociationProxy, ObjectAssociationProxyInstance)
-from sqlalchemy.orm import mapper, scoped_session, sessionmaker, aliased
+from sqlalchemy.orm import scoped_session, sessionmaker, aliased
 from sqlalchemy.orm.interfaces import MANYTOONE, ONETOMANY, MANYTOMANY
 from sqlalchemy.orm.properties import RelationshipProperty
 from sqlalchemy.orm.util import has_identity
@@ -116,7 +116,10 @@ def get_target_class(column):
     fk = next(iter(column.foreign_keys))
     target_table = fk.column.table
     for cls in class_registry.values():
-        if cls.__mapper__.__table__ == target_table:
+        mapper = getattr(cls, "__mapper__", None)
+        if not mapper:
+            continue
+        if mapper.__table__ == target_table:
             return cls
 
 

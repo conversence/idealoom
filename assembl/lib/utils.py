@@ -102,7 +102,7 @@ def path_qs(url):
 
 
 def full_class_name(cls):
-    if not isinstance(cls, type):
+    if not inspect.isclass(cls):
         cls = cls.__class__
     return ".".join((cls.__module__, cls.__name__))
 
