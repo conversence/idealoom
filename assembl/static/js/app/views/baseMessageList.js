@@ -177,10 +177,10 @@ function BaseMessageListMixinFactory(cls) {
             cls.prototype.initialize.apply(this, arguments);
             var that = this;
             this.scrollLogger = new ScrollLogger(that);
-            this.logScroll = _.debounce(
+            this.logScroll = _.throttle(
                 this.logScroll_base,
                 ScrollLogger.getScrollLogInterval(),
-                false
+                true, true
             );
             var collectionManager = new CollectionManager();
             var d = new Date();
@@ -3031,7 +3031,7 @@ function BaseMessageListMixinFactory(cls) {
             let d = new Date();
             let currentTimeStamp = d.getTime();
 
-            that.scrollLogger.vectorStack.push({
+            that.scrollLogger.scrollEventStack.push({
                 timeStamp: currentTimeStamp,
                 scrollTop: currentScrollTop,
             });
