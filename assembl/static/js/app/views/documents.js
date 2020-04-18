@@ -33,8 +33,6 @@ class AbstractDocumentView extends Marionette.View.extend({
                 if (data.html) {
                     console.debug(data);
                     this.$el.html(data.html);
-                } else {
-                    hidePopoverGenerator(0);
                 }
             },
             failure: (data, status, jqXHR) => {
@@ -43,7 +41,6 @@ class AbstractDocumentView extends Marionette.View.extend({
                     // Do not reload for an embed failure
                     jqXHR.handled = true;
                 }
-                hidePopoverGenerator(0);
             }
         });
     }
