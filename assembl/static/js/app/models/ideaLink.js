@@ -62,7 +62,24 @@ class IdeaLinkCollection extends Base.Collection.extend({
      * @member {string} app.models.ideaLink.IdeaLinkCollection.url
      */
     url: Ctx.getApiV2DiscussionUrl("idea_links"),
-}) {}
+}) {
+    updateFromSocket(item) {
+        const id = item["@id"];
+        const tombstone = item["@tombstone"];
+        super.updateFromSocket(...arguments);
+        if (!tombstone) {
+            const model = tombstone ? null : this.get(id);
+            const models = this.where({source: model.get('source'), target: model.get('target')});
+            if (models.length > 1) {
+                for (const other of models) {
+                    if (other.id == undefined) {
+                        this.remove(other)
+                    }
+                }
+            }
+        }
+    }
+}
 
 export default {
     Model: IdeaLinkModel,

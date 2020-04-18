@@ -821,7 +821,9 @@ class IdeaList extends BasePanel.extend({
                     allIdeasCollection.add(newIdea);
 
                     newIdea.save(null, {
-                        success: function (model, resp) {},
+                        success: function (model, resp) {
+                            model.onIdeaCreated();
+                        },
                         error: function (model, resp) {
                             console.error("ERROR: addChildToSelected", resp);
                         },

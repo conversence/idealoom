@@ -12,6 +12,7 @@ import Types from "../utils/types.js";
 import LangString from "./langstring.js";
 import Attachment from "./attachments.js";
 import Permissions from "../utils/permissions.js";
+import IdeaLink from "./ideaLink.js";
 
 /**
  * Idea model
@@ -241,6 +242,18 @@ class IdeaModel extends Base.Model.extend({
         return this.get("@type") === Types.ROOT_IDEA;
     }
 
+    onIdeaCreated() {
+        this.collection.collectionManager.getAllIdeaLinksCollectionPromise().then((ideaLinks)=>{
+            const parent = this.get('parentId');
+            let link = ideaLinks.findWhere({source: parent, target: this.id});
+            if (!link) {
+                link = new IdeaLink.Model({source: parent, target: this.id});
+                ideaLinks.add(link);
+                // DO NOT save link. Wait for socket update.
+            }
+        })
+    }
+
     /**
      * Adds an idea as child
      * @param  {Idea} idea
@@ -257,7 +270,9 @@ class IdeaModel extends Base.Model.extend({
                 parentId: this.getId(),
             },
             {
-                success: function (model, resp) {},
+                success: function (model, resp) {
+                    model.onIdeaCreated();
+                },
                 error: function (model, resp) {
                     console.error("ERROR: addChild", resp);
                 },
