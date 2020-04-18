@@ -55,4 +55,5 @@ def includeme(config):
     config.add_route('check_password_token',
                      'api/v1/check_password_token/{token}')
     config.add_route('mime_type', 'api/v1/mime_type')
+    config.add_route('oembed', 'api/v1/oembed')
     config.add_route('saml_metadata', 'api/v1/saml_metadata')

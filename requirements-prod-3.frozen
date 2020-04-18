@@ -7,6 +7,7 @@
 --find-links https://idealoom.org/wheelhouse/
 
 -e git+https://github.com/conversence/Beaker.git@assembl#egg=Beaker  # via -r requirements.in
+-e git+https://github.com/conversence/pyoembed.git@from_spec#egg=pyoembed  # via -r requirements.in
 -e git+https://github.com/maparent/circus-web.git@p3#egg=circus_web  # via -r requirements.in
 -e git+https://github.com/FreeDiscovery/jwzthreading.git@master#egg=jwzthreading  # via -r requirements.in
 -e git+https://github.com/maparent/langdetect.git@no_sample#egg=langdetect  # via -r requirements.in
@@ -189,6 +190,7 @@ verboselogs==1.7          # via property-manager, rotate-backups
 vine==1.3.0               # via amqp, celery
 wcwidth==0.1.9            # via prompt-toolkit
 webob==1.8.6              # via pyramid
+werkzeug==1.0.0           # via -r requirements.in
 xmlsec==1.3.3             # via python3-saml
 yarl==1.4.2               # via aiohttp
 zipp==3.1.0               # via importlib-metadata
