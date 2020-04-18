@@ -1,0 +1,7 @@
+<div class="idea_pub_state">
+    <div class="sub-section-title">{{ gettext('Idea publication status') }}: <em><% 
+      if (pubStateName) { print(pubStateName) } else { print(i18n.gettext('None')) } %></em></div>
+    <% _.each(transitions, (transition) => { %>
+     <button class="btn btn-xs btn-secondary js_transition" data="<%= transition.label %>" <%= transition.enabled %>><%= transition.name %> → <%= transition.target_name %></button>
+    <% }); %>
+</div>

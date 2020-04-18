@@ -244,10 +244,11 @@ class IdeaSegmentListSubset extends Backbone.Subset.extend({
 }) {
     beforeInitialize(models, options) {
         this.ideaId = options.ideaId;
+        this.importantOnly = options.importantOnly;
     }
 
     sieve(extract) {
-        return extract.linkedToIdea(this.ideaId);
+        return extract.linkedToIdea(this.ideaId) && (!this.importantOnly || extract.get("important"));
     }
 
     comparator(segment) {

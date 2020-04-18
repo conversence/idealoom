@@ -31,6 +31,144 @@ import ConfirmModal from "./confirmModal.js";
 import AttachmentModels from "../models/attachments.js";
 import Loader from "./loader.js";
 
+
+class IdeaTypeView extends Marionette.View.extend({
+    template: "#tmpl-ideaTypeInIdeaPanel",
+    ui: {
+        type_selection: ".js_type_selection",
+    },
+    events: {
+        "change @ui.type_selection": "onTypeSelectionChange",
+    },
+}) {
+    initialize(options) {
+        this.parent = options.parent;
+        this.model = options.parent.model;
+        this.parentLink = options.parentLink;
+        this.translationData = options.parent.translationData;
+    }
+    onTypeSelectionChange(ev) {
+        var vals = ev.target.selectedOptions[0].value.split(/;/, 2);
+        this.model.set("subtype", vals[1]);
+        this.parentLink.set("subtype", vals[0]);
+        // trick: how to make the save atomic?
+        this.model.save();
+        this.parentLink.save();
+    }
+    serializeData() {
+        const locale = Ctx.getLocale();
+        const canEdit = this.model.userCan(Permissions.EDIT_IDEA) || false;
+        const currentTypes = this.model.getCombinedSubtypes(this.parentLink);
+        const possibleTypes = this.model.getPossibleCombinedSubtypes(
+            this.parentLink
+        );
+        const currentTypeDescriptions = this.model.combinedTypeNamesOf(
+            currentTypes,
+            locale
+        );
+        const possibleTypeDescriptions = {};
+        _.map(possibleTypes, (types) => {
+            var names = this.model.combinedTypeNamesOf(types, locale);
+            possibleTypeDescriptions[types] =
+                names[0] + " → " + names[1];
+        });
+        return {
+            linkTypeDescription: currentTypeDescriptions[0],
+            nodeTypeDescription: currentTypeDescriptions[1],
+            canEdit,
+            currentTypes,
+            possibleTypes,
+            possibleTypeDescriptions,
+        }
+    }
+}
+
+
+class PubFlowView extends Marionette.View.extend({
+    template: "#tmpl-pubFlowInIdeaPanel",
+    ui: {
+        pubStateTransition: ".js_transition",
+    },
+    events: {
+        "click @ui.pubStateTransition": "pubStateTransition",
+    },
+}) {
+    initialize(options) {
+        this.parent = options.parent;
+        this.model = options.parent.model;
+        this.pubFlow = options.pubFlow;
+        this.translationData = options.parent.translationData;
+    }
+    serializeData() {
+        let pubStateName = null;
+        const transitions = [];
+        if (!Ctx.hasIdeaPubFlow())
+            return {}
+        const stateLabel = this.model.get("pub_state_name");
+        const states = this.pubFlow.get("states");
+        if (stateLabel) {
+            const state = states.findByLabel(stateLabel);
+            if (state) {
+                pubStateName = state.nameOrLabel(this.translationData);
+            } else {
+                console.error("Could not find state " + stateLabel);
+            }
+        }
+        const transitionColl = this.pubFlow
+            .get("transitions")
+            .filter((transition) => {
+                return transition.get("source_label") == stateLabel;
+            })
+            .map((transition) => {
+                const targetLabel = transition.get("target_label"),
+                    target = states.findByLabel(targetLabel),
+                    targetName = target
+                        ? target.nameOrLabel(this.translationData)
+                        : targetLabel;
+                transitions.push({
+                    name: transition.nameOrLabel(this.translationData),
+                    label: transition.get("label"),
+                    target_name: targetName,
+                    enabled: this.model.userCan(
+                        transition.get("req_permission_name")
+                    )
+                        ? ""
+                        : "disabled=true",
+                });
+            });
+        return {
+            pubStateName,
+            transitions,
+            i18n,
+        }
+    }
+    pubStateTransition(evt) {
+        const transition = evt.target.attributes.data.value;
+        const url = this.model.getApiV2Url() + "/do_transition";
+        const that = this;
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=UTF-8",
+            url,
+            data: JSON.stringify({ transition }),
+            success: function (data) {
+                const state = data.pub_state_name;
+                that.model.set("pub_state_name", state);
+                that.render();
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(
+                    "error! textStatus: ",
+                    textStatus,
+                    "; errorThrown: ",
+                    errorThrown
+                );
+                // TODO: show error in the UI
+            },
+        });
+    }
+}
+
 class IdeaPanel extends BasePanel.extend({
     template: "#tmpl-ideaPanel",
     className: "ideaPanel",
@@ -45,7 +183,6 @@ class IdeaPanel extends BasePanel.extend({
     panelType: PanelSpecTypes.IDEA_PANEL,
     ui: {
         postIt: ".postitlist",
-        type_selection: ".js_type_selection",
         definition: ".js_editDefinitionRegion",
         longTitle: ".js_editLongTitleRegion",
         deleteIdea: ".js_ideaPanel-deleteBtn",
@@ -58,8 +195,9 @@ class IdeaPanel extends BasePanel.extend({
         attachmentButton: ".js_attachment-button",
         mindmapButton: ".js_mindmap-button",
         attachmentImage: ".js_idea-attachment",
+        pubFlowSection: ".js_pub-flow",
+        ideaTypeSection: ".js_idea-type",
         openTargetInPopOver: ".js_openTargetInPopOver",
-        pubStateTransition: ".js_transition",
     },
     regions: {
         segmentList: ".postitlist",
@@ -73,6 +211,8 @@ class IdeaPanel extends BasePanel.extend({
         regionDescription: "@ui.definition",
         attachmentButton: "@ui.attachmentButton",
         attachment: "@ui.attachmentImage",
+        pubFlowRegion: "@ui.pubFlowSection",
+        ideaTypeRegion: "@ui.ideaTypeSection",
     },
 
     modelEvents: {
@@ -89,12 +229,10 @@ class IdeaPanel extends BasePanel.extend({
         dragover: "onDragOver", //Fired on drop targets.  Formerly these events were limited to  @ui.postIt, but that resulted in terrible UX.  Let's make the entire idea panel a drop zone
         dragleave: "onDragLeave", //Fired on drop targets.
         drop: "onDrop", //Fired on drop targets.
-        "change @ui.type_selection": "onTypeSelectionChange",
         "click @ui.closeExtract": "onSegmentCloseButtonClick",
         "click @ui.clearIdea": "onClearAllClick",
         "click @ui.deleteIdea": "onDeleteButtonClick",
         "click @ui.openTargetInPopOver": "openTargetInPopOver",
-        "click @ui.pubStateTransition": "pubStateTransition",
         "click @ui.mindmapButton": "openMindMap",
     },
 }) {
@@ -110,7 +248,8 @@ class IdeaPanel extends BasePanel.extend({
             this.model = this.getGroupState().get("currentIdea");
         }
 
-        collectionManager.getAllWidgetsPromise();
+        this.widgetPromise = collectionManager.getAllWidgetsPromise();
+        this.translationDataPromise = collectionManager.getUserLanguagePreferencesPromise(Ctx);
 
         var pref = Ctx.getPreferences();
         this.ideaPanelOpensAutomatically =
@@ -185,12 +324,8 @@ class IdeaPanel extends BasePanel.extend({
             );
             var model = this.model;
             this.model = null;
-            Promise.join(
-                collectionManager.getIdeaPublicationFlowPromise(),
-                collectionManager.getUserLanguagePreferencesPromise(Ctx)
-            ).then(([pubFlow, userLangColl]) => {
+            this.translationDataPromise.then((userLangColl) => {
                 that.translationData = userLangColl;
-                that.ideaPubFlow = pubFlow;
                 that.setIdeaModel(model);
             });
         }
@@ -333,6 +468,10 @@ class IdeaPanel extends BasePanel.extend({
 
     renderAttachments() {
         var collection = this.getAttachmentCollection();
+        if (!collection) {
+            console.log("missing attachment collection")
+            return;
+        }
         var user = Ctx.getCurrentUser();
         if (user.can(Permissions.EDIT_IDEA)) {
             var attachmentView = new AttachmentViews.AttachmentEditUploadView({
@@ -364,14 +503,8 @@ class IdeaPanel extends BasePanel.extend({
         var canEditNextSynthesis = currentUser.can(Permissions.EDIT_SYNTHESIS);
         var direct_link_relative_url = null;
         var share_link_url = null;
-        var currentTypes = null;
-        var currentTypeDescriptions = ["", ""];
-        var possibleTypes = [];
-        var possibleTypeDescriptions = {};
         var locale = Ctx.getLocale();
         var contributors = undefined;
-        var pubStateName = null;
-        var transitions = [];
         var imported_from_source_name = null;
         var imported_from_id = null;
         var imported_from_url = null;
@@ -386,21 +519,6 @@ class IdeaPanel extends BasePanel.extend({
             );
             imported_from_id = this.model.get("imported_from_id");
             imported_from_url = this.model.get("imported_from_url");
-            if (this.parentLink != undefined) {
-                currentTypes = this.model.getCombinedSubtypes(this.parentLink);
-                possibleTypes = this.model.getPossibleCombinedSubtypes(
-                    this.parentLink
-                );
-                currentTypeDescriptions = this.model.combinedTypeNamesOf(
-                    currentTypes,
-                    locale
-                );
-                _.map(possibleTypes, function (types) {
-                    var names = that.model.combinedTypeNamesOf(types, locale);
-                    possibleTypeDescriptions[types] =
-                        names[0] + " → " + names[1];
-                });
-            }
 
             direct_link_relative_url = this.model.getRouterUrl({
                 parameters: {
@@ -418,40 +536,6 @@ class IdeaPanel extends BasePanel.extend({
                 { t: this.model.getShortTitleSafe(this.translationData) },
                 { s: Ctx.getPreferences().social_sharing },
             ]);
-            if (Ctx.hasIdeaPubFlow()) {
-                const stateLabel = this.model.get("pub_state_name");
-                const states = this.ideaPubFlow.get("states");
-                if (stateLabel) {
-                    const state = states.findByLabel(stateLabel);
-                    if (state) {
-                        pubStateName = state.nameOrLabel(this.translationData);
-                    } else {
-                        console.error("Could not find state " + stateLabel);
-                    }
-                }
-                const transitionColl = this.ideaPubFlow
-                    .get("transitions")
-                    .filter((transition) => {
-                        return transition.get("source_label") == stateLabel;
-                    })
-                    .map((transition) => {
-                        const targetLabel = transition.get("target_label"),
-                            target = states.findByLabel(targetLabel),
-                            targetName = target
-                                ? target.nameOrLabel(this.translationData)
-                                : targetLabel;
-                        transitions.push({
-                            name: transition.nameOrLabel(this.translationData),
-                            label: transition.get("label"),
-                            target_name: targetName,
-                            enabled: this.model.userCan(
-                                transition.get("req_permission_name")
-                            )
-                                ? ""
-                                : "disabled=true",
-                        });
-                    });
-            }
         }
 
         return {
@@ -467,17 +551,10 @@ class IdeaPanel extends BasePanel.extend({
             canEditExtracts: currentUser.can(Permissions.EDIT_EXTRACT),
             canAddExtracts,
             Ctx,
-            pubStateName,
-            transitions,
             direct_link_relative_url,
-            currentTypes,
-            possibleTypes,
-            possibleTypeDescriptions,
             imported_from_source_name,
             imported_from_id,
             imported_from_url,
-            linkTypeDescription: currentTypeDescriptions[0],
-            nodeTypeDescription: currentTypeDescriptions[1],
             share_link_url,
         };
     }
@@ -495,22 +572,12 @@ class IdeaPanel extends BasePanel.extend({
 
         Ctx.initTooltips(this.$el);
 
-        if (this.model && this.model.id && this.extractListSubset) {
+        if (this.model && this.model.id) {
             //Only fetch extracts if idea already has an id.
             //console.log(this.extractListSubset);
             // display only important extract for simple user
-            if (!this.model.userCan(Permissions.ADD_EXTRACT)) {
-                this.extractListSubset.models = _.filter(
-                    this.extractListSubset.models,
-                    function (model) {
-                        return model.get("important");
-                    }
-                );
-            }
 
             this.checkContentHeight();
-
-            this.getExtractslist();
 
             this.renderShortTitle();
 
@@ -524,7 +591,33 @@ class IdeaPanel extends BasePanel.extend({
                 this.renderCKEditorLongTitle();
             }
 
-            this.renderContributors();
+            this.contributorsDataPromise.then(([contributors, allAgents])=> {
+                this.renderContributors(contributors, allAgents);
+            });
+
+            this.extractsDataPromise.then(([
+                allExtractsCollection,
+                extractListSubset,
+                allUsers,
+                messageStructure
+                ])=>{
+                this.renderExtractsData(
+                    allExtractsCollection, extractListSubset, allUsers, messageStructure);
+            });
+            
+            this.parentLinkPromise.then((parentLink)=>{
+                this.showChildView("ideaTypeRegion",
+                    new IdeaTypeView({parent: this, parentLink})
+                )
+            });
+
+            if (Ctx.hasIdeaPubFlow()) {
+                collectionManager.getIdeaPublicationFlowPromise().then((pubFlow)=>{
+                    this.showChildView("pubFlowRegion",
+                        new PubFlowView({parent: this, pubFlow})
+                    )
+                })
+            }
 
             if (
                 this.model.userCan(Permissions.EDIT_IDEA) ||
@@ -590,94 +683,71 @@ class IdeaPanel extends BasePanel.extend({
         }
     }
 
-    getExtractslist() {
-        var that = this;
-        var collectionManager = new CollectionManager();
+    renderExtractsData(
+            allExtractsCollection, extractListSubset, allUsersCollection, allMessagesCollection) {
+        this.extractListView = new SegmentList.SegmentListView({
+            collection: this.extractListSubset,
+            allUsersCollection: allUsersCollection,
+            allMessagesCollection: allMessagesCollection,
+        });
 
-        if (this.extractListSubset) {
-            Promise.join(
-                collectionManager.getAllExtractsCollectionPromise(),
-                collectionManager.getAllUsersCollectionPromise(),
-                collectionManager.getAllMessageStructureCollectionPromise(),
-                function (
-                    allExtractsCollection,
-                    allUsersCollection,
-                    allMessagesCollection
-                ) {
-                    that.extractListView = new SegmentList.SegmentListView({
-                        collection: that.extractListSubset,
-                        allUsersCollection: allUsersCollection,
-                        allMessagesCollection: allMessagesCollection,
-                    });
-
-                    that.showChildView("segmentList", that.extractListView);
-                    that.renderTemplateGetExtractsLabel();
-                }
-            );
-        } else {
-            this.renderTemplateGetExtractsLabel();
-        }
+        this.showChildView("segmentList", this.extractListView);
+        this.renderTemplateGetExtractsLabel();
     }
 
-    renderContributors() {
-        var that = this;
+    renderContributors(contributorsJqXHR, allAgents) {
         var collectionManager = new CollectionManager();
+        var contributorsRaw = this.model.get("contributors");
+        var contributorsId = [];
+        var allAgents = allAgents;
+        _.each(contributorsRaw, function (contributorId) {
+            contributorsId.push(contributorId);
+        });
 
-        collectionManager
-            .getAllUsersCollectionPromise()
-            .then(function (allAgents) {
-                var contributorsRaw = that.model.get("contributors");
-                var contributorsId = [];
-                var allAgents = allAgents;
-                _.each(contributorsRaw, function (contributorId) {
-                    contributorsId.push(contributorId);
-                });
+        //console.log(contributorsId);
+        class ContributorAgentSubset extends Backbone.Subset.extend({
+            name: "ContributorAgentSubset",
+        }) {
+            sieve(agent) {
+                //console.log(agent.id, _.indexOf(contributorsId, agent.id), contributorsId);
+                return _.indexOf(contributorsId, agent.id) !== -1;
+            }
 
-                //console.log(contributorsId);
-                class ContributorAgentSubset extends Backbone.Subset.extend({
-                    name: "ContributorAgentSubset",
-                }) {
-                    sieve(agent) {
-                        //console.log(agent.id, _.indexOf(contributorsId, agent.id), contributorsId);
-                        return _.indexOf(contributorsId, agent.id) !== -1;
-                    }
+            parent() {
+                return allAgents;
+            }
+        }
 
-                    parent() {
-                        return allAgents;
-                    }
-                }
+        var contributors = new ContributorAgentSubset();
 
-                var contributors = new ContributorAgentSubset();
+        //console.log(contributors);
+        class avatarCollectionView extends Marionette.CollectionView.extend(
+            {
+                childView: AgentViews.AgentAvatarView,
+            }
+        ) {}
 
-                //console.log(contributors);
-                class avatarCollectionView extends Marionette.CollectionView.extend(
-                    {
-                        childView: AgentViews.AgentAvatarView,
-                    }
-                ) {}
+        var avatarsView = new avatarCollectionView({
+            collection: contributors,
+        });
 
-                var avatarsView = new avatarCollectionView({
-                    collection: contributors,
-                });
+        this.showChildView("contributors", avatarsView);
+        this.ui.contributorsSection
+            .find(".title-text")
+            .html(
+                i18n.sprintf(
+                    i18n.ngettext(
+                        "%d contributor",
+                        "%d contributors",
+                        contributorsId.length
+                    ),
+                    contributorsId.length
+                )
+            );
 
-                that.showChildView("contributors", avatarsView);
-                that.ui.contributorsSection
-                    .find(".title-text")
-                    .html(
-                        i18n.sprintf(
-                            i18n.ngettext(
-                                "%d contributor",
-                                "%d contributors",
-                                contributorsId.length
-                            ),
-                            contributorsId.length
-                        )
-                    );
-
-                if (contributorsId.length > 0) {
-                    that.ui.contributorsSection.removeClass("hidden");
-                }
-            });
+        if (contributorsId.length > 0) {
+            this.ui.contributorsSection.removeClass("hidden");
+        }
     }
 
     renderShortTitle() {
@@ -837,50 +907,49 @@ class IdeaPanel extends BasePanel.extend({
     }
 
     fetchModelAndRender() {
-        var that = this;
         var collectionManager = new CollectionManager();
-        var fetchPromise = this.model.fetch({
+        const contributorPromise = this.model.fetch({
             data: $.param({ view: "contributors" }),
         });
-        Promise.join(
-            collectionManager.getAllExtractsCollectionPromise(),
-            collectionManager.getAllIdeaLinksCollectionPromise(),
-            fetchPromise,
-            function (allExtractsCollection, allLinksCollection, fetchedJQHR) {
+        this.contributorsDataPromise = Promise.join(
+            contributorPromise, collectionManager.getAllUsersCollectionPromise()
+        )
+
+        // temporary code: single parent link for now.
+        this.parentLinkPromise = collectionManager.getAllIdeaLinksCollectionPromise().then(
+          (allLinksCollection) => allLinksCollection.findWhere({target: this.model.id}));
+
+        const extractsCollectionPromise = collectionManager.getAllExtractsCollectionPromise();
+        const extractListSubsetPromise = extractsCollectionPromise.then(
+            (allExtractsCollection) => {
                 //View could be gone, or model may have changed in the meantime
-                if (that.model && !that.isDestroyed()) {
-                    that.extractListSubset = new SegmentList.IdeaSegmentListSubset(
+                if (this.model && !this.isDestroyed()) {
+                    this.extractListSubset = new SegmentList.IdeaSegmentListSubset(
                         [],
                         {
                             parent: allExtractsCollection,
-                            ideaId: that.model.id,
+                            ideaId: this.model.id,
+                            importantOnly: !this.model.userCan(Permissions.ADD_EXTRACT),
                         }
                     );
-                    that.listenTo(
-                        that.extractListSubset,
+
+                    this.listenTo(
+                        this.extractListSubset,
                         "add remove reset change",
-                        that.renderTemplateGetExtractsLabel
+                        this.renderTemplateGetExtractsLabel
                     );
 
-                    // temporary code: single parent link for now.
-                    that.parentLink = allLinksCollection.findWhere({
-                        target: that.model.id,
-                    });
-                    //console.log("The region:", that.segmentList);
-                    that.setLoading(false);
-                    that.render();
+                    return this.extractListSubset;
                 }
             }
         );
-    }
-
-    onTypeSelectionChange(ev) {
-        var vals = ev.target.selectedOptions[0].value.split(/;/, 2);
-        this.model.set("subtype", vals[1]);
-        this.parentLink.set("subtype", vals[0]);
-        // trick: how to make the save atomic?
-        this.model.save();
-        this.parentLink.save();
+        this.extractsDataPromise = Promise.join(
+            extractsCollectionPromise,
+            extractListSubsetPromise,
+            collectionManager.getAllUsersCollectionPromise(),
+            collectionManager.getAllMessageStructureCollectionPromise());
+        this.setLoading(false);
+        this.render();
     }
 
     deleteCurrentIdea() {
@@ -1245,32 +1314,6 @@ class IdeaPanel extends BasePanel.extend({
             "/ideas/" + id + "/mindmap?mimetype=image/svg%2bxml"
         );
         window.open(url, "_il_mindmap");
-    }
-
-    pubStateTransition(evt) {
-        const transition = evt.target.attributes.data.value;
-        const url = this.model.getApiV2Url() + "/do_transition";
-        const that = this;
-        $.ajax({
-            type: "POST",
-            contentType: "application/json; charset=UTF-8",
-            url,
-            data: JSON.stringify({ transition }),
-            success: function (data) {
-                const state = data.pub_state_name;
-                that.model.set("pub_state_name", state);
-                that.render();
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                console.log(
-                    "error! textStatus: ",
-                    textStatus,
-                    "; errorThrown: ",
-                    errorThrown
-                );
-                // TODO: show error in the UI
-            },
-        });
     }
 }
 

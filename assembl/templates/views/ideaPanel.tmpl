@@ -38,37 +38,9 @@
           </div>
         <% } %>
 
-        <div class="link_idea_type_description">
-        <% if (canEdit) { %>
-          <div class="sub-section-title">{{ gettext('Idea type') }}</div>
-          <select name="link_idea_type_selection" class="js_type_selection">
-            <% for (var i in possibleTypes) {
-              var type = possibleTypes[i],
-                  description = possibleTypeDescriptions[type],
-                  current = (type === currentTypes),
-                  selected = (current)?"selected":"";
-             %>
-             <option value="<%= type %>" <%= selected %> ><%= description %></option>
-             <% } %>
-          </select>
-        <% } else if (nodeTypeDescription) { %>
-          <div class="sub-section-title">{{ gettext('Idea type') }}</div>
-            <% if (linkTypeDescription) { %>
-              <span class="link_description"><%= linkTypeDescription %></span> →
-            <% } %>
-          <span class="node_description"><%= nodeTypeDescription %></span>
-        <% } %>
-        </div>
+        <div class="js_idea-type"></div>
 
-        <% if (Ctx.hasIdeaPubFlow()) { %>
-        <div class="idea_pub_state">
-            <div class="sub-section-title">{{ gettext('Idea publication status') }}: <em><% 
-              if (pubStateName) { print(pubStateName) } else { print(i18n.gettext('None')) } %></em></div>
-            <% _.each(transitions, (transition) => { %>
-             <button class="btn btn-xs btn-secondary js_transition" data="<%= transition.label %>" <%= transition.enabled %>><%= transition.name %> → <%= transition.target_name %></button>
-            <% }); %>
-        </div>
-        <% } %>
+        <div class="js_pub-flow"></div>
 
         <% if (canEditNextSynthesis) { %>
 

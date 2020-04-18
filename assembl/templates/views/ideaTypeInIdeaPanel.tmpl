@@ -1,0 +1,21 @@
+<div class="link_idea_type_description">
+<% if (canEdit) { %>
+  <div class="sub-section-title">{{ gettext('Idea type') }}</div>
+  <select name="link_idea_type_selection" class="js_type_selection">
+    <% for (var i in possibleTypes) {
+      var type = possibleTypes[i],
+          description = possibleTypeDescriptions[type],
+          current = (type === currentTypes),
+          selected = (current)?"selected":"";
+     %>
+     <option value="<%= type %>" <%= selected %> ><%= description %></option>
+     <% } %>
+  </select>
+<% } else if (nodeTypeDescription) { %>
+  <div class="sub-section-title">{{ gettext('Idea type') }}</div>
+    <% if (linkTypeDescription) { %>
+      <span class="link_description"><%= linkTypeDescription %></span> →
+    <% } %>
+  <span class="node_description"><%= nodeTypeDescription %></span>
+<% } %>
+</div>
