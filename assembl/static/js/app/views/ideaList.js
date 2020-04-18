@@ -685,7 +685,7 @@ class IdeaList extends BasePanel.extend({
         if (ideaModel) {
             if (ideaModel.id) {
                 var el = this.$el.find("." + ideaModel.getCssClassFromId());
-                if (el.length) {
+                if (el.length && !el.is(":hidden")) {
                     scrollUtils.scrollToElement(
                         el.first(),
                         null,
@@ -694,12 +694,34 @@ class IdeaList extends BasePanel.extend({
                         false
                     );
                 } else {
-                    console.log("el not found, will retry later");
-                    if (retry == undefined) retry = 0;
-                    if (++retry < 5)
-                        setTimeout(function () {
-                            that.onScrollToIdea(ideaModel, retry);
-                        }, 200);
+                    const collapseStates = this.tableOfIdeasCollapsedState;
+                    let changed = false;
+                    if (collapseStates) {
+                        for (const ancestor of ideaModel.getAncestry()) {
+                            if (ancestor == ideaModel)
+                                continue;
+                            const id = ancestor.getNumericId();
+                            const val = collapseStates.get(id);
+                            if (val == true || val == "true") {
+                                collapseStates.set(id, false);
+                                changed = true;
+                            }
+                        }
+                    }
+                    if (changed)
+                        collapseStates.save().then(()=>{
+                            that.onScrollToIdea(ideaModel);
+                        })
+                    else {
+                        console.log("idea el not found, will retry later");
+                        if (retry == undefined) retry = 0;
+                        if (++retry < 5)
+                            setTimeout(function () {
+                                that.onScrollToIdea(ideaModel, retry);
+                            }, 200);
+                        else
+                            console.warn("idea el not found", ideaModel.id);
+                    }
                 }
             } else {
                 // idea has no id yet, so we will wait until it has one to then be able to compare its model to ours
