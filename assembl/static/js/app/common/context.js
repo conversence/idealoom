@@ -1525,7 +1525,7 @@ Context.prototype = {
                         console.debug(data);
                         popover.html(data.html);
                     } else {
-                        hidePopoverGenerator(0);
+                        popover.addClass("hidden");
                     }
                 },
                 failure: (data, status, jqXHR) => {
@@ -1534,7 +1534,7 @@ Context.prototype = {
                         // Do not reload for an embed failure
                         jqXHR.handled = true;
                     }
-                    hidePopoverGenerator(0);
+                    popover.addClass("hidden");
                 }
             });
 
