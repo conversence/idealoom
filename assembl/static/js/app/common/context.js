@@ -30,7 +30,6 @@ import tooltip from "bootstrap-tooltip";
 // require('ckeditor-sharedcontainer/plugin'); // where is this anyway?
 
 import dropdown from "bootstrap-dropdown";
-import oembed from "jquery-oembed-all/jquery.oembed";
 import highlight from "jquery-highlight";
 
 /**
@@ -1503,6 +1502,7 @@ Context.prototype = {
             return function (evt) {
                 timeoutIdHidePopover = setTimeout(function () {
                     popover.addClass("hidden");
+                    popover.html("<div></div>")
                 }, timer);
             };
         };
@@ -1519,39 +1519,23 @@ Context.prototype = {
 
             //popover.css('padding', '25px 50px');
             popover.removeClass("hidden");
-
-            popover.oembed($(this).attr("href"), {
-                //initiallyVisible: false,
-                embedMethod: "fill",
-
-                //apikeys: {
-                //etsy : 'd0jq4lmfi5bjbrxq2etulmjr',
-                //},
-                maxHeight: "90%",
-                maxWidth: "90%",
-                debug: false,
-                onEmbedFailed: function () {
-                    console.log("onEmbedFailed (assembl)");
-                    popover.addClass("hidden");
+            $.ajax("/api/v1/oembed?url="+encodeURIComponent($(this).attr("href")), {
+                success: (data, status, jqXHR) => {
+                    if (data.html) {
+                        console.debug(data);
+                        popover.html(data.html);
+                    } else {
+                        hidePopoverGenerator(0);
+                    }
                 },
-                onError: function (
-                    externalUrl,
-                    embedProvider,
-                    textStatus,
-                    jqXHR
-                ) {
+                failure: (data, status, jqXHR) => {
                     if (jqXHR) {
-                        // Do not reload assembl for an embed failure
+                        console.warn(jqXHR);
+                        // Do not reload for an embed failure
                         jqXHR.handled = true;
                     }
-                    console.log("err:", externalUrl, embedProvider, textStatus);
-                },
-                afterEmbed: function () {
-                    that.popoverAfterEmbed.apply(this);
-                },
-                proxyHeadCall: function (url) {
-                    return "/api/v1/mime_type?url=" + encodeURIComponent(url);
-                },
+                    hidePopoverGenerator(0);
+                }
             });
 
             popover.unbind("mouseleave"); // this avoids handler accumulation (each call to the following popover.mouseleave() adds a handler)

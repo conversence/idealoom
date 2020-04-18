@@ -7,7 +7,6 @@ import Marionette from "backbone.marionette";
 
 import _ from "underscore";
 import $ from "jquery";
-import oembed from "jquery-oembed-all/jquery.oembed";
 import IdeaLoom from "../app.js";
 import Promise from "bluebird";
 import Ctx from "../common/context.js";
@@ -29,44 +28,23 @@ class AbstractDocumentView extends Marionette.View.extend({
 
     doOembed() {
         //console.log (this.model.get('external_url'));
-        var that = this;
-        this.$el.oembed(this.uri, {
-            //initiallyVisible: false,
-            embedMethod: "fill",
-
-            //apikeys: {
-            //etsy : 'd0jq4lmfi5bjbrxq2etulmjr',
-            //},
-            maxHeight: "300px",
-            maxWidth: "100%",
-            debug: Ctx.debugOembed,
-            onEmbedFailed: function () {
-                if (Ctx.debugOembed) {
-                    console.log("onEmbedFailed (assembl)");
+        $.ajax("/api/v1/oembed?height=300&url="+encodeURIComponent(this.uri), {
+            success: (data, status, jqXHR) => {
+                if (data.html) {
+                    console.debug(data);
+                    this.$el.html(data.html);
+                } else {
+                    hidePopoverGenerator(0);
                 }
-
-                that.onRenderOembedFail();
             },
-            onError: function (externalUrl, embedProvider, textStatus, jqXHR) {
+            failure: (data, status, jqXHR) => {
                 if (jqXHR) {
-                    // Do not reload assembl for an embed failure
+                    console.warn(jqXHR);
+                    // Do not reload for an embed failure
                     jqXHR.handled = true;
                 }
-                if (Ctx.debugOembed) {
-                    console.log("err:", externalUrl, embedProvider, textStatus);
-                }
-
-                that.onRenderOembedFail();
-            },
-            afterEmbed: function () {
-                if (Ctx.debugOembed) {
-                    console.log("Embeeding done");
-                }
-            },
-            proxyHeadCall: function (url) {
-                return "/api/v1/mime_type?url=" + encodeURIComponent(url);
-            },
-            timeout: 5000,
+                hidePopoverGenerator(0);
+            }
         });
     }
 
