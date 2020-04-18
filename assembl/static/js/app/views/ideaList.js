@@ -203,14 +203,14 @@ class IdeaList extends BasePanel.extend({
         this.tableOfIdeasCollapsedState = new UserCustomData.Model({
             id: tableOfIdeasCollapsedStateKey,
         });
-        var tableOfIdeasCollapsedStateFetchPromise = Ctx.isUserConnected()
+        this.tableOfIdeasCollapsedStateFetchPromise = Ctx.isUserConnected()
             ? this.tableOfIdeasCollapsedState.fetch()
             : Promise.resolve(true);
 
         Promise.join(
             collectionManager.getAllIdeasCollectionPromise(),
             collectionManager.getAllIdeaLinksCollectionPromise(),
-            tableOfIdeasCollapsedStateFetchPromise,
+            this.tableOfIdeasCollapsedStateFetchPromise,
             defaultTableOfIdeasCollapsedStateFetchPromise, // now that we have the collapsed state of each idea, we can (re)render the table of ideas
             collectionManager.getUserLanguagePreferencesPromise(Ctx),
             function (
@@ -349,7 +349,9 @@ class IdeaList extends BasePanel.extend({
                 //console.log("ideaList heard a change:currentIdea event");
                 if (currentIdea && !that.isDestroyed()) {
                     that.onScrollToIdea(currentIdea);
-                    that.getRegion("addIdeaButton").currentView.render();
+                    const ideaButtonView = that.getRegion("addIdeaButton").currentView;
+                    if (ideaButtonView)
+                        ideaButtonView.render();
                 }
             });
 
@@ -694,34 +696,36 @@ class IdeaList extends BasePanel.extend({
                         false
                     );
                 } else {
-                    const collapseStates = this.tableOfIdeasCollapsedState;
-                    let changed = false;
-                    if (collapseStates) {
-                        for (const ancestor of ideaModel.getAncestry()) {
-                            if (ancestor == ideaModel)
-                                continue;
-                            const id = ancestor.getNumericId();
-                            const val = collapseStates.get(id);
-                            if (val == true || val == "true") {
-                                collapseStates.set(id, false);
-                                changed = true;
+                    this.tableOfIdeasCollapsedStateFetchPromise.then(() => {
+                        const collapseStates = this.tableOfIdeasCollapsedState;
+                        let changed = false;
+                        if (collapseStates) {
+                            for (const ancestor of ideaModel.getAncestry()) {
+                                if (ancestor == ideaModel)
+                                    continue;
+                                const id = ancestor.getNumericId();
+                                const val = collapseStates.get(id);
+                                if (val == true || val == "true") {
+                                    collapseStates.set(id, false);
+                                    changed = true;
+                                }
                             }
                         }
-                    }
-                    if (changed)
-                        collapseStates.save().then(()=>{
-                            that.onScrollToIdea(ideaModel);
-                        })
-                    else {
-                        console.log("idea el not found, will retry later");
-                        if (retry == undefined) retry = 0;
-                        if (++retry < 5)
-                            setTimeout(function () {
-                                that.onScrollToIdea(ideaModel, retry);
-                            }, 200);
-                        else
-                            console.warn("idea el not found", ideaModel.id);
-                    }
+                        if (changed)
+                            collapseStates.save().then(()=>{
+                                that.onScrollToIdea(ideaModel);
+                            })
+                        else {
+                            console.log("idea el not found, will retry later");
+                            if (retry == undefined) retry = 0;
+                            if (++retry < 5)
+                                setTimeout(function () {
+                                    that.onScrollToIdea(ideaModel, retry);
+                                }, 200);
+                            else
+                                console.warn("idea el not found", ideaModel.id);
+                        }
+                    });
                 }
             } else {
                 // idea has no id yet, so we will wait until it has one to then be able to compare its model to ours
