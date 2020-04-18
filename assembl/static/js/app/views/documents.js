@@ -24,23 +24,22 @@ class AbstractDocumentView extends Marionette.View.extend({
         this.uri = this.model.get("external_url")
             ? this.model.get("external_url")
             : this.model.get("uri");
+        if (!this.model.isFileType())
+            this.oembedData = $.ajax("/api/v1/oembed?height=300&url="+encodeURIComponent(this.uri));
     }
 
     doOembed() {
         //console.log (this.model.get('external_url'));
-        $.ajax("/api/v1/oembed?height=300&url="+encodeURIComponent(this.uri), {
-            success: (data, status, jqXHR) => {
-                if (data.html) {
-                    console.debug(data);
-                    this.$el.html(data.html);
-                }
-            },
-            failure: (data, status, jqXHR) => {
-                if (jqXHR) {
-                    console.warn(jqXHR);
-                    // Do not reload for an embed failure
-                    jqXHR.handled = true;
-                }
+        this.oembedData.then((data, status, jqXHR)=>{
+            if (data.html) {
+                console.debug(data);
+                this.$el.html(data.html);
+            }
+        }).catch((data, status, jqXHR) => {
+            if (jqXHR) {
+                console.warn(jqXHR);
+                // Do not reload for an embed failure
+                jqXHR.handled = true;
             }
         });
     }
