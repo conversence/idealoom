@@ -19,6 +19,7 @@ import IdeaSiblingChainVisitor from "./visitors/ideaSiblingChainVisitor";
 import IdeaLoom from "../app.js";
 import Ctx from "../common/context.js";
 import Idea from "../models/idea.js";
+import Types from "../utils/types.js";
 import UserCustomData from "../models/userCustomData.js";
 import ideaInIdeaList from "./ideaInIdeaList.js";
 import PanelSpecTypes from "../utils/panelSpecTypes.js";
@@ -803,7 +804,7 @@ class IdeaList extends BasePanel.extend({
      */
     addChildToSelected() {
         var currentIdea = this.getGroupState().get("currentIdea");
-        var newIdea = new Idea.Model();
+        var newIdea = new Idea.Model({"@type": Types.IDEA});
         var that = this;
         var collectionManager = new CollectionManager();
 

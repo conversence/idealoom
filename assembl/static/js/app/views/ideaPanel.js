@@ -606,9 +606,11 @@ class IdeaPanel extends BasePanel.extend({
             });
             
             this.parentLinkPromise.then((parentLink)=>{
-                this.showChildView("ideaTypeRegion",
-                    new IdeaTypeView({parent: this, parentLink})
-                )
+                if (parentLink) {
+                    this.showChildView("ideaTypeRegion",
+                        new IdeaTypeView({parent: this, parentLink})
+                    )
+                }
             });
 
             if (Ctx.hasIdeaPubFlow()) {
