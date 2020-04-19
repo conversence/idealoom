@@ -365,7 +365,34 @@ def get_time_series_analytics(request):
             Post, AgentProfile, AgentStatusInDiscussion, ViewPost, Idea,
             AbstractIdeaVote, Action, ActionOnPost, ActionOnIdea, Content)
 
-        # The posters
+        # The idea_subquery
+        idea_subquery = discussion.db.query(intervals_table.c.interval_id,
+            func.count(distinct(Idea.id)).label('count_ideas'),
+            func.count(distinct(Idea.creator_id)).label('count_idea_authors'),
+            # func.DB.DBA.BAG_AGG(Idea.creator_id).label('idea_authors'),
+            # func.DB.DBA.BAG_AGG(Idea.id).label('idea_ids'),
+            )
+        idea_subquery = idea_subquery.outerjoin(Idea, and_(
+            Idea.creation_date >= intervals_table.c.interval_start,
+            Idea.creation_date < intervals_table.c.interval_end,
+            Idea.discussion_id == discussion.id))
+        idea_subquery = idea_subquery.group_by(intervals_table.c.interval_id)
+        idea_subquery = idea_subquery.subquery()
+
+        # The cumulative posters
+        cumulative_ideas_aliased = aliased(Idea)
+        cumulative_ideas_subquery = discussion.db.query(intervals_table.c.interval_id,
+            func.count(distinct(cumulative_ideas_aliased.id)).label('count_cumulative_ideas'),
+            func.count(distinct(cumulative_ideas_aliased.creator_id)).label('count_cumulative_idea_authors')
+            # func.DB.DBA.BAG_AGG(cumulative_ideas_aliased.id).label('cumulative_idea_ids')
+            )
+        cumulative_ideas_subquery = cumulative_ideas_subquery.outerjoin(cumulative_ideas_aliased, and_(
+            cumulative_ideas_aliased.creation_date < intervals_table.c.interval_end,
+            cumulative_ideas_aliased.discussion_id == discussion.id))
+        cumulative_ideas_subquery = cumulative_ideas_subquery.group_by(intervals_table.c.interval_id)
+        cumulative_ideas_subquery = cumulative_ideas_subquery.subquery()
+
+        # The post_subquery
         post_subquery = discussion.db.query(intervals_table.c.interval_id,
             func.count(distinct(Post.id)).label('count_posts'),
             func.count(distinct(Post.creator_id)).label('count_post_authors'),
@@ -500,11 +527,11 @@ def get_time_series_analytics(request):
             func.count(distinct(votes_aliased.id)).label('count_votes'),
             func.count(distinct(votes_aliased.voter_id)).label('count_voters'),
             )
-        votes_subquery = votes_subquery.outerjoin(Idea, Idea.discussion_id == discussion.id)
         votes_subquery = votes_subquery.outerjoin(votes_aliased, and_(
             votes_aliased.creation_date >= intervals_table.c.interval_start,
-            votes_aliased.creation_date < intervals_table.c.interval_end,
-            votes_aliased.idea_id == Idea.id))
+            votes_aliased.creation_date < intervals_table.c.interval_end))
+        votes_subquery = votes_subquery.outerjoin(Idea, and_(
+            votes_aliased.idea_id == Idea.id, Idea.discussion_id == discussion.id))
         votes_subquery = votes_subquery.group_by(intervals_table.c.interval_id)
         votes_subquery = votes_subquery.subquery()
 
@@ -514,10 +541,10 @@ def get_time_series_analytics(request):
             func.count(cumulative_votes_aliased.id).label('count_cumulative_votes'),
             func.count(distinct(cumulative_votes_aliased.voter_id)).label('count_cumulative_voters')
             )
-        cumulative_votes_subquery = cumulative_votes_subquery.outerjoin(Idea, Idea.discussion_id == discussion.id)
         cumulative_votes_subquery = cumulative_votes_subquery.outerjoin(cumulative_votes_aliased, and_(
-            cumulative_votes_aliased.creation_date < intervals_table.c.interval_end,
-            cumulative_votes_aliased.idea_id == Idea.id))
+            cumulative_votes_aliased.creation_date < intervals_table.c.interval_end))
+        cumulative_votes_subquery = cumulative_votes_subquery.outerjoin(Idea, and_(
+            Idea.discussion_id == discussion.id, cumulative_votes_aliased.idea_id == Idea.id))
         cumulative_votes_subquery = cumulative_votes_subquery.group_by(intervals_table.c.interval_id)
         cumulative_votes_subquery = cumulative_votes_subquery.subquery()
 
@@ -528,27 +555,27 @@ def get_time_series_analytics(request):
         # The actions
         actions_on_post = discussion.db.query(
             intervals_table.c.interval_id.label('interval_id'), ActionOnPost.actor_id.label('actor_id'))
-        actions_on_post = actions_on_post.outerjoin(content, content.discussion_id == discussion.id)
-        actions_on_post = actions_on_post.outerjoin(ActionOnPost, and_(
-            ActionOnPost.post_id == content.id,
-            or_(and_(
-                    ActionOnPost.creation_date >= intervals_table.c.interval_start,
-                    ActionOnPost.creation_date < intervals_table.c.interval_end),
-                and_(
-                    ActionOnPost.tombstone_date >= intervals_table.c.interval_start,
-                    ActionOnPost.tombstone_date < intervals_table.c.interval_end))))
+        actions_on_post = actions_on_post.outerjoin(ActionOnPost, or_(
+            and_(
+                ActionOnPost.creation_date >= intervals_table.c.interval_start,
+                ActionOnPost.creation_date < intervals_table.c.interval_end),
+            and_(
+                ActionOnPost.tombstone_date >= intervals_table.c.interval_start,
+                ActionOnPost.tombstone_date < intervals_table.c.interval_end)))
+        actions_on_post = actions_on_post.outerjoin(content, and_(
+            content.discussion_id == discussion.id, ActionOnPost.post_id == content.id))
 
         actions_on_idea = discussion.db.query(
             intervals_table.c.interval_id.label('interval_id'), ActionOnIdea.actor_id.label('actor_id'))
-        actions_on_idea = actions_on_idea.outerjoin(Idea, Idea.discussion_id == discussion.id)
-        actions_on_idea = actions_on_idea.outerjoin(ActionOnIdea, and_(
-            ActionOnIdea.idea_id == Idea.id,
-            or_(and_(
-                    ActionOnIdea.creation_date >= intervals_table.c.interval_start,
-                    ActionOnIdea.creation_date < intervals_table.c.interval_end),
-                and_(
-                    ActionOnIdea.tombstone_date >= intervals_table.c.interval_start,
-                    ActionOnIdea.tombstone_date < intervals_table.c.interval_end))))
+        actions_on_idea = actions_on_idea.outerjoin(ActionOnIdea, or_(
+            and_(
+                ActionOnIdea.creation_date >= intervals_table.c.interval_start,
+                ActionOnIdea.creation_date < intervals_table.c.interval_end),
+            and_(
+                ActionOnIdea.tombstone_date >= intervals_table.c.interval_start,
+                ActionOnIdea.tombstone_date < intervals_table.c.interval_end)))
+        actions_on_idea = actions_on_idea.outerjoin(Idea, and_(
+            ActionOnIdea.idea_id == Idea.id, Idea.discussion_id == discussion.id))
 
         posts = discussion.db.query(
             intervals_table.c.interval_id.label('interval_id'),
@@ -567,19 +594,19 @@ def get_time_series_analytics(request):
         # The actions
         cumulative_actions_on_post = discussion.db.query(
             intervals_table.c.interval_id.label('interval_id'), ActionOnPost.actor_id.label('actor_id'))
-        cumulative_actions_on_post = cumulative_actions_on_post.outerjoin(content, content.discussion_id == discussion.id)
-        cumulative_actions_on_post = cumulative_actions_on_post.outerjoin(ActionOnPost, and_(
-            ActionOnPost.post_id == content.id,
-            or_(ActionOnPost.creation_date < intervals_table.c.interval_end,
-                ActionOnPost.tombstone_date < intervals_table.c.interval_end)))
+        cumulative_actions_on_post = cumulative_actions_on_post.outerjoin(ActionOnPost, or_(
+            ActionOnPost.creation_date < intervals_table.c.interval_end,
+            ActionOnPost.tombstone_date < intervals_table.c.interval_end))
+        cumulative_actions_on_post = cumulative_actions_on_post.outerjoin(content, and_(
+            ActionOnPost.post_id == content.id, content.discussion_id == discussion.id))
 
         cumulative_actions_on_idea = discussion.db.query(
             intervals_table.c.interval_id.label('interval_id'), ActionOnIdea.actor_id.label('actor_id'))
-        cumulative_actions_on_idea = cumulative_actions_on_idea.outerjoin(Idea, Idea.discussion_id == discussion.id)
-        cumulative_actions_on_idea = cumulative_actions_on_idea.outerjoin(ActionOnIdea, and_(
-            ActionOnIdea.idea_id == Idea.id,
-            or_(ActionOnIdea.creation_date < intervals_table.c.interval_end,
-                ActionOnIdea.tombstone_date < intervals_table.c.interval_end)))
+        cumulative_actions_on_idea = cumulative_actions_on_idea.outerjoin(ActionOnIdea, or_(
+            ActionOnIdea.creation_date < intervals_table.c.interval_end,
+            ActionOnIdea.tombstone_date < intervals_table.c.interval_end))
+        cumulative_actions_on_idea = cumulative_actions_on_idea.outerjoin(Idea, and_(
+            ActionOnIdea.idea_id == Idea.id, Idea.discussion_id == discussion.id))
 
         posts = discussion.db.query(
             intervals_table.c.interval_id.label('interval_id'),
@@ -596,6 +623,8 @@ def get_time_series_analytics(request):
 
 
         combined_query = discussion.db.query(intervals_table,
+                                             idea_subquery,
+                                             cumulative_ideas_subquery,
                                              post_subquery,
                                              cumulative_posts_subquery,
                                              top_post_subquery,
@@ -617,6 +646,8 @@ def get_time_series_analytics(request):
                                                    ]).label('fraction_cumulative_logged_in_visitors_who_posted_in_period'),
                                              subscribers_subquery,
                                              )
+        combined_query = combined_query.join(idea_subquery, idea_subquery.c.interval_id == intervals_table.c.interval_id)
+        combined_query = combined_query.join(cumulative_ideas_subquery, cumulative_ideas_subquery.c.interval_id == intervals_table.c.interval_id)
         combined_query = combined_query.join(post_subquery, post_subquery.c.interval_id == intervals_table.c.interval_id)
         combined_query = combined_query.join(cumulative_posts_subquery, cumulative_posts_subquery.c.interval_id == intervals_table.c.interval_id)
         combined_query = combined_query.join(top_post_subquery, top_post_subquery.c.interval_id == intervals_table.c.interval_id)
@@ -645,6 +676,10 @@ def get_time_series_analytics(request):
         "interval_id",
         "interval_start",
         "interval_end",
+        "count_ideas",
+        "count_cumulative_ideas",
+        "count_idea_authors",
+        "count_cumulative_idea_authors",
         "count_posts",
         "count_cumulative_posts",
         "count_top_posts",
@@ -676,10 +711,10 @@ def get_time_series_analytics(request):
 
 def csv_response(results, format, fieldnames=None):
     output = BytesIO()
-    output_utf8 = TextIOWrapper(output, encoding="utf-8")
 
     if format == CSV_MIMETYPE:
         from csv import writer
+        output_utf8 = TextIOWrapper(output, encoding="utf-8")
         csv = writer(output_utf8, dialect='excel', delimiter=';')
         writerow =  csv.writerow
         empty = ''
@@ -706,7 +741,7 @@ def csv_response(results, format, fieldnames=None):
     elif format == XSLX_MIMETYPE:
         from openpyxl.writer.excel import ExcelWriter
         writer = ExcelWriter(workbook, archive)
-        writer.save('')
+        writer.save()
 
     output.seek(0)
     return Response(body_file=output, content_type=format, charset="utf-8")
@@ -1163,6 +1198,8 @@ def get_participant_time_series_analytics(request):
     results = []
 
     default_data_descriptors = [
+        "ideas",
+        "cumulative_ideas",
         "posts",
         "cumulative_posts",
         "top_posts",
@@ -1218,6 +1255,39 @@ def get_participant_time_series_analytics(request):
         # post = with_polymorphic(Post, [])
 
         query_components = []
+
+        if 'ideas' in data_descriptors:
+            # The ideaers
+            idea_query = discussion.db.query(
+                intervals_table.c.interval_id.label('interval_id_q'),
+                AgentProfile.id.label('participant_id'),
+                AgentProfile.name.label('participant'),
+                literal('ideas').label('key'),
+                func.count(distinct(Idea.id)).label('value'),
+                )
+            idea_query = idea_query.join(Idea, and_(
+                Idea.creation_date >= intervals_table.c.interval_start,
+                Idea.creation_date < intervals_table.c.interval_end,
+                Idea.discussion_id == discussion.id))
+            idea_query = idea_query.join(AgentProfile, Idea.creator_id == AgentProfile.id)
+            idea_query = idea_query.group_by(intervals_table.c.interval_id, AgentProfile.id)
+            query_components.append(idea_query)
+
+        if 'cumulative_ideas' in data_descriptors:
+            # Cumulative ideaers
+            cumulative_idea_query = discussion.db.query(
+                intervals_table.c.interval_id.label('interval_id_q'),
+                AgentProfile.id.label('participant_id'),
+                AgentProfile.name.label('participant'),
+                literal('cumulative_ideas').label('key'),
+                func.count(distinct(Idea.id)).label('value'),
+                )
+            cumulative_idea_query = cumulative_idea_query.join(Idea, and_(
+                Idea.creation_date < intervals_table.c.interval_end,
+                Idea.discussion_id == discussion.id))
+            cumulative_idea_query = cumulative_idea_query.join(AgentProfile, Idea.creator_id == AgentProfile.id)
+            cumulative_idea_query = cumulative_idea_query.group_by(intervals_table.c.interval_id, AgentProfile.id)
+            query_components.append(cumulative_idea_query)
 
         if 'posts' in data_descriptors:
             # The posters
@@ -1302,11 +1372,11 @@ def get_participant_time_series_analytics(request):
                 literal('liking').label('key'),
                 func.count(distinct(LikedPost.id)).label('value'),
                 )
-            liking_query = liking_query.join(Post, Post.discussion_id == discussion.id)
             liking_query = liking_query.join(LikedPost, and_(
                 LikedPost.creation_date >= intervals_table.c.interval_start,
-                LikedPost.creation_date < intervals_table.c.interval_end,
-                LikedPost.post_id == Post.id))
+                LikedPost.creation_date < intervals_table.c.interval_end))
+            liking_query = liking_query.join(Post, and_(
+                Post.discussion_id == discussion.id, LikedPost.post_id == Post.id))
             liking_query = liking_query.join(AgentProfile, LikedPost.actor_id == AgentProfile.id)
             liking_query = liking_query.group_by(intervals_table.c.interval_id, AgentProfile.id)
             query_components.append(liking_query)
@@ -1320,11 +1390,11 @@ def get_participant_time_series_analytics(request):
                 literal('cumulative_liking').label('key'),
                 func.count(distinct(LikedPost.id)).label('value'),
                 )
-            cumulative_liking_query = cumulative_liking_query.join(Post, Post.discussion_id == discussion.id)
             cumulative_liking_query = cumulative_liking_query.join(LikedPost, and_(
                 LikedPost.tombstone_date == None,
-                LikedPost.creation_date < intervals_table.c.interval_end,
-                LikedPost.post_id == Post.id))
+                LikedPost.creation_date < intervals_table.c.interval_end))
+            cumulative_liking_query = cumulative_liking_query.join(Post, and_(
+                Post.discussion_id == discussion.id, LikedPost.post_id == Post.id))
             cumulative_liking_query = cumulative_liking_query.join(AgentProfile, LikedPost.actor_id == AgentProfile.id)
             cumulative_liking_query = cumulative_liking_query.group_by(intervals_table.c.interval_id, AgentProfile.id)
             query_components.append(cumulative_liking_query)
@@ -1338,11 +1408,11 @@ def get_participant_time_series_analytics(request):
                 literal('liked').label('key'),
                 func.count(distinct(LikedPost.id)).label('value'),
                 )
-            liked_query = liked_query.join(Post, Post.discussion_id == discussion.id)
             liked_query = liked_query.join(LikedPost, and_(
                 LikedPost.creation_date >= intervals_table.c.interval_start,
-                LikedPost.creation_date < intervals_table.c.interval_end,
-                LikedPost.post_id == Post.id))
+                LikedPost.creation_date < intervals_table.c.interval_end))
+            liked_query = liked_query.join(Post, and_(
+                Post.discussion_id == discussion.id, LikedPost.post_id == Post.id))
             liked_query = liked_query.join(AgentProfile, Post.creator_id == AgentProfile.id)
             liked_query = liked_query.group_by(intervals_table.c.interval_id, AgentProfile.id)
             query_components.append(liked_query)
@@ -1356,11 +1426,11 @@ def get_participant_time_series_analytics(request):
                 literal('cumulative_liked').label('key'),
                 func.count(distinct(LikedPost.id)).label('value'),
                 )
-            cumulative_liked_query = cumulative_liked_query.outerjoin(Post, Post.discussion_id == discussion.id)
             cumulative_liked_query = cumulative_liked_query.outerjoin(LikedPost, and_(
                 LikedPost.tombstone_date == None,
-                LikedPost.creation_date < intervals_table.c.interval_end,
-                LikedPost.post_id == Post.id))
+                LikedPost.creation_date < intervals_table.c.interval_end))
+            cumulative_liked_query = cumulative_liked_query.outerjoin(Post, and_(
+                Post.discussion_id == discussion.id, LikedPost.post_id == Post.id))
             cumulative_liked_query = cumulative_liked_query.outerjoin(AgentProfile, Post.creator_id == AgentProfile.id)
             cumulative_liked_query = cumulative_liked_query.group_by(intervals_table.c.interval_id, AgentProfile.id)
             query_components.append(cumulative_liked_query)

@@ -23,6 +23,8 @@ class StatsModal extends Backbone.Modal.extend({
     },
 
     participantFields: [
+        "ideas",
+        "cumulative_ideas",
         "posts",
         "cumulative_posts",
         "liking",
