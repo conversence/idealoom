@@ -177,10 +177,12 @@ function BaseMessageListMixinFactory(cls) {
             cls.prototype.initialize.apply(this, arguments);
             var that = this;
             this.scrollLogger = new ScrollLogger(that);
+            //Be carefull modifying this
+            //http://demo.nimius.net/debounce_throttle/
             this.logScroll = _.throttle(
                 this.logScroll_base,
                 ScrollLogger.getScrollLogInterval(),
-                true, true
+                { leading: true, trailing: true }
             );
             var collectionManager = new CollectionManager();
             var d = new Date();

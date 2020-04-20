@@ -1,6 +1,8 @@
 /** Estimated words per minute below which we consider that this is a "Slow" scroll */
 const SLOW_SCROLL_WPM_THREASHHOLD = 300;
 
+const SCROLL_TIMEOUT_MS = 1000 * 60 * 2 ; //2 minutes
+
 /** How often to compute message read statistics from scrolling */
 const SCROLL_VECTOR_MEASUREMENT_INTERVAL = 300; //milliseconds, needs to be substantially faster than time between users conscious scroll events
 const DIRECTION_DOWN = "DIRECTION_DOWN";
@@ -345,19 +347,25 @@ class ScrollLogger {
         let previousScrollEventAtStart =
             that.scrollEventStack[that.scrollEventStack.length - 2];
 
-            console.log(
-                "checkMessagesOnscreen() for ",
-                latestScrollEventAtStart,
-                previousScrollEventAtStart,
-                that.scrollEventStack
-            );
+        /*console.log(
+            "checkMessagesOnscreen() for ",
+            latestScrollEventAtStart,
+            previousScrollEventAtStart
+        );*/
         if (previousScrollEventAtStart) {
-            this.processMsgForScrollEvent(
-                viewportGeometry,
-                messageSelectors,
-                latestScrollEventAtStart,
-                previousScrollEventAtStart
-            );
+            if (
+                latestScrollEventAtStart.timeStamp -
+                    previousScrollEventAtStart.timeStamp >
+                SCROLL_TIMEOUT_MS
+            ) {
+                console.log("TODO: Scroll timeout, send final update for previous log and reset");
+            }
+                this.processMsgForScrollEvent(
+                    viewportGeometry,
+                    messageSelectors,
+                    latestScrollEventAtStart,
+                    previousScrollEventAtStart
+                );
             if (false && this.debugScrollLogging) {
                 //console.log(messageSelectors);
                 console.log(
@@ -583,7 +591,7 @@ class ScrollLogger {
             viewportGeometry
         );
 
-        Object.values(this.loggedMessages).map((messageLog) => {
+        this.loggedMessages.forEach((messageLog) => {
             if (this.debugScrollLogging) {
                 let messageInfo = {
                     _internal: _,
@@ -597,7 +605,7 @@ class ScrollLogger {
                 );
             }
         });
-    }
+    } //End processMsgForScrollEvent()
 
     /** Compute the direction of the scroll
                 Reminder:  scrollTop is the position of the scrollBar, so always positive
@@ -636,10 +644,23 @@ class ScrollLogger {
         const attentionRepartitionGlobal = this.computeAttentionRepartitionGlobal(
             msgGeometryMap
         );
-        console.log(attentionRepartitionGlobal);
+        //console.log(attentionRepartitionGlobal);
+        const distancePx =
+            scrollEvent.scrollTop - previousScrollEvent.scrollTop;
+        const direction = that.getDirection(distancePx);
+        const elapsedMilliseconds =
+            scrollEvent.timeStamp - previousScrollEvent.timeStamp;
+
+        if (false && that.debugScrollLogging) {
+            const scrollPxPerMinute =
+                (distancePx / elapsedMilliseconds) * 1000 * 60;
+            console.log(
+                `processScrollVector(), scrolled ${distancePx}px in ${elapsedMilliseconds}ms; ${scrollPxPerMinute} px/min`
+            );
+        }
         //console.log(this.loggedMessages);
         this.loggedMessages.forEach((messageLog, messageId) => {
-            console.log("processScrollVector for messageId", messageLog);
+            //console.log("processScrollVector for messageId", messageId);
             const messageGeometryInfo = msgGeometryMap.get(messageId);
             if (!messageGeometryInfo) {
                 throw new Error(
@@ -687,8 +708,6 @@ class ScrollLogger {
                 console.log("CURRENT_FONT_SIZE_PX", CURRENT_FONT_SIZE_PX);
             }
 
-            const distancePx =
-                scrollEvent.scrollTop - previousScrollEvent.scrollTop;
             messageLog.metrics.numScrollEvents++;
 
             const {
@@ -697,7 +716,6 @@ class ScrollLogger {
             } = messageVsViewportGeometry;
 
             const previousDirection = messageLog._internal.lastValidDirection;
-            const direction = that.getDirection(distancePx);
 
             if (direction !== DIRECTION_NONE) {
                 //We actually moved
@@ -706,9 +724,8 @@ class ScrollLogger {
             if (
                 direction !== DIRECTION_NONE && //We actually moved
                 previousDirection && //Not the first movement
-                previousDirection !== direction
+                previousDirection !== direction //We changed direction
             ) {
-                //We changed direction
                 messageLog.metrics.numDirectionChanges += 1;
                 if (viewportFractionCoveredByMsg >= 1) {
                     //An internal message scroll to re-read something, very strong
@@ -720,8 +737,6 @@ class ScrollLogger {
             }
 
             /* Distance metrics */
-            const elapsedMilliseconds =
-                scrollEvent.timeStamp - previousScrollEvent.timeStamp;
 
             messageLog.metrics.totalDurationMs += elapsedMilliseconds;
             if (direction === DIRECTION_DOWN) {
@@ -761,18 +776,69 @@ class ScrollLogger {
                 const effectiveSrollWordsPerMinute =
                     attentionRepartitionGlobal.viewportFractionContent *
                     rawSrollWordsPerMinute;
-                console.log(
+                /*console.log(
+                    "rawSrollWordsPerMinute",
                     rawSrollWordsPerMinute,
-                    effectiveSrollWordsPerMinute
-                );
+                    "effectiveSrollWordsPerMinute",
+                    effectiveSrollWordsPerMinute,
+                    "px to words factor",
+                    (1 / ESTIMATED_LINE_HEIGHT) * WORDS_PER_LINE
+                );*/
+
                 if (messageLog.metrics.scrollUpAvgEffectiveWPM) {
+                    /*
+                The new cumulative scroll speed cannot simply be obtained by total scroll distance / total time.  While the factor to obtain rawSrollWordsPerMinute is at least constant per message, the factor to obtain effectiveSrollWordsPerMinute per minutes is different for every scroll position.  Instead of memorising the terms for every scroll and recomputing here, we do some math to obtain the new value.
+                
+                We'll explain the formula as if all speed were in px/s
+                Say we have:
+                cD = current cumulative distance scrolled
+                dD = distance scrolled during current scroll
+                cS = current cumulative speed in px/s
+                dS = speed of current scroll in px/s
+                cSWPM = current cumulative speed in WPM
+                sSWPM = speed of current scroll in WPM
+                cT = cumulative time elapsed before current scroll
+                dT = Time elapses during current scroll
+                cF = Constant to transform cumulative speed to effective scrollSpeed
+                dF = Constant to transform current speed to effective scrollSpeed
+                nS = New cumulative speed in px/s
+
+                We have (obviously):
+                (cD + dD) / (cT + dT) = nS in px/s
+
+                We can transform to:
+
+                (cS*cT + dS*dT) / (cT + dT) = nS in px/s
+                
+                Note that the above no longer depends on the px unit, so the correction factors can be applied to speeds
+                (cF*cS*cT + dF*dS*dT) / (cT + dT) = nS in WPM
+
+                but cF*cS and df*dS are the speeds in WPM we have, so it becomes 
+                (cSWPM*cT + dSWPM*dT) / (cT + dT) = nS in WPM
+                */
+                    let cT =
+                        messageLog.metrics.totalDurationMs -
+                        elapsedMilliseconds; //At this stage, messageLog.metrics.totalDurationMs has already been recomputed...
+                    let dT = elapsedMilliseconds;
+                    let cSWPM = messageLog.metrics.scrollUpAvgEffectiveWPM;
+                    let dSWPM = effectiveSrollWordsPerMinute;
+                    /*console.log("Before:", {
+                        cT,
+                        dT,
+                        cSWPM,
+                        dSWPM,
+                        fractionOfTotalUpScroll,
+                    });*/
                     messageLog.metrics.scrollUpAvgEffectiveWPM =
-                        fractionOfTotalUpScroll * effectiveSrollWordsPerMinute +
-                        (1 - fractionOfTotalUpScroll) *
-                            messageLog.metrics.scrollUpAvgEffectiveWPM;
+                        (cSWPM * cT + dSWPM * dT) / (cT + dT);
+                    /*console.log(
+                        "After:",
+                        messageLog.metrics.scrollUpAvgEffectiveWPM
+                    );*/
                 } else {
                     messageLog.metrics.scrollUpAvgEffectiveWPM = effectiveSrollWordsPerMinute;
                 }
+
                 //Règle de 3...
                 messageLog.metrics.effectiveWpmIfUserReadWholeMessage =
                     messageLog.metrics.scrollUpAvgEffectiveWPM /
