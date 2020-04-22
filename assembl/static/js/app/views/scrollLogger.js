@@ -128,14 +128,6 @@ class ScrollLogger {
             );
             //throw new Error("processScrollEventStack(): Unable to compute message dimensions.");
         }
-        const msgTopWhitespaceTop = msgTop;
-        const msgTopWhitespaceBottom = msgContentTop;
-        const msgTopWhitespaceHeight =
-            msgTopWhitespaceBottom - msgTopWhitespaceTop;
-        const msgBottomWhitespaceTop = msgContentBottom;
-        const msgBottomWhitespaceBottom = msgBottom;
-        const msgBottomWhitespaceHeight =
-            msgBottomWhitespaceBottom - msgBottomWhitespaceTop;
 
         /*
             let //15px message padding bottom
@@ -150,13 +142,7 @@ class ScrollLogger {
             msgContentHeight,
             msgContentBottom,
             messageContentSelector,
-            msgWidth,
-            msgTopWhitespaceTop,
-            msgTopWhitespaceBottom,
-            msgTopWhitespaceHeight,
-            msgBottomWhitespaceTop,
-            msgBottomWhitespaceBottom,
-            msgBottomWhitespaceHeight,
+            msgWidth
         };
         //console.log(retVal);
         return retVal;
@@ -239,11 +225,7 @@ class ScrollLogger {
             msgTop,
             msgHeight,
             msgContentTop,
-            msgContentHeight,
-            msgTopWhitespaceTop,
-            msgTopWhitespaceHeight,
-            msgBottomWhitespaceTop,
-            msgBottomWhitespaceHeight,
+            msgContentHeight
         } = messageGeometry;
         const {
             viewportHeight,
@@ -270,25 +252,6 @@ class ScrollLogger {
             msgContentTop,
             msgContentHeight
         );
-        const {
-            fractionInsideViewPort: wsTopFractionInsideViewPort,
-            viewportFractionCovered: wsTopViewportFractionCoveredByMsg,
-        } = this._getContentVisibleFractions(
-            viewportGeometry,
-            msgTopWhitespaceTop,
-            msgTopWhitespaceHeight
-        );
-        const {
-            fractionInsideViewPort: wsBottomFractionInsideViewPort,
-            viewportFractionCovered: wsBottomViewportFractionCoveredByMsg,
-        } = this._getContentVisibleFractions(
-            viewportGeometry,
-            msgBottomWhitespaceTop,
-            msgBottomWhitespaceHeight
-        );
-        const viewportFractionCoveredByMsgWhitespace =
-            wsTopViewportFractionCoveredByMsg +
-            wsBottomViewportFractionCoveredByMsg;
 
         function findOffsetTopUntilElement(element, targetParentElement) {
             //console.log("findOffsetTopUntilElement()",element.offsetTop,element, element.offsetParent, targetParentElement);
@@ -348,7 +311,6 @@ class ScrollLogger {
             msgFractionAboveViewPort,
             msgFractionBelowViewPort,
             msgFractionInsideViewPort,
-            viewportFractionCoveredByMsgWhitespace,
             viewportFractionCoveredByMsgContent,
             viewportFractionCoveredByMsg,
             msgContentVsViewportRatio,
