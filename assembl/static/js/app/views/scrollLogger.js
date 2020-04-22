@@ -3,7 +3,7 @@ import Ctx from "../common/context.js";
 /** Estimated words per minute below which we consider that this is a "Slow" scroll */
 const SLOW_SCROLL_WPM_THREASHHOLD = 300;
 /** After 1 minute, we consider the user wasn't reading since the last interval.  A more refined metric would be the time required to read a wall of text in the viewport at 150 WPM  */
-const SCROLL_TIMEOUT_MS = 1000 * 60 * 1; 
+const SCROLL_TIMEOUT_MS = 1000 * 60 * 1;
 
 /** How often to compute message read statistics from scrolling */
 const SCROLL_VECTOR_MEASUREMENT_INTERVAL = 300; //milliseconds, needs to be substantially faster than time between users conscious scroll events
@@ -82,13 +82,15 @@ class ScrollLogger {
             .find(".message-body")
             .first();
 
-        if (!messageSelector || messageSelector.length !== 1) {
-            console.log(messageSelector);
-            throw new Error(
-                "_getMessageGeometry(): messageSelector is invalid"
-            );
-        }
-
+            if (
+                !messageSelector ||
+                messageSelector.length == 0 ||
+                messageSelector[0].scrollHeight == 0
+            ) {
+                //The tread is collapsed, or the messages has been paged-out
+                //console.log("Invalid message selector", messageSelector);
+                return;
+            }
         if (!messageContentSelector || messageContentSelector.length !== 1) {
             console.log(messageContentSelector);
             throw new Error(
@@ -142,7 +144,7 @@ class ScrollLogger {
             msgContentHeight,
             msgContentBottom,
             messageContentSelector,
-            msgWidth
+            msgWidth,
         };
         //console.log(retVal);
         return retVal;
@@ -225,7 +227,7 @@ class ScrollLogger {
             msgTop,
             msgHeight,
             msgContentTop,
-            msgContentHeight
+            msgContentHeight,
         } = messageGeometry;
         const {
             viewportHeight,
@@ -370,6 +372,7 @@ class ScrollLogger {
                 numSlowScrolls: "TODO",
                 fractionInSlowScrolls: "TODO",
                 totalEffectiveFractionOfMessageScrolled: 0,
+                effectiveTimeSpentOnMessage: "TODO",
                 effectiveWpmIfUserReadWholeMessage: undefined,
             },
         });
@@ -448,9 +451,7 @@ class ScrollLogger {
             //console.log("_computeAttentionSignals for messageId", messageId);
             const messageGeometryInfo = msgGeometryMap.get(messageId);
             if (!messageGeometryInfo) {
-                throw new Error(
-                    `Geometry information is missing for message ${messageId}`
-                );
+                return;
             }
             const { messageVsViewportGeometry } = messageGeometryInfo;
             const messageSelector = messageLog._internal.messageSelector;
@@ -458,6 +459,7 @@ class ScrollLogger {
             const CURRENT_FONT_SIZE_PX = parseFloat(
                 messageSelector.find(".message-body").first().css("font-size")
             );
+            //WARNING TODO:  The px and font size does not change depending on the browser's zoom.  Solution https://developer.mozilla.org/en-US/docs/Web/API/VisualViewport
             if (!CURRENT_FONT_SIZE_PX) {
                 throw new Error("Unable to detemine current font size");
             }
@@ -535,9 +537,9 @@ class ScrollLogger {
                     distancePx
                 );
 
-                /** Imagine a 100px msg, and 1000px viewport.  The total distance to scroll for the message to enter or leave screen is 1100px.  The first 100px, it's partially onscreen.  The last 100px, it's partially onscreen. When it's fully onscreen, it only represents 10% of the viewport.
+                /** Imagine a 100px msg, and 1000px viewport.  The total distance to scroll for the message to enter and leave screen is 1100px.  The first 100px, it's partially onscreen.  The last 100px, it's partially onscreen. When it's fully onscreen, it only represents 10% of the viewport.
                     The total distance to cover is viewport + size of message, even if the message is bigger than the viewport.
-                    The effective distance is the estimated equivalent distance scrolled inside the message.
+                    The effective fraction of the message scrolled is the portion of the total message travel that has actually been scrolled.
                     In the example above, we want after scrolling
                     50px: 50/1100
                     100px: 100/1100
@@ -553,46 +555,49 @@ class ScrollLogger {
                     */
                 const currEffectiveFractionOfMessageScrolled =
                     distancePx / msgContentRealScrollableDistance;
+
                 messageLog.metrics.totalEffectiveFractionOfMessageScrolled += currEffectiveFractionOfMessageScrolled;
 
                 const scrollLines = distancePx / ESTIMATED_LINE_HEIGHT;
 
                 const scrollLinesPerMinute =
                     (scrollLines / elapsedMilliseconds) * 1000 * 60;
-                const rawSrollWordsPerMinute =
+                const rawScrollWordsPerMinute =
                     scrollLinesPerMinute * WORDS_PER_LINE;
-                /** The viewport isn't just composed of content.  This is the effective scroll speed in words per minute if the content of all messages in the viewport constituted the entire content.
+                /** The viewport isn't just composed of content.  The following is the effective scroll speed in words per minute if the content of all messages in the viewport constituted the entire content.  Since the content is only a part of the screen, it's as if the user scrolled slower (in WPM), as we presume he only reads text...
                  *
-                 * Furthermore, messages near the top or bottom of the message list cannot travel the entire viewport beacause they would bump at the top or bottom of the scrollbar.  In practice, this means the user has likely started to read before the scroll for messages at the top, and kept reading after the last scroll at the bottom.  So we compensate for that.
+                 * Furthermore, messages near the top or bottom of the message list cannot travel the entire viewport because they would bump at the top or bottom of the scrollbar.  In practice, this means the user has likely started to read before the scroll for messages at the top, and kept reading after the last scroll at the bottom.  So we compensate for that.
+                 *
+                 * WARNING:  This assumes there is no infinite scroll.  If infinite scroll is implemented, either is must be triggered one vieuport in advance, which completely avoids the problem.  Alternatively, we can ignore the correction for messages towards the end of the viewport, but this doesn't give exact result in the case (for example) there is only a single short message to be brought onscreen thru infinite scrolling
                  */
-                const effectiveSrollWordsPerMinute =
-                    (attentionRepartitionGlobal.viewportFractionContent *
-                        rawSrollWordsPerMinute *
-                        msgContentNormalScrollableDistance) /
-                    msgContentRealScrollableDistance;
+                const effectiveScrollWordsPerMinute =
+                    attentionRepartitionGlobal.viewportFractionContent *
+                    rawScrollWordsPerMinute *
+                    (msgContentNormalScrollableDistance /
+                        msgContentRealScrollableDistance);
                 /*console.log(
-                    "rawSrollWordsPerMinute",
-                    rawSrollWordsPerMinute,
-                    "effectiveSrollWordsPerMinute",
-                    effectiveSrollWordsPerMinute,
+                    "rawScrollWordsPerMinute",
+                    rawScrollWordsPerMinute,
+                    "effectiveScrollWordsPerMinute",
+                    effectiveScrollWordsPerMinute,
                     "px to words factor",
                     (1 / ESTIMATED_LINE_HEIGHT) * WORDS_PER_LINE
                 );*/
 
                 if (messageLog.metrics.scrollUpAvgEffectiveWPM) {
                     /*
-                The new cumulative scroll speed cannot simply be obtained by total scroll distance / total time.  While the factor to obtain rawSrollWordsPerMinute is at least constant per message, the factor to obtain effectiveSrollWordsPerMinute per minutes is different for every scroll position.  Instead of memorising the terms for every scroll and recomputing here, we do some math to obtain the new value.
+                The new average scroll speed cannot simply be obtained by total scroll distance / total time.  While the factor to obtain rawScrollWordsPerMinute is at least constant per message, the factor to obtain effectiveScrollWordsPerMinute per minutes is different for every scroll position.  Instead of memorising the terms for every scroll and recomputing here, we do some math to obtain the new value.
                 
                 We'll explain the formula as if all speed were in px/s
                 Say we have:
-                cD = current cumulative distance scrolled
-                dD = distance scrolled during current scroll
-                cS = current cumulative speed in px/s
-                dS = speed of current scroll in px/s
-                cSWPM = current cumulative speed in WPM
+                cD = cumulative distance scrolled
+                dD = distance scrolled during new scroll
+                cS = cumulative average speed in px/s
+                dS = speed during new scroll in px/s
+                cSWPM = cumulative speed in WPM
                 sSWPM = speed of current scroll in WPM
                 cT = cumulative time elapsed before current scroll
-                dT = Time elapses during current scroll
+                dT = Time elapsed during current scroll
                 cF = Constant to transform cumulative speed to effective scrollSpeed
                 dF = Constant to transform current speed to effective scrollSpeed
                 nS = New cumulative speed in px/s
@@ -615,7 +620,7 @@ class ScrollLogger {
                         elapsedMilliseconds; //At this stage, messageLog.metrics.totalDurationMs has already been recomputed...
                     let dT = elapsedMilliseconds;
                     let cSWPM = messageLog.metrics.scrollUpAvgEffectiveWPM;
-                    let dSWPM = effectiveSrollWordsPerMinute;
+                    let dSWPM = effectiveScrollWordsPerMinute;
                     /*console.log("Before:", {
                         cT,
                         dT,
@@ -630,7 +635,7 @@ class ScrollLogger {
                         messageLog.metrics.scrollUpAvgEffectiveWPM
                     );*/
                 } else {
-                    messageLog.metrics.scrollUpAvgEffectiveWPM = effectiveSrollWordsPerMinute;
+                    messageLog.metrics.scrollUpAvgEffectiveWPM = effectiveScrollWordsPerMinute;
                 }
 
                 //Règle de 3...
@@ -653,8 +658,15 @@ class ScrollLogger {
     ) {
         const msgGeometryMap = new Map();
         for (let messageSelector of messageSelectors) {
-            if (!messageSelector || messageSelector.length == 0) return;
-
+            if (
+                !messageSelector ||
+                messageSelector.length == 0 ||
+                messageSelector[0].scrollHeight == 0
+            ) {
+                //The tread is collapsed, or the messages has been paged-out
+                //console.log("Invalid message selector", messageSelector);
+                break;
+            }
             let messageId = messageSelector[0].id;
             let messageGeometry = this._getMessageGeometry(messageSelector);
 
@@ -793,7 +805,6 @@ class ScrollLogger {
         if (currentScrollTop === undefined) {
             throw new Error("Unable to compute viewport scrollTop");
         }
-        //TODO: While unlikely the height has changed spotaneously during scroll, it is very possible that a message has been expanded from preview, or that the thread branch has been collapsed.  The scroll scrollEvents do not log this.  To fix  "properly", we would need to timestamp individual message size change.  A quick and more realistic improvement would be to immediately force a final update when the message changed geometry, and prune it's history.  It could be done during processScrollEventStack.
 
         const viewportGeometry = this._getViewportGeometry();
         const { currentViewPortTop, currentViewPortBottom } = viewportGeometry;
@@ -809,6 +820,7 @@ class ScrollLogger {
         );*/
         if (previousScrollEventAtStart) {
             if (
+                //If the user didn't come back to his screen after a trip to the coffee machine
                 latestScrollEventAtStart.timeStamp -
                     previousScrollEventAtStart.timeStamp >
                 SCROLL_TIMEOUT_MS
