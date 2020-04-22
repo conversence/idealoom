@@ -1,7 +1,9 @@
+import Ctx from "../common/context.js";
+
 /** Estimated words per minute below which we consider that this is a "Slow" scroll */
 const SLOW_SCROLL_WPM_THREASHHOLD = 300;
-
-const SCROLL_TIMEOUT_MS = 1000 * 60 * 2 ; //2 minutes
+/** After 1 minute, we consider the user wasn't reading since the last interval.  A more refined metric would be the time required to read a wall of text in the viewport at 150 WPM  */
+const SCROLL_TIMEOUT_MS = 1000 * 60 * 1; 
 
 /** How often to compute message read statistics from scrolling */
 const SCROLL_VECTOR_MEASUREMENT_INTERVAL = 300; //milliseconds, needs to be substantially faster than time between users conscious scroll events
@@ -26,7 +28,7 @@ class ScrollLogger {
     }
 
     finalize() {
-        console.log("TODO: Flush all updates before object is destroyed...");
+        this._flushToServerAndReset();
     }
     /**
      * Return the subset of scroll log stack  entries applicable to the timestamps
@@ -34,7 +36,7 @@ class ScrollLogger {
      * @param {*} timeStampFirstOnscreen
      * @param {*} timeStampLastOnscreen
      */
-    getScrollVectorsForTimeRange(
+    _getScrollVectorsForTimeRange(
         timeStampFirstOnscreen,
         timeStampLastOnscreen
     ) {
@@ -52,41 +54,14 @@ class ScrollLogger {
         return applicableVectors;
     }
 
-    getViewportGeometry() {
+    _getViewportGeometry() {
         const currentViewPortTop = this.messageList.getCurrentViewPortTop();
         const currentViewPortBottom = this.messageList.getCurrentViewPortBottom();
-        function findOffsetTopUntilElement(element, targetParentElement) {
-            //console.log("findOffsetTopUntilElement()",element.offsetTop,element, element.offsetParent, targetParentElement);
-            if (element.offsetParent !== targetParentElement) {
-                return (
-                    element.offsetTop +
-                    findOffsetTopUntilElement(
-                        element.offsetParent,
-                        targetParentElement
-                    )
-                );
-            } else {
-                return element.offsetTop;
-            }
-        }
-        const containerSelector = this.messageList.ui.panelBody;
 
-        const scrollableContainerHeight = containerSelector[0].scrollHeight;
-        const firstMessageSelector = containerSelector.find(".message").first();
-        const lastMessageSelector = containerSelector.find(".message").last();
+        const scrollableContainerSelector = this.messageList.ui.panelBody;
 
-        const firstMsgOffsetFromTopOfScrollContainer = findOffsetTopUntilElement(
-            firstMessageSelector[0],
-            this.messageList.ui.panelBody[0]
-        );
-
-        const lastMsgDistanceFromBottomOfScrollContainer =
-            scrollableContainerHeight -
-            findOffsetTopUntilElement(
-                lastMessageSelector[0],
-                containerSelector[0]
-            ) +
-            lastMessageSelector[0].scrollHeight;
+        const scrollableContainerHeight =
+            scrollableContainerSelector[0].scrollHeight;
 
         if (!currentViewPortTop || !currentViewPortBottom) {
             throw new Error("Unable to compute viewport dimensions");
@@ -96,27 +71,28 @@ class ScrollLogger {
             currentViewPortTop,
             currentViewPortBottom,
             scrollableContainerHeight,
+            scrollableContainerSelector,
             viewportHeight,
-            firstMsgOffsetFromTopOfScrollContainer,
-            lastMsgDistanceFromBottomOfScrollContainer,
         };
         //console.log(retVal);
         return retVal;
     }
-    getMessageGeometry(messageSelector, overrideMessageTop) {
+    _getMessageGeometry(messageSelector, overrideMessageTop) {
         const messageContentSelector = messageSelector
             .find(".message-body")
             .first();
 
         if (!messageSelector || messageSelector.length !== 1) {
             console.log(messageSelector);
-            throw new Error("getMessageGeometry(): messageSelector is invalid");
+            throw new Error(
+                "_getMessageGeometry(): messageSelector is invalid"
+            );
         }
 
         if (!messageContentSelector || messageContentSelector.length !== 1) {
             console.log(messageContentSelector);
             throw new Error(
-                "getMessageGeometry(): messageContentSelector is invalid"
+                "_getMessageGeometry(): messageContentSelector is invalid"
             );
         }
 
@@ -125,7 +101,7 @@ class ScrollLogger {
         if (messageContentDom.offsetParent.id !== messageSelector[0].id) {
             console.log(messageContentDom.offsetParent, messageSelector);
             throw new Error(
-                "getMessageGeometry(): the message content's offsetParent isn't the message. offset calculations wont work.  Most likely the CSS or HTML has changed"
+                "_getMessageGeometry(): the message content's offsetParent isn't the message. offset calculations wont work.  Most likely the CSS or HTML has changed"
             );
         }
         //console.log(messageSelector, messageSelector.height(), messageDom.scrollHeight,  messageContentDom.style.marginTop, messageContentDom.style.marginTop, messageContentDom.style.borderTop);
@@ -150,7 +126,7 @@ class ScrollLogger {
             console.log(
                 "TODO:  Unable to compute message dimensions. Need to handle case when thread has been collapsed"
             );
-            //throw new Error("checkMessagesOnscreen(): Unable to compute message dimensions.");
+            //throw new Error("processScrollEventStack(): Unable to compute message dimensions.");
         }
         const msgTopWhitespaceTop = msgTop;
         const msgTopWhitespaceBottom = msgContentTop;
@@ -166,12 +142,14 @@ class ScrollLogger {
           messageWhiteSpaceRatio = (messageSelector.find(".js_messageHeader").height() + messageSelector.find(".js_messageContentBottomMenu").height() - 15) / msgContentHeight;
           */
         const retVal = {
+            messageSelector,
             msgTop,
             msgHeight,
             msgBottom,
             msgContentTop,
             msgContentHeight,
             msgContentBottom,
+            messageContentSelector,
             msgWidth,
             msgTopWhitespaceTop,
             msgTopWhitespaceBottom,
@@ -183,14 +161,14 @@ class ScrollLogger {
         //console.log(retVal);
         return retVal;
     }
-    getContentVisibleFractions(viewportGeometry, contentTop, contentHeight) {
+    _getContentVisibleFractions(viewportGeometry, contentTop, contentHeight) {
         const {
             currentViewPortTop,
             currentViewPortBottom,
             viewportHeight,
         } = viewportGeometry;
         /*console.log(
-            "getContentVisibleFractions(): ",
+            "_getContentVisibleFractions(): ",
             viewportGeometry,
             contentTop,
             contentHeight
@@ -227,7 +205,7 @@ class ScrollLogger {
 
         fractionInsideViewPort =
             1 - fractionAboveViewPort - fractionBelowViewPort;
-        const contentVsViewportRatio = contentHeight / viewportHeight;
+        const msgContentVsViewportRatio = contentHeight / viewportHeight;
         const viewportFractionCovered =
             (fractionInsideViewPort * contentHeight) / viewportHeight;
         const retVal = {
@@ -235,7 +213,7 @@ class ScrollLogger {
             fractionBelowViewPort,
             fractionInsideViewPort,
             viewportFractionCovered,
-            contentVsViewportRatio,
+            msgContentVsViewportRatio,
         };
         //console.log(retVal);
         return retVal;
@@ -246,8 +224,8 @@ class ScrollLogger {
      * @property {number} msgFractionBelowViewPort - Fraction, 0 to 1
      * @property {number} msgFractionInsideViewPort - Fraction, 0 to 1
      * @property {number} viewportFractionCoveredByMsg - Fraction, 0 to 1
-     * @property {number} msgVsViewportRatio - Fraction, can be larger than 1
-     * @property {number} msgScrollableDistance - in px, >=0.  The distance one has to scroll for the message to enter and completely leave the viewport
+     * @property {number} msgContentVsViewportRatio - Fraction, can be larger than 1
+     * @property {number} msgContentRealScrollableDistance - in px, >=0.  The distance one has to scroll for the message to enter and completely leave the viewport
      */
     /**
      *
@@ -255,8 +233,9 @@ class ScrollLogger {
      * @param {*} viewportGeometry
      * @return {messageVsViewportGeometry}
      */
-    getMessageVsViewportGeometry(messageGeometry, viewportGeometry) {
+    _getMessageVsViewportGeometry(messageGeometry, viewportGeometry) {
         const {
+            messageContentSelector,
             msgTop,
             msgHeight,
             msgContentTop,
@@ -266,15 +245,19 @@ class ScrollLogger {
             msgBottomWhitespaceTop,
             msgBottomWhitespaceHeight,
         } = messageGeometry;
-        const { viewportHeight } = viewportGeometry;
+        const {
+            viewportHeight,
+            scrollableContainerHeight,
+            scrollableContainerSelector,
+        } = viewportGeometry;
 
         const {
             fractionAboveViewPort: msgFractionAboveViewPort,
             fractionBelowViewPort: msgFractionBelowViewPort,
             fractionInsideViewPort: msgFractionInsideViewPort,
             viewportFractionCovered: viewportFractionCoveredByMsg,
-            contentVsViewportRatio: msgVsViewportRatio,
-        } = this.getContentVisibleFractions(
+            msgContentVsViewportRatio,
+        } = this._getContentVisibleFractions(
             viewportGeometry,
             msgTop,
             msgHeight
@@ -282,7 +265,7 @@ class ScrollLogger {
         const {
             fractionInsideViewPort: messageContentFractionInsideViewPort,
             viewportFractionCovered: viewportFractionCoveredByMsgContent,
-        } = this.getContentVisibleFractions(
+        } = this._getContentVisibleFractions(
             viewportGeometry,
             msgContentTop,
             msgContentHeight
@@ -290,7 +273,7 @@ class ScrollLogger {
         const {
             fractionInsideViewPort: wsTopFractionInsideViewPort,
             viewportFractionCovered: wsTopViewportFractionCoveredByMsg,
-        } = this.getContentVisibleFractions(
+        } = this._getContentVisibleFractions(
             viewportGeometry,
             msgTopWhitespaceTop,
             msgTopWhitespaceHeight
@@ -298,7 +281,7 @@ class ScrollLogger {
         const {
             fractionInsideViewPort: wsBottomFractionInsideViewPort,
             viewportFractionCovered: wsBottomViewportFractionCoveredByMsg,
-        } = this.getContentVisibleFractions(
+        } = this._getContentVisibleFractions(
             viewportGeometry,
             msgBottomWhitespaceTop,
             msgBottomWhitespaceHeight
@@ -306,8 +289,61 @@ class ScrollLogger {
         const viewportFractionCoveredByMsgWhitespace =
             wsTopViewportFractionCoveredByMsg +
             wsBottomViewportFractionCoveredByMsg;
-        const msgScrollableDistance = msgHeight + viewportHeight;
 
+        function findOffsetTopUntilElement(element, targetParentElement) {
+            //console.log("findOffsetTopUntilElement()",element.offsetTop,element, element.offsetParent, targetParentElement);
+            if (element.offsetParent !== targetParentElement) {
+                return (
+                    element.offsetTop +
+                    findOffsetTopUntilElement(
+                        element.offsetParent,
+                        targetParentElement
+                    )
+                );
+            } else {
+                return element.offsetTop;
+            }
+        }
+        const containerScrollTop = scrollableContainerSelector[0].scrollTop;
+        const containerClientHeight =
+            scrollableContainerSelector[0].clientHeight;
+        const contentBottomOffsetFromTopOfScrollContainer =
+            findOffsetTopUntilElement(
+                messageContentSelector[0],
+                scrollableContainerSelector[0]
+            ) + msgContentHeight;
+        const unscrollableSpaceTop = Math.max(
+            containerClientHeight - contentBottomOffsetFromTopOfScrollContainer,
+            0
+        );
+        const contentTopOffsetFromBottomOfScrollContainer =
+            scrollableContainerHeight -
+            findOffsetTopUntilElement(
+                messageContentSelector[0],
+                scrollableContainerSelector[0]
+            );
+        const unscrollableSpaceBottom = Math.max(
+            containerClientHeight - contentTopOffsetFromBottomOfScrollContainer,
+            0
+        );
+        /** The total distance the message content can travel in the viewport.  Normally viewport height + size of message content, even if the message is bigger than the viewport. */
+        const msgContentNormalScrollableDistance =
+            msgContentHeight + viewportHeight;
+        /**However, this is corrected in the case the viewport cannot scroll that far for messages near the top or bottem of the content. */
+        const msgContentRealScrollableDistance =
+            msgContentNormalScrollableDistance -
+            unscrollableSpaceTop -
+            unscrollableSpaceBottom;
+        /*console.log({
+            contentBottomOffsetFromTopOfScrollContainer,
+            contentTopOffsetFromBottomOfScrollContainer,
+            viewportHeight,
+            containerClientHeight,
+            containerScrollTop,
+            unscrollableSpaceTop,
+            unscrollableSpaceBottom,
+            msgContentRealScrollableDistance,
+        });*/
         const retVal = {
             msgFractionAboveViewPort,
             msgFractionBelowViewPort,
@@ -315,95 +351,12 @@ class ScrollLogger {
             viewportFractionCoveredByMsgWhitespace,
             viewportFractionCoveredByMsgContent,
             viewportFractionCoveredByMsg,
-            msgVsViewportRatio,
-            msgScrollableDistance,
+            msgContentVsViewportRatio,
+            msgContentNormalScrollableDistance,
+            msgContentRealScrollableDistance,
         };
         //console.log(retVal);
         return retVal;
-    }
-
-    /**
-     * Computes which messages are currently onscreen
-     * @param {*} resultMessageIdCollection
-     * @param {*} visitorData
-     */
-    checkMessagesOnscreen(resultMessageIdCollection, visitorData) {
-        let that = this;
-        let messageSelectors = this.messageList.getOnScreenMessagesSelectors(
-            resultMessageIdCollection,
-            visitorData
-        );
-
-        let currentScrollTop = this.messageList.ui.panelBody.scrollTop();
-        if (currentScrollTop === undefined) {
-            throw new Error("Unable to compute viewport scrollTop");
-        }
-        //TODO: While unlikely the height has changed spotaneously during scroll, it is very possible that a message has been expanded from preview, or that the thread branch has been collapsed.  The scroll scrollEvents do not log this.  To fix  "properly", we would need to timestamp individual message size change.  A quick and more realistic improvement would be to immediately force a final update when the message changed geometry, and prune it's history.  It could be done during checkMessagesOnscreen.
-
-        const viewportGeometry = this.getViewportGeometry();
-        const { currentViewPortTop, currentViewPortBottom } = viewportGeometry;
-        let latestScrollEventAtStart =
-            that.scrollEventStack[that.scrollEventStack.length - 1];
-        let previousScrollEventAtStart =
-            that.scrollEventStack[that.scrollEventStack.length - 2];
-
-        /*console.log(
-            "checkMessagesOnscreen() for ",
-            latestScrollEventAtStart,
-            previousScrollEventAtStart
-        );*/
-        if (previousScrollEventAtStart) {
-            if (
-                latestScrollEventAtStart.timeStamp -
-                    previousScrollEventAtStart.timeStamp >
-                SCROLL_TIMEOUT_MS
-            ) {
-                console.log("TODO: Scroll timeout, send final update for previous log and reset");
-            }
-                this.processMsgForScrollEvent(
-                    viewportGeometry,
-                    messageSelectors,
-                    latestScrollEventAtStart,
-                    previousScrollEventAtStart
-                );
-            if (false && this.debugScrollLogging) {
-                //console.log(messageSelectors);
-                console.log(
-                    "checkMessagesOnscreen() starts at currentScrollTop:",
-                    currentScrollTop
-                );
-            }
-
-            let oldestMessageInLogTimeStamp = 0;
-            for (const [id, log] of this.loggedMessages) {
-                if (log.updateType === ATTENTION_UPDATE_FINAL) {
-                    if (that.debugScrollLogging) {
-                        console.log(
-                            "message",
-                            id,
-                            " processed FINAL update, deleting from log..."
-                        );
-                    }
-                    this.loggedMessages.delete(id);
-                } else {
-                    if (!log.timeStampFirstOnscreen) {
-                        throw new Error("timeStampFirstOnscreen is invalid");
-                    }
-                    if (
-                        !oldestMessageInLogTimeStamp ||
-                        log.timeStampFirstOnscreen < oldestMessageInLogTimeStamp
-                    ) {
-                        oldestMessageInLogTimeStamp =
-                            log.timeStampFirstOnscreen;
-                    }
-                }
-            }
-
-            //console.log(oldestMessageInLogTimeStamp, that.loggedMessages);
-            if (oldestMessageInLogTimeStamp) {
-                that.pruneOldScrollEvents(oldestMessageInLogTimeStamp);
-            }
-        }
     }
 
     /**
@@ -411,19 +364,19 @@ class ScrollLogger {
      * timestamp provided
      * @param {*} timeStamp
      */
-    pruneOldScrollEvents(timeStamp) {
+    _getMessageLogTemplate(timeStamp) {
         let that = this;
 
         if (!timeStamp) {
             throw new Error(
-                "pruneOldScrollEvents: missing or invalid timestamp"
+                "_getMessageLogTemplate: missing or invalid timestamp"
             );
         }
         let firstNewerVectorIndex = that.scrollEventStack.findIndex(
             (scrollEvent) => {
                 if (scrollEvent.timeStamp === undefined) {
                     throw new Error(
-                        "pruneOldScrollEvents: Unable to process scrollEvent"
+                        "_getMessageLogTemplate: Unable to process scrollEvent"
                     );
                 }
                 return scrollEvent.timeStamp >= timeStamp;
@@ -437,7 +390,8 @@ class ScrollLogger {
             that.scrollEventStack.splice(0, lastIndexToKeep + 1);
         }
     }
-    getMessageLogTemplate() {
+
+    _getMessageLogTemplate() {
         return _.clone({
             _internal: {
                 lastValidDirection: undefined,
@@ -459,7 +413,12 @@ class ScrollLogger {
         });
     }
 
-    computeAttentionRepartitionGlobal(msgGeometryMap) {
+    /**
+     * Computes the global fraction of the viewport currently occupied by content and non-content.
+     *
+     * @param {*} msgGeometryMap
+     */
+    _computeAttentionRepartitionGlobal(msgGeometryMap) {
         let viewportFractionContent = 0;
         for (const [key, value] of msgGeometryMap) {
             //console.log(key, value);
@@ -473,149 +432,15 @@ class ScrollLogger {
         };
         return retVal;
     }
+
     /**
-     * Compute attention repartition for everything onscreen for a single scroll scrollEvent
-     * @param {*} scrollEvent
-     * @returns {}
+     * Compute the direction of the scroll
+     * Reminder:  scrollTop is the position of the scrollBar, so always positive top() of an element is the distance from top of the container, also always positive.
+     * So, scrolling UP (content moves up), scrollTop increases
+     * When reading, we expect direction to be UP
+     * @param {number} distance - px
      */
-    processMsgForScrollEvent(
-        viewportGeometry,
-        messageSelectors,
-        scrollEvent,
-        previousScrollEvent
-    ) {
-        const msgGeometryMap = new Map();
-        for (let messageSelector of messageSelectors) {
-            if (!messageSelector || messageSelector.length == 0) return;
-
-            let messageId = messageSelector[0].id;
-            let messageGeometry = this.getMessageGeometry(messageSelector);
-
-            let { msgTop } = messageGeometry;
-            let messageVsViewportGeometry = this.getMessageVsViewportGeometry(
-                messageGeometry,
-                viewportGeometry
-            );
-            let {
-                msgFractionInsideViewPort,
-                viewportFractionCoveredByMsgContent,
-                viewportFractionCoveredByMsgWhitespace,
-            } = messageVsViewportGeometry;
-
-            msgGeometryMap.set(messageId, {
-                messageGeometry,
-                messageVsViewportGeometry,
-            });
-            let updateType;
-
-            let existingLog = this.loggedMessages.get(messageId);
-            if (!existingLog) {
-                if (msgFractionInsideViewPort > 0) {
-                    updateType = ATTENTION_UPDATE_INITIAL;
-                    this.loggedMessages.set(
-                        messageId,
-                        this.getMessageLogTemplate()
-                    );
-                } else {
-                    updateType = ATTENTION_UPDATE_NONE;
-                }
-            } else {
-                if (msgFractionInsideViewPort > 0) {
-                    updateType = ATTENTION_UPDATE_INTERIM;
-                } else {
-                    updateType = ATTENTION_UPDATE_FINAL;
-                }
-            }
-            if (updateType !== ATTENTION_UPDATE_NONE) {
-                let timeStampFirstOnscreen;
-                let timeStampLastOnscreen;
-                let msgTopWhenFirstOnscreen;
-
-                switch (updateType) {
-                    case ATTENTION_UPDATE_INITIAL:
-                        timeStampFirstOnscreen = scrollEvent.timeStamp;
-                        timeStampLastOnscreen = scrollEvent.timeStamp;
-                        msgTopWhenFirstOnscreen = msgTop;
-                        break;
-                    case ATTENTION_UPDATE_INTERIM:
-                        timeStampFirstOnscreen =
-                            existingLog.timeStampFirstOnscreen;
-                        timeStampLastOnscreen = scrollEvent.timeStamp;
-                        msgTopWhenFirstOnscreen =
-                            existingLog._internal.msgTopWhenFirstOnscreen;
-                        break;
-                    case ATTENTION_UPDATE_FINAL: //Basically, repeat last interim
-                        timeStampFirstOnscreen =
-                            existingLog.timeStampFirstOnscreen;
-                        timeStampLastOnscreen =
-                            existingLog.timeStampLastOnscreen;
-                        msgTopWhenFirstOnscreen =
-                            existingLog._internal.msgTopWhenFirstOnscreen;
-                        break;
-                    default:
-                        throw new Error("Unknown update type");
-                }
-                /*const scrollEvents = this.getScrollVectorsForTimeRange(
-                    timeStampFirstOnscreen,
-                    timeStampLastOnscreen
-                );
-                */
-                let messageLog = this.loggedMessages.get(messageId);
-
-                //An update with the same updateid replaces the previous one
-                messageLog.updateId = messageId + "_" + timeStampFirstOnscreen;
-                messageLog.messageId = messageId;
-                messageLog.updateType = updateType;
-                messageLog.timeStampFirstOnscreen = timeStampFirstOnscreen;
-                messageLog._internal.msgTopWhenFirstOnscreen = msgTopWhenFirstOnscreen;
-                messageLog._internal.messageSelector = messageSelector;
-            } else {
-                //Update type is NONE
-                if (msgTop > viewportGeometry.currentViewPortBottom) {
-                    //All messages are in DOM order, no reason to keep crunching messages
-                    break;
-                }
-            }
-        }
-        //console.log(msgGeometryMap);
-
-        /* 
-                                                          const previousScrollEvent = scrollEvents[idx - 1];
-                            if (idx !== 0) 
-                //Skip the first scrollEvent, as it's the one BEFORE the message was onscreen.  We need it as a reference to establish speed.
-                */
-        const scrollEventsInfo = this.processScrollVector(
-            scrollEvent,
-            previousScrollEvent,
-            msgGeometryMap,
-            viewportGeometry
-        );
-
-        this.loggedMessages.forEach((messageLog) => {
-            if (this.debugScrollLogging) {
-                let messageInfo = {
-                    _internal: _,
-                    ...messageLog,
-                };
-                console.log(
-                    "Mock-wrote new log for message",
-                    messageLog.messageId,
-                    ": ",
-                    messageInfo
-                );
-            }
-        });
-    } //End processMsgForScrollEvent()
-
-    /** Compute the direction of the scroll
-                Reminder:  scrollTop is the position of the scrollBar, so always positive
-                top() of an element is the distance from top of the container, also always positive
-                So, scrolling UP (content moves up), scrollTop increases
-                When reading, we expect direction to be UP
-                
-         * @param {number} distance - px
-         */
-    getDirection(distance) {
+    _getDirection(distance) {
         if (distance === 0) {
             return DIRECTION_NONE;
         }
@@ -630,24 +455,22 @@ class ScrollLogger {
         }
     }
     /**
-     * @param {*} scrollLoggerMessageInfo The attention information last logged about the message
-     * @param {*} scrollEvents
-     * @param {*} messageSelector
+     * Calculates the actual attention signal the scroll movement implies for each message.
      */
-    processScrollVector(
+    _computeAttentionSignals(
         scrollEvent,
         previousScrollEvent,
         msgGeometryMap,
         viewportGeometry
     ) {
         let that = this;
-        const attentionRepartitionGlobal = this.computeAttentionRepartitionGlobal(
+        const attentionRepartitionGlobal = this._computeAttentionRepartitionGlobal(
             msgGeometryMap
         );
         //console.log(attentionRepartitionGlobal);
         const distancePx =
             scrollEvent.scrollTop - previousScrollEvent.scrollTop;
-        const direction = that.getDirection(distancePx);
+        const direction = that._getDirection(distancePx);
         const elapsedMilliseconds =
             scrollEvent.timeStamp - previousScrollEvent.timeStamp;
 
@@ -655,12 +478,12 @@ class ScrollLogger {
             const scrollPxPerMinute =
                 (distancePx / elapsedMilliseconds) * 1000 * 60;
             console.log(
-                `processScrollVector(), scrolled ${distancePx}px in ${elapsedMilliseconds}ms; ${scrollPxPerMinute} px/min`
+                `_computeAttentionSignals(), scrolled ${distancePx}px in ${elapsedMilliseconds}ms; ${scrollPxPerMinute} px/min`
             );
         }
         //console.log(this.loggedMessages);
         this.loggedMessages.forEach((messageLog, messageId) => {
-            //console.log("processScrollVector for messageId", messageId);
+            //console.log("_computeAttentionSignals for messageId", messageId);
             const messageGeometryInfo = msgGeometryMap.get(messageId);
             if (!messageGeometryInfo) {
                 throw new Error(
@@ -712,7 +535,8 @@ class ScrollLogger {
 
             const {
                 viewportFractionCoveredByMsg,
-                msgScrollableDistance,
+                msgContentNormalScrollableDistance,
+                msgContentRealScrollableDistance,
             } = messageVsViewportGeometry;
 
             const previousDirection = messageLog._internal.lastValidDirection;
@@ -760,22 +584,30 @@ class ScrollLogger {
           
                     If we backed-off 300 px to re-read something, and then finished scrolling, we'd have
                     1400px: 1400/1100
+
+                    The above illustrates the concept of msgContentNormalScrollableDistance. 
+                    
+                    However, messages at the top and bottom of the viewport have a lower msgContentRealScrollableDistance that the example above, as they cannot scroll this far before the scrollbar bumps at the end of their travel.
                     */
                 const currEffectiveFractionOfMessageScrolled =
-                    distancePx / msgScrollableDistance;
+                    distancePx / msgContentRealScrollableDistance;
                 messageLog.metrics.totalEffectiveFractionOfMessageScrolled += currEffectiveFractionOfMessageScrolled;
-                const fractionOfTotalUpScroll =
-                    distancePx / messageLog._internal.cumulativeUpDistancePx;
+
                 const scrollLines = distancePx / ESTIMATED_LINE_HEIGHT;
 
                 const scrollLinesPerMinute =
                     (scrollLines / elapsedMilliseconds) * 1000 * 60;
                 const rawSrollWordsPerMinute =
                     scrollLinesPerMinute * WORDS_PER_LINE;
-                /** The viewport isn't just composed of content.  This is the effective scroll speed in words per minute if the the content of all messages in the viewport constituted the entire content. */
+                /** The viewport isn't just composed of content.  This is the effective scroll speed in words per minute if the content of all messages in the viewport constituted the entire content.
+                 *
+                 * Furthermore, messages near the top or bottom of the message list cannot travel the entire viewport beacause they would bump at the top or bottom of the scrollbar.  In practice, this means the user has likely started to read before the scroll for messages at the top, and kept reading after the last scroll at the bottom.  So we compensate for that.
+                 */
                 const effectiveSrollWordsPerMinute =
-                    attentionRepartitionGlobal.viewportFractionContent *
-                    rawSrollWordsPerMinute;
+                    (attentionRepartitionGlobal.viewportFractionContent *
+                        rawSrollWordsPerMinute *
+                        msgContentNormalScrollableDistance) /
+                    msgContentRealScrollableDistance;
                 /*console.log(
                     "rawSrollWordsPerMinute",
                     rawSrollWordsPerMinute,
@@ -845,6 +677,232 @@ class ScrollLogger {
                     messageLog.metrics.totalEffectiveFractionOfMessageScrolled;
             }
         });
+    }
+
+    /**
+     * Finds every message that is at least partially in the current viewport,
+     * and for each one log attention signal generated for the scrollEvent
+     */
+    _logScrollForMessagesInViewport(
+        viewportGeometry,
+        messageSelectors,
+        scrollEvent,
+        previousScrollEvent
+    ) {
+        const msgGeometryMap = new Map();
+        for (let messageSelector of messageSelectors) {
+            if (!messageSelector || messageSelector.length == 0) return;
+
+            let messageId = messageSelector[0].id;
+            let messageGeometry = this._getMessageGeometry(messageSelector);
+
+            let { msgTop } = messageGeometry;
+            let messageVsViewportGeometry = this._getMessageVsViewportGeometry(
+                messageGeometry,
+                viewportGeometry
+            );
+            let { msgFractionInsideViewPort } = messageVsViewportGeometry;
+
+            msgGeometryMap.set(messageId, {
+                messageGeometry,
+                messageVsViewportGeometry,
+            });
+            let updateType;
+
+            let existingLog = this.loggedMessages.get(messageId);
+            if (!existingLog) {
+                if (msgFractionInsideViewPort > 0) {
+                    updateType = ATTENTION_UPDATE_INITIAL;
+                    this.loggedMessages.set(
+                        messageId,
+                        this._getMessageLogTemplate()
+                    );
+                } else {
+                    updateType = ATTENTION_UPDATE_NONE;
+                }
+            } else {
+                if (msgFractionInsideViewPort > 0) {
+                    updateType = ATTENTION_UPDATE_INTERIM;
+                } else {
+                    updateType = ATTENTION_UPDATE_FINAL;
+                }
+            }
+            if (updateType !== ATTENTION_UPDATE_NONE) {
+                let timeStampFirstOnscreen;
+                let timeStampLastOnscreen;
+                let msgTopWhenFirstOnscreen;
+
+                switch (updateType) {
+                    case ATTENTION_UPDATE_INITIAL:
+                        timeStampFirstOnscreen = scrollEvent.timeStamp;
+                        timeStampLastOnscreen = scrollEvent.timeStamp;
+                        msgTopWhenFirstOnscreen = msgTop;
+                        break;
+                    case ATTENTION_UPDATE_INTERIM:
+                        timeStampFirstOnscreen =
+                            existingLog.timeStampFirstOnscreen;
+                        timeStampLastOnscreen = scrollEvent.timeStamp;
+                        msgTopWhenFirstOnscreen =
+                            existingLog._internal.msgTopWhenFirstOnscreen;
+                        break;
+                    case ATTENTION_UPDATE_FINAL: //Basically, repeat last interim
+                        timeStampFirstOnscreen =
+                            existingLog.timeStampFirstOnscreen;
+                        timeStampLastOnscreen =
+                            existingLog.timeStampLastOnscreen;
+                        msgTopWhenFirstOnscreen =
+                            existingLog._internal.msgTopWhenFirstOnscreen;
+                        break;
+                    default:
+                        throw new Error("Unknown update type");
+                }
+                /*const scrollEvents = this._getScrollVectorsForTimeRange(
+                    timeStampFirstOnscreen,
+                    timeStampLastOnscreen
+                );
+                */
+                let messageLog = this.loggedMessages.get(messageId);
+
+                //An update with the same updateid replaces the previous one
+                messageLog.updateId = messageId + "_" + timeStampFirstOnscreen;
+                messageLog.messageId = messageId;
+                messageLog.updateType = updateType;
+                messageLog.timeStampFirstOnscreen = timeStampFirstOnscreen;
+                messageLog._internal.msgTopWhenFirstOnscreen = msgTopWhenFirstOnscreen;
+                messageLog._internal.messageSelector = messageSelector;
+            } else {
+                //Update type is NONE
+                if (msgTop > viewportGeometry.currentViewPortBottom) {
+                    //All messages are in DOM order, no reason to keep crunching messages
+                    break;
+                }
+            }
+        }
+        //console.log(msgGeometryMap);
+
+        const scrollEventsInfo = this._computeAttentionSignals(
+            scrollEvent,
+            previousScrollEvent,
+            msgGeometryMap,
+            viewportGeometry
+        );
+
+        this._flushToServer();
+    } //End _logScrollForMessagesInViewport()
+
+    _flushToServer(flushAsFinal = false) {
+        this.loggedMessages.forEach((messageLog) => {
+            const updateType = flushAsFinal
+                ? ATTENTION_UPDATE_FINAL
+                : messageLog.updateType;
+            let { _internal, ...messageInfo } = messageLog;
+            const user = Ctx.getCurrentUser().id;
+            messageInfo = { ...messageInfo, user, updateType };
+            if (this.debugScrollLogging) {
+                console.log(
+                    "Mock-wrote new log for message",
+                    messageLog.messageId,
+                    ": ",
+                    messageInfo
+                );
+            }
+        });
+    }
+
+    _flushToServerAndReset() {
+        this._flushToServer(true);
+        this.loggedMessages = new Map();
+        //Keep exactly one event, in case this is due to a timeout.  In which case, we won't lose the the exact time the user resumed reading
+        this.scrollEventStack.splice(0, this.scrollEventStack.length - 1);
+    }
+    /**
+     * This function must be called once each time a scoll event is appended to the stack.  It will call all logging function, and clean up obsolete data from memory
+     * @param {*} resultMessageIdCollection
+     * @param {*} visitorData
+     */
+    processScrollEventStack(resultMessageIdCollection, visitorData) {
+        let that = this;
+        let messageSelectors = this.messageList.getOnScreenMessagesSelectors(
+            resultMessageIdCollection,
+            visitorData
+        );
+
+        let currentScrollTop = this.messageList.ui.panelBody.scrollTop();
+        if (currentScrollTop === undefined) {
+            throw new Error("Unable to compute viewport scrollTop");
+        }
+        //TODO: While unlikely the height has changed spotaneously during scroll, it is very possible that a message has been expanded from preview, or that the thread branch has been collapsed.  The scroll scrollEvents do not log this.  To fix  "properly", we would need to timestamp individual message size change.  A quick and more realistic improvement would be to immediately force a final update when the message changed geometry, and prune it's history.  It could be done during processScrollEventStack.
+
+        const viewportGeometry = this._getViewportGeometry();
+        const { currentViewPortTop, currentViewPortBottom } = viewportGeometry;
+        let latestScrollEventAtStart =
+            that.scrollEventStack[that.scrollEventStack.length - 1];
+        let previousScrollEventAtStart =
+            that.scrollEventStack[that.scrollEventStack.length - 2];
+
+        /*console.log(
+            "processScrollEventStack() for ",
+            latestScrollEventAtStart,
+            previousScrollEventAtStart
+        );*/
+        if (previousScrollEventAtStart) {
+            if (
+                latestScrollEventAtStart.timeStamp -
+                    previousScrollEventAtStart.timeStamp >
+                SCROLL_TIMEOUT_MS
+            ) {
+                if (this.debugScrollLogging) {
+                    console.log(
+                        "Scroll timeout excedded, send final update for previous log and reset"
+                    );
+                }
+                this._flushToServerAndReset();
+                return;
+            }
+            this._logScrollForMessagesInViewport(
+                viewportGeometry,
+                messageSelectors,
+                latestScrollEventAtStart,
+                previousScrollEventAtStart
+            );
+            if (false && this.debugScrollLogging) {
+                //console.log(messageSelectors);
+                console.log(
+                    "processScrollEventStack() starts at currentScrollTop:",
+                    currentScrollTop
+                );
+            }
+
+            let oldestMessageInLogTimeStamp = 0;
+            for (const [id, log] of this.loggedMessages) {
+                if (log.updateType === ATTENTION_UPDATE_FINAL) {
+                    if (that.debugScrollLogging) {
+                        console.log(
+                            "message",
+                            id,
+                            " processed FINAL update, deleting from log..."
+                        );
+                    }
+                    this.loggedMessages.delete(id);
+                } else {
+                    if (!log.timeStampFirstOnscreen) {
+                        throw new Error("timeStampFirstOnscreen is invalid");
+                    }
+                    if (
+                        !oldestMessageInLogTimeStamp ||
+                        log.timeStampFirstOnscreen < oldestMessageInLogTimeStamp
+                    ) {
+                        oldestMessageInLogTimeStamp =
+                            log.timeStampFirstOnscreen;
+                    }
+                }
+            }
+
+            //console.log(oldestMessageInLogTimeStamp, that.loggedMessages);
+            if (oldestMessageInLogTimeStamp) {
+                that._getMessageLogTemplate(oldestMessageInLogTimeStamp);
+            }
+        }
     }
 }
 

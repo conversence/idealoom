@@ -3042,7 +3042,7 @@ function BaseMessageListMixinFactory(cls) {
                 that.getVisitorDataPromise(),
                 function (resultMessageIdCollection, visitorData) {
                     if (!that.isDestroyed()) {
-                        that.scrollLogger.checkMessagesOnscreen(
+                        that.scrollLogger.processScrollEventStack(
                             resultMessageIdCollection,
                             visitorData
                         );
