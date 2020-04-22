@@ -1382,9 +1382,11 @@ Context.prototype = {
             }
 
             onRender() {
-                Sentry.withScope(function (scope) {
-                    scope.setExtra("url", this.model.get("url"));
-                    scope.setExtra("status", this.model.get("status"));
+                Sentry.withScope((scope) => {
+                    if (this.model) {
+                        scope.setExtra("url", this.model.get("url"));
+                        scope.setExtra("status", this.model.get("status"));
+                    }
                     Sentry.captureMessage("Reload popup presented to the user");
                 });
             }
