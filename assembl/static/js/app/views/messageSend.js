@@ -100,7 +100,9 @@ class messageSendView extends LoaderView.extend({
     },
 
     _processHyperlinks: _.throttle(function () {
-        var that = this;
+        if (this.isDestroyed()) {
+            return;
+        }
         var messageText = this.ui.messageBody.val() || "";
         var links = linkify.find(messageText);
         var missingLinks = [];
@@ -117,7 +119,7 @@ class messageSendView extends LoaderView.extend({
         //   //console.log("attachmentsCollection comparator returning: ", index);
         //   return index;
         // };
-        goneModels = that.attachmentsCollection.filter(function (attachment) {
+        goneModels = this.attachmentsCollection.filter((attachment) => {
             var document = attachment.getDocument();
 
             if (document.isFileType()) {
@@ -132,13 +134,13 @@ class messageSendView extends LoaderView.extend({
         });
         //console.log("goneModels: ", goneModels);
 
-        that.attachmentsCollection.destroy(goneModels);
+        this.attachmentsCollection.destroy(goneModels);
 
-        missingLinks = _.filter(links, function (link) {
+        missingLinks = _.filter(links, (link) => {
             var retval;
             //console.log("Checking link", link.href)
             retval =
-                that.attachmentsCollection.filter(function (attachment) {
+                this.attachmentsCollection.filter(function (attachment) {
                     var document = attachment.getDocument();
                     //console.log("filtering for missingLinks comparing:", document.get('uri'), link.href, document.get('uri') === link.href);
                     return document.get("uri") === link.href ? true : false;
@@ -148,7 +150,7 @@ class messageSendView extends LoaderView.extend({
         });
         //console.log("missingLinks: ", missingLinks);
 
-        _.each(missingLinks, function (link) {
+        _.each(missingLinks, (link) => {
             if (link.type !== "url") {
                 console.warn("unknown link type: ", link.type);
                 return;
@@ -160,12 +162,12 @@ class messageSendView extends LoaderView.extend({
 
             var attachment = new Attachments.Model({
                 document: document,
-                objectAttachedToModel: that.model,
+                objectAttachedToModel: this.model,
                 idCreator: Ctx.getCurrentUser().id,
             });
 
             //console.log("Adding missing url", document);
-            that.attachmentsCollection.add(attachment);
+            this.attachmentsCollection.add(attachment);
         });
         //console.log("Attachments after _processHyperlinks:", this.attachmentsCollection);
     }, 500),
