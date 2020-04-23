@@ -68,6 +68,7 @@ class IdeaInIdeaListView extends Marionette.View.extend({
         "click .idealist-arrow": "toggle",
         "dragstart .idealist-body": "onDragStart", // when the user starts dragging this idea
         "dragend .idealist-body": "onDragEnd",
+        "dragenter .idealist-body": "onDragEnter",
         "dragover .idealist-body": "onDragOver",
         "dragleave .idealist-body": "onDragLeave",
         "drop .idealist-body": "onDrop",
@@ -435,6 +436,15 @@ class IdeaInIdeaListView extends Marionette.View.extend({
         Ctx.setDraggedAnnotation(null);
         Ctx.setDraggedSegment(null);
         Ctx.draggedIdea = null;
+    }
+
+
+    /**
+     * @event
+     */
+    onDragEnter(ev) {
+        // console.log("ideaInIdeaList::onDragEnter() ev: ", ev);
+        ev.preventDefault();
     }
 
     /**

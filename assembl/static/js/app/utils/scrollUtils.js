@@ -254,7 +254,7 @@ var scrollToElement = function (el, callback, margin, animate, watch) {
             if (raven_url) {
                 Sentry.captureException(e);
             } else {
-                throw e;
+                console.error(e);
             }
         }
     };

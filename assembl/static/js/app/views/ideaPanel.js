@@ -1036,12 +1036,12 @@ class IdeaPanel extends BasePanel.extend({
             collectionManager
                 .getAllExtractsCollectionPromise()
                 .then(function (allExtractsCollection) {
-                    ev.currentTarget.style.opacity = 0.4;
+                    ev.target.style.opacity = 0.4;
 
                     ev.originalEvent.dataTransfer.effectAllowed = "all";
                     ev.originalEvent.dataTransfer.dropEffect = "move";
 
-                    var cid = ev.currentTarget.getAttribute("data-segmentid");
+                    var cid = ev.target.getAttribute("data-segmentid");
                     var segment = allExtractsCollection.getByCid(cid);
 
                     Ctx.showDragbox(ev, segment.getQuote());
@@ -1058,8 +1058,8 @@ class IdeaPanel extends BasePanel.extend({
         //console.log("ideaPanel::onDragEnd() ev: ", ev);
 
         this.$el.removeClass("is-dragover");
-        if (ev && "currentTarget" in ev) {
-            ev.currentTarget.style.opacity = 1;
+        if (ev && "target" in ev) {
+            ev.target.style.opacity = 1;
         }
         Ctx.setDraggedAnnotation(null);
         Ctx.setDraggedSegment(null);
