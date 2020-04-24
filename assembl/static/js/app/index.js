@@ -14,6 +14,7 @@ import CollectionManager from "./common/collectionManager.js";
 if (raven_url.length) {
     Sentry.init({
         dsn: raven_url,
+        release: idealoom_version,
         integrations: [
             new Integrations.CaptureConsole({
                 levels: ["warn", "error", "assert"],

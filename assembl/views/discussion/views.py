@@ -32,6 +32,7 @@ from assembl.lib.frontend_urls import FrontendUrls
 from assembl.nlp.translation_service import (
     DummyGoogleTranslationService, LanguageIdentificationService)
 from ..auth.views import get_social_autologin
+from ...__version__ import version
 
 
 FIXTURE = os.path.join(os.path.dirname(__file__),
@@ -223,6 +224,7 @@ def home_view(request):
             'extended', user_id, request.permissions))
     else:
         context['idea_publication_flow'] = 'null'
+    context['version'] = version()
 
     response = render_to_response('../../templates/index.jinja2', context,
                                   request=request)

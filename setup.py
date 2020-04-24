@@ -33,7 +33,8 @@ def parse_reqs(*req_files):
 
 
 def compose_version():
-    tag = check_output('git describe --tags', shell=True).decode('ascii')
+    # Compose a version number consistent with PEP440
+    tag = check_output('git describe --tags --always', shell=True).decode('ascii')
     tag = tag.strip().lstrip('v')
     parts = tag.rsplit('-', 2)
     if len(parts) == 1:
