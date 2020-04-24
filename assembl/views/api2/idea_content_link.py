@@ -15,6 +15,7 @@ def icl_instance_del(request):
     result = instance_del(request)
     # assume permissions taken care of there
     idea.send_to_changes()
+    instance.send_to_changes()
     for ancestor in idea.get_all_ancestors():
         ancestor.send_to_changes()
     return result
