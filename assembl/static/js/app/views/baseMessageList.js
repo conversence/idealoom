@@ -2069,7 +2069,7 @@ function BaseMessageListMixinFactory(cls) {
                         const numIdeas = extract.getNumLinkedIdeas();
                         if (numIdeas == 0) {
                             const txt = i18n.gettext(
-                                "This extract is in a harvester's clipboard and hasn' been sorted yet."
+                                "This extract is in a harvester's clipboard and hasn't been sorted yet."
                             );
                             setTimeout(function () {
                                 $(field).html(txt);
