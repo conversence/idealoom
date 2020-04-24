@@ -1001,7 +1001,7 @@ class IdeaPanel extends BasePanel.extend({
                     that.model.destroy({
                         success: function () {
                             that.unblockPanel();
-                            // UX question: should we go to the parent idea, if any?
+                            // UX question: should we go to the parent idea, if any? YES
                             that.getContainingGroup().setCurrentIdea(null);
                         },
                         error: function (model, resp) {
