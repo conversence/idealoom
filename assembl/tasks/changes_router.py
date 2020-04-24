@@ -18,7 +18,7 @@ from aiohttp.web_runner import GracefulExit
 import sockjs
 import simplejson as json
 import zmq
-import zmq.asyncio
+from zmq.asyncio import Context
 
 # from assembl.lib.zmqlib import INTERNAL_SOCKET
 from assembl.lib.raven_client import setup_raven, capture_exception
@@ -31,16 +31,6 @@ log = logging.getLogger("assembl.tasks.changes_router")
 SECTION = 'app:idealoom'
 Everyone = 'system.Everyone'
 Authenticated = 'system.Authenticated'
-
-
-def setup_async_loop():
-    # while zmq < 17
-    ctx = zmq.asyncio.Context()
-    loop = zmq.asyncio.ZMQEventLoop()
-    asyncio.set_event_loop(loop)
-    # following https://github.com/zeromq/pyzmq/issues/1034
-    zmq.asyncio.Socket.fileno = lambda self: self.FD
-    return ctx, loop
 
 
 def setup_router(in_socket, out_socket):
@@ -73,16 +63,15 @@ async def websocket_handler(request):
                 # await ws.send_str(msg.data + '/answer')
         elif msg.type == WSMsgType.ERROR:
             log.error('ws connection closed with exception %s' %
-                  ws.exception())
+                      ws.exception())
 
     active_socket.on_close()
 
     return ws
 
 
-def setup_app(path, server_url, loop):
+def setup_app(path):
     app = web.Application()
-    # app.add_routes([web.get('/socket', websocket_handler)])
     # cors = aiohttp_cors.setup(app)
     # resource = cors.add(app.router.add_resource(path))
     # route = cors.add(
@@ -93,64 +82,113 @@ def setup_app(path, server_url, loop):
     #             allow_headers="*",
     #             max_age=3600,
     #         )})
-    # https://github.com/aio-libs/sockjs/issues/38
-    name = 'changes'
-    manager = sockjs.SessionManager(
-        name, app, ActiveSocket.sockjs_handler)
-    sockjs.add_endpoint(
-        app, ActiveSocket.sockjs_handler,
-        name=name, prefix=path+"/", manager=manager)
     return app
 
 
-class ActiveSocket(object):
-    active_sockets = dict()
+class Dispatcher(object):
+
+    _dispatcher = None
 
     @classmethod
-    def setup(cls, zmq_context, token_secret, server_url, out_socket_name, http_client, loop):
-        cls.zmq_context = zmq_context
-        cls.token_secret = token_secret
-        cls.server_url = server_url
-        cls.out_socket_name = out_socket_name
-        cls.http_client = http_client
-        cls.loop = loop
+    def get_instance(cls):
+        assert cls._dispatcher
+        return cls._dispatcher
 
-    def __init__(self, session):
+    @classmethod
+    def set_instance(cls, instance):
+        assert cls._dispatcher is None
+        cls._dispatcher = instance
+
+    def __init__(self, app, zmq_context, token_secret,
+                 server_url, out_socket_name, path):
+        if self._dispatcher:
+            raise RuntimeError("Singleton")
+        self.zmq_context = zmq_context
+        self.token_secret = token_secret
+        self.server_url = server_url
+        self.out_socket_name = out_socket_name
+        self.active_sockets = dict()
+        self.token = None
+        self.discussion = None
+        self.userId = None
+        self.task = None
+        self.is_shutdown = False
+        self.app = app
+        sockjs.add_endpoint(
+            app, name='changes', prefix=path+"/", handler=Dispatcher.sockjs_handler)
+        app.on_startup.append(Dispatcher.start_dispatcher)
+        app.on_shutdown.append(Dispatcher.shutdown)
+        self.set_instance(self)
+
+    async def startup(self):
+        self.http_client = ClientSession()
+
+    def by_session(self, session):
+        return self.active_sockets.get(session.id, None)
+
+    def start_shutdown(self):
+        if self.is_shutdown:
+            log.warning("shutdown twice")
+            return False
+        self.is_shutdown = True
+        return True
+
+    async def do_shutdown(self):
+        log.info("do_shutdown")
+        self.is_shutdown = True
+        await asyncio.gather(*[
+            session.close() for session in self.active_sockets.values()])
+        if self.http_client is not None:
+            await self.http_client.close()
+        manager = sockjs.get_manager('changes', self.app)
+        await manager.clear()
+
+    async def on_message(self, msg, session):
+        # log.debug(f"on_message: {msg}")
+        if msg.type == sockjs.MSG_CLOSED:
+            socket = self.by_session(session)
+            if socket:
+                self.active_sockets.pop(socket.session.id, None)
+                await socket.close()
+        if self.is_shutdown:
+            return
+        if msg.type == sockjs.MSG_OPEN:
+            self.active_sockets[session.id] = ActiveSocket(self, session)
+        elif msg.type == sockjs.MSG_MESSAGE:
+            socket = self.by_session(session)
+            if socket:
+                await socket.on_message(msg.data)
+
+    @staticmethod
+    async def sockjs_handler(msg, session):
+        await Dispatcher.get_instance().on_message(msg, session)
+
+    @staticmethod
+    async def start_dispatcher(app):
+        return await Dispatcher.get_instance().startup()
+
+    @staticmethod
+    async def shutdown():
+        return await Dispatcher.get_instance().do_shutdown()
+
+
+class ActiveSocket(object):
+
+    def __init__(self, dispatcher, session):
         self.session = session
-        self.active_sockets[session.id] = self
+        self.dispatcher = dispatcher
+        self.http_client = dispatcher.http_client
+        self.token_secret = dispatcher.token_secret
+        self.server_url = dispatcher.server_url
         self.valid = True
-
-    token = None
-    discussion = None
-    userId = None
-    task = None
-    is_shutdown = False
+        self.token = None
+        self.discussion = None
+        self.userId = None
+        self.task = None
 
     def on_open(self, request):
         self.valid = True
         self.closing = False
-
-    @classmethod
-    def by_session(cls, session):
-        return cls.active_sockets.get(session.id, None)
-
-    @classmethod
-    async def do_shutdown(cls, app):
-        for session in list(cls.active_sockets.values()):
-            await session.close()
-        for session in app._state['__sockjs_managers__']['changes'].values():
-            session.expire()
-        await cls.http_client.close()
-        await app.shutdown()
-        for task in list(asyncio.all_tasks()):
-            if task._coro.__name__ == 'do_shutdown':
-                continue
-            if task.done():
-                continue
-            if task.cancelled():
-                continue
-            task.cancel()
-
 
     async def on_recv(self, data):
         try:
@@ -169,7 +207,8 @@ class ActiveSocket(object):
                 data = json.dumps(allowed)
             self.session.send(data)
             log.debug('sent:'+data)
-        except Exception:
+        except Exception as e:
+            log.error(e)
             capture_exception()
             await self.close()
 
@@ -178,7 +217,6 @@ class ActiveSocket(object):
         if not self.valid:
             return
         self.valid = False
-        self.active_sockets.pop(self.session.id, None)
         if self.task and not self.task.cancelled():
             self.task.cancel()
         if self.raw_token and self.discussion and self.userId != Everyone:
@@ -228,7 +266,8 @@ class ActiveSocket(object):
                         self.roles.add(Everyone)
                         self.roles.add(Authenticated)
                         self.roles.add('local:Agent/'+str(self.token['userId']))
-                self.task = self.loop.create_task(self.connect())
+                loop = asyncio.get_event_loop()
+                self.task = loop.create_task(self.connect())
                 self.session.send('[{"@type":"Connection"}]')
                 if self.token and self.raw_token and self.discussion and self.userId != Everyone:
                     async with self.http_client.post(
@@ -236,7 +275,8 @@ class ActiveSocket(object):
                                 self.server_url, self.discussion, self.token['userId']
                             ), data={'token': self.raw_token}) as resp:
                         await resp.text()
-        except Exception:
+        except Exception as e:
+            log.error(e)
             capture_exception()
             await self.close()
 
@@ -260,21 +300,6 @@ class ActiveSocket(object):
             sock.close()
             await self.close()
 
-    @staticmethod
-    async def sockjs_handler(msg, session):
-        if msg.type == sockjs.MSG_CLOSED:
-            socket = ActiveSocket.by_session(session)
-            if socket:
-                await socket.close()
-        if ActiveSocket.is_shutdown:
-            return
-        if msg.type == sockjs.MSG_OPEN:
-            active_socket = ActiveSocket(session)
-        elif msg.type == sockjs.MSG_MESSAGE:
-            socket = ActiveSocket.by_session(session)
-            if socket:
-                await socket.on_message(msg.data)
-
 
 async def log_queue(zmq_context, out_socket):
     socket = zmq_context.socket(zmq.SUB)
@@ -283,22 +308,22 @@ async def log_queue(zmq_context, out_socket):
         socket.subscribe(b'')
         log.debug("log subscribed")
         while True:
-            msg = await socket.recv()
+            msg = await socket.recv_multipart()
             log.debug(msg)
     finally:
         socket.close()
 
 
 def term(router, loop, app, *_ignore):
-    ActiveSocket.is_shutdown = True
-    router.launcher.terminate()
+    if Dispatcher.get_instance().start_shutdown():
+        router.launcher.terminate()
+        loop.create_task(Dispatcher.shutdown())
     router.join()
     signal.alarm(1)
-    if loop.is_running():
-        loop.create_task(ActiveSocket.do_shutdown(app))
 
 
 def raise_graceful_exit():
+    log.info("Graceful exit")
     # why is it so hard to stop?
     raise GracefulExit()
 
@@ -337,37 +362,44 @@ if __name__ == '__main__':
             if not exists(sdir):
                 makedirs(sdir)
 
+    zmq_context = Context()
     router = setup_router(in_socket, out_socket)
 
-    for socket_name in (in_socket, out_socket):
-        if socket_name.startswith('ipc://'):
-            socket_name = socket_name[6:]
-            for i in range(5):
-                if exists(socket_name):
-                    break
-                sleep(0.1)
-            else:
-                raise RuntimeError("could not create socket " + socket_name)
-            if not access(socket_name, R_OK | W_OK):
-                raise RuntimeError(socket_name + " cannot be accessed")
+    async def check_sockets(app):
+        log.info("check_sockets")
+        for socket_name in (in_socket, out_socket):
+            if socket_name.startswith('ipc://'):
+                socket_name = socket_name[6:]
+                for i in range(5):
+                    if exists(socket_name):
+                        break
+                    sleep(0.1)
+                else:
+                    log.error("fail")
+                    raise RuntimeError("could not create socket " + socket_name)
+                if not access(socket_name, R_OK | W_OK):
+                    log.error("fail")
+                    raise RuntimeError(socket_name + " cannot be accessed")
+        log.info("sockets are there")
+        loop = asyncio.get_event_loop()
+        signal.signal(signal.SIGTERM, partial(term, router, loop, app))
+        signal.signal(signal.SIGINT, partial(term, router, loop, app))
+        loop.add_signal_handler(signal.SIGALRM, raise_graceful_exit)
+        loop.create_task(log_queue(zmq_context, out_socket))
+        log.info("signals are setup")
 
-    zmq_context, loop = setup_async_loop()
-    http_client = ClientSession()
-    ActiveSocket.setup(zmq_context, token_secret, server_url, out_socket, http_client, loop)
-    app = setup_app('/socket', server_url, loop)
+    path = '/socket'
+    app = setup_app(path)
+    Dispatcher(app, zmq_context, token_secret, server_url, out_socket, path)
+    assert Dispatcher.get_instance()
+    app.on_startup.append(check_sockets)
 
-    log_task = loop.create_task(log_queue(zmq_context, out_socket))
-    signal.signal(signal.SIGTERM, partial(term, router, loop, app))
-    signal.signal(signal.SIGINT, partial(term, router, loop, app))
-    loop.add_signal_handler(signal.SIGALRM, raise_graceful_exit)
     try:
         web.run_app(app, handle_signals=False, port=websocket_port)
     except asyncio.CancelledError:
-        print("done")
+        log.info("done")
     except KeyboardInterrupt:
         raise
     except Exception:
         capture_exception()
         raise
-    finally:
-        loop.close()
