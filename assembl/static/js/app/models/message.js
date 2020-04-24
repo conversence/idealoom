@@ -110,7 +110,7 @@ class MessageModel extends Base.Model.extend({
             });
         }
         //console.log("Message Model parse() called, returning:", rawModel);
-        return rawModel;
+        return super.parse(...arguments);
     }
 
     /**

@@ -46,7 +46,7 @@ class publicationFlowModel extends Base.Model.extend({
                 });
             }
         }
-        return rawModel;
+        return super.parse(...arguments);
     }
 
     /**
@@ -127,7 +127,7 @@ class publicationStateModel extends Base.Model.extend({
         }
         rawModel.flow = options.flow || rawModel.flow;
 
-        return rawModel;
+        return super.parse(...arguments);
     }
 
     validate(attrs, options) {
@@ -212,7 +212,7 @@ class publicationTransitionModel extends Base.Model.extend({
         }
         rawModel.flow = options.flow || rawModel.flow;
 
-        return rawModel;
+        return super.parse(...arguments);
     }
 
     /**

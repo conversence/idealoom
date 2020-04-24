@@ -2094,7 +2094,7 @@ function BaseMessageListMixinFactory(cls) {
                                             i18n.gettext(
                                                 'This extract was organized in %d ideas, most lately " %s ", by the facilitator of the debate'
                                             ),
-                                            title
+                                            numIdeas, title
                                         );
                                     setTimeout(function () {
                                         $(field).html(txt);

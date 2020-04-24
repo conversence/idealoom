@@ -51,7 +51,7 @@ class TimelineEventModel extends Base.Model.extend({
                 parse: true,
             });
         }
-        return rawModel;
+        return super.parse(...arguments);
     }
 
     asLocalTime(time) {

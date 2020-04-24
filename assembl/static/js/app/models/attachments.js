@@ -105,7 +105,7 @@ class AttachmentModel extends Base.Model.extend({
                         rawModel.document
                 );
         }
-        return rawModel;
+        return super.parse(...arguments);
     }
 
     /**

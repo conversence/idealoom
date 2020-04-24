@@ -123,7 +123,7 @@ class SegmentModel extends Base.Model.extend({
             rawModel.ideaLinks,
             { parse: true, url: this.getIdeaLinkUrl() }
         );
-        return rawModel;
+        return super.parse(...arguments);
     }
 
     linkedToIdea(ideaId) {
