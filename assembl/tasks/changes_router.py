@@ -281,15 +281,15 @@ class ActiveSocket(object):
             await self.close()
 
     async def connect(self):
-        sock = self.zmq_context.socket(zmq.SUB)
+        sock = self.dispatcher.zmq_context.socket(zmq.SUB)
         try:
             sock.identity = b'SUB'
-            sock.connect(self.out_socket_name)
+            sock.connect(self.dispatcher.out_socket_name)
             sock.subscribe(b'*')
             sock.subscribe(self.discussion.encode('ascii'))
             log.debug("bound")
             while self.valid:
-                msg = await sock.recv_multipart() # waits for msg to be ready
+                msg = await sock.recv_multipart()  # waits for msg to be ready
                 log.debug("got socket msg %s", msg)
                 await self.on_recv(msg)
                 log.debug("msg managed")
