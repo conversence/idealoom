@@ -4,7 +4,7 @@
  */
 
 import Marionette from "backbone.marionette";
-import * as Sentry from '@sentry/browser';
+import * as Sentry from "@sentry/browser";
 
 import i18n from "./i18n.js";
 import TourModel from "../models/tour.js";
@@ -115,9 +115,9 @@ class TourManager extends Marionette.Object.extend({
                 );
             } catch (err) {
                 Sentry.addBreadcrumb({
-                  category: 'ui',
-                  message: 'wrong toursSeen in localStorage',
-                  level: 'info'
+                    category: "ui",
+                    message: "wrong toursSeen in localStorage",
+                    level: "info",
                 });
                 Sentry.captureException(err);
             }
@@ -156,7 +156,7 @@ class TourManager extends Marionette.Object.extend({
             Sentry.withScope((scope) => {
                 scope.setExtra("tour", tourName);
                 Sentry.captureMessage("Unknown tour");
-            })
+            });
         }
         if (this.isTourSeen(tourName)) {
             return;
@@ -262,7 +262,7 @@ class TourManager extends Marionette.Object.extend({
                         Sentry.withScope((scope) => {
                             scope.setExtra("tour", tour.name);
                             Sentry.captureMessage("Tour was not seen");
-                        })
+                        });
                         that.currentTour = that.getNextTour(true);
                     }
                     if (that.currentTour !== undefined) {

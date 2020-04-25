@@ -22,8 +22,7 @@ if (raven_url.length) {
         ],
     });
     const user_id = Ctx.getCurrentUserId();
-    if (user_id)
-        Sentry.setUser({ user_id });
+    if (user_id) Sentry.setUser({ user_id });
     window.Sentry = Sentry;
 }
 

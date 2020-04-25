@@ -1504,7 +1504,7 @@ Context.prototype = {
             return function (evt) {
                 timeoutIdHidePopover = setTimeout(function () {
                     popover.addClass("hidden");
-                    popover.html("<div></div>")
+                    popover.html("<div></div>");
                 }, timer);
             };
         };
@@ -1521,24 +1521,28 @@ Context.prototype = {
 
             //popover.css('padding', '25px 50px');
             popover.removeClass("hidden");
-            $.ajax("/api/v1/oembed?url="+encodeURIComponent($(this).attr("href")), {
-                success: (data, status, jqXHR) => {
-                    if (data.html) {
-                        console.debug(data);
-                        popover.html(data.html);
-                    } else {
+            $.ajax(
+                "/api/v1/oembed?url=" +
+                    encodeURIComponent($(this).attr("href")),
+                {
+                    success: (data, status, jqXHR) => {
+                        if (data.html) {
+                            console.debug(data);
+                            popover.html(data.html);
+                        } else {
+                            popover.addClass("hidden");
+                        }
+                    },
+                    failure: (data, status, jqXHR) => {
+                        if (jqXHR) {
+                            console.warn(jqXHR);
+                            // Do not reload for an embed failure
+                            jqXHR.handled = true;
+                        }
                         popover.addClass("hidden");
-                    }
-                },
-                failure: (data, status, jqXHR) => {
-                    if (jqXHR) {
-                        console.warn(jqXHR);
-                        // Do not reload for an embed failure
-                        jqXHR.handled = true;
-                    }
-                    popover.addClass("hidden");
+                    },
                 }
-            });
+            );
 
             popover.unbind("mouseleave"); // this avoids handler accumulation (each call to the following popover.mouseleave() adds a handler)
 

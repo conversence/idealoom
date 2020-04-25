@@ -120,7 +120,10 @@ class AppClass extends Marionette.Application {
         }
         const message_el = document.getElementById("flash-message");
         if (message_el.textContent.length) {
-            Growl.showTopGrowl(Growl.GrowlReason.SUCCESS, message_el.textContent);
+            Growl.showTopGrowl(
+                Growl.GrowlReason.SUCCESS,
+                message_el.textContent
+            );
         }
     }
 }

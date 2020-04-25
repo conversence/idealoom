@@ -69,11 +69,14 @@ class IdeaLinkCollection extends Base.Collection.extend({
         super.updateFromSocket(...arguments);
         if (!tombstone) {
             const model = tombstone ? null : this.get(id);
-            const models = this.where({source: model.get('source'), target: model.get('target')});
+            const models = this.where({
+                source: model.get("source"),
+                target: model.get("target"),
+            });
             if (models.length > 1) {
                 for (const other of models) {
                     if (other.id == undefined) {
-                        this.remove(other)
+                        this.remove(other);
                     }
                 }
             }

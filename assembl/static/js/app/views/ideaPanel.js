@@ -31,7 +31,6 @@ import ConfirmModal from "./confirmModal.js";
 import AttachmentModels from "../models/attachments.js";
 import Loader from "./loader.js";
 
-
 class IdeaTypeView extends Marionette.View.extend({
     template: "#tmpl-ideaTypeInIdeaPanel",
     ui: {
@@ -69,8 +68,7 @@ class IdeaTypeView extends Marionette.View.extend({
         const possibleTypeDescriptions = {};
         _.map(possibleTypes, (types) => {
             var names = this.model.combinedTypeNamesOf(types, locale);
-            possibleTypeDescriptions[types] =
-                names[0] + " → " + names[1];
+            possibleTypeDescriptions[types] = names[0] + " → " + names[1];
         });
         return {
             linkTypeDescription: currentTypeDescriptions[0],
@@ -79,10 +77,9 @@ class IdeaTypeView extends Marionette.View.extend({
             currentTypes,
             possibleTypes,
             possibleTypeDescriptions,
-        }
+        };
     }
 }
-
 
 class PubFlowView extends Marionette.View.extend({
     template: "#tmpl-pubFlowInIdeaPanel",
@@ -102,8 +99,7 @@ class PubFlowView extends Marionette.View.extend({
     serializeData() {
         let pubStateName = null;
         const transitions = [];
-        if (!Ctx.hasIdeaPubFlow())
-            return {}
+        if (!Ctx.hasIdeaPubFlow()) return {};
         const stateLabel = this.model.get("pub_state_name");
         const states = this.pubFlow.get("states");
         if (stateLabel) {
@@ -140,7 +136,7 @@ class PubFlowView extends Marionette.View.extend({
             pubStateName,
             transitions,
             i18n,
-        }
+        };
     }
     pubStateTransition(evt) {
         const transition = evt.target.attributes.data.value;
@@ -249,7 +245,9 @@ class IdeaPanel extends BasePanel.extend({
         }
 
         this.widgetPromise = collectionManager.getAllWidgetsPromise();
-        this.translationDataPromise = collectionManager.getUserLanguagePreferencesPromise(Ctx);
+        this.translationDataPromise = collectionManager.getUserLanguagePreferencesPromise(
+            Ctx
+        );
 
         var pref = Ctx.getPreferences();
         this.ideaPanelOpensAutomatically =
@@ -469,7 +467,7 @@ class IdeaPanel extends BasePanel.extend({
     renderAttachments() {
         var collection = this.getAttachmentCollection();
         if (!collection) {
-            console.log("missing attachment collection")
+            console.log("missing attachment collection");
             return;
         }
         var user = Ctx.getCurrentUser();
@@ -591,34 +589,44 @@ class IdeaPanel extends BasePanel.extend({
                 this.renderCKEditorLongTitle();
             }
 
-            this.contributorsDataPromise.then(([contributors, allAgents])=> {
+            this.contributorsDataPromise.then(([contributors, allAgents]) => {
                 this.renderContributors(contributors, allAgents);
             });
 
-            this.extractsDataPromise.then(([
-                allExtractsCollection,
-                extractListSubset,
-                allUsers,
-                messageStructure
-                ])=>{
-                this.renderExtractsData(
-                    allExtractsCollection, extractListSubset, allUsers, messageStructure);
-            });
-            
-            this.parentLinkPromise.then((parentLink)=>{
+            this.extractsDataPromise.then(
+                ([
+                    allExtractsCollection,
+                    extractListSubset,
+                    allUsers,
+                    messageStructure,
+                ]) => {
+                    this.renderExtractsData(
+                        allExtractsCollection,
+                        extractListSubset,
+                        allUsers,
+                        messageStructure
+                    );
+                }
+            );
+
+            this.parentLinkPromise.then((parentLink) => {
                 if (parentLink) {
-                    this.showChildView("ideaTypeRegion",
-                        new IdeaTypeView({parent: this, parentLink})
-                    )
+                    this.showChildView(
+                        "ideaTypeRegion",
+                        new IdeaTypeView({ parent: this, parentLink })
+                    );
                 }
             });
 
             if (Ctx.hasIdeaPubFlow()) {
-                collectionManager.getIdeaPublicationFlowPromise().then((pubFlow)=>{
-                    this.showChildView("pubFlowRegion",
-                        new PubFlowView({parent: this, pubFlow})
-                    )
-                })
+                collectionManager
+                    .getIdeaPublicationFlowPromise()
+                    .then((pubFlow) => {
+                        this.showChildView(
+                            "pubFlowRegion",
+                            new PubFlowView({ parent: this, pubFlow })
+                        );
+                    });
             }
 
             if (
@@ -686,7 +694,11 @@ class IdeaPanel extends BasePanel.extend({
     }
 
     renderExtractsData(
-            allExtractsCollection, extractListSubset, allUsersCollection, allMessagesCollection) {
+        allExtractsCollection,
+        extractListSubset,
+        allUsersCollection,
+        allMessagesCollection
+    ) {
         this.extractListView = new SegmentList.SegmentListView({
             collection: this.extractListSubset,
             allUsersCollection: allUsersCollection,
@@ -723,11 +735,9 @@ class IdeaPanel extends BasePanel.extend({
         var contributors = new ContributorAgentSubset();
 
         //console.log(contributors);
-        class avatarCollectionView extends Marionette.CollectionView.extend(
-            {
-                childView: AgentViews.AgentAvatarView,
-            }
-        ) {}
+        class avatarCollectionView extends Marionette.CollectionView.extend({
+            childView: AgentViews.AgentAvatarView,
+        }) {}
 
         var avatarsView = new avatarCollectionView({
             collection: contributors,
@@ -914,12 +924,16 @@ class IdeaPanel extends BasePanel.extend({
             data: $.param({ view: "contributors" }),
         });
         this.contributorsDataPromise = Promise.join(
-            contributorPromise, collectionManager.getAllUsersCollectionPromise()
-        )
+            contributorPromise,
+            collectionManager.getAllUsersCollectionPromise()
+        );
 
         // temporary code: single parent link for now.
-        this.parentLinkPromise = collectionManager.getAllIdeaLinksCollectionPromise().then(
-          (allLinksCollection) => allLinksCollection.findWhere({target: this.model.id}));
+        this.parentLinkPromise = collectionManager
+            .getAllIdeaLinksCollectionPromise()
+            .then((allLinksCollection) =>
+                allLinksCollection.findWhere({ target: this.model.id })
+            );
 
         const extractsCollectionPromise = collectionManager.getAllExtractsCollectionPromise();
         const extractListSubsetPromise = extractsCollectionPromise.then(
@@ -931,7 +945,9 @@ class IdeaPanel extends BasePanel.extend({
                         {
                             parent: allExtractsCollection,
                             ideaId: this.model.id,
-                            importantOnly: !this.model.userCan(Permissions.ADD_EXTRACT),
+                            importantOnly: !this.model.userCan(
+                                Permissions.ADD_EXTRACT
+                            ),
                         }
                     );
 
@@ -949,7 +965,8 @@ class IdeaPanel extends BasePanel.extend({
             extractsCollectionPromise,
             extractListSubsetPromise,
             collectionManager.getAllUsersCollectionPromise(),
-            collectionManager.getAllMessageStructureCollectionPromise());
+            collectionManager.getAllMessageStructureCollectionPromise()
+        );
         this.setLoading(false);
         this.render();
     }

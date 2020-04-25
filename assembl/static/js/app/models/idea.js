@@ -243,15 +243,24 @@ class IdeaModel extends Base.Model.extend({
     }
 
     onIdeaCreated() {
-        this.collection.collectionManager.getAllIdeaLinksCollectionPromise().then((ideaLinks)=>{
-            const parent = this.get('parentId');
-            let link = ideaLinks.findWhere({source: parent, target: this.id});
-            if (!link) {
-                link = new IdeaLink.Model({source: parent, target: this.id, "@type": Types.IDEA_LINK});
-                ideaLinks.add(link);
-                // DO NOT save link. Wait for socket update.
-            }
-        })
+        this.collection.collectionManager
+            .getAllIdeaLinksCollectionPromise()
+            .then((ideaLinks) => {
+                const parent = this.get("parentId");
+                let link = ideaLinks.findWhere({
+                    source: parent,
+                    target: this.id,
+                });
+                if (!link) {
+                    link = new IdeaLink.Model({
+                        source: parent,
+                        target: this.id,
+                        "@type": Types.IDEA_LINK,
+                    });
+                    ideaLinks.add(link);
+                    // DO NOT save link. Wait for socket update.
+                }
+            });
     }
 
     /**

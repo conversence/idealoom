@@ -438,7 +438,6 @@ class IdeaInIdeaListView extends Marionette.View.extend({
         Ctx.draggedIdea = null;
     }
 
-
     /**
      * @event
      */

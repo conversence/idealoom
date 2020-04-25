@@ -349,9 +349,9 @@ class IdeaList extends BasePanel.extend({
                 //console.log("ideaList heard a change:currentIdea event");
                 if (currentIdea && !that.isDestroyed()) {
                     that.onScrollToIdea(currentIdea);
-                    const ideaButtonView = that.getRegion("addIdeaButton").currentView;
-                    if (ideaButtonView)
-                        ideaButtonView.render();
+                    const ideaButtonView = that.getRegion("addIdeaButton")
+                        .currentView;
+                    if (ideaButtonView) ideaButtonView.render();
                 }
             });
 
@@ -701,8 +701,7 @@ class IdeaList extends BasePanel.extend({
                         let changed = false;
                         if (collapseStates) {
                             for (const ancestor of ideaModel.getAncestry()) {
-                                if (ancestor == ideaModel)
-                                    continue;
+                                if (ancestor == ideaModel) continue;
                                 const id = ancestor.getNumericId();
                                 const val = collapseStates.get(id);
                                 if (val == true || val == "true") {
@@ -712,9 +711,9 @@ class IdeaList extends BasePanel.extend({
                             }
                         }
                         if (changed)
-                            collapseStates.save().then(()=>{
+                            collapseStates.save().then(() => {
                                 that.onScrollToIdea(ideaModel);
-                            })
+                            });
                         else {
                             console.log("idea el not found, will retry later");
                             if (retry == undefined) retry = 0;
@@ -830,7 +829,7 @@ class IdeaList extends BasePanel.extend({
      */
     addChildToSelected() {
         var currentIdea = this.getGroupState().get("currentIdea");
-        var newIdea = new Idea.Model({"@type": Types.IDEA});
+        var newIdea = new Idea.Model({ "@type": Types.IDEA });
         var that = this;
         var collectionManager = new CollectionManager();
 

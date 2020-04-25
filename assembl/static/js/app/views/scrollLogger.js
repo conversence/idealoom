@@ -82,15 +82,15 @@ class ScrollLogger {
             .find(".message-body")
             .first();
 
-            if (
-                !messageSelector ||
-                messageSelector.length == 0 ||
-                messageSelector[0].scrollHeight == 0
-            ) {
-                //The tread is collapsed, or the messages has been paged-out
-                //console.log("Invalid message selector", messageSelector);
-                return;
-            }
+        if (
+            !messageSelector ||
+            messageSelector.length == 0 ||
+            messageSelector[0].scrollHeight == 0
+        ) {
+            //The tread is collapsed, or the messages has been paged-out
+            //console.log("Invalid message selector", messageSelector);
+            return;
+        }
         if (!messageContentSelector || messageContentSelector.length !== 1) {
             console.log(messageContentSelector);
             throw new Error(
