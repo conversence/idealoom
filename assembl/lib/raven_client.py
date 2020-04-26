@@ -9,6 +9,8 @@ from sentry_sdk.integrations.pyramid import PyramidIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 from sentry_sdk.integrations.redis import RedisIntegration
 
+from ..__version__ import version
+
 
 def sentry_context(user_id=None, **kwargs):
     with configure_scope() as scope:
@@ -38,7 +40,7 @@ def setup_raven(settings, settings_file=None, use_async=False, celery=False):
     else:
         raven_url = settings.get('raven_url', '')
     if raven_url and len(raven_url) > 12:
-        integrations = integrations=[
+        integrations = integrations = [
             PyramidIntegration(),
             SqlalchemyIntegration(),
             RedisIntegration(),
@@ -50,7 +52,9 @@ def setup_raven(settings, settings_file=None, use_async=False, celery=False):
             from sentry_sdk.integrations.celery import CeleryIntegration
             integrations.append(CeleryIntegration())
 
-        sentry_init(raven_url, integrations = integrations)
+        sentry_init(
+            raven_url, integrations=integrations, release=version(),
+            server_name=settings.get('app:idealoom', 'public_hostname'))
 
 
 def includeme(config):

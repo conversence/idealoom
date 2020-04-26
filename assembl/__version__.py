@@ -36,3 +36,7 @@ def version():
             _cached_version = pkg_resources.get_distribution("idealoom").version
             assert str(_cached_version) == __version__
     return _cached_version
+
+
+def sem_version():
+    return to_semver(version())
