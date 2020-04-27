@@ -951,13 +951,17 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
             def visit_idea(self, idea, level, prev_result):
                 age = ((idea.last_modified or idea.creation_date)-root_time).total_seconds()  # may be negative
                 color = Color(hsl=(180-(135.0 * age), 0.15, 0.85))
+                kwargs = {}
+                if idea.description_id:
+                    kwargs['tooltip'] = sanitize_text(idea.definition)
                 G.add_node(idea.id,
                            label=idea.short_title or "",
                            fontsize = 18 - (1.5 * level),
                            height=(20-(1.5*level))/72.0,
                            # fillcolor=color.hex,
                            target="idealoom",
-                           URL=idea.get_url())
+                           URL=idea.get_url(),
+                           **kwargs)
                 if prev_result:
                     links = [l for l in idea.source_links if l.source_id == prev_result.id]
                     if links:
