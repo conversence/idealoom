@@ -1530,6 +1530,20 @@ def check_and_create_database_user(host=None, user=None, password=None):
 
 
 @task
+def create_sentry_revision():
+    # assumes org, project, url, token etc. in ~/.sentryclirc
+    with cd(env.projectpath):
+        version = run("python "+os.path.join(local_code_root, 'assembl', '__version__.py'))
+        # git_rev = run("git rev-parse --short HEAD")
+    with cd(os.path.join(local_code_root, 'assembl')):
+        main_js = run('''sed -E -e 's/.*"([^"]+main[^"]+)".*/$1\1/' static/js/build/index.html''')
+        run(f"./static/node_modules/.bin/sentry-cli releases new {version}")
+        # run(f"./static/node_modules/.bin/sentry-cli set-commits -c {git_rev} {version}")
+        run(f"./static/node_modules/.bin/sentry-cli releases files {version} upload-sourcemaps static{main_js}*")
+        run(f"./static/node_modules/.bin/sentry-cli releases finalize {version}")
+
+
+@task
 def check_and_create_sentry_database_user():
     user = env.sentry_db_user
     password = env.sentry_db_password

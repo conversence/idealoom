@@ -40,3 +40,7 @@ def version():
 
 def sem_version():
     return to_semver(version())
+
+
+if __name__ == '__main__':
+    print(version())
