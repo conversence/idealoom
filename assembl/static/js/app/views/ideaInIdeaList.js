@@ -168,6 +168,13 @@ class IdeaInIdeaListView extends Marionette.View.extend({
                 " - " +
                 data.longTitle.bestValue(this.translationData).substr(0, 50);
         }
+        data.textDefinition = data.definition
+            ? JSON.stringify(
+                  Ctx.stripHtml(
+                      this.model.getDefinitionDisplayText(this.translationData)
+                  )
+              )
+            : null;
 
         data.Ctx = Ctx;
         data.idea_css_class = this.model.getCssClassFromId();

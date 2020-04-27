@@ -217,6 +217,10 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
         return ""
 
     @property
+    def text_definition(self):
+        return sanitize_text(self.definition)
+
+    @property
     def long_title(self):
         if self.synthesis_title_id:
             return self.synthesis_title.safe_best_entry_in_request().value
@@ -953,7 +957,7 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
                 color = Color(hsl=(180-(135.0 * age), 0.15, 0.85))
                 kwargs = {}
                 if idea.description_id:
-                    kwargs['tooltip'] = sanitize_text(idea.definition)
+                    kwargs['tooltip'] = idea.text_definition
                 G.add_node(idea.id,
                            label=idea.short_title or "",
                            fontsize = 18 - (1.5 * level),

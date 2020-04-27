@@ -35,7 +35,7 @@
 .annotator-hl {
   background: $theme_message_highlight_background;
   &.hl-currentidea {
-    background: darken($theme_message_highlight_background, 30%);
+    background: darken($theme_message_highlight_background, 25%);
   }
 }
 
