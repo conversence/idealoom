@@ -8,7 +8,6 @@ import Backbone from "backbone";
 import MessageListHeaderView from "./messageListHeader.js";
 import _ from "underscore";
 import $ from "jquery";
-import highlight from "jquery-highlight";
 import IdeaLoom from "../app.js";
 import Ctx from "../common/context.js";
 import i18n from "../utils/i18n.js";

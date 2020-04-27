@@ -1450,6 +1450,9 @@ class MessageView extends LoaderView.extend({
      */
     renderAnnotations(annotations) {
         var that = this;
+        var currentIdea = that.messageListView
+            .getGroupState()
+            .get("currentIdea");
 
         if (!this.isDestroyed()) {
             _.each(annotations, function (annotation) {
@@ -1461,7 +1464,18 @@ class MessageView extends LoaderView.extend({
                         "data-annotation-id",
                         annotation["@id"]
                     );
-                    $(highlight).on("click", func);
+                    const jqh = $(highlight);
+                    if (currentIdea) {
+                        const local = annotation.ideaLinks.find({
+                            idIdea: currentIdea.id,
+                        });
+                        if (local) {
+                            jqh.addClass("hl-currentidea");
+                            // I should worry about removing this, but if the current idea changes,
+                            // messages reload anyway
+                        }
+                    }
+                    jqh.on("click", func);
                 });
             });
         }
