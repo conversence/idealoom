@@ -1251,11 +1251,16 @@ Context.prototype = {
      * @function app.common.context.Context.htmlEntities
      */
     htmlEntities: function (str) {
-        return String(str)
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;");
+        const map = {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#x27;",
+            "/": "&#x2F;",
+        };
+        const reg = /[&<>"'/]/gi;
+        return str.replace(reg, (match) => map[match]);
     },
     /**
      * Use the browser's built-in functionality to quickly and safely escape the string

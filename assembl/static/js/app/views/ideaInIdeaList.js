@@ -169,7 +169,7 @@ class IdeaInIdeaListView extends Marionette.View.extend({
                 data.longTitle.bestValue(this.translationData).substr(0, 50);
         }
         data.textDefinition = data.definition
-            ? JSON.stringify(
+            ? Ctx.escapeHtml(
                   Ctx.stripHtml(
                       this.model.getDefinitionDisplayText(this.translationData)
                   )
