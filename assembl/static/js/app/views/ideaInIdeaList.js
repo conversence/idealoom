@@ -168,6 +168,7 @@ class IdeaInIdeaListView extends Marionette.View.extend({
                 " - " +
                 data.longTitle.bestValue(this.translationData).substr(0, 50);
         }
+        // TODO: take a short-ish preview?
         data.textDefinition = data.definition
             ? Ctx.escapeHtml(
                   Ctx.stripHtml(

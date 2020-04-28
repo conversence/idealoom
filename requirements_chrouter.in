@@ -1,12 +1,12 @@
 -e git+https://github.com/conversence/sockjs.git@juanjoa#egg=sockjs
-cchardet==2.1.4
+cchardet==2.1.6
 aiohttp==3.6.2
 aiocontextvars==0.2.2 ; python_version < '3.7'
 # aiohttp-cors==0.7.0
 
 # Those chrouter reqs repeat requirements in requirements.in, keep in sync.
 PyJWT==1.7.1
-pytz==2019.3
+pytz==2020.1
 pyzmq==19.0.0
 sentry-sdk==0.14.3
 simplejson==3.17.0
