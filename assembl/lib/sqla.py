@@ -43,9 +43,10 @@ from sqlalchemy.orm.session import object_session, Session
 from sqlalchemy.engine import strategies
 from sqla_rdfbridge.mapping import PatternIriClass
 from sqlalchemy.engine.url import URL
-from zope.sqlalchemy import ZopeTransactionExtension
+from zope.sqlalchemy import register
 from zope.sqlalchemy.datamanager import mark_changed as z_mark_changed
 from pyramid.httpexceptions import HTTPUnauthorized, HTTPBadRequest
+import transaction
 
 from .parsedatetime import parse_datetime
 from ..view_def import get_view_def
@@ -162,10 +163,8 @@ class TableLockCreationThread(Thread):
         try:
             for num in range(self.num_attempts):
                 db = session_maker()
-                # Get the ThreadTransactionManager in a quite horrible way.
-                if is_zopish():
-                    tm = getattr(session_maker.session_factory.kw[
-                        'extension'], 'transaction_manager', None)
+                if session_maker.is_zopish:
+                    tm = transaction.manager
                 else:
                     # Ad hoc transaction manager. TODO: Use existing machinery.
                     # This is only used in testing, though.
@@ -2353,10 +2352,13 @@ class TimestampedMixin(object):
 
 
 def make_session_maker(zope_tr=True, autoflush=True):
-    return scoped_session(sessionmaker(
+    session = scoped_session(sessionmaker(
         autoflush=autoflush,
-        class_=ReadWriteSession,
-        extension=ZopeTransactionExtension() if zope_tr else None))
+        class_=ReadWriteSession))
+    if zope_tr:
+        register(session)
+    session.is_zopish = zope_tr
+    return session
 
 
 def initialize_session_maker(zope_tr=True, autoflush=True):
@@ -2570,12 +2572,6 @@ def configure_engine(settings, zope_tr=True, autoflush=True, session_maker=None,
     event.listen(Session, 'after_rollback', session_rollback_listener)
     event.listen(engine, 'rollback', engine_rollback_listener)
     return engine
-
-
-def is_zopish():
-    return isinstance(
-        _session_maker.session_factory.kw.get('extension'),
-        ZopeTransactionExtension)
 
 
 def mark_changed(session=None):

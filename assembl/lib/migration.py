@@ -11,7 +11,7 @@ from alembic.script import ScriptDirectory
 import transaction
 
 from ..lib.sqla import (
-    get_metadata, get_session_maker, mark_changed, is_zopish)
+    get_metadata, get_session_maker, mark_changed)
 from ..lib.text_search import update_indices
 
 
