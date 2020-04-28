@@ -66,16 +66,18 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Idealoom'
-copyright = u"2012-2019, Clouds Collective of skills inc., Bluenove Group inc., Imagination For People, Caravan Web Worker Cooperative inc., Technologies Coeus inc., Solutions Conversence inc."
+copyright = u"2012-2020, Clouds Collective of skills inc., Bluenove Group inc., Imagination For People, Caravan Web Worker Cooperative inc., Technologies Coeus inc., Solutions Conversence inc."
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
-# The short X.Y version.
-version = '0.2'
+from assembl.__version__ import sem_version
 # The full version, including alpha/beta/rc tags.
-release = '0.2'
+release = sem_version()
+# The short X.Y version.
+version = str(release.truncate('minor'))[:-2]
+release = str(release)
 
 viewcode_import = True
 
@@ -290,7 +292,7 @@ texinfo_documents = [
 epub_title = u'IdeaLoom'
 epub_author = u'Conversence'
 epub_publisher = u'Conversence'
-epub_copyright = u'2019, Conversence'
+epub_copyright = u'2020, Conversence'
 
 # The basename for the epub file. It defaults to the project name.
 #epub_basename = u'Assembl'
