@@ -203,7 +203,7 @@ termcolor==1.1.0          # via jasmine-splinter-runner
 tomako==0.1.0.post1       # via circus-web
 tornado==4.5.3            # via circus, circus-web, tomako, tornadio2
 traitlets==4.3.3          # via ipython
-transaction==2.4.0        # via -r requirements.in, pyramid-mailer, pyramid-tm, repoze.sendmail, zope.sqlalchemy
+transaction==3.0.0        # via -r requirements.in, pyramid-mailer, pyramid-tm, repoze.sendmail, zope.sqlalchemy
 translationstring==1.3    # via -r requirements.in, colander, pyramid
 unidecode==1.1.1          # via -r requirements.in
 update-dotdee==5.0        # via rotate-backups
