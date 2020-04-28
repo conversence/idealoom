@@ -42,7 +42,7 @@ def instance_check_op(request, op, cls, **kwargs):
         request.errors.status = 404
         return False
     if not instance.user_can_req(op, request):
-        request.errors.add("querystring", 'permissions', "Not authorized "+op)
+        request.errors.add("querystring", 'permissions', f"Not authorized {op}")
         request.errors.status = 403
         return False
     return True
