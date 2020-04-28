@@ -2,7 +2,7 @@
 -e git+https://github.com/matthewnorman/pyramid_autodoc@sphinx_161_no_domains_v2#egg=pyramid_autodoc
 cornice_sphinx==0.3
 # https://github.com/Cornices/cornice.ext.sphinx/issues/22
-Sphinx==2.0.1  # rq.filter: <2.1
+Sphinx==3.0.3
 sphinxcontrib-httpdomain==1.7.0
 sphinxcontrib-zopeext==0.2.4
 sqlalchemy-schemadisplay==1.3

@@ -1,4 +1,4 @@
-build_virtualenvbuild_virtualenvInstalling IdeaLoom
+Installing IdeaLoom
 ===================
 
 Prerequisites

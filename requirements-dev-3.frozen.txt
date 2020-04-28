@@ -196,7 +196,7 @@ social-auth-core==3.3.3   # via -r requirements.in, social-auth-app-pyramid, soc
 social-auth-storage-sqlalchemy==1.1.0  # via -r requirements.in, social-auth-app-pyramid
 soupsieve==2.0            # via beautifulsoup4
 sparqlwrapper==1.8.5      # via -r requirements.in
-sphinx==2.0.1             # via -r requirements_doc.in, cornice-sphinx, pyramid-autodoc, sphinxcontrib-httpdomain, sphinxcontrib-zopeext
+sphinx==3.0.3             # via -r requirements_doc.in, cornice-sphinx, pyramid-autodoc, sphinxcontrib-httpdomain, sphinxcontrib-zopeext
 sphinxcontrib-applehelp==1.0.2  # via sphinx
 sphinxcontrib-devhelp==1.0.2  # via sphinx
 sphinxcontrib-htmlhelp==1.0.3  # via sphinx
