@@ -23,7 +23,7 @@ from os import getenv
 from getpass import getuser
 from platform import system
 from time import sleep, strftime, time
-from configparser import ConfigParser, SafeConfigParser, NoOptionError
+from configparser import ConfigParser, SafeConfigParser
 from io import StringIO
 import sys
 # Importing the "safe" os.path commands
@@ -1533,7 +1533,7 @@ def check_and_create_database_user(host=None, user=None, password=None):
 def create_sentry_revision():
     # assumes org, project, url, token etc. in ~/.sentryclirc
     with cd(env.projectpath):
-        version = run("python "+os.path.join(local_code_root, 'assembl', '__version__.py'))
+        version = venvcmd("python "+os.path.join(local_code_root, 'assembl', '__version__.py'))
         # git_rev = run("git rev-parse --short HEAD")
     with cd(os.path.join(local_code_root, 'assembl')):
         main_js = run('''sed -E -e 's/.*"([^"]+main[^"]+)".*/$1\1/' static/js/build/index.html''')
