@@ -146,7 +146,17 @@ class TourManager extends Marionette.Object.extend({
         return undefined;
     }
 
-    requestTour(tourName) {
+    requestTour(tourName, attempt) {
+        if (!this.toursById) {
+            // not initialized
+            attempt = attempt ? attempt : 0;
+            if (attempt < 5) {
+                this.setTimeout(() => {
+                    this.requestTour(tourName, attempt + 1);
+                }, 500);
+            }
+            return;
+        }
         if (tourName === undefined) {
             console.error("undefined tour name");
             return;
