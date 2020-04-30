@@ -1,5 +1,4 @@
 -e git+https://github.com/conversence/Beaker.git@assembl#egg=Beaker
--e git+https://github.com/conversence/pyoembed.git@from_spec#egg=pyoembed
 -e git+https://github.com/maparent/circus-web.git@p3#egg=circus_web
 -e git+https://github.com/FreeDiscovery/jwzthreading.git@master#egg=jwzthreading
 -e git+https://github.com/maparent/langdetect.git@no_sample#egg=langdetect

@@ -10,12 +10,13 @@
 -e git+https://github.com/maparent/circus-web.git@p3#egg=circus_web  # via -r requirements.in
 -e git+https://github.com/FreeDiscovery/jwzthreading.git@master#egg=jwzthreading  # via -r requirements.in
 -e git+https://github.com/maparent/langdetect.git@no_sample#egg=langdetect  # via -r requirements.in
--e git+https://github.com/conversence/pyoembed.git@from_spec#egg=pyoembed  # via -r requirements.in
+-e git+https://github.com/conversence/pyoembed.git@async#egg=pyoembed  # via -r requirements_chrouter.in
 -e git+https://github.com/assembl/pyramid_beaker.git@assembl#egg=pyramid_beaker  # via -r requirements.in
 -e git+https://github.com/conversence/sockjs.git@juanjoa#egg=sockjs  # via -r requirements_chrouter.in
 -e git+https://github.com/conversence/sqlalchemy-rdfbridge.git#egg=sqlalchemy-rdfbridge  # via -r requirements.in
 -e git+https://github.com/maparent/sqlalchemy-utils.git@abstract_generic#egg=sqlalchemy_utils  # via -r requirements.in
 -e git+https://github.com/maparent/tornadio2.git@session_id_str#egg=tornadIO2  # via -r requirements.in
+aiocache==0.11.1            # via -r requirements_chrouter.in
 aiohttp==3.6.2            # via -r requirements_chrouter.in, sockjs
 alembic==1.4.2            # via -r requirements.in
 amqp==2.5.2               # via kombu
