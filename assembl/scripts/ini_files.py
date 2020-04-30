@@ -62,6 +62,7 @@ DEFAULTS = {
     'autostart_celery_notify_beat': 'true',
     'autostart_source_reader': 'true',
     'autostart_changes_router': 'true',
+    'autostart_oembed_router': 'true',
     'autostart_pserve': 'false',
     'autostart_webpack': 'false',
     'autostart_uwsgi': 'false',
@@ -178,6 +179,7 @@ def generate_ini_files(config, config_fname):
         'WEBPACK_URL': webpack_url,
         'server_port': config.getint('server:main', 'port'),
         'ASSEMBL_URL': url,
+        'oembed_port': config.getint('app:idealoom', 'oembed_port'),
         'code_root': config.get(SECTION, 'code_root'),
     }
     for procname in (
@@ -185,6 +187,7 @@ def generate_ini_files(config, config_fname):
             'celery_notify_beat',
             'source_reader',
             'changes_router',
+            'oembed',
             'pserve',
             'webpack',
             'chaussette',

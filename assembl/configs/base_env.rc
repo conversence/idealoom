@@ -26,9 +26,20 @@ make_project_web_visible = true
 changes_websocket_port = 8090
 # Whether the websocket is proxied by nginx, and exposed through the public_port
 changes_websocket_proxied = true
-changes_prefix = /socket
+changes_websocket_prefix = /socket
 accept_secure_connection = true
 require_secure_connection = true
+# The port to use for oembed (client frontends will connect to this)
+# In prod, your firewall needs to allow this through or proxy it through nginx
+# UNIQUE_PER_SERVER
+# Convention:
+# 8025 thru 8027: reserved for development
+# 8028 thru 8029: reserved for automated testing
+# 8030-: production
+oembed_port = 8030
+oembed_host = localhost
+oembed_proxied = true
+oembed_prefix = /oembed
 
 *sentry_scheme = https
 *sentry_host = localhost
@@ -110,6 +121,7 @@ circus__autostart_celery = true
 circus__autostart_celery_notify_beat = true
 circus__autostart_source_reader = true
 circus__autostart_changes_router = true
+circus__autostart_oembed = true
 circus__autostart_pserve = false
 circus__autostart_webpack = false
 circus__autostart_uwsgi = true

@@ -210,6 +210,16 @@ def get_css_links(static_url, testing=False):
     return "\n".join(links)
 
 
+def get_service_url(config, service, secure_req):
+    proxied = asbool(config.get(f'{service}_proxied'))
+    port = None if proxied else config.get(f'{service}_port')
+    use_secure = proxied and (
+        asbool(config.get("require_secure_connection"))
+        or (asbool(config.get("accept_secure_connection")) and secure_req))
+    return get_global_base_url(
+        use_secure, port) + config.get(f'{service}_prefix')
+
+
 def get_default_context(request, **kwargs):
     kwargs.update(default_context)
     from ..auth.util import get_current_discussion
@@ -217,16 +227,9 @@ def get_default_context(request, **kwargs):
     if request.scheme == "http"\
             and asbool(config.get("require_secure_connection")):
         raise HTTPFound(application_url + request.path_qs)
-    socket_proxied = asbool(config.get('changes_websocket_proxied'))
-    websocket_port = None if socket_proxied \
-        else config.get('changes_websocket_port')
-    secure_socket = socket_proxied and (
-        asbool(config.get("require_secure_connection"))
-        or (asbool(config.get("accept_secure_connection"))
-            and request.url.startswith('https:')))
-    socket_url = get_global_base_url(
-        secure_socket, websocket_port) + config.get('changes_prefix')
-
+    secure_req = request.url.startswith('https:')
+    socket_url = get_service_url(config, 'changes_websocket', secure_req)
+    oembed_url = get_service_url(config, 'oembed', secure_req)
     localizer = request.localizer
     _ = TranslationStringFactory('assembl')
     user = request.user
@@ -367,6 +370,7 @@ def get_default_context(request, **kwargs):
         web_analytics=analytics_settings,
         help_url=help_url,
         socket_url=socket_url,
+        oembed_url=oembed_url,
         first_login_after_auto_subscribe_to_notifications=first_login_after_auto_subscribe_to_notifications,
         raven_url=config.get('raven_url') or '',
         activate_tour=str(config.get('activate_tour') or False).lower(),

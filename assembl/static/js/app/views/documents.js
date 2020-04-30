@@ -26,7 +26,9 @@ class AbstractDocumentView extends Marionette.View.extend({
             : this.model.get("uri");
         if (!this.model.isFileType())
             this.oembedData = $.ajax(
-                "/api/v1/oembed?height=300&url=" + encodeURIComponent(this.uri)
+                Ctx.getOEmbedUrl() +
+                    "?height=300&url=" +
+                    encodeURIComponent(this.uri)
             );
     }
 

@@ -335,12 +335,12 @@ if __name__ == '__main__':
 
     logging.config.fileConfig(sys.argv[1],)
 
-    settings = configparser.ConfigParser({'changes_prefix': ''})
+    settings = configparser.ConfigParser({'changes_websocket_prefix': ''})
     settings.read(sys.argv[-1])
 
     in_socket = settings.get(SECTION, 'changes_socket')
     out_socket = settings.get(SECTION, 'changes_socket_out', fallback=in_socket + "p")
-    changes_prefix = settings.get(SECTION, 'changes_prefix')
+    changes_prefix = settings.get(SECTION, 'changes_websocket_prefix')
     token_secret = settings.get(SECTION, 'session.secret')
     websocket_port = settings.getint(SECTION, 'changes_websocket_port')
     # NOTE: Not sure those are always what we want.
@@ -388,9 +388,8 @@ if __name__ == '__main__':
         loop.create_task(log_queue(zmq_context, out_socket))
         log.info("signals are setup")
 
-    path = '/socket'
-    app = setup_app(path)
-    Dispatcher(app, zmq_context, token_secret, server_url, out_socket, path)
+    app = setup_app(changes_prefix)
+    Dispatcher(app, zmq_context, token_secret, server_url, out_socket, changes_prefix)
     assert Dispatcher.get_instance()
     app.on_startup.append(check_sockets)
 

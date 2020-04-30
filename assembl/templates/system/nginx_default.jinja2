@@ -72,10 +72,18 @@ server {
 
   {% if changes_websocket_proxied %}
     location /socket {
-        proxy_pass http://{{changes_websocket_host}}:{{changes_websocket_port}}{{changes_prefix}};
+        proxy_pass http://{{changes_websocket_host}}:{{changes_websocket_port}}{{changes_websocket_prefix}};
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
+    }
+  {% endif %}
+
+  {% if oembed_proxied %}
+    location /oembed {
+        proxy_pass http://{{oembed_host}}:{{oembed_port}}{{oembed_prefix}};
+        proxy_http_version 1.1;
+        add_header Access-Control-Allow-Origin https://{{public_hostname}}
     }
   {% endif %}
 

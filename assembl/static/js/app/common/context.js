@@ -41,6 +41,7 @@ var Context = function () {
     this.DISCUSSION_SLUG = $("#discussion-slug").val();
     this.DISCUSSION_ID = $("#discussion-id").val();
     this.SOCKET_URL = $("#socket-url").val();
+    this.OEMBED_URL = $("#oembed-url").val();
     this.CURRENT_USER_ID = $("#user-id").val();
     /**
      * Send debugging output to console.log to observe when views render
@@ -246,6 +247,14 @@ Context.prototype = {
      **/
     getSocketUrl: function () {
         return this.SOCKET_URL;
+    },
+    /**
+     * Returns the URL of the OEmbed server
+     * @returns {String}
+     * @function app.common.context.Context.getOEmbedUrl
+     **/
+    getOEmbedUrl: function () {
+        return this.OEMBED_URL;
     },
     /**
      * Returns the id of the current discussion
@@ -1527,7 +1536,8 @@ Context.prototype = {
             //popover.css('padding', '25px 50px');
             popover.removeClass("hidden");
             $.ajax(
-                "/api/v1/oembed?url=" +
+                that.getOEmbedUrl() +
+                    "?url=" +
                     encodeURIComponent($(this).attr("href")),
                 {
                     success: (data, status, jqXHR) => {
