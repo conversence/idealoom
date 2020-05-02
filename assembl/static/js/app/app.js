@@ -3,7 +3,7 @@
  * @module app.app
  */
 
-import { Application, View, setRenderer } from "backbone.marionette";
+import { Application, View, setRenderer, Events } from "backbone.marionette";
 import TemplateCache from "marionette.templatecache";
 
 import $ from "jquery";
@@ -29,6 +29,7 @@ class AppClass extends Application {
     onStart() {
         var that = this;
         setRenderer(TemplateCache.render);
+        _.extend(Backbone.View.prototype, Events);
         this.rootView = new RootView();
         this.socket_vent = Radio.channel("socket");
         this.tour_vent = Radio.channel("tour");
