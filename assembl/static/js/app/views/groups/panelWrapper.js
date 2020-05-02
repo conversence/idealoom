@@ -4,7 +4,7 @@
  */
 
 import $ from "jquery";
-import Marionette from "backbone.marionette";
+import { bindEvents } from "backbone.marionette";
 import panelViewByPanelSpec from "../../objects/viewsFactory.js";
 import Ctx from "../../common/context.js";
 import BasePanel from "../basePanel.js";
@@ -13,11 +13,12 @@ import panelSpec from "../../models/panelSpec.js";
 window.jQuery = $;
 import tooltip from "bootstrap-tooltip";
 import PanelSpecTypes from "../../utils/panelSpecTypes.js";
+import { View } from "backbone.marionette";
 
 /**
  * @class app.views.groups.panelWrapper.PanelWrapper
  */
-class PanelWrapper extends Marionette.View.extend({
+class PanelWrapper extends View.extend({
     template: "#tmpl-panelWrapper",
 
     regions: {
@@ -70,7 +71,7 @@ class PanelWrapper extends Marionette.View.extend({
         this.contentsView = new contentClass({
             panelWrapper: this,
         });
-        Marionette.bindEvents(this, this.model, this.modelEvents);
+        bindEvents(this, this.model, this.modelEvents);
         this.setPanelMinWidth();
         $(window).on("resize", function () {
             that.setPanelMinWidth();

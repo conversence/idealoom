@@ -2,7 +2,7 @@
  * @module app.views.preferencesView
  */
 
-import Marionette from "backbone.marionette";
+import { View, CollectionView } from "backbone.marionette";
 import Backbone from "backbone";
 import _ from "underscore";
 import BackboneSubset from "Backbone.Subset";
@@ -135,7 +135,7 @@ function getPreferenceEditView(preferenceModel, subViewKey, useKey) {
  * A single preference item
  * @class app.views.preferencesView.PreferencesItemView
  */
-class PreferencesItemView extends Marionette.View.extend({
+class PreferencesItemView extends View.extend({
     regions: {
         subview: ".js_prefItemSubview",
     },
@@ -282,7 +282,7 @@ class ListPreferencesItemView extends PreferencesItemView.extend({
  * Abstract class for preference views
  * @class app.views.preferencesView.BasePreferenceView
  */
-class BasePreferenceView extends Marionette.View.extend({
+class BasePreferenceView extends View.extend({
     ui: {
         prefValue: ".pref_value",
     },
@@ -682,7 +682,7 @@ class DomainPreferenceView extends StringPreferenceView.extend({
  * The collection view for the items in a preference-as-list
  * @class app.views.preferencesView.ListSubviewCollectionView
  */
-class ListSubviewCollectionView extends Marionette.CollectionView.extend({
+class ListSubviewCollectionView extends CollectionView.extend({
     childView: ListPreferencesItemView,
 }) {
     initialize(options) {
@@ -724,7 +724,7 @@ class ListSubviewCollectionView extends Marionette.CollectionView.extend({
  * The collection view for the items in a preference-as-dict
  * @class app.views.preferencesView.DictSubviewCollectionView
  */
-class DictSubviewCollectionView extends Marionette.CollectionView.extend({
+class DictSubviewCollectionView extends CollectionView.extend({
     childView: DictPreferencesItemView,
 }) {
     initialize(options) {
@@ -888,7 +888,7 @@ class DictPreferenceView extends ListPreferenceView.extend({
  * The list of all preferences
  * @class app.views.preferencesView.PreferencesCollectionView
  */
-class PreferencesCollectionView extends Marionette.CollectionView.extend({
+class PreferencesCollectionView extends CollectionView.extend({
     childView: PreferencesItemView,
 }) {
     initialize(options) {

@@ -3,7 +3,7 @@
  * @module app.views.contextPage
  */
 
-import Marionette from "backbone.marionette";
+import { View, CollectionView } from "backbone.marionette";
 
 import IdeaLoom from "../app.js";
 import Ctx from "../common/context.js";
@@ -21,7 +21,7 @@ import Statistics from "./statistics.js";
 import Types from "../utils/types.js";
 import Promise from "bluebird";
 
-class Partner extends Marionette.View.extend({
+class Partner extends View.extend({
     template: "#tmpl-partnerItem",
     className: "gu gu-2of7 partnersItem mrl",
 }) {
@@ -44,11 +44,11 @@ class Partner extends Marionette.View.extend({
     }
 }
 
-class PartnerListBody extends Marionette.CollectionView.extend({
+class PartnerListBody extends CollectionView.extend({
     childView: Partner,
 }) {}
 
-class PartnerList extends Marionette.View.extend({
+class PartnerList extends View.extend({
     template: "#tmpl-partnerList",
     className: "gr mvxl",
 
@@ -80,7 +80,7 @@ class PartnerList extends Marionette.View.extend({
     }
 }
 
-class Synthesis extends Marionette.View.extend({
+class Synthesis extends View.extend({
     template: "#tmpl-synthesisContext",
 
     events: {
@@ -130,7 +130,7 @@ class Synthesis extends Marionette.View.extend({
     }
 }
 
-class Instigator extends Marionette.View.extend({
+class Instigator extends View.extend({
     template: "#tmpl-instigator",
 
     ui: {
@@ -182,7 +182,7 @@ class Instigator extends Marionette.View.extend({
     }
 }
 
-class Introduction extends Marionette.View.extend({
+class Introduction extends View.extend({
     template: "#tmpl-introductions",
 
     ui: {
@@ -268,7 +268,7 @@ class Introduction extends Marionette.View.extend({
     }
 }
 
-class ContextPage extends Marionette.View.extend({
+class ContextPage extends View.extend({
     template: "#tmpl-contextPage",
     panelType: PanelSpecTypes.DISCUSSION_CONTEXT,
     className: "contextPanel",

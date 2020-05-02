@@ -3,14 +3,13 @@
  * @module app.views.admin.adminNavigationMenu
  */
 
-import Marionette from "backbone.marionette";
-
 import $ from "jquery";
 import i18n from "../../utils/i18n.js";
 import Permissions from "../../utils/permissions.js";
 import Ctx from "../../common/context.js";
+import { View } from "backbone.marionette";
 
-class adminNavigationMenu extends Marionette.View.extend({
+class adminNavigationMenu extends View.extend({
     tagName: "nav",
     className: "sidebar-nav",
     selectedSection: undefined,

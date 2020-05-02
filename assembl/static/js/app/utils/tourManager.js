@@ -3,7 +3,7 @@
  * @module app.utils.tourManager
  */
 
-import Marionette from "backbone.marionette";
+import { MnObject } from "backbone.marionette";
 import * as Sentry from "@sentry/browser";
 
 import i18n from "./i18n.js";
@@ -14,7 +14,7 @@ import $ from "jquery";
 import AppTours from "./tours/appTours.js";
 import hopscotch from "hopscotch";
 
-class TourManager extends Marionette.Object.extend({
+class TourManager extends MnObject.extend({
     channelName: "tour",
     nextTours: [],
     tourModel: undefined,

@@ -3,8 +3,6 @@
  * @module app.views.groups.defineGroupModal
  */
 
-import Marionette from "backbone.marionette";
-
 import $ from "jquery";
 import _ from "underscore";
 import Backbone from "backbone";

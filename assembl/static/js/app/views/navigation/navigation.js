@@ -3,8 +3,6 @@
  * @module app.views.navigation.navigation
  */
 
-import Marionette from "backbone.marionette";
-
 import Jed from "jed";
 import $ from "jquery";
 import _ from "underscore";

@@ -3,11 +3,11 @@
  * @module app.objects.messagesInProgress
  */
 
-import Marionette from "backbone.marionette";
+import { MnObject } from "backbone.marionette";
 
 import Ctx from "../common/context.js";
 
-class messagesInProgress extends Marionette.Object.extend({
+class messagesInProgress extends MnObject.extend({
     _store: window.localStorage,
     _key: "composing_messages",
     _messages: null,

@@ -3,7 +3,7 @@
  * @module app.views.announcements
  */
 
-import Marionette from "backbone.marionette";
+import { View, CollectionView } from "backbone.marionette";
 
 import _ from "underscore";
 import $ from "jquery";
@@ -186,7 +186,7 @@ class AnnouncementEditableView extends AbstractAnnouncementView.extend({
     }
 }
 
-class AnnouncementListEmptyEditableView extends Marionette.View.extend({
+class AnnouncementListEmptyEditableView extends View.extend({
     template: "#tmpl-announcementListEmptyEditable",
 
     ui: {
@@ -216,12 +216,10 @@ class AnnouncementListEmptyEditableView extends Marionette.View.extend({
     }
 }
 
-class AnnouncementEditableCollectionView extends Marionette.CollectionView.extend(
-    {
-        childView: AnnouncementEditableView,
-        emptyView: AnnouncementListEmptyEditableView,
-    }
-) {
+class AnnouncementEditableCollectionView extends CollectionView.extend({
+    childView: AnnouncementEditableView,
+    emptyView: AnnouncementListEmptyEditableView,
+}) {
     initialize(options) {
         this.objectAttachedTo = options.objectAttachedTo;
     }

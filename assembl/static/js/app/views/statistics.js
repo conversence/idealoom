@@ -3,8 +3,6 @@
  * @module app.views.statistics
  */
 
-import Marionette from "backbone.marionette";
-
 import IdeaLoom from "../app.js";
 import Ctx from "../common/context.js";
 import CollectionManager from "../common/collectionManager.js";
@@ -35,8 +33,9 @@ import {
 import i18n from "../utils/i18n.js";
 import Moment from "moment";
 import Promise from "bluebird";
+import { View } from "backbone.marionette";
 
-class Statistics extends Marionette.View.extend({
+class Statistics extends View.extend({
     template: "#tmpl-statistics",
 
     ui: {

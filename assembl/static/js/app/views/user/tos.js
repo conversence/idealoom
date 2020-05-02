@@ -3,8 +3,6 @@
  * @module app.views.user.tos
  */
 
-import Marionette from "backbone.marionette";
-
 import $ from "jquery";
 import _ from "underscore";
 import Promise from "bluebird";
@@ -14,8 +12,9 @@ import UserNavigationMenu from "./userNavigationMenu.js";
 import Ctx from "../../common/context.js";
 import CollectionManager from "../../common/collectionManager.js";
 import Growl from "../../utils/growl.js";
+import { View } from "backbone.marionette";
 
-class UserTOS extends Marionette.View.extend({
+class UserTOS extends View.extend({
     template: "#tmpl-userTOS",
     className: "admin-tos",
 

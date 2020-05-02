@@ -2,7 +2,6 @@
  *
  * @module app.views.admin.sourceEditViews
  */
-import Marionette from "backbone.marionette";
 import Promise from "bluebird";
 import $ from "jquery";
 

@@ -3,8 +3,6 @@
  * @module app.views.facebookViews
  */
 
-import Marionette from "backbone.marionette";
-
 import Backbone from "backbone";
 import _ from "underscore";
 import Ctx from "../common/context.js";
@@ -17,6 +15,7 @@ import CollectionManager from "../common/collectionManager.js";
 import Social from "../models/social.js";
 import LoaderView from "./loaderView.js";
 import Source from "../models/sources.js";
+import { View } from "backbone.marionette";
 
 var _allFacebookPermissions = undefined;
 var getAllFacebookPermissions = function () {
@@ -586,7 +585,7 @@ var checkState = function (renderView) {
         });
 };
 
-class errorView extends Marionette.View.extend({
+class errorView extends View.extend({
     template: "#tmpl-exportPostModal-fb-token-error",
 
     ui: {
@@ -805,7 +804,7 @@ class pageView extends LoaderView.extend({
     }
 }
 
-class exportPostForm extends Marionette.View.extend({
+class exportPostForm extends View.extend({
     template: "#tmpl-exportPostModal-fb",
 
     regions: {
@@ -1141,7 +1140,7 @@ class exportPostForm extends Marionette.View.extend({
     }
 }
 
-class FacebookSourceForm extends Marionette.View.extend({
+class FacebookSourceForm extends View.extend({
     template: "#tmpl-facebookSourceForm",
 
     regions: {
@@ -1288,7 +1287,7 @@ class pageSourceForm extends FacebookSourceForm {
     }
 }
 
-class basefbView extends Marionette.View.extend({
+class basefbView extends View.extend({
     template: "#tmpl-sourceFacebook",
 
     ui: {

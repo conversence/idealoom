@@ -5,7 +5,7 @@
 
 import Backbone from "backbone";
 
-import Marionette from "backbone.marionette";
+//import { CollectionView } from "backbone.marionette";
 import IdeaLoom from "../app.js";
 import _ from "underscore";
 import $ from "jquery";
@@ -222,9 +222,9 @@ class messageSendView extends LoaderView.extend({
         //     parentView: this
         //   }
         // });
-        // var AttachmentEditableCollectionView = Marionette.CollectionView.extend({
+        // var AttachmentEditableCollectionView = CollectionView.extend({
         //   constructor: function AttachmentEditableCollectionView() {
-        //     Marionette.CollectionView.apply(this, arguments);
+        //     super(...arguments);
         //   },
 
         //   childView: AttachmentViews.AttachmentEditableView

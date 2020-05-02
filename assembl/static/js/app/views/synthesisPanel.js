@@ -8,7 +8,7 @@ import IdeaRenderVisitor from "./visitors/ideaRenderVisitor.js";
 import * as Sentry from "@sentry/browser";
 import _ from "underscore";
 import $ from "jquery";
-import Marionette from "backbone.marionette";
+import { CollectionView } from "backbone.marionette";
 import IdeaLoom from "../app.js";
 import Ctx from "../common/context.js";
 import MessageModel from "../models/message.js";
@@ -233,7 +233,7 @@ class SynthesisPanel extends BasePanel.extend({
             }
 
             that.synthesisIdeaRoots.reset(roots);
-            var synthesisIdeaRootsView = new Marionette.CollectionView({
+            var synthesisIdeaRootsView = new CollectionView({
                 collection: that.synthesisIdeaRoots,
                 childView: IdeaFamilyView,
                 childViewOptions: {

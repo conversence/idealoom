@@ -3,12 +3,12 @@
  * @module app.objects.storage
  */
 
-import Marionette from "backbone.marionette";
+import { MnObject } from "backbone.marionette";
 
 import groupSpec from "../models/groupSpec.js";
 import Ctx from "../common/context.js";
 
-class storage extends Marionette.Object.extend({
+class storage extends MnObject.extend({
     _store: window.localStorage,
 }) {
     getStoragePrefix() {

@@ -6,7 +6,7 @@
 import Backbone from "backbone";
 
 import BackboneModal from "backbone.modal";
-import Marionette from "backbone.marionette";
+import { View, CollectionView } from "backbone.marionette";
 import IdeaLoom from "../app.js";
 import CookiesManager from "../utils/cookiesManager.js";
 import Widget from "../models/widget.js";
@@ -17,7 +17,7 @@ import CollectionManager from "../common/collectionManager.js";
 import $ from "jquery";
 import i18n from "../utils/i18n.js";
 
-class CookieInfobarItemView extends Marionette.View.extend({
+class CookieInfobarItemView extends View.extend({
     template: "#tmpl-cookieBanner",
 
     ui: {
@@ -44,7 +44,7 @@ class CookieInfobarItemView extends Marionette.View.extend({
     }
 }
 
-class TosInfobarItemView extends Marionette.View.extend({
+class TosInfobarItemView extends View.extend({
     template: "#tmpl-tos_infobar",
 
     events: {
@@ -174,7 +174,7 @@ class WidgetInfobarItemView extends LoaderView.extend({
     }
 }
 
-class InfobarsView extends Marionette.CollectionView.extend({
+class InfobarsView extends CollectionView.extend({
     collectionEvents: {
         "add remove reset change": "adjustInfobarSize",
     },

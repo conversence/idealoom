@@ -3,16 +3,15 @@
  * @module app.views.user.profile
  */
 
-import Marionette from "backbone.marionette";
-
 import $ from "jquery";
 import Agents from "../../models/agents.js";
 import i18n from "../../utils/i18n.js";
 import UserNavigationMenu from "./userNavigationMenu.js";
 import Ctx from "../../common/context.js";
 import Growl from "../../utils/growl.js";
+import { View } from "backbone.marionette";
 
-class profile extends Marionette.View.extend({
+class profile extends View.extend({
     template: "#tmpl-userProfile",
     className: "admin-profile",
 

@@ -3,9 +3,9 @@
  * @module app.views.navigation.notification
  */
 
-import Marionette from "marionette.js";
+import { View } from "backbone.marionette";
 
-class sidebarNotification extends Marionette.View.extend({
+class sidebarNotification extends View.extend({
     template: "#tmpl-sidebar-notification",
 }) {}
 

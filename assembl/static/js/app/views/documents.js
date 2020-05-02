@@ -3,8 +3,6 @@
  * @module app.views.documents
  */
 
-import Marionette from "backbone.marionette";
-
 import _ from "underscore";
 import $ from "jquery";
 import IdeaLoom from "../app.js";
@@ -12,8 +10,9 @@ import Promise from "bluebird";
 import Ctx from "../common/context.js";
 import i18n from "../utils/i18n.js";
 import * as Sentry from "@sentry/browser";
+import { View } from "backbone.marionette";
 
-class AbstractDocumentView extends Marionette.View.extend({
+class AbstractDocumentView extends View.extend({
     className: "embeddedFile",
 }) {
     initialize(options) {

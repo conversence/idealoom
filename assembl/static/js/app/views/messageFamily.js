@@ -3,8 +3,6 @@
  * @module app.views.messageFamily
  */
 
-import Marionette from "backbone.marionette";
-
 import _ from "underscore";
 import i18n from "../utils/i18n.js";
 import IdeaLoom from "../app.js";

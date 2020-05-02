@@ -7,7 +7,6 @@ import $ from "jquery";
 import Promise from "bluebird";
 import _ from "underscore";
 import Backbone from "backbone";
-import Marionette from "backbone.marionette";
 
 import AllMessagesInIdeaListView from "./allMessagesInIdeaList.js";
 import OrphanMessagesInIdeaListView from "./orphanMessagesInIdeaList.js";
@@ -30,11 +29,12 @@ import i18n from "../utils/i18n.js";
 import OtherInIdeaListView from "./otherInIdeaList.js";
 import Analytics from "../internal_modules/analytics/dispatcher.js";
 import DiscussionPreference from "../models/discussionPreference.js";
+import { View } from "backbone.marionette";
 
 var FEATURED = "featured";
 var IN_SYNTHESIS = "inNextSynthesis";
 
-class AddIdeaButton extends Marionette.View.extend({
+class AddIdeaButton extends View.extend({
     template: _.template(
         '<% if (mayAdd) { %><a href="#" class="js_ideaList-addbutton btn btn-default btn-sm ' +
             '<% if (!canAddHere) { print("is-disabled") } %>"><i class="icon-add-2"></i>' +

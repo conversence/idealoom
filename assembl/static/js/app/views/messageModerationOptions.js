@@ -5,15 +5,15 @@
 
 import Backbone from "backbone";
 
-import Marionette from "backbone.marionette";
 import IdeaLoom from "../app.js";
 import _ from "underscore";
 import $ from "jquery";
 import Ctx from "../common/context.js";
 import AgentViews from "./agent.js";
 import i18n from "../utils/i18n.js";
+import { View } from "backbone.marionette";
 
-class messageModerationOptions extends Marionette.View.extend({
+class messageModerationOptions extends View.extend({
     template: "#tmpl-messageModerationOptions",
     className: "messageModerationOptions",
 

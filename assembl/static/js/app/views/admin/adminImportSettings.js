@@ -3,15 +3,14 @@
  * @module app.views.admin.adminDiscussionSettings
  */
 
-import Marionette from "backbone.marionette";
-
 import i18n from "../../utils/i18n.js";
 import CollectionManager from "../../common/collectionManager.js";
 import Sources from "../../models/sources.js";
 import SourceView from "./generalSource.js";
 import AdminNavigationMenu from "./adminNavigationMenu.js";
+import { View } from "backbone.marionette";
 
-class AdminImportSettings extends Marionette.View.extend({
+class AdminImportSettings extends View.extend({
     template: "#tmpl-adminImportSettings",
     className: "admin-import",
 

@@ -3,8 +3,6 @@
  * @module app.views.navBar
  */
 
-import Marionette from "backbone.marionette";
-
 import Backbone from "backbone";
 import BackboneModal from "backbone.modal";
 import Promise from "bluebird";
@@ -27,8 +25,9 @@ import Analytics from "../internal_modules/analytics/dispatcher.js";
 import StatisticsModal from "./modals/discussionStatisticsModal.js";
 import LoaderView from "./loaderView.js";
 import AgentViews from "./agent.js";
+import { View } from "backbone.marionette";
 
-class navBarLeft extends Marionette.View.extend({
+class navBarLeft extends View.extend({
     template: "#tmpl-navBarLeft",
     className: "navbar-left",
 
@@ -239,7 +238,7 @@ class navBarRight extends LoaderView.extend({
     }
 }
 
-class navBar extends Marionette.View.extend({
+class navBar extends View.extend({
     template: "#tmpl-navBar",
     tagName: "nav",
     className: "navbar navbar-default",

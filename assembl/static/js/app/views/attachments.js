@@ -3,7 +3,7 @@
  * @module app.views.attachments
  */
 
-import Marionette from "backbone.marionette";
+import { View, CollectionView } from "backbone.marionette";
 
 import _ from "underscore";
 import $ from "jquery";
@@ -27,7 +27,7 @@ var TARGET = {
  * Represents the link between an object (ex: Message, Idea) and a remote (url)
  * or eventually local document attached to it.
  */
-class AbstractAttachmentView extends Marionette.View.extend({
+class AbstractAttachmentView extends View.extend({
     ui: {
         documentEmbeed: ".js_regionDocumentEmbeed",
     },
@@ -343,7 +343,7 @@ class AttachmentEditableErrorView extends AttachmentView {
 /*
   The collection view that will display all the attachment types that the message can support in an editable state
  */
-class AttachmentEditableCollectionView extends Marionette.CollectionView {
+class AttachmentEditableCollectionView extends CollectionView {
     initialize(options) {
         this.parentView = options.parentView ? options.parentView : null;
         this.limits = options.limits || {};
@@ -399,7 +399,7 @@ class AttachmentEditableCollectionViewIdeaPanel extends AttachmentEditableCollec
 /*
   A contained view that will show attachments
  */
-class AttachmentEditUploadView extends Marionette.View.extend({
+class AttachmentEditUploadView extends View.extend({
     template: "#tmpl-uploadView",
 
     ui: {
@@ -512,7 +512,7 @@ class AttachmentEditUploadViewModal extends Backbone.Modal.extend({
 /*
   The button view that will be the stand-alone view for the attachment button
  */
-class AttachmentUploadButtonView extends Marionette.View.extend({
+class AttachmentUploadButtonView extends View.extend({
     template: "#tmpl-attachmentButton",
 
     ui: {
@@ -585,7 +585,7 @@ class AttachmentUploadTextView extends AttachmentUploadButtonView.extend({
 /**
  * @class app.views.attachments.AttachmentCollectionView
  */
-class AttachmentCollectionView extends Marionette.CollectionView.extend({
+class AttachmentCollectionView extends CollectionView.extend({
     childView: AttachmentView,
 }) {}
 

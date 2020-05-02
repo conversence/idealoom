@@ -3,7 +3,8 @@
  * @module app.app
  */
 
-import Marionette from "backbone.marionette";
+import { Application, View, setRenderer } from "backbone.marionette";
+import TemplateCache from "marionette.templatecache";
 
 import $ from "jquery";
 import classlist from "classlist-polyfill";
@@ -12,7 +13,7 @@ import Types from "./utils/types.js";
 import _ from "underscore";
 import Growl from "./utils/growl.js";
 
-class RootView extends Marionette.View.extend({
+class RootView extends View.extend({
     el: "body",
 
     regions: {
@@ -24,9 +25,10 @@ class RootView extends Marionette.View.extend({
     },
 }) {}
 
-class AppClass extends Marionette.Application {
+class AppClass extends Application {
     onStart() {
         var that = this;
+        setRenderer(TemplateCache.render);
         this.rootView = new RootView();
         this.socket_vent = Radio.channel("socket");
         this.tour_vent = Radio.channel("tour");
@@ -128,7 +130,7 @@ class AppClass extends Marionette.Application {
     }
 }
 
-_.extend(Backbone.Marionette.View.prototype, {
+_.extend(View.prototype, {
     /*
      * Use to check if you should (re)render
      */
@@ -142,9 +144,7 @@ _.extend(Backbone.Marionette.View.prototype, {
             throw new Error("listenTo on a destroyed view");
         }
 
-        Object.getPrototypeOf(
-            Backbone.Marionette.View.prototype
-        ).listenTo.apply(this, args);
+        Object.getPrototypeOf(View.prototype).listenTo.apply(this, args);
     },
 
     listenToOnce: function (...args) {
@@ -153,9 +153,7 @@ _.extend(Backbone.Marionette.View.prototype, {
             throw new Error("listenToOnce on a destroyed view");
         }
 
-        Object.getPrototypeOf(
-            Backbone.Marionette.View.prototype
-        ).listenToOnce.apply(this, args);
+        Object.getPrototypeOf(View.prototype).listenToOnce.apply(this, args);
     },
 });
 

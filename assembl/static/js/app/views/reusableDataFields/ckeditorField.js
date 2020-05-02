@@ -3,8 +3,6 @@
  * @module app.views.reusableDataFields.ckeditorField
  */
 
-import Marionette from "backbone.marionette";
-
 import _ from "underscore";
 import $ from "jquery";
 import dotdotdot from "dotdotdot-js";
@@ -14,8 +12,9 @@ import BackboneModal from "backbone.modal";
 import Permissions from "../../utils/permissions.js";
 import CK from "ckeditor";
 import Ctx from "../../common/context.js";
+import { View } from "backbone.marionette";
 
-class cKEditorField extends Marionette.View.extend({
+class cKEditorField extends View.extend({
     template: "#tmpl-ckeditorField",
 
     /**

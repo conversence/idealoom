@@ -3,7 +3,7 @@
  * @module app.views.tokenVoteSession
  */
 
-import Marionette from "backbone.marionette";
+import { View, CollectionView, Region } from "backbone.marionette";
 
 import $ from "jquery";
 import _ from "underscore";
@@ -181,7 +181,7 @@ var transitionAnimation = function (el, el2, duration) {
 };
 
 // This view shows at the top of the popin the bag of remaining tokens the user has
-class TokenBagsView extends Marionette.View.extend({
+class TokenBagsView extends View.extend({
     template: "#tmpl-tokenBags",
 
     regions: {
@@ -226,7 +226,7 @@ class TokenBagsView extends Marionette.View.extend({
 
 // This view shows the remaining tokens the user has, of a given category
 // This view's model is a token category (an instance of Widget.TokenCategorySpecificationModel)
-class RemainingCategoryTokensView extends Marionette.View.extend({
+class RemainingCategoryTokensView extends View.extend({
     template: false,
 }) {
     initialize(options) {
@@ -335,12 +335,10 @@ class RemainingCategoryTokensView extends Marionette.View.extend({
     }
 }
 
-class RemainingTokenCategoriesCollectionView extends Marionette.CollectionView.extend(
-    {
-        template: false,
-        childView: RemainingCategoryTokensView,
-    }
-) {
+class RemainingTokenCategoriesCollectionView extends CollectionView.extend({
+    template: false,
+    childView: RemainingCategoryTokensView,
+}) {
     initialize(options) {
         console.log("RemainingTokenCategoriesCollectionView::initialize()");
         this.myVotesCollection = options.myVotesCollection;
@@ -360,7 +358,7 @@ class RemainingTokenCategoriesCollectionView extends Marionette.CollectionView.e
 
 // This view shows (in the block of an idea) the clickable tokens (of one given category of tokens) a user can allocate (and has allocated) on this idea
 // This view's model is a token category
-class TokenCategoryAllocationView extends Marionette.View.extend({
+class TokenCategoryAllocationView extends View.extend({
     template: "#tmpl-tokenIdeaAllocation",
     className: "token-category-allocation",
 }) {
@@ -865,12 +863,10 @@ class TokenCategoryAllocationView extends Marionette.View.extend({
 }
 
 // The collection parameter has to be a collection of token categories
-class TokenCategoryAllocationCollectionView extends Marionette.CollectionView.extend(
-    {
-        template: "#tmpl-tokenCategoryAllocationCollection",
-        childView: TokenCategoryAllocationView,
-    }
-) {
+class TokenCategoryAllocationCollectionView extends CollectionView.extend({
+    template: "#tmpl-tokenCategoryAllocationCollection",
+    childView: TokenCategoryAllocationView,
+}) {
     initialize(options) {
         this.idea = options.idea;
         this.myVotesCollection = options.myVotesCollection;
@@ -892,7 +888,7 @@ class TokenCategoryAllocationCollectionView extends Marionette.CollectionView.ex
     }
 }
 
-class TokenCategoryExclusivePairCollectionView extends Marionette.View.extend({
+class TokenCategoryExclusivePairCollectionView extends View.extend({
     template: "#tmpl-tokenCategoryExclusivePairCollection",
 
     regions: {
@@ -985,7 +981,7 @@ class TokenCategoryExclusivePairCollectionView extends Marionette.View.extend({
 }
 
 // This view shows an idea in the list of votable ideas (and calls a subview which shows the tokens for this idea)
-class TokenVoteItemView extends Marionette.View.extend({
+class TokenVoteItemView extends View.extend({
     template: "#tmpl-tokenVoteItem",
 
     regions: {
@@ -1085,7 +1081,7 @@ class TokenVoteItemView extends Marionette.View.extend({
     }
 }
 
-class TokenVoteCollectionViewBody extends Marionette.CollectionView.extend({
+class TokenVoteCollectionViewBody extends CollectionView.extend({
     tagName: "tbody",
     childView: TokenVoteItemView,
 }) {
@@ -1102,7 +1098,7 @@ class TokenVoteCollectionViewBody extends Marionette.CollectionView.extend({
 }
 
 // This view shows the list of votable ideas and their tokens
-class TokenVoteCollectionView extends Marionette.View.extend({
+class TokenVoteCollectionView extends View.extend({
     template: "#tmpl-tokenVoteCollection",
 
     regions: {
@@ -1137,7 +1133,7 @@ class TokenVoteCollectionView extends Marionette.View.extend({
   The view of a single vote result, which will be created by
   the collection view TokenVoteResultCollectionView
  */
-class TokenVoteResultView extends Marionette.View.extend({
+class TokenVoteResultView extends View.extend({
     template: "#tmpl-tokenVoteResultSingleView",
     className: "token-result-row",
 
@@ -1352,12 +1348,10 @@ class TokenVoteResultView extends Marionette.View.extend({
     }
 }
 
-class TokenVoteResultCollectionViewBody extends Marionette.CollectionView.extend(
-    {
-        childView: TokenVoteResultView,
-        tagName: "tbody",
-    }
-) {
+class TokenVoteResultCollectionViewBody extends CollectionView.extend({
+    childView: TokenVoteResultView,
+    tagName: "tbody",
+}) {
     initialize(options) {
         this.categoryIndex = options.categoryIndex;
         this.sumTokens = options.sumTokens;
@@ -1380,7 +1374,7 @@ class TokenVoteResultCollectionViewBody extends Marionette.CollectionView.extend
 /*
   This is the collection view of each vote result
  */
-class TokenVoteResultCollectionView extends Marionette.View.extend({
+class TokenVoteResultCollectionView extends View.extend({
     template: "#tmpl-tokenVoteResultCollectionView",
 
     ui: {
@@ -1512,7 +1506,7 @@ class TokenVoteResultCollectionView extends Marionette.View.extend({
   It contains the question asked, and a collection view of each
   idea's vote results
  */
-class TokenResultView extends Marionette.View.extend({
+class TokenResultView extends View.extend({
     template: "#tmpl-tokenVoteResultView",
 
     ui: {
@@ -1866,7 +1860,7 @@ class TokenVoteSessionModal extends Backbone.Modal.extend({
                         });
                     },
                 });
-                var regionVotablesCollection = new Marionette.Region({
+                var regionVotablesCollection = new Region({
                     el: that.$(".votables-collection"),
                 });
                 regionVotablesCollection.show(collectionView);

@@ -3,7 +3,7 @@
  * @module app.views.segmentList
  */
 
-import Marionette from "backbone.marionette";
+import { View, CollectionView } from "backbone.marionette";
 
 import Backbone from "backbone";
 import BackboneModal from "backbone.modal";
@@ -23,7 +23,7 @@ import AgentViews from "./agent.js";
 import BackboneSubset from "Backbone.Subset";
 import Promise from "bluebird";
 
-class SegmentView extends Marionette.View.extend({
+class SegmentView extends View.extend({
     template: "#tmpl-segment",
     gridSize: BasePanel.prototype.CLIPBOARD_GRID_SIZE,
 
@@ -194,7 +194,7 @@ class SegmentView extends Marionette.View.extend({
     }
 }
 
-class SegmentListView extends Marionette.CollectionView.extend({
+class SegmentListView extends CollectionView.extend({
     childView: SegmentView,
 }) {
     initialize(options) {

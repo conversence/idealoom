@@ -1,4 +1,3 @@
-import Marionette from "backbone.marionette";
 import Promise from "bluebird";
 import _ from "underscore";
 import $ from "jquery";

@@ -3,7 +3,7 @@
  * @module app.views.user.userNotificationSubscriptions
  */
 
-import Marionette from "backbone.marionette";
+import { View, CollectionView } from "backbone.marionette";
 
 import IdeaLoom from "../../app.js";
 import $ from "jquery";
@@ -23,7 +23,7 @@ import Analytics from "../../internal_modules/analytics/dispatcher.js";
 /**
  * User notification
  * */
-class Notification extends Marionette.View.extend({
+class Notification extends View.extend({
     template: "#tmpl-userSubscriptions",
     tagName: "label",
     className: "checkbox dispb",
@@ -78,7 +78,7 @@ class Notification extends Marionette.View.extend({
     }
 }
 
-class Notifications extends Marionette.CollectionView.extend({
+class Notifications extends CollectionView.extend({
     childView: Notification,
 
     collectionEvents: {
@@ -104,7 +104,7 @@ class Notifications extends Marionette.CollectionView.extend({
 /**
  * Notification template
  * */
-class TemplateSubscription extends Marionette.View.extend({
+class TemplateSubscription extends View.extend({
     template: "#tmpl-templateSubscription",
     tagName: "label",
     className: "checkbox dispb",
@@ -180,7 +180,7 @@ class TemplateSubscription extends Marionette.View.extend({
     }
 }
 
-class TemplateSubscriptions extends Marionette.CollectionView.extend({
+class TemplateSubscriptions extends CollectionView.extend({
     childView: TemplateSubscription,
 
     collectionEvents: {
@@ -227,7 +227,7 @@ class TemplateSubscriptions extends Marionette.CollectionView.extend({
 /**
  *  Choose an email to notify user
  * */
-class NotificationByEmail extends Marionette.View.extend({
+class NotificationByEmail extends View.extend({
     template: "#tmpl-notificationByEmail",
     tagName: "label",
     className: "radio",
@@ -264,11 +264,11 @@ class NotificationByEmail extends Marionette.View.extend({
     }
 }
 
-class NotificationByEmailsList extends Marionette.CollectionView.extend({
+class NotificationByEmailsList extends CollectionView.extend({
     childView: NotificationByEmail,
 }) {}
 
-class NotificationByEmails extends Marionette.View.extend({
+class NotificationByEmails extends View.extend({
     template: "#tmpl-notificationByEmails",
 
     regions: {
@@ -288,7 +288,7 @@ class NotificationByEmails extends Marionette.View.extend({
 /**
  * Subscripbe / Unsubscribe action
  * */
-class Subscriber extends Marionette.View.extend({
+class Subscriber extends View.extend({
     template: "#tmpl-userSubscriber",
 
     ui: {
@@ -358,7 +358,7 @@ class Subscriber extends Marionette.View.extend({
     }
 }
 
-class userNotificationSubscriptions extends Marionette.View.extend({
+class userNotificationSubscriptions extends View.extend({
     template: "#tmpl-userNotificationSubscriptions",
     className: "admin-notifications",
 

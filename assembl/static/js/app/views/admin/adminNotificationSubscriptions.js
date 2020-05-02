@@ -3,7 +3,7 @@
  * @module app.views.admin.adminNotificationSubscriptions
  */
 
-import Marionette from "backbone.marionette";
+import { View, CollectionView } from "backbone.marionette";
 
 import CollectionManager from "../../common/collectionManager.js";
 import Permissions from "../../utils/permissions.js";
@@ -13,7 +13,7 @@ import $ from "jquery";
 import Promise from "bluebird";
 import AdminNavigationMenu from "./adminNavigationMenu.js";
 
-class NotificationView extends Marionette.View.extend({
+class NotificationView extends View.extend({
     template: "#tmpl-adminNotification",
     className: "controls",
 
@@ -48,12 +48,12 @@ class NotificationView extends Marionette.View.extend({
     }
 }
 
-class NotificationListBody extends Marionette.CollectionView.extend({
+class NotificationListBody extends CollectionView.extend({
     childView: NotificationView,
     className: "mtl",
 }) {}
 
-class NotificationList extends Marionette.View.extend({
+class NotificationList extends View.extend({
     template: "#tmpl-adminNotificationList",
 
     regions: {
@@ -70,7 +70,7 @@ class NotificationList extends Marionette.View.extend({
     }
 }
 
-class defaultNotification extends Marionette.View.extend({
+class defaultNotification extends View.extend({
     template: "#tmpl-defaultNotification",
 
     ui: {
@@ -95,7 +95,7 @@ class defaultNotification extends Marionette.View.extend({
     }
 }
 
-class adminNotificationSubscriptions extends Marionette.View.extend({
+class adminNotificationSubscriptions extends View.extend({
     template: "#tmpl-adminNotificationSubscriptions",
     className: "admin-notifications",
 

@@ -3,7 +3,7 @@
  * @module app.views.navigation.synthesisInNavigation
  */
 
-import Marionette from "backbone.marionette";
+import { CollectionView } from "backbone.marionette";
 
 import _ from "underscore";
 import $ from "jquery";
@@ -61,7 +61,7 @@ class SynthesisItem extends LoaderView.extend({
     }
 }
 
-class SynthesisList extends Marionette.CollectionView.extend({
+class SynthesisList extends CollectionView.extend({
     childView: SynthesisItem,
 }) {
     initialize(options) {

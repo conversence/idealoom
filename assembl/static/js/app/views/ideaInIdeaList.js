@@ -15,10 +15,10 @@ import Permissions from "../utils/permissions.js";
 import UserCustomData from "../models/userCustomData.js";
 import PanelSpecTypes from "../utils/panelSpecTypes.js";
 import scrollUtils from "../utils/scrollUtils.js";
-import Marionette from "backbone.marionette";
+import { View, CollectionView } from "backbone.marionette";
 import Analytics from "../internal_modules/analytics/dispatcher.js";
 
-class IdeaInIdeaListView extends Marionette.View.extend({
+class IdeaInIdeaListView extends View.extend({
     /**
      * Tag name
      * @type {string}
@@ -703,14 +703,12 @@ class IdeaInIdeaListView extends Marionette.View.extend({
     }
 }
 
-class ideaListIdeaFamilyCollectionView extends Marionette.CollectionView.extend(
-    {
-        childView: IdeaInIdeaListView,
-        /*collectionEvents: {
+class ideaListIdeaFamilyCollectionView extends CollectionView.extend({
+    childView: IdeaInIdeaListView,
+    /*collectionEvents: {
     'add sync':'render'
   }*/
-    }
-) {}
+}) {}
 
 export default {
     IdeaFamilyCollectionView: ideaListIdeaFamilyCollectionView,

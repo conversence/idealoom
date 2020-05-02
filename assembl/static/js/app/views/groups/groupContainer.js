@@ -4,7 +4,7 @@
  */
 
 import $ from "jquery";
-import Marionette from "backbone.marionette";
+import { CollectionView } from "backbone.marionette";
 import ctx from "../../common/context.js";
 import IdeaLoom from "../../app.js";
 import GroupContent from "./groupContent.js";
@@ -17,7 +17,7 @@ import PanelSpecTypes from "../../utils/panelSpecTypes.js";
  *
  * @class app.views.groups.groupContainer.groupContainer
  */
-class groupContainer extends Marionette.CollectionView.extend({
+class groupContainer extends CollectionView.extend({
     className: "groupsContainer",
     childView: GroupContent,
     group_borders_size: 0,

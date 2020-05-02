@@ -3,8 +3,6 @@
  * @module app.views.message
  */
 
-import Marionette from "backbone.marionette";
-
 import Ctx from "../common/context.js";
 import i18n from "../utils/i18n.js";
 import Permissions from "../utils/permissions.js";

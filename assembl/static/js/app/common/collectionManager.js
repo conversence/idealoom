@@ -3,7 +3,7 @@
  * @module app.common.collectionManager
  */
 
-import Marionette from "backbone.marionette";
+import { MnObject } from "backbone.marionette";
 import * as Sentry from "@sentry/browser";
 
 import Promise from "bluebird";
@@ -41,7 +41,7 @@ import PublicationFlow from "../models/publicationFlow.js";
  * A singleton to manage lazy loading of server collections
  * @class app.common.collectionManager.CollectionManager
  */
-class CollectionManager extends Marionette.Object.extend({
+class CollectionManager extends MnObject.extend({
     channelName: "socket",
 
     radioEvents: {

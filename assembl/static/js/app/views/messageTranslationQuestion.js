@@ -2,8 +2,6 @@
  *
  * @module app.views.messageTranslationQuestion
  */
-import Marionette from "backbone.marionette";
-
 import Backbone from "backbone";
 import Ctx from "../common/context.js";
 import CollectionManager from "../common/collectionManager.js";
@@ -15,6 +13,7 @@ import Growl from "../utils/growl.js";
 import LangString from "../models/langstring.js";
 import LoaderView from "./loaderView.js";
 import LanguagePreference from "../models/languagePreference.js";
+import { View } from "backbone.marionette";
 
 /**
  * Date: Jan 14, 2016
@@ -54,7 +53,7 @@ var processConfirmLanguagePreferences = function (messageView) {
     }
 };
 
-class LanguageSelectionView extends Marionette.View.extend({
+class LanguageSelectionView extends View.extend({
     template: "#tmpl-message_translation_question_selection",
 
     ui: {

@@ -1,4 +1,4 @@
-import Marionette from "backbone.marionette";
+import { View, CollectionView } from "backbone.marionette";
 import Promise from "bluebird";
 import _ from "underscore";
 import Growl from "../../utils/growl.js";
@@ -10,12 +10,12 @@ import CollectionManager from "../../common/collectionManager.js";
 import AdminNavigationMenu from "./adminNavigationMenu.js";
 import RoleModels from "../../models/roles.js";
 
-class RoleHeaderCell extends Marionette.View.extend({
+class RoleHeaderCell extends View.extend({
     tagName: "th",
     template: _.template("<%= name %>"),
 }) {}
 
-class RoleHeaderRow extends Marionette.CollectionView.extend({
+class RoleHeaderRow extends CollectionView.extend({
     childView: RoleHeaderCell,
     tagName: "thead",
 }) {
@@ -177,7 +177,7 @@ class StateRolePermissionCell extends RolePermissionCell {
     }
 }
 
-class RolePermissionRow extends Marionette.CollectionView.extend({
+class RolePermissionRow extends CollectionView.extend({
     childView: RolePermissionCell,
     tagName: "tr",
 }) {
@@ -239,7 +239,7 @@ class StateRolePermissionRow extends RolePermissionRow.extend({
 
 class DeleteRoleRow extends RolePermissionRow {}
 
-class RolePermissionTable extends Marionette.CollectionView.extend({
+class RolePermissionTable extends CollectionView.extend({
     childView: RolePermissionRow,
     tagName: "tbody",
 }) {
@@ -271,7 +271,7 @@ class StateRolePermissionTable extends RolePermissionTable.extend({
     }
 }
 
-class StateForm extends Marionette.View.extend({
+class StateForm extends View.extend({
     regions: {
         header: {
             el: ".theader",
@@ -307,7 +307,7 @@ class StateForm extends Marionette.View.extend({
     }
 }
 
-class StateList extends Marionette.CollectionView.extend({
+class StateList extends CollectionView.extend({
     childView: StateForm,
 }) {
     childViewOptions(model) {

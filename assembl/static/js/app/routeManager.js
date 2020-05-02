@@ -3,7 +3,7 @@
  * @module app.routeManager
  */
 
-import Marionette from "backbone.marionette";
+import { MnObject } from "backbone.marionette";
 
 import IdeaLoom from "./app.js";
 import Promise from "bluebird";
@@ -146,7 +146,7 @@ var trackAnalyticsWithQueryString = function (qs, context) {
  * @class app.routeManager.RouteManager
  */
 
-class routeManager extends Marionette.Object {
+class routeManager extends MnObject {
     initialize() {
         window.assembl = {};
 

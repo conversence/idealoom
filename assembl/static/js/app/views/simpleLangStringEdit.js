@@ -10,7 +10,7 @@ import i18n from "../utils/i18n.js";
 import EditableField from "./reusableDataFields/editableField.js";
 import LangString from "../models/langstring.js";
 import CollectionManager from "../common/collectionManager.js";
-import Marionette from "backbone.marionette";
+import { View, CollectionView } from "backbone.marionette";
 import Growl from "../utils/growl.js";
 import $ from "jquery";
 import _ from "underscore";
@@ -19,7 +19,7 @@ import Promise from "bluebird";
 /**
  * @class  app.views.admin.simp.SimpleLangStringEditPanel
  */
-class SimpleLangStringEditPanel extends Marionette.View.extend({
+class SimpleLangStringEditPanel extends View.extend({
     template: "#tmpl-simpleLangStringEdit",
 
     ui: {
@@ -72,7 +72,7 @@ class SimpleLangStringEditPanel extends Marionette.View.extend({
 /**
  * @class  app.views.admin.adminMessageColumns.LangStringEntryView
  */
-class LangStringEntryView extends Marionette.View.extend({
+class LangStringEntryView extends View.extend({
     template: "#tmpl-langStringEntry",
 
     ui: {
@@ -147,7 +147,7 @@ class LangStringEntryView extends Marionette.View.extend({
  * The collections of columns to be seen on this idea
  * @class app.views.adminMessageColumns.LangStringEntryList
  */
-class LangStringEntryList extends Marionette.CollectionView.extend({
+class LangStringEntryList extends CollectionView.extend({
     childView: LangStringEntryView,
 }) {
     initialize(options) {

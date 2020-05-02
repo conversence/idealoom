@@ -3,8 +3,6 @@
  * @module app.views.reusableDataFields.EditableLSField
  */
 
-import Marionette from "backbone.marionette";
-
 import _ from "underscore";
 import $ from "jquery";
 import IdeaLoom from "../../app.js";

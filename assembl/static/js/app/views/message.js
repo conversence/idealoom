@@ -3,8 +3,6 @@
  * @module app.views.message
  */
 
-import Marionette from "backbone.marionette";
-
 import Backbone from "backbone";
 import BackboneModal from "backbone.modal";
 import _ from "underscore";

@@ -3,14 +3,13 @@
  * @module app.views.externalVisualization
  */
 
-import Marionette from "backbone.marionette";
-
 import i18n from "../utils/i18n.js";
 import Ctx from "../common/context.js";
 import PanelSpecTypes from "../utils/panelSpecTypes.js";
 import BasePanel from "./basePanel.js";
+import { View } from "backbone.marionette";
 
-class externalVisualizationPanel extends Marionette.View.extend({
+class externalVisualizationPanel extends View.extend({
     template: "#tmpl-externalViz",
     panelType: PanelSpecTypes.EXTERNAL_VISUALIZATION_CONTEXT,
     className: "externalViz",

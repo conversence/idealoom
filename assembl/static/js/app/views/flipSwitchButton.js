@@ -3,9 +3,9 @@
  * @module app.views.flipSwitchButton
  */
 
-import Marionette from "backbone.marionette";
+import { View } from "backbone.marionette";
 
-class FlipSwitchButton extends Marionette.View.extend({
+class FlipSwitchButton extends View.extend({
     template: "#tmpl-flipSwitchButton",
     className: "flipSwitchButton",
 

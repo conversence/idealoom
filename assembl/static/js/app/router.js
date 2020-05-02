@@ -3,7 +3,7 @@
  * @module app.router
  */
 
-import Marionette from "backbone.marionette";
+import AppRouter from "marionette.approuter";
 
 import routeManager from "./routeManager.js";
 import Ctx from "./common/context.js";
@@ -17,7 +17,7 @@ import agent from "./models/agents.js";
  * @class app.router.Router
  * @extends Marionette.AppRouter
  */
-class Router extends Marionette.AppRouter.extend({
+class Router extends AppRouter.extend({
     controller: routeManager,
 
     //Note:  This should match with assembl/lib/frontend_url.py

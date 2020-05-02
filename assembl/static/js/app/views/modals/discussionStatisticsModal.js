@@ -4,7 +4,6 @@
  */
 import Backbone from "backbone";
 
-import Marionette from "backbone.marionette";
 import i18n from "../../utils/i18n.js";
 import $ from "jquery";
 import _ from "underscore";

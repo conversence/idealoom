@@ -3,7 +3,7 @@
  * @module app.views.admin.adminPartners
  */
 
-import Marionette from "backbone.marionette";
+import { View, CollectionView } from "backbone.marionette";
 
 import Backbone from "backbone";
 import BackboneModal from "backbone.modal";
@@ -15,7 +15,7 @@ import i18n from "../../utils/i18n.js";
 import partnerModel from "../../models/partners.js";
 import AdminNavigationMenu from "./adminNavigationMenu.js";
 
-class Partners extends Marionette.View.extend({
+class Partners extends View.extend({
     template: "#tmpl-partnersInAdmin",
     className: "gr",
 
@@ -95,7 +95,7 @@ class Partners extends Marionette.View.extend({
     }
 }
 
-class PartnerList extends Marionette.CollectionView.extend({
+class PartnerList extends CollectionView.extend({
     childView: Partners,
 
     collectionEvents: {
@@ -103,7 +103,7 @@ class PartnerList extends Marionette.CollectionView.extend({
     },
 }) {}
 
-class adminPartners extends Marionette.View.extend({
+class adminPartners extends View.extend({
     template: "#tmpl-adminPartners",
     className: "admin-notifications",
 

@@ -1,8 +1,8 @@
-import Marionette from "backbone.marionette";
+import { View } from "backbone.marionette";
 
 /** LoaderView: a Marionette View that starts as a loader.
  */
-class LoaderView extends Marionette.View {
+class LoaderView extends View {
     isLoading() {
         return this.template === "#tmpl-loader";
     }

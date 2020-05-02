@@ -3,7 +3,7 @@
  * @module app.views.groups.groupContent
  */
 
-import Marionette from "backbone.marionette";
+import { View, CollectionView } from "backbone.marionette";
 
 import Ctx from "../../common/context.js";
 import i18n from "../../utils/i18n.js";
@@ -18,7 +18,7 @@ import UserCustomData from "../../models/userCustomData.js";
 /** Represents the entire content of a single panel group
  * @class  app.views.groups.groupContent.groupContent
  */
-class groupContentBody extends Marionette.CollectionView.extend({
+class groupContentBody extends CollectionView.extend({
     className: "groupBody",
     childView: PanelWrapper,
 }) {
@@ -40,7 +40,7 @@ class groupContentBody extends Marionette.CollectionView.extend({
 /** Represents the entire content of a single panel group
  * @class  app.views.groups.groupContent.groupContent
  */
-class groupContent extends Marionette.View.extend({
+class groupContent extends View.extend({
     template: "#tmpl-groupContent",
     className: "groupContent",
 

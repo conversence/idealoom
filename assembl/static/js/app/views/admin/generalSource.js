@@ -2,7 +2,7 @@
  *
  * @module app.views.admin.generalSource
  */
-import Marionette from "backbone.marionette";
+import { View, CollectionView } from "backbone.marionette";
 import $ from "jquery";
 import _ from "underscore";
 import Moment from "moment";
@@ -16,7 +16,7 @@ import Source from "../../models/sources.js";
 import CollectionManager from "../../common/collectionManager.js";
 import getSourceEditView from "./sourceEditViews.js";
 
-class ReadSource extends Marionette.View.extend({
+class ReadSource extends View.extend({
     template: "#tmpl-adminImportSettingsGeneralSourceRead",
 
     ui: {
@@ -151,7 +151,7 @@ function getSourceDisplayView(model) {
     return ReadSource;
 }
 
-class SourceView extends Marionette.View.extend({
+class SourceView extends View.extend({
     ui: {
         edit_container: ".js_source_edit_container",
     },
@@ -180,7 +180,7 @@ class SourceView extends Marionette.View.extend({
     }
 }
 
-class CreateSource extends Marionette.View.extend({
+class CreateSource extends View.extend({
     template: "#tmpl-DiscussionSettingsCreateSource",
 
     regions: {
@@ -247,7 +247,7 @@ class CreateSource extends Marionette.View.extend({
     }
 }
 
-class DiscussionSourceList extends Marionette.CollectionView.extend({
+class DiscussionSourceList extends CollectionView.extend({
     // getChildView: getSourceDisplayView
     childView: SourceView,
 }) {}

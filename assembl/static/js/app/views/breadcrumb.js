@@ -3,7 +3,7 @@
  * @module app.views.breadcrumb
  */
 
-import Marionette from "backbone.marionette";
+import { View, CollectionView } from "backbone.marionette";
 
 import $ from "jquery";
 import _ from "underscore";
@@ -16,7 +16,7 @@ import CollectionManager from "../common/collectionManager.js";
  *
  * @param {function} options.serializerFunc  The serializer function taking the passed model and returning a template string
  */
-class BreadcrumbItemView extends Marionette.View.extend({
+class BreadcrumbItemView extends View.extend({
     template: _.template("<%= entity %>"),
     className: "breadcrumb",
 }) {
@@ -45,7 +45,7 @@ class BreadcrumbItemView extends Marionette.View.extend({
     }
 }
 
-class BreadcrumbCollectionView extends Marionette.CollectionView.extend({
+class BreadcrumbCollectionView extends CollectionView.extend({
     childView: BreadcrumbItemView,
 }) {
     initialize(options) {

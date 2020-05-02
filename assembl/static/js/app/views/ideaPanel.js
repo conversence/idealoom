@@ -8,7 +8,7 @@ import _ from "underscore";
 import highlight from "jquery-highlight";
 import BackboneSubset from "Backbone.Subset";
 import Promise from "bluebird";
-import Marionette from "backbone.marionette";
+import { View, CollectionView } from "backbone.marionette";
 
 import IdeaLoom from "../app.js";
 import Ctx from "../common/context.js";
@@ -31,7 +31,7 @@ import ConfirmModal from "./confirmModal.js";
 import AttachmentModels from "../models/attachments.js";
 import Loader from "./loader.js";
 
-class IdeaTypeView extends Marionette.View.extend({
+class IdeaTypeView extends View.extend({
     template: "#tmpl-ideaTypeInIdeaPanel",
     ui: {
         type_selection: ".js_type_selection",
@@ -81,7 +81,7 @@ class IdeaTypeView extends Marionette.View.extend({
     }
 }
 
-class PubFlowView extends Marionette.View.extend({
+class PubFlowView extends View.extend({
     template: "#tmpl-pubFlowInIdeaPanel",
     ui: {
         pubStateTransition: ".js_transition",
@@ -735,7 +735,7 @@ class IdeaPanel extends BasePanel.extend({
         var contributors = new ContributorAgentSubset();
 
         //console.log(contributors);
-        class avatarCollectionView extends Marionette.CollectionView.extend({
+        class avatarCollectionView extends CollectionView.extend({
             childView: AgentViews.AgentAvatarView,
         }) {}
 

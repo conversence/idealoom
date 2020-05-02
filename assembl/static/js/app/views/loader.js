@@ -3,13 +3,12 @@
  * @module app.views.loader
  */
 
-import Marionette from "backbone.marionette";
-
 import _ from "underscore";
 import IdeaLoom from "../app.js";
 import Ctx from "../common/context.js";
+import { View } from "backbone.marionette";
 
-class LoaderView extends Marionette.View.extend({
+class LoaderView extends View.extend({
     template: "#tmpl-loader",
 }) {
     onRender() {

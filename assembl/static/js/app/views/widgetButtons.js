@@ -5,7 +5,7 @@
 
 import Backbone from "backbone";
 
-import Marionette from "backbone.marionette";
+import { CollectionView, View } from "backbone.marionette";
 import _ from "underscore";
 import i18n from "../utils/i18n.js";
 import Moment from "moment";
@@ -13,7 +13,7 @@ import Widget from "../models/widget.js";
 import Ctx from "../common/context.js";
 import Permissions from "../utils/permissions.js";
 
-class WidgetButtonView extends Marionette.View.extend({
+class WidgetButtonView extends View.extend({
     template: "#tmpl-widgetButton",
 
     ui: {
@@ -93,7 +93,7 @@ class WidgetButtonView extends Marionette.View.extend({
     }
 }
 
-class WidgetButtonListView extends Marionette.CollectionView.extend({
+class WidgetButtonListView extends CollectionView.extend({
     childView: WidgetButtonView,
 }) {
     initialize(options) {

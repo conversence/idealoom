@@ -16,9 +16,9 @@ import i18n from "../utils/i18n.js";
 import Permissions from "../utils/permissions.js";
 import PanelSpecTypes from "../utils/panelSpecTypes.js";
 import BasePanel from "./basePanel.js";
-import Marionette from "backbone.marionette";
 import CollectionManager from "../common/collectionManager.js";
 import Promise from "bluebird";
+import { View } from "backbone.marionette";
 
 /**
  * Constants
@@ -27,7 +27,7 @@ var DEFAULT_MESSAGE_VIEW_LI_ID_PREFIX = "js_defaultMessageView-";
 
 var MESSAGE_LIST_VIEW_STYLES_CLASS_PREFIX = "js_messageList-view-";
 
-class MessageListHeader extends Marionette.View.extend({
+class MessageListHeader extends View.extend({
     template: "#tmpl-messageListHeader",
     className: "messageListHeaderItsMe",
 

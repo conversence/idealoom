@@ -3,8 +3,6 @@
  * @module app.views.admin.adminDiscussion
  */
 
-import Marionette from "backbone.marionette";
-
 import $ from "jquery";
 import _ from "underscore";
 import autosize from "jquery-autosize";
@@ -15,8 +13,9 @@ import Discussion from "../../models/discussion.js";
 import DiscussionSource from "../../models/discussionSource.js";
 import i18n from "../../utils/i18n.js";
 import AdminNavigationMenu from "./adminNavigationMenu.js";
+import { View } from "backbone.marionette";
 
-class adminDiscussion extends Marionette.View.extend({
+class adminDiscussion extends View.extend({
     template: "#tmpl-adminDiscussion",
     className: "admin-discussion",
 

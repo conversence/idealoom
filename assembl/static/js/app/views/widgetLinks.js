@@ -5,12 +5,12 @@
 
 import Backbone from "backbone";
 
-import Marionette from "backbone.marionette";
+import { CollectionView, View } from "backbone.marionette";
 import _ from "underscore";
 import $ from "jquery";
 import Widget from "../models/widget.js";
 
-class WidgetLinkView extends Marionette.View.extend({
+class WidgetLinkView extends View.extend({
     template: "#tmpl-widgetLink",
     tagName: "li",
 
@@ -65,7 +65,7 @@ class WidgetLinkView extends Marionette.View.extend({
     }
 }
 
-class WidgetLinkListView extends Marionette.CollectionView.extend({
+class WidgetLinkListView extends CollectionView.extend({
     childView: WidgetLinkView,
 }) {
     initialize(options) {

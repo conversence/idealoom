@@ -3,7 +3,7 @@
  * @module app.views.ideaClassificationOnMessage
  */
 
-import Marionette from "backbone.marionette";
+import { View, CollectionView } from "backbone.marionette";
 
 import $ from "jquery";
 import _ from "underscore";
@@ -255,7 +255,7 @@ class IndirectExtractView extends IdeaClassificationView.extend({
     }
 }
 
-class ErrorView extends Marionette.View.extend({
+class ErrorView extends View.extend({
     template: _.template(
         '<div><%= i18n.gettext("Something went wrong in getting the contents of this idea. We are looking into it. Thank you for your patience.") %></div>'
     ),
@@ -274,11 +274,9 @@ class ErrorView extends Marionette.View.extend({
     }
 }
 
-class IdeaShowingMessageCollectionViewBody extends Marionette.CollectionView.extend(
-    {
-        className: "items",
-    }
-) {
+class IdeaShowingMessageCollectionViewBody extends CollectionView.extend({
+    className: "items",
+}) {
     initialize(options) {
         this._groupContent = options.groupContent;
         this.messageView = options.messageView;
@@ -322,7 +320,7 @@ class IdeaShowingMessageCollectionViewBody extends Marionette.CollectionView.ext
     }
 }
 
-class IdeaShowingMessageCollectionView extends Marionette.View.extend({
+class IdeaShowingMessageCollectionView extends View.extend({
     template: "#tmpl-ideaClassification_collection",
 
     regions: {

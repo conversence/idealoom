@@ -3,8 +3,6 @@
  * @module app.views.user.userNavigationMenu
  */
 
-import Marionette from "backbone.marionette";
-
 import $ from "jquery";
 import i18n from "../../utils/i18n.js";
 import Ctx from "../../common/context.js";

@@ -3,7 +3,7 @@
  * @module app.views.user.account
  */
 
-import Marionette from "backbone.marionette";
+import { View, CollectionView } from "backbone.marionette";
 
 import $ from "jquery";
 import _ from "underscore";
@@ -14,7 +14,7 @@ import UserNavigationMenu from "./userNavigationMenu.js";
 import i18n from "../../utils/i18n.js";
 import Growl from "../../utils/growl.js";
 
-class email extends Marionette.View.extend({
+class email extends View.extend({
     template: "#tmpl-associateAccount",
     className: "associate-email mbs",
 
@@ -53,11 +53,11 @@ class email extends Marionette.View.extend({
     }
 }
 
-class emailListBody extends Marionette.CollectionView.extend({
+class emailListBody extends CollectionView.extend({
     childView: email,
 }) {}
 
-class emailList extends Marionette.View.extend({
+class emailList extends View.extend({
     template: "#tmpl-associateAccounts",
 
     regions: {
@@ -74,7 +74,7 @@ class emailList extends Marionette.View.extend({
     }
 }
 
-class socialProvidersList extends Marionette.View.extend({
+class socialProvidersList extends View.extend({
     template: "#tmpl-socialProviders",
 }) {
     initialize(options) {
@@ -86,7 +86,7 @@ class socialProvidersList extends Marionette.View.extend({
     }
 }
 
-class userAccount extends Marionette.View.extend({
+class userAccount extends View.extend({
     template: "#tmpl-userAccountForm",
 
     ui: {
@@ -151,7 +151,7 @@ class userAccount extends Marionette.View.extend({
     }
 }
 
-class account extends Marionette.View.extend({
+class account extends View.extend({
     template: "#tmpl-userAccount",
     className: "admin-account",
 

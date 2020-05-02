@@ -2,7 +2,6 @@
  * The link between an idea and a message.
  * @module app.models.ideaContentLink
  */
-import Marionette from "backbone.marionette";
 import Backbone from "backbone";
 import _ from "underscore";
 import $ from "jquery";

@@ -7,11 +7,11 @@ import _ from "underscore";
 
 import $ from "jquery";
 import Promise from "bluebird";
-import Marionette from "backbone.marionette";
+import { View, CollectionView } from "backbone.marionette";
 import Ctx from "../../common/context.js";
 import Permissions from "../../utils/permissions.js";
 
-class SimpleLinkView extends Marionette.View.extend({
+class SimpleLinkView extends View.extend({
     template: "#tmpl-simpleLink",
 
     ui: {
@@ -34,7 +34,7 @@ class SimpleLinkView extends Marionette.View.extend({
     }
 }
 
-class LinkListView extends Marionette.CollectionView.extend({
+class LinkListView extends CollectionView.extend({
     childView: SimpleLinkView,
 }) {
     initialize(options) {

@@ -3,8 +3,6 @@
  * @module app.views.agent
  */
 
-import Marionette from "backbone.marionette";
-
 import IdeaLoom from "../app.js";
 import _ from "underscore";
 import $ from "jquery";
@@ -13,8 +11,9 @@ import CollectionManager from "../common/collectionManager.js";
 import i18n from "../utils/i18n.js";
 import Permissions from "../utils/permissions.js";
 import availableFilters from "./postFilters.js";
+import { View } from "backbone.marionette";
 
-class AgentView extends Marionette.View.extend({
+class AgentView extends View.extend({
     ui: {
         avatar: ".js_agentAvatar",
         name: ".js_agentName",

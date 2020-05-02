@@ -3,11 +3,10 @@
  * @module app.views.authorization
  */
 
-import Marionette from "backbone.marionette";
-
 import Ctx from "../common/context.js";
+import { View } from "backbone.marionette";
 
-class authorization extends Marionette.View.extend({
+class authorization extends View.extend({
     template: "#tmpl-authorization",
     className: "authorization",
 }) {

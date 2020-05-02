@@ -11,7 +11,7 @@ import EditableField from "../reusableDataFields/editableField.js";
 import TimelineEvent from "../../models/timeline.js";
 import LangString from "../../models/langstring.js";
 import CollectionManager from "../../common/collectionManager.js";
-import Marionette from "backbone.marionette";
+import { View, CollectionView } from "backbone.marionette";
 import Growl from "../../utils/growl.js";
 import SimpleLangStringEditPanel from "../simpleLangStringEdit.js";
 import Moment from "moment";
@@ -121,7 +121,7 @@ class AdminTimelineEventPanel extends LoaderView.extend({
 /**
  * @class  app.views.admin.adminTimelineEvents.TimelineEventView
  */
-class TimelineEventView extends Marionette.View.extend({
+class TimelineEventView extends View.extend({
     template: "#tmpl-adminTimelineEvent",
 
     ui: {
@@ -283,7 +283,7 @@ class TimelineEventView extends Marionette.View.extend({
  * The collections of events to be seen on this idea
  * @class app.views.adminTimelineEvents.TimelineEventsList
  */
-class TimelineEventsList extends Marionette.CollectionView.extend({
+class TimelineEventsList extends CollectionView.extend({
     childView: TimelineEventView,
 }) {
     initialize(options) {

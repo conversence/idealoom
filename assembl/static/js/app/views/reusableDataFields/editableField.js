@@ -4,12 +4,12 @@
  */
 
 import $ from "jquery";
-import Marionette from "backbone.marionette";
 import _ from "underscore";
 import IdeaLoom from "../../app.js";
 import Ctx from "../../common/context.js";
+import { View } from "backbone.marionette";
 
-class EditableField extends Marionette.View.extend({
+class EditableField extends View.extend({
     template: _.template(""),
 
     events: {
