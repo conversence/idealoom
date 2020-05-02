@@ -346,7 +346,6 @@ class IdeaInIdeaListView extends Marionette.View.extend({
         );
         if (messageListView) {
             //Syncing with current idea below isn't sufficient, as we need to set/unset the unread filter
-            messageListView.triggerMethod("messageList:clearAllFilters");
             messageListView.trigger(
                 "messageList:addFilterIsRelatedToIdea",
                 this.model,
