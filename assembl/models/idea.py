@@ -176,22 +176,22 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
         Integer(), ForeignKey(LangString.id))
     title = relationship(
         LangString,
-        lazy="joined",
+        lazy="joined", single_parent=True,
         primaryjoin=title_id == LangString.id,
         backref=backref("idea_from_title", lazy="dynamic"),
-        cascade="all")
+        cascade="all, delete-orphan")
     synthesis_title = relationship(
         LangString,
-        lazy="joined",
+        lazy="joined", single_parent=True,
         primaryjoin=synthesis_title_id == LangString.id,
         backref=backref("idea_from_synthesis_title", lazy="dynamic"),
-        cascade="all")
+        cascade="all, delete-orphan")
     description = relationship(
         LangString,
-        lazy="joined",
+        lazy="joined", single_parent=True,
         primaryjoin=description_id == LangString.id,
         backref=backref("idea_from_description", lazy="dynamic"),
-        cascade="all")
+        cascade="all, delete-orphan")
     hidden = Column(Boolean, server_default='0')
     creator_id = Column(Integer, ForeignKey(
         AgentProfile.id, ondelete="SET NULL", onupdate="CASCADE"))
