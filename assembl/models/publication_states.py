@@ -36,10 +36,10 @@ class PublicationFlow(NamedClassMixin, Base):
         Integer(), ForeignKey(LangString.id, ondelete="SET NULL", onupdate="CASCADE"))
     name = relationship(
         LangString,
-        lazy="joined",
+        lazy="joined", single_parent=True,
         primaryjoin=name_id == LangString.id,
         backref=backref("pub_flow_from_name", lazy="dynamic"),
-        cascade="all")
+        cascade="all, delete-orphan")
     default_duplicate_handling = DuplicateHandling.USE_ORIGINAL
 
     @classmethod
@@ -103,10 +103,10 @@ class PublicationState(ContextualNamedClassMixin, Base):
     flow = relationship(PublicationFlow, backref="states")
     name = relationship(
         LangString,
-        lazy="joined",
+        lazy="joined", single_parent=True,
         primaryjoin=name_id == LangString.id,
         backref=backref("pub_state_from_name", lazy="dynamic"),
-        cascade="all")
+        cascade="all, delete-orphan")
     default_duplicate_handling = DuplicateHandling.USE_ORIGINAL
 
     @classmethod
@@ -166,10 +166,10 @@ class PublicationTransition(ContextualNamedClassMixin, Base):
         primaryjoin=requires_permission_id==Permission.id)
     name = relationship(
         LangString,
-        lazy="joined",
+        lazy="joined", single_parent=True,
         primaryjoin=name_id == LangString.id,
         backref=backref("pub_transition_from_name", lazy="dynamic"),
-        cascade="all")
+        cascade="all, delete-orphan")
     default_duplicate_handling = DuplicateHandling.USE_ORIGINAL
 
     @classmethod
