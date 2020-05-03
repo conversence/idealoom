@@ -82,6 +82,9 @@ class PublicationFlow(NamedClassMixin, Base):
     crud_permissions = CrudPermissions(P_SYSADMIN, P_READ, P_SYSADMIN)
 
 
+LangString.setup_ownership_load_event(PublicationFlow, ['name'])
+
+
 class PublicationState(ContextualNamedClassMixin, Base):
     """A publication state"""
     __tablename__ = "publication_state"
@@ -122,6 +125,8 @@ class PublicationState(ContextualNamedClassMixin, Base):
         return  query, False
 
     crud_permissions = CrudPermissions(P_SYSADMIN, P_READ, P_SYSADMIN)
+
+LangString.setup_ownership_load_event(PublicationState, ['name'])
 
 
 class PublicationTransition(ContextualNamedClassMixin, Base):
@@ -218,6 +223,8 @@ class PublicationTransition(ContextualNamedClassMixin, Base):
         return target
 
     crud_permissions = CrudPermissions(P_SYSADMIN, P_READ, P_SYSADMIN)
+
+LangString.setup_ownership_load_event(PublicationTransition, ['name'])
 
 
 class StateDiscussionPermission(DiscussionBoundBase):

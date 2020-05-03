@@ -51,6 +51,9 @@ class AbstractVocabulary(Base):
                         value.name.add_value(val, locale)
 
 
+# Remember to LangString.setup_ownership_load_event on concrete subclasses
+
+
 class AbstractIdentifierVocabulary(AbstractVocabulary):
     """A vocabulary backed by a string"""
     __abstract__ = True
