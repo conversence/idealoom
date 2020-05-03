@@ -3,6 +3,9 @@
  * @module app.tests
  */
 import Mocha from "mocha";
+import { setRenderer } from "backbone.marionette";
+import TemplateCache from "marionette.templatecache";
+setRenderer(TemplateCache.render);
 
 mocha.setup("bdd");
 
