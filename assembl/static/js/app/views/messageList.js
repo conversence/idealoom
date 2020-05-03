@@ -404,10 +404,7 @@ class MessageList extends BaseMessageList.extend({
         return data;
     }
 
-    onBeforeRender() {
-        //Save some state from the previous render
-        super.onBeforeRender(...arguments);
-
+    render() {
         if (this.currentQuery.isQueryValid()) {
             this.setLoading(false);
         } else if (this.getGroupState().get("currentIdea") !== null) {
@@ -429,8 +426,7 @@ class MessageList extends BaseMessageList.extend({
                         });
          */
         }
-
-        //console.log("onBeforeRender:  template is now:", this.template);
+        super.render(...arguments);
     }
 
     onRender() {

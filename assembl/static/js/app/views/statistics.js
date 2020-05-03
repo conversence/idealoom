@@ -63,6 +63,7 @@ class Statistics extends View.extend({
     }
 
     onBeforeRender() {
+        // TODO: this should be a serializeData
         this.computeStatistics();
     }
 
