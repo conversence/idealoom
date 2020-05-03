@@ -299,7 +299,7 @@ class LangString(Base):
             self.owner_object = self.owner_object_from_query()
         return self.owner_object
 
-    def owner_object_from_query(self):
+    def owner_object_query(self):
         queries = []
         for owning_class, reln_name in self._owning_relns:
             backref_name = owning_class.__mapper__.relationships[reln_name].backref[0]
@@ -307,11 +307,27 @@ class LangString(Base):
             query = query.with_entities(owning_class.id, literal(owning_class.__name__).label('classname'))
             queries.append(query)
         query = queries[0].union(*queries[1:])
+        return query
+
+    def owner_object_from_query(self):
+        query = self.owner_object_query()
         data = query.first()
         if data:
             id, cls_name = data
             cls = [cls for (cls, _) in self._owning_relns if cls.__name__ == cls_name][0]
             return self.db.query(cls).filter_by(id=id).first()
+
+    @classmethod
+    def orphans_query(cls, db=None):
+        db = db or cls.default_db
+        queries = []
+        for owning_class, reln_name in cls._owning_relns:
+            reln = getattr(owning_class, reln_name)
+            col = next(iter(reln.impl.parent_token.local_columns))
+            query = db.query(col.label('id'))
+            queries.append(query)
+        subquery = queries[0].union(*queries[1:])
+        return db.query(cls.id.label('id')).except_(subquery)
 
     def send_to_changes(self, connection, operation=CrudOperation.DELETE,
                         discussion_id=None, view_def="changes"):
