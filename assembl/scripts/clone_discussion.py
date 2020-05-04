@@ -415,7 +415,8 @@ def delete_discussion(session, discussion_id):
     tables = DiscussionBoundBase.metadata.sorted_tables
     # Special case for preferences
     discussion = session.query(Discussion).get(discussion_id)
-    session.delete(discussion.preferences)
+    if discussion.preferences:
+        session.delete(discussion.preferences)
     # tables.append(Preferences.__table__)
     tables.reverse()
     for table in tables:
