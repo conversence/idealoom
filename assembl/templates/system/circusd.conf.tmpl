@@ -206,6 +206,7 @@ stderr_stream.backup_count = %(circus_log_backups_uwsgi_err)s
 
 [env:uwsgi]
 LC_CTYPE = %(lcctype)s
+PATH = %(VIRTUAL_ENV)s/bin:/usr/local/bin:/usr/bin
 
 [watcher:maintenance_uwsgi]
 working_dir = %(here)s
