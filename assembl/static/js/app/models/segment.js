@@ -252,6 +252,8 @@ class SegmentModel extends Base.Model.extend({
 
     addIdeaLink(ideaId) {
         const links = this.get("ideaLinks");
+        links.collectionManager =
+            links.collectionManager || this.collection.collectionManager;
         const link = new ideaContentLink.Model({
             idPost: this.get("idPost"),
             idIdea: ideaId,
