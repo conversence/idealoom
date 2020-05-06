@@ -498,6 +498,7 @@ class IdeaPanel extends BasePanel.extend({
         var canEdit = false;
         var canDelete = false;
         var canAddExtracts = false;
+        var canEditExtracts = false;
         var canEditNextSynthesis = currentUser.can(Permissions.EDIT_SYNTHESIS);
         var direct_link_relative_url = null;
         var share_link_url = null;
@@ -512,6 +513,7 @@ class IdeaPanel extends BasePanel.extend({
             canEdit = this.model.userCan(Permissions.EDIT_IDEA) || false;
             canDelete = this.model.userCan(Permissions.EDIT_IDEA);
             canAddExtracts = this.model.userCan(Permissions.ASSOCIATE_EXTRACT); //TODO: This is a bit too coarse
+            canEditExtracts: this.model.userCan(Permissions.EDIT_EXTRACT);
             imported_from_source_name = this.model.get(
                 "imported_from_source_name"
             );
@@ -534,6 +536,12 @@ class IdeaPanel extends BasePanel.extend({
                 { t: this.model.getShortTitleSafe(this.translationData) },
                 { s: Ctx.getPreferences().social_sharing },
             ]);
+        } else {
+            const user = Ctx.getCurrentUser();
+            canEdit = user.can(Permissions.EDIT_IDEA);
+            canDelete = user.can(Permissions.EDIT_IDEA);
+            canAddExtracts = user.can(Permissions.ASSOCIATE_EXTRACT);
+            canEditExtracts: user.can(Permissions.EDIT_EXTRACT);
         }
 
         return {
@@ -546,7 +554,7 @@ class IdeaPanel extends BasePanel.extend({
             getSubIdeasLabel: this.getSubIdeasLabel,
             canDelete,
             canEditNextSynthesis,
-            canEditExtracts: this.model.userCan(Permissions.EDIT_EXTRACT),
+            canEditExtracts,
             canAddExtracts,
             Ctx,
             direct_link_relative_url,
@@ -1236,7 +1244,7 @@ class IdeaPanel extends BasePanel.extend({
         var that = this;
         var collectionManager = new CollectionManager();
 
-        if (this.model.userCan(Permissions.EDIT_IDEA)) {
+        if (this.model && this.model.userCan(Permissions.EDIT_IDEA)) {
             this.ui.announcement.removeClass("hidden");
             collectionManager
                 .getAllAnnouncementCollectionPromise()
