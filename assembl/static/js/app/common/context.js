@@ -75,6 +75,12 @@ var Context = function () {
     this.debugOembed = false;
 
     /**
+     * Send debugging output to console.log to observe scroll logging
+     * @type {boolean}
+     */
+    this.debugScrollLogging = false;
+
+    /**
      * The state that the application can be under (production | test)
      * @type {string}
      */

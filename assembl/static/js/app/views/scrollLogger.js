@@ -17,7 +17,7 @@ const ATTENTION_UPDATE_NONE = "NONE";
 
 class ScrollLogger {
     constructor(messageList) {
-        this.debugScrollLogging = true;
+        this.debugScrollLogging = Ctx.debugScrollLogging;
         this.messageList = messageList;
         this.scrollEventStack = [];
         this.loggedMessages = new Map();
