@@ -1030,7 +1030,7 @@ class IdeaList extends BasePanel.extend({
         // check first on the front-end that the user has the permission to do this (in order to avoid future failure during API calls)
         if (
             !Ctx.isUserConnected() ||
-            !Ctx.getCurrentUser().can(Permissions.ADD_IDEA) ||
+            !Ctx.getCurrentUser().can(Permissions.ADMIN_DISCUSSION) ||
             !this.defaultTableOfIdeasCollapsedState
         ) {
             alert(i18n.gettext("You don't have the permission to do this."));

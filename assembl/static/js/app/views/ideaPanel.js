@@ -546,7 +546,7 @@ class IdeaPanel extends BasePanel.extend({
             getSubIdeasLabel: this.getSubIdeasLabel,
             canDelete,
             canEditNextSynthesis,
-            canEditExtracts: currentUser.can(Permissions.EDIT_EXTRACT),
+            canEditExtracts: this.model.userCan(Permissions.EDIT_EXTRACT),
             canAddExtracts,
             Ctx,
             direct_link_relative_url,
@@ -1049,7 +1049,7 @@ class IdeaPanel extends BasePanel.extend({
         var collectionManager = new CollectionManager();
 
         //TODO: Deal with local permissions
-        if (Ctx.getCurrentUser().can(Permissions.EDIT_EXTRACT)) {
+        if (this.model.userCan(Permissions.EDIT_EXTRACT)) {
             collectionManager
                 .getAllExtractsCollectionPromise()
                 .then(function (allExtractsCollection) {
@@ -1236,7 +1236,7 @@ class IdeaPanel extends BasePanel.extend({
         var that = this;
         var collectionManager = new CollectionManager();
 
-        if (Ctx.getCurrentUser().can(Permissions.EDIT_IDEA)) {
+        if (this.model.userCan(Permissions.EDIT_IDEA)) {
             this.ui.announcement.removeClass("hidden");
             collectionManager
                 .getAllAnnouncementCollectionPromise()
@@ -1296,7 +1296,7 @@ class IdeaPanel extends BasePanel.extend({
                 "You may want to describe this idea for users here..."
             ),
             showPlaceholderOnEditIfEmpty: false,
-            canEdit: Ctx.getCurrentUser().can(Permissions.EDIT_IDEA),
+            canEdit: this.model.userCan(Permissions.EDIT_IDEA),
             autosave: true,
             openInModal: true,
         });

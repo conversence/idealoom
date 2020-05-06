@@ -564,7 +564,7 @@ class IdeaModel extends Base.Model.extend({
                         }),
                     ]),
                 }),
-                longTitle: new LangString.Model({
+                definition: new LangString.Model({
                     entries: new LangString.EntryCollection([
                         new LangString.EntryModel({
                             value: segment.getQuote(),

@@ -360,7 +360,6 @@ class NavigationView extends BasePanel.extend({
         return {
             Ctx: Ctx,
             hasMinimize: true, // minimization of the navigation panel is now allowed to everyone. Before, it was: (Ctx.getCurrentInterfaceType() === Ctx.InterfaceTypes.EXPERT),
-            canAdd: Ctx.getCurrentUser().can(Permissions.ADD_IDEA),
         };
     }
 

@@ -47,9 +47,10 @@
           <% if (Ctx.getCurrentInterfaceType() != Ctx.InterfaceTypes.SIMPLE) { %>
             <div class="sub-section-title">{{ gettext('Expression in next synthesis') }}</div>
           <% } %>
+          <div class="ideaPanel-longtitle panel-editablearea js_editLongTitleRegion" class="mbs" data-toggle="tooltip" title="{{gettext('Expression of this idea in the next synthesis.  You may want to edit them all together in the synthesis panel rather than here.')}}">
+          </div>
+
         <% } %>
-        <div class="ideaPanel-longtitle panel-editablearea js_editLongTitleRegion" class="mbs" data-toggle="tooltip" title="{{gettext('Expression of this idea in the next synthesis.  You may want to edit them all together in the synthesis panel rather than here.')}}">
-        </div>
 
         <% if (Ctx.getCurrentInterfaceType() != Ctx.InterfaceTypes.SIMPLE) { %>
           <div class="sub-section-title">{{ gettext('Description of this idea') }}</div>
