@@ -91,6 +91,10 @@ var computeScrollTarget = function (
     var elViewPortOffset = getElementViewportOffset(el, scrollableViewport);
     var scrollTarget =
         elViewPortOffset + scrollableViewportScrollTop - desiredViewportOffset;
+    const isVisible =
+        elViewPortOffset >= desiredViewportOffset &&
+        elViewPortOffset + el.height() + desiredViewportOffset <=
+            scrollableViewport.height();
     if (debugScrollUtils) {
         console.log(
             "scrollUtils::computeScrollTarget(): scrollableViewport info:",
@@ -104,10 +108,12 @@ var computeScrollTarget = function (
             "elViewPortOffset: ",
             elViewPortOffset,
             "computed scrollTarget:",
-            scrollTarget
+            scrollTarget,
+            "isVisible:",
+            isVisible
         );
     }
-    return scrollTarget;
+    return [scrollTarget, isVisible];
 };
 var scrollToNextPanel = function (elm, delay, xValue) {
     var selector = elm;
@@ -175,19 +181,19 @@ var scrollToElement = function (el, callback, margin, animate, watch) {
         return;
     }
 
-    var scrollTarget;
     var desiredViewportOffset = margin || 30;
 
     if (animate === undefined) {
         animate = true;
     }
 
-    scrollTarget = computeScrollTarget(
+    const [scrollTarget, isVisible] = computeScrollTarget(
         el,
         scrollableElement,
         desiredViewportOffset
     );
 
+    if (isVisible) return;
     if (debugScrollUtils) {
         console.log(
             "scrollUtils::scrollToElement(): initialized on ",
@@ -224,7 +230,7 @@ var scrollToElement = function (el, callback, margin, animate, watch) {
                     );
                 }
 
-                var scrollTarget = computeScrollTarget(
+                const [scrollTarget, isVisible] = computeScrollTarget(
                     elReference,
                     scrollableElement,
                     desiredViewportOffset
