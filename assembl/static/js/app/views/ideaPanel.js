@@ -1015,11 +1015,11 @@ class IdeaPanel extends BasePanel.extend({
                 IdeaLoom.rootView.showChildView("slider", confirmModal);
             } else {
                 var onSubmit = function () {
+                    const parent = that.model.getParent();
                     that.model.destroy({
                         success: function () {
                             that.unblockPanel();
-                            // UX question: should we go to the parent idea, if any? YES
-                            that.getContainingGroup().setCurrentIdea(null);
+                            that.getContainingGroup().setCurrentIdea(parent);
                         },
                         error: function (model, resp) {
                             console.error("ERROR: deleteCurrentIdea", resp);
