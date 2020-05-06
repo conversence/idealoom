@@ -175,7 +175,12 @@ class IdeaInIdeaListView extends View.extend({
                       this.model.getDefinitionDisplayText(this.translationData)
                   )
               )
-            : null;
+            : data.shortTitle;
+        if (data.textDefinition.length > 255) {
+            const shorter = data.textDefinition.substr(0, 255);
+            const pos = shorter.lastIndexOf(" ");
+            data.textDefinition = shorter.substr(0, pos) + "...";
+        }
 
         data.Ctx = Ctx;
         data.idea_css_class = this.model.getCssClassFromId();
