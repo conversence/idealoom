@@ -1,4 +1,4 @@
-import { View, CollectionView } from "backbone.marionette";
+import { View, CollectionView, common } from "backbone.marionette";
 import Promise from "bluebird";
 import _ from "underscore";
 import Growl from "../../utils/growl.js";
@@ -19,7 +19,7 @@ class RoleHeaderRow extends CollectionView.extend({
     childView: RoleHeaderCell,
     tagName: "thead",
 }) {
-    _createBuffer() {
+    _getBuffer(views) {
         // copied from Marionette... will be hard to keep up to date.
         // But I need the way to prefix an element in-place.
         const elBuffer = this.Dom.createBuffer();
@@ -27,9 +27,8 @@ class RoleHeaderRow extends CollectionView.extend({
             elBuffer,
             "<th>" + this.options.cell0 + "</th>"
         );
-        _.each(this._bufferedChildren, (b) => {
-            this.Dom.appendContents(elBuffer, b.el, { _$contents: b.$el });
-        });
+        this.Dom.appendContents(elBuffer, super._getBuffer(views));
+
         return elBuffer;
     }
 
@@ -201,15 +200,16 @@ class RolePermissionRow extends CollectionView.extend({
         };
     }
 
-    _createBuffer() {
+    _getBuffer(views) {
+        // copied from Marionette... will be hard to keep up to date.
+        // But I need the way to prefix an element in-place.
         const elBuffer = this.Dom.createBuffer();
         this.Dom.appendContents(
             elBuffer,
             "<th>" + this.model.get("name") + "</th>"
         );
-        _.each(this._bufferedChildren, (b) => {
-            this.Dom.appendContents(elBuffer, b.el, { _$contents: b.$el });
-        });
+        this.Dom.appendContents(elBuffer, super._getBuffer(views));
+
         return elBuffer;
     }
 }
@@ -266,8 +266,8 @@ class StateRolePermissionTable extends RolePermissionTable.extend({
         });
     }
 
-    filter(child, index, collection) {
-        return child.get("name").indexOf("Idea") >= 0;
+    viewFilter(view, index, children) {
+        return view.model.get("name").indexOf("Idea") >= 0;
     }
 }
 
