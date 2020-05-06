@@ -50,7 +50,7 @@ class IdeaModel extends Base.Model.extend({
         widget_links: [],
         level: 0,
         inNextSynthesis: false,
-        extra_permissions: [],
+        extra_permissions: null,
         imported_from_id: null,
         imported_from_url: null,
         imported_from_source_name: null,
@@ -292,7 +292,7 @@ class IdeaModel extends Base.Model.extend({
     userCan(permission) {
         return (
             Ctx.getCurrentUser().can(permission) ||
-            _.contains(this.get("extra_permissions"), permission)
+            _.contains(this.get("extra_permissions") || [], permission)
         );
     }
 
@@ -888,7 +888,7 @@ class IdeaCollection extends Base.Collection.extend({
         if (!this._extraUserPermissions) {
             const extraUserPermissions = {};
             this.each((idea) => {
-                _.each(idea.get("extra_permissions"), (p) => {
+                _.each(idea.get("extra_permissions") || [], (p) => {
                     extraUserPermissions[p] = true;
                 });
             });
@@ -907,10 +907,18 @@ class IdeaCollection extends Base.Collection.extend({
             // new model: refetch to get updated permissions, which cannot go on socket
             model = this.get(id);
             model.fetch({
+                // there is clearly a time cost here
                 success: () => {
                     const newModel = that.get(id);
-                    if (newModel != model) {
-                        newModel.fetch();
+                    if (
+                        newModel != model &&
+                        newModel.get("extra_permissions") == undefined &&
+                        model.get("extra_permissions") != undefined
+                    ) {
+                        newModel.set(
+                            "extra_permissions",
+                            model.get("extra_permissions")
+                        );
                     }
                 },
             });
