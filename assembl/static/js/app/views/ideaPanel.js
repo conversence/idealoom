@@ -1305,7 +1305,11 @@ class IdeaPanel extends BasePanel.extend({
     }
 
     renderCKEditorLongTitle() {
-        var that = this;
+        const canEdit = Ctx.getCurrentUser().can(Permissions.EDIT_SYNTHESIS);
+        if (!canEdit) {
+            // do not show this unless you can edit it.
+            return;
+        }
 
         var model = this.model.getLongTitleDisplayText(this.translationData);
         if (!model.length) return;
@@ -1314,7 +1318,7 @@ class IdeaPanel extends BasePanel.extend({
             model: this.model,
             modelProp: "longTitle",
             translationData: this.translationData,
-            canEdit: Ctx.getCurrentUser().can(Permissions.EDIT_SYNTHESIS),
+            canEdit,
             autosave: true,
             openInModal: true,
         });
