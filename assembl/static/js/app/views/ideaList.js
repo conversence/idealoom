@@ -180,14 +180,7 @@ class IdeaList extends BasePanel.extend({
         //Variable used to check the position of the ideaList upon re-renders
         this.bodyTopPosition = 0;
 
-        var requestRender = function () {
-            setTimeout(function () {
-                if (!that.isDestroyed()) {
-                    //console.log("Render from ideaList requestRender");
-                    that.render();
-                }
-            }, 1);
-        };
+        var requestRender = _.debounce(_.bind(this.render, this), 150);
 
         this.defaultTableOfIdeasCollapsedState = new DiscussionPreference.DictModel(
             {
@@ -395,6 +388,9 @@ class IdeaList extends BasePanel.extend({
     render() {
         //Overriding render because getting the scrollTop position of the ideaList body container
         //is lost upon re-rendering. BeforeRender and onRender are too late.
+        if (this.isDestroyed()) {
+            return;
+        }
         if (Ctx.debugRender) {
             console.log("Render is called");
         }
