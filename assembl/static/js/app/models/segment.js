@@ -119,10 +119,12 @@ class SegmentModel extends Base.Model.extend({
     }
 
     parse(rawModel, options) {
-        rawModel.ideaLinks = new ideaContentLink.Collection(
-            rawModel.ideaLinks,
-            { parse: true, url: this.getIdeaLinkUrl() }
-        );
+        if (rawModel.ideaLinks) {
+            rawModel.ideaLinks = new ideaContentLink.Collection(
+                rawModel.ideaLinks,
+                { parse: true, url: this.getIdeaLinkUrl() }
+            );
+        }
         return super.parse(...arguments);
     }
 
