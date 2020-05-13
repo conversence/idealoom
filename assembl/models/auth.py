@@ -201,12 +201,8 @@ class AgentProfile(Base):
         for post in other_profile.posts_created[:]:
             post.creator = self
             post.creator_id = self.id
-        for extract in other_profile.extracts_created[:]:
-            extract.creator = self
-        for idea_link in other_profile.idealinks_created[:]:
-            idea_link.creator = self
-        for attachment in other_profile.attachments[:]:
-            attachment.creator = self
+        for extract in other_profile.extracts_attributed[:]:
+            extract.attributed_to = self
         from .action import Action
         for action in session.query(Action).filter_by(
             actor_id=other_profile.id).all():
@@ -857,8 +853,12 @@ class User(NamedClassMixin, OriginMixin, AgentProfile):
                         (not self.last_login)
                         or (other_user.last_login > self.last_login)):
                     self.password = other_user.password
-            for extract in other_user.extracts_owned[:]:
-                extract.owner = self
+            for extract in other_user.extracts_created[:]:
+                extract.creator = self
+            for idea_content_link in other_user.idealinks_created[:]:
+                idea_content_link.creator = self
+            for attachment in other_user.attachments[:]:
+                attachment.creator = self
             for role in other_user.roles[:]:
                 role.user = self
             for role in other_user.local_roles[:]:
