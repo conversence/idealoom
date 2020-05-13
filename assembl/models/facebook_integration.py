@@ -46,7 +46,7 @@ from .attachment import Document, PostAttachment
 
 log = logging.getLogger(__name__)
 
-API_VERSION_USED = 2.2
+API_VERSION_USED = 3.2
 DEFAULT_TIMEOUT = 30  # seconds
 DOMAIN = 'facebook.com'
 

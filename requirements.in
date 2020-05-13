@@ -20,7 +20,7 @@ contextlib2==0.6.0
 cornice==4.0.1
 cryptography==2.9.2
 Fabric3==1.14.post1
-facebook-sdk==1.0.0  # rq.filter: <2
+facebook-sdk==3.1.0
 feedparser==5.2.1
 flaky==3.6.1
 future==0.18.2

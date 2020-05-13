@@ -57,7 +57,7 @@ dogpile.cache==0.9.0      # via pyramid-dogpile-cache
 et-xmlfile==1.0.1         # via openpyxl
 executor==22.0            # via rotate-backups, update-dotdee
 fabric3==1.14.post1       # via -r requirements.in
-facebook-sdk==1.0.0       # via -r requirements.in
+facebook-sdk==3.1.0       # via -r requirements.in
 fasteners==0.15           # via executor
 feedparser==5.2.1         # via -r requirements.in
 flaky==3.6.1              # via -r requirements.in
