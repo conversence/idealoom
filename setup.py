@@ -6,6 +6,7 @@ from subprocess import check_output
 from setuptools import setup, find_packages
 from pip._internal.network.session import PipSession
 from pip._internal.req import parse_requirements
+from pip._internal.req.constructors import install_req_from_parsed_requirement
 
 try:
     from semantic_version import Version
@@ -24,10 +25,12 @@ def parse_reqs(*req_files):
     session = PipSession()
     for req_file in req_files:
         # parse_requirements() returns generator of
-        # pip.req.InstallRequirement objects
+        # pip.req.ParsedRequirement objects,
+        # contvert to InstallRequirements
         parsed = parse_requirements(req_file, session=session)
+        reqs = (install_req_from_parsed_requirement(pr) for pr in parsed)
         requirements.update({
-            str(ir.req) for ir in parsed
+            str(ir.req) for ir in reqs
             if (not ir.markers) or ir.markers.evaluate()})
     return list(requirements)
 
