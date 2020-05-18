@@ -79,7 +79,7 @@
     "@babel/plugin-transform-template-literals": "^7.8",
     "@babel/preset-env": "^7.9",
     "@sentry/webpack-plugin": "~1.11",
-    "autoprefixer": "~9.7",
+    "autoprefixer": "~9.8",
     "babel-core": "^7.0.0-0",
     "babel-eslint": "^10",
     "babel-loader": "^8.1",
@@ -90,7 +90,7 @@
     "chai-as-promised": "~7.1",
     "check-error": "~1.0",
     "css-loader": "~3",
-    "eslint": "~6.8",
+    "eslint": "~7.0",
     "eslint-config-prettier": "~6",
     "eslint-loader": "~4.0",
     "eslint-plugin-babel": "~5.3",
@@ -127,7 +127,7 @@
     "webpack": "^4.42",
     "webpack-cli": "^3.3",
     "webpack-dashboard": "~3.2",
-    "webpack-dev-server": "~3.10",
+    "webpack-dev-server": "~3.11",
     "yarn": "^1.22.4"
   },
   "resolutions": {
