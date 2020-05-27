@@ -4,6 +4,8 @@ This is a RESTful API based on `cornice <https://cornice.readthedocs.io/en/lates
 It should remain somewhat stable, and allows optimization of complex queries.
 """
 import os
+import simplejson
+from cornice.renderer import CorniceRenderer
 
 FIXTURE_DIR = os.path.join(
     os.path.dirname(__file__), '..', '..', 'static', 'js', 'tests', 'fixtures')
@@ -48,6 +50,11 @@ def instance_check_op(request, op, cls, **kwargs):
     return True
 
 
+class SimpleJSONRenderer(CorniceRenderer):
+    def __init__(self, **kwargs):
+        kwargs["serializer"] = simplejson.dumps
+
+
 def includeme(config):
     """ Initialize views and renderers at app start-up time. """
 
@@ -57,3 +64,4 @@ def includeme(config):
     config.add_route('mime_type', 'api/v1/mime_type')
     config.add_route('oembed', 'api/v1/oembed')
     config.add_route('saml_metadata', 'api/v1/saml_metadata')
+    config.add_renderer(None, SimpleJSONRenderer())
