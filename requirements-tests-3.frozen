@@ -18,27 +18,27 @@
 -e git+https://github.com/maparent/tornadio2.git@session_id_str#egg=tornadIO2  # via -r requirements.in, circus-web
 alabaster==0.7.12         # via sphinx
 alembic==1.4.2            # via -r requirements.in
-amqp==2.5.2               # via kombu
+amqp==2.6.0               # via kombu
 anyjson==0.3.3            # via -r requirements.in, circus-web
 appnope==0.1.0            # via ipython
 attrs==19.3.0             # via pytest
 babel==2.8.0              # via -r requirements.in, sphinx
-backcall==0.1.0           # via ipython
+backcall==0.2.0           # via ipython
 bcrypt==3.1.7             # via paramiko
 beautifulsoup4==4.9.1     # via -r requirements.in, webtest
 billiard==3.6.3.0         # via celery
-boto3==1.13.17            # via smart-open
+boto3==1.14.0             # via smart-open
 boto==2.49.0              # via smart-open
-botocore==1.16.17         # via boto3, s3transfer
+botocore==1.17.0          # via boto3, s3transfer
 cachetools==4.1.0         # via google-auth, premailer
-celery==4.4.2             # via -r requirements.in
-certifi==2020.4.5.1       # via requests, sentry-sdk
+celery==4.4.5             # via -r requirements.in
+certifi==2020.4.5.2       # via requests, sentry-sdk
 cffi==1.14.0              # via bcrypt, cryptography, pynacl
 characteristic==14.3.0    # via montague
 chardet==3.0.4            # via requests
 circus==0.16.1            # via -r requirements.in, circus-web
 click==7.1.2              # via lingua, pip-tools
-codecov==2.1.3            # via -r requirements_tests.in
+codecov==2.1.4            # via -r requirements_tests.in
 colander==1.7.0           # via -r requirements.in
 colorama==0.4.3           # via -r requirements.in
 coloredlogs==14.0         # via -r requirements.in, executor, rotate-backups, update-dotdee
@@ -62,13 +62,13 @@ facebook-sdk==3.1.0       # via -r requirements.in
 fasteners==0.15           # via executor
 feedparser==5.2.1         # via -r requirements.in
 flaky==3.6.1              # via -r requirements.in
-future==0.18.2            # via -r requirements.in
+future==0.18.2            # via -r requirements.in, celery
 gensim==3.8.3             # via -r requirements.in
-google-api-core==1.17.0   # via google-api-python-client
-google-api-python-client==1.8.4  # via -r requirements.in
+google-api-core==1.20.0   # via google-api-python-client
+google-api-python-client==1.9.3  # via -r requirements.in
 google-auth-httplib2==0.0.3  # via google-api-python-client
-google-auth==1.15.0       # via google-api-core, google-api-python-client, google-auth-httplib2
-googleapis-common-protos==1.51.0  # via google-api-core
+google-auth==1.17.0       # via google-api-core, google-api-python-client, google-auth-httplib2
+googleapis-common-protos==1.52.0  # via google-api-core
 hashfs==0.7.2             # via -r requirements.in
 hiredis==1.0.1            # via -r requirements.in
 httplib2==0.18.1          # via google-api-python-client, google-auth-httplib2
@@ -79,7 +79,7 @@ imagesize==1.2.0          # via sphinx
 imapclient==2.1.0         # via -r requirements.in
 imaplib2==2.45.0          # via -r requirements.in
 ipython-genutils==0.2.0   # via traitlets
-ipython==7.14.0           # via -r requirements.in, pyramid-ipython
+ipython==7.15.0           # via -r requirements.in, pyramid-ipython
 iso639==0.1.4             # via -r requirements.in
 iso8601==0.1.12           # via colander
 isodate==0.6.0            # via -r requirements.in, python3-saml, rdflib
@@ -89,10 +89,10 @@ jinja2==2.11.2            # via -r requirements.in, pyramid-jinja2, sphinx
 jmespath==0.10.0          # via boto3, botocore
 joblib==0.15.1            # via scikit-learn
 jsonpath-ng==1.5.1        # via -r requirements.in
-kombu==4.6.8              # via celery
+kombu==4.6.10             # via celery
 lingua==4.14              # via -r requirements.in
 lxml==4.5.1               # via -r requirements.in, premailer, xmlsec
-mako==1.1.2               # via alembic, circus-web, tomako
+mako==1.1.3               # via alembic, circus-web, tomako
 markupsafe==1.1.1         # via circus-web, jinja2, mako, pyramid-jinja2
 mock==4.0.2               # via -r requirements_tests.in
 monotonic==1.5            # via fasteners
@@ -100,8 +100,8 @@ montague==0.2.1           # via pyramid-autodoc
 more-itertools==8.3.0     # via pytest
 naturalsort==1.5.1        # via rotate-backups, update-dotdee
 ndg_httpsclient==0.5.1    # via -r requirements.in
-nodeenv==1.3.5            # via -r requirements.in
-numpy==1.18.4             # via gensim, scikit-learn, scipy
+nodeenv==1.4.0            # via -r requirements.in
+numpy==1.18.5             # via gensim, scikit-learn, scipy
 oauthlib==3.1.0           # via requests-oauthlib, social-auth-core
 openpyxl==3.0.3           # via -r requirements.in
 packaging==20.4           # via pytest, sphinx
@@ -110,7 +110,7 @@ parso==0.7.0              # via jedi
 pastedeploy==2.1.0        # via plaster-pastedeploy
 pexpect==4.8.0            # via ipython
 pickleshare==0.7.5        # via ipython
-pip-tools==5.1.2          # via -r requirements.in
+pip-tools==5.2.1          # via -r requirements.in
 plaster-pastedeploy==0.7  # via pyramid
 plaster==1.0              # via plaster-pastedeploy, pyramid
 pluggy==0.13.1            # via pytest
@@ -119,7 +119,7 @@ polib==1.1.0              # via -r requirements.in, lingua
 premailer==3.7.0          # via -r requirements.in
 prompt-toolkit==3.0.5     # via ipython
 property-manager==3.0     # via executor, rotate-backups, update-dotdee
-protobuf==3.12.1          # via google-api-core, googleapis-common-protos
+protobuf==3.12.2          # via google-api-core, googleapis-common-protos
 psutil==5.7.0             # via circus
 psycopg2-binary==2.8.5    # via -r requirements.in
 ptyprocess==0.6.0         # via pexpect
@@ -146,9 +146,9 @@ pyramid==1.10.4           # via -r requirements.in, cornice, pyramid-autodoc, py
 pystemmer==2.0.0.1        # via -r requirements.in
 pytest-cov==2.9.0         # via -r requirements_tests.in
 pytest-localserver==0.5.0  # via -r requirements_tests.in
-pytest-mock==3.1.0        # via -r requirements_tests.in
-pytest-splinter==2.0.1    # via -r requirements_tests.in
-pytest==5.4.2             # via -r requirements_tests.in, pytest-cov, pytest-mock, pytest-splinter
+pytest-mock==3.1.1        # via -r requirements_tests.in
+pytest-splinter==2.1.0    # via -r requirements_tests.in
+pytest==5.4.3             # via -r requirements_tests.in, pytest-cov, pytest-mock, pytest-splinter
 python-dateutil==2.8.1    # via -r requirements.in, alembic, botocore, rotate-backups
 python-editor==1.0.4      # via alembic
 python-json-logger==0.1.11  # via -r requirements.in
@@ -160,14 +160,14 @@ pyyaml==5.3.1             # via -r requirements.in
 pyzmq==19.0.1             # via -r requirements.in, circus, circus-web
 rdflib-jsonld==0.5.0      # via -r requirements.in
 rdflib==5.0.0             # via -r requirements.in, rdflib-jsonld, sparqlwrapper
-redis==3.5.2              # via -r requirements.in
+redis==3.5.3              # via -r requirements.in
 reg==0.12                 # via -r requirements.in
 repoze.lru==0.7           # via reg
 repoze.sendmail==4.4.1    # via pyramid-mailer
 requests-oauthlib==1.3.0  # via -r requirements.in, social-auth-core
 requests==2.23.0          # via -r requirements.in, codecov, facebook-sdk, google-api-core, premailer, requests-oauthlib, smart-open, social-auth-core, sphinx
 rotate-backups==8.1       # via -r requirements.in
-rsa==4.0                  # via google-auth
+rsa==4.1                  # via google-auth
 s3transfer==0.3.3         # via boto3
 scikit-learn==0.23.1      # via -r requirements.in
 scipy==1.4.1              # via gensim, scikit-learn
@@ -184,7 +184,7 @@ social-auth-core==3.3.3   # via -r requirements.in, social-auth-app-pyramid, soc
 social-auth-storage-sqlalchemy==1.1.0  # via -r requirements.in, social-auth-app-pyramid
 soupsieve==2.0.1          # via beautifulsoup4
 sparqlwrapper==1.8.5      # via -r requirements.in
-sphinx==3.0.4             # via -r requirements_doc.in, cornice-sphinx, pyramid-autodoc, sphinxcontrib-httpdomain, sphinxcontrib-zopeext
+sphinx==3.1.0             # via -r requirements_doc.in, cornice-sphinx, pyramid-autodoc, sphinxcontrib-httpdomain, sphinxcontrib-zopeext
 sphinxcontrib-applehelp==1.0.2  # via sphinx
 sphinxcontrib-devhelp==1.0.2  # via sphinx
 sphinxcontrib-htmlhelp==1.0.3  # via sphinx
@@ -198,6 +198,7 @@ sqlalchemy-schemadisplay==1.3  # via -r requirements.in, -r requirements_doc.in
 sqlalchemy==1.3.17        # via -r requirements.in, alembic, social-auth-storage-sqlalchemy, sqlalchemy-utils, zope.sqlalchemy
 structlog==20.1.0         # via -r requirements.in
 termcolor==1.1.0          # via jasmine-splinter-runner
+threadpoolctl==2.1.0      # via scikit-learn
 tomako==0.1.0.post1       # via circus-web
 tornado==4.5.3            # via circus, circus-web, tomako, tornadio2
 traitlets==4.3.3          # via ipython
@@ -211,8 +212,8 @@ uwsgitop==0.11            # via -r requirements.in
 venusian==3.0.0           # via cornice, pyramid
 verboselogs==1.7          # via property-manager, rotate-backups
 vine==1.3.0               # via amqp, celery
-waitress==1.4.3           # via webtest
-wcwidth==0.1.9            # via prompt-toolkit, pytest
+waitress==1.4.4           # via webtest
+wcwidth==0.2.4            # via prompt-toolkit, pytest
 webob==1.8.6              # via pyramid, webtest
 webtest==2.0.35           # via -r requirements_tests.in
 werkzeug==1.0.1           # via -r requirements.in, pytest-localserver
