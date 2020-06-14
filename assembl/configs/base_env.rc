@@ -101,7 +101,7 @@ _uses_memcache = true
 _uses_nginx = true
 _uses_uwsgi = true
 _gitrepo = https://github.com/conversence/idealoom.git
-_gitbranch = master
+_gitbranch = main
 _is_production_env = true
 # Legacy: Can be prod.wsgi, staging.wsgi or dev.wsgi.
 _wsginame = prod.wsgi

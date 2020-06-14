@@ -2,7 +2,7 @@ FROM    debian:buster
 
 ENV     DEBIAN_FRONTEND noninteractive
 ARG	GITREPO=conversence/idealoom
-ARG	GITBRANCH=master
+ARG	GITBRANCH=main
 ARG DOCKER_RC=assembl/configs/docker.rc
 ARG BUILDING_DOCKER=true
 
