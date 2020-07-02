@@ -1070,6 +1070,10 @@ The {idealoom} Team"""))
         recipients=["%s <%s>" % (email.profile.name, email.email)],
         body=text_message.format(**data),
         html=html_message.format(**data))
+    message.extra_headers['Date'] = datetime.utcnow().strftime(
+        '%a, %d %b %Y %T %z (+0000)')
+    # TODO: message ID.
+    # TODO: create my own message subclass that autofills this.
     if immediate:
         mailer.send_immediately(message)
     else:
@@ -1129,4 +1133,6 @@ The {idealoom} Team
         recipients=["%s <%s>" % (
             profile.name, email or profile.get_preferred_email())],
         body=text_body.format(**data), html=html_body.format(**data))
+    message.extra_headers['Date'] = datetime.utcnow().strftime(
+        '%a, %d %b %Y %T %z (+0000)')
     mailer.send(message)

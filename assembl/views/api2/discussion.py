@@ -1088,6 +1088,8 @@ def test_results(request):
         sender=config.get('idealoom_admin_email'),
         recipients=["maparent@acm.org"],
         body=json.dumps(request.POST.dict_of_lists()))
+    message.extra_headers['Date'] = datetime.utcnow().strftime(
+        '%a, %d %b %Y %T %z (+0000)')
     mailer.send(message)
     return Response(body="Thank you!", content_type="text/text", charset="ascii")
 
