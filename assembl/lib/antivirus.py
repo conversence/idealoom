@@ -43,18 +43,22 @@ class SophosAntiVirus(AntiVirus):
             return False
 
 
-class ClamScanVirus(AntiVirus):
+class ClamScanAntiVirus(AntiVirus):
     command = 'clamscan'
+    options = ['--no-summary', '-i']
     def check(self, path):
+        args = [self.command]
+        args.extend(self.options)
+        args.append(path)
         try:
-            return call([self.command, '--no-summary' '-i', path]) == 0
+            return call(args) == 0
         except:
             return False
 
 
-class ClamDScanVirus(ClamScanVirus):
+class ClamDScanAntiVirus(ClamScanAntiVirus):
     command = 'clamdscan'
-
+    options = ClamScanAntiVirus + ['--fdpass']
 
 def get_antivirus(cls_name=None):
     cls_name = cls_name or config.get(

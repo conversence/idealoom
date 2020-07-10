@@ -32,11 +32,9 @@ def main():
             files.update({
                 File.av_checked: AntiVirusStatus.unchecked.name})
             mark_changed(session)
-    with transaction.manager:
-        file_ids = files.with_entities(File.id).all()
-    for file_id in file_ids:
+    files = files.all()
+    for file_obj in files:
         with transaction.manager:
-            file_obj = session.query(File).options(undefer(File.data)).get(file_id)
             file_obj.ensure_virus_checked(antivirus)
 
 
