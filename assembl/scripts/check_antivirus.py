@@ -16,7 +16,7 @@ def main():
     parser.add_argument("-r", "--reset", action="store_true",
                         help="Reset status of all files")
     parser.add_argument("-a", "--antivirus",
-                        default="assembl.lib.antivirus.SophosAntiVirus",
+                        default="assembl.lib.antivirus.ClamDScanAntiVirus",
                         help="antivirus class")
     args = parser.parse_args()
     session = boostrap_configuration(args.configuration)
