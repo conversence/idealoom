@@ -43,8 +43,21 @@ class SophosAntiVirus(AntiVirus):
             return False
 
 
+class ClamScanVirus(AntiVirus):
+    command = 'clamscan'
+    def check(self, path):
+        try:
+            return call([self.command, '--no-summary' '-i', path]) == 0
+        except:
+            return False
+
+
+class ClamDScanVirus(ClamScanVirus):
+    command = 'clamdscan'
+
+
 def get_antivirus(cls_name=None):
     cls_name = cls_name or config.get(
-        "anti_virus", "assembl.lib.antivirus.SophosAntiVirus")
+        "anti_virus", "assembl.lib.antivirus.ClamDScanVirus")
     av_class = resolver.resolve(cls_name)
     return av_class()
