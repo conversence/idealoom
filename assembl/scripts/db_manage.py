@@ -34,7 +34,7 @@ def main():
         projectpath = dirname(dirname(dirname(__file__)))
         dbdumps_dir = join(projectpath, "idealoom_dumps")
         if not exists(dbdumps_dir):
-            subprocess.check_call('mkdir', '-m700', dbdumps_dir)
+            subprocess.check_call(['mkdir', '-m700', dbdumps_dir])
 
         filename = 'db_%s.sql.pgdump' % time.strftime('%Y%m%d')
         file_path = join(dbdumps_dir, filename)
