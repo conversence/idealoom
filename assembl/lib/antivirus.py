@@ -58,7 +58,7 @@ class ClamScanAntiVirus(AntiVirus):
 
 class ClamDScanAntiVirus(ClamScanAntiVirus):
     command = 'clamdscan'
-    options = ClamScanAntiVirus + ['--fdpass']
+    options = ClamScanAntiVirus.options + ['--fdpass']
 
 def get_antivirus(cls_name=None):
     cls_name = cls_name or config.get(
