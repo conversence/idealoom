@@ -5,16 +5,14 @@ from __future__ import print_function
 import argparse
 import subprocess
 import sys
-import os
 import time
 from os.path import join, dirname, exists
 
 from pyramid.paster import get_appsettings
-import transaction
 from alembic.migration import MigrationContext
 
-from ..lib.migration import bootstrap_db, bootstrap_db_data
-from ..lib.sqla import configure_engine, mark_changed
+from ..lib.migration import bootstrap_db
+from ..lib.sqla import configure_engine
 from ..lib.zmqlib import configure_zmq
 from ..lib.config import set_config
 
@@ -30,13 +28,13 @@ def main():
     configure_zmq(settings['changes_socket'], False)
     engine = configure_engine(settings, True)
     if args.command == "bootstrap":
-        db = bootstrap_db(args.configuration)
+        bootstrap_db(args.configuration)
 
     elif args.command == "backup":
         projectpath = dirname(dirname(dirname(__file__)))
-        dbdumps_dir = join(projectpath, "assembl_dumps")
+        dbdumps_dir = join(projectpath, "idealoom_dumps")
         if not exists(dbdumps_dir):
-            subprocess.check_call('mkdir -m700 ' + dbdumps_dir)
+            subprocess.check_call('mkdir', '-m700', dbdumps_dir)
 
         filename = 'db_%s.sql.pgdump' % time.strftime('%Y%m%d')
         file_path = join(dbdumps_dir, filename)
