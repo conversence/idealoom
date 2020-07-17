@@ -120,17 +120,17 @@ module.exports = {
         }],
       },
       {
-        test: /sinon.*\.js$/,
-        use: [
-          {
-            loader: 'imports-loader?define=>false',
-          }],
-      },
-      {
         test: /bootstrap.*\.js|jquery[-\.]/,
         use: [
           {
-            loader: 'imports-loader?jquery,jQuery=jquery',
+            loader: 'imports-loader',
+            options: {
+                type: "commonjs",
+                imports: {
+                    moduleName: 'jquery',
+                    name: 'jQuery',
+                }
+            },
           },
         ],
       },
@@ -157,7 +157,7 @@ module.exports = {
                   path.resolve(__dirname, 'node_modules/bourbon/app/assets/stylesheets'),
                 ],
               },
-              prependData: '$static_url: "'+sassStaticUrl+'";',
+              additionalData: '$static_url: "'+sassStaticUrl+'";',
             },
           },
         ],
