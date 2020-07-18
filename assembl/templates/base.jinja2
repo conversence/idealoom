@@ -75,7 +75,8 @@
     {% include 'includes/javascript.jinja2' %}
     {% include 'includes/updatebrowser.jinja2' %}
     
-    
+    <script type="text/javascript">idealoom_version = '{{ version }}';</script>
+
     {% block extra_js %}{% endblock %}
     {% block main_js %}{% endblock %}
 
