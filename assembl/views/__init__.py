@@ -32,7 +32,7 @@ from ..lib.frontend_urls import FrontendUrls
 from ..lib.locale import get_language, get_country, strip_most_countries
 from ..lib.utils import get_global_base_url
 from ..lib.raven_client import capture_exception, flush
-from ..auth import R_PARTICIPANT
+from ..__version__ import version
 
 log = logging.getLogger(__name__)
 default_context = {
@@ -344,7 +344,8 @@ def get_default_context(request, **kwargs):
     if messages:
         kwargs['message'] = '<br />'.join(messages)
 
-    (theme_name, theme_relative_path)=get_theme_info(discussion)
+    (theme_name, theme_relative_path) = get_theme_info(discussion)
+
     return dict(
         kwargs,
         STATIC_URL=static_url,
@@ -378,8 +379,9 @@ def get_default_context(request, **kwargs):
         providers_json=json.dumps(providers),
         js_links=get_js_links(static_url),
         css_links=get_css_links(static_url),
+        version=version(),
         translations=codecs.open(jedfilename, encoding='utf-8').read()
-        )
+    )
 
 
 def get_template_views():
