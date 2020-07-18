@@ -161,7 +161,7 @@ class PreferencesItemView extends View.extend({
                 model.sync("read", model, {
                     success: function (model2, resp2) {
                         // this should be done by backbone, but isn't because we have a success?
-                        model.set(that.valueModelKey(), model2);
+                        model.set(that.key, model2);
                         // neutralize change
                         model.changed = {};
                         model._subcollectionCache = undefined;
@@ -782,11 +782,11 @@ class ListPreferenceView extends BasePreferenceView.extend({
     template: "#tmpl-listPreferenceView",
     subviewClass: ListSubviewCollectionView,
 }) {
-    initialize(options) {
-        super.initialize(...arguments);
+    initialize(options, is_dict) {
+        super.initialize(options);
         this.submodels = this.model.valueAsCollection(
             this.preferenceData,
-            true
+            is_dict
         );
     }
 
@@ -861,8 +861,7 @@ class DictPreferenceView extends ListPreferenceView.extend({
     subviewClass: DictSubviewCollectionView,
 }) {
     initialize(options) {
-        // skip ListPreferenceView
-        super.initialize(...arguments);
+        super.initialize(options, true);
         this.submodels = this.model.valueAsCollection(
             this.preferenceData,
             false

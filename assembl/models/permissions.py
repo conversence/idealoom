@@ -379,20 +379,26 @@ class DiscussionPermission(DiscussionBoundBase):
         return (cls.discussion_id == discussion_id, )
 
 
-def create_default_permissions(discussion):
+def create_default_permissions(discussion, public=True):
     session = discussion.db
     permissions = {p.name: p for p in session.query(Permission).all()}
     roles = {r.name: r for r in session.query(Role).all()}
-    defaults = discussion.preferences['default_permissions']
-    for role_name, permission_names in defaults.items():
-        role = roles.get(role_name, None)
-        assert role, "Unknown role: " + role_name
-        for permission_name in permission_names:
-            permission = permissions.get(permission_name, None)
-            assert permission, "Unknown permission: " + permission_name
-            session.add(DiscussionPermission(
-                discussion=discussion, role=role, permission=permission))
-
+    default_sets = [discussion.preferences['default_permissions']]
+    if public:
+        default_sets.append(discussion.preferences['default_permissions_public'])
+    existing = set()
+    for defaults in default_sets:
+        for role_name, permission_names in defaults.items():
+            role = roles.get(role_name, None)
+            assert role, "Unknown role: " + role_name
+            for permission_name in permission_names:
+                if (role_name, permission_name) in existing:
+                    continue
+                permission = permissions.get(permission_name, None)
+                assert permission, "Unknown permission: " + permission_name
+                session.add(DiscussionPermission(
+                    discussion=discussion, role=role, permission=permission))
+                existing.add((role_name, permission_name))
 
 
 class UserTemplate(DiscussionBoundBase, User):

@@ -35,13 +35,13 @@ class DiscussionIndividualPreferenceModel extends Backbone.Model {
      * @function app.models.discussionPreference.DiscussionIndividualPreferenceModel.valueAsCollection
      * The preference is a list or dict of something. Return a collection of that something, or dict items.
      */
-    valueAsCollection(preferenceData, as_list) {
+    valueAsCollection(preferenceData, as_dict) {
         // MISSING: Better handling of default_item_X and default_Key...
         if (this._subcollectionCache === undefined) {
             var collection;
             var that = this;
             var value = this.get("value");
-            if (as_list) {
+            if (!as_dict) {
                 if (!Array.isArray(value)) {
                     // Error in value type
                     // shallow clone, hopefully good enough

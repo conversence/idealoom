@@ -1,16 +1,17 @@
-from builtins import object
-import simplejson as json
+from os import urandom
+from base64 import b64encode
 
+import simplejson as json
 from pyramid.i18n import TranslationStringFactory
 from pyramid.view import view_config
 from pyramid.renderers import render_to_response
-from pyramid.security import authenticated_userid
 from pyramid.httpexceptions import (
     HTTPFound, HTTPNotFound, HTTPBadRequest, HTTPUnauthorized)
+from pyramid.settings import asbool
 import transaction
 from pyisemail import is_email
 
-from assembl.lib.locale import (to_posix_string, strip_country)
+from assembl.lib.locale import strip_country
 from assembl.models import (
     Discussion, DiscussionPermission, Role, Permission, UserRole,
     LocalUserRole)
@@ -144,74 +145,94 @@ def discussion_admin(request):
     if not user_id:
         return HTTPFound(location='/login?next=/admin/discussions/')
 
-    session = User.default_db
+    db = User.default_db
+    config = request.registry.settings
+    can_create_mailbox = asbool(config.get('can_create_mailbox', False))
+    create_mailbox = False
+    slug = request.POST.get('slug', '')
+    domain = config.get('imap_domain', None) or config.get('public_hostname')
+    if slug:
+        email = "@".join((slug, domain))
+    else:
+        email = ''
 
     context = dict(
         get_default_context(request),
-        discussions=session.query(Discussion))
+        slug=slug,
+        imap_mailbox="auto" if can_create_mailbox else "setup",
+        topic='',
+        source_name="IMAP",
+        host=config.get("mail.host"),
+        username=email,
+        admin_sender=email,
+        folder='inbox',
+        port=143,
+        use_ssl=False,
+        public_discussion=True,
+        homepage='',
+        mailing_list_address='',
+        can_create_mailbox=can_create_mailbox,
+        discussions=db.query(Discussion))
 
     if request.method == 'POST':
+        context['errors'] = errors = []
+        context.update(request.POST)
+        ml_address = context['mailing_list_address']
 
-        g = lambda x: request.POST.get(x, None)
-
-        (topic, slug, admin_sender, name, host, port,
-            ssl, folder, password, username, homepage) = (
-            g('topic'),
-            g('slug'),
-            g('admin_sender'),
-            g('mbox_name'),
-            g('host'),
-            g('port'),
-            True if g('ssl') == 'on' else False,
-            g('folder'),
-            g('password'),
-            g('username'),
-            g('homepage')
-            )
-
-        errors = []
-
-        if not admin_sender:
-            errors.append("Please specify the admin_sender")
-        elif not is_email(admin_sender):
-            errors.append("Please specify a valid email for admin_sender")
         if not slug:
             errors.append("Please specify a slug")
-        if not username:
-            errors.append("Please specify a user name")
 
-        if errors:
-            context['errors'] = errors
-        else:
+        if context['imap_mailbox'] == "setup":
+            if not context['admin_sender']:
+                errors.append(_("Please specify the admin_sender"))
+            elif not is_email(context['admin_sender']):
+                errors.append(_("Please specify a valid admin sender email"))
+
+            if ml_address and not is_email(ml_address):
+                errors.append(_("Please specify a valid mailing list address"))
+            if not context['username']:
+                errors.append(_("Please specify a user name"))
+            if not context['password']:
+                errors.append(_("Please specify a password"))
+            create_mailbox = True
+            password = context['password']
+        elif context['imap_mailbox'] == "auto":
+            assert can_create_mailbox
+            password = b64encode(urandom(12))
+            create_mailbox = True
+
+        if not errors:
             discussion = Discussion(
-                topic=topic,
                 creator_id=user_id,
-                slug=slug
+                slug=slug,
+                topic=context['topic'],
+                homepage=context['homepage'],
             )
 
             # Could raise an exception if there is no/incorrect scheme passed
-            discussion.homepage = homepage
-            session.add(discussion)
+            db.add(discussion)
             discussion.apply_side_effects_without_json(request=request)
-            discussion.invoke_callbacks_after_creation()
 
             create_default_permissions(discussion)
-            mailbox_class = (
-                MailingList if g('mailing_list_address') else IMAPMailbox)
-            mailbox = mailbox_class(
-                name=name,
-                host=host,
-                port=int(port),
-                username=username,
-                use_ssl=ssl,
-                folder=folder,
-                admin_sender=admin_sender,
-                password=password,
-            )
+            if create_mailbox:
+                mailbox_class = (
+                    MailingList if ml_address else IMAPMailbox)
+                mailbox = mailbox_class(
+                    discussion=discussion,
+                    name=context['source_name'],
+                    host=context['host'],
+                    port=int(context['port']),
+                    username=context['username'],
+                    use_ssl=context['use_ssl'] == 'on',
+                    folder=context['folder'],
+                    admin_sender=context['admin_sender'],
+                    password=password,
+                )
+                if ml_address:
+                    mailbox.post_email_address = ml_address
+                db.add(mailbox)
 
-            if(g('mailing_list_address')):
-                mailbox.post_email_address = g('mailing_list_address')
-            mailbox.discussion = discussion
+            discussion.invoke_callbacks_after_creation()
 
     return render_to_response(
         'admin/discussions.jinja2',

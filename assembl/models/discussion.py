@@ -175,11 +175,6 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
                 traceback.print_exc()
 
     def creation_side_effects(self, context):
-        if not self.root_idea:
-            from .idea import RootIdea
-            self.root_idea = RootIdea(discussion=self)
-            yield self.root_idea.get_instance_context(
-                self.get_collection_context("root_idea", context))
         if not self.table_of_contents:
             from .idea_graph_view import TableOfContents
             self.table_of_contents = TableOfContents(discussion=self)
@@ -213,6 +208,17 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
                 flow = PublicationFlow.getByName(flow_name)
                 if flow:
                     self.idea_publication_flow = flow
+                    # yield?
+        if not self.root_idea:
+            from .idea import RootIdea
+            self.root_idea = RootIdea(discussion=self)
+            if flow:
+                state_label = self.preferences['default_idea_pub_state']
+                state = flow.state_by_label(state_label)
+                if state:
+                    self.root_idea.pub_state = state
+            yield self.root_idea.get_instance_context(
+                self.get_collection_context("root_idea", context))
 
     def unique_query(self):
         # DiscussionBoundBase is misleading here

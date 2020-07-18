@@ -616,7 +616,7 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
             "default": "default"
         },
 
-        # The specification of the default idea publication flow for a discussion
+        # The specification of the default idea publication state for new ideas
         {
             "id": "default_idea_pub_state",
             "name": _("Publication state of a new idea"),
@@ -634,11 +634,11 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
         # The specification of the default permissions for a discussion
         {
             "id": "default_permissions",
-            "name": _("Default permissions"),
+            "name": _("Default private permissions"),
             "value_type": "dict_of_role_to_list_of_permission",
             "show_in_preferences": False,
             "description": _(
-                "The basic permissions for a new discussion"),
+                "The base permissions for a new private discussion"),
             "allow_user_override": None,
             "modification_permission": P_SYSADMIN,
             # "frontend_validator_function": func_name...?,
@@ -696,11 +696,33 @@ class Preferences(MutableMapping, NamedClassMixin, AbstractBase):
                     P_ADD_POST,
                     P_READ_USER_INFO,
                     P_VOTE,
+                    P_READ,
+                    P_READ_IDEA,
                 ],
                 R_OWNER: [
                     P_DELETE_POST,
                     P_EDIT_EXTRACT,
                 ],
+            },
+        },
+
+
+        # The specification of the default permissions for a public discussion
+        {
+            "id": "default_permissions_public",
+            "name": _("Default public permissions"),
+            "value_type": "dict_of_role_to_list_of_permission",
+            "show_in_preferences": False,
+            "description": _(
+                "Extra permissions for a new public discussion"),
+            "allow_user_override": None,
+            "modification_permission": P_SYSADMIN,
+            # "frontend_validator_function": func_name...?,
+            # "backend_validator_function": func_name...?,
+            "item_default": {
+                R_PARTICIPANT: [P_READ],
+            },
+            "default": {
                 Authenticated: [
                     P_SELF_REGISTER,
                 ],

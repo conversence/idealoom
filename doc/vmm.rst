@@ -1,7 +1,7 @@
 Setting up Dovecot and VMM
 ==========================
 
-This allows to set up assembl so email accounts for discussion are auto-created when a discussion is created.
+This allows to set up idealoom so email accounts for discussion are auto-created when a discussion is created.
 
 Principles
 ----------
@@ -159,30 +159,32 @@ Use VMM
 Explore vmm commands at http://vmm.localdomain.org/howto.html
 
 Basically, you need to create the base domain, a postmaster account, and
-an account for the assembl instance, possibly ``assembl@example.domain``
+an account for the idealoom instance, possibly ``idealoom@example.domain``
 (added to ``local.ini`` below, with its appropriate password). Other
 users will be created automatically by vmm.
 
 sudoer
 ------
 
-If you have many assembl instances on the server, you may want to create
-an assembls group instead of giving permissions to each. I will assume
-that there is an ``assembls`` group and that users are members of that
-group.
-
-.. code-block:: sh
-
-    addgroup assembls
-    usermod -a -G assembls assembl_user
-
 Use ``visudo`` to edit ``/etc/sudoer``.
 
-Then give permissions to that group to execute the vmm ua command:
+Then give permissions to that user to execute the `vmm ua` command:
 
 ::
 
-    %assembls ALL=NOPASSWD: /etc/init.d/nginx restart , /etc/init.d/nginx reload , /etc/init.d/nginx stop , /etc/init.d/nginx start, /usr/sbin/vmm ua *
+    idealoom_user ALL=NOPASSWD: /etc/init.d/nginx restart , /etc/init.d/nginx reload , /etc/init.d/nginx stop , /etc/init.d/nginx start, /usr/sbin/vmm ua *
+
+
+If you have many idealoom instances on the server, you may want to create
+an idealooms group instead of giving permissions to each. To create an ``idealooms``
+group and add users as members of that group:
+
+.. code-block:: sh
+
+    addgroup idealooms
+    usermod -a -G idealooms idealoom_user
+
+Repeat the second line for each idealoom user account. Then, in the visudo line above, replace the initial `idealoom_user` with `%idealooms`.
 
 Assembl adjustments
 -------------------
@@ -191,10 +193,10 @@ In ``local.ini``
 
 .. code-block:: ini
 
-    idealoom_admin_email = assembl@example.domain
+    idealoom_admin_email = idealoom@example.domain
     mail.host = localhost
-    mail.username = assembl@example.domain
-    mail.password = (password of the assembl user.)
+    mail.username = idealoom@example.domain
+    mail.password = (vmm password of the idealoom account.)
     mail.tls = true
     imap_domain = ...
     discussion_callbacks =
@@ -206,7 +208,7 @@ Testing
 
 Restart dovecot and postfix (``/etc/init.d/postfix restart`` and ``/etc/init.d/dovecot restart``), and look for any startup error in ``/var/log/mail.log``.
 
-to test postfix, start a ``pshell`` in assembl, and try the following with a real recipient:
+to test postfix, start a ``pshell`` in idealoom, and try the following with a real recipient:
 
 .. code-block:: python
 

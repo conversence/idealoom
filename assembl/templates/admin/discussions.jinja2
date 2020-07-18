@@ -1,65 +1,90 @@
 {% extends 'base.jinja2' %}
 
+{% block main_js %}
+    <script src="{{ STATIC_URL }}/node_modules/jquery/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        show_mailbox();
+    </script>
+{% endblock %}
+
 {% block content %}
     {% for error in errors %}
         <p class="msg-error" style="color:red">{{ error }}</p>
     {% endfor %}
 
-<table>
+<table onload="show_mailbox()">
   <tr>
     <td>
-      <h2>Créer une discussion</h2>
+      <h2>{% trans %}Create a discussion{% endtrans %}</h2>
       <form method="post" action=".">
 	<p>
-	  <label for="topic">Topic</label>
-	  <input type="text" name="topic" id="topic"/>
+	  <label for="topic">{% trans %}Topic{% endtrans %}</label>
+	  <input type="text" name="topic" id="topic" value="{{ topic }}"/>
 	</p>
 	
 	<p>
-	  <label for="slug">Slug</label>
-	  <input type="text" name="slug" id="slug"/>
+	  <label for="slug">{% trans %}Slug{% endtrans %}</label>
+	  <input type="text" name="slug" id="slug" value="{{ slug }}"/>
 	</p>
 
     <p>
-      <label for="homepage">Homepage (optional)</label>
-      <input type="text" name="homepage" id="homepage"/>
+      <label for="homepage">{% trans %}Homepage (optional){% endtrans %}</label>
+      <input type="text" name="homepage" id="homepage" value="{{ homepage }}"/>
     </p>
+
+    <p>
+      <label for="public_discussion">{% trans %}Public discussion{% endtrans %}</label>
+      <input type="checkbox" name="public_discussion" id="public_discussion" checked=checked />
+    </p>
+
+    <p>
+      <label for="mailbox">{% trans %}IMAP Mailbox{% endtrans %}</label>
+      <select type="choice" name="imap_mailbox" id="imap_mailbox" onchange="show_mailbox();">
+        {% if can_create_mailbox %}
+        <option value="auto" {% if imap_mailbox=='auto' %} selected {% endif %}>{% trans %}Autocreate{% endtrans %}</option>
+        {% endif %}
+        <option value="setup" {% if imap_mailbox=='setup' %} selected {% endif %}>{% trans %}Setup{% endtrans %}</option>
+        <option value="none" {% if imap_mailbox=='none' %} selected {% endif %}>{% trans %}None{% endtrans %}</option>
+      </select>
+    </p>
+
+    <div id="mailbox_config">
 
 	<h3>Mailbox configuration</h3>
 
 	<p>
-	  <label for="mbox_name">Name</label>
-	  <input type="text" name="mbox_name" id="mbox_name"/>
+	  <label for="source_name">{% trans %}Source Name{% endtrans %}</label>
+	  <input type="text" name="source_name" id="source_name" value="{{ source_name }}"/>
 	</p>
 
 	<p>
-	  <label for="host">Host</label>
-	  <input type="text" name="host" id="host"/>
+	  <label for="host">{% trans %}IMAP host{% endtrans %}</label>
+	  <input type="text" name="host" id="host" value="{{ host }}"/>
 	</p>
 
 	<p>
-	  <label for="port">Port</label>
-	  <input type="text" name="port" id="port" value="143"/>
+	  <label for="port">{% trans %}IMAP Port{% endtrans %}</label>
+	  <input type="text" name="port" id="port" value="{{ port }}"/>
 	</p>
 
 	<p>
-	  <label for="ssl">SSL? (leave off if you use STARTTLS)</label>
-	  <input type="checkbox" name="ssl" id="ssl" />
+	  <label for="use_ssl">{% trans %}use SSL? (leave off if you use STARTTLS){% endtrans %}</label>
+	  <input type="checkbox" name="use_ssl" id="use_ssl" />
 	</p>
 
     <p>
-      <label for="admin_sender">Admin sender</label>
-      <input type="text" name="admin_sender" id="admin_sender"/>
+      <label for="admin_sender">{% trans %}Admin sender email{% endtrans %}</label>
+      <input type="text" name="admin_sender" id="admin_sender" value="{{ admin_sender }}"/>
     </p>
 
 	<p>
-	  <label for="folder">Folder</label>
-	  <input type="text" name="folder" id="folder" value="inbox"/>
+	  <label for="folder">{% trans %}IMAP Folder{% endtrans %}</label>
+	  <input type="text" name="folder" id="folder" value="{{ folder }}"/>
 	</p>
 
 	<p>
 	  <label for="username">Username</label>
-	  <input type="text" name="username" id="username"/>
+	  <input type="text" name="username" id="username"  value="{{ username }}"/>
 	</p>
 
 	<p>
@@ -72,13 +97,15 @@
       <input type="text" name="mailing_list_address" id="mailing_list_address"/>
     </p>
 
+    </div>
+
 	<p>
 	  <input type="submit" value="Create"/>
 	</p>
       </form>
     </td>
     <td>
-      <h2>Discussions existantes</h2>
+      <h2>{% trans %}Discussions already on the server{% endtrans %}</h2>
       <ul class="discussionlist">
         {% for discussion in discussions %}
         <li><a href='{{ discussion.get_url() }}'>{{ discussion.topic }}</a></li>
@@ -89,4 +116,19 @@
     </td>
   </tr>
 </table>
+
+
+<script type="text/javascript">
+function show_mailbox() {
+    var choice = document.getElementById("imap_mailbox");
+    console.log(choice)
+    var config = $('#mailbox_config');
+    if (choice.value == "setup") {
+        config.show();
+    } else {
+        config.hide();
+    }
+}
+</script>
+
 {% endblock %}
