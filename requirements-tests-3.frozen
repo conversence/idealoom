@@ -61,7 +61,7 @@ fabric3==1.14.post1       # via -r requirements.in
 facebook-sdk==3.1.0       # via -r requirements.in
 fasteners==0.15           # via executor
 feedparser==5.2.1         # via -r requirements.in
-flaky==3.6.1              # via -r requirements_tests.in
+flaky==3.7.0              # via -r requirements_tests.in
 future==0.18.2            # via -r requirements.in, celery
 gensim==3.8.3             # via -r requirements.in
 google-api-core==1.21.0   # via google-api-python-client
