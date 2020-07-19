@@ -44,7 +44,6 @@ class DiscussionPreloadTranslationTable(TranslationTable):
 
 def translate_content(
         content, translation_table=None, service=None,
-        constrain_to_discussion_languages=True,
         send_to_changes=False):
     from ..models import LocaleLabel
     discussion = content.discussion
@@ -68,8 +67,7 @@ def translate_content(
             combined += " " + und_body.value or next(
                 iter(content.body.non_mt_entries())).value or ''
         try:
-            language, _ = service.identify(
-                combined, constrain_to_discussion_languages)
+            language, _ = service.identify(combined)
         except:
             capture_exception()
             return changed
@@ -92,8 +90,7 @@ def translate_content(
                 if entry.value:
                     # assume can_guess_locale = true
                     try:
-                        service.confirm_locale(
-                            entry, constrain_to_discussion_languages)
+                        service.confirm_locale(entry)
                     except:
                         capture_exception()
                         return changed
@@ -149,7 +146,6 @@ def translate_content_task(content_id):
 @celery.task(ignore_result=True, shared=False)
 def translate_discussion(
         discussion_id, translation_table=None,
-        constrain_to_discussion_languages=True,
         send_to_changes=False):
     from ..models import Discussion
     discussion = Discussion.get(discussion_id)
@@ -162,6 +158,5 @@ def translate_discussion(
     changed = False
     for post in discussion.posts:
         changed |= translate_content(
-            post, translation_table, service,
-            constrain_to_discussion_languages, send_to_changes)
+            post, translation_table, service, send_to_changes)
     return changed
