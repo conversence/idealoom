@@ -10,7 +10,7 @@ import ssl
 import certifi
 
 from assembl.lib.raven_client import capture_exception
-from assembl.models import ContentSource, Post, AbstractMailbox, ImportedPost, Email
+from assembl.models import ContentSource, AbstractMailbox, ImportedPost, Email
 from .source_reader import (
     ReaderStatus, SourceReader, ReaderError, ClientError, IrrecoverableError)
 

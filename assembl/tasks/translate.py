@@ -49,9 +49,7 @@ def translate_content(
     from ..models import LocaleLabel
     discussion = content.discussion
     service = service or discussion.translation_service()
-    if service.canTranslate is None:
-        return
-    if translation_table is None:
+    if service.canTranslate and translation_table is None:
         translation_table = DiscussionPreloadTranslationTable(
             service, discussion)
     undefined = LocaleLabel.UNDEFINED
@@ -59,7 +57,7 @@ def translate_content(
     # Special case: Short strings.
     und_subject = content.subject.undefined_entry
     und_body = content.body.undefined_entry
-    if service.distinct_identify_step and (
+    if ((service.distinct_identify_step or not service.canTranslate) and (
             (und_subject and not service.can_guess_locale(und_subject.value)) or
             (und_body and not service.can_guess_locale(und_body.value))):
         combined = ""
@@ -83,6 +81,9 @@ def translate_content(
             und_body.locale = language
             content.db.expire(und_body, ("locale",))
             content.db.expire(content.body, ("entries",))
+
+    if not service.canTranslate:
+        return
 
     for prop in ("body", "subject"):
         ls = getattr(content, prop)
