@@ -367,8 +367,8 @@ class FeedSourceReader(PullSourceReader):
                     self.source.db.add(account)
                 if not post.find_duplicate(True, True):
                     self.source.db.add(post)
-                self.source.db.commit()
                 self.handle_new_content(post)
+                self.source.db.commit()
             except Exception as e:
                 self.source.db.rollback()
                 raise ReaderError(e)
