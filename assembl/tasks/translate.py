@@ -48,7 +48,7 @@ def translate_content(
         send_to_changes=False):
     from ..models import LocaleLabel
     discussion = content.discussion
-    service = service or discussion.translation_service()
+    service = service or    
     if service.canTranslate and translation_table is None:
         translation_table = DiscussionPreloadTranslationTable(
             service, discussion)
@@ -57,7 +57,7 @@ def translate_content(
     # Special case: Short strings.
     und_subject = content.subject.undefined_entry
     und_body = content.body.undefined_entry
-    if ((service.distinct_identify_step or not service.canTranslate) and (
+    if ((not service.canTranslate or service.distinct_identify_step) and (
             (und_subject and not service.can_guess_locale(und_subject.value)) or
             (und_body and not service.can_guess_locale(und_body.value)))):
         combined = ""
@@ -82,14 +82,12 @@ def translate_content(
             content.db.expire(und_body, ("locale",))
             content.db.expire(content.body, ("entries",))
 
-    if not service.canTranslate:
-        return
-
     for prop in ("body", "subject"):
         ls = getattr(content, prop)
         if ls:
             entries = ls.entries_as_dict
-            if service.distinct_identify_step and undefined in entries:
+            if (not service.canTranslate or
+                    service.distinct_identify_step) and undefined in entries:
                 entry = entries[undefined]
                 if entry.value:
                     # assume can_guess_locale = true
@@ -106,16 +104,19 @@ def translate_content(
                        for entry in entries.values()}
             entries.pop(None, None)
             originals = ls.non_mt_entries()
+            if not service.canTranslate:
+                continue
             # pick randomly. TODO: Recency order?
             for original in originals:
                 source_loc = (service.asKnownLocale(original.locale) or
                               original.locale) or 'und'
-                for dest in translation_table.languages_for(source_loc, content.db):
+                for dest in translation_table.languages_for(
+                        source_loc, content.db):
                     if locale_compatible(dest, source_loc):
                         continue
                     entry = entries.get(dest, None)
                     is_html = (prop == "body" and
-                        content.get_body_mime_type() == 'text/html')
+                               content.get_body_mime_type() == 'text/html')
                     if entry is None or (
                             entry.error_code and
                             not service.has_fatal_error(entry)):
