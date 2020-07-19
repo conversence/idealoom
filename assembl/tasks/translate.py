@@ -48,7 +48,7 @@ def translate_content(
         send_to_changes=False):
     from ..models import LocaleLabel
     discussion = content.discussion
-    service = service or    
+    service = service or discussion.translation_service()
     if service.canTranslate and translation_table is None:
         translation_table = DiscussionPreloadTranslationTable(
             service, discussion)
