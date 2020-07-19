@@ -59,7 +59,7 @@ def translate_content(
     und_body = content.body.undefined_entry
     if ((service.distinct_identify_step or not service.canTranslate) and (
             (und_subject and not service.can_guess_locale(und_subject.value)) or
-            (und_body and not service.can_guess_locale(und_body.value))):
+            (und_body and not service.can_guess_locale(und_body.value)))):
         combined = ""
         if und_subject:
             combined = und_subject.value or next(
