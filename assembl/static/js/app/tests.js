@@ -7,6 +7,7 @@ import { setRenderer } from "backbone.marionette";
 import TemplateCache from "marionette.templatecache";
 setRenderer(TemplateCache.render);
 
+window.mocha = mocha;
 mocha.setup("bdd");
 
 // use require instead of import so it comes after setup
