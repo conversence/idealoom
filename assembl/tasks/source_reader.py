@@ -3,7 +3,6 @@
 and reads at reasonable intervals. It can also handle sources that can push changes. """
 from __future__ import print_function
 from builtins import str
-import sys
 import signal
 from random import uniform
 from time import sleep
@@ -21,7 +20,7 @@ from zope.component import getGlobalSiteManager
 from kombu import BrokerConnection, Exchange, Queue
 from kombu.mixins import ConsumerMixin
 from kombu.utils.debug import setup_logging
-from sqlalchemy import event, inspect
+from sqlalchemy import inspect
 from sqlalchemy.exc import TimeoutError
 
 from . import configure
@@ -33,6 +32,10 @@ from ..lib.zmqlib import configure_zmq
 
 log = logging.getLogger(__name__)
 pool_counter = 0
+
+
+def fmax(*args):
+    return max(filter(None, args))
 
 
 class ReaderStatus(OrderedEnum):
@@ -269,11 +272,11 @@ class SourceReader(with_metaclass(ABCMeta, Thread)):
     def wake(self):
         log.debug("SourceReader.wake")
         if self.status in (ReaderStatus.PAUSED, ReaderStatus.CLOSED) and (
-                datetime.utcnow() - max(self.last_prod, self.last_read)
+                datetime.utcnow() - fmax(self.last_prod, self.last_read)
                 > self.min_time_between_reads):
             self.event.set()
         elif self.status == ReaderStatus.TRANSIENT_ERROR and (
-                datetime.utcnow() - max(self.last_prod, self.last_error_status)
+                datetime.utcnow() - fmax(self.last_prod, self.last_error_status)
                 > self.transient_error_backoff):
             # Exception: transient backoff escalation can be cancelled by wake
             self.event.set()
