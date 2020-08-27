@@ -21,6 +21,8 @@ import IdeaModel from "../models/idea.js";
 import i18n from "../utils/i18n.js";
 import Moment from "moment";
 import Widget from "../models/widget.js";
+// why is this needed?
+import "regenerator-runtime/runtime";
 import { scaleLinear, format, select } from "d3";
 
 // from http://stackoverflow.com/questions/3959211/fast-factorial-function-in-javascript
