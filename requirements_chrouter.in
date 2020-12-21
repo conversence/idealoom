@@ -1,14 +1,14 @@
 -e git+https://github.com/conversence/pyoembed.git@async#egg=pyoembed
 -e git+https://github.com/conversence/sockjs.git@juanjoa#egg=sockjs
-cchardet==2.1.6
+cchardet==2.1.7
 aiocache==0.11.1
 aiocontextvars==0.2.2 ; python_version < '3.7'
-aiohttp==3.6.2
+aiohttp==3.7.3
 # aiohttp-cors==0.7.0
 
 # Those chrouter reqs repeat requirements in requirements.in, keep in sync.
 PyJWT==1.7.1
-pytz==2020.1
-pyzmq==19.0.2
-sentry-sdk==0.16.5
+pytz==2020.4
+pyzmq==20.0.0
+sentry-sdk==0.19.5
 simplejson==3.17.2
