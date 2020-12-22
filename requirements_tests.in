@@ -8,6 +8,7 @@ pytest-mock==3.4.0
 pytest-splinter==3.3.0
 pytest==6.2.1
 WebTest==2.0.35
-
+# temporary: until aiohttp accepts chardet 4
+chardet<4
 # Do I still need this?
 # cov-core==1.15.0

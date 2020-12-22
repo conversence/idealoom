@@ -39,7 +39,7 @@ celery==5.0.5             # via -r requirements.in
 certifi==2020.12.5        # via requests, sentry-sdk
 cffi==1.14.4              # via bcrypt, cryptography, pynacl
 characteristic==14.3.0    # via montague
-chardet==3.0.4            # via aiohttp, requests
+chardet==3.0.4            # via -r requirements_tests.in, aiohttp, requests
 circus==0.17.1            # via -r requirements.in, circus-web
 click-didyoumean==0.0.3   # via celery
 click-plugins==1.1.1      # via celery
