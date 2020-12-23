@@ -167,7 +167,7 @@ requests-oauthlib==1.3.0  # via -r requirements.in, social-auth-core
 requests==2.25.1          # via -r requirements.in, codecov, facebook-sdk, google-api-core, premailer, requests-oauthlib, social-auth-core, sphinx
 rotate-backups==8.1       # via -r requirements.in
 rsa==4.6                  # via google-auth
-scikit-learn==0.23.2      # via -r requirements.in
+scikit-learn==0.24        # via -r requirements.in
 scipy==1.5.4              # via gensim, scikit-learn
 selenium==3.141.0         # via pytest-splinter, splinter
 semantic-version==2.8.5   # via -r requirements.in
