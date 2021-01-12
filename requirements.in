@@ -29,18 +29,16 @@ hashfs==0.7.2
 hiredis==1.1.0
 IMAPClient==2.1.0
 imaplib2==2.45.0
-ipython==7.19.0
 iso639==0.1.4  # failure with 0.1.3
 isodate==0.6.0
 Jinja2==2.11.2
 jsonpath-ng==1.5.2
-PyJWT==1.7.1
 lingua==4.14
 lxml==4.6.2
 nodeenv==1.5.0
 ndg_httpsclient==0.5.1
 openpyxl==3.0.5
-pip-tools==5.4.0
+pip-tools==5.5.0
 polib==1.1.0
 premailer==3.7.0
 psycopg2-binary==2.8.6
@@ -48,9 +46,9 @@ pygraphviz==1.6
 python-Levenshtein==0.12.0
 pylibmc==1.6.1
 pyIsEmail  # 1.3.1 was pushed to pypi as "v1.3.1", which confuses pip.
+PyJWT<2
 pyramid==1.10.5
 pyramid-dogpile-cache==0.0.4
-pyramid-ipython==0.2
 pyramid-jinja2==2.8
 pyramid-mailer==0.15.1
 pyramid-retry==2.1.1
@@ -58,8 +56,7 @@ pyramid-tm==2.4
 PyStemmer==2.0.1
 python-dateutil==2.8.1
 python-json-logger==2.0.1
-python3-saml==1.9.0
-pytz==2020.4
+pytz==2020.5
 PyYAML==5.3.1
 pyzmq==20.0.0
 rdflib==5.0.0
@@ -74,13 +71,13 @@ semantic-version==2.8.5
 sentry-sdk==0.19.5
 simplejson==3.17.2
 six==1.15.0
-social-auth-core==3.3.3
+social-auth-core[all]==4.0.2
 social-auth-app-pyramid==1.0.0
 social-auth-storage-sqlalchemy==1.1.0
 SPARQLWrapper==1.8.5
 sqlalchemy==1.3.22
 sqlalchemy-schemadisplay==1.3
-structlog==20.1.0
+structlog==20.2.0
 transaction==3.0.1
 translationstring==1.4
 Unidecode==1.1.2
