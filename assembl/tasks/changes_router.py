@@ -242,6 +242,7 @@ class ActiveSocket(object):
                         self.userId = Everyone
                     log.info('userId: %s', self.userId)
                 except TokenInvalid:
+                    print("TokenInvalid")
                     pass
             if self.token and self.discussion:
                 # Check if token authorizes discussion
@@ -370,7 +371,7 @@ if __name__ == '__main__':
         for socket_name in (in_socket, out_socket):
             if socket_name.startswith('ipc://'):
                 socket_name = socket_name[6:]
-                for i in range(5):
+                for i in range(15):
                     if exists(socket_name):
                         break
                     sleep(0.1)

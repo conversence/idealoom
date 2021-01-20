@@ -20,14 +20,15 @@ class TokenInvalid(Exception):
 
 def encode_token(token, secret):
     token.update({'issuedAt': _now().isoformat()})
-    return jwt.encode(token, secret)
+    return jwt.encode(token, secret, algorithm="HS256")
 
 
 def decode_token(token, secret='', ttl=DEFAULT_TTL, verify=True):
     try:
         if not isinstance(token, bytes):
             token = token.encode('ascii')
-        token = jwt.decode(token, secret, verify=verify)
+        token = jwt.decode(
+            token, secret, verify=verify, algorithms=["HS256"])
     except UnicodeEncodeError as e:
         raise TokenInvalid("token should be ascii", e)
     except jwt.DecodeError as e:
