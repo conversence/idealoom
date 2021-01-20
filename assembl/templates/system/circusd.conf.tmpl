@@ -2,8 +2,6 @@
 umask = 022
 virtualenv = %(VIRTUAL_ENV)s
 copy_env = True
-httpd = %(circus_webapp)s
-httpd_port = %(circus_webapp_port)d
 statsd = %(circus_statsd)s
 pidfile = %(here)s/var/run/circusd.pid
 endpoint = ipc://%(here)s/var/run/circus_endpoint
