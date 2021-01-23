@@ -26,7 +26,7 @@
     # via -r requirements.in
 alabaster==0.7.12
     # via sphinx
-alembic==1.5.1
+alembic==1.5.2
     # via -r requirements.in
 amqp==5.0.3
     # via kombu
@@ -286,7 +286,7 @@ polib==1.1.0
     #   lingua
 premailer==3.7.0
     # via -r requirements.in
-prompt-toolkit==3.0.10
+prompt-toolkit==3.0.13
     # via click-repl
 property-manager==3.0
     # via
@@ -359,7 +359,7 @@ pyramid==1.10.5
     #   pyramid-tm
 pystemmer==2.0.1
     # via -r requirements.in
-pytest-cov==2.11.0
+pytest-cov==2.11.1
     # via -r requirements_tests.in
 pytest-localserver==0.5.0
     # via -r requirements_tests.in
@@ -396,7 +396,7 @@ pytz==2020.5
     #   babel
     #   celery
     #   google-api-core
-pyyaml==5.4
+pyyaml==5.4.1
     # via -r requirements.in
 pyzmq==21.0.1
     # via
@@ -493,7 +493,7 @@ six==1.15.0
     #   webtest
 smart-open==4.1.2
     # via gensim
-snowballstemmer==2.0.0
+snowballstemmer==2.1.0
     # via sphinx
 social-auth-app-pyramid==1.0.0
     # via -r requirements.in
