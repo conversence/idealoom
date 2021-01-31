@@ -59,6 +59,7 @@ DEFAULTS = {
     'celery_tasks.translate.num_workers': '2',
     # Sensible defaults
     'autostart_celery': 'true',
+    'autostart_flower': 'false',
     'autostart_celery_notify_beat': 'true',
     'autostart_source_reader': 'true',
     'autostart_changes_router': 'true',
@@ -68,6 +69,7 @@ DEFAULTS = {
     'autostart_uwsgi': 'false',
     'autostart_metrics_server': 'false',
     'autostart_edgesense_server': 'false',
+    'flower_port': '5555',
     'circus_log_size': '1048576',  # ~1Mb
     'circus_log_backups': '3',
     'instance_name': 'idealoom',
@@ -179,6 +181,7 @@ def generate_ini_files(config, config_fname):
         'ASSEMBL_URL': url,
         'oembed_port': config.getint('app:idealoom', 'oembed_port'),
         'code_root': config.get(SECTION, 'code_root'),
+        'flower_port': get_default('flower_port', 5555),
     }
     for procname in (
             'celery',
@@ -192,6 +195,7 @@ def generate_ini_files(config, config_fname):
             'maintenance',
             'metrics',
             'metrics_py',
+            'flower',
             # 'edgesense',
             'uwsgi'):
         name = 'autostart_' + procname

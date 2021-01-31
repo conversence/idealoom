@@ -40,6 +40,30 @@ stderr_stream.backup_count = %(circus_log_backups_celery_err)s
 [env:celery]
 LC_CTYPE = %(lcctype)s
 
+[watcher:flower]
+working_dir = %(here)s
+virtualenv = %(VIRTUAL_ENV)s
+copy_env = True
+cmd = flower -A assembl.tasks -b %(CELERY_BROKER)s flower -p %(flower_port)s
+autostart = %(autostart_flower)s
+startsecs = 2
+stopasgroup = false
+stopwaitsecs = 60
+# If the process didn't kill it's children after 60 seconds, it's unlikely to
+# ever reap them, so kill them all
+killasgroup = true
+stdout_stream.class = FileStream
+stdout_stream.filename = %(log_dir)s/flower.log
+stderr_stream.class = FileStream
+stderr_stream.filename = %(log_dir)s/flower.err.log
+stdout_stream.max_bytes = %(circus_log_size_flower_out)s
+stdout_stream.backup_count = %(circus_log_backups_flower_out)s
+stderr_stream.max_bytes = %(circus_log_size_flower_err)s
+stderr_stream.backup_count = %(circus_log_backups_flower_err)s
+
+[env:flower]
+LC_CTYPE = %(lcctype)s
+
 [watcher:source_reader]
 working_dir = %(here)s
 virtualenv = %(VIRTUAL_ENV)s

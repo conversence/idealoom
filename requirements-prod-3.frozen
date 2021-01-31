@@ -10,6 +10,8 @@
     # via
     #   -r requirements.in
     #   pyramid-beaker
+-e git+https://github.com/avikam/flower.git#egg=flower
+    # via -r requirements.in
 -e git+https://github.com/FreeDiscovery/jwzthreading.git@master#egg=jwzthreading
     # via -r requirements.in
 -e git+https://github.com/maparent/langdetect.git@no_sample#egg=langdetect
@@ -31,9 +33,9 @@ aiohttp==3.7.3
     #   -r requirements_chrouter.in
     #   pyoembed
     #   sockjs
-alembic==1.5.2
+alembic==1.5.3
     # via -r requirements.in
-amqp==5.0.3
+amqp==5.0.5
     # via kombu
 anyjson==0.3.3
     # via -r requirements.in
@@ -51,14 +53,16 @@ beautifulsoup4==4.9.3
     #   pyoembed
 billiard==3.6.3.0
     # via celery
-cachetools==4.2.0
+cachetools==4.2.1
     # via
     #   google-auth
     #   premailer
 cchardet==2.1.7
     # via -r requirements_chrouter.in
 celery==5.0.5
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   flower
 certifi==2020.12.5
     # via
     #   requests
@@ -125,7 +129,7 @@ defusedxml==0.6.0
     #   social-auth-core
 dnspython==2.1.0
     # via pyisemail
-dogpile.cache==1.1.1
+dogpile.cache==1.1.2
     # via pyramid-dogpile-cache
 ecdsa==0.14.1
     # via python-jose
@@ -147,7 +151,7 @@ future==0.18.2
     # via -r requirements.in
 gensim==3.8.3
     # via -r requirements.in
-google-api-core==1.25.0
+google-api-core==1.25.1
     # via google-api-python-client
 google-api-python-client==1.12.8
     # via -r requirements.in
@@ -175,6 +179,8 @@ humanfriendly==9.1
     #   property-manager
     #   rotate-backups
     #   update-dotdee
+humanize==3.2.0
+    # via flower
 hupper==1.10.2
     # via pyramid
 idna==2.10
@@ -196,7 +202,7 @@ isodate==0.6.0
     #   rdflib
 jdcal==1.4.1
     # via openpyxl
-jinja2==2.11.2
+jinja2==2.11.3
     # via
     #   -r requirements.in
     #   pyramid-jinja2
@@ -234,7 +240,7 @@ ndg_httpsclient==0.5.1
     # via -r requirements.in
 nodeenv==1.5.0
     # via -r requirements.in
-numpy==1.19.5
+numpy==1.20.0
     # via
     #   gensim
     #   scikit-learn
@@ -267,7 +273,9 @@ polib==1.1.0
     #   lingua
 premailer==3.7.0
     # via -r requirements.in
-prompt-toolkit==3.0.13
+prometheus_client==0.8.0
+    # via flower
+prompt-toolkit==3.0.14
     # via click-repl
 property-manager==3.0
     # via
@@ -350,7 +358,7 @@ python-levenshtein==0.12.1
     # via -r requirements.in
 python3-openid==3.2.0
     # via social-auth-core
-python3-saml==1.10.0
+python3-saml==1.10.1
     # via social-auth-core
 pytz==2020.5
     # via
@@ -358,10 +366,11 @@ pytz==2020.5
     #   -r requirements_chrouter.in
     #   babel
     #   celery
+    #   flower
     #   google-api-core
 pyyaml==5.4.1
     # via -r requirements.in
-pyzmq==21.0.1
+pyzmq==21.0.2
     # via
     #   -r requirements.in
     #   -r requirements_chrouter.in
@@ -482,7 +491,9 @@ structlog==20.2.0
 threadpoolctl==2.1.0
     # via scikit-learn
 tornado==6.1
-    # via circus
+    # via
+    #   circus
+    #   flower
 transaction==3.0.1
     # via
     #   -r requirements.in
@@ -503,7 +514,7 @@ update-dotdee==6.0
     # via rotate-backups
 uritemplate==3.0.1
     # via google-api-python-client
-urllib3==1.26.2
+urllib3==1.26.3
     # via
     #   requests
     #   sentry-sdk

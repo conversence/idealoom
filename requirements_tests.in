@@ -6,7 +6,7 @@ pytest-cov==2.11.1
 pytest-localserver==0.5.0
 pytest-mock==3.5.1
 pytest-splinter==3.3.1
-pytest==6.2.1
+pytest==6.2.2
 WebTest==2.0.35
 # temporary: until aiohttp accepts chardet 4
 chardet<4
