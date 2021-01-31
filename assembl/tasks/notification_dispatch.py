@@ -10,16 +10,14 @@ _dispatcher = None
 
 @celery.task()
 def processPostCreatedTask(id):
-    global _dispatcher
     with transaction.manager:
-        _dispatcher.processPostCreated(id)
+        get_dispatcher().processPostCreated(id)
 
 
 @celery.task()
 def processPostModifiedTask(id, state_changed):
-    global _dispatcher
     with transaction.manager:
-        _dispatcher.processPostModified(id, state_changed)
+        get_dispatcher().processPostModified(id, state_changed)
 
 
 class ModelEventWatcherCelerySender(BaseModelEventWatcher):
@@ -32,12 +30,10 @@ class ModelEventWatcherCelerySender(BaseModelEventWatcher):
         processPostModifiedTask.delay(id, state_changed)
 
 
-def create_dispatcher():
-    from ..models.notification import (
-        ModelEventWatcherNotificationSubscriptionDispatcher)
+def get_dispatcher():
     global _dispatcher
-    _dispatcher = ModelEventWatcherNotificationSubscriptionDispatcher()
-
-
-def includeme(config):
-    create_dispatcher()
+    if not _dispatcher:
+        from ..models.notification import (
+            ModelEventWatcherNotificationSubscriptionDispatcher)
+        _dispatcher = ModelEventWatcherNotificationSubscriptionDispatcher()
+    return _dispatcher
