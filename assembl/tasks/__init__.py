@@ -49,14 +49,14 @@ def configure(registry, task_name):
     configure_model_watcher(registry, task_name)
     region = get('aws_region', 'us-east-1')
     config = {
-        "CELERY_TASK_SERIALIZER": 'json',
-        "CELERY_ACKS_LATE": True,
-        "CELERY_CACHE_BACKEND": settings.get('celery_tasks.broker', ''),
-        "CELERY_RESULT_BACKEND": settings.get('celery_tasks.broker', ''),
-        "CELERY_STORE_ERRORS_EVEN_IF_IGNORED": True,
-        "BROKER_TRANSPORT_OPTIONS": {'region': region},
+        "task_serializer": 'json',
+        "task_acks_late": True,
+        "cache_backend": settings.get('celery_tasks.broker', ''),
+        "result_backend": settings.get('celery_tasks.broker', ''),
+        "task_store_errors_even_if_ignored": True,
+        "broker_transport_options": {'region': region},
     }
-    config['BROKER_URL'] = settings.get('celery_tasks.broker')
+    config['broker_url'] = settings.get('celery_tasks.broker')
     celery.config_from_object(config, force=True)
 
 
