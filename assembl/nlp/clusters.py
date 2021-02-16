@@ -1545,7 +1545,7 @@ class OpticsSemanticsAnalysisWithSuggestions(OpticsSemanticsAnalysis):
                 # does it help the score?
                 data = {post_id: -1 for post_id in intersection_posts}
                 score = self.internal_silhouette(idea_id, data)
-                original_score = silhouette_scores_per_idea[idea_id][2] or 0
+                original_score = silhouette_scores_per_idea.get(idea_id, [0,0,0])[2] or 0
                 suggestions_partition.append(dict(
                         basic_info,
                         original_score=original_score,
@@ -1575,7 +1575,7 @@ class OpticsSemanticsAnalysisWithSuggestions(OpticsSemanticsAnalysis):
                     union_posts.update(self.get_posts_of_idea(idea_id))
                     score = self.partial_silhouette_score(
                         labels, post_ids.searchsorted(list(union_posts)))
-                    original_score = silhouette_scores_per_idea[idea_id][0]
+                    original_score = silhouette_scores_per_idea.get(idea_id, [0])[0]
                     suggestions_add.append(dict(
                         basic_info,
                         new_posts=new_posts,
