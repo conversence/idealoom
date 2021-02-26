@@ -34,14 +34,14 @@
     # via -r requirements_dev.in
 aiocache==0.11.1
     # via -r requirements_chrouter.in
-aiohttp==3.7.3
+aiohttp==3.7.4
     # via
     #   -r requirements_chrouter.in
     #   pyoembed
     #   sockjs
 alabaster==0.7.12
     # via sphinx
-alembic==1.5.4
+alembic==1.5.5
     # via -r requirements.in
 amqp==5.0.5
     # via kombu
@@ -84,7 +84,7 @@ certifi==2020.12.5
     # via
     #   requests
     #   sentry-sdk
-cffi==1.14.4
+cffi==1.14.5
     # via
     #   bcrypt
     #   cryptography
@@ -93,7 +93,6 @@ characteristic==14.3.0
     # via montague
 chardet==3.0.4
     # via
-    #   -r requirements_tests.in
     #   aiohttp
     #   requests
 circus==0.17.1
@@ -128,7 +127,7 @@ colour==0.1.5
     # via -r requirements.in
 contextlib2==0.6.0.post1
     # via -r requirements.in
-cornice==5.0.3
+cornice==5.1.0
     # via
     #   -r requirements.in
     #   cornice-sphinx
@@ -138,7 +137,7 @@ coverage==5.4
     # via
     #   codecov
     #   pytest-cov
-cryptography==3.4.4
+cryptography==3.4.6
     # via
     #   -r requirements.in
     #   paramiko
@@ -194,12 +193,12 @@ google-api-python-client==1.12.8
     # via -r requirements.in
 google-auth-httplib2==0.0.4
     # via google-api-python-client
-google-auth==1.26.0
+google-auth==1.27.0
     # via
     #   google-api-core
     #   google-api-python-client
     #   google-auth-httplib2
-googleapis-common-protos==1.52.0
+googleapis-common-protos==1.53.0
     # via google-api-core
 hashfs==0.7.2
     # via -r requirements.in
@@ -356,7 +355,7 @@ property-manager==3.0
     #   executor
     #   rotate-backups
     #   update-dotdee
-protobuf==3.14.0
+protobuf==3.15.3
     # via
     #   google-api-core
     #   googleapis-common-protos
@@ -378,9 +377,9 @@ pyasn1==0.4.8
     #   rsa
 pycparser==2.20
     # via cffi
-pydot==1.4.1
+pydot==1.4.2
     # via sqlalchemy-schemadisplay
-pygments==2.7.4
+pygments==2.8.0
     # via
     #   ipython
     #   pyramid-debugtoolbar
@@ -426,7 +425,7 @@ pyramid-retry==2.1.1
     # via -r requirements.in
 pyramid-tm==2.4
     # via -r requirements.in
-pyramid==1.10.5
+pyramid==1.10.7
     # via
     #   -r requirements.in
     #   cornice
@@ -483,7 +482,7 @@ pytz==2021.1
     #   google-api-core
 pyyaml==5.4.1
     # via -r requirements.in
-pyzmq==22.0.2
+pyzmq==22.0.3
     # via
     #   -r requirements.in
     #   -r requirements_chrouter.in
@@ -521,13 +520,13 @@ requests==2.25.1
     #   sphinx
 rotate-backups==8.1
     # via -r requirements.in
-rsa==4.7
+rsa==4.7.2
     # via
     #   google-auth
     #   python-jose
 scikit-learn==0.24.1
     # via -r requirements.in
-scipy==1.6.0
+scipy==1.6.1
     # via
     #   gensim
     #   scikit-learn
@@ -537,7 +536,7 @@ selenium==3.141.0
     #   splinter
 semantic-version==2.8.5
     # via -r requirements.in
-sentry-sdk==0.20.0
+sentry-sdk==0.20.3
     # via
     #   -r requirements.in
     #   -r requirements_chrouter.in
@@ -582,7 +581,7 @@ six==1.15.0
     #   sqlalchemy-utils
     #   update-dotdee
     #   webtest
-smart-open==4.1.2
+smart-open==4.2.0
     # via gensim
 snowballstemmer==2.1.0
     # via sphinx
@@ -601,7 +600,7 @@ soupsieve==2.2
     # via beautifulsoup4
 sparqlwrapper==1.8.5
     # via -r requirements.in
-sphinx==3.4.3
+sphinx==3.5.1
     # via
     #   -r requirements_doc.in
     #   cornice-sphinx
@@ -646,7 +645,7 @@ sqlparse==0.4.1
     # via sqltap
 stevedore==3.3.0
     # via dogpile.cache
-structlog==20.2.0
+structlog==21.1.0
     # via -r requirements.in
 termcolor==1.1.0
     # via jasmine-splinter-runner
@@ -704,7 +703,7 @@ waitress==1.4.4
     # via webtest
 wcwidth==0.2.5
     # via prompt-toolkit
-webob==1.8.6
+webob==1.8.7
     # via
     #   pyramid
     #   webtest

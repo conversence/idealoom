@@ -5,7 +5,7 @@
 -e git+https://github.com/assembl/pyramid_beaker.git@assembl#egg=pyramid_beaker
 -e git+https://github.com/maparent/sqlalchemy-utils.git@abstract_generic#egg=sqlalchemy_utils
 -e git+https://github.com/conversence/sqlalchemy-rdfbridge.git#egg=sqlalchemy-rdfbridge
-alembic==1.5.4
+alembic==1.5.5
 anyjson==0.3.3
 Babel==2.9.0
 beautifulsoup4==4.9.3
@@ -16,8 +16,8 @@ colorama==0.4.4
 colour==0.1.5
 coloredlogs==15.0
 contextlib2==0.6.0.post1
-cornice==5.0.3
-cryptography==3.4.4
+cornice==5.1.0
+cryptography==3.4.6
 Fabric3==1.14.post1
 facebook-sdk==3.1.0
 feedparser==6.0.2
@@ -45,7 +45,7 @@ pygraphviz==1.7
 pyIsEmail  # 1.3.1 was pushed to pypi as "v1.3.1", which confuses pip.
 PyJWT==2.0.1
 pylibmc==1.6.1
-pyramid==1.10.5
+pyramid==1.10.7
 pyramid-dogpile-cache==0.0.4
 pyramid-jinja2==2.8
 pyramid-mailer==0.15.1
@@ -57,7 +57,7 @@ python-json-logger==2.0.1
 python-Levenshtein==0.12.2
 pytz==2021.1
 PyYAML==5.4.1
-pyzmq==22.0.2
+pyzmq==22.0.3
 rdflib==5.0.0
 rdflib-jsonld==0.5.0
 redis==3.5.3
@@ -67,7 +67,7 @@ requests==2.25.1
 rotate-backups==8.1
 scikit-learn==0.24.1
 semantic-version==2.8.5
-sentry-sdk==0.20.0
+sentry-sdk==0.20.3
 simplejson==3.17.2
 six==1.15.0
 social-auth-core[all]==4.0.3
@@ -76,7 +76,7 @@ social-auth-storage-sqlalchemy==1.1.0
 SPARQLWrapper==1.8.5
 sqlalchemy==1.3.23
 sqlalchemy-schemadisplay==1.3
-structlog==20.2.0
+structlog==21.1.0
 transaction==3.0.1
 translationstring==1.4
 Unidecode==1.2.0
