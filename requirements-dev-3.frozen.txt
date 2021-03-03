@@ -93,6 +93,7 @@ characteristic==14.3.0
     # via montague
 chardet==3.0.4
     # via
+    #   -r requirements_tests.in
     #   aiohttp
     #   requests
 circus==0.17.1
@@ -133,7 +134,7 @@ cornice==5.1.0
     #   cornice-sphinx
 cornice_sphinx==0.3
     # via -r requirements_doc.in
-coverage==5.4
+coverage==5.5
     # via
     #   codecov
     #   pytest-cov
@@ -233,7 +234,7 @@ iniconfig==1.1.1
     # via pytest
 ipython-genutils==0.2.0
     # via traitlets
-ipython==7.20.0
+ipython==7.21.0
     # via
     #   -r requirements_dev.in
     #   pyramid-ipython
@@ -425,7 +426,7 @@ pyramid-retry==2.1.1
     # via -r requirements.in
 pyramid-tm==2.4
     # via -r requirements.in
-pyramid==1.10.7
+pyramid==1.10.8
     # via
     #   -r requirements.in
     #   cornice
