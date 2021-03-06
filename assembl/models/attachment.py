@@ -251,7 +251,7 @@ class File(Document):
                 self.av_checked = status
             finally:
                 if temp:
-                    os.path.delete(path)
+                    os.path.unlink(path)
         return status
 
     @property

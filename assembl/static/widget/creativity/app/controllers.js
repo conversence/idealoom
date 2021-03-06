@@ -419,7 +419,7 @@ creativityApp.controller('adminCtl',
           $scope.updateOnceWidgetIsCreated = function() {
             $http({
               method: 'GET',
-              url: $scope.widget_endpoint
+              url: $scope.widget_endpoint,
 
               //data: $.param(post_data),
               headers: {'Content-Type': 'application/json'},

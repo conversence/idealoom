@@ -226,8 +226,6 @@
     },
     "AnnotationSelector": {
         "body": true,
-    },
-    "AnnotationSelector": {
         "extract_id": false,
         "body": true
     },

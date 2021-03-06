@@ -772,7 +772,7 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
             if result != IdeaVisitor.CUT_VISIT:
                 children.append(child)
                 if result:
-                    child_results.append((child, r))
+                    child_results.append((child, result))
         for child in children:
             child._visit_ideas_breadth_first(
                 idea_visitor, visited, level+1, result)

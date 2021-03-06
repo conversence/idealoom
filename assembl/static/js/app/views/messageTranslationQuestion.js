@@ -129,7 +129,6 @@ class LanguageSelectionView extends View.extend({
                     LangString.LocaleUtils.stripCountry(this.translatedFrom)
                 )
             ),
-            translatedTo: this.translatedTo,
             translatedFrom: this.translatedFrom,
         };
     }

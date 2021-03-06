@@ -68,7 +68,7 @@ creativityServices.factory('configTestingService', [function() {
         data: {
           "@type": 'MultiCriterionVotingWidget',
           settings: {"idea": "local:GenericIdeaNode/2"}
-        }).then(function success(response) {
+        }}).then(function success(response) {
           getConfig(response.getResponseHeader('location'));
         },
         function error(response) {
@@ -90,7 +90,7 @@ creativityServices.factory('configTestingService', [function() {
       $http({
         url: url,
         method: 'GET',
-        data: {}).then(fnSuccess, fnError);
+        data: {}}).then(fnSuccess, fnError);
     }
   }
 
