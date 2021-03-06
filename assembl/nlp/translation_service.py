@@ -533,7 +533,11 @@ class GoogleTranslationService(DummyGoogleTranslationService):
             return text, LocaleLabel.NON_LINGUISTIC
         if not self.client:
             from googleapiclient.http import HttpError
-            raise HttpError(401, '{"error":"Please define server_api_key"}')
+            from httplib2 import Response
+            msg = b'{"error":"Please define server_api_key"}'
+            r = Response({"status": "401", "content-length": len(msg)})
+            r.reason = msg
+            raise HttpError(r, msg)
         r = self.client.translations().list(
             q=text,
             format="html" if is_html else "text",
