@@ -41,7 +41,7 @@ aiohttp==3.7.4
     #   sockjs
 alabaster==0.7.12
     # via sphinx
-alembic==1.5.5
+alembic==1.5.6
     # via -r requirements.in
 amqp==5.0.5
     # via kombu
@@ -188,13 +188,13 @@ future==0.18.2
     # via -r requirements.in
 gensim==3.8.3
     # via -r requirements.in
-google-api-core==1.26.0
+google-api-core==1.26.1
     # via google-api-python-client
-google-api-python-client==1.12.8
+google-api-python-client==2.0.2
     # via -r requirements.in
-google-auth-httplib2==0.0.4
+google-auth-httplib2==0.1.0
     # via google-api-python-client
-google-auth==1.27.0
+google-auth==1.27.1
     # via
     #   google-api-core
     #   google-api-python-client
@@ -356,7 +356,7 @@ property-manager==3.0
     #   executor
     #   rotate-backups
     #   update-dotdee
-protobuf==3.15.3
+protobuf==3.15.5
     # via
     #   google-api-core
     #   googleapis-common-protos
@@ -537,7 +537,7 @@ selenium==3.141.0
     #   splinter
 semantic-version==2.8.5
     # via -r requirements.in
-sentry-sdk==0.20.3
+sentry-sdk==1.0.0
     # via
     #   -r requirements.in
     #   -r requirements_chrouter.in
@@ -588,7 +588,7 @@ snowballstemmer==2.1.0
     # via sphinx
 social-auth-app-pyramid==1.0.0
     # via -r requirements.in
-social-auth-core[all]==4.0.3
+social-auth-core[all]==4.1.0
     # via
     #   -r requirements.in
     #   social-auth-app-pyramid
@@ -601,7 +601,7 @@ soupsieve==2.2
     # via beautifulsoup4
 sparqlwrapper==1.8.5
     # via -r requirements.in
-sphinx==3.5.1
+sphinx==3.5.2
     # via
     #   -r requirements_doc.in
     #   cornice-sphinx
