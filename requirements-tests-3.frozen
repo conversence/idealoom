@@ -67,10 +67,8 @@ cffi==1.14.5
     #   pynacl
 characteristic==14.3.0
     # via montague
-chardet==3.0.4
-    # via
-    #   -r requirements_tests.in
-    #   requests
+chardet==4.0.0
+    # via requests
 circus==0.17.1
     # via -r requirements.in
 click-didyoumean==0.0.3

@@ -28,7 +28,7 @@
     # via -r requirements.in
 aiocache==0.11.1
     # via -r requirements_chrouter.in
-aiohttp==3.7.4
+aiohttp==3.7.4.post0
     # via
     #   -r requirements_chrouter.in
     #   pyoembed
@@ -72,7 +72,7 @@ cffi==1.14.5
     #   bcrypt
     #   cryptography
     #   pynacl
-chardet==3.0.4
+chardet==4.0.0
     # via
     #   aiohttp
     #   requests
