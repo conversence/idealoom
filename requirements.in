@@ -1,5 +1,5 @@
 -e git+https://github.com/conversence/Beaker.git@assembl#egg=Beaker
--e git+https://github.com/avikam/flower.git#egg=flower
+-e git+https://github.com/mher/flower.git#egg=flower
 -e git+https://github.com/FreeDiscovery/jwzthreading.git@master#egg=jwzthreading
 -e git+https://github.com/maparent/langdetect.git@no_sample#egg=langdetect
 -e git+https://github.com/assembl/pyramid_beaker.git@assembl#egg=pyramid_beaker

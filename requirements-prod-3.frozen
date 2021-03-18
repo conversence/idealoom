@@ -10,7 +10,7 @@
     # via
     #   -r requirements.in
     #   pyramid-beaker
--e git+https://github.com/avikam/flower.git#egg=flower
+-e git+https://github.com/mher/flower.git#egg=flower
     # via -r requirements.in
 -e git+https://github.com/FreeDiscovery/jwzthreading.git@master#egg=jwzthreading
     # via -r requirements.in
