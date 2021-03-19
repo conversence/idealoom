@@ -18,6 +18,8 @@
     # via -r requirements.in
 -e git+https://github.com/maparent/langdetect.git@no_sample#egg=langdetect
     # via -r requirements.in
+-e git+https://github.com/conversence/pyramid_dogpile_cache#egg=pyramid-dogpile-cache
+    # via -r requirements.in
 -e git+https://github.com/matthewnorman/pyramid_autodoc@sphinx_161_no_domains_v2#egg=pyramid_autodoc
     # via -r requirements_doc.in
 -e git+https://github.com/assembl/pyramid_beaker.git@assembl#egg=pyramid_beaker
@@ -119,7 +121,7 @@ cryptography==3.4.6
     #   social-auth-core
 cssselect==1.1.0
     # via premailer
-cssutils==1.0.2
+cssutils==2.2.0
     # via premailer
 decorator==4.4.2
     # via
@@ -166,7 +168,7 @@ google-api-python-client==2.0.2
     # via -r requirements.in
 google-auth-httplib2==0.1.0
     # via google-api-python-client
-google-auth==1.27.1
+google-auth==1.28.0
     # via
     #   google-api-core
     #   google-api-python-client
@@ -293,14 +295,14 @@ premailer==3.7.0
     # via -r requirements.in
 prometheus_client==0.8.0
     # via flower
-prompt-toolkit==3.0.16
+prompt-toolkit==3.0.17
     # via click-repl
 property-manager==3.0
     # via
     #   executor
     #   rotate-backups
     #   update-dotdee
-protobuf==3.15.5
+protobuf==3.15.6
     # via
     #   google-api-core
     #   googleapis-common-protos
@@ -322,7 +324,7 @@ pycparser==2.20
     # via cffi
 pydot==1.4.2
     # via sqlalchemy-schemadisplay
-pygments==2.8.0
+pygments==2.8.1
     # via sphinx
 pygraphviz==1.7
     # via -r requirements.in
@@ -344,8 +346,6 @@ pyparsing==2.4.7
     #   packaging
     #   pydot
     #   rdflib
-pyramid-dogpile-cache==0.0.4
-    # via -r requirements.in
 pyramid-jinja2==2.8
     # via -r requirements.in
 pyramid-mailer==0.15.1
@@ -590,7 +590,7 @@ update-dotdee==6.0
     # via rotate-backups
 uritemplate==3.0.1
     # via google-api-python-client
-urllib3==1.26.3
+urllib3==1.26.4
     # via
     #   pytest-splinter
     #   requests
@@ -610,7 +610,7 @@ vine==5.0.0
     # via
     #   amqp
     #   celery
-waitress==1.4.4
+waitress==2.0.0
     # via webtest
 wcwidth==0.2.5
     # via prompt-toolkit
