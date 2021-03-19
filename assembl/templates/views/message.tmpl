@@ -169,7 +169,7 @@
       <div class="js_avatarContainer"></div>
     <% } %>
     <div class="message-headerAndDate">
-      <div class="message-author" data-user-id="<%= creator.get('@id') %>"><span class='js_nameContainer'></span></div>
+      <div class="message-author" data-user-id="<%= (creator) ? creator.get('@id') : 'system.Everyone' %>"><span class='js_nameContainer'></span></div>
       <div class="message-date">{{ gettext('<time title="%(precise_date)s">%(nice_date)s</time>')|format(nice_date=nice_date,precise_date=precise_date)|safe }} {{ showInspirationSource() }}</div>
       {{ readUnreadIndicator() }}
     </div>
