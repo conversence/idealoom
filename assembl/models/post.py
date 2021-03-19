@@ -686,8 +686,8 @@ class SynthesisPost(LocalPost):
             self.publishes_synthesis.subject,
             self.discussion.main_locale)
 
-    def as_html(self, jinja_env):
-        return self.publishes_synthesis.as_html(jinja_env)
+    def as_html(self, jinja_env, lang_prefs):
+        return self.publishes_synthesis.as_html(jinja_env, lang_prefs)
 
 
 class WidgetPost(LocalPost):

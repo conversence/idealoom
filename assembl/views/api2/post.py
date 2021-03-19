@@ -6,7 +6,9 @@ from pyramid.httpexceptions import HTTPUnauthorized, HTTPBadRequest
 from pyramid.security import authenticated_userid, Everyone
 
 from assembl.auth import P_READ, P_MODERATE, P_DELETE_POST
-from assembl.models import Content, Post, SynthesisPost, User, Extract, Discussion
+from assembl.models import (
+    Content, Post, SynthesisPost, User, Extract, Discussion,
+    LanguagePreferenceCollection)
 from assembl.models.post import PublicationStates
 from ..traversal import InstanceContext, CollectionContext
 from . import (
@@ -102,7 +104,8 @@ def html_export(request):
     from pyramid_jinja2 import IJinja2Environment
     jinja_env = request.registry.queryUtility(
         IJinja2Environment, name='.jinja2')
-    return Response(request.context._instance.as_html(jinja_env),
+    lang_prefs = LanguagePreferenceCollection.getCurrent(request)
+    return Response(request.context._instance.as_html(jinja_env, lang_prefs),
                     content_type='text/html', charset="utf-8")
 
 
