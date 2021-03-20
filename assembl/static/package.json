@@ -128,7 +128,7 @@
     "webpack-cli": "^3.3",
     "webpack-dashboard": "~3.2",
     "webpack-dev-server": "~3.11",
-    "yarn": "^1.22.5"
+    "yarn": "^1.22.10"
   },
   "resolutions": {
     "babel-core": "7.0.0-bridge.0"
