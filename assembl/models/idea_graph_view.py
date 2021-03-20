@@ -27,7 +27,7 @@ from .langstrings import LangString
 from ..semantic.virtuoso_mapping import QuadMapPatternS
 from ..auth import (
     CrudPermissions, P_ADMIN_DISC, P_EDIT_SYNTHESIS)
-from .idea import Idea, IdeaLink, RootIdea, IdeaVisitor
+from .idea import Idea, IdeaLink, RootIdea, IdeaVisitor, HtmlizationVisitor
 from ..semantic.namespaces import (
     SIOC, CATALYST, IDEA, ASSEMBL, DCTERMS, QUADNAMES)
 from assembl.views.traversal import AbstractCollectionDefinition
@@ -311,18 +311,22 @@ class ExplicitSubGraphView(IdeaGraphView):
         assoc = idea_assocs_by_idea_id.get(idea_id, None)
         if assoc:
             result = idea_visitor.visit_idea(
-                assoc, level, prev_result, parent_link_assoc)
+                assoc, level, prev_result, assoc, parent_link_assoc)
+            idea = assoc.idea
+        else:
+            idea = None
         visited.add(idea_id)
         child_results = []
         if result is not IdeaVisitor.CUT_VISIT:
             for link_assoc in children_links[idea_id]:
                 child_id = link_assoc.idea_link.target_id
+                child_assoc = idea_assocs_by_idea_id.get(child_id, None)
                 r = self._visit_ideas_depth_first(
                     child_id, idea_assocs_by_idea_id, children_links,
                     idea_visitor, visited, level+1, result, link_assoc)
                 if r:
                     child_results.append((child_id, r))
-        return idea_visitor.end_visit(assoc, level, result, child_results, parent_link_assoc)
+        return idea_visitor.end_visit(idea, level, result, child_results, assoc, parent_link_assoc)
 
     @classmethod
     def extra_collections(cls):
@@ -585,32 +589,15 @@ class Synthesis(ExplicitSubGraphView):
 LangString.setup_ownership_load_event(
     Synthesis, ['subject', 'introduction', 'conclusion'])
 
-
-class SynthesisHtmlizationVisitor(IdeaVisitor):
+class SynthesisHtmlizationVisitor(HtmlizationVisitor):
     def __init__(self, graph_view, jinja_env, lang_prefs):
-        self.jinja_env = jinja_env
-        self.lang_prefs = lang_prefs
-        self.idea_template = jinja_env.get_template('idea_in_synthesis.jinja2')
+        super(SynthesisHtmlizationVisitor, self).__init__(
+            jinja_env, lang_prefs, 'idea_in_synthesis.jinja2')
         self.synthesis_template = jinja_env.get_template('synthesis.jinja2')
         self.graph_view = graph_view
-        self.result = None
-
-    def visit_idea(self, idea_assoc, level, prev_result, parent_link_assoc):
-        return True
-
-    def end_visit(self, idea_assoc, level, prev_result, child_results, parent_link_assoc):
-        if prev_result is not True:
-            idea_assoc = None
-        if idea_assoc or child_results:
-            results = [r for (c, r) in child_results]
-            idea = idea_assoc.idea if idea_assoc else None
-            self.result = self.idea_template.render(
-                idea=idea, children=results, level=level, lang_prefs=self.lang_prefs,
-                idea_assoc=idea_assoc, parent_link_assoc=parent_link_assoc)
-            return self.result
 
     def as_html(self):
-        inner = getattr(self, 'result', '')
+        inner = super(SynthesisHtmlizationVisitor, self).as_html()
         synthesis = self.graph_view
         subject = synthesis.subject.best_lang(self.lang_prefs).value
         introduction = synthesis.introduction.best_lang(self.lang_prefs).value

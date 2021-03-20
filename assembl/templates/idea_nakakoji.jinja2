@@ -1,0 +1,13 @@
+{% if idea %}
+<div>
+<h{{level+1}} id="idea_{{idea.id}}">{{idea.long_title or idea.short_title}} <a href="{{ idea.get_url() }}" target="idealoom" class="link-to-idea">🔗</a></h{{level+1}}>
+{% if idea.definition %}
+<div class="definition" style="font-size:smaller;">{{idea.definition|safe}}</div>
+{% endif %}
+</div>
+{% endif %}
+<div style="padding-left:1em;">
+{% for child in children %}
+{{child|safe}}
+{% endfor %}
+</div>

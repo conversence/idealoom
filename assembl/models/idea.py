@@ -90,11 +90,11 @@ class IdeaVisitor(with_metaclass(ABCMeta, object)):
     CUT_VISIT = object()
 
     @abstractmethod
-    def visit_idea(self, idea, level, prev_result):
+    def visit_idea(self, idea, level, prev_result, idea_assoc=None, parent_link_assoc=None):
         pass
 
-    def end_visit(self, idea, level, result, child_results):
-        return result
+    def end_visit(self, idea, level, prev_result, child_results, idea_assoc=None, parent_link_assoc=None):
+        return prev_result
 
 
 class IdeaLinkVisitor(with_metaclass(ABCMeta, object)):
@@ -112,7 +112,7 @@ class AppendingVisitor(IdeaVisitor):
     def __init__(self):
         self.ideas = []
 
-    def visit_idea(self, idea, level, prev_result):
+    def end_visit(self, idea, level, prev_result, child_results, idea_assoc=None, parent_link_assoc=None):
         self.ideas.append(idea)
         return self.ideas
 
@@ -126,7 +126,7 @@ class WordCountVisitor(IdeaVisitor):
     def cleantext(self, text):
         return sanitize_text(text)
 
-    def visit_idea(self, idea, level, prev_result):
+    def visit_idea(self, idea, level, prev_result, idea_assoc=None, parent_link_assoc=None):
         if idea.short_title:
             self.counter.add_text(self.cleantext(idea.short_title), 2)
         if idea.long_title:
@@ -154,6 +154,31 @@ class WordCountVisitor(IdeaVisitor):
 
     def best(self, num=8):
         return self.counter.best(num)
+
+
+class HtmlizationVisitor(IdeaVisitor):
+    def __init__(self, jinja_env, lang_prefs, idea_template="idea_nakakoji.jinja2"):
+        self.jinja_env = jinja_env
+        self.lang_prefs = lang_prefs
+        self.idea_template = jinja_env.get_template(idea_template)
+        self.result = ''
+
+    def visit_idea(self, idea, level, prev_result, idea_assoc=None, parent_link_assoc=None):
+        return True
+
+    def end_visit(self, idea, level, prev_result, child_results, idea_assoc=None, parent_link_assoc=None):
+        if prev_result is not True:
+            idea_assoc = None
+            idea = None
+        if idea or child_results:
+            results = [r for (c, r) in child_results]
+            self.result = self.idea_template.render(
+                idea=idea, children=results, level=level, lang_prefs=self.lang_prefs,
+                idea_assoc=idea_assoc, parent_link_assoc=parent_link_assoc)
+            return self.result
+
+    def as_html(self):
+        return self.result
 
 
 class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
@@ -933,6 +958,11 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
         frontendUrls = FrontendUrls(self.discussion)
         return frontendUrls.get_idea_url(self)
 
+    def as_html(self, jinja_env, lang_prefs):
+        v = HtmlizationVisitor(jinja_env, lang_prefs)
+        self.visit_ideas_depth_first(v)
+        return v.as_html()
+
     def local_mind_map(self):
         import pygraphviz
         from colour import Color
@@ -952,7 +982,7 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
                 self.min_time = None
                 self.max_time = None
 
-            def visit_idea(self, idea, level, prev_result):
+            def visit_idea(self, idea, level, prev_result, idea_assoc=None, parent_link_assoc=None):
                 age = ((idea.last_modified or idea.creation_date)-root_time).total_seconds()  # may be negative
                 color = Color(hsl=(180-(135.0 * age), 0.15, 0.85))
                 kwargs = {}

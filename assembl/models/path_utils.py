@@ -417,7 +417,7 @@ class PostPathCombiner(PostPathGlobalCollection, IdeaVisitor):
             self.paths[id] = paths.clone()
         self.discussion = post_path_global_collection.discussion
 
-    def visit_idea(self, idea_id, level, prev_result):
+    def visit_idea(self, idea_id, level, prev_result, idea_assoc=None, parent_link_assoc=None):
         if isinstance(idea_id, Idea):
             idea_id = idea_id.id
         return self.paths[idea_id]
@@ -426,7 +426,7 @@ class PostPathCombiner(PostPathGlobalCollection, IdeaVisitor):
         # When the parent has no information, and can get it from a single child
         parent_result.paths = child_result.paths[:]
 
-    def end_visit(self, idea_id, level, result, child_results):
+    def end_visit(self, idea_id, level, result, child_results, idea_assoc=None, parent_link_assoc=None):
         if isinstance(idea_id, Idea):
             idea_id = idea_id.id
         child_results = [

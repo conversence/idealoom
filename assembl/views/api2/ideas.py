@@ -121,3 +121,17 @@ def autocomplete(request):
             r['match_field'] = 'shortTitle' if ls_id == title.id else 'definition'
         results.append(r)
     return {'results': results}
+
+
+
+
+@view_config(context=InstanceContext, request_method='GET',
+             ctx_instance_class=Idea, permission=P_READ,
+             accept="text/html", name="html_view")
+def html_export(request):
+    from pyramid_jinja2 import IJinja2Environment
+    jinja_env = request.registry.queryUtility(
+        IJinja2Environment, name='.jinja2')
+    lang_prefs = LanguagePreferenceCollection.getCurrent(request)
+    return Response(request.context._instance.as_html(jinja_env, lang_prefs),
+                    content_type='text/html', charset="utf-8")
