@@ -192,7 +192,7 @@ class AgentProfile(Base):
                     other_account.profile = self
                     session.delete(my_account)
             elif (isinstance(other_account, EmailAccount) and
-                  other_account.email.lower() in my_social_emails):
+                other_account.email.lower() in my_social_emails):
                 pass
             else:
                 other_account.profile = self

@@ -40,11 +40,13 @@ def upgrade(pyramid_env):
             if 'default_permissions' in values:
                 found = False
                 for role, permissions in list(values['default_permissions'].items()):
-                    if role not in base_roles:
-                        if P_OVERRIDE_SOCIAL_AUTOLOGIN not in permissions:
-                            permissions.append(P_OVERRIDE_SOCIAL_AUTOLOGIN)
-                            values['default_permissions'][role] = permissions
-                            found = True
+                    if (
+                        role not in base_roles
+                        and P_OVERRIDE_SOCIAL_AUTOLOGIN not in permissions
+                    ):
+                        permissions.append(P_OVERRIDE_SOCIAL_AUTOLOGIN)
+                        values['default_permissions'][role] = permissions
+                        found = True
                 if found:
                     changes.append({'id': id, 'pref_json': dumps(values)})
         if changes:

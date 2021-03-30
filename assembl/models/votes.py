@@ -389,9 +389,7 @@ class TokenCategorySpecification(DiscussionBoundBase):
             TokenIdeaVote.voter_id == vote.voter_id,
             TokenIdeaVote.tombstone_date == None
             ).first()
-        if total > self.total_number:
-            return False
-        return True
+        return total <= self.total_number
 
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):
@@ -477,7 +475,7 @@ class LickertVoteSpecification(AbstractVoteSpecification):
             for spec in group_specs
         }
         group_spec_ids = {x.id for x in group_specs}
-        group_signature = ",".join([spec.uri() for spec in group_specs])
+        group_signature = ",".join(spec.uri() for spec in group_specs)
         joint_histograms[group_signature] = histograms_by_idea = {}
         sums = [0] * len(group_specs)
         sum_squares = [0] * len(group_specs)
@@ -583,7 +581,7 @@ class ResourceVoteSpecification(AbstractVoteSpecification):
 
     def results_for(self, voting_results, histogram_size=None):
         base = super(ResourceVoteSpecification, self).results_for(voting_results)
-        base['total'] = sum([v.vote_value for v in voting_results])
+        base['total'] = sum(v.vote_value for v in voting_results)
         return base
 
     def vote_range(self):
@@ -831,10 +829,7 @@ class AbstractIdeaVote(HistoryMixinWithOrigin, DiscussionBoundBase):
     @classmethod
     def restrict_to_owners_condition(cls, query, user_id, alias=None, alias_maker=None):
         if not alias:
-            if alias_maker:
-                alias = alias_maker.alias_from_class(cls)
-            else:
-                alias = cls
+            alias = alias_maker.alias_from_class(cls) if alias_maker else cls
         return (query, alias.voter_id == user_id)
 
     # Do we still need this? Can access through vote_spec

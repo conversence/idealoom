@@ -172,9 +172,16 @@ def downgrade(pyramid_env):
                     'locale.id', onupdate='CASCADE', ondelete='CASCADE')))
 
 
-        op.execute('INSERT INTO locale (code, rtl) values '
-                + ','.join(["('%s', %s)" % (loc, str(is_rtl(loc)).lower())
-                           for loc in locales]))
+        op.execute(
+            (
+                'INSERT INTO locale (code, rtl) values '
+                + ','.join(
+                    "('%s', %s)" % (loc, str(is_rtl(loc)).lower())
+                    for loc in locales
+                )
+            )
+        )
+
 
         op.execute('''UPDATE locale_label
             SET named_locale_id = (SELECT id FROM locale

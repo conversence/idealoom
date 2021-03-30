@@ -90,7 +90,7 @@ def reconstruct_idea_history(db):
         if len(live_id):
             live_id = live_id[0] if live_id else l[-1]
             non_synth = [id for id in l if id not in synthesis_dates]
-            if not non_synth[-1] == live_id:
+            if non_synth[-1] != live_id:
                 import pdb; pdb.set_trace()
         else:
             live_id = l[-1]
@@ -135,7 +135,7 @@ def reconstruct_vote_history(db):
         similar_votes.sort(key=lambda v: v.id)
         previous = None
         assert not similar_votes[-1].is_tombstone
-        assert all([vote.is_tombstone for vote in similar_votes[:-1]])
+        assert all(vote.is_tombstone for vote in similar_votes[:-1])
         live_vote_id = similar_votes[-1].id
         for vote in similar_votes:
             vote.base_id = live_vote_id

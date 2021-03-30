@@ -685,13 +685,13 @@ def build_virtualenv():
         # and that sometimes precludes building python modules.
         bcfile = "/usr/local/Frameworks/Python.framework/Versions/3.6/lib/python3.6/distutils/distutils.cfg"
         vefile = env.venvpath + "/lib/python3.6/distutils/distutils.cfg"
-        sec = "build_ext"
         if exists(bcfile):
             brew_config = SafeConfigParser()
             brew_config.read(bcfile)
             venv_config = SafeConfigParser()
             if exists(vefile):
                 venv_config.read(vefile)
+            sec = "build_ext"
             if (brew_config.has_section(sec) and
                     not venv_config.has_section(sec)):
                 venv_config.add_section(sec)

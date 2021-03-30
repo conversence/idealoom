@@ -109,9 +109,11 @@ def downgrade(pyramid_env):
         prov_to_dom = {
             id: old_domains[prov]
             for (id, prov) in providers.items()}
-        case_clause = "CASE provider_id %s END" % "\n ".join([
+        case_clause = "CASE provider_id %s END" % "\n ".join(
             "WHEN %d THEN '%s'" % (id, dom)
-            for (id, dom) in prov_to_dom.items()])
+            for (id, dom) in prov_to_dom.items()
+        )
+
         db.execute("""INSERT INTO idprovider_agent_account
             (id, provider_id, username, userid, profile_info, picture_url,
                 domain)

@@ -131,10 +131,7 @@ def add_simple_text_search(query, text_columns, keywords, include_rank=True):
     filters = [func.to_tsvector(fts_config, column).match(
                     keywords_j, postgresql_regconfig='simple')
                for column in text_columns]
-    if len(filters) > 1:
-        filter = or_(*filters)
-    else:
-        filter = filters[0]
+    filter = or_(*filters) if len(filters) > 1 else filters[0]
     query = query.filter(filter)
     if include_rank:
         ranks = [func.ts_rank(

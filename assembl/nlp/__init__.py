@@ -130,10 +130,7 @@ class ReversibleStemmer(object):
         return text
 
     def stemWords(self, words):
-        result = []
-        for word in words:
-            result.append(self.stemWord(word))
-        return result
+        return [self.stemWord(word) for word in words]
 
 
 _stemmers = {

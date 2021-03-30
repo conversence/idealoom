@@ -71,7 +71,6 @@ async def websocket_handler(request):
 
 
 def setup_app(path):
-    app = web.Application()
     # cors = aiohttp_cors.setup(app)
     # resource = cors.add(app.router.add_resource(path))
     # route = cors.add(
@@ -82,7 +81,7 @@ def setup_app(path):
     #             allow_headers="*",
     #             max_age=3600,
     #         )})
-    return app
+    return web.Application()
 
 
 class Dispatcher(object):
@@ -107,7 +106,7 @@ class Dispatcher(object):
         self.token_secret = token_secret
         self.server_url = server_url
         self.out_socket_name = out_socket_name
-        self.active_sockets = dict()
+        self.active_sockets = {}
         self.token = None
         self.discussion = None
         self.userId = None
@@ -243,7 +242,6 @@ class ActiveSocket(object):
                     log.info('userId: %s', self.userId)
                 except TokenInvalid:
                     print("TokenInvalid")
-                    pass
             if self.token and self.discussion:
                 # Check if token authorizes discussion
                 async with self.http_client.get(
@@ -270,12 +268,12 @@ class ActiveSocket(object):
                 loop = asyncio.get_event_loop()
                 self.task = loop.create_task(self.connect())
                 self.session.send('[{"@type":"Connection"}]')
-                if self.token and self.raw_token and self.discussion and self.userId != Everyone:
-                    async with self.http_client.post(
-                            '%s/data/Discussion/%s/all_users/%d/connecting' % (
-                                self.server_url, self.discussion, self.token['userId']
-                            ), data={'token': self.raw_token}) as resp:
-                        await resp.text()
+            if self.token and self.raw_token and self.discussion and self.userId != Everyone:
+                async with self.http_client.post(
+                        '%s/data/Discussion/%s/all_users/%d/connecting' % (
+                            self.server_url, self.discussion, self.token['userId']
+                        ), data={'token': self.raw_token}) as resp:
+                    await resp.text()
         except Exception as e:
             log.error(e)
             capture_exception()
@@ -371,7 +369,7 @@ if __name__ == '__main__':
         for socket_name in (in_socket, out_socket):
             if socket_name.startswith('ipc://'):
                 socket_name = socket_name[6:]
-                for i in range(15):
+                for _ in range(15):
                     if exists(socket_name):
                         break
                     sleep(0.1)

@@ -203,10 +203,11 @@ def piwik_SitesManager_getSitesIdFromSiteUrl(piwik_url, piwik_api_token, url):
     params = {
         "module": "API",
         "format": "JSON",
-        "token_auth": piwik_api_token
+        "token_auth": piwik_api_token,
+        "method": "SitesManager.getSitesIdFromSiteUrl",
+        "url": url,
     }
-    params["method"] = "SitesManager.getSitesIdFromSiteUrl"
-    params["url"] = url
+
     result = requests.get(piwik_url, params=params, timeout=15)
 
     if result.status_code != 200:
@@ -225,11 +226,12 @@ def piwik_SitesManager_addSite(piwik_url, piwik_api_token, siteName, urls, ecomm
     params = {
         "module": "API",
         "format": "JSON",
-        "token_auth": piwik_api_token
+        "token_auth": piwik_api_token,
+        "method": "SitesManager.addSite",
+        "siteName": siteName,
+        "urls": urls,
     }
-    params["method"] = "SitesManager.addSite"
-    params["siteName"] = siteName
-    params["urls"] = urls
+
     if ( ecommerce ):
         params["ecommerce"] = ecommerce
     if ( siteSearch ):
@@ -281,12 +283,13 @@ def piwik_UsersManager_setUserAccess(piwik_url, piwik_api_token, userLogin, acce
     params = {
         "module": "API",
         "format": "JSON",
-        "token_auth": piwik_api_token
+        "token_auth": piwik_api_token,
+        "method": "UsersManager.setUserAccess",
+        "userLogin": userLogin,
+        "access": access,
+        "idSites": idSites,
     }
-    params["method"] = "UsersManager.setUserAccess"
-    params["userLogin"] = userLogin
-    params["access"] = access
-    params["idSites"] = idSites
+
     result = requests.get(piwik_url, params=params, timeout=15)
 
     if result.status_code != 200:
@@ -297,17 +300,16 @@ def piwik_UsersManager_setUserAccess(piwik_url, piwik_api_token, userLogin, acce
     if not content:
         raise requests.ConnectionError()
 
-    user_access_is_set = ("result" in content and content["result"] == "success")
-    return user_access_is_set
+    return ("result" in content and content["result"] == "success")
 
 def piwik_UsersManager_hasSuperUserAccess(piwik_url, piwik_api_token, userLogin):
     params = {
         "module": "API",
         "format": "JSON",
-        "token_auth": piwik_api_token
+        "token_auth": piwik_api_token,
+        "method": "UsersManager.hasSuperUserAccess",
+        "userLogin": userLogin,
     }
-    params["method"] = "UsersManager.hasSuperUserAccess"
-    params["userLogin"] = userLogin
 
     result = requests.get(piwik_url, params=params, timeout=15)
 
