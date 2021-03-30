@@ -363,29 +363,6 @@ class BaseOps(object):
                 yield(c.name, getattr(self, c.name))
 
     @classmethod
-    def validator(cls, mapping_cls=None, include=None, exclude=None):
-        """Return a ColanderAlchemy schema mapper.
-
-        Fields targeted by the validator can be specified with include/exclude.
-        Not used at this point.
-
-        """
-        if include == '__nopk__':
-            includes = cls._col_names() - cls._pk_names()
-        elif include == '__pk__':
-            includes = cls._pk_names()
-        elif include is None:
-            includes = cls._col_names()
-        else:
-            includes = set(include)
-        if exclude is not None:
-            includes -= set(exclude)
-
-        if mapping_cls is None:
-            mapping_cls = SQLAlchemySchemaNode
-        return mapping_cls(cls, includes=list(includes))
-
-    @classmethod
     def _col_names(cls):
         """Return a list of the columns, as a set."""
         return set(cls.__table__.c.keys())
@@ -2049,6 +2026,7 @@ class BaseOps(object):
         # make this into a protocol!
         creator_id = getattr(self, 'creator_id', None)
         if creator_id:
+            from ..models import User
             return [User.uri_generic(creator_id)]
         return []
 
