@@ -25,8 +25,6 @@ def upgrade(pyramid_env):
 UPDATE  imported_post
 SET     body_mime_type = 'text/plain'
 """)
-        pass
-
     # Do stuff with the app's models here.
     from assembl import models as m
     db = m.get_session_maker()()
@@ -38,4 +36,3 @@ def downgrade(pyramid_env):
     with context.begin_transaction():
         #ALTER TABLE assembl..imported_post DROP COLUMN body_mime_type
         op.drop_column('imported_post', 'body_mime_type')
-        pass

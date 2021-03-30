@@ -191,10 +191,10 @@ class AgentProfile(Base):
                     other_account.merge(my_account)
                     other_account.profile = self
                     session.delete(my_account)
-            elif (isinstance(other_account, EmailAccount) and
-                  other_account.email.lower() in my_social_emails):
-                pass
-            else:
+            elif (
+                not isinstance(other_account, EmailAccount)
+                or other_account.email.lower() not in my_social_emails
+            ):
                 other_account.profile = self
         if other_profile.name and not self.name:
             self.name = other_profile.name

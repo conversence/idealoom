@@ -18,5 +18,4 @@ def boostrap_configuration(config):
     configure_zmq(settings['changes_socket'], False)
     configure_model_watcher(env['registry'], 'idealoom')
     configure_engine(settings, True)
-    session = get_session_maker()()
-    return session
+    return get_session_maker()()

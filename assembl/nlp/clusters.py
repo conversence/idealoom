@@ -603,9 +603,10 @@ class SemanticAnalysisData(object):
             return {}
         words = topic.split(' + ')
         words = (word.split('*') for word in words)
-        return dict(((' '.join((
-                trans(w) for w in k.strip('"').split('_') if w)), float(v))
-            for (v, k) in words))
+        return {
+            ' '.join((trans(w) for w in k.strip('"').split('_') if w)): float(v)
+            for (v, k) in words
+        }
 
     def calc_features(self, post_clusters):
         corpus = self.corpus
@@ -836,10 +837,9 @@ class SKLearnClusteringSemanticAnalysis(SemanticAnalysisData):
         results = {id: self.get_cluster_info(id)
                    for (id,) in idea_ids}
         results[None] = self.get_cluster_info()
-        posres = {id: r for (id, r) in results.items() if r is not None}
         # for id, (silhouette_score, compare_with_ideas, clusters, post_info) in posres.iteritems():
         #     log.debug(" ".join((id, silhouette_score, repr([len(x['cluster']) for x in clusters]))))
-        return posres
+        return {id: r for (id, r) in results.items() if r is not None}
 
     def as_html(self, f=None, jinja_env=None):
         discussion = self.discussion
@@ -1254,13 +1254,12 @@ class OpticsSemanticsAnalysis(SemanticAnalysisData):
         post_idss = set(post_ids)
         if parent:
             return [p for p in parent.children if p.id in post_idss]
-        else:
-            ancestry = self.post_ancestry
-            post_ids = [pid for pid in post_ids if not set(
-                ancestry[pid][:-1]).intersection(post_idss)]
-            post_ids.sort()
-            posts = self.posts
-            return [posts[id] for id in post_ids]
+        ancestry = self.post_ancestry
+        post_ids = [pid for pid in post_ids if not set(
+            ancestry[pid][:-1]).intersection(post_idss)]
+        post_ids.sort()
+        posts = self.posts
+        return [posts[id] for id in post_ids]
 
 
 def show_clusters(clusters):
@@ -1791,8 +1790,7 @@ def _intra_cluster_distance(distances_row, labels, i):
     if not np.any(mask):
         # cluster of size 1
         return 0
-    a = np.mean(distances_row[mask])
-    return a
+    return np.mean(distances_row[mask])
 
 
 def _nearest_cluster_distance(distances_row, labels, i):
@@ -1816,6 +1814,10 @@ def _nearest_cluster_distance(distances_row, labels, i):
         Mean nearest-cluster distance for sample i
     """
     label = labels[i]
-    b = np.min([np.mean(distances_row[labels == cur_label])
-               for cur_label in set(labels) if not cur_label == label])
-    return b
+    return np.min(
+        [
+            np.mean(distances_row[labels == cur_label])
+            for cur_label in set(labels)
+            if cur_label != label
+        ]
+    )

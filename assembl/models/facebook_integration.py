@@ -670,7 +670,7 @@ class FacebookGenericSource(PostSource):
                                  create a Facebook attachment")
 
         try:
-            if not raw_attach or attachment.get('url') == None:
+            if not raw_attach or attachment.get('url') is None:
                 return
 
             old_attachments_on_post = assembl_post.attachments
@@ -772,42 +772,39 @@ class FacebookGenericSource(PostSource):
             upper = self.upper_bound
         if not lower:
             lower = self.lower_bound
-        if upper:
-            if post_created_time > upper:
-                cont = False
-        if lower:
-            if post_created_time < lower:
-                cont = False
+        if upper and post_created_time > upper:
+            cont = False
+        if lower and post_created_time < lower:
+            cont = False
 
-        if cont:
-            post_id = post.get('id')
-            creator = self.parser.get_user_post_creator(post)
-            self._manage_user(creator, users_db, reimport)
-
-            # Get all of the tagged users instead?
-            for user in self.parser.get_users_post_to_sans_self(post, obj_id):
-                self._manage_user(user, users_db, reimport)
-
-            creator_id = creator.get('id', None)
-            creator_agent = users_db.get(creator_id)
-            result = self._create_or_update_post(post, creator_agent,
-                                                 posts_db, reimport)
-
-            if not result:
-                return
-
-            assembl_post = posts_db.get(post_id)
-            self._create_or_update_attachment(post, assembl_post, reimport,
-                                              self.parser.get_post_attachments)
-            # self._create_attachments(post, assembl_post, reimport,
-            #                          self.parser.get_post_attachments)
-            self.db.commit()
-            # Refresh the instance
-            self.db.query(self.__class__).populate_existing().get(self.id)
-            return assembl_post, cont
-
-        else:
+        if not cont:
             return None, cont
+
+        post_id = post.get('id')
+        creator = self.parser.get_user_post_creator(post)
+        self._manage_user(creator, users_db, reimport)
+
+        # Get all of the tagged users instead?
+        for user in self.parser.get_users_post_to_sans_self(post, obj_id):
+            self._manage_user(user, users_db, reimport)
+
+        creator_id = creator.get('id', None)
+        creator_agent = users_db.get(creator_id)
+        result = self._create_or_update_post(post, creator_agent,
+                                             posts_db, reimport)
+
+        if not result:
+            return
+
+        assembl_post = posts_db.get(post_id)
+        self._create_or_update_attachment(post, assembl_post, reimport,
+                                          self.parser.get_post_attachments)
+        # self._create_attachments(post, assembl_post, reimport,
+        #                          self.parser.get_post_attachments)
+        self.db.commit()
+        # Refresh the instance
+        self.db.query(self.__class__).populate_existing().get(self.id)
+        return assembl_post, cont
 
     def _manage_comment(self, comment, parent_post, posts_db, users_db,
                         reimport=False):

@@ -200,15 +200,13 @@ class IdeaLoomIdeaSource(IdeaSource):
         def find_objects(j):
             if isinstance(j, list):
                 for x in j:
-                    for obj in find_objects(x):
-                        yield obj
+                    yield from find_objects(x)
             elif isinstance(j, dict):
                 jid = j.get('@id', None)
                 if jid:
                     yield j
                 for x in j.values():
-                    for obj in find_objects(x):
-                        yield obj
+                    yield from find_objects(x)
 
         self.read_data_gen(find_objects(data), admin_user_id, apply_filter)
 
@@ -383,15 +381,13 @@ class CatalystIdeaSource(IdeaSource):
         def find_objects(j):
             if isinstance(j, list):
                 for x in j:
-                    for obj in find_objects(x):
-                        yield obj
+                    yield from find_objects(x)
             elif isinstance(j, dict):
                 jid = j.get('@id', None)
                 if jid:
                     yield j
                 for x in j.values():
-                    for obj in find_objects(x):
-                        yield obj
+                    yield from find_objects(x)
 
         self.read_data_gen(find_objects(jsonld), admin_user_id)
         self.db.flush()

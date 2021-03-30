@@ -391,9 +391,8 @@ class AbstractMailbox(PostSource):
                     if len(parts) == 1:
                         return (parts[0], parts_type)
                     if parts_type == "text/html":
-                        return ("\n".join([
-                            "<div>%s</div>" % p for p in parts]), parts_type)
-                    if parts_type == "text/plain":
+                        return "\n".join("<div>%s</div>" % p for p in parts), parts_type
+                    elif parts_type == "text/plain":
                         return ("\n".join(parts), parts_type)
             elif part.get_content_disposition():
                 # TODO: Inline attachments
@@ -418,11 +417,14 @@ class AbstractMailbox(PostSource):
 
         def email_header_to_unicode(header_string, join_crlf=True):
             text = u''.join(
-                [
-                    txt.decode(enc) if enc else txt.decode('iso-8859-1') if isinstance(txt, bytes) else txt
-                    for (txt, enc) in decode_email_header(header_string)
-                ]
+                txt.decode(enc)
+                if enc
+                else txt.decode('iso-8859-1')
+                if isinstance(txt, bytes)
+                else txt
+                for (txt, enc) in decode_email_header(header_string)
             )
+
             if join_crlf:
                 text = u''.join(text.split(u'\r\n'))
 

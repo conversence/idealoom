@@ -37,10 +37,7 @@ def get_user(request):
         user = 0
     if user is 0:
         logged_in = request.unauthenticated_userid
-        if logged_in:
-            request._user = User.get(logged_in)
-        else:
-            request._user = None
+        request._user = User.get(logged_in) if logged_in else None
     return request._user
 
 
@@ -181,10 +178,9 @@ def discussion_id_from_request(request):
     """Obtain the discussion_id from the request,
     possibly without fetching the discussion"""
     from assembl.views.traversal import BaseContext
-    if request.matchdict:
-        if 'discussion_id' in request.matchdict:
-            discussion_id = int(request.matchdict['discussion_id'])
-            return discussion_id
+    if request.matchdict and 'discussion_id' in request.matchdict:
+        discussion_id = int(request.matchdict['discussion_id'])
+        return discussion_id
     if getattr(request, "context", None) and isinstance(
             request.context, BaseContext):
         discussion_id = request.context.get_discussion_id()
@@ -647,7 +643,7 @@ def add_multiple_users_csv(
             name, email, None, None, True, localrole=with_role,
             discussion=discussion_id, change_old_password=False)
         status_in_discussion = None
-        if send_password_change and not (created_user or created_localrole):
+        if send_password_change and not created_user and not created_localrole:
             status_in_discussion = user.get_status_in_discussion(discussion_id)
         if send_password_change and (
                 created_user or created_localrole or (

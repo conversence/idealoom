@@ -84,7 +84,7 @@ def downgrade(pyramid_env):
             FROM extract
             LEFT OUTER JOIN idea_content_link as icl ON (icl.extract_id = extract.id)
             WHERE icl.id IS NULL
-            """) 
+            """)
         connected_extracts = list(db.execute(
             """SELECT id, extract_id from idea_content_link
             WHERE extract_id IS NOT NULL"""))
@@ -95,16 +95,18 @@ def downgrade(pyramid_env):
         duplicates = set()
         for e, icls in by_extract.items():
             if len(icls) > 1:
-                if e in icls:
-                    keep = e
-                else:
-                    keep = min(*icls)
+                keep = e if e in icls else min(*icls)
                 dups = set(icls)
                 dups.remove(keep)
                 duplicates.update(dups)
         if duplicates:
-            db.execute("DELETE FROM idea_content_link WHERE id IN (%s)" % (
-                ",".join([str(x) for x in duplicates])))
+            db.execute(
+                (
+                    "DELETE FROM idea_content_link WHERE id IN (%s)"
+                    % ",".join(str(x) for x in duplicates)
+                )
+            )
+
             connected_extracts = [(icl, e) for (icl, e) in connected_extracts
                                   if icl not in duplicates]
         mismatched = [(icl, e) for (icl, e) in connected_extracts if icl != e]

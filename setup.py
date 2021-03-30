@@ -48,13 +48,15 @@ def compose_version():
 
 
 def widget_components():
-    paths = []
     exclusions = {
         'browserify', 'jasmine', 'jsdoc', 'karma', 'mocha',
         'serve', 'src', '.sass-cache'}
-    for (path, directories, filenames) in os.walk('assembl/static/widget'):
-        if not set(path.split('/')).intersection(exclusions):
-            paths.append(path)
+    paths = [
+        path
+        for (path, directories, filenames) in os.walk('assembl/static/widget')
+        if not set(path.split('/')).intersection(exclusions)
+    ]
+
     return [path[8:] + "/*" for path in paths]
 
 

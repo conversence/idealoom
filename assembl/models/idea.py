@@ -421,10 +421,7 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
     @classmethod
     def restrict_to_owners_condition(cls, query, user_id, alias=None, alias_maker=None):
         if not alias:
-            if alias_maker:
-                alias = alias_maker.alias_from_class(cls)
-            else:
-                alias = cls
+            alias = alias_maker.alias_from_class(cls) if alias_maker else cls
         return (query, alias.creator_id == user_id)
 
     @classmethod
@@ -804,10 +801,7 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
         return idea_visitor.end_visit(self, level, prev_result, child_results)
 
     def most_common_words(self, lang=None, num=8):
-        if lang:
-            langs = (lang,)
-        else:
-            langs = self.discussion.discussion_locales
+        langs = (lang, ) if lang else self.discussion.discussion_locales
         word_counter = WordCountVisitor(langs)
         self.visit_ideas_depth_first(word_counter)
         return word_counter.best(num)
@@ -1304,8 +1298,7 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
             inst_ctx=WidgetPost, ctx='Idea.linkedposts')
         def add_youtube_attachment(inst_ctx, ctx):
             from .attachment import Document, PostAttachment
-            for subctx in add_related_post_link(inst_ctx, ctx):
-                yield subctx
+            yield from add_related_post_link(inst_ctx, ctx)
             post = inst_ctx._instance
             insp_url = post.metadata_json.get('inspiration_url', '')
             if insp_url.startswith("https://www.youtube.com/"):

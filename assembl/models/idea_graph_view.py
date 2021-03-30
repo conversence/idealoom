@@ -259,9 +259,8 @@ class ExplicitSubGraphView(IdeaGraphView):
     }
 
     def copy(self, db=None):
-        retval = IdeaGraphView.copy(self, db=db)
         # retval.ideas = self.ideas
-        return retval
+        return IdeaGraphView.copy(self, db=db)
 
     def get_idea_links(self):
         # more efficient than the association_proxy

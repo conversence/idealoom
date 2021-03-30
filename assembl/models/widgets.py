@@ -648,16 +648,14 @@ class IdeaCreatingWidget(BaseIdeaWidget):
         def hide_proposal_idea(inst_ctx, ctx):
             obj = inst_ctx._instance
             obj.hidden = True
-            for subctx in add_proposal_post(inst_ctx, ctx):
-                yield subctx
+            yield from add_proposal_post(inst_ctx, ctx)
 
         @collection_creation_side_effects.register(
             inst_ctx=IdeaProposalPost, ctx='BaseIdeaWidget.base_idea_hiding')
         def hide_proposal_post(inst_ctx, ctx):
             obj = inst_ctx._instance
             obj.hidden = True
-            for subctx in add_proposal_post_link(inst_ctx, ctx):
-                yield subctx
+            yield from add_proposal_post_link(inst_ctx, ctx)
 
         return (BaseIdeaCollectionC(),
                 BaseIdeaHidingCollection('base_idea_hiding'),

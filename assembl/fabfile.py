@@ -685,13 +685,13 @@ def build_virtualenv():
         # and that sometimes precludes building python modules.
         bcfile = "/usr/local/Frameworks/Python.framework/Versions/3.6/lib/python3.6/distutils/distutils.cfg"
         vefile = env.venvpath + "/lib/python3.6/distutils/distutils.cfg"
-        sec = "build_ext"
         if exists(bcfile):
             brew_config = SafeConfigParser()
             brew_config.read(bcfile)
             venv_config = SafeConfigParser()
             if exists(vefile):
                 venv_config.read(vefile)
+            sec = "build_ext"
             if (brew_config.has_section(sec) and
                     not venv_config.has_section(sec)):
                 venv_config.add_section(sec)
@@ -955,7 +955,6 @@ def update_node(force_reinstall=False):
     Install node and npm to a known-good version
     """
     node_version = '12.18.2'
-    npm_version = '6.14.5'
     with settings(warn_only=True), hide('running', 'stdout'):
         node_version_cmd_result = venvcmd("node --version")
     if force_reinstall or "v"+node_version not in node_version_cmd_result.split():
@@ -963,6 +962,7 @@ def update_node(force_reinstall=False):
         #Because otherwise node may be busy
         circus_process_stop('dev:webpack')
         run("rm -rf "+join(env.venvpath, "lib/node_modules"))
+        npm_version = '6.14.5'
         venvcmd(f"nodeenv --node={node_version} --npm={npm_version} --python-virtualenv assembl/static")
         with cd(get_node_base_path()):
             venvcmd("npm install --no-save reinstall -g", chdir=False)
