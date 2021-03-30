@@ -185,7 +185,7 @@ def ensure_inheritance():
 
 def ensure_inheritance_of(cls):
     # Do not bother with tableless classes
-    if not '__tablename__' in cls.__dict__:
+    if '__tablename__' not in cls.__dict__:
         return
     base = cls
     first = None

@@ -209,10 +209,7 @@ class PostPathLocalCollection(object):
             return False
         if len(self.paths) != len(other.paths):
             return False
-        for (n, path) in enumerate(self.paths):
-            if path != other.paths[n]:
-                return False
-        return True
+        return all(path == other.paths[n] for (n, path) in enumerate(self.paths))
 
     def clone(self):
         clone = self.__class__()

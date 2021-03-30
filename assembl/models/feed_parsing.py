@@ -167,8 +167,7 @@ class PaginatedParsedData(ParsedData):
 
     def get_entries(self):
         for feed in self.get_next_feed():
-            for entry in self._get_entry_per_feed(feed):
-                yield entry
+            yield from self._get_entry_per_feed(feed)
 
 
 class FeedPost(ImportedPost):

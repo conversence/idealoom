@@ -46,9 +46,8 @@ def get_nsm(session):
 
 def get_virtuoso(session, storage=None):
     storage = storage or AppQuadStorageManager.discussion_storage_name()
-    v = Virtuoso(quad_storage=storage,
+    return Virtuoso(quad_storage=storage,
                  connection=session.connection())
-    return v
 
 USER_SECTION = 'user'
 PRIVATE_USER_SECTION = 'private'
@@ -159,11 +158,10 @@ class AppClassPatternExtractor(ClassPatternExtractor):
 
     def delayed_class(self, sqla_cls, for_graph):
         from ..models import DiscussionBoundBase
-        delayed = (
+        return (
             issubclass(sqla_cls, DiscussionBoundBase)
             and getattr(sqla_cls.get_discussion_conditions,
                         '__isabstractmethod__', None))
-        return delayed
 
     def delayed_column(self, sqla_cls, column, for_graph):
         return self.delayed_class(sqla_cls.mro()[1], for_graph)
@@ -693,13 +691,12 @@ class AppQuadStorageManager(object):
     @staticmethod
     def get_jsonld_context(expand=False):
         server_uri = AppQuadStorageManager.local_uri()
-        if expand:
-            with open(local_context_loc) as f:
-                context = json.load(f)
-            context["@context"]['local'] = server_uri
-            return context
-        else:
+        if not expand:
             return [context_url, {'local': server_uri}]
+        with open(local_context_loc) as f:
+            context = json.load(f)
+        context["@context"]['local'] = server_uri
+        return context
 
     def graph_as_jsonld(self, cg):
         context = self.get_jsonld_context()

@@ -113,8 +113,8 @@ def post_extract(request):
         if token:
             token = decode_token(
                 token, request.registry.settings['session.secret'])
-            if token:
-                user_id = token['userId']
+        if token:
+            user_id = token['userId']
         user_id = user_id or Everyone
         permissions = get_permissions(user_id, discussion.id)
     else:
@@ -221,8 +221,8 @@ def put_extract(request):
         if token:
             token = decode_token(
                 token, request.registry.settings['session.secret'])
-            if token:
-                user_id = token['userId']
+        if token:
+            user_id = token['userId']
         user_id = user_id or Everyone
 
     extract = Extract.get_instance(extract_id)
@@ -290,8 +290,8 @@ def delete_extract(request):
         if token:
             token = decode_token(
                 token, request.registry.settings['session.secret'])
-            if token:
-                user_id = token['userId']
+        if token:
+            user_id = token['userId']
         user_id = user_id or Everyone
 
     extract_id = request.matchdict['id']
@@ -322,8 +322,8 @@ def do_search_extracts(request):
         if token:
             token = decode_token(
                 token, request.registry.settings['session.secret'])
-            if token:
-                user_id = token['userId']
+        if token:
+            user_id = token['userId']
     user_id = user_id or Everyone
     if not user_has_permission(discussion.id, user_id, P_READ):
         raise HTTPForbidden()

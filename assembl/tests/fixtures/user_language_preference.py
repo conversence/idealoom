@@ -8,14 +8,12 @@ def build_user_language_preference(
     if source_of_evidence is None:
         from assembl.models.auth import LanguagePreferenceOrder
         source_of_evidence = LanguagePreferenceOrder.Explicit.value
-    ulp = UserLanguagePreference(
+    return UserLanguagePreference(
         user=user,
         locale=locale,
         preferred_order=0,
         translate=translate,
         source_of_evidence=source_of_evidence)
-
-    return ulp
 
 
 def build_cookie_user_language_preference(user, locale, translate=None):

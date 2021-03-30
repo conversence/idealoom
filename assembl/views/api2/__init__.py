@@ -102,10 +102,9 @@ def class_view(request):
     q = ctx.create_query(view == 'id_only', tombstones)
     if view == 'id_only':
         return [ctx._class.uri_generic(x) for (x,) in q.all()]
-    else:
-        permissions = ctx.get_permissions()
-        r = [i.generic_json(view, user_id, permissions) for i in q.all()]
-        return [x for x in r if x is not None]
+    permissions = ctx.get_permissions()
+    r = [i.generic_json(view, user_id, permissions) for i in q.all()]
+    return [x for x in r if x is not None]
 
 
 @view_config(context=InstanceContext, renderer='json',
@@ -135,9 +134,8 @@ def collection_view(request, default_view='default'):
     q = ctx.create_query(view == 'id_only', tombstones)
     if view == 'id_only':
         return [ctx.collection_class.uri_generic(x) for (x,) in q.all()]
-    else:
-        res = [i.generic_json(view, user_id, permissions) for i in q.all()]
-        return [x for x in res if x is not None]
+    res = [i.generic_json(view, user_id, permissions) for i in q.all()]
+    return [x for x in res if x is not None]
 
 
 @view_config(context=InstanceContext, request_method='POST')
@@ -232,9 +230,8 @@ def instance_put_form(request, form_data=None):
     view = request.GET.get('view', None) or 'default'
     if view == 'id_only':
         return [instance.uri()]
-    else:
-        user_id = authenticated_userid(request) or Everyone
-        return instance.generic_json(view, user_id, permissions)
+    user_id = authenticated_userid(request) or Everyone
+    return instance.generic_json(view, user_id, permissions)
 
 
 @view_config(context=InstanceContext, request_method='DELETE', renderer='json')

@@ -145,24 +145,19 @@ class UpdatablePgEnum(ENUM):
                 bind = bind.execution_options(isolation_level="AUTOCOMMIT")
                 for i, name in enumerate(value_names):
                     if i >= len(db_names) or name != db_names[i]:
-                        if i == 0:
-                            if len(db_names):
+                        if len(db_names):
+                            if i == 0:
                                 bind.execute(
                                     "ALTER TYPE %s ADD VALUE '%s' BEFORE '%s'" % (
                                         self.name, name, db_names[0]))
                             else:
                                 bind.execute(
-                                    "ALTER TYPE %s ADD VALUE '%s' " % (
-                                        self.name, name))
-                        else:
-                            if len(db_names):
-                                bind.execute(
                                     "ALTER TYPE %s ADD VALUE '%s' AFTER '%s'" % (
                                         self.name, name, db_names[i - 1]))
-                            else:
-                                bind.execute(
-                                    "ALTER TYPE %s ADD VALUE '%s' " % (
-                                        self.name, name))
+                        else:
+                            bind.execute(
+                                "ALTER TYPE %s ADD VALUE '%s' " % (
+                                    self.name, name))
                         db_names[i:i] = [name]
             else:
                 bind = bind.execution_options(isolation_level="AUTOCOMMIT")

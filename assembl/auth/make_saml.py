@@ -43,8 +43,8 @@ def make_saml_key():
 
 
 def private_key_from_cleaned_text(key_text):
-    key_text = '\n'.join([l.strip() for l in
-                          str(key_text).strip('\n').split('\n')])
+    key_text = '\n'.join(l.strip() for l in
+                              str(key_text).strip('\n').split('\n'))
     key_text = "-----BEGIN RSA PRIVATE KEY-----\n\n%s\n-----END RSA PRIVATE KEY-----\n" % key_text
     return serialization.load_pem_private_key(
         key_text, password=None, backend=default_backend())

@@ -368,9 +368,9 @@ def reset_password(request):
         raise JSONError(error)
     if not email:
         email = user.get_preferred_email()
-        if not email:
-            error = localizer.translate(_("This user has no email"))
-            raise JSONError(error, code=HTTPPreconditionFailed.code)
+    if not email:
+        error = localizer.translate(_("This user has no email"))
+        raise JSONError(error, code=HTTPPreconditionFailed.code)
     if not isinstance(user, User):
         error = localizer.translate(_("This is not a user"))
         raise JSONError(error, code=HTTPPreconditionFailed.code)
@@ -457,13 +457,11 @@ def assembl_register_user(request):
         errors.add_error(localizer.translate(_("No email.")),
                          ErrorTypes.INVALID_EMAIL)
     username = json.get('username', None)
-    if username:
-        if session.query(User).filter_by(
-                username=username).count():
-            errors.add_error(localizer.translate(_(
-                "We already have a user with this username.")),
-                ErrorTypes.EXISTING_USERNAME,
-                HTTPConflict.code)
+    if username and session.query(User).filter_by(username=username).count():
+        errors.add_error(localizer.translate(_(
+            "We already have a user with this username.")),
+            ErrorTypes.EXISTING_USERNAME,
+            HTTPConflict.code)
 
     if errors:
         raise errors

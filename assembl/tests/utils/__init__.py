@@ -187,7 +187,7 @@ def api_call_to_fname(api_call, method="GET", **args):
         os.makedirs(api_dir)
     args = list(args.items())
     args.sort()
-    args = "_".join(["%s_%s" % x for x in args])
+    args = "_".join("%s_%s" % x for x in args)
     if args:
         fname += "_" + args
     if method != "GET":

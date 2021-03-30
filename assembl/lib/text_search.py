@@ -40,9 +40,11 @@ def update_indices(db):
     existing = {name[len(prefix):] for (name,) in result if name.startswith(prefix)}
     desired = set(desired.split())
     desired.add('simple')
-    commands = []
-    for locale in existing - desired:
-        commands.append('DROP INDEX %s.%s%s' % (schema, prefix, locale))
+    commands = [
+        'DROP INDEX %s.%s%s' % (schema, prefix, locale)
+        for locale in existing - desired
+    ]
+
     for locale in desired - existing:
         pg_name = postgres_language_configurations[locale]
         command = """CREATE INDEX %(prefix)s%(locale)s

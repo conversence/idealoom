@@ -387,9 +387,8 @@ class UserPreferenceCollection(NamespacedUserKVCollection):
             keys.add(k)
             yield k, v
         for k, v in self.dprefs.items():
-            if k not in keys:
-                if self.dpref.can_read(k, self.permissions):
-                    yield k, v
+            if k not in keys and self.dpref.can_read(k, self.permissions):
+                yield k, v
 
     def items(self):
         # the inherited items makes multiple requests

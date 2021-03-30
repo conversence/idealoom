@@ -130,8 +130,7 @@ def get_permissions(user_id, discussion_id, target_instance=None):
     permissions = session.query(Permission.name).join(
         rp_query, rp_query.c.permission_id == Permission.id).join(
         Role, (rp_query.c.role_id == Role.id) & Role.id.in_(roles))
-    result = [x[0] for x in permissions.distinct()]
-    return result
+    return [x[0] for x in permissions.distinct()]
 
 
 def base_permissions_from_request(request):
@@ -305,8 +304,7 @@ class TokenSessionAuthenticationPolicy(SessionAuthenticationPolicy):
                     data, salt = data.split('.', 1)
                     salt = base64.urlsafe_b64decode(salt)
                     data = [int(i) for i in data.split(',')]
-                    user_id = data[0]
-                    return user_id
+                    return data[0]
                 except:
                     pass
 

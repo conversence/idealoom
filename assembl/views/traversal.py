@@ -58,8 +58,7 @@ class BaseContext(object):
 
     def get_all_instances(self):
         # Should be a yield from
-        for i in self.__parent__.get_all_instances():
-            yield i
+        yield from self.__parent__.get_all_instances()
 
     def get_first_instance(self):
         gen = self.get_all_instances()
@@ -75,8 +74,7 @@ class BaseContext(object):
 
     def context_chain(self):
         yield self
-        for ctx in self.__parent__.context_chain():
-            yield ctx
+        yield from self.__parent__.context_chain()
 
     def get_instance_ctx_of_class(self, cls):
         """Look in the context chain for a model instance of a given class,
@@ -101,7 +99,8 @@ class BaseContext(object):
     def __hash__(self):
         h = hash(self.__class__)
         if self.__parent__:
-            h = h % hash(self.__parent__)
+            h %= hash(self.__parent__)
+        return h
 
 
 class DictContext(BaseContext):
@@ -244,8 +243,7 @@ class TraversalContext(BaseContext):
 
     def creation_side_effects_rec(self, inst_ctx, top_ctx):
         """Recursion"""
-        for inst in self.__parent__.creation_side_effects_rec(inst_ctx, top_ctx):
-            yield inst
+        yield from self.__parent__.creation_side_effects_rec(inst_ctx, top_ctx)
 
     def creation_side_effects(self, inst_ctx=None):
         """Generator for objects that are created as side-effect of another
@@ -253,8 +251,7 @@ class TraversalContext(BaseContext):
         """
         for sub_inst_ctx in self.creation_side_effects_rec(inst_ctx, self):
             yield sub_inst_ctx
-            for sub_sub in self.creation_side_effects(sub_inst_ctx):
-                yield sub_sub
+            yield from self.creation_side_effects(sub_inst_ctx)
 
     def on_new_instance(self, instance):
         """If a model instance was created in this context, let the context learn about it.
@@ -301,8 +298,7 @@ class Api2Context(TraversalContext):
 
     def creation_side_effects_rec(self, inst_ctx, top_ctx):
         """Apply simple side-effects from the instance"""
-        for inst in inst_ctx._instance.creation_side_effects(top_ctx):
-            yield inst
+        yield from inst_ctx._instance.creation_side_effects(top_ctx)
 
 
 def process_args(args, cls):
@@ -516,8 +512,7 @@ class InstanceContext(TraversalContext):
     def get_all_instances(self):
         yield self._instance
         # Should be a yield from
-        for i in self.__parent__.get_all_instances():
-            yield i
+        yield from self.__parent__.get_all_instances()
 
     def get_target_class(self):
         return self._instance.__class__
@@ -708,12 +703,10 @@ class CollectionContext(TraversalContext):
 
     def creation_side_effects_rec(self, inst_ctx, top_ctx):
         """Apply side-effects through multiple dispatch on the collection"""
-        for ins in self.__parent__.creation_side_effects_rec(inst_ctx, top_ctx):
-            yield ins
+        yield from self.__parent__.creation_side_effects_rec(inst_ctx, top_ctx)
         assert isinstance(top_ctx, CollectionContext)
         assert isinstance(inst_ctx, InstanceContext)
-        for ins in collection_creation_side_effects(inst_ctx, self):
-            yield ins
+        yield from collection_creation_side_effects(inst_ctx, self)
 
     @as_native_str()
     def __repr__(self):
@@ -956,13 +949,12 @@ class RelationCollectionDefinition(AbstractCollectionDefinition):
         return getattr(instance, property.key)
 
     def contains(self, parent_instance, instance):
-        if uses_list(self.relationship):
-            if self.back_relation and not uses_list(self.back_relation):
-                return self.get_attribute(
-                    instance, self.back_relation) == parent_instance
-            return instance in self.get_attribute(parent_instance)
-        else:
+        if not uses_list(self.relationship):
             return instance == self.get_attribute(parent_instance)
+        if self.back_relation and not uses_list(self.back_relation):
+            return self.get_attribute(
+                instance, self.back_relation) == parent_instance
+        return instance in self.get_attribute(parent_instance)
 
     def get_instance(self, key, parent_instance):
         from ..models import NamedClassMixin
@@ -1088,13 +1080,12 @@ class UserNsDictCollection(AbstractCollectionDefinition):
         from pyramid.httpexceptions import HTTPUnauthorized
         from assembl.models.user_key_values import UserNsDict
         request = get_current_request()
-        if request is not None:
-            user_id = request.unauthenticated_userid
-            # Check again downstream for real userid
-            if user_id is None:
-                raise HTTPUnauthorized()
-        else:
+        if request is None:
             raise RuntimeError()
+        user_id = request.unauthenticated_userid
+        # Check again downstream for real userid
+        if user_id is None:
+            raise HTTPUnauthorized()
         return UserNsDict(parent_instance, user_id)
 
     def get_instance(self, namespace, parent_instance):
@@ -1291,19 +1282,20 @@ def root_factory(request, user_id=None):
     """The factory function for the root context"""
     # OK, this is the old code... I need to do better, but fix first.
     from ..models import Discussion
-    if request.matchdict and 'discussion_id' in request.matchdict:
-        discussion_id = int(request.matchdict['discussion_id'])
-        discussion = Discussion.default_db.query(Discussion).get(discussion_id)
-        if not discussion:
-            raise HTTPNotFound("No discussion ID %d" % (discussion_id,))
-        return discussion
-    elif request.matchdict and 'discussion_slug' in request.matchdict:
-        discussion_slug = request.matchdict['discussion_slug']
-        discussion = Discussion.default_db.query(Discussion).filter_by(
-            slug=discussion_slug).first()
-        if not discussion:
-            raise HTTPNotFound("No discussion named %s" % (discussion_slug,))
-        return discussion
+    if request.matchdict:
+        if 'discussion_id' in request.matchdict:
+            discussion_id = int(request.matchdict['discussion_id'])
+            discussion = Discussion.default_db.query(Discussion).get(discussion_id)
+            if not discussion:
+                raise HTTPNotFound("No discussion ID %d" % (discussion_id,))
+            return discussion
+        elif 'discussion_slug' in request.matchdict:
+            discussion_slug = request.matchdict['discussion_slug']
+            discussion = Discussion.default_db.query(Discussion).filter_by(
+                slug=discussion_slug).first()
+            if not discussion:
+                raise HTTPNotFound("No discussion named %s" % (discussion_slug,))
+            return discussion
     return app_root_factory(request, user_id)
 
 

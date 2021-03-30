@@ -151,11 +151,7 @@ def discussion_admin(request):
     create_mailbox = False
     slug = request.POST.get('slug', '')
     domain = config.get('imap_domain', None) or config.get('public_hostname')
-    if slug:
-        email = "@".join((slug, domain))
-    else:
-        email = ''
-
+    email = "@".join((slug, domain)) if slug else ''
     context = dict(
         get_default_context(request),
         slug=slug,

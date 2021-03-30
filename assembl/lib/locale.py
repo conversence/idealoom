@@ -19,12 +19,10 @@ def get_localizer(request=None):
         from pyramid.threadlocal import get_current_request
         request = get_current_request()
     if request:
-        localizer = request.localizer
-    else:
-        locale_code = get_config().get('available_languages', 'fr_CA en_CA').\
-            split()[0]
-        localizer = Localizer(locale_code)
-    return localizer
+        return request.localizer
+    locale_code = get_config().get('available_languages', 'fr_CA en_CA').\
+        split()[0]
+    return Localizer(locale_code)
 
 
 def use_underscore(locale):
@@ -46,7 +44,7 @@ def to_posix_string(locale_code):
         posix_lang = lang
     elif is_valid639_2(lang):
         temp = to_iso639_1(lang)
-        posix_lang = temp if temp else lang
+        posix_lang = temp or lang
     else:
         # Aryan, not sure what case is being covered here
         full_name = lang.lower().capitalize()
@@ -88,20 +86,20 @@ def get_country(locale):
 
 def ensure_locale_has_country(locale):
     # assuming a posix locale
-    if '_' not in locale:
-        # first look in config
-        settings = get_config()
-        available = settings.get('available_languages', 'en_CA fr_CA').split()
-        avail_langs = {get_language(loc): loc
-                       for loc in reversed(available) if '_' in loc}
-        locale_with_country = avail_langs.get(locale, None)
-        if not locale_with_country:
-            if is_valid639_1(locale):
-                return locale
-            return None
-        return locale_with_country
+    if '_' in locale:
+        return locale
         # TODO: Default countries for languages. Look in pycountry?
-    return locale
+    # first look in config
+    settings = get_config()
+    available = settings.get('available_languages', 'en_CA fr_CA').split()
+    avail_langs = {get_language(loc): loc
+                   for loc in reversed(available) if '_' in loc}
+    locale_with_country = avail_langs.get(locale, None)
+    if not locale_with_country:
+        if is_valid639_1(locale):
+            return locale
+        return None
+    return locale_with_country
 
 
 def strip_country(locale):
@@ -168,10 +166,7 @@ def locale_compatible(locname1, locname2):
 
 
 def any_locale_compatible(locname, locnames):
-    for l in locnames:
-        if locale_compatible(l, locname):
-            return True
-    return False
+    return any(locale_compatible(l, locname) for l in locnames)
 
 
 def get_preferred_languages(session, user_id):

@@ -264,10 +264,11 @@ class HistoryMixinWithOrigin(HistoryMixin, OriginMixin):
 class Dehistoricizer(ReplacingCloningVisitor):
     """remove refs to tombstone_date in an expression"""
     def __init__(self, *target_classes):
-        self.tscols = set([
+        self.tscols = {
             target_cls.__mapper__.columns["tombstone_date"]
             for target_cls in target_classes
-            if issubclass(target_cls, HistoryMixin)])
+            if issubclass(target_cls, HistoryMixin)
+        }
 
     def replace(self, elem):
         if isinstance(elem, BinaryExpression):
@@ -329,10 +330,9 @@ def reln_in_history(self, name, timestamp):
             my_cls, join_condition).filter(filter).all()
     if reln.uselist:
         return results
-    else:
-        assert len(results) <= 1
-        if results:
-            return results[0]
+    assert len(results) <= 1
+    if results:
+        return results[0]
 
 
 class HistoricalProxy(object):

@@ -47,9 +47,7 @@ class ClamScanAntiVirus(AntiVirus):
     command = 'clamscan'
     options = ['--no-summary', '-i']
     def check(self, path):
-        args = [self.command]
-        args.extend(self.options)
-        args.append(path)
+        args = [self.command, *self.options, path]
         try:
             return call(args) == 0
         except:

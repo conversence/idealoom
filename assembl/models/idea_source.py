@@ -331,10 +331,9 @@ class CatalystIdeaSource(IdeaSource):
         # Maybe look in the context instead?
         typename = self.equivalents.get(typename, typename)
         if typename:
-            cls = get_named_class(typename)
             # TODO: Adjust for subclasses according to json record
             # cls = cls.get_jsonld_subclass(json)
-            return cls
+            return get_named_class(typename)
 
     def normalize_id(self, id):
         if not id:
@@ -363,12 +362,14 @@ class CatalystIdeaSource(IdeaSource):
                 record['rdf_type'] = \
                     self.deprecatedClassesAndProps.get(type, type)
                 record['@type'] = cls.external_typename()
-            if issubclass(cls, (AbstractIdeaVote, AbstractVoteSpecification)):
-                if 'widget' not in record:
-                    if 'dummy_vote_widget' not in self.instance_by_id:
-                        self.instance_by_id['dummy_vote_widget'] = \
-                            MultiCriterionVotingWidget(discussion=self.discussion)
-                    record['widget'] = 'dummy_vote_widget'
+            if (
+                issubclass(cls, (AbstractIdeaVote, AbstractVoteSpecification))
+                and 'widget' not in record
+            ):
+                if 'dummy_vote_widget' not in self.instance_by_id:
+                    self.instance_by_id['dummy_vote_widget'] = \
+                        MultiCriterionVotingWidget(discussion=self.discussion)
+                record['widget'] = 'dummy_vote_widget'
         print("****** get_record: ", record.get('@id', None), record)
         return record
 

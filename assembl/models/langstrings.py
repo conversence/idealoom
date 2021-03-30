@@ -57,7 +57,7 @@ class LocaleLabel(Base):
         by_target = defaultdict(list)
         for ln in locale_labels:
             by_target[ln.locale_of_label].append(ln)
-        result = dict()
+        result = {}
         locale_chain.reverse()
         for locale in locale_chain:
             result.update({
@@ -74,7 +74,7 @@ class LocaleLabel(Base):
         by_target = defaultdict(list)
         for ln in locale_labels:
             by_target[ln.locale_of_label].append(ln)
-        result = dict()
+        result = {}
         target_locs.reverse()
         for loc in target_locs:
             result.update({
@@ -104,11 +104,12 @@ class LocaleLabel(Base):
             # shortcut
             return
         existing = set(db.query(cls.named_locale, cls.locale_of_label).all())
-        missing = []
-        for (lcode, tcode, name) in names:
-            if (lcode, tcode) not in existing:
-                missing.append(cls(
-                    named_locale=lcode, locale_of_label=tcode, name=name))
+        missing = [
+            cls(named_locale=lcode, locale_of_label=tcode, name=name)
+            for (lcode, tcode, name) in names
+            if (lcode, tcode) not in existing
+        ]
+
         db.bulk_save_objects(missing)
         db.flush()
 
@@ -148,10 +149,7 @@ class LangString(Base):
                         (ImportRecord.target_table == cls.__tablename__))
 
     def __bool__(self):
-        for entry in self.entries:
-            if entry:
-                return True
-        return False
+        return any(self.entries)
 
     def as_jsonld(self, default_lang=None, use_map=False):
         entries = [e.as_jsonld(default_lang) for e in self.entries]
@@ -166,31 +164,32 @@ class LangString(Base):
         """Add a LangStringEntry to the langstring.
         Previous versions with the same language will be tombstoned,
         and translations based on such a version will be suppressed."""
-        if entry and isinstance(entry, LangStringEntry):
-            entry_locale = entry.locale
-            for ex_entry in self.entries:
-                # Loop on the entries means that repeated calls to
-                # add_entry will be O(n^2). If this becomes an issue,
-                # create an add_entries method.
-                if ex_entry is entry:
-                    continue
-                if ex_entry.value == entry.value:
-                    if entry in self.entries:
-                        self.entries.remove(entry)
-                    return ex_entry
-                ex_locale = ex_entry.locale
-                if entry_locale == ex_locale:
-                    if ex_entry.is_machine_translated:
-                        self.entries.remove(ex_entry)
-                    else:
-                        if not allow_replacement:
-                            return None
-                        ex_entry.is_tombstone = True
-                        self.remove_translations_of(ex_entry)
-                        if inspect(self).persistent:
-                            self.db.expire(self, ["entries"])
-            entry.langstring = self
-            return entry
+        if not entry or not isinstance(entry, LangStringEntry):
+            return
+        entry_locale = entry.locale
+        for ex_entry in self.entries:
+            # Loop on the entries means that repeated calls to
+            # add_entry will be O(n^2). If this becomes an issue,
+            # create an add_entries method.
+            if ex_entry is entry:
+                continue
+            if ex_entry.value == entry.value:
+                if entry in self.entries:
+                    self.entries.remove(entry)
+                return ex_entry
+            ex_locale = ex_entry.locale
+            if entry_locale == ex_locale:
+                if ex_entry.is_machine_translated:
+                    self.entries.remove(ex_entry)
+                else:
+                    if not allow_replacement:
+                        return None
+                    ex_entry.is_tombstone = True
+                    self.remove_translations_of(ex_entry)
+                    if inspect(self).persistent:
+                        self.db.expire(self, ["entries"])
+        entry.langstring = self
+        return entry
 
     def remove_translations_of(self, entry):
         """Remove all translations based on this code."""
@@ -486,7 +485,7 @@ class LangString(Base):
                 if locale_id and locale_id in available:
                     return available[locale_id]
             # is another variant there?
-            mt_variants = list()
+            mt_variants = []
             for sublocale in locale_collection_subsets[root_locale]:
                 if sublocale in locale_codes:
                     continue
@@ -503,8 +502,6 @@ class LangString(Base):
             locale_id = locale_collection.get(sublocale, None)
             if locale_id and locale_id in available:
                 return available[locale_id]
-        # TODO: Look at other languages in the country?
-        # Give up and give nothing, or give first?
 
     @best_lang_old.expression
     def best_lang_old(self, locale_codes):
@@ -527,7 +524,7 @@ class LangString(Base):
                     scores[locale_id] = current_score
                     current_score += 1
             # is another variant there?
-            mt_variants = list()
+            mt_variants = []
             found = False
             for sublocale in locale_collection_subsets[root_locale]:
                 if sublocale in locale_codes:
@@ -593,12 +590,11 @@ class LangString(Base):
                     if not allow_errors:
                         entries = [e for e in entries if not e.error_code]
                     for pref in candidates:
-                        if pref.translate:
-                            best = self.closest_entry(pref.translate)
-                            if best:
-                                return best
-                        else:
+                        if not pref.translate:
                             return entriesByLocale[pref.locale]
+                        best = self.closest_entry(pref.translate)
+                        if best:
+                            return best
         # give up and give first original
         entries = self.non_mt_entries()
         if entries:
@@ -756,12 +752,13 @@ class LangStringEntry(TombstonableMixin, Base):
             langstring=langstring,
             locale=self.locale,
             value=self.value,
-            tombstone_date = self.tombstone_date or (
-                tombstone if tombstone else None),
+            tombstone_date=self.tombstone_date or tombstone or None,
             locale_identification_data=self.locale_identification_data,
-            locale_confirmed = self.locale_confirmed,
+            locale_confirmed=self.locale_confirmed,
             error_code=self.error_code,
-            error_count=self.error_count)
+            error_count=self.error_count,
+        )
+
         db = db or self.db
         db.add(clone)
         return clone
@@ -875,7 +872,7 @@ class LangStringEntry(TombstonableMixin, Base):
             if not original and self.locale_identification_data:
                 original = LocaleLabel.UNDEFINED
             original = original or old_locale_code
-            if original != locale_code and original != LocaleLabel.UNDEFINED:
+            if original not in [locale_code, LocaleLabel.UNDEFINED]:
                 data["original"] = original
             self.locale = locale_code
             changed = True
@@ -886,17 +883,16 @@ class LangStringEntry(TombstonableMixin, Base):
                 data['original'] = original
             self.locale_identification_data_json = data
             self.locale_confirmed = certainty or locale_code == original
-        if changed:
-            if langstring:
-                langstring.remove_translations_of(self)
-                # Re-adding to verify there's no conflict
-                added = langstring.add_entry(self, certainty)
-                if added is None:
-                    # We identified an entry with something that existed
-                    # as a known original. Not sure what to do now,
-                    # reverting just in case.
-                    self.locale_code = old_locale_code
-                    changed = False
+        if changed and langstring:
+            langstring.remove_translations_of(self)
+            # Re-adding to verify there's no conflict
+            added = langstring.add_entry(self, certainty)
+            if added is None:
+                # We identified an entry with something that existed
+                # as a known original. Not sure what to do now,
+                # reverting just in case.
+                self.locale_code = old_locale_code
+                changed = False
         return changed
 
     def forget_identification(self, force=False):

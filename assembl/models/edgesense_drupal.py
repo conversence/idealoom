@@ -92,7 +92,7 @@ class EdgeSenseDrupalSource(PostSource):
     @classmethod
     def create(cls, nodes, users, comments, title, discussion, root_url=''):
         now = datetime.utcnow()
-        if root_url is '' or None:
+        if not root_url:
             url = urlparse(nodes)
             schema = url[0] if url[0] is not '' else 'http'
             root_url = schema + '//' + url[1]
@@ -410,9 +410,8 @@ class EdgeSenseParser(object):
                 else:
                     self._create_user(user, users_db)
 
-            new_post = EdgeSenseNode.create(self.source, post,
+            return EdgeSenseNode.create(self.source, post,
                                             users_db[user_id])
-            return new_post
         return None
 
     def _create_comment(self, post, posts_db, users_db):
@@ -433,38 +432,35 @@ class EdgeSenseParser(object):
                 else:
                     self._create_user(user, users_db)
 
-            new_post = EdgeSenseComment.create(self.source, post,
+            return EdgeSenseComment.create(self.source, post,
                                                users_db[user_id])
-            return new_post
         return None
 
     def _parse_nodes(self, posts_db, users_db):
         if not self.nodes:
             raise ValueError('There are no nodes to parse')
-        else:
-            for node in self.nodes:
-                node_id = EdgeSenseSpecificPost.create_nid(node.get('node'))
-                if node_id in posts_db:
-                    continue
-                new_post = self._create_node(node, posts_db, users_db)
-                if not new_post:
-                    continue
-                posts_db[node_id] = new_post
-                self.session.add(new_post)
+        for node in self.nodes:
+            node_id = EdgeSenseSpecificPost.create_nid(node.get('node'))
+            if node_id in posts_db:
+                continue
+            new_post = self._create_node(node, posts_db, users_db)
+            if not new_post:
+                continue
+            posts_db[node_id] = new_post
+            self.session.add(new_post)
 
     def _parse_comments(self, posts_db, users_db):
         if not self.comments:
             raise ValueError('There are no comments to parse')
-        else:
-            for comment in self.comments:
-                comment_id = comment['comment']['cid']
-                if comment_id in posts_db:
-                    continue
-                new_post = self._create_comment(comment, posts_db, users_db)
-                if not new_post:
-                    continue
-                posts_db[comment_id] = new_post
-                self.session.add(new_post)
+        for comment in self.comments:
+            comment_id = comment['comment']['cid']
+            if comment_id in posts_db:
+                continue
+            new_post = self._create_comment(comment, posts_db, users_db)
+            if not new_post:
+                continue
+            posts_db[comment_id] = new_post
+            self.session.add(new_post)
 
     def parse(self):
         # First, setup
@@ -507,75 +503,73 @@ class EdgeSenseParser(object):
     def _reimport_nodes_users(self, posts_db, users_db):
         if not self.nodes:
             raise ValueError('There are no nodes to re-parse')
-        else:
-            for node in self.nodes:
-                nde = node['node']
-                nid = EdgeSenseSpecificPost.create_nid(nde)
-                if nid in posts_db:
-                    user_id = nde.get('uid')
-                    self._update_user(user_id, users_db)
+        for node in self.nodes:
+            nde = node['node']
+            nid = EdgeSenseSpecificPost.create_nid(nde)
+            if nid in posts_db:
+                user_id = nde.get('uid')
+                self._update_user(user_id, users_db)
 
-                    old_node = posts_db.get(nid)
-                    old_node.import_date = datetime.utcnow()
-                    old_node.source = self.source
-                    old_node.discussion = self.source.discussion
-                    old_node.source_post_id = nid
-                    body = nde['Body']
-                    body = old_node.process_body(body, self.source.node_root)
-                    old_node.body = body
-                    old_node.body_mime_type = 'text/plain'
-                    old_node.creation_date = datetime.fromtimestamp(
-                        int(nde['created']))
+                old_node = posts_db.get(nid)
+                old_node.import_date = datetime.utcnow()
+                old_node.source = self.source
+                old_node.discussion = self.source.discussion
+                old_node.source_post_id = nid
+                body = nde['Body']
+                body = old_node.process_body(body, self.source.node_root)
+                old_node.body = body
+                old_node.body_mime_type = 'text/plain'
+                old_node.creation_date = datetime.fromtimestamp(
+                    int(nde['created']))
 
-                    user = users_db.get(user_id, None)
-                    if user:
-                        # user can possibly not exist
-                        agent = user.profile
-                        old_node.creator = agent
+                user = users_db.get(user_id, None)
+                if user:
+                    # user can possibly not exist
+                    agent = user.profile
+                    old_node.creator = agent
 
-                else:
-                    new_post = self._create_node(node, posts_db, users_db)
-                    if not new_post:
-                        continue
-                    posts_db[nid] = new_post
-                    self.session.add(new_post)
+            else:
+                new_post = self._create_node(node, posts_db, users_db)
+                if not new_post:
+                    continue
+                posts_db[nid] = new_post
+                self.session.add(new_post)
 
     def _reimport_comment_users(self, posts_db, users_db):
         if not self.comments:
             raise ValueError('There are no comments to re-parse')
-        else:
-            for comment in self.comments:
-                comm = comment['comment']
-                comment_id = comm.get('cid')
-                user_id = comm.get('uid', None)
-                if comm['cid'] in posts_db:
-                    self._update_user(user_id, users_db)
+        for comment in self.comments:
+            comm = comment['comment']
+            comment_id = comm.get('cid')
+            user_id = comm.get('uid', None)
+            if comm['cid'] in posts_db:
+                self._update_user(user_id, users_db)
 
-                    old_comm = posts_db.get(comment_id)
-                    old_comm.import_date = datetime.utcnow()
-                    old_comm.source = self.source
-                    old_comm.discussion = self.source.discussion
-                    old_comm.source_post_id = comment_id
+                old_comm = posts_db.get(comment_id)
+                old_comm.import_date = datetime.utcnow()
+                old_comm.source = self.source
+                old_comm.discussion = self.source.discussion
+                old_comm.source_post_id = comment_id
 
-                    body = comm['Comment']
-                    body = old_comm.process_body(body, self.source.node_root)
-                    old_comm.body = body
-                    old_comm.body_mime_type = 'text/plain'
-                    old_comm.creation_date = datetime.fromtimestamp(
-                        int(comm['created']))
+                body = comm['Comment']
+                body = old_comm.process_body(body, self.source.node_root)
+                old_comm.body = body
+                old_comm.body_mime_type = 'text/plain'
+                old_comm.creation_date = datetime.fromtimestamp(
+                    int(comm['created']))
 
-                    user = users_db.get(user_id, None)
-                    if user:
-                        agent = user.profile
-                        old_comm.creator = agent
+                user = users_db.get(user_id, None)
+                if user:
+                    agent = user.profile
+                    old_comm.creator = agent
 
-                else:
-                    new_comm = self._create_comment(comment, posts_db,
-                                                    users_db)
-                    if not new_comm:
-                        continue
-                    posts_db[comment_id] = new_comm
-                    self.session.add(new_comm)
+            else:
+                new_comm = self._create_comment(comment, posts_db,
+                                                users_db)
+                if not new_comm:
+                    continue
+                posts_db[comment_id] = new_comm
+                self.session.add(new_comm)
 
     def re_import(self):
         self._setup()

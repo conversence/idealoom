@@ -141,7 +141,7 @@ class UUID(TypeDecorator):
     def process_bind_param(self, value, dialect=None):
         if value and isinstance(value, uuid.UUID):
             return value.hex
-        elif value and not isinstance(value, uuid.UUID):
+        elif value:
             raise ValueError('value %s is not a valid uuid.UUID' % value)
         else:
             return None

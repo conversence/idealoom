@@ -62,8 +62,8 @@ def copy_table(source_session, dest_session, source_table, dest_table):
         done = set()
         while len(values):
             batch = values
-            values = list()
-            next_batch = list()
+            values = []
+            next_batch = []
             for val in batch:
                 fkey = val[fkey_name]
                 if fkey is None or fkey in done:

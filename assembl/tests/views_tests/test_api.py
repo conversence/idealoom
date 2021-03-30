@@ -187,7 +187,7 @@ def disabledtest_next_synthesis_idea_management(
     assert res.status_code == 200
     subidea_data = json.loads(res.body)
     assert subidea_data['@id'] == subidea_1_1_1.uri()
-    assert subidea_data['inNextSynthesis'] == False
+    assert not subidea_data['inNextSynthesis']
 
     subidea_data['inNextSynthesis'] = True
 
@@ -626,7 +626,7 @@ def test_mailbox_import_jacklayton(discussion, test_app, jack_layton_mailbox):
     20-       |-Harper says:  [L:Federal environmental programs are ineffective] and a waste of money. <2400278.6mpFWar2xg@benoitg-t510>
     """
 
-    assert posts[1].parent == None
+    assert posts[1].parent is None
     assert len(posts[1].children) == 3
     assert posts[2].parent == posts[1]
     assert posts[3].parent == posts[1]

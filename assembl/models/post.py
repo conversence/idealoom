@@ -184,11 +184,9 @@ class Post(Content):
 
     def get_descendants(self):
         assert self.id
-        descendants = self.db.query(Post).filter(
+        return self.db.query(Post).filter(
             Post.parent_id == self.id).order_by(
             Content.creation_date)
-
-        return descendants
 
     def is_read(self):
         # TODO: Make it user-specific.
@@ -311,23 +309,19 @@ class Post(Content):
         return query.scalar()
 
     def ancestor_ids(self):
-        ancestor_ids = [
+        return [
             int(ancestor_id) \
             for ancestor_id \
             in self.ancestry.split(',') \
             if ancestor_id
         ]
-        return ancestor_ids
 
     def ancestors(self):
-
-        ancestors = [
+        return [
             Post.get(ancestor_id) \
             for ancestor_id \
             in self.ancestor_ids
         ]
-
-        return ancestors
 
     def prefetch_descendants(self):
         pass  #TODO
@@ -589,10 +583,7 @@ class Post(Content):
     @classmethod
     def restrict_to_owners_condition(cls, query, user_id, alias=None, alias_maker=None):
         if not alias:
-            if alias_maker:
-                alias = alias_maker.alias_from_class(cls)
-            else:
-                alias = cls
+            alias = alias_maker.alias_from_class(cls) if alias_maker else cls
         return (query, alias.creator_id == user_id)
 
 

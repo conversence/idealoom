@@ -484,10 +484,7 @@ def circus_restart():
 def is_circus_running():
     with settings(warn_only=True), hide('running', 'stdout', 'stderr'):
         circusd_cmd_result = venvcmd("python -m circus.circusctl --timeout 5 dstats")
-        if circusd_cmd_result.failed:
-            return False
-        else:
-            return True
+        return not circusd_cmd_result.failed
 
 def circus_process_start(process_name):
     """
@@ -506,7 +503,7 @@ def circus_process_start(process_name):
             if circusd_cmd_result.failed:
                 print(red('Failed starting circusd'))
                 exit()
-    for try_num in range(20):
+    for _ in range(20):
         with hide('running', 'stdout'):
             status = venvcmd("python -m circus.circusctl --timeout 5 status %s" % process_name)
 
@@ -540,7 +537,7 @@ def circus_process_stop(process_name):
     if not match:
         print(cyan('Circusd doesn\'t seem to be running, nothing to stop'))
         return
-    for try_num in range(20):
+    for _ in range(20):
         venvcmd("python -m circus.circusctl --timeout 10 stop %s" % process_name)
         with hide('running', 'stdout'):
             status_cmd_result = venvcmd("python -m circus.circusctl status %s" % process_name)
@@ -1589,10 +1586,7 @@ def create_sentry_project():
     keys = r.json()
     assert len(keys), "No key defined?"
     default = [k for k in keys if k["label"] == "Default"]
-    if default:
-        key = default[0]
-    else:
-        key = keys[0]
+    key = default[0] if default else keys[0]
     # This should ideally go in the .rc file, but fab should not write rc files.
     # putting it in the local random file for now.
     parser = RawConfigParser()
@@ -2212,36 +2206,37 @@ def build_doc():
 @task
 def set_fail2ban_configurations():
     """Utilize configurations to populate and push fail2ban configs, must be done as a sudo user"""
-    if exists('/etc/fail2ban'):
-        from jinja2 import Environment, FileSystemLoader
-        # This is done locally
-        template_folder = os.path.join(local_code_root, 'assembl', 'templates', 'system')
-        jenv = Environment(
-            loader=FileSystemLoader(template_folder),
-            autoescape=lambda t: False)
-        filters = [f for f in os.listdir(template_folder) if f.startswith('filter-')]
-        filters.append('jail.local.jinja2')
-        filters_to_file = {}
-        for f in filters:
-            with NamedTemporaryFile(delete=False) as f2:
-                filters_to_file[f] = f2.name
-        try:
-            # populate jail and/or filters
-            print("Generating template files")
-            for (template_name, temp_path) in filters_to_file.items():
-                with open(temp_path, 'w') as f:
-                    filter_template = jenv.get_template(template_name)
-                    f.write(filter_template.render(**env))
+    if not exists('/etc/fail2ban'):
+        return
+    from jinja2 import Environment, FileSystemLoader
+    # This is done locally
+    template_folder = os.path.join(local_code_root, 'assembl', 'templates', 'system')
+    jenv = Environment(
+        loader=FileSystemLoader(template_folder),
+        autoescape=lambda t: False)
+    filters = [f for f in os.listdir(template_folder) if f.startswith('filter-')]
+    filters.append('jail.local.jinja2')
+    filters_to_file = {}
+    for f in filters:
+        with NamedTemporaryFile(delete=False) as f2:
+            filters_to_file[f] = f2.name
+    try:
+        # populate jail and/or filters
+        print("Generating template files")
+        for (template_name, temp_path) in filters_to_file.items():
+            with open(temp_path, 'w') as f:
+                filter_template = jenv.get_template(template_name)
+                f.write(filter_template.render(**env))
 
-                final_name = template_name[:-7]  # remove .jinja2 extension
-                final_path = '/etc/fail2ban/'
-                if final_name.startswith('filter-'):
-                    final_name = final_name[7:]  # Remove filter-
-                    final_name += '.conf'  # add extension
-                    final_path += 'filter.d/'
-                final_path = join(final_path, final_name)
-                put(temp_path, final_path)
+            final_name = template_name[:-7]  # remove .jinja2 extension
+            final_path = '/etc/fail2ban/'
+            if final_name.startswith('filter-'):
+                final_name = final_name[7:]  # Remove filter-
+                final_name += '.conf'  # add extension
+                final_path += 'filter.d/'
+            final_path = join(final_path, final_name)
+            put(temp_path, final_path)
 
-        finally:
-            for path in filters_to_file.values():
-                os.unlink(path)
+    finally:
+        for path in filters_to_file.values():
+            os.unlink(path)

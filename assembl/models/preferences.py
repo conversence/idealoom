@@ -35,10 +35,7 @@ def merge_json(base, patch):
         return patch
     base = dict(base)
     for k, v in patch.items():
-        if k in base:
-            base[k] = merge_json(base[k], v)
-        else:
-            base[k] = v
+        base[k] = merge_json(base[k], v) if k in base else v
     return base
 
 

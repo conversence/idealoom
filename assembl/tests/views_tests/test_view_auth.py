@@ -119,12 +119,12 @@ def test_social_login(
     url = urllib.parse.urlparse(res.location)
     qs = urllib.parse.parse_qs(url.query)
     state = qs['state']
-    code = 'code'
-    session_state = 'session_state'
     with mock.patch('requests.sessions.Session.request') as mock_request:
         mock_request.side_effect = fake_response_handler
         path = test_webrequest.route_path(
             'social.complete', backend=google_identity_provider.provider_type)
+        code = 'code'
+        session_state = 'session_state'
         res2 = test_app.get(path, {
             'state': state,
             'code': code,
@@ -155,8 +155,6 @@ def test_add_social_account(
     url = urllib.parse.urlparse(res.location)
     qs = urllib.parse.parse_qs(url.query)
     state = qs['state']
-    code = 'code'
-    session_state = 'session_state'
     cookie = next(iter(test_app.cookiejar))
     beaker_session = session_factory(Request.blank(
         "/", cookies={cookie.name: cookie.value}))
@@ -167,6 +165,8 @@ def test_add_social_account(
         mock_request.side_effect = fake_response_handler
         path = test_webrequest.route_path(
             'social.complete', backend=google_identity_provider.provider_type)
+        code = 'code'
+        session_state = 'session_state'
         res2 = test_app.get(path, {
             'state': state,
             'code': code,
@@ -195,13 +195,13 @@ def test_merge_social_account(
     url = urllib.parse.urlparse(res.location)
     qs = urllib.parse.parse_qs(url.query)
     state = qs['state']
-    code = 'code'
-    session_state = 'session_state'
-
     with mock.patch('requests.sessions.Session.request') as mock_request:
         mock_request.side_effect = fake_response_handler
         path = test_webrequest.route_path(
             'social.complete', backend=google_identity_provider.provider_type)
+        code = 'code'
+        session_state = 'session_state'
+
         res2 = test_app.get(path, {
             'state': state,
             'code': code,

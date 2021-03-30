@@ -91,16 +91,15 @@ class AbstractMailbox(PostSource):
         if self.__compiled_subject_mangling_regex is None:
             self._compile_subject_mangling_regex()
 
-        if self.__compiled_subject_mangling_regex:
-            if self.subject_mangling_replacement:
-                repl = self.subject_mangling_replacement
-            else:
-                repl = ''
-            (retval, num) =\
-                self.__compiled_subject_mangling_regex.subn(repl, subject)
-            return retval
-        else:
+        if not self.__compiled_subject_mangling_regex:
             return subject
+        if self.subject_mangling_replacement:
+            repl = self.subject_mangling_replacement
+        else:
+            repl = ''
+        (retval, num) =\
+            self.__compiled_subject_mangling_regex.subn(repl, subject)
+        return retval
 
     @staticmethod
     def clean_angle_brackets(message_id):
@@ -257,10 +256,12 @@ class AbstractMailbox(PostSource):
 
         #Strip GMail quotes
         matches = doc.find_class('gmail_quote')
-        if len(matches) > 0:
-            if not matches[0].text or "---------- Forwarded message ----------" not in matches[0].text:
-                matches[0].drop_tree()
-                return html.tostring(doc, encoding="unicode")
+        if len(matches) > 0 and (
+            not matches[0].text
+            or "---------- Forwarded message ----------" not in matches[0].text
+        ):
+            matches[0].drop_tree()
+            return html.tostring(doc, encoding="unicode")
 
         #Strip modern Apple Mail quotes
         find = etree.XPath(r"//child::blockquote[contains(@type,'cite')]/preceding-sibling::br[contains(@class,'Apple-interchange-newline')]/parent::node()/parent::node()")
@@ -298,9 +299,10 @@ class AbstractMailbox(PostSource):
                                         '|'.join(['^Subject:.*$','^Objet :.*$']),
                                     ]
         regexpNS = "http://exslt.org/regular-expressions"
-        successiveStringsToMatchRegex = []
-        for singleHeaderLanguageRegex in successiveStringsToMatch:
-            successiveStringsToMatchRegex.append(r"descendant::*[re:test(text(), '"+singleHeaderLanguageRegex+"')]")
+        successiveStringsToMatchRegex = [
+            r"descendant::*[re:test(text(), '" + singleHeaderLanguageRegex + "')]"
+            for singleHeaderLanguageRegex in successiveStringsToMatch
+        ]
 
         regex = " and ".join(successiveStringsToMatchRegex)
         find = etree.XPath(r"//descendant::div["+regex+"]",
@@ -725,9 +727,7 @@ FROM post WHERE post.id IN (SELECT MAX(post.id) as max_post_id FROM imported_pos
         if parsed_email.get('Precedence', None) == 'list':
             # A mailing list message: Allow for mailing lists only
             return isinstance(self, MailingList)
-        if parsed_email.get('Auto-Submitted', None) == 'auto-generated':
-            return False
-        return True
+        return parsed_email.get('Auto-Submitted', None) != 'auto-generated'
 
     def generate_message_id(self, source_post_id):
         if source_post_id.startswith('<') and source_post_id.endswith('>'):

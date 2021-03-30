@@ -506,10 +506,12 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
                 email = email.split('@', 1)[-1]
                 if email.lower() in require_email_domain:
                     return True
-            if autologin_backend:
-                if isinstance(account, SocialAuthAccount):
-                    if account.provider_with_idp == autologin_backend:
-                        return True
+            if (
+                autologin_backend
+                and isinstance(account, SocialAuthAccount)
+                and account.provider_with_idp == autologin_backend
+            ):
+                return True
         return False
 
     @property
@@ -537,8 +539,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
 
     def get_notifications(self):
         for widget in self.widgets:
-            for n in widget.has_notification():
-                yield n
+            yield from widget.has_notification()
 
     def get_user_template(self, role_name, autocreate=False, on_thread=True):
         template = self.db.query(UserTemplate).join(
@@ -872,8 +873,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
     def get_extract_graphs_cif(self):
         from .idea import Idea
         for e in self.get_bound_extracts():
-            for graph in e.extract_graph_json():
-                yield graph
+            yield from e.extract_graph_json()
 
     def get_discussion_graph_cif(self):
         from .post import Post
@@ -1025,9 +1025,14 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
                 if link_types == ['InclusionRelation']:
                     kwargs = dict(color="grey", fontcolor="#333333")
                 G.add_edge(
-                    source, dest, label=";\\n".join([
-                        link_names[link_type] for link_type in link_types]),
-                    **kwargs)
+                    source,
+                    dest,
+                    label=";\\n".join(
+                        link_names[link_type] for link_type in link_types
+                    ),
+                    **kwargs
+                )
+
         G.layout('dot')
         return G
 
@@ -1051,14 +1056,16 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
             if for_user_id:
                 state = transition.source
                 required = transition.req_permission_name
-                if required not in base_permissions:
+                if (
+                    required not in base_permissions
+                    and required
+                    not in permissions_for_state(self.id, state.id, for_user_id)
+                ):
                     if required not in permissions_for_state(
-                            self.id, state.id, for_user_id):
-                        if required not in permissions_for_state(
-                                self.id, state.id, for_user_id, True):
-                            kwargs['color'] = "grey"
-                        else:
-                            kwargs['color'] = "orange"
+                            self.id, state.id, for_user_id, True):
+                        kwargs['color'] = "grey"
+                    else:
+                        kwargs['color'] = "orange"
             G.add_edge(transition.source_label, transition.target_label,
                        label=name, **kwargs)
         G.layout('dot')
@@ -1179,10 +1186,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
         """
         composer = ""
         base = self.get_base_url()
-        if kwargs.get('use_api2', True):
-            base += "/data/"
-        else:
-            base += "/"
+        base += "/data/" if kwargs.get('use_api2', True) else "/"
         uri = self.uri(base_uri=base)
         composer += uri
         for arg in args:

@@ -92,10 +92,7 @@ class UserRole(Base, PrivateObjectMixin):
     @classmethod
     def restrict_to_owners_condition(cls, query, user_id, alias=None, alias_maker=None):
         if not alias:
-            if alias_maker:
-                alias = alias_maker.alias_from_class(cls)
-            else:
-                alias = cls
+            alias = alias_maker.alias_from_class(cls) if alias_maker else cls
         return (query, alias.profile_id == user_id)
 
     def get_default_parent_context(self, request=None, user_id=None):
@@ -176,10 +173,7 @@ class AbstractLocalUserRole(DiscussionBoundBase, PrivateObjectMixin):
     @classmethod
     def restrict_to_owners_condition(cls, query, user_id, alias=None, alias_maker=None):
         if not alias:
-            if alias_maker:
-                alias = alias_maker.alias_from_class(cls)
-            else:
-                alias = cls
+            alias = alias_maker.alias_from_class(cls) if alias_maker else cls
         return (query, alias.profile_id == user_id)
 
 

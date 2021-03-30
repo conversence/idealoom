@@ -84,7 +84,7 @@ class HypothesisExtractSource(ImportRecordSource):
             rows = result.json().get('rows', None)
             if not rows:
                 break
-            latest = parse_datetime(max([x['updated'] for x in rows]))
+            latest = parse_datetime(max(x['updated'] for x in rows))
             self.read_data_gen(rows, admin_user_id, True)
         self.db.flush()
 

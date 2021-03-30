@@ -516,10 +516,7 @@ class AbstractAgentAccount(Base):
     @classmethod
     def restrict_to_owners_condition(cls, query, user_id, alias=None, alias_maker=None):
         if not alias:
-            if alias_maker:
-                alias = alias_maker.alias_from_class(cls)
-            else:
-                alias = cls
+            alias = alias_maker.alias_from_class(cls) if alias_maker else cls
         return (query, alias.profile_id == user_id)
 
     __mapper_args__ = {
@@ -934,10 +931,9 @@ class User(NamedClassMixin, OriginMixin, AgentProfile):
     def get_all_permissions(self):
         from ..auth.util import get_permissions
         from .discussion import Discussion
-        permissions = {
+        return {
             Discussion.uri_generic(d_id): get_permissions(self.id, d_id)
             for (d_id,) in self.db.query(Discussion.id)}
-        return permissions
 
     def send_to_changes(self, connection=None, operation=CrudOperation.UPDATE,
                         discussion_id=None, view_def="changes"):

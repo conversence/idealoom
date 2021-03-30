@@ -233,8 +233,7 @@ class SocialAuthAccount(
     def create_user(cls, email=None, username=None, fullname=None, *args, **kwargs):
         if fullname:
             kwargs['name'] = fullname
-        user = cls._new_instance(cls.user_model(), *args, **kwargs)
-        return user
+        return cls._new_instance(cls.user_model(), *args, **kwargs)
 
     @classmethod
     def get_user(cls, pk):
@@ -328,10 +327,7 @@ class SocialAuthAccount(
 
     def display_name(self):
         # TODO: format according to provider, ie @ for twitter.
-        if self.username:
-            name = self.username
-        else:
-            name = self.uid
+        name = self.username or self.uid
         return ":".join((self.identity_provider.provider_type, name))
 
     def get_provider_name(self):

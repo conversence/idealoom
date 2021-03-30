@@ -126,8 +126,13 @@ def put_permissions_for_role(request):
     permissions = set(session.query(Permission).filter(Permission.name.in_(data)).all())
     data = set(data)
     if len(permissions) != len(data):
-        raise HTTPBadRequest("Not valid permissions: %s" % (repr(
-            data - set((p.name for p in permissions))),))
+        raise HTTPBadRequest(
+            (
+                "Not valid permissions: %s"
+                % (repr(data - {p.name for p in permissions}),)
+            )
+        )
+
     known_dp = session.query(DiscussionPermission).join(Permission).filter(
         role=role, discussion=discussion).all()
     dp_by_permission = {dp.permission.name: dp for dp in known_dp}
@@ -202,8 +207,10 @@ def put_global_roles_for_user(request):
     roles = set(session.query(Role).filter(Role.name.in_(data)).all())
     data = set(data)
     if len(roles) != len(data):
-        raise HTTPBadRequest("Not valid roles: %s" % (repr(
-            data - set((p.name for p in roles))),))
+        raise HTTPBadRequest(
+            ("Not valid roles: %s" % (repr(data - {p.name for p in roles}),))
+        )
+
     known_gu_roles = session.query(UserRole).join(Role).filter(
         user=user).all()
     gur_by_role = {gur.role.name: gur for gur in known_gu_roles}
@@ -267,8 +274,10 @@ def put_discussion_roles_for_user(request):
     roles = set(session.query(Role).filter(Role.name.in_(data)).all())
     data = set(data)
     if len(roles) != len(data):
-        raise HTTPBadRequest("Not valid roles: %s" % (repr(
-            data - set((p.name for p in roles))),))
+        raise HTTPBadRequest(
+            ("Not valid roles: %s" % (repr(data - {p.name for p in roles}),))
+        )
+
     known_lu_roles = session.query(LocalUserRole).join(Role).filter(
         user=user, discussion=discussion).all()
     lur_by_role = {lur.role.name: lur for lur in known_lu_roles}

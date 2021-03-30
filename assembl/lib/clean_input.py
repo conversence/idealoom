@@ -147,10 +147,7 @@ def sanitize_html(html_value, valid_tags=VALID_TAGS,
     """
     if keep_tag_content:
         return _sanitize_html_keep(html_value, valid_tags, valid_attributes)
-    if valid_tags is not None:
-        cleaner = _make_cleaner(valid_tags)
-    else:
-        cleaner = _BASE_CLEANER
+    cleaner = _BASE_CLEANER if valid_tags is None else _make_cleaner(valid_tags)
     return ''.join(_clean_html(html_value, cleaner))
 
 

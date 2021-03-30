@@ -482,10 +482,7 @@ class Extract(DiscussionBoundBase, OriginMixin):
     @classmethod
     def restrict_to_owners_condition(cls, query, user_id, alias=None, alias_maker=None):
         if not alias:
-            if alias_maker:
-                alias = alias_maker.alias_from_class(cls)
-            else:
-                alias = cls
+            alias = alias_maker.alias_from_class(cls) if alias_maker else cls
         return (query, alias.creator_id == user_id)
 
     crud_permissions = CrudPermissions(
@@ -692,14 +689,15 @@ class TextFragmentIdentifier(AnnotationSelector):
                 "end": self.xpath_end, "endOffset": self.offset_end}
 
     def as_web_annotation(self):
-        all = []
-        all.append({
-            "type": "TextQuoteSelector",
-            "exact": self.body})
-        all.append({
-            "conformsTo": "http://tools.ietf.org/rfc/rfc3023",
-            "type": "FragmentSelector",
-            "value": self.as_xpointer()})
+        all = [
+            {"type": "TextQuoteSelector", "exact": self.body},
+            {
+                "conformsTo": "http://tools.ietf.org/rfc/rfc3023",
+                "type": "FragmentSelector",
+                "value": self.as_xpointer(),
+            },
+        ]
+
         if self.xpath_start == self.xpath_end:
             all.append({
                 "id": self.uri(),

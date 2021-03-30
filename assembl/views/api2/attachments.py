@@ -91,7 +91,7 @@ def get_file(request):
         raise HTTPNotAcceptable("Infected with a virus")
     handoff_to_nginx = asbool(config.get('handoff_to_nginx', False))
     if handoff_to_nginx:
-        kwargs = dict()
+        kwargs = {}
     else:
         if 'Range' in request.headers:
             raise HTTPRequestRangeNotSatisfiable()

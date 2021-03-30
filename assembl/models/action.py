@@ -105,10 +105,7 @@ class Action(TombstonableMixin, OriginMixin, DiscussionBoundBase):
     @classmethod
     def restrict_to_owners_condition(cls, query, user_id, alias=None, alias_maker=None):
         if not alias:
-            if alias_maker:
-                alias = alias_maker.alias_from_class(cls)
-            else:
-                alias = cls
+            alias = alias_maker.alias_from_class(cls) if alias_maker else cls
         return (query, alias.actor_id == user_id)
 
     crud_permissions = CrudPermissions(

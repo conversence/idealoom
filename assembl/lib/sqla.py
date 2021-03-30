@@ -573,7 +573,7 @@ class BaseOps(object):
 
         The :py:meth:`uri_generic` will follow this pattern.
         Used for Virtuoso RDF-Relational mapping; disabled for now."""
-        if getattr(cls, '_iri_class', 0) is 0:
+        if getattr(cls, '_iri_class', 0) == 0:
             id_column = getattr(cls, 'id', None)
             if id_column is None:
                 cls._iri_class = None
@@ -1148,9 +1148,8 @@ class BaseOps(object):
             # Not an instance
             return None
         target_id = json.get('@id', None)
-        if target_id is not None:
-            if isinstance(target_id, string_types):
-                instance = object_importer.get_object(target_id)
+        if target_id is not None and isinstance(target_id, string_types):
+            instance = object_importer.get_object(target_id)
         if instance is not None:
             # Interesting that it works here and not upstream
             sub_context = instance.get_instance_context(context)
@@ -1923,15 +1922,14 @@ class BaseOps(object):
                     if json is None:
                         # TODO: Use the logic in api2.instance_put_form
                         raise NotImplementedError()
-                    else:
-                        # TODO: check the CrudPermissions on subobject,
-                        # UNLESS it's they're inherited (eg Langstring)
-                        other = other._do_update_from_json(
-                            json, parse_def, context,
-                            duplicate_handling, object_importer)
-                        return other.handle_duplication(
-                            json, parse_def, context,
-                            duplicate_handling, object_importer)
+                    # TODO: check the CrudPermissions on subobject,
+                    # UNLESS it's they're inherited (eg Langstring)
+                    other = other._do_update_from_json(
+                        json, parse_def, context,
+                        duplicate_handling, object_importer)
+                    return other.handle_duplication(
+                        json, parse_def, context,
+                        duplicate_handling, object_importer)
                 else:
                     raise ValueError("Invalid value of duplicate_handling")
         return self

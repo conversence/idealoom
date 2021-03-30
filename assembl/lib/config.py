@@ -12,14 +12,11 @@ log = logging.getLogger()
 def set_config(settings, reconfig=False):
     """ Set the settings object. """
     global _settings
-    if _settings:
-        if reconfig:
-            _settings = settings
-        else:
-            _settings.update(settings)
-            log.debug("combined settings:" + repr(_settings))
-    else:
+    if reconfig or not _settings:
         _settings = settings
+    else:
+        _settings.update(settings)
+        log.debug("combined settings:" + repr(_settings))
     return _settings
 
 

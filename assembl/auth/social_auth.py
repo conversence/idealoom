@@ -67,7 +67,7 @@ def associate_by_email(backend, details, provider=None, user=None, *args, **kwar
         users = list(backend.strategy.storage.user.get_users_by_email(email))
         if user and user not in users:
             users.insert(0, user)
-        if len(users) == 0:
+        if not users:
             return None
         user = users.pop(0)
         if not isinstance(user, User):
@@ -144,7 +144,7 @@ def associate_user(backend, uid, user=None, social=None, details=None,
 def auto_subscribe(backend, social, user, *args, **kwargs):
     if not user:
         return
-    if user and social.email:
+    if social.email:
         # Remove pure-email account if found social.
         for email_account in user.email_accounts:
             if email_account.email_ci == social.email:

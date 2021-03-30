@@ -56,9 +56,8 @@ def backbone_include(config):
     config.add_route('test', '/test')
 
 def get_theme_base_path():
-    theme_base_path = os.path.join(os.path.dirname(os.path.dirname(__file__)),
+    return os.path.join(os.path.dirname(os.path.dirname(__file__)),
                               'static', 'css', 'themes')
-    return theme_base_path
 
 def find_theme(theme_name):
     """

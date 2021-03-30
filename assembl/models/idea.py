@@ -461,7 +461,7 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
     def widget_ancestor_endpoints(self, target_idea=None):
         # HACK. Review consequences after test.
         target_idea = target_idea or self
-        inherited = dict()
+        inherited = {}
         for p in self.get_parents():
             inherited.update(p.widget_ancestor_endpoints(target_idea))
         inherited.update({
@@ -535,7 +535,7 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
         query = self.get_ancestors_query(
             tombstone_date=self.tombstone_date, subquery=not id_only)
         if id_only:
-            return list((id for (id,) in self.db.query(query)))
+            return [id for (id,) in self.db.query(query)]
         else:
             return self.db.query(Idea).filter(Idea.id.in_(query)).all()
 
@@ -592,7 +592,7 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
         query = self.get_descendants_query(
             inclusive=inclusive, subquery=not id_only)
         if id_only:
-            return list((id for (id,) in self.db.query(query)))
+            return [id for (id,) in self.db.query(query)]
         else:
             return self.db.query(Idea).filter(Idea.id.in_(query)).all()
 
@@ -840,13 +840,12 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
             ).order_by(count(Extract.id).desc())
         if id_only:
             return [AgentProfile.uri_generic(a) for (a,) in query]
-        else:
-            ids = [x for (x,) in query]
-            if not ids:
-                return []
-            agents = {a.id: a for a in self.db.query(AgentProfile).filter(
-                AgentProfile.id.in_(ids))}
-            return [agents[id] for id in ids]
+        ids = [x for (x,) in query]
+        if not ids:
+            return []
+        agents = {a.id: a for a in self.db.query(AgentProfile).filter(
+            AgentProfile.id.in_(ids))}
+        return [agents[id] for id in ids]
 
     def get_contributors(self):
         from .generic import Content
@@ -1071,8 +1070,7 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
                 if idea_id in idea_contains:
                     break
                 idea_contains[idea_id] = counter.paths[idea_id].includes_post(post_path)
-        ideas = [id for (id, incl) in idea_contains.items() if incl]
-        return ideas
+        return [id for (id, incl) in idea_contains.items() if incl]
 
     @classmethod
     def idea_read_counts(cls, discussion_id, post_id, user_id):

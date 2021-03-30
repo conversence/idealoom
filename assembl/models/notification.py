@@ -285,9 +285,10 @@ class NotificationSubscription(DiscussionBoundBase, OriginMixin):
         if user:
             target_user_id = user.id
         if self.user_id:
-            if target_user_id != self.user_id:
-                if not user_has_permission(self.discussion_id, user_id, P_ADMIN_DISC):
-                    raise HTTPUnauthorized()
+            if target_user_id != self.user_id and not user_has_permission(
+                self.discussion_id, user_id, P_ADMIN_DISC
+            ):
+                raise HTTPUnauthorized()
             # For now, do not allow changing user, it's way too complicated.
             if 'user' in json and User.get_database_id(json['user']) != self.user_id:
                 raise HTTPBadRequest()
@@ -360,10 +361,7 @@ class NotificationSubscription(DiscussionBoundBase, OriginMixin):
         """Filter query according to object owners.
         Also allow to read subscriptions of templates."""
         if not alias:
-            if alias_maker:
-                alias = alias_maker.alias_from_class(cls)
-            else:
-                alias = cls
+            alias = alias_maker.alias_from_class(cls) if alias_maker else cls
         # optimize the join on a single table
         utt = inspect(UserTemplate).tables[0]
         query = query.outerjoin(utt, alias.user_id == utt.c.id)
@@ -1016,14 +1014,12 @@ class Notification(Base):
             self.event_source_object().creator.name,
             self.get_from_email_address())
         recipient = self.get_to_email_address()
-        message = Message(
+        return Message(
             subject=self.get_notification_subject(),
             sender=sender,
             recipients=[recipient],
             extra_headers=headers,
             body=email_text_part, html=email_html_part)
-
-        return message
 
 
 User.notifications = relationship(

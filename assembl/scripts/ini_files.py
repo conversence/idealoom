@@ -396,10 +396,7 @@ def iniconfig_to_rc(parser, dest=None, extends=None, target_dir=None):
                                    os.path.basename(extends))
         dest.write("_extends = %s\n" % (extends,))
     for section in parser.sections():
-        if section == SECTION:
-            prefix = ''
-        else:
-            prefix = section + '__'
+        prefix = '' if section == SECTION else section + '__'
         for key, value in parser.items(section):
             if '\n' in value:
                 log.warning("avoid multiline values in RC: %s=%s" % (key, value))

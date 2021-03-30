@@ -234,12 +234,10 @@ class FacebookParser(object):
 
     def get_feed_paginated(self, object_id):
         wall, page = self.get_feed(object_id)
-        for post in wall:
-            yield post
+        yield from wall
         if page:
             for wall_posts in self._get_next_feed(object_id, page):
-                for post in iter(wall_posts):
-                    yield post
+                yield from iter(wall_posts)
 
     # ----------------------------- comments ----------------------------------
     def get_comments(self, object_id, **args):
@@ -274,21 +272,17 @@ class FacebookParser(object):
         comments = post.get('comments')
         comments_data = comments.get('data')
         next_page = comments.get('paging', {}).get('next', None)
-        for comment in comments_data:
-            yield comment
+        yield from comments_data
         for comments in self._get_next_comments(post.get('id'), next_page):
-            for comment in comments:
-                yield comment
+            yield from comments
 
     def get_comments_on_comment_paginated(self, parent_comment):
         comments, next_page = self.get_comments(parent_comment.get('id'))
-        for comment in comments:
-            yield comment
+        yield from comments
         for comments in self._get_next_comments(
                                            parent_comment.get('id'),
                                            next_page):
-            for comment in comments:
-                yield comment
+            yield from comments
 
     # ----------------------------- posts -------------------------------------
     def get_single_post(self, object_id, **kwargs):
@@ -327,12 +321,10 @@ class FacebookParser(object):
 
     def get_posts_paginated(self, object_id):
         wall, page = self.get_posts(object_id)
-        for post in wall:
-            yield post
+        yield from wall
         if page:
             for page_post in self._get_next_posts_page(object_id, page):
-                for post in page_post:
-                    yield post
+                yield from page_post
     # -------------------------------------------------------------------------
 
     def get_app_id(self):
@@ -351,8 +343,7 @@ class FacebookParser(object):
 
     def _get_query_from_url(self, page):
         parse = urlparse(page)
-        qs = parse_qs(parse.query)
-        return qs
+        return parse_qs(parse.query)
 
     def get_user_post_creator(self, post):
         # Return {'id': ..., 'name': ...}
@@ -372,19 +363,17 @@ class FacebookParser(object):
         return comment.get('from')
 
     def _get_tagged_entities(self, source, entity_type):
-        if 'message_tags' in source:
-            # Messaage_tags can either be directly linked, or they can be
-            # ordinal keys (dict of dict)
-            # Check if no ordinality exists:
-            if 'id' in source['message_tags'][0]:
-                return [x for x in source['message_tags']
-                        if x['type'] == entity_type]
-            else:
-                ordinal_dict = source['message_tags']
-                return [y for y in ordinal_dict.values()
-                        if y['type'] == entity_type]
-        else:
+        if 'message_tags' not in source:
             return []
+        # Messaage_tags can either be directly linked, or they can be
+        # ordinal keys (dict of dict)
+        # Check if no ordinality exists:
+        if 'id' in source['message_tags'][0]:
+            return [x for x in source['message_tags']
+                    if x['type'] == entity_type]
+        ordinal_dict = source['message_tags']
+        return [y for y in ordinal_dict.values()
+                if y['type'] == entity_type]
 
     def get_users_from_mention(self, comment):
         return self._get_tagged_entities(comment, 'user')
@@ -452,7 +441,7 @@ class FacebookParser(object):
             return None
 
         attach_type = attachment.get('type')
-        if attach_type == 'photo' or attach_type == 'video':
+        if attach_type in ['photo', 'video']:
             # Just return the full post address
             return {
                     'url': attachment.get('url', None),
@@ -539,11 +528,17 @@ class FacebookGenericSource(PostSource):
                     lower=None, upper=None):
         created_date = datetime.utcnow()
         last_import = created_date
-        return cls(name=some_name, creation_date=created_date,
-                   discussion=discussion, fb_source_id=fb_id,
-                   url_path=url, last_import=last_import,
-                   creator=creator, lower_bound=lower,
-                   upper_bound=upper)
+        return cls(
+            name=some_name,
+            creation_date=last_import,
+            discussion=discussion,
+            fb_source_id=fb_id,
+            url_path=url,
+            last_import=last_import,
+            creator=creator,
+            lower_bound=lower,
+            upper_bound=upper,
+        )
 
     @property
     def upper_bound_timezone_checked(self):
@@ -597,9 +592,8 @@ class FacebookGenericSource(PostSource):
         return {x.uri_id: x for x in results}
 
     def _get_current_attachments(self):
-        results = self.db.query(PostAttachment).\
+        return self.db.query(PostAttachment).\
             filter_by(discussion=self.discussion).all()
-        return results
 
     def _create_fb_user(self, user, db):
         if user['id'] not in db:
@@ -642,10 +636,7 @@ class FacebookGenericSource(PostSource):
 
     def _url_exists(self, url, ls):
         "Internal function for attachment management"
-        for l in ls:
-            if l.document.uri_id == url:
-                return True
-        return False
+        return any(l.document.uri_id == url for l in ls)
 
     def _manage_attachment(self, post, getter):
         post_id = post.get('id', None)
@@ -734,10 +725,7 @@ class FacebookGenericSource(PostSource):
             # This makes the underlying assumption that a facebook
             # post only has ONE attachment
             self.clear_post_attachments(assembl_post)
-            self._create_attachments(post, assembl_post, getter)
-
-        else:
-            self._create_attachments(post, assembl_post, getter)
+        self._create_attachments(post, assembl_post, getter)
 
     def _manage_user(self, creator, users_db, reimport):
         if reimport:
@@ -1029,7 +1017,7 @@ class FacebookGenericSource(PostSource):
 
         tokens = [a for a in tokens if not a.is_expired()]
 
-        if len(tokens) > 0:
+        if tokens:
             return tokens[0]
         return None
 
@@ -1037,10 +1025,7 @@ class FacebookGenericSource(PostSource):
         self.provider = None
         self._get_facebook_provider()
         token = self.user_access_token()
-        if token:
-            api = FacebookAPI(token.token)
-        else:
-            api = FacebookAPI()
+        api = FacebookAPI(token.token) if token else FacebookAPI()
         self.parser = FacebookParser(api)
 
 
@@ -1149,9 +1134,7 @@ class FacebookAccessToken(Base):
 
     @property
     def infinite_token(self):
-        if not self.expiration:
-            return True
-        return False
+        return not self.expiration
 
     @property
     def expires(self):
@@ -1161,8 +1144,6 @@ class FacebookAccessToken(Base):
     def expires(self, value):
         if isinstance(value, datetime):
             self.expiration = value
-        else:
-            pass
 
     @property
     def long_lived_access_token(self):
@@ -1249,10 +1230,7 @@ class FacebookAccessToken(Base):
     @classmethod
     def restrict_to_owners_condition(cls, query, user_id, alias=None, alias_maker=None):
         if not alias:
-            if alias_maker:
-                alias = alias_maker.alias_from_class(cls)
-            else:
-                alias = cls
+            alias = alias_maker.alias_from_class(cls) if alias_maker else cls
         query = query.join(alias.user)
         return (query, SocialAuthAccount.profile_id == user_id)
 

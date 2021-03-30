@@ -36,12 +36,8 @@ def get_subclasses_recursive(c):
 
 def get_concrete_subclasses_recursive(c):
     """Recursively returns only the concrete classes is a class hierarchy"""
-    concreteSubclasses = []
-    subclasses = get_subclasses_recursive(c)
-    for d in subclasses:
-        if not inspect.isabstract(d):
-            concreteSubclasses.append(d)
-    return concreteSubclasses
+    return [d for d in get_subclasses_recursive(c)
+            if not inspect.isabstract(d)]
 
 
 def get_global_base_url(require_secure=None, override_port=None):

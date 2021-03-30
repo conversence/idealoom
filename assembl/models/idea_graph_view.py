@@ -219,12 +219,11 @@ class SubGraphIdeaLinkAssociation(DiscussionBoundBase):
 
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):
-        if alias_maker:
-            subgraph_alias = alias_maker.alias_from_relns(cls.sub_graph)
-            return ((subgraph_alias.discussion_id == discussion_id))
-        else:
+        if not alias_maker:
             return ((cls.sub_graph_id == ExplicitSubGraphView.id),
                     (ExplicitSubGraphView.discussion_id == discussion_id))
+        subgraph_alias = alias_maker.alias_from_relns(cls.sub_graph)
+        return ((subgraph_alias.discussion_id == discussion_id))
 
     crud_permissions = CrudPermissions(P_ADMIN_DISC)
 

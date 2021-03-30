@@ -94,14 +94,14 @@ class FrontendUrls(object):
     @staticmethod
     def getRequestedPostId(request):
         if 'remainder' in request.matchdict:
-            return '/'.join(i for i in request.matchdict['remainder'])
+            return '/'.join(request.matchdict['remainder'])
         return None
 
     # used for route 'purl_idea': '/idea*remainder'
     @staticmethod
     def getRequestedIdeaId(request):
         if 'remainder' in request.matchdict:
-            return '/'.join(i for i in request.matchdict['remainder'])
+            return '/'.join(request.matchdict['remainder'])
         return None
 
     def getDiscussionLogoUrl(self):
