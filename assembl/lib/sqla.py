@@ -107,7 +107,7 @@ _session_maker = None
 db_schema = None
 _metadata = None
 Base = None
-class_registry = dict()
+class_registry = {}
 aliased_class_registry = None
 
 
@@ -1583,10 +1583,12 @@ class BaseOps(object):
             collection = sub_i_ctx.__parent__.collection
             parent_instance = sub_i_ctx.__parent__.parent_instance
             attr = collection.get_attribute(parent_instance)
-            if isinstance(attr, list):
-                if sub_instance not in attr:
-                    collection.on_new_instance(self, sub_instance)
-            elif attr != sub_instance:
+            if (
+                isinstance(attr, list)
+                and sub_instance not in attr
+                or not isinstance(attr, list)
+                and attr != sub_instance
+            ):
                 collection.on_new_instance(self, sub_instance)
             self.db.add(sub_instance)
 
@@ -1651,10 +1653,6 @@ class BaseOps(object):
                             self.__class__.__name__))
                 setter(self, value)
                 continue
-            elif parse_instruction[0] == "'":
-                if value != parse_instruction[1:]:
-                    raise HTTPBadRequest("%s should be %s'" % (
-                        key, parse_instruction))
             else:
                 key = parse_instruction
             accessor = None

@@ -66,8 +66,6 @@ WHERE p.id = post.id
 )
         """)
         op.create_unique_constraint(config.get('db_schema')+"_"+config.get('db_user')+"_imported_post_UNQC_source_post_id_source_id", "imported_post", ["source_post_id","source_id"])
-        pass
-
     # Do stuff with the app's models here.
     from assembl import models as m
     db = m.get_session_maker()()

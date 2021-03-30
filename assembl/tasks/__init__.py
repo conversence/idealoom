@@ -104,12 +104,9 @@ class CeleryWithConfig(Celery):
         settings_file = join(rootdir, 'local.ini')
         if not exists(settings_file):
             settings_file = join(rootdir, 'production.ini')
-        if not exists(settings_file):
             rootdir = dirname(dirname(dirname(realpath(__file__))))
             settings_file = join(rootdir, 'local.ini')
-        if not exists(settings_file):
             settings_file = join(rootdir, 'production.ini')
-        if not exists(settings_file):
             raise RuntimeError("Missing settings file")
         _settings = settings = get_appsettings(settings_file, 'idealoom')
         configure_zmq(settings['changes_socket'], False)

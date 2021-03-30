@@ -347,13 +347,9 @@ class Optics(object):
         max_val = N.amax(RD[start+1:end])
         if max_val > cluster_edge:
             return False
-        if down_area:
-            if not (down_area.start <= start <= down_area.end):
-                return False
-        if up_area:
-            if not (up_area.start <= end <= up_area.end):
-                return False
-        return True
+        if down_area and not (down_area.start <= start <= down_area.end):
+            return False
+        return not up_area or up_area.start <= end <= up_area.end
 
     def as_cluster(self, down_area, up_area):
         cluster = self.cluster_boundary(down_area, up_area)
@@ -396,8 +392,8 @@ class Optics(object):
                         continue
                     steep_down_areas[a] = max(steep_down_areas[a], RD[index])
                 cutoff = RD[ivl.end+1] * (1-eps)
-                for a in steep_down_areas:
-                    if steep_down_areas[a] <= cutoff:
+                for a, value in steep_down_areas.items():
+                    if value <= cutoff:
                         # print 'trying', a, ivl
                         cluster = self.as_cluster(a, ivl)
                         if cluster:
@@ -424,7 +420,7 @@ class Optics(object):
                 check = check.parent
             else:
                 assert False
-        return base
+        return last
 
     def cluster_as_ids(self, cluster):
         return self.order[cluster.as_slice()]

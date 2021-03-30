@@ -44,8 +44,11 @@ def upgrade(pyramid_env):
 def downgrade(pyramid_env):
     from assembl.semantic.virtuoso_mapping import get_session
     from assembl.models import Content
-    assert not ('body' in Content.__table__.c or 'subject' in Content.__table__.c), \
-        "Comment out the body and subject from Content to run the back migration"
+    assert (
+        'body' not in Content.__table__.c
+        and 'subject' not in Content.__table__.c
+    ), "Comment out the body and subject from Content to run the back migration"
+
     dbsession = get_session()
     try:
         dbsession.execute("SPARQL drop quad map quadnames:col_pattern_Content_subject")

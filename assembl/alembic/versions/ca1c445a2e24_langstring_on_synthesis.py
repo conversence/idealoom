@@ -72,8 +72,7 @@ def upgrade(pyramid_env):
                     lang = candidate_langs[0]
 
             def as_lang_string(text):
-                ls = m.LangString.create(text, lang)
-                return ls
+                return m.LangString.create(text, lang)
 
             if subject:
                 synthesis.subject = as_lang_string(subject)

@@ -52,11 +52,15 @@ def upgrade(pyramid_env):
                 m.IdeaLink.tombstone_date == None).first()[0] <= 1
             bases.sort()
             first = bases[0]
-            db.execute("""UPDATE idea_idea_link
+            db.execute(
+                """UPDATE idea_idea_link
                 SET base_id = %d,
                 creation_date = (SELECT creation_date FROM idea_idea_link AS il2 WHERE base_id=%d LIMIT 1)
                 WHERE base_id IN (%s)
-                """ % (first, first, ','.join([str(id) for id in bases[1:]])))
+                """
+                % (first, first, ','.join(str(id) for id in bases[1:]))
+            )
+
         mark_changed()
 
 

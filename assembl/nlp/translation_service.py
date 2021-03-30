@@ -247,9 +247,8 @@ class AbstractTranslationService(LanguageIdentificationService):
             # This is only stored if both identification and translation
             # failed to identify a language.
             target_lse = source_lse.langstring.entries_as_dict.get(target, None)
-            if target_lse and not retranslate:
-                if self.has_fatal_error(target_lse):
-                    return target_lse
+            if target_lse and not retranslate and self.has_fatal_error(target_lse):
+                return target_lse
         if target_lse is None:
             target_lse = LangStringEntry(
                 langstring_id=source_lse.langstring_id,
@@ -269,16 +268,24 @@ class AbstractTranslationService(LanguageIdentificationService):
                 lang = self.asPosixLocale(lang)
                 # What if detected language is not a discussion language?
                 if source_locale == LocaleLabel.UNDEFINED:
-                    if constrain_locale_threshold and (
-                            self.strlen_nourl(source_lse.value) <
-                            constrain_locale_threshold):
-                        if (not lang) or not any_locale_compatible(
-                                lang, self.discussion.discussion_locales):
-                            self.set_error(
-                                source_lse,
-                                LangStringStatus.IDENTIFIED_TO_UNKNOWN,
-                                "Identified to "+lang)
-                            return source_lse
+                    if (
+                        constrain_locale_threshold
+                        and (
+                            self.strlen_nourl(source_lse.value)
+                            < constrain_locale_threshold
+                        )
+                        and (
+                            (not lang)
+                            or not any_locale_compatible(
+                                lang, self.discussion.discussion_locales
+                            )
+                        )
+                    ):
+                        self.set_error(
+                            source_lse,
+                            LangStringStatus.IDENTIFIED_TO_UNKNOWN,
+                            "Identified to "+lang)
+                        return source_lse
                     source_lse.identify_locale(lang, dict(
                         service=self.__class__.__name__))
                     # This should never actually happen, because
@@ -307,11 +314,13 @@ class AbstractTranslationService(LanguageIdentificationService):
                 target_lse.value = None
         else:
             # Note: when retranslating, we may lose a valid translation.
-            if source_locale == LocaleLabel.UNDEFINED:
-                if not self.distinct_identify_step:
-                    # At least do this much.
-                    self.confirm_locale(source_lse)
-                    source_locale = source_lse.locale
+            if (
+                source_locale == LocaleLabel.UNDEFINED
+                and not self.distinct_identify_step
+            ):
+                # At least do this much.
+                self.confirm_locale(source_lse)
+                source_locale = source_lse.locale
             self.set_error(
                 target_lse, LangStringStatus.CANNOT_TRANSLATE,
                 "cannot translate")
@@ -654,13 +663,12 @@ class DeeplTranslationService(AbstractTranslationService):
     def decode_exception(self, exception, identify_phase=False):
         if isinstance(exception, requests.Timeout):
             return LangStringStatus.SERVICE_DOWN, str(exception)
-        if isinstance(exception, RuntimeError):
-            if exception.args[0] == "status":
-                status = exception.args[1]
-                if status in (456,):
-                    return LangStringStatus.QUOTA_ERROR, ""
-                if status in (400, 403, 404):
-                    return LangStringStatus.PERMANENT_TRANSLATION_FAILURE, ""
-                elif status in (503, 429):
-                    return LangStringStatus.SERVICE_DOWN, ""
+        if isinstance(exception, RuntimeError) and exception.args[0] == "status":
+            status = exception.args[1]
+            if status in (456,):
+                return LangStringStatus.QUOTA_ERROR, ""
+            if status in (400, 403, 404):
+                return LangStringStatus.PERMANENT_TRANSLATION_FAILURE, ""
+            elif status in (503, 429):
+                return LangStringStatus.SERVICE_DOWN, ""
         return LangStringStatus.UNKNOWN_ERROR, ""

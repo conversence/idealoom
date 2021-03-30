@@ -239,10 +239,7 @@ class PostPathLocalCollection(object):
             content = with_polymorphic(
                 Content, [], Content.__table__,
                 aliased=False, flat=True)
-            if labeled:
-                query = db.query(post.id.label("post_id"))
-            else:
-                query = db.query(post.id)
+            query = db.query(post.id.label("post_id")) if labeled else db.query(post.id)
             query = query.join(content, (content.id == post.id) &
                                (content.discussion_id==discussion_id))
             if include_deleted is not None:

@@ -245,7 +245,7 @@ def get_mapper_info(mapper):
     from assembl.lib.history_mixin import TombstonableMixin
     from assembl.models import LangStringEntry
     if mapper not in class_info:
-        pk_keys_cols = set([c for c in mapper.primary_key])
+        pk_keys_cols = set(mapper.primary_key)
         direct_reln = {r for r in mapper.relationships
                        if r.direction.name == 'MANYTOONE'
                        and r.viewonly == False
@@ -260,8 +260,11 @@ def get_mapper_info(mapper):
             # It might have been excluded by a relation.
             copy_col_props.add(mapper._props['tombstone_date'])
         non_nullable_reln = {
-            r for r in direct_reln
-            if any([not c.nullable for c in r.local_columns])}
+            r
+            for r in direct_reln
+            if any(not c.nullable for c in r.local_columns)
+        }
+
         treat_as_non_nullable = []
         for cls in mapper.class_.mro():
             relns = TREAT_AS_NON_NULLABLE.get(cls.__name__, ())
@@ -294,11 +297,10 @@ def assign_dict(values, r, subob):
 
 
 def assign_ob(ob, r, subob):
-    if r.direction.name != 'MANYTOONE':
-        if r.mapper != ob.__class__.__mapper__:
-            "DISCARDING", r
-            # Handled by the reverse connection
-            return
+    if r.direction.name != 'MANYTOONE' and r.mapper != ob.__class__.__mapper__:
+        "DISCARDING", r
+        # Handled by the reverse connection
+        return
     for col in r.local_columns:
         if col.foreign_keys:
             fkcol = next(iter(col.foreign_keys)).column
@@ -323,10 +325,7 @@ class JoinColumnsVisitor(ClauseVisitor):
         if cls in self.classes:
             return True
         for other_cls in self.classes:
-            if issubclass(cls, other_cls):
-                self.classes.add(cls)
-                return True
-            elif issubclass(other_cls, cls):
+            if issubclass(cls, other_cls) or issubclass(other_cls, cls):
                 self.classes.add(cls)
                 return True
 
@@ -370,10 +369,12 @@ class JoinColumnsVisitor(ClauseVisitor):
 
     def final_query(self):
         while len(self.missing):
-            missing = []
-            for column in self.missing:
-                if not self.process_column(column):
-                    missing.append(column)
+            missing = [
+                column
+                for column in self.missing
+                if not self.process_column(column)
+            ]
+
             if len(missing) == len(self.missing):
                 break
             self.missing = missing
@@ -526,12 +527,10 @@ def clone_discussion(
         for r in nullable_relns:
             subob = getattr(ob, r.key, None)
             if subob is not None:
-                if isinstance(subob, list):
+                if isinstance(subob, list) or subob not in copies_of:
                     local_promises[r] = subob
-                elif subob in copies_of:
-                    assign_dict(values, r, copies_of[subob])
                 else:
-                    local_promises[r] = subob
+                    assign_dict(values, r, copies_of[subob])
         values.update(changes[ob])
         if isinstance(ob, Discussion):
             values['table_of_contents'] = None
