@@ -869,23 +869,16 @@ class RelationCollectionDefinition(AbstractCollectionDefinition):
     def __init__(self, owner_class, relationship, name=None):
         super(RelationCollectionDefinition, self).__init__(
             owner_class, name or relationship.key, relationship.mapper.class_)
+        if not isinstance(relationship, RelationshipProperty):
+            relationship = getattr(
+                relationship.class_.__mapper__.relationships,
+                relationship.key, relationship)
         self.relationship = relationship
         back_properties = list(getattr(relationship, '_reverse_property', ()))
         if back_properties:
             # TODO: How to chose?
             self.back_relation = back_properties.pop()
             self.owner_class = self.back_relation.mapper.class_
-        elif relationship.info.get('backref', None):
-            back_ref = relationship.info['backref']
-            if isinstance(back_ref, InstrumentedAttribute):
-                back_ref = back_ref.class_.__mapper__.relationships.get(back_ref.key)
-            if isinstance(back_ref, str):
-                # TODO: This is probably doable with SQLA machinery...
-                cl_name, reln_name = back_ref.split(".", 1)
-                if cl_name == self.collection_class.__name__:
-                    back_ref = self.collection_class.__mapper__.relationships.get(reln_name, None)
-            if isinstance(back_ref, RelationshipProperty):
-                self.back_relation = back_ref
 
     def decorate_query(
             self, query, owner_alias, coll_alias, parent_instance, ctx):

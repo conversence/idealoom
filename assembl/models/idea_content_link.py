@@ -104,7 +104,7 @@ class IdeaContentLink(DiscussionBoundBase, OriginMixin):
 
     discussion = relationship(
         Discussion, viewonly=True, uselist=False, secondary=Content.__table__,
-        # backref is Discussion.idea_content_links below
+        backref="idea_content_links",
         info={'rdf': QuadMapPatternS(None, ASSEMBL.in_conversation)})
 
     @classmethod
@@ -120,12 +120,6 @@ class IdeaContentLink(DiscussionBoundBase, OriginMixin):
 
     crud_permissions = CrudPermissions(
             P_ADD_IDEA, P_READ, P_EDIT_IDEA, P_EDIT_IDEA)
-
-
-# explicit backref of IdeaContentLink.discussion
-Discussion.idea_content_links = relationship(
-    IdeaContentLink, viewonly=True, secondary=Content.__table__,
-    info={"backref": IdeaContentLink.discussion})
 
 
 @event.listens_for(IdeaContentLink.idea, 'set', propagate=True, active_history=True)
@@ -256,8 +250,7 @@ class Extract(DiscussionBoundBase, OriginMixin):
         info={'rdf': QuadMapPatternS(None, CATALYST.relevantToConversation)})
     discussion = relationship(
         Discussion, backref=backref('extracts', cascade="all, delete-orphan"),
-        info={'rdf': QuadMapPatternS(None, ASSEMBL.in_conversation),
-              'backref': 'Discussion.idea_content_links'})
+        info={'rdf': QuadMapPatternS(None, ASSEMBL.in_conversation)})
 
     content_id = Column(Integer, ForeignKey(
         'content.id', ondelete="CASCADE", onupdate="CASCADE"),

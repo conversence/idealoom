@@ -87,7 +87,7 @@ class AbstractVoteSpecification(DiscussionBoundBase):
         if getattr(cls, 'discussion', None) is None:
             cls.discussion = relationship(
                 Discussion, viewonly=True, uselist=False,
-                secondary=Widget.__table__)
+                secondary=Widget.__table__, backref="vote_specifications")
 
     def get_default_parent_context(self, request=None, user_id=None):
         return self.widget.get_collection_context(
