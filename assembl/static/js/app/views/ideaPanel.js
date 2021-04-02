@@ -190,6 +190,7 @@ class IdeaPanel extends BasePanel.extend({
         adminSection: ".js_ideaPanel-section-admin",
         attachmentButton: ".js_attachment-button",
         mindmapButton: ".js_mindmap-button",
+        recHtmlButton: ".js_rec-html-button",
         attachmentImage: ".js_idea-attachment",
         pubFlowSection: ".js_pub-flow",
         ideaTypeSection: ".js_idea-type",
@@ -230,6 +231,7 @@ class IdeaPanel extends BasePanel.extend({
         "click @ui.deleteIdea": "onDeleteButtonClick",
         "click @ui.openTargetInPopOver": "openTargetInPopOver",
         "click @ui.mindmapButton": "openMindMap",
+        "click @ui.recHtmlButton": "openRecHtmlView",
     },
 }) {
     initialize(options) {
@@ -1345,6 +1347,13 @@ class IdeaPanel extends BasePanel.extend({
             "/ideas/" + id + "/mindmap?mimetype=image/svg%2bxml"
         );
         window.open(url, "_il_mindmap");
+    }
+    openRecHtmlView(evt) {
+        const id = this.model.getNumericId();
+        const url = Ctx.getApiV2DiscussionUrl(
+            "/ideas/" + id + "/html_view"
+        );
+        window.open(url, "_il_html");
     }
 }
 
