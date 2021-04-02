@@ -90,10 +90,10 @@ class IdeaVisitor(with_metaclass(ABCMeta, object)):
     CUT_VISIT = object()
 
     @abstractmethod
-    def visit_idea(self, idea, level, prev_result, idea_assoc=None, parent_link_assoc=None):
+    def visit_idea(self, idea, level, prev_result, ctx=None):
         pass
 
-    def end_visit(self, idea, level, prev_result, child_results, idea_assoc=None, parent_link_assoc=None):
+    def end_visit(self, idea, level, prev_result, child_results, ctx=None):
         return prev_result
 
 
@@ -112,7 +112,7 @@ class AppendingVisitor(IdeaVisitor):
     def __init__(self):
         self.ideas = []
 
-    def end_visit(self, idea, level, prev_result, child_results, idea_assoc=None, parent_link_assoc=None):
+    def end_visit(self, idea, level, prev_result, child_results, ctx=None):
         self.ideas.append(idea)
         return self.ideas
 
@@ -126,7 +126,7 @@ class WordCountVisitor(IdeaVisitor):
     def cleantext(self, text):
         return sanitize_text(text)
 
-    def visit_idea(self, idea, level, prev_result, idea_assoc=None, parent_link_assoc=None):
+    def visit_idea(self, idea, level, prev_result, ctx=None):
         if idea.short_title:
             self.counter.add_text(self.cleantext(idea.short_title), 2)
         if idea.long_title:
@@ -157,28 +157,43 @@ class WordCountVisitor(IdeaVisitor):
 
 
 class HtmlizationVisitor(IdeaVisitor):
-    def __init__(self, jinja_env, lang_prefs, idea_template="idea_nakakoji.jinja2"):
+    def __init__(self, jinja_env, lang_prefs,
+            idea_template="idea_nakakoji.jinja2",
+            page_template=None, db=None):
         self.jinja_env = jinja_env
         self.lang_prefs = lang_prefs
         self.idea_template = jinja_env.get_template(idea_template)
+        self.page_template = jinja_env.get_template(page_template
+            ) if page_template else None
         self.result = ''
+        self.db = db
 
-    def visit_idea(self, idea, level, prev_result, idea_assoc=None, parent_link_assoc=None):
+    def visit_idea(self, idea, level, prev_result, ctx=None):
         return True
 
-    def end_visit(self, idea, level, prev_result, child_results, idea_assoc=None, parent_link_assoc=None):
+    def end_visit(self, idea_id, level, prev_result, child_results, ctx=None):
+        (idea_assoc, parent_link_assoc) = ctx or (None, None)
         if prev_result is not True:
             idea_assoc = None
-            idea = None
-        if idea or child_results:
+            idea_id = None
+        if idea_id or child_results:
             results = [r for (c, r) in child_results]
+            if isinstance(idea_id, int):
+                if idea_assoc:
+                    idea = idea_assoc.idea
+                else:
+                    assert self.db
+                    idea = self.db.query(Idea).filter_by(id=idea_id).one()
+            else:
+                idea = idea_id
             self.result = self.idea_template.render(
                 idea=idea, children=results, level=level, lang_prefs=self.lang_prefs,
                 idea_assoc=idea_assoc, parent_link_assoc=parent_link_assoc)
             return self.result
 
     def as_html(self):
-        return self.result
+        return self.page_template.render(content=self.result
+            ) if self.page_template else self.result
 
 
 class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
@@ -975,7 +990,7 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
                 self.min_time = None
                 self.max_time = None
 
-            def visit_idea(self, idea, level, prev_result, idea_assoc=None, parent_link_assoc=None):
+            def visit_idea(self, idea, level, prev_result, ctx=None):
                 age = ((idea.last_modified or idea.creation_date)-root_time).total_seconds()  # may be negative
                 color = Color(hsl=(180-(135.0 * age), 0.15, 0.85))
                 kwargs = {}

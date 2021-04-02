@@ -310,22 +310,18 @@ class ExplicitSubGraphView(IdeaGraphView):
         assoc = idea_assocs_by_idea_id.get(idea_id, None)
         if assoc:
             result = idea_visitor.visit_idea(
-                assoc, level, prev_result, assoc, parent_link_assoc)
-            idea = assoc.idea
-        else:
-            idea = None
+                idea_id, level, prev_result, (assoc, parent_link_assoc))
         visited.add(idea_id)
         child_results = []
         if result is not IdeaVisitor.CUT_VISIT:
             for link_assoc in children_links[idea_id]:
                 child_id = link_assoc.idea_link.target_id
-                child_assoc = idea_assocs_by_idea_id.get(child_id, None)
                 r = self._visit_ideas_depth_first(
                     child_id, idea_assocs_by_idea_id, children_links,
                     idea_visitor, visited, level+1, result, link_assoc)
                 if r:
                     child_results.append((child_id, r))
-        return idea_visitor.end_visit(idea, level, result, child_results, assoc, parent_link_assoc)
+        return idea_visitor.end_visit(idea_id, level, result, child_results, (assoc, parent_link_assoc))
 
     @classmethod
     def extra_collections(cls):
@@ -591,17 +587,15 @@ LangString.setup_ownership_load_event(
 class SynthesisHtmlizationVisitor(HtmlizationVisitor):
     def __init__(self, graph_view, jinja_env, lang_prefs):
         super(SynthesisHtmlizationVisitor, self).__init__(
-            jinja_env, lang_prefs, 'idea_in_synthesis.jinja2')
-        self.synthesis_template = jinja_env.get_template('synthesis.jinja2')
+            jinja_env, lang_prefs, 'idea_in_synthesis.jinja2', 'synthesis.jinja2')
         self.graph_view = graph_view
 
     def as_html(self):
-        inner = super(SynthesisHtmlizationVisitor, self).as_html()
         synthesis = self.graph_view
         subject = synthesis.subject.best_lang(self.lang_prefs).value
         introduction = synthesis.introduction.best_lang(self.lang_prefs).value
         conclusion = synthesis.conclusion.best_lang(self.lang_prefs).value
-        return self.synthesis_template.render(
-            synthesis=synthesis, content=inner,
+        return self.page_template.render(
+            synthesis=synthesis, content=self.result,
             introduction=introduction,
             subject=subject, conclusion=conclusion)

@@ -1,6 +1,6 @@
 {% if idea %}
 <div>
-<h{{level+1}} id="idea_{{idea.id}}">{{idea.long_title or idea.short_title}} <a href="{{ idea.get_url() }}" target="idealoom" class="link-to-idea">🔗</a></h{{level+1}}>
+<h{{[level+1, 6]|min}} class="level{{level+1}}" id="idea_{{idea.id}}">{{idea.long_title or idea.short_title}} <a href="{{ idea.get_url() }}" target="idealoom" class="link-to-idea">🔗</a></h{{[level+1, 6]|min}}>
 {% if idea.definition %}
 <div class="definition" style="font-size:smaller;">{{idea.definition|safe}}</div>
 {% endif %}
