@@ -285,7 +285,7 @@ class Api2Context(TraversalContext):
 
     def all_class_names(self):
         return [k.external_typename()
-                for k in Base._decl_class_registry.values()
+                for k in Base.registry.mappers._class_registry.values()
                 if getattr(k, 'external_typename', False)]
 
     # Base of recursion for methods defined in TraversalContext

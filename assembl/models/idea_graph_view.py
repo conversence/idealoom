@@ -93,7 +93,6 @@ class IdeaGraphView(DiscussionBoundBase, OriginMixin):
         pass
 
 
-
 class SubGraphIdeaAssociation(DiscussionBoundBase):
     """Association table saying that an Idea is part of a ExplicitSubGraphView"""
     __tablename__ = 'sub_graph_idea_association'
@@ -267,7 +266,7 @@ class ExplicitSubGraphView(IdeaGraphView):
         # more efficient than the association_proxy
         return self.db.query(IdeaLink).join(
             SubGraphIdeaLinkAssociation
-            ).filter_by(sub_graph_id=self.id).all()
+        ).filter_by(sub_graph_id=self.id).all()
 
     def get_idealink_assocs(self):
         return self.idealink_assocs
@@ -276,7 +275,7 @@ class ExplicitSubGraphView(IdeaGraphView):
         # more efficient than the association_proxy
         return self.db.query(Idea).join(
             SubGraphIdeaAssociation
-            ).filter_by(sub_graph_id=self.id).all()
+        ).filter_by(sub_graph_id=self.id).all()
 
     def visit_ideas_depth_first(self, idea_visitor):
         # prefetch
@@ -332,14 +331,14 @@ class ExplicitSubGraphView(IdeaGraphView):
 
             def decorate_query(self, query, owner_alias, last_alias,
                                parent_instance, ctx):
-                return query.join(SubGraphIdeaAssociation, owner_alias)
+                return query.join(SubGraphIdeaAssociation).join(owner_alias)
 
             def contains(self, parent_instance, instance):
                 return instance.db.query(
                     SubGraphIdeaAssociation).filter_by(
                         idea=instance,
                         sub_graph=parent_instance
-                    ).count() > 0
+                ).count() > 0
 
         @collection_creation_side_effects.register(
             inst_ctx=Idea, ctx='ExplicitSubGraphView.ideas')
@@ -368,11 +367,11 @@ class ExplicitSubGraphView(IdeaGraphView):
                 return query.join(SubGraphIdeaLinkAssociation, owner_alias)
 
             def contains(self, parent_instance, instance):
-                    return instance.db.query(
-                        SubGraphIdeaLinkAssociation).filter_by(
-                            idea_link=instance,
-                            sub_graph=parent_instance
-                        ).count() > 0
+                return instance.db.query(
+                    SubGraphIdeaLinkAssociation).filter_by(
+                        idea_link=instance,
+                        sub_graph=parent_instance
+                ).count() > 0
 
         @collection_creation_side_effects.register(
             inst_ctx=IdeaLink, ctx='ExplicitSubGraphView.idea_links')
@@ -390,12 +389,12 @@ class ExplicitSubGraphView(IdeaGraphView):
 
 
 SubGraphIdeaLinkAssociation.discussion = relationship(
-        Discussion, viewonly=True, uselist=False,
-        secondary=join(
-            ExplicitSubGraphView.__table__,
-            IdeaGraphView.__table__,
-            ExplicitSubGraphView.id == IdeaGraphView.id),
-        info={'rdf': QuadMapPatternS(None, ASSEMBL.in_conversation)})
+    Discussion, viewonly=True, uselist=False,
+    secondary=join(
+        ExplicitSubGraphView.__table__,
+        IdeaGraphView.__table__,
+        ExplicitSubGraphView.id == IdeaGraphView.id),
+    info={'rdf': QuadMapPatternS(None, ASSEMBL.in_conversation)})
 
 
 class TableOfContents(IdeaGraphView):
@@ -510,6 +509,7 @@ class Synthesis(ExplicitSubGraphView):
         idea_copies = {root.id: root}
         # Also copies ideas between two synthesis ideas
         relevant_idea_ids = synthesis_idea_ids.copy()
+
         def add_ancestors_between(idea, path=None):
             if isinstance(idea, RootIdea):
                 return
@@ -581,8 +581,10 @@ class Synthesis(ExplicitSubGraphView):
 
     crud_permissions = CrudPermissions(P_EDIT_SYNTHESIS)
 
+
 LangString.setup_ownership_load_event(
     Synthesis, ['subject', 'introduction', 'conclusion'])
+
 
 class SynthesisHtmlizationVisitor(HtmlizationVisitor):
     def __init__(self, graph_view, jinja_env, lang_prefs):

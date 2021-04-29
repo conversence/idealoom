@@ -390,7 +390,7 @@ def delete_discussion(session, discussion_id):
     from assembl.models import (
         Base, Discussion, DiscussionBoundBase, Preferences, LangStringEntry)
     # delete anything related first
-    classes = DiscussionBoundBase._decl_class_registry.values()
+    classes = [m.class_ for m in Base.registry.mappers]
     classes_by_table = defaultdict(list)
     for cls in classes:
         if isclass(cls):

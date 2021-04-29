@@ -18,8 +18,8 @@ from sqlalchemy import (
     Integer,
     String,
     DateTime,
-    Binary
 )
+from sqlalchemy.dialects.postgresql import BYTEA as Binary
 import simplejson as json
 # from dateutil.parser import parse as parse_datetime
 from sqlalchemy.orm import (

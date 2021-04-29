@@ -235,10 +235,10 @@ class PostPathLocalCollection(object):
         def base_query(labeled=False):
             post = with_polymorphic(
                 Post, [], Post.__table__,
-                aliased=False, flat=True)
+                aliased=False)
             content = with_polymorphic(
                 Content, [], Content.__table__,
-                aliased=False, flat=True)
+                aliased=False)
             query = db.query(post.id.label("post_id")) if labeled else db.query(post.id)
             query = query.join(content, (content.id == post.id) &
                                (content.discussion_id==discussion_id))
@@ -314,8 +314,8 @@ class PostPathLocalCollection(object):
             condition = None
         if getattr(q, "c", None) is None:
             # base query
-            c = q._entities[0]
-            q = q.with_entities(c.expr.label("post_id"))
+            expr = q.column_descriptions[0]['expr']
+            q = q.with_entities(expr.label("post_id"))
             q = q.subquery("relposts")
         else:
             # compound query, already has columns
@@ -327,7 +327,7 @@ class PostPathLocalCollection(object):
         subq = self.as_clause_base(db, discussion_id, include_deleted=include_deleted)
         content = content or with_polymorphic(
             Content, [], Content.__table__,
-            aliased=False, flat=True)
+            aliased=False)
 
         q = db.query(content).filter(
                 (content.discussion_id == discussion_id)
@@ -336,8 +336,8 @@ class PostPathLocalCollection(object):
         if include_deleted is not None:
             if include_deleted:
                 post = with_polymorphic(
-                    Post, [], Post.__table__,
-                    aliased=False, flat=True)
+                    Post, [], Post.__table__.alias("post_del"),
+                    aliased=False)
                 q = q.join(
                     post, (post.id == content.id) &
                     post.publication_state.in_(deleted_publication_states))
@@ -372,12 +372,12 @@ class PostPathGlobalCollection(object):
         post = with_polymorphic(Content, [Post])
         ICL = with_polymorphic(
             IdeaContentLink, [], IdeaContentLink.__table__,
-            aliased=False, flat=True)
+            aliased=False)
         post = with_polymorphic(
-            Post, [], Post.__table__, aliased=False, flat=True)
+            Post, [], Post.__table__, aliased=False)
         # This should be a join but creates a subquery
         content = with_polymorphic(
-            Content, [], Content.__table__, aliased=False, flat=True)
+            Content, [], Content.__table__, aliased=False)
         q = discussion.db.query(
             ICL.idea_id,
             ICL.type,
@@ -440,7 +440,7 @@ class PostPathCombiner(PostPathGlobalCollection, IdeaVisitor):
         subq = root_path.as_clause_base(db, self.discussion.id, include_deleted=include_deleted)
         content = content or with_polymorphic(
             Content, [], Content.__table__,
-            aliased=False, flat=True)
+            aliased=False)
 
         synth_post_type = SynthesisPost.__mapper_args__['polymorphic_identity']
         webpage_post_type = Webpage.__mapper_args__['polymorphic_identity']
@@ -453,7 +453,7 @@ class PostPathCombiner(PostPathGlobalCollection, IdeaVisitor):
             if include_deleted:
                 post = with_polymorphic(
                     Post, [], Post.__table__,
-                    aliased=False, flat=True)
+                    aliased=False)
                 q = q.join(
                     post, (post.id == content.id) &
                     post.publication_state.in_(deleted_publication_states))
@@ -495,14 +495,13 @@ class PostPathCounter(PostPathCombiner):
 
     def get_counts_for_query(self, q):
         # HACKITY HACK
-        entities = [
-            x.entity_zero.entity for x in q._entities]
+        entities = [i['entity'] for i in q.column_descriptions]
         entities = {e.__mapper__.tables[0].name: e for e in entities}
         content_entity = entities['content']
 
         post = with_polymorphic(
             Post, [], Post.__table__,
-            aliased=False, flat=True)
+            aliased=False)
         q = q.join(
             post, (content_entity.id == post.id) &
                   (post.publication_state.in_(countable_publication_states)))

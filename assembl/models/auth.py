@@ -25,13 +25,13 @@ from sqlalchemy import (
     UnicodeText,
     DateTime,
     Time,
-    Binary,
     inspect,
     event,
     Index,
     func,
     UniqueConstraint
 )
+from sqlalchemy.dialects.postgresql import BYTEA as Binary
 from pyramid.httpexceptions import HTTPUnauthorized
 from sqlalchemy.orm import (
     relationship, backref, deferred)

@@ -550,7 +550,7 @@ def get_time_series_analytics(request):
 
         content = with_polymorphic(
                     Content, [], Content.__table__,
-                    aliased=False, flat=True)
+                    aliased=False)
 
         # The actions
         actions_on_post = discussion.db.query(
@@ -1253,7 +1253,7 @@ def get_participant_time_series_analytics(request):
 
         content = with_polymorphic(
                     Content, [], Content.__table__,
-                    aliased=False, flat=True)
+                    aliased=False)
         # post = with_polymorphic(Post, [])
 
         query_components = []

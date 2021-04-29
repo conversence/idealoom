@@ -7,15 +7,12 @@ Create Date: 2015-06-23 10:11:15.798197
 """
 
 # revision identifiers, used by Alembic.
+from assembl.lib import config
+import transaction
+import sqlalchemy as sa
+from alembic import context, op
 revision = '4e6b939229c3'
 down_revision = '5a410de37088'
-
-from alembic import context, op
-import sqlalchemy as sa
-import transaction
-
-
-from assembl.lib import config
 
 
 def upgrade(pyramid_env):
@@ -24,7 +21,7 @@ def upgrade(pyramid_env):
     db = m.get_session_maker()()
     with transaction.manager:
         synths = db.query(m.Synthesis).join(
-            m.SubGraphIdeaAssociation, m.Idea, m.SynthesisPost).filter(
+            m.SubGraphIdeaAssociation).join(m.Idea).join(m.SynthesisPost).filter(
             (m.SynthesisPost.id != None) & (m.Idea.tombstone_date == None)).all()
         # reuse idea snapshots in this one case
         for synth in synths:

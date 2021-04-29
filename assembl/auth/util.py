@@ -54,27 +54,28 @@ def get_role_query(user_id, discussion_id, target_instance=None,
         base_roles.append(R_OWNER)
     clauses = []
     roles = session.query(Role).join(UserRole).filter(
-            UserRole.profile_id == user_id)
+        UserRole.profile_id == user_id)
     if with_ownership:
         clauses.append(session.query(Role).filter_by(name=R_OWNER))
     if discussion_id:
         clauses.append(session.query(Role).join(LocalUserRole).filter(and_(
-                    LocalUserRole.profile_id == user_id,
-                    LocalUserRole.requested == False,
-                    LocalUserRole.discussion_id == discussion_id)))
+            LocalUserRole.profile_id == user_id,
+            LocalUserRole.requested == False,
+            LocalUserRole.discussion_id == discussion_id)))
     clauses.append(session.query(Role).filter(Role.name.in_(base_roles)))
     if target_instance and hasattr(target_instance, 'local_user_roles'):
-        target_cls = target_instance.__class__.__mapper__.relationships['local_user_roles'].argument.class_
+        target_cls = target_instance.__class__.__mapper__.relationships[
+            'local_user_roles'].argument.class_
         clauses.append(target_cls.filter_on_instance(
             target_instance, session.query(Role).join(target_cls).filter(
-                target_cls.profile_id==user_id)))
+                target_cls.profile_id == user_id)))
     roles = roles.union(*clauses)
     return roles.distinct()
 
 
 def get_roles(user_id, discussion_id=None, target_instance=None):
     return [x[0] for x in get_role_query(user_id, discussion_id, target_instance
-        ).with_entities(Role.name)]
+                                         ).with_entities(Role.name)]
 
 
 def request_main_target(request):
@@ -105,24 +106,25 @@ def get_permissions(user_id, discussion_id, target_instance=None):
     user_id = user_id or Everyone
     session = get_session_maker()()
     is_sysadmin = user_id != Everyone and session.query(UserRole).filter_by(profile_id=user_id
-        ).join(Role).filter_by(name=R_SYSADMIN).count()
+                                                                            ).join(Role).filter_by(name=R_SYSADMIN).count()
     if is_sysadmin:
         return list(ASSEMBL_PERMISSIONS)
     if not discussion_id:
         return []
-    roles = get_role_query(user_id, discussion_id, target_instance).with_entities(Role.id)
+    roles = get_role_query(user_id, discussion_id,
+                           target_instance).with_entities(Role.id)
 
     rp_query = session.query(
-            DiscussionPermission.role_id.label('role_id'),
-            DiscussionPermission.permission_id.label('permission_id')).filter(
+        DiscussionPermission.role_id.label('role_id'),
+        DiscussionPermission.permission_id.label('permission_id')).filter(
         DiscussionPermission.discussion_id == discussion_id)
     if target_instance and hasattr(target_instance, 'pub_state_id'):
         rp_query = rp_query.union(
             session.query(
                 StateDiscussionPermission.role_id.label('role_id'),
                 StateDiscussionPermission.permission_id.label('permission_id')).join(
-            PublicationState, PublicationState.id == StateDiscussionPermission.pub_state_id).filter(
-            PublicationState.id == target_instance.pub_state_id))
+                PublicationState, PublicationState.id == StateDiscussionPermission.pub_state_id).filter(
+                PublicationState.id == target_instance.pub_state_id))
     rp_query = rp_query.subquery()
     permissions = session.query(Permission.name).join(
         rp_query, rp_query.c.permission_id == Permission.id).join(
@@ -145,7 +147,8 @@ def permissions_for_states(discussion_id, user_id):
     db = get_session_maker()()
 
     roles = get_role_query(user_id, discussion_id).with_entities(Role.id)
-    states = db.query(Idea.pub_state_id).filter_by(discussion_id=discussion_id).distinct()
+    states = db.query(Idea.pub_state_id).filter_by(
+        discussion_id=discussion_id).distinct()
     states = [x[0] for x in states if x[0]]
     sdps = db.query(StateDiscussionPermission).filter(
         StateDiscussionPermission.discussion_id == discussion_id,
@@ -272,6 +275,7 @@ def get_non_expired_user_id(request):
 class UpgradingSessionAuthenticationPolicy(SessionAuthenticationPolicy):
     """ A session authentication policy that tells the underlying beaker session
     whenever the user logs in or out. Allows to have different cookie policies"""
+
     def remember(self, request, user_id, **kwargs):
         request.session.elevate_privilege(True)
         return super(UpgradingSessionAuthenticationPolicy, self).remember(
@@ -358,12 +362,12 @@ def discussions_with_access(userid, permission=P_READ):
     db = Discussion.default_db
     if userid == Everyone:
         return db.query(Discussion).join(
-            DiscussionPermission, Role, Permission).filter(and_(
+            DiscussionPermission).join(Role).join(Permission).filter(and_(
                 Permission.name == permission,
                 Role.name == userid))
     elif userid == Authenticated:
         return db.query(Discussion).join(
-            DiscussionPermission, Role, Permission).filter(and_(
+            DiscussionPermission).join(Role).join(Permission).filter(and_(
                 Permission.name == permission,
                 Role.name.in_((Authenticated, Everyone))))
     else:
@@ -373,22 +377,22 @@ def discussions_with_access(userid, permission=P_READ):
             return db.query(Discussion).all()
 
         perms = db.query(DiscussionPermission).join(
-            Role, Permission, UserRole, User).filter(
+            Role).join(Permission).join(UserRole).join(User).filter(
                 User.id == userid).filter(
                     Permission.name == permission
-                ).union(db.query(DiscussionPermission).join(
-                    Role, Permission).join(
-                        LocalUserRole, and_(
-                            LocalUserRole.discussion_id == DiscussionPermission.discussion_id,
-                            LocalUserRole.requested == False)
-                    ).join(User).filter(
-                        User.id == userid).filter(
-                            Permission.name == permission)
-                ).union(db.query(DiscussionPermission).join(
-                    Role, Permission).filter(
-                        Role.name.in_((Authenticated, Everyone))).filter(
-                            Permission.name == permission)
-                )
+        ).union(db.query(DiscussionPermission).join(
+            Role).join(Permission).join(
+            LocalUserRole, and_(
+                LocalUserRole.discussion_id == DiscussionPermission.discussion_id,
+                LocalUserRole.requested == False)
+        ).join(User).filter(
+            User.id == userid).filter(
+            Permission.name == permission)
+        ).union(db.query(DiscussionPermission).join(
+            Role).join(Permission).filter(
+            Role.name.in_((Authenticated, Everyone))).filter(
+            Permission.name == permission)
+        )
         return db.query(Discussion).join(perms.subquery('perms'))
 
 
@@ -420,14 +424,14 @@ def user_has_permission(discussion_id, user_id, permission):
     db = Discussion.default_db
     if user_id == Everyone:
         permission = db.query(DiscussionPermission).join(
-            Permission, Role).filter(
+            Permission).join(Role).filter(
                 DiscussionPermission.discussion_id == discussion_id).filter(
                     Role.name == user_id).filter(
                         Permission.name == permission).first()
         return permission is not None
     elif user_id == Authenticated:
         permission = db.query(DiscussionPermission).join(
-            Permission, Role).filter(
+            Permission).join(Role).filter(
                 DiscussionPermission.discussion_id == discussion_id).filter(
                     Role.name.in_((Authenticated, Everyone))).filter(
                         Permission.name == permission).first()
@@ -437,27 +441,27 @@ def user_has_permission(discussion_id, user_id, permission):
     if sysadmin:
         return True
     permission = db.query(DiscussionPermission).join(
-        Permission, Role, UserRole).filter(
+        Permission).join(Role).join(UserRole).filter(
             DiscussionPermission.discussion_id == discussion_id).filter(
                 UserRole.profile_id == user_id).filter(
                     Permission.name == permission
-                ).union(
+    ).union(
                     db.query(DiscussionPermission
-                        ).join(Permission, Role, LocalUserRole).filter(and_(
-                            # Virtuoso disregards this explicit condition
-                            DiscussionPermission.discussion_id == discussion_id,
-                            # So I have to add this one as well.
-                            LocalUserRole.discussion_id == discussion_id,
-                            LocalUserRole.profile_id == user_id,
-                            LocalUserRole.requested == False,
-                            Permission.name == permission))
-                ).union(
+                             ).join(Permission).join(Role).join(LocalUserRole).filter(and_(
+                                 # Virtuoso disregards this explicit condition
+                                 DiscussionPermission.discussion_id == discussion_id,
+                                 # So I have to add this one as well.
+                                 LocalUserRole.discussion_id == discussion_id,
+                                 LocalUserRole.profile_id == user_id,
+                                 LocalUserRole.requested == False,
+                                 Permission.name == permission))
+    ).union(
                     db.query(DiscussionPermission).join(
-                            Permission, Role).filter(
-                                DiscussionPermission.discussion_id == discussion_id).filter(
-                                    Role.name.in_((Authenticated, Everyone))).filter(
-                                        Permission.name == permission)
-                ).first()
+                        Permission).join(Role).filter(
+                        DiscussionPermission.discussion_id == discussion_id).filter(
+                        Role.name.in_((Authenticated, Everyone))).filter(
+                        Permission.name == permission)
+    ).first()
     return permission is not None
 
 
@@ -467,23 +471,23 @@ def users_with_permission(discussion_id, permission, id_only=True):
     db = Discussion.default_db
     user_ids = db.query(User.id).join(
         LocalUserRole, Role, DiscussionPermission, Permission).filter(and_(
-        Permission.name == permission,
-        LocalUserRole.requested == False,
-        LocalUserRole.discussion_id == discussion_id,
-        DiscussionPermission.discussion_id == discussion_id)
-        ).union(
+            Permission.name == permission,
+            LocalUserRole.requested == False,
+            LocalUserRole.discussion_id == discussion_id,
+            DiscussionPermission.discussion_id == discussion_id)
+    ).union(
             db.query(User.id).join(
-                UserRole, Role, DiscussionPermission, Permission).filter(
+                UserRole).join(Role).join(DiscussionPermission).join(Permission).filter(
                 and_(
                     Permission.name == permission,
                     DiscussionPermission.discussion_id == discussion_id))
-        ).union(
+    ).union(
             db.query(User.id).join(
-                UserRole, Role).filter(
+                UserRole).join(Role).filter(
                 and_(
                     Role.name == R_SYSADMIN,
                     DiscussionPermission.discussion_id == discussion_id))
-        ).distinct()
+    ).distinct()
     if id_only:
         return [AgentProfile.uri_generic(id) for (id, ) in user_ids]
     else:
