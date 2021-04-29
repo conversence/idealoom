@@ -154,5 +154,5 @@ def includeme(config):
     global _settings
     _settings = config.registry.settings
     config.include('.threaded_model_watcher')
-    configure(config.registry, 'assembl')
+    configure(config.registry, 'idealoom')
     config.include('.source_reader')
