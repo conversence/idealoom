@@ -41,12 +41,16 @@ class PseudoDiscussion(object):
     homepage_url = None
     logo = None
     preferences = Preferences()
+
     def translation_service(self):
         return None
+
     def get_base_url(self, *args):
         return get_global_base_url(True)
+
     def get_url(self, *args):
         return get_global_base_url(True)
+
     def get_all_agents_preload(self, user):
         return []
 
@@ -101,7 +105,7 @@ def base_admin_view(request):
 @view_config(route_name='test_simultaneous_ajax_calls',
              permission=P_SYSADMIN, request_method="GET")
 def test_simultaneous_ajax_calls(request):
-    g = lambda x: request.GET.get(x, None)
+    def g(x): return request.GET.get(x, None)
 
     session = User.default_db
 
@@ -246,7 +250,7 @@ def discussion_edit(request):
     permissions = request.permissions
     partners = json.dumps([p.generic_json(
         user_id=user_id, permissions=permissions
-        ) for p in discussion.partner_organizations])
+    ) for p in discussion.partner_organizations])
 
     if not discussion:
         raise HTTPNotFound("Discussion with id '%d' not found." % (
@@ -261,7 +265,7 @@ def discussion_edit(request):
 
     if request.method == 'POST':
 
-        g = lambda x: request.POST.get(x, None)
+        def g(x): return request.POST.get(x, None)
 
         (topic, slug, objectives) = (
             g('topic'),
@@ -309,13 +313,13 @@ def discussion_permissions(request):
     permission_names.sort()
 
     disc_perms = db.query(DiscussionPermission).filter_by(
-        discussion_id=discussion_id).join(Role, Permission).all()
+        discussion_id=discussion_id).join(Role).join(Permission).all()
     disc_perms_as_set = set((dp.role.name, dp.permission.name)
                             for dp in disc_perms)
     disc_perms_dict = {(dp.role.name, dp.permission.name): dp
                        for dp in disc_perms}
     local_roles = db.query(LocalUserRole).filter_by(
-        discussion_id=discussion_id).join(Role, User).all()
+        discussion_id=discussion_id).join(Role).join(User).all()
     local_roles_as_set = set((lur.user.id, lur.role.name)
                              for lur in local_roles)
     local_roles_dict = {(lur.user.id, lur.role.name): lur
@@ -351,7 +355,7 @@ def discussion_permissions(request):
                     del roles_by_name[role]
                     role_names.remove(role)
         elif 'submit_add_role' in request.POST:
-            #TODO: Sanitize role
+            # TODO: Sanitize role
             role = Role(name='r:'+request.POST['new_role'])
             roles_by_name[role.name] = role
             role_names.append(role.name)
@@ -474,7 +478,7 @@ def general_permissions(request):
     permission_names = [p.name for p in permissions]
     permission_names.sort()
 
-    user_roles = db.query(UserRole).join(Role, User).all()
+    user_roles = db.query(UserRole).join(Role).join(User).all()
     user_roles_as_set = set(
         (lur.user.id, lur.role.name) for lur in user_roles)
     user_roles_dict = {

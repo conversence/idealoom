@@ -7,7 +7,7 @@ from pyramid.security import Everyone, Authenticated
 from pyramid.response import Response
 from pyramid.view import view_config
 from pyramid.httpexceptions import HTTPNotFound, HTTPBadRequest, HTTPServerError
-from sqlalchemy.orm import aliased, joinedload, joinedload_all, contains_eager
+from sqlalchemy.orm import aliased
 
 from assembl.views.api import API_DISCUSSION_PREFIX
 from assembl.models import (

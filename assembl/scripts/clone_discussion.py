@@ -205,7 +205,8 @@ def prefetch(session, discussion_id):
             undefers = [undefer(attr.key) for attr in mapper.iterate_properties
                         if getattr(attr, 'deferred', False)]
             conditions = cls.get_discussion_conditions(discussion_id)
-            session.query(with_polymorphic(cls, "*")).filter(
+            poly = with_polymorphic(cls, "*")
+            session.query(poly).filter(
                 and_(*conditions)).options(*undefers).all()
 
 
@@ -390,7 +391,7 @@ def delete_discussion(session, discussion_id):
     from assembl.models import (
         Base, Discussion, DiscussionBoundBase, Preferences, LangStringEntry)
     # delete anything related first
-    classes = DiscussionBoundBase._decl_class_registry.values()
+    classes = [m.class_ for m in Base.registry.mappers]
     classes_by_table = defaultdict(list)
     for cls in classes:
         if isclass(cls):
@@ -439,11 +440,12 @@ def delete_discussion(session, discussion_id):
             query = v.final_query().filter(cond)
             if query.count():
                 print("*" * 20, "Not all deleted!")
-                ids = query.all()
-                for subcls in cls.mro():
-                    if getattr(subcls, '__tablename__', None):
-                        session.query(subcls).filter(
-                            subcls.id.in_(ids)).delete(False)
+                ids = {x for (x,) in query.all() if x}
+                if ids:
+                    for subcls in cls.mro():
+                        if getattr(subcls, '__tablename__', None):
+                            session.execute(subcls.__table__.delete(
+                                subcls.__table__.c.id.in_(ids)))
             session.flush()
 
 
@@ -451,7 +453,7 @@ def clone_discussion(
         from_session, discussion_id, to_session=None, new_slug=None):
     from assembl.models import (
         DiscussionBoundBase, Discussion, Post, User, Preferences, HistoryMixin,
-        BaseIdeaWidget, TombstonableMixin, MultiCriterionVotingWidget)
+        BaseIdeaWidget, TombstonableMixin, MultiCriterionVotingWidget, LangString)
     global user_refs
     discussion = from_session.query(Discussion).get(discussion_id)
     assert discussion
@@ -500,6 +502,7 @@ def clone_discussion(
         mapper = class_mapper(ob.__class__)
         (direct_reln, copy_col_props, nullable_relns, non_nullable_reln
          ) = get_mapper_info(mapper)
+        direct_reln_keys = {r.key: next(iter(r.local_columns)).key for r in direct_reln}
         values = {r.key: getattr(ob, r.key, None) for r in copy_col_props}
 
         print("->", ob.__class__, ob.id)
@@ -555,6 +558,13 @@ def clone_discussion(
         if isinstance(ob, HistoryMixin):
             values['base_id'] = history_new_base_ids.get(
                 (ob.__class__, ob.base_id), None)
+            # very special case: Langstring may be shared between versions,
+            # and that breaks the single-parent promise implicit in sqla.
+            # TODO: less temporary solution to this.
+            lsk = [k for (k, v) in values.items() if isinstance(v, LangString)]
+            for k in lsk:
+                v = values.pop(k)
+                values[direct_reln_keys[k]] = v.id
             copy = ob.__class__(**values)
             copy._before_insert()  # set the base_id
             if ob.is_tombstone:

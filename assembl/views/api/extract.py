@@ -7,7 +7,7 @@ from pyramid.httpexceptions import (
     HTTPNoContent, HTTPClientError)
 from sqlalchemy import Unicode
 from sqlalchemy.sql.expression import cast
-from sqlalchemy.orm import joinedload_all
+from sqlalchemy.orm import joinedload
 import simplejson as json
 
 from assembl.views.api import API_DISCUSSION_PREFIX
@@ -78,10 +78,10 @@ def _get_extracts_real(request, view_def='default', ids=None, user_id=None):
         ids = [Extract.get_database_id(id) for id in ids]
         all_extracts = all_extracts.filter(Extract.id.in_(ids))
 
-    all_extracts = all_extracts.options(joinedload_all(
+    all_extracts = all_extracts.options(joinedload(
         Extract.idea_content_links))
     all_extracts = all_extracts.options(
-        joinedload_all(Extract.selectors).joinedload(
+        joinedload(Extract.selectors).joinedload(
             AnnotationSelector.extract, innerjoin=True))
     permissions = request.permissions
 

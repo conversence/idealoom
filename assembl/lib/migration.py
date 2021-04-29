@@ -8,17 +8,18 @@ from alembic.config import Config
 from alembic.migration import MigrationContext
 from alembic.environment import EnvironmentContext
 from alembic.script import ScriptDirectory
+from sqlalchemy import text
 import transaction
 
 from ..lib.sqla import (
-    get_metadata, get_session_maker, mark_changed)
+    get_metadata, get_session_maker, mark_changed,)
 from ..lib.text_search import update_indices
 
 
 def has_tables(db):
-    (num_tables,) = db.query(
+    (num_tables,) = db.query(text(
         """COUNT(table_name) FROM information_schema.tables
-        WHERE table_schema='public'""").first()
+        WHERE table_schema='public'""")).first()
     # don't count alembic
     return num_tables > 1
 

@@ -68,12 +68,12 @@ from assembl.views.traversal import (
 from future.utils import with_metaclass
 
 
-
 _ = TranslationStringFactory('assembl')
 
 
 class defaultdictlist(defaultdict):
     """A defaultdict of lists."""
+
     def __init__(self):
         super(defaultdictlist, self).__init__(list)
 
@@ -119,6 +119,7 @@ class AppendingVisitor(IdeaVisitor):
 
 class WordCountVisitor(IdeaVisitor):
     """A Visitor that counts words related to an idea"""
+
     def __init__(self, langs, count_posts=True):
         self.counter = WordCounter(langs)
         self.count_posts = True
@@ -138,9 +139,9 @@ class WordCountVisitor(IdeaVisitor):
             query = idea.db.query(Content)
             related = idea.get_related_posts_query(True)
             query = query.join(related, Content.id == related.c.post_id
-                ).filter(Content.hidden==False,
-                         Content.tombstone_condition()).options(
-                    Content.subqueryload_options())
+                               ).filter(Content.hidden == False,
+                                        Content.tombstone_condition()).options(
+                Content.subqueryload_options())
             titles = set()
             # TODO maparent: Group langstrings by language.
             for content in query:
@@ -158,13 +159,13 @@ class WordCountVisitor(IdeaVisitor):
 
 class HtmlizationVisitor(IdeaVisitor):
     def __init__(self, jinja_env, lang_prefs,
-            idea_template="idea_nakakoji.jinja2",
-            page_template=None, db=None):
+                 idea_template="idea_nakakoji.jinja2",
+                 page_template=None, db=None):
         self.jinja_env = jinja_env
         self.lang_prefs = lang_prefs
         self.idea_template = jinja_env.get_template(idea_template)
         self.page_template = jinja_env.get_template(page_template
-            ) if page_template else None
+                                                    ) if page_template else None
         self.result = ''
         self.db = db
 
@@ -193,7 +194,7 @@ class HtmlizationVisitor(IdeaVisitor):
 
     def as_html(self):
         return self.page_template.render(content=self.result
-            ) if self.page_template else self.result
+                                         ) if self.page_template else self.result
 
 
 class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
@@ -242,7 +243,7 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
     def import_record(cls):
         return relationship(
             ImportRecord, uselist=False,
-            primaryjoin=(remote(ImportRecord.target_id)==foreign(cls.id)) &
+            primaryjoin=(remote(ImportRecord.target_id) == foreign(cls.id)) &
                         (ImportRecord.target_table == cls.__tablename__))
 
     @property
@@ -298,11 +299,11 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
 
     title_entries = relationship(
         LangStringEntry, viewonly=True, uselist=True,
-        primaryjoin=foreign(title_id)==remote(LangStringEntry.langstring_id))
+        primaryjoin=foreign(title_id) == remote(LangStringEntry.langstring_id))
 
     description_entries = relationship(
         LangStringEntry, viewonly=True, uselist=True,
-        primaryjoin=foreign(description_id)==remote(
+        primaryjoin=foreign(description_id) == remote(
             LangStringEntry.langstring_id))
 
     links = relationship(
@@ -320,7 +321,7 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
         'polymorphic_on': sqla_type,
         # Not worth it for now, as the only other class is RootIdea, and there
         # is only one per discussion - benoitg 2013-12-23
-        #'with_polymorphic': '*'
+        # 'with_polymorphic': '*'
     }
 
     def populate_from_context(self, context):
@@ -402,7 +403,7 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
             & (IdeaLink.tombstone_date == None)).filter(
             (IdeaLink.source_id == self.id)
             & (Idea.tombstone_date == None)
-            ).order_by(IdeaLink.order).all()
+        ).order_by(IdeaLink.order).all()
 
     def get_parents(self):
         return self.db.query(Idea).join(
@@ -493,7 +494,8 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
             discussion=self.discussion,
             pub_state_id=self.pub_state_id,
             title=self.title.clone(db=db) if self.title else None,
-            synthesis_title=self.synthesis_title.clone(db=db) if self.synthesis_title else None,
+            synthesis_title=self.synthesis_title.clone(
+                db=db) if self.synthesis_title else None,
             description=self.description.clone(db=db) if self.description else None)
         # TODO: Clone local roles?
         return super(Idea, self).copy(db=db, **kwargs)
@@ -507,23 +509,23 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
         else:
             root_condition = (IdeaLink.target_id == target_id)
         link = select(
-                [IdeaLink.source_id, IdeaLink.target_id]
-            ).select_from(
-                IdeaLink
-            ).where(
-                (IdeaLink.tombstone_date == tombstone_date) &
-                (root_condition)
-            ).cte(recursive=True)
+            [IdeaLink.source_id, IdeaLink.target_id]
+        ).select_from(
+            IdeaLink
+        ).where(
+            (IdeaLink.tombstone_date == tombstone_date) &
+            (root_condition)
+        ).cte(recursive=True)
         target_alias = aliased(link)
         sources_alias = aliased(IdeaLink)
         parent_link = sources_alias.target_id == target_alias.c.source_id
         parents = select(
-                [sources_alias.source_id, sources_alias.target_id]
-            ).select_from(sources_alias).where(parent_link
-                & (sources_alias.tombstone_date == tombstone_date))
+            [sources_alias.source_id, sources_alias.target_id]
+        ).select_from(sources_alias).where(parent_link
+                                           & (sources_alias.tombstone_date == tombstone_date))
         with_parents = link.union(parents)
         select_exp = select([with_parents.c.source_id.label('id')]
-            ).select_from(with_parents)
+                            ).select_from(with_parents)
         if inclusive:
             if isinstance(target_id, int):
                 target_id = literal_column(str(target_id), Integer)
@@ -557,9 +559,9 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
             return self.announcement
         aq = self.get_ancestors_query()
         announcements = self.db.query(IdeaAnnouncement
-            ).filter(IdeaAnnouncement.idea_id.in_(aq),
-                     IdeaAnnouncement.should_propagate_down==True
-            ).all()
+                                      ).filter(IdeaAnnouncement.idea_id.in_(aq),
+                                               IdeaAnnouncement.should_propagate_down == True
+                                               ).all()
         # assume order is preserved from aq...
         if announcements:
             return announcements[-1]
@@ -569,23 +571,23 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
             cls, root_idea_id=bindparam('root_idea_id', type_=Integer),
             inclusive=True):
         link = select(
-                [IdeaLink.source_id, IdeaLink.target_id]
-            ).select_from(
-                IdeaLink
-            ).where(
-                (IdeaLink.tombstone_date == None) &
-                (IdeaLink.source_id == root_idea_id)
-            ).cte(recursive=True)
+            [IdeaLink.source_id, IdeaLink.target_id]
+        ).select_from(
+            IdeaLink
+        ).where(
+            (IdeaLink.tombstone_date == None) &
+            (IdeaLink.source_id == root_idea_id)
+        ).cte(recursive=True)
         source_alias = aliased(link)
         targets_alias = aliased(IdeaLink)
         parent_link = targets_alias.source_id == source_alias.c.target_id
         children = select(
-                [targets_alias.source_id, targets_alias.target_id]
-            ).select_from(targets_alias).where(parent_link
-                & (targets_alias.tombstone_date == None))
+            [targets_alias.source_id, targets_alias.target_id]
+        ).select_from(targets_alias).where(parent_link
+                                           & (targets_alias.tombstone_date == None))
         with_children = link.union(children)
         select_exp = select([with_children.c.target_id.label('id')]
-            ).select_from(with_children)
+                            ).select_from(with_children)
         if inclusive:
             if isinstance(root_idea_id, int):
                 root_idea_id = literal_column(str(root_idea_id), Integer)
@@ -595,7 +597,8 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
 
     def get_descendants_query(
             self, inclusive=True, subquery=True):
-        select_exp = self.get_descendants_query_cls(self.id, inclusive=inclusive)
+        select_exp = self.get_descendants_query_cls(
+            self.id, inclusive=inclusive)
         if subquery:
             select_exp = self.db.query(select_exp).subquery()
         return select_exp
@@ -733,20 +736,20 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
     @classmethod
     def children_dict(cls, discussion_id):
         # We do not want a subclass
-        cls = [c for c in cls.mro() if c.__name__=="Idea"][0]
+        cls = [c for c in cls.mro() if c.__name__ == "Idea"][0]
         source = aliased(cls, name="source")
         target = aliased(cls, name="target")
         link_info = list(cls.default_db.query(
             IdeaLink.target_id, IdeaLink.source_id
-            ).join(source, source.id == IdeaLink.source_id
-            ).join(target, target.id == IdeaLink.target_id
-            ).filter(
+        ).join(source, source.id == IdeaLink.source_id
+               ).join(target, target.id == IdeaLink.target_id
+                      ).filter(
             source.discussion_id == discussion_id,
             IdeaLink.tombstone_date == None,
             source.tombstone_date == None,
             target.tombstone_date == None,
             target.discussion_id == discussion_id
-            ).order_by(IdeaLink.order))
+        ).order_by(IdeaLink.order))
         if not link_info:
             (root_id,) = cls.default_db.query(
                 RootIdea.id).filter_by(discussion_id=discussion_id).first()
@@ -841,12 +844,12 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
         subquery = self.get_descendants_query()
         query = self.db.query(
             Post.creator_id
-            ).join(IdeaExtractLink
-            ).join(Extract
-            ).join(subquery, IdeaExtractLink.idea_id == subquery.c.id
-            ).filter(Extract.important == True
-            ).group_by(Post.creator_id
-            ).order_by(count(Extract.id).desc())
+        ).join(IdeaExtractLink
+               ).join(Extract
+                      ).join(subquery, IdeaExtractLink.idea_id == subquery.c.id
+                             ).filter(Extract.important == True
+                                      ).group_by(Post.creator_id
+                                                 ).order_by(count(Extract.id).desc())
         if id_only:
             return [AgentProfile.uri_generic(a) for (a,) in query]
         ids = [x for (x,) in query]
@@ -863,19 +866,19 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
         related = self.get_related_posts_query(True)
         content = with_polymorphic(
             Content, [], Content.__table__,
-            aliased=False, flat=True)
+            aliased=False)
         post = with_polymorphic(
             Post, [], Post.__table__,
-            aliased=False, flat=True)
+            aliased=False)
         query = self.db.query(post.creator_id
-            ).join(content, post.id == content.id
-            ).join(related, content.id == related.c.post_id
-            ).filter(content.hidden == False,
-                content.discussion_id == self.discussion_id
-            ).group_by(
-                post.creator_id
-            ).order_by(
-                count(post.id.distinct()).desc())
+                              ).join(content, post.id == content.id
+                                     ).join(related, content.id == related.c.post_id
+                                            ).filter(content.hidden == False,
+                                                     content.discussion_id == self.discussion_id
+                                                     ).group_by(
+            post.creator_id
+        ).order_by(
+            count(post.id.distinct()).desc())
 
         return ['local:Agent/' + str(i) for (i,) in query]
 
@@ -883,7 +886,8 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
         from ..semantic.inference import get_inference_store
         ontology = get_inference_store()
         typology = self.discussion.idea_typology
-        rules = typology.get('ideas', {}).get(self.rdf_type, {}).get('rules', {})
+        rules = typology.get('ideas', {}).get(
+            self.rdf_type, {}).get('rules', {})
         for child_link in self.target_links:
             link_type = child_link.rdf_type
             child = child_link.target
@@ -931,9 +935,11 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
                                 2 if r_link_type == link_type else 3,
                                 r_link_type, inter.pop()))
                 if 'GenericIdeaNode' in node_rules:
-                    potential_link_types.append((4, link_type, 'GenericIdeaNode'))
+                    potential_link_types.append(
+                        (4, link_type, 'GenericIdeaNode'))
                 else:
-                    potential_link_types.append((5, 'InclusionRelation', 'GenericIdeaNode'))
+                    potential_link_types.append(
+                        (5, 'InclusionRelation', 'GenericIdeaNode'))
                 potential_link_types.sort()
                 _, child_link.rdf_type, new_child_type = potential_link_types[0]
                 if new_child_type != child_type:
@@ -978,9 +984,9 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
         from assembl.models import Idea, IdeaLink, RootIdea
         G = pygraphviz.AGraph(directed=True, overlap=False)
         # G.graph_attr['overlap']='prism'
-        G.node_attr['penwidth']=0
-        G.node_attr['shape']='rect'
-        G.node_attr['style']='filled'
+        G.node_attr['penwidth'] = 0
+        G.node_attr['shape'] = 'rect'
+        G.node_attr['style'] = 'filled'
         G.node_attr['fillcolor'] = '#efefef'
         root_time = self.creation_date
 
@@ -991,21 +997,23 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
                 self.max_time = None
 
             def visit_idea(self, idea, level, prev_result, ctx=None):
-                age = ((idea.last_modified or idea.creation_date)-root_time).total_seconds()  # may be negative
+                age = ((idea.last_modified or idea.creation_date) -
+                       root_time).total_seconds()  # may be negative
                 color = Color(hsl=(180-(135.0 * age), 0.15, 0.85))
                 kwargs = {}
                 if idea.description_id:
                     kwargs['tooltip'] = idea.text_definition
                 G.add_node(idea.id,
                            label=idea.short_title or "",
-                           fontsize = 18 - (1.5 * level),
+                           fontsize=18 - (1.5 * level),
                            height=(20-(1.5*level))/72.0,
                            # fillcolor=color.hex,
                            target="idealoom",
                            URL=idea.get_url(),
                            **kwargs)
                 if prev_result:
-                    links = [l for l in idea.source_links if l.source_id == prev_result.id]
+                    links = [
+                        l for l in idea.source_links if l.source_id == prev_result.id]
                     if links:
                         link = links[0]
                         G.add_edge(link.source_id, link.target_id)
@@ -1054,20 +1062,20 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
         from sqlalchemy.sql.functions import func
         from .idea_content_link import IdeaContentPositiveLink
         from .post import Post
-        (ancestry, discussion_id, idea_link_ids)  = cls.default_db.query(
+        (ancestry, discussion_id, idea_link_ids) = cls.default_db.query(
             Post.ancestry, Post.discussion_id,
             func.idea_content_links_above_post(Post.id)
-            ).filter(Post.id==post_id).first()
+        ).filter(Post.id == post_id).first()
         post_path = "%s%d," % (ancestry, post_id)
         if not idea_link_ids:
             return []
         idea_link_ids = [int(id) for id in idea_link_ids.split(',') if id]
         # This could be combined with previous in postgres.
         root_ideas = cls.default_db.query(
-                IdeaContentPositiveLink.idea_id.distinct()
-            ).filter(
-                IdeaContentPositiveLink.idea_id != None,
-                IdeaContentPositiveLink.id.in_(idea_link_ids)).all()
+            IdeaContentPositiveLink.idea_id.distinct()
+        ).filter(
+            IdeaContentPositiveLink.idea_id != None,
+            IdeaContentPositiveLink.id.in_(idea_link_ids)).all()
         if not root_ideas:
             return []
         root_ideas = [x for (x,) in root_ideas]
@@ -1078,7 +1086,8 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
             for idea_id in discussion_data.idea_ancestry(root_idea_id):
                 if idea_id in idea_contains:
                     break
-                idea_contains[idea_id] = counter.paths[idea_id].includes_post(post_path)
+                idea_contains[idea_id] = counter.paths[idea_id].includes_post(
+                    post_path)
         return [id for (id, incl) in idea_contains.items() if incl]
 
     @classmethod
@@ -1126,7 +1135,7 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
             raise HTTPUnauthorized("You need permission %s to apply transition %s" % (
                 transition.req_permission_name, transition.label))
         if transition.source_id and transition.source_id != self.pub_state_id:
-            raise HTTPBadRequest("Transition %s applies to state %s, not %s" %(
+            raise HTTPBadRequest("Transition %s applies to state %s, not %s" % (
                 transition.label, transition.source_label, self.pub_state_name))
         self.pub_state_id = transition.target_id
 
@@ -1144,7 +1153,8 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
             user_id = request.user.id
         permissions = self.all_permissions_for(user_id, request)
         if P_SYSADMIN in permissions or P_ADMIN_DISC in permissions:
-            state = self.discussion.idea_publication_flow.state_by_label(state_label)
+            state = self.discussion.idea_publication_flow.state_by_label(
+                state_label)
             assert state, "No such state"
             self.pub_state = state
             return True
@@ -1182,7 +1192,8 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
         request = get_current_request()
         if request.unauthenticated_userid != user_id:
             request = None
-        base_permissions = request.base_permissions if request else get_permissions(user_id, self.discussion_id)
+        base_permissions = request.base_permissions if request else get_permissions(
+            user_id, self.discussion_id)
         if request and request.main_target is self:
             permissions = request.permissions
         elif not self.local_user_roles:
@@ -1191,7 +1202,8 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
             if request:
                 permissions = request.permissions_for_states[self.pub_state.label]
             else:
-                permissions = permissions_for_state(self.discussion_id, self.pub_state_id, user_id)
+                permissions = permissions_for_state(
+                    self.discussion_id, self.pub_state_id, user_id)
         else:
             permissions = get_permissions(user_id, self.discussion_id, self)
         return list(set(permissions) - set(base_permissions))
@@ -1211,14 +1223,14 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
         # TODO: CACHE!!!
         base = set(roles_with_permission(self.get_discussion(), P_READ_IDEA))
         q = self.db.query(Role.name).join(StateDiscussionPermission
-            ).filter_by(discussion_id=self.discussion_id,
-                pub_state_id=self.pub_state_id
-            ).join(Permission).filter_by(name=P_READ_IDEA).all()
+                                          ).filter_by(discussion_id=self.discussion_id,
+                                                      pub_state_id=self.pub_state_id
+                                                      ).join(Permission).filter_by(name=P_READ_IDEA).all()
         base.update((x for (x,) in q))
         # stop caching here
         base.update((local_role.get_user_uri()
-            for local_role in self.local_user_roles
-            if local_role.role_name in base))
+                     for local_role in self.local_user_roles
+                     if local_role.role_name in base))
         creator_id = self.creator_id
         if creator_id:
             base.add(User.uri_generic(creator_id))
@@ -1273,7 +1285,7 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
                 return instance.db.query(
                     IdeaLink).filter_by(
                     source=parent_instance, target=instance
-                    ).count() > 0
+                ).count() > 0
 
         @collection_creation_side_effects.register(
             inst_ctx=Idea, ctx='Idea.children')
@@ -1290,13 +1302,13 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
                     cls, 'linkedposts', Content)
 
             def decorate_query(self, query, owner_alias, last_alias, parent_instance, ctx):
-                return query.join(IdeaRelatedPostLink, owner_alias)
+                return query.join(IdeaRelatedPostLink).join(owner_alias)
 
             def contains(self, parent_instance, instance):
                 return instance.db.query(
                     IdeaRelatedPostLink).filter_by(
                     content=instance, idea=parent_instance
-                    ).count() > 0
+                ).count() > 0
 
         @collection_creation_side_effects.register(
             inst_ctx=Post, ctx='Idea.linkedposts')
@@ -1348,11 +1360,13 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
                 query = query.join(IdeaContentWidgetLink).join(
                     idea,
                     IdeaContentWidgetLink.idea_id == parent_instance.id)
-                if Content in chain(*(
-                        mapper.entities for mapper in query._entities)):
+                entities = [i['entity'] for i in query.column_descriptions]
+                entities = {e._aliased_insp._target if getattr(e, "_aliased_insp", None) else e: e
+                            for e in entities}
+                if Content in entities:
                     query = query.options(
-                        contains_eager(Content.widget_idea_links))
-                        # contains_eager(Content.extracts) seems to slow things down instead
+                        contains_eager(getattr(entities[Content], "widget_idea_links")))
+                    # contains_eager(Content.extracts) seems to slow things down instead
                 # Filter out idea proposal posts
                 query = query.filter(last_alias.type.notin_(
                     IdeaProposalPost.polymorphic_identities()))
@@ -1362,7 +1376,7 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
                 return instance.db.query(
                     IdeaContentWidgetLink).filter_by(
                     content=instance, idea=parent_instance
-                    ).count() > 0
+                ).count() > 0
 
         @collection_creation_side_effects.register(
             inst_ctx=Post, ctx='Idea.widgetposts')
@@ -1381,12 +1395,14 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
             def __init__(self, cls):
                 super(ActiveShowingWidgetsCollection, self).__init__(
                     cls, cls.active_showing_widget_links)
+
             def decorate_query(self, query, owner_alias, last_alias, parent_instance, ctx):
                 from .widgets import IdeaShowingWidgetLink
                 idea = owner_alias
                 widget_idea_link = last_alias
-                query = query.join(
-                    idea, widget_idea_link.idea).join(
+                query = query.join(idea
+                    ).join(widget_idea_link.idea
+                    ).join(
                     Widget, widget_idea_link.widget).filter(
                     Widget.test_active(),
                     widget_idea_link.type.in_(
@@ -1415,8 +1431,9 @@ class Idea(HistoryMixinWithOrigin, TimestampedMixin, DiscussionBoundBase):
     crud_permissions = CrudPermissions(
         P_ADD_IDEA, P_READ_IDEA, P_EDIT_IDEA, P_ADMIN_DISC, variable=MAYBE)
 
+
 LangString.setup_ownership_load_event(Idea,
-    ['title', 'description', 'synthesis_title'])
+                                      ['title', 'description', 'synthesis_title'])
 
 
 class RootIdea(Idea):
@@ -1434,7 +1451,6 @@ class RootIdea(Idea):
         'polymorphic_identity': 'root_idea',
     }
 
-
     def __init__(self, *args, **kwargs):
         kwargs['rdf_type_id'] = 3
         super(RootIdea, self).__init__(*args, **kwargs)
@@ -1445,7 +1461,7 @@ class RootIdea(Idea):
         from .post import Post
         result = self.db.query(Post).filter(
             Post.discussion_id == self.discussion_id,
-            Post.hidden==False,
+            Post.hidden == False,
             Post.tombstone_condition()
         ).count()
         return int(result)
@@ -1458,7 +1474,7 @@ class RootIdea(Idea):
         discussion_data = self.get_discussion_data(self.discussion_id)
         result = self.db.query(Post).filter(
             Post.discussion_id == self.discussion_id,
-            Post.hidden==False,
+            Post.hidden == False,
             Post.tombstone_condition()
         ).join(
             ViewPost,
@@ -1475,7 +1491,7 @@ class RootIdea(Idea):
         from .post import Post
         result = self.db.query(Post.creator_id).filter(
             Post.discussion_id == self.discussion_id,
-            Post.hidden==False,
+            Post.hidden == False,
             Post.tombstone_condition()
         ).distinct().count()
         return int(result)
@@ -1512,13 +1528,13 @@ class IdeaLink(HistoryMixinWithOrigin, DiscussionBoundBase):
     __external_typename = "DirectedIdeaRelation"
     rdf_class = IDEA.DirectedIdeaRelation
     rdf_type_id = Column(
-            Integer, ForeignKey('uriref.id'),
-            server_default=str(URIRefDb.index_of(IDEA.InclusionRelation)))
+        Integer, ForeignKey('uriref.id'),
+        server_default=str(URIRefDb.index_of(IDEA.InclusionRelation)))
     source_id = Column(
         Integer, ForeignKey(
             'idea.id', ondelete="CASCADE", onupdate="CASCADE"),
         nullable=False, index=True)
-        #info={'rdf': QuadMapPatternS(None, IDEA.target_idea)})
+    # info={'rdf': QuadMapPatternS(None, IDEA.target_idea)})
     target_id = Column(Integer, ForeignKey(
         'idea.id', ondelete="CASCADE", onupdate="CASCADE"),
         nullable=False, index=True)
@@ -1558,7 +1574,7 @@ class IdeaLink(HistoryMixinWithOrigin, DiscussionBoundBase):
     def import_record(cls):
         return relationship(
             ImportRecord, uselist=False,
-            primaryjoin=(remote(ImportRecord.target_id)==foreign(cls.id)) &
+            primaryjoin=(remote(ImportRecord.target_id) == foreign(cls.id)) &
                         (ImportRecord.target_table == cls.__tablename__))
 
     rdf_type_db = relationship(URIRefDb)
@@ -1629,16 +1645,17 @@ class IdeaLink(HistoryMixinWithOrigin, DiscussionBoundBase):
                 Idea.iri_class().apply(idea_link.target_id),
                 conditions=conditions,
                 name=QUADNAMES.col_pattern_IdeaLink_target_id
-                #exclude_base_condition=True
-                ),
+                # exclude_base_condition=True
+            ),
             QuadMapPatternS(
                 cls.iri_class().apply(idea_link.id),
                 IDEA.target_idea,
                 Idea.iri_class().apply(idea_link.source_id),
                 name=QUADNAMES.col_pattern_IdeaLink_source_id
-                ),
+            ),
             QuadMapPatternS(
-                None, RDF.type, IriClass(VirtRDF.QNAME_ID).apply(IdeaLink.rdf_type_db.val),
+                None, RDF.type, IriClass(VirtRDF.QNAME_ID).apply(
+                    IdeaLink.rdf_type_db.val),
                 name=QUADNAMES.class_IdeaLink_class),
         ]
 
@@ -1697,10 +1714,12 @@ class IdeaLink(HistoryMixinWithOrigin, DiscussionBoundBase):
                 (source_idea.discussion_id == discussion_id))
 
     def user_can(self, user_id, operation, permissions):
-        result = super(IdeaLink, self).user_can(user_id, operation, permissions)
+        result = super(IdeaLink, self).user_can(
+            user_id, operation, permissions)
         if operation != CrudOperation.CREATE and not result:
             user_id = user_id or Everyone
-            perm, owner_perm = self.crud_permissions.crud_permissions(operation)
+            perm, owner_perm = self.crud_permissions.crud_permissions(
+                operation)
             local_perms = self.target.local_permissions(user_id)
             if perm in local_perms:
                 return perm
@@ -1752,7 +1771,7 @@ Idea.num_children = column_property(
         (_ilt.c.source_id == _it.c.id)
         & (_ilt.c.tombstone_date == None)
         & (_it.c.tombstone_date == None)
-        ).correlate_except(_ilt),
+    ).correlate_except(_ilt),
     deferred=True)
 
 
@@ -1760,7 +1779,8 @@ class IdeaLocalUserRole(AbstractLocalUserRole):
     """The role that a user has in the context of a discussion"""
     __tablename__ = 'idea_user_role'
 
-    user = relationship(AgentProfile, backref=backref("local_idea_roles", cascade="all, delete-orphan"))
+    user = relationship(AgentProfile, backref=backref(
+        "local_idea_roles", cascade="all, delete-orphan"))
 
     idea_id = Column(Integer, ForeignKey(
         Idea.id, ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
@@ -1851,7 +1871,7 @@ def send_user_to_socket_for_idea_local_user_role(
     user = target.user
     if not target.user:
         user = User.get(target.profile_id)
-    user.send_to_changes(connection, CrudOperation.UPDATE, target.get_discussion_id())
+    user.send_to_changes(connection, CrudOperation.UPDATE,
+                         target.get_discussion_id())
     user.send_to_changes(
         connection, CrudOperation.UPDATE, target.get_discussion_id(), "private")
-

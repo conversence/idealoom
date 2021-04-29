@@ -370,10 +370,11 @@ class SemanticAnalysisData(object):
             corpus_fname = join(dirname, CORPUS_FNAME)
             if exists(corpus_fname):
                 corpus = IdMmCorpus(corpus_fname)
-                doc_count = db.query(Content).with_polymorphic(
-                    Content).options(defer(Content.like_count)).join(
-                    Discussion).filter(Discussion.id.in_(discussion_ids)
-                                       ).count()
+                doc_count = db.query(Content
+                    ).options(defer(Content.like_count)
+                    ).join(Discussion
+                    ).filter(Discussion.id.in_(discussion_ids)
+                    ).count()
                 if corpus.num_docs == doc_count:
                     corpora[lang] = corpus
                     if my_discussion_lang == lang:

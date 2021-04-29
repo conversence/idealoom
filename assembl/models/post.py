@@ -16,13 +16,13 @@ from sqlalchemy import (
     String,
     UnicodeText,
     ForeignKey,
-    Binary,
     Text,
     Index,
     or_,
     event,
     func
 )
+from sqlalchemy.dialects.postgresql import BYTEA as Binary
 from sqlalchemy.orm import (
     relationship, backref, deferred, column_property, with_polymorphic)
 

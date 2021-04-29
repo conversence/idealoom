@@ -29,8 +29,8 @@ def test_jack_layton_linked_discussion(
     posts_by_idea = {}
     for idea in ideas:
         posts_of_idea = list(test_session.execute(
-            counters.paths[idea.id].as_clause_base(
-                test_session, subidea_1.discussion_id)))
+            test_session.query(counters.paths[idea.id].as_clause_base(
+                test_session, subidea_1.discussion_id))))
         posts_of_idea = [posts_num_by_id[id] for (id,) in posts_of_idea]
         # posts_of_idea.sort()
         # posts_of_idea = [str(id) for id in posts_of_idea]

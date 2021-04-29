@@ -12,21 +12,12 @@ from datetime import datetime, timedelta
 from future.utils import string_types
 import transaction
 from sqlalchemy import (
-    Boolean,
     Column,
     String,
     ForeignKey,
     Integer,
     Unicode,
-    UnicodeText,
     DateTime,
-    Time,
-    Binary,
-    Text,
-    inspect,
-    desc,
-    event,
-    Index,
     UniqueConstraint
 )
 import simplejson as json

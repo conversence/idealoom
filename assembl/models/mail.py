@@ -26,14 +26,13 @@ from datetime import datetime
 # from imaplib2 import IMAP4_SSL, IMAP4
 import transaction
 from pyisemail import is_email
-from sqlalchemy.orm import (deferred, undefer, joinedload_all)
+from sqlalchemy.orm import (deferred, undefer, joinedload)
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy import (
     Column,
     Integer,
     ForeignKey,
     String,
-    Binary,
     UnicodeText,
     Boolean,
 )
@@ -658,7 +657,7 @@ FROM post WHERE post.id IN (SELECT MAX(post.id) as max_post_id FROM imported_pos
         for email_id in emails:
             with transaction.manager:
                 email_ = Email.get(email_id).options(
-                    joinedload_all(Email.parent), undefer(Email.imported_blob))
+                    joinedload(Email.parent), undefer(Email.imported_blob))
                 blob = AbstractMailbox.guess_encoding(email.imported_blob)
                 (email_object, dummy, error) = self.parse_email(blob, email)
 
@@ -848,7 +847,7 @@ class IMAPMailbox(AbstractMailbox):
                 #We imported mails, we need to re-thread
                 emails = session.query(Email).filter(
                     Email.discussion_id == discussion_id,
-                    ).options(joinedload_all(Email.parent))
+                    ).options(joinedload(Email.parent))
 
                 AbstractMailbox.thread_mails(emails)
 
@@ -970,7 +969,7 @@ class MaildirMailbox(AbstractFilesystemMailbox):
             with transaction.manager:
                 emails = session.query(Email).filter(
                         Email.discussion_id == discussion_id,
-                        ).options(joinedload_all(Email.parent))
+                        ).options(joinedload(Email.parent))
                 AbstractMailbox.thread_mails(emails)
 
 class Email(ImportedPost):

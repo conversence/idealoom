@@ -8,31 +8,31 @@ from sqlalchemy.orm import attributes
 from sqlalchemy_utils.generic import (
     TypeMapper, GenericRelationshipProperty as GenericRelationshipProperty_)
 from future.utils import string_types
+from aenum import Enum, extend_enum
 
 from .decl_enums import UpdatablePgEnum
 
 
-class BaseTableEnum(object):
-    # pretends to be a pyEnum by implementing __members__
-    __members__ = OrderedDict()
+class BaseTableEnum(Enum):
+    pass
 
-    @classmethod
-    def init_members(cls, Base):
-        """Must be called after object initialization"""
-        base_cls_by_table = {
-            c.__tablename__: c for c in Base._decl_class_registry.values()
-            if getattr(c, '__dict__', {}).get('__tablename__', None) and
-            c.__dict__['__tablename__'] == c.base_tablename()}
-        tables = list(base_cls_by_table.keys())
-        # make table order predictable
-        tables.sort()
-        for table in tables:
-            cls.__members__[table] = base_cls_by_table[table]
 
+def populate_base_table_enum(base):
+    """Must be called after object initialization"""
+    base_cls_by_table = {
+        c.__tablename__: c for c in base.registry._class_registry.values()
+        if getattr(c, '__dict__', {}).get('__tablename__', None) and
+        c.__dict__['__tablename__'] == c.base_tablename()}
+    tables = list(base_cls_by_table.keys())
+    # make table order predictable
+    tables.sort()
+    for table in tables:
+        extend_enum(BaseTableEnum, table, base_cls_by_table[table])
 
 class UniversalTableRefColType(UpdatablePgEnum):
     def __init__(self, *args, **kwargs):
         kwargs['name'] = 'base_tables_enum'
+        kwargs['omit_aliases'] = False
         super(UniversalTableRefColType, self).__init__(
             BaseTableEnum, *args, ordered=False, **kwargs)
 
@@ -44,7 +44,7 @@ class UniversalTableRefColType(UpdatablePgEnum):
 
 def init_datatype(base_class):
     from ..models.import_records import ImportRecord
-    BaseTableEnum.init_members(base_class)
+    populate_base_table_enum(base_class)
     type = ImportRecord.__mapper__.columns['target_table'].type
     type.reset_enum()
 

@@ -16,8 +16,7 @@ from pyramid.security import authenticated_userid, Everyone
 
 from sqlalchemy import String, text
 
-from sqlalchemy.orm import (
-    joinedload_all, aliased, subqueryload_all, undefer)
+from sqlalchemy.orm import (aliased, subqueryload, joinedload)
 from sqlalchemy.sql.expression import bindparam, and_, or_
 from sqlalchemy.sql import cast, column, func, case
 
@@ -299,11 +298,11 @@ def get_posts(request):
         ideaContentLinkCache = dict(ideaContentLinkQuery.all())
         posts = posts.options(
             # undefer(Post.idea_content_links_above_post),
-            joinedload_all(Post.creator),
-            joinedload_all(Post.extracts),
-            joinedload_all(Post.widget_idea_links),
-            joinedload_all(SynthesisPost.publishes_synthesis),
-            subqueryload_all(Post.attachments))
+            joinedload(Post.creator),
+            joinedload(Post.extracts),
+            joinedload(Post.widget_idea_links),
+            joinedload(SynthesisPost.publishes_synthesis),
+            subqueryload(Post.attachments))
         if len(discussion.discussion_locales) > 1:
             posts = posts.options(*Content.subqueryload_options())
         else:
@@ -346,11 +345,11 @@ def get_posts(request):
             else:
                 ancestors = ancestors.options(
                     # undefer(Post.idea_content_links_above_post),
-                    joinedload_all(Post.creator),
-                    joinedload_all(Post.extracts),
-                    joinedload_all(Post.widget_idea_links),
-                    joinedload_all(SynthesisPost.publishes_synthesis),
-                    subqueryload_all(Post.attachments))
+                    joinedload(Post.creator),
+                    joinedload(Post.extracts),
+                    joinedload(Post.widget_idea_links),
+                    joinedload(SynthesisPost.publishes_synthesis),
+                    subqueryload(Post.attachments))
                 if len(discussion.discussion_locales) > 1:
                     ancestors = ancestors.options(
                         *Content.subqueryload_options())

@@ -38,9 +38,9 @@ from sqlalchemy.orm import scoped_session, sessionmaker, aliased
 from sqlalchemy.orm.interfaces import MANYTOONE, ONETOMANY, MANYTOMANY
 from sqlalchemy.orm.properties import RelationshipProperty
 from sqlalchemy.orm.util import has_identity
-from sqlalchemy.util import classproperty
 from sqlalchemy.orm.session import object_session, Session
-from sqlalchemy.engine import strategies
+from sqlalchemy.engine import Engine
+from sqlalchemy.event import listens_for
 from sqla_rdfbridge.mapping import PatternIriClass
 from sqlalchemy.engine.url import URL
 from zope.sqlalchemy import register
@@ -61,8 +61,10 @@ from .utils import get_global_base_url
 from .config import get_config
 from . import logging
 from .read_write_session import ReadWriteSession
+from .abc import classproperty
 
-atexit_engines = []
+
+atexit_engines = set()
 log = logging.getLogger()
 
 
@@ -77,29 +79,22 @@ class DuplicateHandling(Enum):
     NO_CHECK = 1        # Don't look for duplicates
     ERROR = 2           # raise a ObjectNotUniqueError
     USE_ORIGINAL = 3    # Update the original value instead of a new one.
-    TOMBSTONE = 4       # Tombstone the original value (assumes TombstonableMixin) and use new one
+    # Tombstone the original value (assumes TombstonableMixin) and use new one
+    TOMBSTONE = 4
     TOMBSTONE_AND_COPY = 5  # Make a tombstone of original value, and reuse it
 
 
 class ObjectNotUniqueError(ValueError):
     pass
 
-
-class CleanupStrategy(strategies.PlainEngineStrategy):
-    name = 'atexit_cleanup'
-
-    def create(self, *args, **kwargs):
-        engine = super(CleanupStrategy, self).create(*args, **kwargs)
-        atexit_engines.append(engine)
-        return engine
-
-CleanupStrategy()
+# TODO: Replace CleanupStrategy with signals
 
 
 @atexit.register
 def dispose_sqlengines():
-    #print "ATEXIT", atexit_engines
+    # print "ATEXIT", atexit_engines
     [e.dispose() for e in atexit_engines]
+
 
 _TABLENAME_RE = re.compile('([A-Z]+)')
 
@@ -149,6 +144,7 @@ class TableLockCreationThread(Thread):
         Will be called many times.
     :returns: Whether there was anything added (maybe not in this process)
     """
+
     def __init__(self, object_generator, lock_table_name, num_attempts=3):
         super(TableLockCreationThread, self).__init__()
         self.object_generator = object_generator
@@ -180,7 +176,7 @@ class TableLockCreationThread(Thread):
                     tm = CommittingTm(db)
                 with tm:
                     got_lock = (db.execute("SELECT pg_try_advisory_xact_lock(%d)" % (
-                            self.lock_id,)).first(), )
+                        self.lock_id,)).first(), )
                     if not got_lock:
                         log.info("Could not get the table lock in attempt %d"
                                  % (num,))
@@ -287,7 +283,7 @@ class PromiseObjectImporter(SimpleObjectImporter):
     def fulfilled(self, source):
         return not (source in self.promises_by_source and
                     len(self.promises_by_source[source]))
-    
+
     def apply(self, source, target_id_or_data, promise):
         target_id = self.normalize_id(target_id_or_data)
         target = self.get_object(target_id)
@@ -311,7 +307,6 @@ class BaseOps(object):
     Many protocols are defined here.
 
     """
-
 
     # @declared_attr
     # def __tablename__(cls):
@@ -453,7 +448,7 @@ class BaseOps(object):
         if id is None:
             if 'id' not in self.__class__.__dict__:
                 raise NotImplementedError("get_id_as_str on " +
-                    self.__class__.__name__)
+                                          self.__class__.__name__)
             return None
         return str(id)
 
@@ -762,13 +757,14 @@ class BaseOps(object):
 
     _methods_by_class = {}
     _props_by_class = {}
+
     @classmethod
     def get_single_arg_methods(cls):
         if cls not in cls._methods_by_class:
             cls._methods_by_class[cls] = dict(pyinspect.getmembers(
                 cls, lambda m: (
                     pyinspect.ismethod(m) or pyinspect.isfunction(m))
-                    and m.__code__.co_argcount == 1))
+                and m.__code__.co_argcount == 1))
         return cls._methods_by_class[cls]
 
     @classmethod
@@ -878,7 +874,7 @@ class BaseOps(object):
                 assert get_view_def(view_name),\
                     "in viewdef %s, class %s, name %s, unknown viewdef %s" % (
                         view_def_name, my_typename, name, view_name)
-            #print prop_name, name, view_name
+            # print prop_name, name, view_name
 
             def translate_to_json(v):
                 if isinstance(v, Base):
@@ -966,12 +962,12 @@ class BaseOps(object):
 
                 continue
             elif isinstance(getattr(self.__class__, prop_name, None),
-                    (AssociationProxy, ObjectAssociationProxyInstance)):
+                            (AssociationProxy, ObjectAssociationProxyInstance)):
                 vals = getattr(self, prop_name)
             else:
                 assert prop_name in relns,\
-                        "in viewdef %s, class %s, prop_name %s not a column, property or relation" % (
-                            view_def_name, my_typename, prop_name)
+                    "in viewdef %s, class %s, prop_name %s not a column, property or relation" % (
+                        view_def_name, my_typename, prop_name)
                 known.add(prop_name)
                 # Add derived prop?
                 reln = relns[prop_name]
@@ -1201,8 +1197,8 @@ class BaseOps(object):
                 "User id <%s> cannot create a <%s> object" % (
                     user_id, cls.__name__))
         elif result is not inst and \
-            not result.user_can(
-                user_id, CrudPermissions.UPDATE, permissions
+                not result.user_can(
+                    user_id, CrudPermissions.UPDATE, permissions
                 ) and cls.default_db.is_modified(result, False):
             raise HTTPUnauthorized(
                 "User id <%s> cannot modify a <%s> object" % (
@@ -1240,7 +1236,6 @@ class BaseOps(object):
             return self.handle_duplication(
                 json, parse_def, context, None, object_importer)
 
-
     def _assign_subobject(self, instance, accessor):
         if isinstance(accessor, RelationshipProperty):
             # Let it throw an exception if reln not nullable?
@@ -1256,7 +1251,8 @@ class BaseOps(object):
                 for col in local_columns:
                     setattr(self, col.name, instance.id)
             else:
-                raise RuntimeError("Multiple column relationship not handled yet")
+                raise RuntimeError(
+                    "Multiple column relationship not handled yet")
         elif isinstance(accessor, property):
             accessor.fset(self, instance)
         elif isinstance(accessor, Column):
@@ -1274,7 +1270,7 @@ class BaseOps(object):
                     # Maybe delay and flush after identity check?
                     raise NotImplementedError()
         elif isinstance(accessor,
-                (AssociationProxy, ObjectAssociationProxyInstance)):
+                        (AssociationProxy, ObjectAssociationProxyInstance)):
             # only for lists, I think
             assert False, "we should not get here"
         else:
@@ -1339,208 +1335,221 @@ class BaseOps(object):
         for (accessor_name, (
                 value, accessor, target_cls, s_parse_def, c_context)
              ) in subobject_changes.items():
-                if isinstance(value, list):
-                    from_context = side_effects.get(accessor_name, None)
-                    if from_context:
-                        assert len(value) == 1, "conflict between side effects and sub-objects"
-                        value = value[0]
-                        assert isinstance(value, dict), "this should be an object description"
-                        val_id = value.get('@id', None)
-                        assert not val_id, "sub-object is a reference, conflicts with side-effect"
-                        i_context = from_context.get_instance_context(c_context)
-                        from_context2 = from_context._do_update_from_json(
-                            value, s_parse_def, i_context,
-                            duplicate_handling, object_importer)
-                        if from_context is not from_context2:
-                            # TODO: remove old object, add new one, but maybe other objects are ok...
-                            raise NotImplementedError()
-                        continue
-                    values = value
-                    instances = []
-                    current_instances = []
-                    if isinstance(accessor, property):
-                        current_instances = property.fget(self)
-                        return
-                    elif isinstance(accessor, Column):
-                        raise HTTPBadRequest(
-                            "%s cannot have multiple values" % (accessor.key, ))
-                    elif isinstance(accessor, RelationshipProperty):
-                        if accessor.back_populates:
-                            current_instances = getattr(self, accessor.key)
-                    elif isinstance(accessor,
-                            (AssociationProxy, ObjectAssociationProxyInstance)):
-                        current_instances = accessor.__get__(self, self.__class__)
-                    current_instances = set(current_instances)
-                    remaining_instances = set(current_instances)
-                    for value in values:
-                        val_id = None
-                        existing = None
-                        if isinstance(value, string_types):
-                            val_id = value
-                        elif isinstance(value, dict):
-                            val_id = value.get('@id', None)
-                            if val_id:
-                                if val_id in object_importer:
-                                    # import pdb
-                                    # pdb.set_trace()
-                                    log.error("this reference was present in two objects: "+val_id)
-                                    existing = object_importer[val_id]
-                        else:
-                            raise NotImplementedError()
-                        if val_id and not existing:
-                            existing = get_named_object(val_id)
-                        if existing and inspect(existing).persistent:
-                            # existing object, so we did not go through delayed creation
-                            sub_i_ctx = existing.get_instance_context(c_context)
-                            existing2 = existing._do_update_from_json(
-                                value, s_parse_def, sub_i_ctx,
-                                duplicate_handling, object_importer)
-                            if existing is not existing2:
-                                # delete existing? Or will that be implicit?
-                                existing = existing2
-                            remaining_instances.discard(existing)
-                        elif val_id:
-                            def process(instance, accessor_name):
-                                done = False
-                                rel = self.__class__.__mapper__.relationships.get(accessor_name, None)
-                                if rel:
-                                    back_properties = list(getattr(rel, '_reverse_property', ()))
-                                    if back_properties:
-                                        back_rel = next(iter(back_properties))
-                                        setattr(instance, back_rel.key, self)
-                                        done = True
-                                if not done:
-                                    # maybe it's an association proxy?
-                                    getattr(self, accessor_name).append(instance)
-                                if inspect(instance).persistent and isinstance(value, dict):
-                                    # existing object, so we did not go through delayed creation
-                                    sub_i_ctx = instance.get_instance_context(c_context)
-                                    instance2 = instance._do_update_from_json(
-                                        value, s_parse_def, sub_i_ctx,
-                                        duplicate_handling, object_importer)
-                                    if instance is not instance2:
-                                        # delete instance? Or will that be implicit?
-                                        instance = instance2
-                            object_importer.apply(self, val_id, partial(process, accessor_name=accessor_name))
-                        elif isinstance(value, dict):
-                            # just create the subobject
-                            instance_ctx = self._create_subobject_from_json(
-                                value, target_cls, parse_def,
-                                c_context, accessor_name, object_importer)
-                            if not instance_ctx:
-                                raise HTTPBadRequest("Could not create " + dumps(value))
-                            instance = instance_ctx._instance
-                            assert instance is not None
-                            best_match = instance.find_best_sibling(self, remaining_instances)
-                            if best_match:
-                                self.db.expunge(instance)
-                                sub_i_ctx = best_match.get_instance_context(c_context)
-                                existing = best_match._do_update_from_json(
-                                    value, s_parse_def, sub_i_ctx,
-                                    duplicate_handling, object_importer)
-                                remaining_instances.remove(existing)
-                            else:
-                                # create sub_i_ctx?
-                                instance = instance.handle_duplication(
-                                    value, parse_def, context, duplicate_handling,
-                                    object_importer)
-                                instances.append(instance)
-                        else:
-                            assert False, "We should not get here"
-                    # self._assign_subobject_list(
-                    #     instances, accessor, context.get_user_id(),
-                    #     context.get_permissions())
-                    if instances and isinstance(accessor,
-                            (AssociationProxy, ObjectAssociationProxyInstance)):
-                        for instance in instances:
-                            accessor.add(instance)
-                    if remaining_instances:
-                        if isinstance(accessor, RelationshipProperty):
-                            remote_columns = list(accessor.remote_side)
-                            if len(accessor.remote_side) > 1:
-                                if issubclass(accessor.mapper.class_, TombstonableMixin):
-                                    remote_columns = list(filter(lambda c: c.name != 'tombstone_date', remote_columns))
-                            assert len(remote_columns) == 1
-                            remote = remote_columns[0]
-                            if remote.nullable:
-                                # TODO: check update permissions on that object.
-                                for inst in remaining_instances:
-                                    setattr(inst, remote.key, None)
-                            else:
-                                for inst in remaining_instances:
-                                    if inspect(inst).pending:
-                                        self.db.expunge(inst)
-                                    elif not inst.user_can(
-                                            context.get_user_id(), CrudPermissions.DELETE,
-                                            context.get_permissions()):
-                                        raise HTTPUnauthorized(
-                                            "Cannot delete object %s", inst.uri())
-                                    else:
-                                        if isinstance(inst, TombstonableMixin):
-                                            inst.is_tombstone = True
-                                        else:
-                                            self.db.delete(inst)
-                        elif isinstance(accessor,
-                                (AssociationProxy, ObjectAssociationProxyInstance)):
-                            for instance in remaining_instances:
-                                accessor.delete(instance)
-
-                elif isinstance(accessor, property):
-                    # instance would have been treated above,
-                    # this is a json thingy.
-                    # Unless it's a real list? How to know?
-                    self._assign_subobject(value, accessor)
-                elif isinstance(value, dict):
+            if isinstance(value, list):
+                from_context = side_effects.get(accessor_name, None)
+                if from_context:
+                    assert len(
+                        value) == 1, "conflict between side effects and sub-objects"
+                    value = value[0]
+                    assert isinstance(
+                        value, dict), "this should be an object description"
                     val_id = value.get('@id', None)
-                    from_context = side_effects.get(accessor_name, None)
-                    existing = from_context or getattr(self, accessor_name, None)
-                    if not existing and val_id:
-                        existing = object_importer.get_object(val_id)
-                        if existing:
-                            # import pdb
-                            # pdb.set_trace()
-                            log.error("this reference was present in two objects: "+val_id)
-                    if existing:
-                        assert isinstance(existing, Base)
-                        if (val_id and val_id.startswith('local:') and
-                                existing.id and existing.uri() != val_id and
-                                existing != object_importer.get_object(val_id)):
-                            # import pdb
-                            # pdb.set_trace()
-                            assert False, "conflict for %s: we have %s\nreplacing with %s" % (
-                                accessor_name, existing.uri(), val_id)
-                        # object exists, or was just created as side-effect, update it.
+                    assert not val_id, "sub-object is a reference, conflicts with side-effect"
+                    i_context = from_context.get_instance_context(c_context)
+                    from_context2 = from_context._do_update_from_json(
+                        value, s_parse_def, i_context,
+                        duplicate_handling, object_importer)
+                    if from_context is not from_context2:
+                        # TODO: remove old object, add new one, but maybe other objects are ok...
+                        raise NotImplementedError()
+                    continue
+                values = value
+                instances = []
+                current_instances = []
+                if isinstance(accessor, property):
+                    current_instances = property.fget(self)
+                    return
+                elif isinstance(accessor, Column):
+                    raise HTTPBadRequest(
+                        "%s cannot have multiple values" % (accessor.key, ))
+                elif isinstance(accessor, RelationshipProperty):
+                    if accessor.back_populates:
+                        current_instances = getattr(self, accessor.key)
+                elif isinstance(accessor,
+                                (AssociationProxy, ObjectAssociationProxyInstance)):
+                    current_instances = accessor.__get__(self, self.__class__)
+                current_instances = set(current_instances)
+                remaining_instances = set(current_instances)
+                for value in values:
+                    val_id = None
+                    existing = None
+                    if isinstance(value, string_types):
+                        val_id = value
+                    elif isinstance(value, dict):
+                        val_id = value.get('@id', None)
+                        if val_id:
+                            if val_id in object_importer:
+                                # import pdb
+                                # pdb.set_trace()
+                                log.error(
+                                    "this reference was present in two objects: "+val_id)
+                                existing = object_importer[val_id]
+                    else:
+                        raise NotImplementedError()
+                    if val_id and not existing:
+                        existing = get_named_object(val_id)
+                    if existing and inspect(existing).persistent:
+                        # existing object, so we did not go through delayed creation
                         sub_i_ctx = existing.get_instance_context(c_context)
                         existing2 = existing._do_update_from_json(
-                                value, s_parse_def, sub_i_ctx,
-                                duplicate_handling, object_importer)
+                            value, s_parse_def, sub_i_ctx,
+                            duplicate_handling, object_importer)
                         if existing is not existing2:
+                            # delete existing? Or will that be implicit?
                             existing = existing2
-                            self._assign_subobject(existing, accessor)
-                            self.db.add(existing)
-                        if val_id:
-                            object_importer[val_id] = existing
-                    else:
+                        remaining_instances.discard(existing)
+                    elif val_id:
+                        def process(instance, accessor_name):
+                            done = False
+                            rel = self.__class__.__mapper__.relationships.get(
+                                accessor_name, None)
+                            if rel:
+                                back_properties = list(
+                                    getattr(rel, '_reverse_property', ()))
+                                if back_properties:
+                                    back_rel = next(iter(back_properties))
+                                    setattr(instance, back_rel.key, self)
+                                    done = True
+                            if not done:
+                                # maybe it's an association proxy?
+                                getattr(self, accessor_name).append(instance)
+                            if inspect(instance).persistent and isinstance(value, dict):
+                                # existing object, so we did not go through delayed creation
+                                sub_i_ctx = instance.get_instance_context(
+                                    c_context)
+                                instance2 = instance._do_update_from_json(
+                                    value, s_parse_def, sub_i_ctx,
+                                    duplicate_handling, object_importer)
+                                if instance is not instance2:
+                                    # delete instance? Or will that be implicit?
+                                    instance = instance2
+                        object_importer.apply(self, val_id, partial(
+                            process, accessor_name=accessor_name))
+                    elif isinstance(value, dict):
                         # just create the subobject
                         instance_ctx = self._create_subobject_from_json(
                             value, target_cls, parse_def,
                             c_context, accessor_name, object_importer)
                         if not instance_ctx:
-                            raise HTTPBadRequest("Could not create " + dumps(value))
-                        if instance_ctx._instance is not None:
-                            instance = instance_ctx._instance
-                            if instance is not None:
-                                # create sub_i_ctx?
-                                instance = instance.handle_duplication(
-                                    value, parse_def, context, duplicate_handling,
-                                    object_importer)
-                                self._assign_subobject(instance, accessor)
-                                if val_id:
-                                    object_importer[val_id] = instance
+                            raise HTTPBadRequest(
+                                "Could not create " + dumps(value))
+                        instance = instance_ctx._instance
+                        assert instance is not None
+                        best_match = instance.find_best_sibling(
+                            self, remaining_instances)
+                        if best_match:
+                            self.db.expunge(instance)
+                            sub_i_ctx = best_match.get_instance_context(
+                                c_context)
+                            existing = best_match._do_update_from_json(
+                                value, s_parse_def, sub_i_ctx,
+                                duplicate_handling, object_importer)
+                            remaining_instances.remove(existing)
+                        else:
+                            # create sub_i_ctx?
+                            instance = instance.handle_duplication(
+                                value, parse_def, context, duplicate_handling,
+                                object_importer)
+                            instances.append(instance)
+                    else:
+                        assert False, "We should not get here"
+                # self._assign_subobject_list(
+                #     instances, accessor, context.get_user_id(),
+                #     context.get_permissions())
+                if instances and isinstance(accessor,
+                                            (AssociationProxy, ObjectAssociationProxyInstance)):
+                    for instance in instances:
+                        accessor.add(instance)
+                if remaining_instances:
+                    if isinstance(accessor, RelationshipProperty):
+                        remote_columns = list(accessor.remote_side)
+                        if len(accessor.remote_side) > 1:
+                            if issubclass(accessor.mapper.class_, TombstonableMixin):
+                                remote_columns = list(
+                                    filter(lambda c: c.name != 'tombstone_date', remote_columns))
+                        assert len(remote_columns) == 1
+                        remote = remote_columns[0]
+                        if remote.nullable:
+                            # TODO: check update permissions on that object.
+                            for inst in remaining_instances:
+                                setattr(inst, remote.key, None)
+                        else:
+                            for inst in remaining_instances:
+                                if inspect(inst).pending:
+                                    self.db.expunge(inst)
+                                elif not inst.user_can(
+                                        context.get_user_id(), CrudPermissions.DELETE,
+                                        context.get_permissions()):
+                                    raise HTTPUnauthorized(
+                                        "Cannot delete object %s", inst.uri())
+                                else:
+                                    if isinstance(inst, TombstonableMixin):
+                                        inst.is_tombstone = True
+                                    else:
+                                        self.db.delete(inst)
+                    elif isinstance(accessor,
+                                    (AssociationProxy, ObjectAssociationProxyInstance)):
+                        for instance in remaining_instances:
+                            accessor.delete(instance)
+
+            elif isinstance(accessor, property):
+                # instance would have been treated above,
+                # this is a json thingy.
+                # Unless it's a real list? How to know?
+                self._assign_subobject(value, accessor)
+            elif isinstance(value, dict):
+                val_id = value.get('@id', None)
+                from_context = side_effects.get(accessor_name, None)
+                existing = from_context or getattr(self, accessor_name, None)
+                if not existing and val_id:
+                    existing = object_importer.get_object(val_id)
+                    if existing:
+                        # import pdb
+                        # pdb.set_trace()
+                        log.error(
+                            "this reference was present in two objects: "+val_id)
+                if existing:
+                    assert isinstance(existing, Base)
+                    if (val_id and val_id.startswith('local:') and
+                            existing.id and existing.uri() != val_id and
+                            existing != object_importer.get_object(val_id)):
+                        # import pdb
+                        # pdb.set_trace()
+                        assert False, "conflict for %s: we have %s\nreplacing with %s" % (
+                            accessor_name, existing.uri(), val_id)
+                    # object exists, or was just created as side-effect, update it.
+                    sub_i_ctx = existing.get_instance_context(c_context)
+                    existing2 = existing._do_update_from_json(
+                        value, s_parse_def, sub_i_ctx,
+                        duplicate_handling, object_importer)
+                    if existing is not existing2:
+                        existing = existing2
+                        self._assign_subobject(existing, accessor)
+                        self.db.add(existing)
+                    if val_id:
+                        object_importer[val_id] = existing
                 else:
-                    # should not get here
-                    import pdb
-                    pdb.set_trace()
+                    # just create the subobject
+                    instance_ctx = self._create_subobject_from_json(
+                        value, target_cls, parse_def,
+                        c_context, accessor_name, object_importer)
+                    if not instance_ctx:
+                        raise HTTPBadRequest(
+                            "Could not create " + dumps(value))
+                    if instance_ctx._instance is not None:
+                        instance = instance_ctx._instance
+                        if instance is not None:
+                            # create sub_i_ctx?
+                            instance = instance.handle_duplication(
+                                value, parse_def, context, duplicate_handling,
+                                object_importer)
+                            self._assign_subobject(instance, accessor)
+                            if val_id:
+                                object_importer[val_id] = instance
+            else:
+                # should not get here
+                import pdb
+                pdb.set_trace()
 
         if not object_importer.fulfilled(self):
             log.error("not fulfilled: "+str(self))
@@ -1662,7 +1671,8 @@ class BaseOps(object):
                             setattr(self, key, value.decode('utf-8'))
                         elif col.type.python_type is past_str \
                                 and isinstance(value, past_unicode):  # python2
-                            setattr(self, key, value.encode('ascii'))  # or utf-8?
+                            setattr(self, key, value.encode(
+                                'ascii'))  # or utf-8?
                         elif col.type.python_type is bool \
                                 and value.lower() in ("true", "false"):
                             # common error... tolerate.
@@ -1725,14 +1735,14 @@ class BaseOps(object):
                 can_be_list = True
             elif getattr(self.__class__, key, None) is not None\
                     and isinstance(getattr(self.__class__, key),
-                        (AssociationProxy, ObjectAssociationProxyInstance)):
+                                   (AssociationProxy, ObjectAssociationProxyInstance)):
                 accessor = getattr(self.__class__, key)
                 # Target_cls?
                 can_be_list = must_be_list = True
             elif not value:
-                log.info("Ignoring unknown empty value for "\
-                    "attribute %s in json id %s (type %s)" % (
-                        key, json.get('@id', '?'), json.get('@type', '?')))
+                log.info("Ignoring unknown empty value for "
+                         "attribute %s in json id %s (type %s)" % (
+                             key, json.get('@id', '?'), json.get('@type', '?')))
                 continue
             else:
                 raise HTTPBadRequest(
@@ -1744,7 +1754,8 @@ class BaseOps(object):
             c_context = self.get_collection_context(key, context) or context
             log.debug("Chaining context from %s to %s" % (context, c_context))
             if c_context is context:
-                log.info("Could not find collection context: %s %s" % (self, key))
+                log.info("Could not find collection context: %s %s" %
+                         (self, key))
             if isinstance(value, string_types):
                 assert not must_be_list
                 target_id = value
@@ -1854,8 +1865,8 @@ class BaseOps(object):
         return ()
 
     def handle_duplication(
-                self, json={}, parse_def={}, context=None,
-                duplicate_handling=None, object_importer=None):
+            self, json={}, parse_def={}, context=None,
+            duplicate_handling=None, object_importer=None):
         """Look for duplicates of this object.
 
         Some uniqueness is handled in the database, but it is difficult to do
@@ -1951,7 +1962,8 @@ class BaseOps(object):
         """Assert this object is unique"""
         duplicate = self.find_duplicate()
         if duplicate is not None:
-            raise ObjectNotUniqueError("Duplicate of <%s> created" % (duplicate.uri()))
+            raise ObjectNotUniqueError(
+                "Duplicate of <%s> created" % (duplicate.uri()))
 
     @classmethod
     def extra_collections_dict(cls):
@@ -2043,7 +2055,6 @@ class BaseOps(object):
         """filter query according to object owners"""
         return (query, None)
 
-
     @classmethod
     def pubflowid_from_discussion(cls, discussion):
         return None
@@ -2079,78 +2090,85 @@ class BaseOps(object):
 
         query = query or db.query(clsAlias)
         base_permissions = base_permissions or ()
-        if permission in base_permissions or P_SYSADMIN in base_permissions: # 1 shortcut
+        if permission in base_permissions or P_SYSADMIN in base_permissions:  # 1 shortcut
             return query
         roles_with_d_permission_q = db.query(Role.id).join(
             DiscussionPermission).join(Permission).filter(
                 (Permission.name == permission) &
                 (DiscussionPermission.discussion == discussion)
-            ).subquery()
+        ).subquery()
         local_role_class, lrc_fk = cls.local_role_class_and_fkey()
-        (query, ownership_condition) = cls.restrict_to_owners_condition(query, user_id, clsAlias)
+        (query, ownership_condition) = cls.restrict_to_owners_condition(
+            query, user_id, clsAlias)
         conditions = []
         if ownership_condition is not None:  # 3
             owner_has_permission = db.query(DiscussionPermission
-                ).filter_by(discussion_id=discussion.id
-                ).join(Role).filter_by(name=R_OWNER
-                ).join(Permission).filter_by(name=owner_permission).limit(1).count()
+                                            ).filter_by(discussion_id=discussion.id
+                                                        ).join(Role).filter_by(name=R_OWNER
+                                                                               ).join(Permission).filter_by(name=owner_permission).limit(1).count()
             if owner_has_permission:
                 conditions.append(ownership_condition)
         if local_role_class:    # 5
             ilur_dp = aliased(local_role_class)
 
             query = query.outerjoin(
-                    ilur_dp,
-                    (getattr(ilur_dp, lrc_fk)==clsAlias.id) &
-                    (ilur_dp.profile_id==user_id) &
-                    ilur_dp.role_id.in_(roles_with_d_permission_q)
-                )
+                ilur_dp,
+                (getattr(ilur_dp, lrc_fk) == clsAlias.id) &
+                (ilur_dp.profile_id == user_id) &
+                ilur_dp.role_id.in_(roles_with_d_permission_q)
+            )
             conditions.append(ilur_dp.id != None)
 
         if pubflow_id:
             # TODO: Could this be simplified with a view?
             states_with_permission_q = db.query(PublicationState.id  # 2
-                ).filter(PublicationState.flow_id == pubflow_id
-                ).join(StateDiscussionPermission,
-                    (StateDiscussionPermission.pub_state_id==PublicationState.id) &
-                    (StateDiscussionPermission.discussion_id==discussion.id)
-                ).join(Role,
-                    (StateDiscussionPermission.role_id == Role.id) &
-                    Role.name.in_(roles)
-                ).join(Permission,
-                    (StateDiscussionPermission.permission_id==Permission.id) &
-                    (Permission.name == permission))
-            conditions.append(clsAlias.pub_state_id.in_(states_with_permission_q))
+                                                ).filter(PublicationState.flow_id == pubflow_id
+                                                         ).join(StateDiscussionPermission,
+                                                                (StateDiscussionPermission.pub_state_id == PublicationState.id) &
+                                                                (StateDiscussionPermission.discussion_id == discussion.id)
+                                                                ).join(Role,
+                                                                       (StateDiscussionPermission.role_id == Role.id) &
+                                                                       Role.name.in_(
+                                                                           roles)
+                                                                       ).join(Permission,
+                                                                              (StateDiscussionPermission.permission_id == Permission.id) &
+                                                                              (Permission.name == permission))
+            conditions.append(clsAlias.pub_state_id.in_(
+                states_with_permission_q))
             if ownership_condition is not None:  # 4
                 states_with_owner_permission_q = db.query(PublicationState.id
-                    ).filter(PublicationState.flow_id == pubflow_id
-                    ).join(StateDiscussionPermission,
-                        (StateDiscussionPermission.pub_state_id==PublicationState.id) &
-                        (StateDiscussionPermission.discussion_id==discussion.id)
-                    ).join(Permission,
-                        (StateDiscussionPermission.permission_id==Permission.id) &
-                        Permission.name.in_(owner_permissions)
-                    ).join(Role,
-                        (StateDiscussionPermission.role_id==Role.id) &
-                        (Role.name == R_OWNER))
-                conditions.append(ownership_condition & clsAlias.pub_state_id.in_(states_with_owner_permission_q))
+                                                          ).filter(PublicationState.flow_id == pubflow_id
+                                                                   ).join(StateDiscussionPermission,
+                                                                          (StateDiscussionPermission.pub_state_id == PublicationState.id) &
+                                                                          (StateDiscussionPermission.discussion_id == discussion.id)
+                                                                          ).join(Permission,
+                                                                                 (StateDiscussionPermission.permission_id == Permission.id) &
+                                                                                 Permission.name.in_(
+                                                                                     owner_permissions)
+                                                                                 ).join(Role,
+                                                                                        (StateDiscussionPermission.role_id == Role.id) &
+                                                                                        (Role.name == R_OWNER))
+                conditions.append(ownership_condition & clsAlias.pub_state_id.in_(
+                    states_with_owner_permission_q))
 
             if local_role_class:  # 6
                 ilur_ip = aliased(local_role_class)
                 sdp_ilocal = aliased(StateDiscussionPermission)
-                permissionO = Permission.getByName(permission)  # avoid an outerjoin
+                permissionO = Permission.getByName(
+                    permission)  # avoid an outerjoin
 
                 query = query.outerjoin(
-                        ilur_ip,
-                        (getattr(ilur_ip, lrc_fk)==clsAlias.id) &
-                        (ilur_ip.profile_id==user_id)
-                    ).outerjoin(
-                        sdp_ilocal,
-                        (sdp_ilocal.role_id==ilur_ip.role_id) &
-                        (sdp_ilocal.pub_state_id==clsAlias.pub_state_id) &
-                        (sdp_ilocal.permission_id==permissionO.id)
-                    )
-                conditions.append((ilur_ip.id != None) & (sdp_ilocal.id != None))
+                    ilur_ip,
+                    (getattr(ilur_ip, lrc_fk) == clsAlias.id) &
+                    (ilur_ip.profile_id == user_id)
+                ).outerjoin(
+                    sdp_ilocal,
+                    (sdp_ilocal.role_id == ilur_ip.role_id) &
+                    (sdp_ilocal.pub_state_id == clsAlias.pub_state_id) &
+                    (sdp_ilocal.permission_id == permissionO.id)
+                )
+                conditions.append((ilur_ip.id != None) &
+                                  (sdp_ilocal.id != None))
         if conditions:
             query = query.filter(or_(*conditions))
         return query
@@ -2178,8 +2196,8 @@ class BaseOps(object):
         (local_role_class, fkey) = self.local_role_class_and_fkey()
         if local_role_class:
             query = self.db.query(Role.name).join(local_role_class).filter(
-                getattr(local_role_class, fkey)==self.id,
-                local_role_class.profile_id==user_id)
+                getattr(local_role_class, fkey) == self.id,
+                local_role_class.profile_id == user_id)
             roles.extend((x for (x,) in query))
         return roles
 
@@ -2196,18 +2214,18 @@ class BaseOps(object):
             base_roles.append(R_OWNER)
         clauses = []
         roles = session.query(Role).join(UserRole).filter(
-                UserRole.profile_id == user_id)
+            UserRole.profile_id == user_id)
         if discussion_id:
             clauses.append(session.query(Role).join(LocalUserRole).filter(and_(
-                        LocalUserRole.profile_id == user_id,
-                        LocalUserRole.requested == False,
-                        LocalUserRole.discussion_id == discussion_id)))
+                LocalUserRole.profile_id == user_id,
+                LocalUserRole.requested == False,
+                LocalUserRole.discussion_id == discussion_id)))
         clauses.append(session.query(Role).filter(Role.name.in_(base_roles)))
         (local_role_class, fkey) = self.local_role_class_and_fkey()
         if local_role_class:
             clauses.append(session.query(Role).join(local_role_class).filter(
-                getattr(local_role_class, fkey)==self.id,
-                local_role_class.profile_id==user_id))
+                getattr(local_role_class, fkey) == self.id,
+                local_role_class.profile_id == user_id))
         roles = roles.union(*clauses)
         return roles.distinct()
 
@@ -2225,28 +2243,28 @@ class BaseOps(object):
         if not discussion:
             return []
         roles = self.get_role_query(user_id, discussion.id
-            ).with_entities(Role.id).subquery()
+                                    ).with_entities(Role.id).subquery()
         queries = []
         if include_global:
             queries.append(
                 session.query(Permission.name).join(
                     DiscussionPermission
                 ).join(Role
-                ).filter(Role.id.in_(roles)))
+                       ).filter(Role.id.in_(roles)))
         elif self.is_owner(user_id):
             queries.append(
                 session.query(Permission.name).join(
                     DiscussionPermission
                 ).join(Role
-                ).filter(Role.name == R_OWNER))
+                       ).filter(Role.name == R_OWNER))
         pub_state_id = getattr(self, 'pub_state_id', None)
         if pub_state_id:
             queries.append(
                 session.query(Permission.name).join(
                     StateDiscussionPermission,
-                    (Permission.id==StateDiscussionPermission.permission_id) &
-                    (StateDiscussionPermission.pub_state_id==pub_state_id) &
-                    (StateDiscussionPermission.discussion_id==discussion.id) &
+                    (Permission.id == StateDiscussionPermission.permission_id) &
+                    (StateDiscussionPermission.pub_state_id == pub_state_id) &
+                    (StateDiscussionPermission.discussion_id == discussion.id) &
                     StateDiscussionPermission.role_id.in_(roles)
                 )
             )
@@ -2427,7 +2445,8 @@ def before_commit_listener(session):
     We have to do this before commit, while objects are still attached."""
     # If there hasn't been a flush yet, make sure any sql error occur BEFORE
     # we send changes to the socket.
-    session.flush()
+    if not session._flushing:
+        session.flush()
     info = session.connection().info
     if 'cdict' in info:
         changes = defaultdict(list)
@@ -2497,7 +2516,8 @@ def connection_url(settings, prefix='db_'):
             db_host, database=db_database, query=query)
     else:
         query = {'sslmode': 'disable' if db_host == 'localhost' else 'require'}
-        password = settings.get(prefix + 'password', None) or settings.get('db_password')
+        password = settings.get(prefix + 'password',
+                                None) or settings.get('db_password')
         return URL(
             'postgresql+psycopg2', db_user, password, db_host, 5432, db_database, query)
 
@@ -2533,7 +2553,8 @@ def configure_engine(settings, zope_tr=True, autoflush=True, session_maker=None,
     if read_url:
         settings = dict(settings)
         settings['sqlalchemy.url'] = read_url
-        read_engine = engine_from_config(settings, 'sqlalchemy.', **engine_kwargs)
+        read_engine = engine_from_config(
+            settings, 'sqlalchemy.', **engine_kwargs)
     else:
         read_engine = None
     session_maker.configure(bind=engine, read_bind=read_engine)

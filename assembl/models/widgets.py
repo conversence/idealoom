@@ -329,7 +329,6 @@ class IdeaInspireMeWidgetLink(
     }
 
 
-
 class IdeaCreativitySessionWidgetLink(
         IdeaShowingWidgetLink, BaseIdeaWidgetLink):
     __mapper_args__ = {
@@ -427,15 +426,16 @@ class BaseIdeaWidget(Widget):
 
 
 BaseIdeaWidget.base_idea = relationship(
-        Idea, viewonly=True, secondary=BaseIdeaWidgetLink.__table__,
-        primaryjoin=((BaseIdeaWidget.id == BaseIdeaWidgetLink.widget_id)
-                     & BaseIdeaWidgetLink.polymorphic_filter()),
-        secondaryjoin=BaseIdeaWidgetLink.idea_id == Idea.id,
-        uselist=False)
+    Idea, viewonly=True, secondary=BaseIdeaWidgetLink.__table__,
+    primaryjoin=((BaseIdeaWidget.id == BaseIdeaWidgetLink.widget_id)
+                 & BaseIdeaWidgetLink.polymorphic_filter()),
+    secondaryjoin=BaseIdeaWidgetLink.idea_id == Idea.id,
+    uselist=False)
 
 
 class BaseIdeaCollection(RelationCollectionDefinition):
     """The 'collection' of the ``base_idea`` of this :py:class:`BaseIdeaWidget`"""
+
     def __init__(self, name=None):
         super(BaseIdeaCollection, self).__init__(
             BaseIdeaWidget, BaseIdeaWidget.base_idea, name)
@@ -523,13 +523,13 @@ class IdeaCreatingWidget(BaseIdeaWidget):
             Idea, IdeaContentWidgetLink.idea_id == Idea.id).join(
             IdeaLink, IdeaLink.target_id == Idea.id).filter(
             IdeaLink.source_id == root_idea_id, ~Content.hidden
-            ).union(
+        ).union(
                 self.db.query(IdeaProposalPost.id).join(
                     Idea, IdeaProposalPost.idea_id == Idea.id).join(
                     IdeaLink, IdeaLink.target_id == Idea.id).filter(
                     IdeaLink.source_id == root_idea_id,
                     ~IdeaProposalPost.hidden)
-            ).all()
+        ).all()
         return [Content.uri_generic(id) for (id,) in ids]
 
     def set_confirmed_messages(self, post_ids):
@@ -566,7 +566,7 @@ class IdeaCreatingWidget(BaseIdeaWidget):
                         gen_idea_link,
                         (gen_idea_link.idea_id ==
                             children_ctx.class_alias.id) & (
-                        gen_idea_link.widget_id == owner_alias.id))
+                            gen_idea_link.widget_id == owner_alias.id))
                 return query
 
         class BaseIdeaHidingCollection(BaseIdeaCollectionC):
@@ -580,7 +580,6 @@ class IdeaCreatingWidget(BaseIdeaWidget):
                 if P_ADD_POST in permissions and P_ADD_IDEA not in permissions:
                     return [P_ADD_IDEA]
                 return []
-
 
         class BaseIdeaDescendantsCollectionC(BaseIdeaDescendantsCollection):
             hide_proposed_ideas = False
@@ -673,7 +672,7 @@ class InspirationWidget(IdeaCreatingWidget):
     def configured(self):
         active_modules = self.settings_json.get('active_modules', {})
         return bool(active_modules.get('card', None)
-                or active_modules.get('video', None))
+                    or active_modules.get('video', None))
 
     @classmethod
     def get_ui_endpoint_base(cls):
@@ -701,7 +700,8 @@ class CreativitySessionWidget(IdeaCreatingWidget):
         if self.base_idea_link:
             self.base_idea_link.idea_id = id
         else:
-            self.base_idea_link = IdeaCreativitySessionWidgetLink(widget=self, idea=idea)
+            self.base_idea_link = IdeaCreativitySessionWidgetLink(
+                widget=self, idea=idea)
             self.db.add(self.base_idea_link)
         # This is wrong, but not doing it fails.
         self.base_idea = idea
@@ -728,15 +728,15 @@ class CreativitySessionWidget(IdeaCreatingWidget):
         # Participants from created ideas
         participant_ids.update((c[0] for c in self.db.query(
             IdeaProposalPost.creator_id).join(
-                Idea, GeneratedIdeaWidgetLink).filter(
+                Idea).join(GeneratedIdeaWidgetLink).filter(
                     Widget.id == self.id)))
         return len(participant_ids)
 
     def num_posts_by(self, user_id):
         from .post import WidgetPost
         return self.db.query(WidgetPost
-            ).join(self.__class__
-            ).filter(WidgetPost.creator_id==user_id).count()
+                             ).join(self.__class__
+                                    ).filter(WidgetPost.creator_id == user_id).count()
 
     @property
     def num_posts_by_current_user(self):
@@ -789,7 +789,8 @@ class VotingWidget(BaseIdeaWidget):
                 votable_root_idea = Idea.get_instance(
                     settings['votable_root_id'])
             except Exception as e:
-                log.error("Cannot find votable root. " + settings['votable_root_id'])
+                log.error("Cannot find votable root. " +
+                          settings['votable_root_id'])
                 return
             if len(votable_root_idea.children):
                 for child in votable_root_idea.children:
@@ -839,7 +840,6 @@ class VotingWidget(BaseIdeaWidget):
                 self.discussion_id, self.id, vote_spec.id)
             for vote_spec in self.vote_specifications
         }
-
 
     def add_criterion(self, idea):
         if idea not in self.criteria:
@@ -964,10 +964,12 @@ class VotingWidget(BaseIdeaWidget):
     # def criteria(self):
     #     return [cl.idea for cl in self.criteria_links]
 
+
 class MultiCriterionVotingWidget(VotingWidget):
     __mapper_args__ = {
         'polymorphic_identity': 'multicriterion_voting_widget',
     }
+
 
 class TokenVotingWidget(VotingWidget):
     __mapper_args__ = {

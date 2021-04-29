@@ -3,8 +3,7 @@ from functools import reduce
 
 from sqlalchemy.sql import func, case
 from sqlalchemy.sql.expression import or_
-from sqlalchemy.orm import (
-    joinedload_all, aliased, subqueryload_all, undefer)
+from sqlalchemy.orm import aliased
 
 from assembl.lib.config import get
 

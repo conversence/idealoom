@@ -1,21 +1,28 @@
 """Definition of the discussion class."""
 from __future__ import division
-from future import standard_library
-standard_library.install_aliases()
-from builtins import str
-from itertools import groupby, chain
-import traceback
-from datetime import datetime
-from collections import defaultdict
-import logging
-
-from future.utils import as_native_str
-import simplejson as json
-from pyramid.security import Allow, ALL_PERMISSIONS
-from pyramid.settings import asbool
-from pyramid.path import DottedNameResolver
-from pyramid.httpexceptions import HTTPUnauthorized
-from pyramid.threadlocal import get_current_registry
+from ..semantic.namespaces import (CATALYST, ASSEMBL, DCTERMS)
+from .preferences import Preferences
+from .publication_states import PublicationFlow
+from .permissions import (
+    DiscussionPermission, Role, Permission, UserRole, LocalUserRole,
+    UserTemplate)
+from ..auth.util import get_permissions, permissions_for_state
+from .auth import User
+from ..auth import (
+    P_READ, R_SYSADMIN, P_ADMIN_DISC, R_PARTICIPANT, P_SYSADMIN,
+    CrudPermissions, Authenticated, Everyone)
+from ..semantic.virtuoso_mapping import QuadMapPatternS
+from . import DiscussionBoundBase, NamedClassMixin, OriginMixin
+from ..lib.discussion_creation import IDiscussionCreationCallback
+from ..lib.locale import strip_country
+from ..lib.sqla import CrudOperation
+from ..lib.sqla_types import URLString, CoerceUnicode
+from assembl.lib.utils import slugify, get_global_base_url, full_class_name
+from assembl.lib import config
+from sqlalchemy.sql.expression import literal, distinct
+from sqlalchemy.exc import InvalidRequestError
+from sqlalchemy.orm import (
+    relationship, join, subqueryload, joinedload, backref, with_polymorphic, aliased)
 from sqlalchemy import (
     Column,
     Integer,
@@ -29,30 +36,22 @@ from sqlalchemy import (
     func,
     inspect,
 )
-from sqlalchemy.orm import (
-    relationship, join, subqueryload, joinedload, backref, with_polymorphic)
-from sqlalchemy.exc import InvalidRequestError
-from sqlalchemy.sql.expression import literal, distinct
+from pyramid.threadlocal import get_current_registry
+from pyramid.httpexceptions import HTTPUnauthorized
+from pyramid.path import DottedNameResolver
+from pyramid.settings import asbool
+from pyramid.security import Allow, ALL_PERMISSIONS
+import simplejson as json
+from future.utils import as_native_str
+import logging
+from collections import defaultdict
+from datetime import datetime
+import traceback
+from itertools import groupby, chain
+from builtins import str
+from future import standard_library
+standard_library.install_aliases()
 
-from assembl.lib import config
-from assembl.lib.utils import slugify, get_global_base_url, full_class_name
-from ..lib.sqla_types import URLString, CoerceUnicode
-from ..lib.sqla import CrudOperation
-from ..lib.locale import strip_country
-from ..lib.discussion_creation import IDiscussionCreationCallback
-from . import DiscussionBoundBase, NamedClassMixin, OriginMixin
-from ..semantic.virtuoso_mapping import QuadMapPatternS
-from ..auth import (
-    P_READ, R_SYSADMIN, P_ADMIN_DISC, R_PARTICIPANT, P_SYSADMIN,
-    CrudPermissions, Authenticated, Everyone)
-from .auth import User
-from ..auth.util import get_permissions, permissions_for_state
-from .permissions import (
-    DiscussionPermission, Role, Permission, UserRole, LocalUserRole,
-    UserTemplate)
-from .publication_states import PublicationFlow
-from .preferences import Preferences
-from ..semantic.namespaces import (CATALYST, ASSEMBL, DCTERMS)
 
 resolver = DottedNameResolver(__package__)
 log = logging.getLogger(__name__)
@@ -122,7 +121,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
                 raise HTTPBadRequest(
                     "The homepage url does not have a scheme. Must be either http or https"
                 )
-    
+
             if parsed_url.scheme not in (u'http', u'https'):
                 raise HTTPBadRequest(
                     "The url has an incorrect scheme. Only http and https are accepted for homepage url"
@@ -305,7 +304,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
         return self.db.query(Synthesis.id).outerjoin(
             SynthesisPost).filter(
             Synthesis.discussion_id == self.id,
-            SynthesisPost.id == None).first()
+            SynthesisPost.id == None).first()[0]
 
     def get_next_synthesis(self, full_data=True):
         from .idea_graph_view import Synthesis
@@ -382,7 +381,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
 
     def get_permissions_by_role(self):
         roleperms = self.db.query(Role.name, Permission.name).select_from(
-            DiscussionPermission).join(Role, Permission).filter(
+            DiscussionPermission).join(Role).join(Permission).filter(
                 DiscussionPermission.discussion_id == self.id).all()
         roleperms.sort()
         byrole = groupby(roleperms, lambda r_p: r_p[0])
@@ -390,7 +389,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
 
     def get_roles_by_permission(self):
         permroles = self.db.query(Permission.name, Role.name).select_from(
-            DiscussionPermission).join(Role, Permission).filter(
+            DiscussionPermission).join(Role).join(Permission).filter(
                 DiscussionPermission.discussion_id == self.id).all()
         permroles.sort()
         byperm = groupby(permroles, lambda p_r: p_r[0])
@@ -399,22 +398,22 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
     def get_readers(self):
         session = self.db
         users = session.query(User).join(
-            UserRole, Role, DiscussionPermission, Permission).filter(
+            UserRole).join(Role).join(DiscussionPermission).join(Permission).filter(
                 DiscussionPermission.discussion_id == self.id and
                 Permission.name == P_READ
             ).union(self.db.query(User).join(
-                LocalUserRole, Role, DiscussionPermission, Permission).filter(
+                LocalUserRole).join(Role).join(DiscussionPermission).join(Permission).filter(
                     DiscussionPermission.discussion_id == self.id and
                     LocalUserRole.discussion_id == self.id and
                     Permission.name == P_READ)).all()
         if session.query(DiscussionPermission).join(
-            Role, Permission).filter(
+            Role).join(Permission).filter(
                 DiscussionPermission.discussion_id == self.id and
                 Permission.name == P_READ and
                 Role.name == Authenticated).first():
             pass  # add a pseudo-authenticated user???
         if session.query(DiscussionPermission).join(
-            Role, Permission).filter(
+            Role).join(Permission).filter(
                 DiscussionPermission.discussion_id == self.id and
                 Permission.name == P_READ and
                 Role.name == Everyone).first():
@@ -587,27 +586,28 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
             NotificationSubscription, NotificationSubscriptionStatus,
             NotificationCreationOrigin)
         from .auth import AgentStatusInDiscussion
+        notif_cls_p = with_polymorphic(notif_cls, [notif_cls])
         # Make most subscriptions inactive (simpler than deciding which ones should be)
-        default_ns = self.db.query(notif_cls.id
-            ).join(User, notif_cls.user_id == User.id
+        default_ns = self.db.query(notif_cls_p.id
+            ).join(User, notif_cls_p.user_id == User.id
             ).join(LocalUserRole, LocalUserRole.profile_id == User.id
             ).join(AgentStatusInDiscussion,
-                   AgentStatusInDiscussion.profile_id == User.id
+                AgentStatusInDiscussion.profile_id == User.id
             ).filter(
                 LocalUserRole.discussion_id == self.id,
                 AgentStatusInDiscussion.discussion_id == self.id,
                 AgentStatusInDiscussion.last_visit != None,
-                notif_cls.discussion_id == self.id,
-                notif_cls.creation_origin == NotificationCreationOrigin.DISCUSSION_DEFAULT)
+                notif_cls_p.discussion_id == self.id,
+                notif_cls_p.creation_origin == NotificationCreationOrigin.DISCUSSION_DEFAULT)
         deactivated = default_ns.filter(
-            notif_cls.status == NotificationSubscriptionStatus.ACTIVE)
+            notif_cls_p.status == NotificationSubscriptionStatus.ACTIVE)
         if roles_subscribed:
             # Make some subscriptions active (back)
             activated = default_ns.filter(
-                    LocalUserRole.role_id.in_(roles_subscribed),
-                    notif_cls.status == NotificationSubscriptionStatus.INACTIVE_DFT)
-            self.db.query(notif_cls
-                ).filter(notif_cls.id.in_(activated.subquery())
+                LocalUserRole.role_id.in_(roles_subscribed),
+                notif_cls_p.status == NotificationSubscriptionStatus.INACTIVE_DFT)
+            self.db.query(notif_cls_p
+                ).filter(notif_cls_p.id.in_(activated.subquery())
                 ).update(
                     {"status": NotificationSubscriptionStatus.ACTIVE,
                      "last_status_change_date": datetime.utcnow()},
@@ -617,13 +617,13 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
                 ).join(LocalUserRole, LocalUserRole.profile_id == User.id
                 ).join(AgentStatusInDiscussion,
                        AgentStatusInDiscussion.profile_id == User.id
-                ).outerjoin(notif_cls, (notif_cls.user_id == User.id) & (
-                                        notif_cls.discussion_id == self.id)
+                ).outerjoin(notif_cls_p, (notif_cls_p.user_id == User.id) & (
+                                          notif_cls_p.discussion_id == self.id)
                 ).filter(LocalUserRole.discussion_id == self.id,
                          AgentStatusInDiscussion.discussion_id == self.id,
                          AgentStatusInDiscussion.last_visit != None,
                          LocalUserRole.role_id.in_(roles_subscribed),
-                         notif_cls.id == None).distinct()
+                         notif_cls_p.id == None).distinct()
 
             def missing_subscriptions_gen():
                 return [
@@ -640,8 +640,8 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
             deactivated = deactivated.except_(
                 default_ns.filter(
                     LocalUserRole.role_id.in_(roles_subscribed)))
-        self.db.query(notif_cls
-            ).filter(notif_cls.id.in_(deactivated.subquery())
+        self.db.query(notif_cls_p
+            ).filter(notif_cls_p.id.in_(deactivated.subquery())
             ).update(
                 {"status": NotificationSubscriptionStatus.INACTIVE_DFT,
                  "last_status_change_date": datetime.utcnow()},
@@ -845,8 +845,8 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
             queries.append(db.query(literal(current_user).label('user_id')))
         if include_readers:
             queries.append(db.query(ViewPost.actor_id.label('user_id')).join(
-                Content, Content.id==ViewPost.post_id).filter(
-                Content.discussion_id==self.id))
+                Content, Content.id == ViewPost.post_id).filter(
+                Content.discussion_id == self.id))
         query = queries[0].union(*queries[1:]).distinct()
         if ids_only:
             return query
@@ -866,7 +866,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
     def get_bound_extracts(self):
         from .idea_content_link import Extract, IdeaExtractLink
         return self.db.query(Extract).join(IdeaExtractLink).filter(
-            Extract.discussion==self)
+            Extract.discussion == self)
 
     def get_extract_graphs_cif(self):
         from .idea import Idea
@@ -954,7 +954,7 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
         from .auth import AgentProfile
         query = self.db.query(
             func.count(Post.id), Post.creator_id).filter(
-                Post.discussion_id==self.id,
+                Post.discussion_id == self.id,
                 Post.tombstone_condition())
         if start_date:
             query = query.filter(Post.creation_date >= start_date)
@@ -1077,13 +1077,13 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
         ideas = self.db.query(Idea).filter_by(
             tombstone_date=None, discussion_id=self.id).all()
         links = self.db.query(IdeaLink).filter_by(
-            tombstone_date=None).join(Idea, IdeaLink.source_id==Idea.id).filter(
-            Idea.discussion_id==self.id).all()
+            tombstone_date=None).join(Idea, IdeaLink.source_id == Idea.id).filter(
+            Idea.discussion_id == self.id).all()
         G = pygraphviz.AGraph(directed=True, overlap=False)
         # G.graph_attr['overlap']='prism'
-        G.node_attr['penwidth']=0
-        G.node_attr['shape']='rect'
-        G.node_attr['style']='filled'
+        G.node_attr['penwidth'] = 0
+        G.node_attr['shape'] = 'rect'
+        G.node_attr['style'] = 'filled'
         G.node_attr['fillcolor'] = '#efefef'
         start_time = min((idea.creation_date for idea in ideas))
         end_time = max((idea.last_modified or idea.creation_date for idea in ideas))
@@ -1103,15 +1103,18 @@ class Discussion(NamedClassMixin, OriginMixin, DiscussionBoundBase):
                 G.add_node(idea.id, label="", style="invis")
             else:
                 level = node_level(idea.id)
-                age = (end_time - (idea.last_modified or idea.creation_date)).total_seconds() / (end_time - start_time).total_seconds()
-                log.debug("%d %s %s %s" % (idea.id, start_time, (idea.last_modified or idea.creation_date), end_time))
+                age = (end_time - (idea.last_modified or idea.creation_date)
+                       ).total_seconds() / (end_time - start_time).total_seconds()
+                log.debug("%d %s %s %s" % (idea.id, start_time,
+                          (idea.last_modified or idea.creation_date), end_time))
                 log.debug("%ld %ld" % ((end_time - (idea.last_modified or idea.creation_date)).total_seconds(),
                                        (end_time - start_time).total_seconds()))
-                #empirical
+                # empirical
                 color = Color(hsl=(180-(135.0 * age), 0.15, 0.85))
-                G.add_node(idea.id,
+                G.add_node(
+                    idea.id,
                     label=idea.short_title or "",
-                    fontsize = 18 - (1.5 * level),
+                    fontsize=18 - (1.5 * level),
                     height=(20-(1.5*level))/72.0,
                     fillcolor=color.hex,
                     target="idealoom",

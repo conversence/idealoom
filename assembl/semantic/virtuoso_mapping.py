@@ -353,8 +353,7 @@ class AppQuadStorageManager(object):
         self.session.execute("DB.DBA.RDF_AUDIT_METADATA(1, '*')")
 
     def prepare_storage(self, quad_storage_name, imported=None):
-        cpe = AppClassPatternExtractor(
-            Base._decl_class_registry)
+        cpe = AppClassPatternExtractor(Base.registry._class_registry.values())
         qs = QuadStorage(
             quad_storage_name, cpe, imported, False, nsm=self.nsm)
         return qs, cpe
