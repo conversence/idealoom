@@ -331,7 +331,8 @@ class LangString(Base):
     def send_to_changes(self, connection, operation=CrudOperation.DELETE,
                         discussion_id=None, view_def="changes"):
         owner_object = self.get_owner_object()
-        if owner_object is not None:
+        if owner_object is not None and owner_object.id:
+            # if not owner_object.id, it will have its own send_to_changes
             owner_object.send_to_changes(
                 connection, operation, discussion_id, view_def)
         else:
