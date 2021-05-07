@@ -28,17 +28,19 @@
     # via -r requirements.in
 -e git+https://github.com/maparent/sqlalchemy-utils.git@abstract_generic#egg=sqlalchemy_utils
     # via -r requirements.in
+aenum==3.0.0
+    # via -r requirements.in
 alabaster==0.7.12
     # via sphinx
-alembic==1.5.8
+alembic==1.6.2
     # via -r requirements.in
-amqp==5.0.5
+amqp==5.0.6
     # via kombu
 anyjson==0.3.3
     # via -r requirements.in
-attrs==20.3.0
+attrs==21.2.0
     # via pytest
-babel==2.9.0
+babel==2.9.1
     # via
     #   -r requirements.in
     #   sphinx
@@ -48,9 +50,9 @@ beautifulsoup4==4.9.3
     # via
     #   -r requirements.in
     #   webtest
-billiard==3.6.3.0
+billiard==3.6.4.0
     # via celery
-cachetools==4.2.1
+cachetools==4.2.2
     # via
     #   google-auth
     #   premailer
@@ -103,7 +105,7 @@ colour==0.1.5
     # via -r requirements.in
 contextlib2==0.6.0.post1
     # via -r requirements.in
-cornice==5.1.0
+cornice==5.2.0
     # via
     #   -r requirements.in
     #   cornice-sphinx
@@ -123,7 +125,7 @@ cssselect==1.1.0
     # via premailer
 cssutils==2.2.0
     # via premailer
-decorator==4.4.2
+decorator==5.0.7
     # via
     #   dogpile.cache
     #   jsonpath-ng
@@ -142,7 +144,7 @@ dogpile.cache==1.1.2
     # via pyramid-dogpile-cache
 ecdsa==0.14.1
     # via python-jose
-et-xmlfile==1.0.1
+et-xmlfile==1.1.0
     # via openpyxl
 executor==23.2
     # via
@@ -160,15 +162,15 @@ flaky==3.7.0
     # via -r requirements_tests.in
 future==0.18.2
     # via -r requirements.in
-gensim==4.0.0
+gensim==4.0.1
     # via -r requirements.in
 google-api-core==1.26.3
     # via google-api-python-client
-google-api-python-client==2.0.2
+google-api-python-client==2.3.0
     # via -r requirements.in
 google-auth-httplib2==0.1.0
     # via google-api-python-client
-google-auth==1.28.0
+google-auth==1.30.0
     # via
     #   google-api-core
     #   google-api-python-client
@@ -179,7 +181,7 @@ hashfs==0.7.2
     # via -r requirements.in
 hiredis==2.0.0
     # via -r requirements.in
-httplib2==0.19.0
+httplib2==0.19.1
     # via
     #   google-api-python-client
     #   google-auth-httplib2
@@ -190,7 +192,7 @@ humanfriendly==9.1
     #   property-manager
     #   rotate-backups
     #   update-dotdee
-humanize==3.3.0
+humanize==3.5.0
     # via flower
 hupper==1.10.2
     # via pyramid
@@ -249,7 +251,7 @@ naturalsort==1.5.1
     #   update-dotdee
 ndg_httpsclient==0.5.1
     # via -r requirements.in
-nodeenv==1.5.0
+nodeenv==1.6.0
     # via -r requirements.in
 numpy==1.20.2
     # via
@@ -271,11 +273,11 @@ paramiko==2.7.2
     # via fabric3
 pastedeploy==2.1.1
     # via plaster-pastedeploy
-pbr==5.5.1
+pbr==5.6.0
     # via stevedore
 pep517==0.10.0
     # via pip-tools
-pip-tools==6.0.1
+pip-tools==6.1.0
     # via -r requirements.in
 plaster-pastedeploy==0.7
     # via pyramid
@@ -291,9 +293,9 @@ polib==1.1.1
     # via
     #   -r requirements.in
     #   lingua
-premailer==3.7.0
+premailer==3.8.0
     # via -r requirements.in
-prometheus-client==0.9.0
+prometheus-client==0.10.1
     # via flower
 prompt-toolkit==3.0.18
     # via click-repl
@@ -302,7 +304,7 @@ property-manager==3.0
     #   executor
     #   rotate-backups
     #   update-dotdee
-protobuf==3.15.6
+protobuf==3.16.0
     # via
     #   google-api-core
     #   googleapis-common-protos
@@ -324,13 +326,13 @@ pycparser==2.20
     # via cffi
 pydot==1.4.2
     # via sqlalchemy-schemadisplay
-pygments==2.8.1
+pygments==2.9.0
     # via sphinx
 pygraphviz==1.7
     # via -r requirements.in
 pyisemail==1.3.2
     # via -r requirements.in
-pyjwt==2.0.1
+pyjwt==2.1.0
     # via
     #   -r requirements.in
     #   social-auth-core
@@ -371,11 +373,11 @@ pytest-cov==2.11.1
     # via -r requirements_tests.in
 pytest-localserver==0.5.0
     # via -r requirements_tests.in
-pytest-mock==3.5.1
+pytest-mock==3.6.1
     # via -r requirements_tests.in
 pytest-splinter==3.3.1
     # via -r requirements_tests.in
-pytest==6.2.2
+pytest==6.2.4
     # via
     #   -r requirements_tests.in
     #   pytest-cov
@@ -446,9 +448,9 @@ rsa==4.7.2
     # via
     #   google-auth
     #   python-jose
-scikit-learn==0.24.1
+scikit-learn==0.24.2
     # via -r requirements.in
-scipy==1.6.2
+scipy==1.6.3
     # via
     #   gensim
     #   scikit-learn
@@ -458,7 +460,7 @@ selenium==3.141.0
     #   splinter
 semantic-version==2.8.5
     # via -r requirements.in
-sentry-sdk==1.0.0
+sentry-sdk==1.1.0
     # via -r requirements.in
 sgmllib3k==1.0.0
     # via feedparser
@@ -466,7 +468,7 @@ simpleeval==0.9.10
     # via rotate-backups
 simplejson==3.17.2
     # via -r requirements.in
-six==1.15.0
+six==1.16.0
     # via
     #   -r requirements.in
     #   bcrypt
@@ -517,7 +519,7 @@ soupsieve==2.2.1
     # via beautifulsoup4
 sparqlwrapper==1.8.5
     # via -r requirements.in
-sphinx==3.5.3
+sphinx==3.5.4
     # via
     #   -r requirements_doc.in
     #   cornice-sphinx
@@ -625,7 +627,7 @@ werkzeug==1.0.1
     # via
     #   -r requirements.in
     #   pytest-localserver
-xmlsec==1.3.9
+xmlsec==1.3.10
     # via python3-saml
 zope.component==5.0.0
     # via -r requirements.in
@@ -637,7 +639,7 @@ zope.event==4.5.0
     # via zope.component
 zope.hookable==5.0.1
     # via zope.component
-zope.interface==5.3.0
+zope.interface==5.4.0
     # via
     #   -r requirements.in
     #   pyramid
@@ -647,7 +649,7 @@ zope.interface==5.3.0
     #   transaction
     #   zope.component
     #   zope.sqlalchemy
-zope.sqlalchemy==1.3
+zope.sqlalchemy==1.4
     # via -r requirements.in
 
 # The following packages are considered to be unsafe in a requirements file:
