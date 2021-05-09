@@ -101,7 +101,7 @@
     "html-webpack-plugin": "^4.0",
     "husky": "~6.0",
     "imports-loader": "~1.1",
-    "jsdoc-rst-template": "git+https://github.com/assembl/jsdoc-rst-template.git",
+    "jsdoc-rst-template": "git+https://github.com/conversence/jsdoc-rst-template.git",
     "lebab": "^3.1",
     "lolex": "~6",
     "mini-css-extract-plugin": "^0.9",
