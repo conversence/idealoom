@@ -117,6 +117,8 @@ and add the following:
     smtpd_tls_received_header = yes
     smtpd_tls_session_cache_timeout = 3600s
     tls_random_source = dev:/dev/urandom
+    local_transport = virtual
+    local_recipient_maps = $virtual_mailbox_maps
 
 Make sure that `relayhost =` is empty
 
