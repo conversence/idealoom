@@ -28,11 +28,11 @@
     # via -r requirements.in
 -e git+https://github.com/maparent/sqlalchemy-utils.git@abstract_generic#egg=sqlalchemy_utils
     # via -r requirements.in
-aenum==3.0.0
+aenum==3.1.0
     # via -r requirements.in
 alabaster==0.7.12
     # via sphinx
-alembic==1.6.2
+alembic==1.6.5
     # via -r requirements.in
 amqp==5.0.6
     # via kombu
@@ -56,11 +56,11 @@ cachetools==4.2.2
     # via
     #   google-auth
     #   premailer
-celery==5.0.5
+celery==5.1.0
     # via
     #   -r requirements.in
     #   flower
-certifi==2020.12.5
+certifi==2021.5.30
     # via
     #   requests
     #   sentry-sdk
@@ -79,7 +79,7 @@ click-didyoumean==0.0.3
     # via celery
 click-plugins==1.1.1
     # via celery
-click-repl==0.1.6
+click-repl==0.2.0
     # via celery
 click==7.1.2
     # via
@@ -123,9 +123,9 @@ cryptography==3.4.7
     #   social-auth-core
 cssselect==1.1.0
     # via premailer
-cssutils==2.2.0
+cssutils==2.3.0
     # via premailer
-decorator==5.0.7
+decorator==5.0.9
     # via
     #   dogpile.cache
     #   jsonpath-ng
@@ -140,9 +140,9 @@ docutils==0.16
     # via
     #   cornice-sphinx
     #   sphinx
-dogpile.cache==1.1.2
+dogpile.cache==1.1.3
     # via pyramid-dogpile-cache
-ecdsa==0.14.1
+ecdsa==0.17.0
     # via python-jose
 et-xmlfile==1.1.0
     # via openpyxl
@@ -154,7 +154,7 @@ fabric3==1.14.post1
     # via -r requirements.in
 facebook-sdk==3.1.0
     # via -r requirements.in
-fasteners==0.16
+fasteners==0.16.2
     # via executor
 feedparser==6.0.2
     # via -r requirements.in
@@ -164,13 +164,13 @@ future==0.18.2
     # via -r requirements.in
 gensim==4.0.1
     # via -r requirements.in
-google-api-core==1.26.3
+google-api-core==1.30.0
     # via google-api-python-client
-google-api-python-client==2.3.0
+google-api-python-client==2.8.0
     # via -r requirements.in
 google-auth-httplib2==0.1.0
     # via google-api-python-client
-google-auth==1.30.0
+google-auth==1.30.2
     # via
     #   google-api-core
     #   google-api-python-client
@@ -192,9 +192,9 @@ humanfriendly==9.1
     #   property-manager
     #   rotate-backups
     #   update-dotdee
-humanize==3.5.0
+humanize==3.7.1
     # via flower
-hupper==1.10.2
+hupper==1.10.3
     # via pyramid
 idna==2.10
     # via requests
@@ -215,7 +215,7 @@ isodate==0.6.0
     #   -r requirements.in
     #   python3-saml
     #   rdflib
-jinja2==2.11.3
+jinja2==3.0.1
     # via
     #   -r requirements.in
     #   pyramid-jinja2
@@ -224,7 +224,7 @@ joblib==1.0.1
     # via scikit-learn
 jsonpath-ng==1.5.2
     # via -r requirements.in
-kombu==5.0.2
+kombu==5.1.0
     # via celery
 lingua==4.14
     # via -r requirements.in
@@ -236,7 +236,7 @@ lxml==4.6.3
     #   xmlsec
 mako==1.1.4
     # via alembic
-markupsafe==1.1.1
+markupsafe==2.0.1
     # via
     #   jinja2
     #   mako
@@ -253,12 +253,12 @@ ndg_httpsclient==0.5.1
     # via -r requirements.in
 nodeenv==1.6.0
     # via -r requirements.in
-numpy==1.20.2
+numpy==1.20.3
     # via
     #   gensim
     #   scikit-learn
     #   scipy
-oauthlib==3.1.0
+oauthlib==3.1.1
     # via
     #   requests-oauthlib
     #   social-auth-core
@@ -293,9 +293,9 @@ polib==1.1.1
     # via
     #   -r requirements.in
     #   lingua
-premailer==3.8.0
+premailer==3.9.0
     # via -r requirements.in
-prometheus-client==0.10.1
+prometheus-client==0.11.0
     # via flower
 prompt-toolkit==3.0.18
     # via click-repl
@@ -304,7 +304,7 @@ property-manager==3.0
     #   executor
     #   rotate-backups
     #   update-dotdee
-protobuf==3.16.0
+protobuf==3.17.3
     # via
     #   google-api-core
     #   googleapis-common-protos
@@ -369,7 +369,7 @@ pyramid==1.10.8
     #   pyramid-tm
 pystemmer==2.0.1
     # via -r requirements.in
-pytest-cov==2.11.1
+pytest-cov==2.12.1
     # via -r requirements_tests.in
 pytest-localserver==0.5.0
     # via -r requirements_tests.in
@@ -390,7 +390,7 @@ python-dateutil==2.8.1
     #   rotate-backups
 python-editor==1.0.4
     # via alembic
-python-jose==3.2.0
+python-jose==3.3.0
     # via social-auth-core
 python-json-logger==2.0.1
     # via -r requirements.in
@@ -409,7 +409,7 @@ pytz==2021.1
     #   google-api-core
 pyyaml==5.4.1
     # via -r requirements.in
-pyzmq==22.0.3
+pyzmq==22.1.0
     # via
     #   -r requirements.in
     #   circus
@@ -490,7 +490,6 @@ six==1.16.0
     #   pynacl
     #   pyopenssl
     #   python-dateutil
-    #   python-jose
     #   rdflib
     #   rotate-backups
     #   social-auth-app-pyramid
@@ -500,7 +499,7 @@ six==1.16.0
     #   sqlalchemy-utils
     #   update-dotdee
     #   webtest
-smart-open==5.0.0
+smart-open==5.1.0
     # via gensim
 snowballstemmer==2.1.0
     # via sphinx
@@ -530,7 +529,7 @@ sphinxcontrib-applehelp==1.0.2
     # via sphinx
 sphinxcontrib-devhelp==1.0.2
     # via sphinx
-sphinxcontrib-htmlhelp==1.0.3
+sphinxcontrib-htmlhelp==2.0.0
     # via sphinx
 sphinxcontrib-httpdomain==1.7.0
     # via
@@ -540,7 +539,7 @@ sphinxcontrib-jsmath==1.0.1
     # via sphinx
 sphinxcontrib-qthelp==1.0.3
     # via sphinx
-sphinxcontrib-serializinghtml==1.1.4
+sphinxcontrib-serializinghtml==1.1.5
     # via sphinx
 sphinxcontrib-zopeext==0.2.4
     # via -r requirements_doc.in
@@ -552,7 +551,7 @@ sqlalchemy-schemadisplay==1.3
     # via
     #   -r requirements.in
     #   -r requirements_doc.in
-sqlalchemy==1.3.23
+sqlalchemy==1.3.24
     # via
     #   -r requirements.in
     #   alembic
@@ -571,6 +570,7 @@ toml==0.10.2
     # via
     #   pep517
     #   pytest
+    #   pytest-cov
 tornado==6.1
     # via
     #   circus
@@ -593,7 +593,7 @@ update-dotdee==6.0
     # via rotate-backups
 uritemplate==3.0.1
     # via google-api-python-client
-urllib3==1.26.4
+urllib3==1.26.5
     # via
     #   pytest-splinter
     #   requests
@@ -613,6 +613,7 @@ vine==5.0.0
     # via
     #   amqp
     #   celery
+    #   kombu
 waitress==2.0.0
     # via webtest
 wcwidth==0.2.5
@@ -627,7 +628,7 @@ werkzeug==1.0.1
     # via
     #   -r requirements.in
     #   pytest-localserver
-xmlsec==1.3.10
+xmlsec==1.3.11
     # via python3-saml
 zope.component==5.0.0
     # via -r requirements.in
