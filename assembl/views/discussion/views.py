@@ -193,6 +193,7 @@ def home_view(request):
                            LanguagePreferenceOrder.OS_Default)
     else:
         locale = request.localizer.locale_name
+        preferences = preferences.values_json
 
     target_locale = strip_country(locale)
 
