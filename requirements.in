@@ -29,7 +29,7 @@ google-api-python-client==2.8.0
 hashfs==0.7.2
 hiredis==2.0.0
 IMAPClient==2.2.0
-imaplib2==2.45.0
+imaplib2==3.6.0
 iso639==0.1.4
 isodate==0.6.0
 Jinja2==3.0.1

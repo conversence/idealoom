@@ -193,7 +193,7 @@ idna==2.10
     #   yarl
 imapclient==2.2.0
     # via -r requirements.in
-imaplib2==2.45.0
+imaplib2==3.6.0
     # via -r requirements.in
 iso639==0.1.4
     # via -r requirements.in
