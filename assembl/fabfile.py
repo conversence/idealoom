@@ -954,8 +954,8 @@ def update_node(force_reinstall=False):
     """
     Install node and npm to a known-good version
     """
-    node_version = '12.18.2'
-    npm_version = '6.14.5'
+    node_version = '14.17.1'
+    npm_version = '6.14.13'
     with settings(warn_only=True), hide('running', 'stdout'):
         node_version_cmd_result = venvcmd("node --version")
     if force_reinstall or "v"+node_version not in node_version_cmd_result.split():
