@@ -11,7 +11,7 @@ alembic==1.6.5
 anyjson==0.3.3
 Babel==2.9.1
 beautifulsoup4==4.9.3
-celery==5.1.0
+celery==5.1.1
 circus==0.17.1
 colander==1.8.3
 colorama==0.4.4
@@ -22,10 +22,10 @@ cornice==5.2.0
 cryptography==3.4.7
 Fabric3==1.14.post1
 facebook-sdk==3.1.0
-feedparser==6.0.2
+feedparser==6.0.8
 future==0.18.2
 gensim==4.0.1
-google-api-python-client==2.8.0
+google-api-python-client==2.10.0
 hashfs==0.7.2
 hiredis==2.0.0
 IMAPClient==2.2.0
@@ -39,10 +39,10 @@ lxml==4.6.3
 nodeenv==1.6.0
 ndg_httpsclient==0.5.1
 openpyxl==3.0.7
-pip-tools==6.1.0
+pip-tools==6.2.0
 polib==1.1.1
 premailer==3.9.0
-psycopg2-binary==2.8.6
+psycopg2-binary==2.9.1
 pygraphviz==1.7
 pyIsEmail  # 1.3.1 was pushed to pypi as "v1.3.1", which confuses pip.
 PyJWT==2.1.0
