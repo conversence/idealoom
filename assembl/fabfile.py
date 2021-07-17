@@ -795,7 +795,7 @@ def compile_stylesheets_and_js():
     """
     with cd(env.projectpath):
         with cd('assembl/static'):
-            venvcmd('./node_modules/.bin/webpack -p', chdir=False)
+            venvcmd('./node_modules/.bin/webpack build', chdir=False)
 
 
 def tests():

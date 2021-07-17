@@ -10,7 +10,7 @@ import IdeaLoom from "../../app.js";
 import Backbone from "backbone";
 import BackboneModal from "backbone.modal";
 import Permissions from "../../utils/permissions.js";
-import CK from "ckeditor";
+import CK from "ckeditor4";
 import Ctx from "../../common/context.js";
 import { View } from "backbone.marionette";
 

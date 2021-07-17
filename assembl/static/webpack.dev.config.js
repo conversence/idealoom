@@ -39,7 +39,12 @@ module.exports = _.extend(base_config, {
     host: webpackHost,
     disableHostCheck: disableHostCheck,
   },
+  mode: 'development',
+  optimization: {
+    minimize: false
+  },
   plugins: [
+    base_config.plugins[0],
     new webpack.HotModuleReplacementPlugin(),
     new MiniCssExtractPlugin({ filename: "[name].[contenthash].css" }),
     new HtmlWebpackPlugin({

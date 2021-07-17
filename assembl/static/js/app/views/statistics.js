@@ -19,7 +19,7 @@ import {
     interpolate,
     line as d3line,
     max as d3max,
-    mouse,
+    pointer,
     scaleLinear,
     scaleOrdinal,
     scaleTime,
@@ -418,8 +418,8 @@ class Statistics extends View.extend({
             var i18n_messages = i18n.gettext("messages");
             var data_length = data.length;
 
-            function mouse_move() {
-                var mouse_position = mouse(this);
+            function mouse_move(event) {
+                var mouse_position = pointer(event, this);
                 var x_position = mouse_position[0];
                 var xInDomain = x.invert(x_position);
                 var i = Math.min(

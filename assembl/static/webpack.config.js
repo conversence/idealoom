@@ -1,12 +1,14 @@
-var path = require('path'),
-    glob = require('glob'),
-    webpack = require('webpack'),
-    _ = require('underscore'),
-    MiniCssExtractPlugin = require("mini-css-extract-plugin"),
-    HtmlWebpackPlugin = require('html-webpack-plugin'),
-    HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin'),
-    TerserPlugin = require('terser-webpack-plugin'),
-    sassStaticUrl = process.env.sassStaticUrl || '/static/';
+const path = require('path'),
+  glob = require('glob'),
+  webpack = require('webpack'),
+  _ = require('underscore'),
+  MiniCssExtractPlugin = require("mini-css-extract-plugin"),
+  CopyPlugin = require('copy-webpack-plugin'),
+  HtmlWebpackPlugin = require('html-webpack-plugin'),
+  HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin'),
+  TerserPlugin = require('terser-webpack-plugin'),
+  sassStaticUrl = process.env.sassStaticUrl || (__dirname + '/'),
+  distPath = path.join(__dirname, 'js/build');
 
 function theme_entries() {
   var entries = {},
@@ -80,19 +82,16 @@ module.exports = {
     annotator_ext: './css/lib/annotator_ext.scss',
   }),
   optimization: {
-    minimizer: [
-      new TerserPlugin({
-        sourceMap: true,
-        parallel: true,
-        cache: true
-    })],
+    minimize: true,
+    minimizer: [new TerserPlugin()],
   },
+  mode: 'production',
   output: {
-    path: path.join(__dirname, 'js/build'),
+    path: distPath,
     filename: (chunkData) => {
-      return chunkData.chunk.name === 'annotator_ext' ? '[name].js': '[name].[hash].js';
+      return chunkData.chunk.name === 'annotator_ext' ? '[name].js': '[name].[contenthash].js';
     },
-    sourceMapFilename: "[name].[hash].js.map",
+    sourceMapFilename: "[name].[contenthash].js.map",
     publicPath: '/js/build/',
   },
   resolve: {
@@ -109,6 +108,9 @@ module.exports = {
       'jquery.dotdotdot$': path.resolve(__dirname, 'js/bower/jquery.dotdotdot/src/js/jquery.dotdotdot.js'),
       'jquery-highlight$': path.resolve(__dirname, 'js/lib/jquery-highlight/jquery.highlight.js'),
       'moment$': 'moment/moment',
+    },
+    fallback: {
+      stream: require.resolve('stream-browserify')
     },
   },
   module: {
@@ -154,7 +156,7 @@ module.exports = {
             options: {
               sassOptions: {
                 includePaths: [
-                  path.resolve(__dirname, 'node_modules/bourbon/app/assets/stylesheets'),
+                  path.resolve(__dirname, path.dirname(__dirname), 'node_modules/bourbon/app/assets/stylesheets'),
                 ],
               },
               additionalData: '$static_url: "'+sassStaticUrl+'";',
@@ -170,23 +172,15 @@ module.exports = {
         ]
       },
       {
-        test: /\.(jpg|png|woff|woff2|eot|ttf|svg|html)$/,
-        use: [{
-          loader: 'url-loader',
-        }],
+        test: /\.(jpg|png|gif|woff|woff2|eot|ttf|svg|html)$/,
+        type: 'asset/inline'
       },
       {
         test: /LICENSE$/,
-        use: [{
-          loader: 'url-loader',
-        }],
+        type: 'asset/inline'
       },
     ],
     noParse: [/sinon/],
-  },
-  node: {
-    fs: 'empty',
-    child_process: 'empty',
   },
   devtool: 'source-map',
   optimization: {
@@ -221,13 +215,20 @@ module.exports = {
     // }
   },
   plugins: [
-    // this makes mocha choke on requiring supports-color for very obscure reasons.
-    // Revisit.
-    // new webpack.DefinePlugin({
-    //   'process.env': {
-    //     NODE_ENV: JSON.stringify('production')
-    //   }
-    // }),
+    // keep at position 0, so dev can reuse it.
+    new webpack.ProvidePlugin({
+      process: 'process/browser',
+      Buffer: ['buffer', 'Buffer'],
+    }),
+		new CopyPlugin( {
+			patterns: [
+				{
+					from: '{config.js,contents.css,styles.js,adapters/**/*,lang/**/*,plugins/**/*,skins/**/*,vendor/**/*}',
+					to: path.resolve( distPath, 'ckeditor4' ),
+					context: path.resolve( __dirname, 'node_modules', 'ckeditor4' )
+				}
+			]
+		}),
     // temporary: No caching because it breaks annotator_ext. Wait for
     // https://github.com/webpack-contrib/mini-css-extract-plugin/pull/225
     new MiniCssExtractPlugin({

@@ -8,7 +8,7 @@ import $ from "jquery";
 import IdeaLoom from "../../app.js";
 import Permissions from "../../utils/permissions.js";
 import LangString from "../../models/langstring.js";
-import CK from "ckeditor";
+import CK from "ckeditor4";
 import EditableField from "./editableField.js";
 import Ctx from "../../common/context.js";
 
