@@ -783,9 +783,9 @@ def compile_widget_stylesheets():
     Generate *.css files from *.scss in widgets
     """
     with cd(env.projectpath):
-        venvcmd(get_node_bin_path()+'/node-sass --source-map -r -o assembl/static/widget/card/app/css --source-map assembl/static/widget/card/app/css assembl/static/widget/card/app/scss', shell=True)
-        venvcmd(get_node_bin_path()+'/node-sass --source-map -r -o assembl/static/widget/video/app/css --source-map assembl/static/widget/video/app/css assembl/static/widget/video/app/scss', shell=True)
-        venvcmd(get_node_bin_path()+'/node-sass --source-map -r -o assembl/static/widget/session/css --source-map assembl/static/widget/session/css assembl/static/widget/session/scss', shell=True)
+        venvcmd(get_node_bin_path()+'/node-sass -r -o assembl/static/widget/card/app/css --source-map assembl/static/widget/card/app/css assembl/static/widget/card/app/scss', shell=True)
+        venvcmd(get_node_bin_path()+'/node-sass -r -o assembl/static/widget/video/app/css --source-map assembl/static/widget/video/app/css assembl/static/widget/video/app/scss', shell=True)
+        venvcmd(get_node_bin_path()+'/node-sass -r -o assembl/static/widget/session/css --source-map assembl/static/widget/session/css assembl/static/widget/session/scss', shell=True)
 
 
 @task
