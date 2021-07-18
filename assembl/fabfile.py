@@ -1534,9 +1534,10 @@ def create_sentry_revision():
         # git_rev = run("git rev-parse --short HEAD")
     with cd(os.path.join(local_code_root, 'assembl')):
         main_js = run(r'''sed -E -e 's/.*"([^"]+main[^"]+)".*/\1/' static/js/build/index.html''')
+        map_js = run(f'tail -1 static{main_js}').split('=')[1].strip()
         run(f"./static/node_modules/.bin/sentry-cli releases new {version}")
         # run(f"./static/node_modules/.bin/sentry-cli set-commits -c {git_rev} {version}")
-        run(f"./static/node_modules/.bin/sentry-cli releases files {version} upload-sourcemaps static{main_js}*")
+        run(f"./static/node_modules/.bin/sentry-cli releases files {version} upload-sourcemaps static{main_js} static/js/build/{map_js}")
         run(f"./static/node_modules/.bin/sentry-cli releases finalize {version}")
 
 
