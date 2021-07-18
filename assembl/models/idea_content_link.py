@@ -94,8 +94,11 @@ class IdeaContentLink(DiscussionBoundBase, OriginMixin):
     }
 
     def get_discussion_id(self):
-        content = self.content or Content.get(self.content_id)
-        return content.get_discussion_id()
+        ob = (self.__dict__.get('content', None) or
+              self.__dict__.get('idea', None) or
+              Content.get(self.content_id) or
+              Idea.get(self.idea_id))
+        return ob.get_discussion_id()
 
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):
@@ -530,8 +533,9 @@ class AnnotationSelector(DiscussionBoundBase):
         cascade="all, delete-orphan")
 
     def get_discussion_id(self):
-        extract = self.extract or Extract.get(self.extract_id)
-        return extract.get_discussion_id()
+        ob = (self.__dict__.get('extract', None) or
+              Extract.get(self.extract_id))
+        return ob.get_discussion_id()
 
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):

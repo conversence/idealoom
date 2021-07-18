@@ -516,7 +516,7 @@ class DiscussionPerUserNamespacedKeyValue(
         User, backref="discussion_namespaced_key_values")
 
     def get_discussion_id(self):
-        return self.discussion_id
+        return self.discussion_id or self.discussion.id
 
     def container_url(self):
         return "/data/Discussion/%d/user_ns_kv" % (self.discussion_id,)
@@ -554,7 +554,9 @@ class IdeaNamespacedKeyValue(
         Idea, backref="namespaced_key_values")
 
     def get_discussion_id(self):
-        return self.idea.discussion_id
+        ob = (self.__dict__.get('idea', None) or
+              Idea.get(self.idea_id))
+        return ob.get_discussion_id()
 
     def container_url(self):
         return "/data/Discussion/%d/ideas/%d/ns_kv" % (

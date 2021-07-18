@@ -157,8 +157,9 @@ class ActionOnPost(Action):
         super(ActionOnPost, self).populate_from_context(context)
 
     def get_discussion_id(self):
-        post = self.post or Post.get(self.post_id)
-        return post.get_discussion_id()
+        ob = (self.__dict__.get('post', None) or
+              Post.get(self.post_id))
+        return ob.get_discussion_id()
 
     @classmethod
     def special_quad_patterns(cls, alias_maker, discussion_id):
@@ -338,8 +339,9 @@ class ActionOnIdea(Action):
             name=QUADNAMES.class_ActionOnIdea_class)]
 
     def get_discussion_id(self):
-        idea = self.idea or Idea.get(self.idea_id)
-        return idea.get_discussion_id()
+        ob = (self.__dict__.get('idea', None) or
+              Idea.get(self.idea_id))
+        return ob.get_discussion_id()
 
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):

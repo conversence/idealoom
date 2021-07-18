@@ -222,7 +222,7 @@ class NotificationSubscription(DiscussionBoundBase, OriginMixin):
             notification.first_matching_subscription_id = self.id
 
     def get_discussion_id(self):
-        return self.discussion_id
+        return self.discussion_id or self.discussion.id
 
     def get_language_preferences(self):
         if getattr(self, '_lang_pref', None) is None:

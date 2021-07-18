@@ -1273,8 +1273,10 @@ class AnonymousUser(DiscussionBoundBase, User):
     # Create an index for (discussion, role)?
 
     def get_discussion_id(self):
-        source = self.source or ContentSource.get(self.source_id)
-        return source.discussion_id
+        from .generic import ContentSource
+        ob = (self.__dict__.get('source', None) or
+              ContentSource.get(self.source_id))
+        return ob.get_discussion_id()
 
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):

@@ -146,7 +146,7 @@ class TimelineEvent(DiscussionBoundBase):
             self.previous_event_id = previous_event_id
 
     def get_discussion_id(self):
-        return self.discussion_id
+        return self.discussion_id or self.discussion.id
 
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):

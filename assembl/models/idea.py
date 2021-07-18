@@ -1689,8 +1689,13 @@ class IdeaLink(HistoryMixinWithOrigin, DiscussionBoundBase):
         return super(IdeaLink, self).copy(db=db, **kwargs)
 
     def get_discussion_id(self):
-        source = self.source_ts or self.source or Idea.get(self.source_id)
-        return source.get_discussion_id()
+        ob = (self.__dict__.get('source_ts', None) or
+              self.__dict__.get('source', None) or
+              self.__dict__.get('target_ts', None) or
+              self.__dict__.get('target', None) or
+              Idea.get(self.source_id) or
+              Idea.get(self.target_id))
+        return ob.get_discussion_id()
 
     def send_to_changes(self, connection=None, operation=CrudOperation.UPDATE,
                         discussion_id=None, view_def="changes"):
@@ -1798,7 +1803,9 @@ class IdeaLocalUserRole(AbstractLocalUserRole):
         return query.filter_by(idea_id=instance.id)
 
     def get_discussion_id(self):
-        return self.idea.discussion_id
+        ob = (self.__dict__.get('idea', None) or
+              Idea.get(self.idea_id))
+        return ob.get_discussion_id()
 
     def container_url(self):
         return "/data/Discussion/%d/ideas/%d/local_user_roles" % (

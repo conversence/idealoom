@@ -242,11 +242,9 @@ class AbstractVoteSpecification(DiscussionBoundBase):
 
     def get_discussion_id(self):
         from .widgets import Widget
-        widget = self.widget
-        if self.widget_id and not widget:
-            widget = Widget.get(self.widget_id)
-        if widget:
-            return widget.get_discussion_id()
+        ob = (self.__dict__.get('widget', None) or
+              Widget.get(self.widget_id))
+        return ob.get_discussion_id()
 
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):
@@ -367,8 +365,9 @@ class TokenCategorySpecification(DiscussionBoundBase):
         return (0, self.maximum_per_idea)
 
     def get_discussion_id(self):
-        tvs = self.token_vote_specification or TokenVoteSpecification.get(self.token_vote_specification_id)
-        return tvs.get_discussion_id()
+        ob = (self.__dict__.get('token_vote_specification', None) or
+              TokenVoteSpecification.get(self.token_vote_specification_id))
+        return ob.get_discussion_id()
 
     def container_url(self):
         return "/data/Discussion/%d/widgets/%d/vote_specifications/%d/token_categories" % (
@@ -850,8 +849,10 @@ class AbstractIdeaVote(HistoryMixinWithOrigin, DiscussionBoundBase):
         backref=backref("votes_ts", cascade="all, delete-orphan"))
 
     def get_discussion_id(self):
-        idea = self.idea or self.idea_ts or Idea.get(self.idea_id)
-        return idea.get_discussion_id()
+        ob = (self.__dict__.get('idea_ts', None) or
+              self.__dict__.get('idea', None) or
+              Idea.get(self.idea_id))
+        return ob.get_discussion_id()
 
     def container_url(self):
         # Or stop at widget or spec?

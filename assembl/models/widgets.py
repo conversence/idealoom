@@ -81,7 +81,7 @@ class Widget(DiscussionBoundBase):
         super(Widget, self).populate_from_context(context)
 
     def get_discussion_id(self):
-        return self.discussion_id
+        return self.discussion_id or self.discussion.id
 
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):
@@ -262,8 +262,11 @@ class IdeaWidgetLink(DiscussionBoundBase):
         super(IdeaWidgetLink, self).populate_from_context(context)
 
     def get_discussion_id(self):
-        idea = self.idea or Idea.get(self.idea_id)
-        return idea.get_discussion_id()
+        ob = (self.__dict__.get('idea', None) or
+              self.__dict__.get('widget', None) or
+              Idea.get(self.idea_id) or
+              Widget.get(self.widget_id))
+        return ob.get_discussion_id()
 
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):
@@ -1010,8 +1013,9 @@ class WidgetUserConfig(DiscussionBoundBase):
         self.state = json.dumps(val)
 
     def get_discussion_id(self):
-        widget = self.widget or Widget.get(self.widget_id)
-        return widget.get_discussion_id()
+        ob = (self.__dict__.get('widget', None) or
+              Widget.get(self.widget_id))
+        return ob.get_discussion_id()
 
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):

@@ -33,7 +33,11 @@ class ImportRecord(DiscussionBoundBase):
     target = generic_relationship(target_table, target_id)
 
     def get_discussion_id(self):
-        return self.source.discussion_id
+        from .generic import ContentSource
+        ob = (self.__dict__.get('source', None) or
+              ContentSource.get(self.source_id))
+        return ob.get_discussion_id()
+        # TODO: try the target?
 
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):

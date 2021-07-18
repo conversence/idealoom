@@ -76,7 +76,7 @@ class IdeaGraphView(DiscussionBoundBase, OriginMixin):
         return retval
 
     def get_discussion_id(self):
-        return self.discussion_id
+        return self.discussion_id or self.discussion.id
 
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):
@@ -133,8 +133,9 @@ class SubGraphIdeaAssociation(DiscussionBoundBase):
         ]
 
     def get_discussion_id(self):
-        sub_graph = self.sub_graph or IdeaGraphView.get(self.sub_graph_id)
-        return sub_graph.get_discussion_id()
+        ob = (self.__dict__.get('sub_graph', None) or
+              IdeaGraphView.get(self.sub_graph_id))
+        return ob.get_discussion_id()
 
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):
@@ -206,8 +207,9 @@ class SubGraphIdeaLinkAssociation(DiscussionBoundBase):
         ]
 
     def get_discussion_id(self):
-        sub_graph = self.sub_graph or IdeaGraphView.get(self.sub_graph_id)
-        return sub_graph.get_discussion_id()
+        ob = (self.__dict__.get('sub_graph', None) or
+              IdeaGraphView.get(self.sub_graph_id))
+        return ob.get_discussion_id()
 
     def unique_query(self):
         # documented in lib/sqla
@@ -419,9 +421,6 @@ class TableOfContents(IdeaGraphView):
     discussion = relationship(
         Discussion, backref=backref("table_of_contents", uselist=False))
 
-    def get_discussion_id(self):
-        return self.discussion.id
-
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):
         return (cls.discussion_id == discussion_id,)
@@ -565,9 +564,6 @@ class Synthesis(ExplicitSubGraphView):
     @property
     def is_next_synthesis(self):
         return self.discussion.get_next_synthesis() == self
-
-    def get_discussion_id(self):
-        return self.discussion_id
 
     @classmethod
     def get_discussion_conditions(cls, discussion_id, alias_maker=None):
