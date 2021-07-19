@@ -82,7 +82,7 @@ transaction==3.0.1
 translationstring==1.4
 Unidecode==1.2.0
 uwsgitop==0.11
-werkzeug==1.0.1
+Werkzeug==2.0.1
 zope.component==5.0.1
 zope.interface==5.4.0
 zope.sqlalchemy==1.5

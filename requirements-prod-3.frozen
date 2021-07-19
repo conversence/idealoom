@@ -78,7 +78,7 @@ cffi==1.14.6
     #   pynacl
 chardet==4.0.0
     # via aiohttp
-charset-normalizer==2.0.2
+charset-normalizer==2.0.3
     # via requests
 circus==0.17.1
     # via -r requirements.in
@@ -199,7 +199,7 @@ imaplib2==3.6.0
     # via -r requirements.in
 iso639==0.1.4
     # via -r requirements.in
-iso8601==0.1.14
+iso8601==0.1.16
     # via colander
 isodate==0.6.0
     # via
@@ -244,7 +244,7 @@ ndg_httpsclient==0.5.1
     # via -r requirements.in
 nodeenv==1.6.0
     # via -r requirements.in
-numpy==1.21.0
+numpy==1.21.1
     # via
     #   gensim
     #   scikit-learn
@@ -263,7 +263,7 @@ pastedeploy==2.1.1
     # via plaster-pastedeploy
 pbr==5.6.0
     # via stevedore
-pep517==0.10.0
+pep517==0.11.0
     # via pip-tools
 pip-tools==6.2.0
     # via -r requirements.in
@@ -495,7 +495,7 @@ structlog==21.1.0
     # via -r requirements.in
 threadpoolctl==2.2.0
     # via scikit-learn
-toml==0.10.2
+tomli==1.0.4
     # via pep517
 tornado==6.1
     # via
@@ -544,7 +544,7 @@ wcwidth==0.2.5
     # via prompt-toolkit
 webob==1.8.7
     # via pyramid
-werkzeug==1.0.1
+werkzeug==2.0.1
     # via -r requirements.in
 wheel==0.36.2
     # via pip-tools
