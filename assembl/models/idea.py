@@ -1668,8 +1668,7 @@ class IdeaLink(HistoryMixinWithOrigin, DiscussionBoundBase):
         for atype in chain([my_type], ontology.getDirectSuperClasses(my_type)):
             props = ontology.ontology.subjects(RDFS.domain, atype)
             for prop in props:
-                # bug: why doesn't to_symbol work?
-                name = ontology.context._prefixes[str(prop)]
+                name = ontology.context.to_symbol(prop)
                 for superp in ontology.getDirectSuperProperties(prop):
                     if superp == IDEA.source_idea:
                         result[name] = Idea.uri_generic(self.target_id)

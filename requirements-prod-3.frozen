@@ -383,13 +383,10 @@ pyzmq==22.1.0
     #   -r requirements.in
     #   -r requirements_chrouter.in
     #   circus
-rdflib==5.0.0
+rdflib==6.0.0
     # via
     #   -r requirements.in
-    #   rdflib-jsonld
     #   sparqlwrapper
-rdflib-jsonld==0.5.0
-    # via -r requirements.in
 redis==3.5.3
     # via -r requirements.in
 reg==0.12

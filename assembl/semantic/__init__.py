@@ -17,6 +17,6 @@ _jsonld_context = None
 def jsonld_context(ontology_root=DEFAULT_ROOT):
     global _jsonld_context
     if _jsonld_context is None:
-        from rdflib_jsonld.context import Context
+        from rdflib.plugins.shared.jsonld.context import Context
         _jsonld_context = Context(local_context_loc)
     return _jsonld_context

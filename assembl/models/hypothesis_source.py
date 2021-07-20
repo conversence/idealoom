@@ -9,7 +9,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship, reconstructor
 from future.utils import string_types
 import simplejson as json
-from rdflib_jsonld.context import Context
+from rdflib.plugins.shared.jsonld.context import Context
 from pyramid.threadlocal import get_current_registry
 import requests
 
