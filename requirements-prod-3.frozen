@@ -126,10 +126,9 @@ decorator==5.0.9
     # via
     #   dogpile.cache
     #   jsonpath-ng
-defusedxml==0.6.0
+defusedxml==0.7.1
     # via
     #   python3-openid
-    #   python3-saml
     #   social-auth-core
 dnspython==2.1.0
     # via pyisemail
@@ -157,9 +156,9 @@ gensim==4.0.1
     # via -r requirements.in
 google-api-core==1.31.0
     # via google-api-python-client
-google-api-python-client==2.13.0
+google-api-python-client==2.14.0
     # via -r requirements.in
-google-auth==1.33.0
+google-auth==1.33.1
     # via
     #   google-api-core
     #   google-api-python-client
@@ -366,7 +365,7 @@ python-levenshtein==0.12.2
     # via -r requirements.in
 python3-openid==3.2.0
     # via social-auth-core
-python3-saml==1.10.1
+python3-saml==1.11.0
     # via social-auth-core
 pytz==2021.1
     # via
@@ -454,7 +453,6 @@ six==1.16.0
     #   pynacl
     #   pyopenssl
     #   python-dateutil
-    #   rdflib
     #   rotate-backups
     #   social-auth-app-pyramid
     #   social-auth-storage-sqlalchemy
@@ -477,7 +475,7 @@ soupsieve==2.2.1
     # via beautifulsoup4
 sparqlwrapper==1.8.5
     # via -r requirements.in
-sqlalchemy==1.4.21
+sqlalchemy==1.4.22
     # via
     #   -r requirements.in
     #   alembic
@@ -492,7 +490,7 @@ structlog==21.1.0
     # via -r requirements.in
 threadpoolctl==2.2.0
     # via scikit-learn
-tomli==1.0.4
+tomli==1.1.0
     # via pep517
 tornado==6.1
     # via
@@ -557,7 +555,7 @@ zope.deprecation==4.4.0
     #   pyramid-jinja2
 zope.event==4.5.0
     # via zope.component
-zope.hookable==5.0.1
+zope.hookable==5.1.0
     # via zope.component
 zope.interface==5.4.0
     # via
