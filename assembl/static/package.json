@@ -93,7 +93,7 @@
     "eslint": "~7",
     "eslint-config-prettier": "~8",
     "eslint-plugin-babel": "~5.3",
-    "eslint-plugin-import": "~2.23",
+    "eslint-plugin-import": "~2.24",
     "eslint-webpack-plugin": "~3.0",
     "file-loader": "~6.2",
     "fixtures": "0.0.2",
