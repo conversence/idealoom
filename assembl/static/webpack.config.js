@@ -7,6 +7,7 @@ const path = require('path'),
   HtmlWebpackPlugin = require('html-webpack-plugin'),
   HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin'),
   TerserPlugin = require('terser-webpack-plugin'),
+  bourbon = require('node-bourbon'),
   sassStaticUrl = process.env.sassStaticUrl || (__dirname + '/'),
   distPath = path.join(__dirname, 'js/build');
 
@@ -103,8 +104,8 @@ module.exports = {
     ],
     descriptionFiles: ['package.json', '../../bower.json'],
     alias: {
-      sinon: path.resolve(__dirname, 'node_modules/sinon/pkg/sinon'),
-      bourbon$: path.resolve(__dirname, 'node_modules/bourbon/app/assets/stylesheets/_bourbon.scss'),
+      sinon: path.resolve(path.dirname(require.resolve('sinon')), '../pkg/sinon'),
+      bourbon$: bourbon.includePaths[0] +  '/_bourbon.scss',
       'jquery.dotdotdot$': path.resolve(__dirname, 'js/bower/jquery.dotdotdot/src/js/jquery.dotdotdot.js'),
       'jquery-highlight$': path.resolve(__dirname, 'js/lib/jquery-highlight/jquery.highlight.js'),
       'moment$': 'moment/moment',
@@ -155,9 +156,7 @@ module.exports = {
             loader: 'sass-loader',
             options: {
               sassOptions: {
-                includePaths: [
-                  path.resolve(__dirname, path.dirname(__dirname), 'node_modules/bourbon/app/assets/stylesheets'),
-                ],
+                includePaths: bourbon.includePaths,
               },
               additionalData: '$static_url: "'+sassStaticUrl+'";',
             },
@@ -225,27 +224,27 @@ module.exports = {
 				{
 					from: '{config.js,contents.css,styles.js,adapters/**/*,lang/**/*,plugins/**/*,skins/**/*,vendor/**/*}',
 					to: path.resolve( distPath, 'ckeditor4' ),
-					context: path.resolve( __dirname, 'node_modules', 'ckeditor4' )
+					context: path.dirname( require.resolve('ckeditor4'))
 				},
 				{
-					from: 'dist/jquery.min.js',
+					from: 'jquery.min.js',
 					to: distPath,
-					context: path.resolve( __dirname, 'node_modules', 'jquery' )
+					context: path.dirname( require.resolve('jquery') )
 				},
 				{
 					from: 'underscore-min.js',
 					to: distPath,
-					context: path.resolve( __dirname, 'node_modules', 'underscore' )
+					context: path.dirname( require.resolve('underscore') )
 				},
 				{
 					from: '{css/hopscotch.min.css,img/*}',
 					to: path.resolve( distPath, 'hopscotch' ),
-					context: path.resolve( __dirname, 'node_modules', 'hopscotch', 'dist' )
+					context: path.dirname( path.dirname( require.resolve('hopscotch') ) )
 				},
 				{
 					from: 'mocha.css',
-					to: path.resolve( distPath, 'mocha' ),
-					context: path.resolve( __dirname, 'node_modules', 'mocha' )
+					to: distPath,
+					context: path.dirname( require.resolve('mocha') )
 				}
 			]
 		}),
