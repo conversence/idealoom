@@ -474,7 +474,7 @@ soupsieve==2.2.1
     # via beautifulsoup4
 sparqlwrapper==1.8.5
     # via -r requirements.in
-sqlalchemy==1.4.22
+sqlalchemy==1.4.23
     # via
     #   -r requirements.in
     #   alembic

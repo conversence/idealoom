@@ -543,7 +543,7 @@ splinter==0.15.0
     # via
     #   jasmine-splinter-runner
     #   pytest-splinter
-sqlalchemy==1.4.22
+sqlalchemy==1.4.23
     # via
     #   -r requirements.in
     #   alembic
