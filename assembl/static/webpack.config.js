@@ -226,6 +226,26 @@ module.exports = {
 					from: '{config.js,contents.css,styles.js,adapters/**/*,lang/**/*,plugins/**/*,skins/**/*,vendor/**/*}',
 					to: path.resolve( distPath, 'ckeditor4' ),
 					context: path.resolve( __dirname, 'node_modules', 'ckeditor4' )
+				},
+				{
+					from: 'dist/jquery.min.js',
+					to: distPath,
+					context: path.resolve( __dirname, 'node_modules', 'jquery' )
+				},
+				{
+					from: 'underscore-min.js',
+					to: distPath,
+					context: path.resolve( __dirname, 'node_modules', 'underscore' )
+				},
+				{
+					from: '{css/hopscotch.min.css,img/*}',
+					to: path.resolve( distPath, 'hopscotch' ),
+					context: path.resolve( __dirname, 'node_modules', 'hopscotch', 'dist' )
+				},
+				{
+					from: 'mocha.css',
+					to: path.resolve( distPath, 'mocha' ),
+					context: path.resolve( __dirname, 'node_modules', 'mocha' )
 				}
 			]
 		}),

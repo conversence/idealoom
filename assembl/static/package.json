@@ -22,6 +22,9 @@
     }
   },
   "scripts": {
+    "build": "webpack b",
+    "dev": "webpack serve --config webpack.dev.config.js",
+    "bower": "bower",
     "pretty": "prettier --write \"./js/app/**/*.js\"",
     "test": "npm run wd && npm run cover",
     "start": "mochify --watch",
@@ -29,7 +32,7 @@
     "cover": "mochify --cover"
   },
   "dependencies": {
-    "@babel/runtime": "^7.14",
+    "@babel/runtime": "^7.15",
     "@sentry/browser": "~6",
     "@sentry/integrations": "~6",
     "backbone": "^1.4",
@@ -123,9 +126,9 @@
     "terser-webpack-plugin": "~5.1",
     "watchify": "~4.0",
     "webpack": "^5",
-    "webpack-cli": "^4.7",
+    "webpack-cli": "^4.8",
     "webpack-dashboard": "~3.3",
-    "webpack-dev-server": "~3.11",
+    "webpack-dev-server": "~4",
     "yarn": "^1.22.11"
   },
   "resolutions": {

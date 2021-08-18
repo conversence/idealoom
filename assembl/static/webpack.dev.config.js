@@ -30,14 +30,16 @@ base_config.output.publicPath = process.env.WEBPACK_URL + '/js/build';
 module.exports = _.extend(base_config, {
   devServer: {
     hot: true,
-    inline: false,
     headers: {
-        "Access-Control-Allow-Origin": process.env.ASSEMBL_URL,
-        "Access-Control-Allow-Credentials": "true"
+      "Access-Control-Allow-Origin": process.env.ASSEMBL_URL,
+      "Access-Control-Allow-Credentials": "true"
     },
     port: webpack_port,
     host: webpackHost,
-    disableHostCheck: disableHostCheck,
+    allowedHosts: (disableHostCheck)?"all":webpackHost,
+    static: {
+      directory: '.'
+    }
   },
   mode: 'development',
   optimization: {
@@ -45,6 +47,7 @@ module.exports = _.extend(base_config, {
   },
   plugins: [
     base_config.plugins[0],
+    base_config.plugins[1],
     new webpack.HotModuleReplacementPlugin(),
     new MiniCssExtractPlugin({ filename: "[name].[contenthash].css" }),
     new HtmlWebpackPlugin({
