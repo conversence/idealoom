@@ -42,6 +42,7 @@
     "backbone.radio": "~2.0.0",
     "bluebird": "~3.7",
     "bootstrap-notify": "~3.1",
+    "buffer": "~6",
     "ckeditor4": "~4.16",
     "classlist-polyfill": "~1.2",
     "core-js": "~3.16",
@@ -56,6 +57,7 @@
     "d3-transition": "~3.0",
     "debug": "~4.3",
     "dotdotdot-js": "^4.1",
+    "events": "~3.3",
     "glob": "^7.1",
     "hopscotch": "~0.3",
     "jed": "~1.1",
@@ -70,7 +72,9 @@
     "regenerator-runtime": "~0.13",
     "select2": "~4.0",
     "sockjs-client": "~1.5",
-    "underscore": "^1.13"
+    "stream-browserify": "~3.0",
+    "underscore": "^1.13",
+    "util": "~0.12"
   },
   "devDependencies": {
     "@babel/core": "^7.15",
@@ -133,6 +137,7 @@
   },
   "resolutions": {
     "babel-core": "7.0.0-bridge.0",
+    "backbone.marionette": "^4.1.2",
     "chokidar": "~3.5"
   }
 }
