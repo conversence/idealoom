@@ -1,6 +1,6 @@
 from lxml import html
 from lxml.html.clean import Cleaner
-from html.parser import HTMLParser
+from html import unescape
 
 VALID_TAGS = ['a',
               'b',
@@ -42,17 +42,11 @@ VALID_ATTRIBUTES = ['href',  # For hyperlinks
                     ]
 
 
-_html_parser = HTMLParser()
-
-
-def unescape(text):
-    return _html_parser.unescape(text)
-
-
 def _make_cleaner(tags):
     return Cleaner(
         allow_tags=tags, safe_attrs_only=True, remove_unknown_tags=False,
         add_nofollow=True)
+
 
 _BASE_CLEANER = _make_cleaner(VALID_TAGS)
 
@@ -147,7 +141,8 @@ def sanitize_html(html_value, valid_tags=VALID_TAGS,
     """
     if keep_tag_content:
         return _sanitize_html_keep(html_value, valid_tags, valid_attributes)
-    cleaner = _BASE_CLEANER if valid_tags is None else _make_cleaner(valid_tags)
+    cleaner = _BASE_CLEANER if valid_tags is None else _make_cleaner(
+        valid_tags)
     return ''.join(_clean_html(html_value, cleaner))
 
 
