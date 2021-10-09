@@ -72,7 +72,7 @@ def bind_piwik(discussion, admin=None):
                 else:
                     raise requests.ConnectionError()
         else:
-            user_login = user_already_exists[0]["login"]
+            user_login = user_already_exists["login"]
 
         # Check wether a Piwik site with this URL already exists
         discussion_urls = discussion.get_discussion_urls()
@@ -168,8 +168,6 @@ def piwik_UsersManager_getUserByEmail(piwik_url, piwik_api_token, userEmail):
 
     if "result" in content and content["result"] == "error":
         return False
-    elif not isinstance(content, list):
-        raise requests.ConnectionError()
     else:
         return content
 
