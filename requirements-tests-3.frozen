@@ -38,15 +38,10 @@ amqp==5.0.6
     # via kombu
 anyjson==0.3.3
     # via -r requirements.in
-async-generator==1.10
-    # via
-    #   trio
-    #   trio-websocket
 attrs==21.2.0
     # via
     #   outcome
     #   pytest
-    #   trio
 babel==2.9.1
     # via
     #   -r requirements.in
@@ -71,7 +66,6 @@ certifi==2021.10.8
     # via
     #   requests
     #   sentry-sdk
-    #   urllib3
 cffi==1.15.0
     # via
     #   bcrypt
@@ -129,7 +123,6 @@ cryptography==35.0.0
     #   paramiko
     #   pyopenssl
     #   social-auth-core
-    #   urllib3
 cssselect==1.1.0
     # via premailer
 cssutils==2.3.0
@@ -185,8 +178,6 @@ google-auth-httplib2==0.1.0
     # via google-api-python-client
 googleapis-common-protos==1.53.0
     # via google-api-core
-h11==0.12.0
-    # via wsproto
 hashfs==0.7.2
     # via -r requirements.in
 hiredis==2.0.0
@@ -207,10 +198,7 @@ humanize==3.12.0
 hupper==1.10.3
     # via pyramid
 idna==3.3
-    # via
-    #   requests
-    #   trio
-    #   urllib3
+    # via requests
 imagesize==1.2.0
     # via sphinx
 imapclient==2.2.0
@@ -277,8 +265,6 @@ oauthlib==3.1.1
     #   social-auth-core
 openpyxl==3.0.9
     # via -r requirements.in
-outcome==1.1.0
-    # via trio
 packaging==21.2
     # via
     #   pytest
@@ -355,9 +341,7 @@ pylibmc==1.6.1
 pynacl==1.4.0
     # via paramiko
 pyopenssl==21.0.0
-    # via
-    #   ndg-httpsclient
-    #   urllib3
+    # via ndg-httpsclient
 pyparsing==2.4.7
     # via
     #   httplib2
@@ -463,7 +447,7 @@ scipy==1.7.2
     # via
     #   gensim
     #   scikit-learn
-selenium==4.0.0
+selenium==3.141.0
     # via
     #   pytest-splinter
     #   splinter
@@ -505,8 +489,6 @@ six==1.16.0
     #   update-dotdee
 smart-open==5.2.1
     # via gensim
-sniffio==1.2.0
-    # via trio
 snowballstemmer==2.1.0
     # via sphinx
 social-auth-app-pyramid==1.0.0
@@ -520,8 +502,6 @@ social-auth-storage-sqlalchemy==1.1.0
     # via
     #   -r requirements.in
     #   social-auth-app-pyramid
-sortedcontainers==2.4.0
-    # via trio
 soupsieve==2.3
     # via beautifulsoup4
 sparqlwrapper==1.8.5
@@ -596,19 +576,13 @@ translationstring==1.4
     #   -r requirements.in
     #   colander
     #   pyramid
-trio==0.19.0
-    # via
-    #   selenium
-    #   trio-websocket
-trio-websocket==0.9.2
-    # via selenium
 unidecode==1.3.2
     # via -r requirements.in
 update-dotdee==6.0
     # via rotate-backups
 uritemplate==4.1.1
     # via google-api-python-client
-urllib3[secure]==1.26.7
+urllib3==1.26.7
     # via
     #   pytest-splinter
     #   requests
@@ -645,8 +619,6 @@ werkzeug==2.0.2
     #   pytest-localserver
 wheel==0.37.0
     # via pip-tools
-wsproto==1.0.0
-    # via trio-websocket
 xmlsec==1.3.12
     # via python3-saml
 zope.component==5.0.1
