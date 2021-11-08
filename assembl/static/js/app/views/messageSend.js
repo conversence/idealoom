@@ -24,8 +24,8 @@ import Attachments from "../models/attachments.js";
 import AttachmentViews from "./attachments.js";
 import Promise from "bluebird";
 import LoaderView from "./loaderView.js";
+import * as linkify from 'linkifyjs';
 import Analytics from "../internal_modules/analytics/dispatcher.js";
-const linkify = require("linkifyjs");
 
 /**
  * @init
@@ -104,7 +104,7 @@ class messageSendView extends LoaderView.extend({
             return;
         }
         var messageText = this.ui.messageBody.val() || "";
-        var links = linkify.find(messageText);
+        var links = linkify.find(messageText, 'url');
         var missingLinks = [];
         var goneModels = [];
         //console.log("_processHyperlinks called");

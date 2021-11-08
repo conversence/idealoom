@@ -15,12 +15,11 @@ import i18n from "../utils/i18n.js";
 import * as Sentry from "@sentry/browser";
 import Backbone from "backbone";
 import BackboneModal from "backbone.modal";
+import 'linkify-jquery';
 
 import upload from "backbone-model-file-upload"; // why here?
 
 import Analytics from "../internal_modules/analytics/dispatcher.js";
-require("linkifyjs");
-require("linkifyjs/jquery")($);
 
 window.jQuery = $;
 window._ = _;
