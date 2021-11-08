@@ -1,5 +1,5 @@
 -e git+https://github.com/assembl/sqltap.git@readonly_binds#egg=sqltap
-ipython==7.28.0
+ipython==7.29.0
 PdbSublimeTextSupport==0.2
 pyramid-debugtoolbar-ajax==0.1.5
 pyramid-debugtoolbar==4.9

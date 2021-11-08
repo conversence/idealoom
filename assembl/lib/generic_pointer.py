@@ -19,6 +19,8 @@ class BaseTableEnum(Enum):
 
 def populate_base_table_enum(base):
     """Must be called after object initialization"""
+    if len(BaseTableEnum._member_names_):
+        return
     base_cls_by_table = {
         c.__tablename__: c for c in base.registry._class_registry.values()
         if getattr(c, '__dict__', {}).get('__tablename__', None) and
@@ -28,6 +30,7 @@ def populate_base_table_enum(base):
     tables.sort()
     for table in tables:
         extend_enum(BaseTableEnum, table, base_cls_by_table[table])
+
 
 class UniversalTableRefColType(UpdatablePgEnum):
     def __init__(self, *args, **kwargs):
@@ -108,7 +111,8 @@ class GenericRelationshipProperty(GenericRelationshipProperty_):
                 target_type = pointer._discriminator_col.type
                 type_enum = target_type.enum_class
                 for key in type_enum.keys():
-                    fname = "on_delete_%s_universal_cascade_%s_%s" % (target_table, source_table, key)
+                    fname = "on_delete_%s_universal_cascade_%s_%s" % (
+                        target_table, source_table, key)
                     text = """
         DROP TABLE IF EXISTS %(fname)s;
         CREATE FUNCTION %(fname)s() RETURNS trigger AS $%(fname)s$
@@ -123,7 +127,7 @@ class GenericRelationshipProperty(GenericRelationshipProperty_):
             DEFERRABLE FOR EACH ROW
             EXECUTE PROCEDURE %(fname)s
             """ % {'key': key, 'source_table': source_table,
-                   'target_table': target_table, 'fname': fname}
+                        'target_table': target_table, 'fname': fname}
                 db.execute(text)
 
 
@@ -163,4 +167,3 @@ def generic_relationship(*args, **kwargs):
 #             key + "_table": BaseTableEnum.__members__[instance.base_tablename()]
 #         }
 #         return instance.db.query(cls).filter_by(**filter_args)
-
