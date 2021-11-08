@@ -637,7 +637,7 @@ sphinxcontrib-serializinghtml==1.1.5
     # via sphinx
 sphinxcontrib-zopeext==0.2.4
     # via -r requirements_doc.in
-splinter==0.15.0
+splinter==0.16.0
     # via
     #   jasmine-splinter-runner
     #   pytest-splinter
