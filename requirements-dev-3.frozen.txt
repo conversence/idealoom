@@ -34,7 +34,7 @@
     # via -r requirements.in
 -e git+https://github.com/assembl/sqltap.git@readonly_binds#egg=sqltap
     # via -r requirements_dev.in
-aenum==3.1.3
+aenum==3.1.5
     # via -r requirements.in
 aiocache==0.11.1
     # via -r requirements_chrouter.in
@@ -47,7 +47,7 @@ aiosignal==1.2.0
     # via aiohttp
 alabaster==0.7.12
     # via sphinx
-alembic==1.7.4
+alembic==1.7.5
     # via -r requirements.in
 amqp==5.0.6
     # via kombu
@@ -55,7 +55,7 @@ anyjson==0.3.3
     # via -r requirements.in
 appnope==0.1.2
     # via ipython
-async-timeout==4.0.0
+async-timeout==4.0.1
     # via aiohttp
 attrs==21.2.0
     # via
@@ -140,7 +140,7 @@ cornice==6.0.0
     #   cornice-sphinx
 cornice_sphinx==0.3
     # via -r requirements_doc.in
-coverage[toml]==6.1.1
+coverage[toml]==6.1.2
     # via
     #   codecov
     #   pytest-cov
@@ -199,7 +199,7 @@ gensim==4.1.2
     # via -r requirements.in
 google-api-core==2.2.2
     # via google-api-python-client
-google-api-python-client==2.29.0
+google-api-python-client==2.30.0
     # via -r requirements.in
 google-auth==2.3.3
     # via
@@ -233,7 +233,7 @@ idna==3.3
     # via
     #   requests
     #   yarl
-imagesize==1.2.0
+imagesize==1.3.0
     # via sphinx
 imapclient==2.2.0
     # via -r requirements.in
@@ -256,7 +256,7 @@ isodate==0.6.0
     #   rdflib
 jedi==0.18.0
     # via ipython
-jinja2==3.0.2
+jinja2==3.0.3
     # via
     #   -r requirements.in
     #   pyramid-jinja2
@@ -370,7 +370,7 @@ protobuf==3.19.1
     #   googleapis-common-protos
 psutil==5.8.0
     # via circus
-psycopg2-binary==2.9.1
+psycopg2-binary==2.9.2
     # via -r requirements.in
 ptyprocess==0.7.0
     # via pexpect
@@ -589,7 +589,7 @@ social-auth-storage-sqlalchemy==1.1.0
     # via
     #   -r requirements.in
     #   social-auth-app-pyramid
-soupsieve==2.3
+soupsieve==2.3.1
     # via beautifulsoup4
 sparqlwrapper==1.8.5
     # via -r requirements.in
@@ -622,7 +622,7 @@ splinter==0.16.0
     # via
     #   jasmine-splinter-runner
     #   pytest-splinter
-sqlalchemy==1.4.26
+sqlalchemy==1.4.27
     # via
     #   -r requirements.in
     #   alembic
