@@ -43,7 +43,7 @@
     "bluebird": "~3.7",
     "bootstrap-notify": "~3.1",
     "buffer": "~6",
-    "ckeditor4": "~4.16",
+    "ckeditor4": "~4.17",
     "classlist-polyfill": "~1.2",
     "core-js": "~3.19",
     "d3": "~7.1",
