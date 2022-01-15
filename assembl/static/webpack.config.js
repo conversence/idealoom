@@ -2,7 +2,7 @@ const path = require('path'),
   glob = require('glob'),
   webpack = require('webpack'),
   _ = require('underscore'),
-  MiniCssExtractPlugin = require("mini-css-extract-plugin"),
+  MiniCssExtractPlugin = require("mini-css-extract-plugin").default,
   CopyPlugin = require('copy-webpack-plugin'),
   HtmlWebpackPlugin = require('html-webpack-plugin'),
   HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin'),
@@ -123,7 +123,7 @@ module.exports = {
         }],
       },
       {
-        test: /bootstrap.*\.js|jquery[-\.]/,
+        test: /bootstrap.*\.js|^jquery[-\.]/,
         use: [
           {
             loader: 'imports-loader',
