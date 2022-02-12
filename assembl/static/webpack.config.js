@@ -2,7 +2,7 @@ const path = require('path'),
   glob = require('glob'),
   webpack = require('webpack'),
   _ = require('underscore'),
-  MiniCssExtractPlugin = require("mini-css-extract-plugin").default,
+  MiniCssExtractPlugin = require("mini-css-extract-plugin"),
   CopyPlugin = require('copy-webpack-plugin'),
   HtmlWebpackPlugin = require('html-webpack-plugin'),
   HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin'),
@@ -115,6 +115,7 @@ module.exports = {
     },
   },
   module: {
+    exprContextCritical: false, // silence mocha errors
     rules: [
       {
         test: /\.pegjs$/,
