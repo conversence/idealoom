@@ -515,7 +515,9 @@ class GoogleTranslationService(DummyGoogleTranslationService):
                         from ..lib.raven_client import capture_message
                         capture_message("google changed its language set again")
             except:
-                return self.known_locales_cls
+                pass
+            if not self._known_locales:
+                self._known_locales = self.known_locales_cls
         return self._known_locales
 
     def identify(
@@ -628,6 +630,8 @@ class DeeplTranslationService(AbstractTranslationService):
                         capture_message("Deepl changed its language set again")
             except Exception:
                 # assume we have correct info
+                pass
+            if not self._known_locales:
                 self._known_locales = self.known_locales_cls
         return self._known_locales or self.known_locales_cls
 
