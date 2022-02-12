@@ -301,7 +301,7 @@ def get_posts(request):
             joinedload(Post.creator),
             joinedload(Post.extracts),
             joinedload(Post.widget_idea_links),
-            joinedload(SynthesisPost.publishes_synthesis),
+            # joinedload(SynthesisPost.publishes_synthesis),
             subqueryload(Post.attachments))
         if len(discussion.discussion_locales) > 1:
             posts = posts.options(*Content.subqueryload_options())
