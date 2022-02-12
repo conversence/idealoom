@@ -144,10 +144,10 @@ def get_posts(request):
     posted_before_date = request.GET.get('posted_before_date')
 
     PostClass = SynthesisPost if only_synthesis == "true" else Post
-    posts = discussion.db.query(PostClass)
+    posts = discussion.db.query(Content).join(PostClass, PostClass.id == Content.id)
 
     posts = posts.filter(
-        PostClass.discussion == discussion,
+        Content.discussion == discussion,
     )
     ##no_of_posts_to_discussion = posts.count()
 
@@ -176,21 +176,21 @@ def get_posts(request):
                 _("Getting orphan posts of a specific idea isn't supported.")))
         orphans = Idea._get_orphan_posts_statement(
             discussion.id, True, include_deleted=deleted).subquery("orphans")
-        posts = posts.join(orphans, PostClass.id == orphans.c.post_id)
+        posts = posts.join(orphans, Content.id == orphans.c.post_id)
 
     if root_idea_id:
         related = Idea.get_related_posts_query_c(
             discussion.id, root_idea_id, True, include_deleted=deleted)
-        posts = posts.join(related, PostClass.id == related.c.post_id)
+        posts = posts.join(related, Content.id == related.c.post_id)
     elif not only_orphan:
         if deleted is not None:
             if deleted:
                 posts = posts.filter(
-                    PostClass.publication_state.in_(
+                    Post.publication_state.in_(
                         deleted_publication_states))
             else:
                 posts = posts.filter(
-                    PostClass.tombstone_date == None)
+                    Content.tombstone_date == None)
 
     if root_post_id:
         root_post = Post.get(root_post_id)
@@ -200,7 +200,7 @@ def get_posts(request):
             root_post.ancestry + cast(root_post.id, String) + ',%'
             ))
             |
-            (PostClass.id==root_post.id)
+            (Content.id==root_post.id)
             )
     elif family_post_id:
         root_post = Post.get(family_post_id)
@@ -210,9 +210,9 @@ def get_posts(request):
             root_post.ancestry + cast(root_post.id, String) + ',%'
             ))
             |
-            (PostClass.id==root_post.id)
+            (Content.id==root_post.id)
             |
-            (PostClass.id.in_(ancestor_ids))
+            (Content.id.in_(ancestor_ids))
             )
     else:
         root_post = None
@@ -223,21 +223,21 @@ def get_posts(request):
     if posted_after_date:
         posted_after_date = parse_datetime(posted_after_date)
         if posted_after_date:
-            posts = posts.filter(PostClass.creation_date >= posted_after_date)
+            posts = posts.filter(Content.creation_date >= posted_after_date)
         #Maybe we should do something if the date is invalid.  benoitg
 
     if posted_before_date:
         posted_before_date = parse_datetime(posted_before_date)
         if posted_before_date:
-            posts = posts.filter(PostClass.creation_date <= posted_before_date)
+            posts = posts.filter(Content.creation_date <= posted_before_date)
         #Maybe we should do something if the date is invalid.  benoitg
 
     if post_author_id:
-        posts = posts.filter(PostClass.creator_id == post_author_id)
+        posts = posts.filter(Post.creator_id == post_author_id)
 
     if post_replies_to:
-        parent_alias = aliased(PostClass)
-        posts = posts.join(parent_alias, PostClass.parent)
+        parent_alias = aliased(Content)
+        posts = posts.join(parent_alias, Post.parent)
         posts = posts.filter(parent_alias.creator_id == post_replies_to)
 
     if keywords:
@@ -245,7 +245,7 @@ def get_posts(request):
         keywords = list(chain(*[keyword.split() for keyword in keywords]))
         locales = request.GET.getall('locale')
         posts, rank = add_text_search(
-            posts, (PostClass.body_id,), keywords, locales, order == 'score')
+            posts, (Content.body_id,), keywords, locales, order == 'score')
 
     if not_harvested:
         # TODO: Add a flag for harvesting that does not result in extracts
@@ -271,7 +271,7 @@ def get_posts(request):
             posts = posts.outerjoin(
                 ViewPost, and_(
                     ViewPost.actor_id==user_id,
-                    ViewPost.post_id==PostClass.id,
+                    ViewPost.post_id==Content.id,
                     ViewPost.tombstone_date == None))
             if is_unread == "true":
                 posts = posts.filter(ViewPost.id == None)
@@ -294,7 +294,7 @@ def get_posts(request):
         pass  # posts = posts.options(defer(Post.body))
     else:
         ideaContentLinkQuery = posts.with_entities(
-            PostClass.id, PostClass.idea_content_links_above_post)
+            Content.id, Post.idea_content_links_above_post)
         ideaContentLinkCache = dict(ideaContentLinkQuery.all())
         posts = posts.options(
             # undefer(Post.idea_content_links_above_post),
@@ -339,7 +339,7 @@ def get_posts(request):
         ancestor_ids -= post_ids
         if ancestor_ids:
             ancestors = discussion.db.query(
-                PostClass).filter(PostClass.id.in_(ancestor_ids))
+                Content).filter(Content.id.in_(ancestor_ids))
             if view_def in ('partial_post', 'id_only'):
                 pass  # ancestors = ancestors.options(defer(Post.body))
             else:
@@ -359,7 +359,7 @@ def get_posts(request):
             posts.extend(ancestors.all())
 
     if view_def == 'id_only':
-        posts = posts.with_entities(PostClass.id)
+        posts = posts.with_entities(Content.id)
 
     for query_result in posts:
         score, viewpost, likedpost = None, None, None
