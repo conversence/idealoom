@@ -2422,10 +2422,10 @@ cipher-base@^1.0.0, cipher-base@^1.0.1, cipher-base@^1.0.3:
     inherits "^2.0.1"
     safe-buffer "^5.0.1"
 
-ckeditor4@~4.17:
-  version "4.17.2"
-  resolved "https://registry.yarnpkg.com/ckeditor4/-/ckeditor4-4.17.2.tgz#b751f3e0ac0eef613a5576689dcf37852c23096e"
-  integrity sha512-YgBaKNJbWvYbgTNhKDLTjsqCLBNwzDbN5OhsMm+I/mtDCuO/Nu6S/jAvlwHozy12uFPMCeOM7n4rGZ4gEJgOgg==
+ckeditor4@~4.18:
+  version "4.18.0"
+  resolved "https://registry.yarnpkg.com/ckeditor4/-/ckeditor4-4.18.0.tgz#d54861a9d5a01029f16a54b820a4af10d3bbc156"
+  integrity sha512-O4tnQCH0APKrBsz78L+m48s9Cs90aq0Nsatmh9CUj2YBTh8UZYdYcelBLVA84SlwA1nsx07aC76Zn08vgHqmLQ==
 
 classlist-polyfill@~1.2:
   version "1.2.0"
