@@ -3,6 +3,6 @@
 cornice_sphinx==0.3
 # https://github.com/Cornices/cornice.ext.sphinx/issues/22
 Sphinx==3.5.4
-sphinxcontrib-httpdomain==1.7.0
-sphinxcontrib-zopeext==0.2.4
+sphinxcontrib-httpdomain==1.8.0
+sphinxcontrib-zopeext==0.3.2
 sqlalchemy-schemadisplay==1.3
