@@ -260,7 +260,7 @@ oauthlib==3.2.0
     # via
     #   requests-oauthlib
     #   social-auth-core
-openpyxl==3.0.9
+openpyxl==3.0.10
     # via -r requirements.in
 packaging==21.3
     # via

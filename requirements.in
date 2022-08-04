@@ -37,7 +37,7 @@ lingua==4.15.0
 lxml<4.7
 nodeenv==1.7.0
 ndg_httpsclient==0.5.1
-openpyxl==3.0.9
+openpyxl==3.0.10
 pip-tools==6.8.0
 polib==1.1.1
 premailer==3.10.0
