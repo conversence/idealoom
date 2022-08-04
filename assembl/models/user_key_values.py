@@ -1,7 +1,7 @@
 """Models for arbitrary key-values storage, bound to a namespace, a user, and some other object (currently only the discussion)."""
 from __future__ import absolute_import
 from builtins import object
-from collections import Mapping, MutableMapping
+from collections.abc import MutableMapping
 
 import simplejson as json
 from sqlalchemy import (

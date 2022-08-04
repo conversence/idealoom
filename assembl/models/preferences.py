@@ -7,7 +7,6 @@ from future.utils import text_type
 standard_library.install_aliases()
 from builtins import str
 from itertools import chain
-from collections import MutableMapping
 
 from future.utils import string_types
 import simplejson as json

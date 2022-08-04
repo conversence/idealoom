@@ -13,7 +13,8 @@ import sys
 from datetime import datetime
 import inspect as pyinspect
 import types
-from collections import Iterable, defaultdict
+from collections import defaultdict
+from collections.abc import Iterable
 from contextlib import contextmanager
 import atexit
 from abc import abstractmethod
