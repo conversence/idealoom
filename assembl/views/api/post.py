@@ -236,7 +236,7 @@ def get_posts(request):
         posts = posts.filter(Post.creator_id == post_author_id)
 
     if post_replies_to:
-        parent_alias = aliased(Content)
+        parent_alias = aliased(Content, flat=True)
         posts = posts.join(parent_alias, Post.parent)
         posts = posts.filter(parent_alias.creator_id == post_replies_to)
 
