@@ -27,7 +27,7 @@ from functools import partial
 from future.utils import string_types, as_native_str
 from past.builtins import str as past_str, unicode as past_unicode, long
 from enum import Enum
-from anyjson import dumps, loads
+from simplejson import dumps, loads
 from sqlalchemy import (
     DateTime, MetaData, engine_from_config, event, Column, Integer,
     inspect, or_, and_)
