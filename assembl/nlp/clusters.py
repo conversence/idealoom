@@ -186,8 +186,12 @@ class SemanticAnalysisData(object):
         # It will depend on discussion shape.
         if idea_id not in self._posts_by_idea:
             discussion = self.discussion
-            related = Idea.get_related_posts_query_c(
+            related_c = Idea.get_related_posts_query_c(
                 discussion.id, idea_id, True)
+            related = discussion.db.query(Content.id).filter(
+                (Content.discussion_id == discussion.id)
+                & (Content.hidden == False)
+                ).join(related_c, Content.id == related_c.c.post_id)
             # Note: This includes hidden posts. Not a huge deal,
             # but may need a join.
             post_ids = list(discussion.db.execute(related))
@@ -1405,7 +1409,7 @@ class OpticsSemanticsAnalysisWithSuggestions(OpticsSemanticsAnalysis):
         sub_labels = labels[idea_post_nums]
         if len(set(sub_labels)) < 2:
             return 0
-        return metrics.silhouette_score(sub_distance, sub_labels, 'precomputed')
+        return metrics.silhouette_score(sub_distance, sub_labels, metric='precomputed')
 
     def remove_singletons(self, labels, idea_id):
         post_ids = self.post_ids
