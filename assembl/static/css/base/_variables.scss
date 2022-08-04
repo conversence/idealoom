@@ -144,9 +144,9 @@ $max_panel_unit_size: $message_panel_grid_size + $idea_panel_grid_size;
 // the number of grid units taken by largest group. Assume one message + 3 smaller panels.
 $max_group_unit_size: $synthesis_panel_grid_size + $idea_panel_grid_size + $message_panel_grid_size + $clipboard_grid_size;
 
-$grid_unit_min_size: $small_screen / $min_num_grid_units;
+$grid_unit_min_size: calc($small_screen / $min_num_grid_units);
 // huge screen
-$max_num_grid_units: round(2560px/$grid_unit_min_size);
+$max_num_grid_units: calc(2560px / $grid_unit_min_size);
 // message-list min 5, nav3, idea 4
 
 //badges

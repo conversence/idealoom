@@ -96,15 +96,10 @@
   }
 
   &:active {
-    @extend .iconbutton.is-activated;
+    // Active state
+    opacity: 1;
+    background-color: transparentize(#e5e5e5, 0.5);
   }
-}
-
-// Active state
-// ************
-.iconbutton.is-activated {
-  opacity: 1;
-  background-color: transparentize(#e5e5e5, 0.5);
 }
 
 // DELETE OVER THIS LINE AFTER REFACTORING

@@ -19,11 +19,7 @@
 }
 .contextmenu-item, .contextmenu-item a {
     color: $gray1;
-    &:hover { @extend .contextmenu-item.is-hovered; }
-}
-
-// .contextmenu-item hovered state
-// +++++++++++
-.contextmenu-item.is-hovered {
-    color: $black;
+    &:hover, &.is-hovered {
+        color: $black;
+    }
 }
