@@ -8,9 +8,9 @@
     # via
     #   -r requirements.in
     #   pyramid-beaker
--e git+https://github.com/wmorgan6796/fabric@add_python3.10_compat#egg=Fabric3
+-e git+https://github.com/circus-tent/circus#egg=circus
     # via -r requirements.in
--e git+https://github.com/mher/flower.git#egg=flower
+-e git+https://github.com/wmorgan6796/fabric@add_python3.10_compat#egg=Fabric3
     # via -r requirements.in
 -e git+https://github.com/conversence/jasmine-splinter-runner.git#egg=jasmine-splinter-runner
     # via -r requirements_tests.in
@@ -27,8 +27,6 @@
 -e git+https://github.com/conversence/sqlalchemy-rdfbridge.git#egg=sqlalchemy-rdfbridge
     # via -r requirements.in
 -e git+https://github.com/maparent/sqlalchemy-utils.git@abstract_generic_1.4#egg=sqlalchemy_utils
-    # via -r requirements.in
--e git+https://github.com/circus-tent/circus#egg=circus
     # via -r requirements.in
 aenum==3.1.11
     # via -r requirements.in
@@ -126,7 +124,7 @@ cornice==6.0.1
     #   cornice-sphinx
 cornice-sphinx==0.3
     # via -r requirements_doc.in
-coverage[toml]==6.4.2
+coverage[toml]==6.4.3
     # via
     #   codecov
     #   pytest-cov
@@ -175,6 +173,8 @@ feedparser==6.0.10
     # via -r requirements.in
 flaky==3.7.0
     # via -r requirements_tests.in
+flower==1.2.0
+    # via -r requirements.in
 future==0.18.2
     # via -r requirements.in
 gensim==4.2.0
@@ -183,7 +183,7 @@ google-api-core==2.8.2
     # via google-api-python-client
 google-api-python-client==2.55.0
     # via -r requirements.in
-google-auth==2.9.1
+google-auth==2.10.0
     # via
     #   google-api-core
     #   google-api-python-client
@@ -209,7 +209,7 @@ humanfriendly==10.0
     #   property-manager
     #   rotate-backups
     #   update-dotdee
-humanize==4.2.3
+humanize==4.3.0
     # via flower
 hupper==1.10.3
     # via pyramid
@@ -363,7 +363,7 @@ pyjwt==2.4.0
     # via
     #   -r requirements.in
     #   social-auth-core
-pylibmc==1.6.1
+pylibmc==1.6.2
     # via -r requirements.in
 pynacl==1.5.0
     # via paramiko
@@ -474,7 +474,7 @@ rsa==4.9
     # via
     #   google-auth
     #   python-jose
-scikit-learn==1.1.1
+scikit-learn==1.1.2
     # via -r requirements.in
 scipy==1.9.0
     # via
@@ -484,7 +484,7 @@ selenium==4.3.0
     # via pytest-splinter
 semantic-version==2.10.0
     # via -r requirements.in
-sentry-sdk==1.9.0
+sentry-sdk==1.9.2
     # via -r requirements.in
 sgmllib3k==1.0.0
     # via feedparser
@@ -512,7 +512,6 @@ six==1.16.0
     #   social-auth-app-pyramid
     #   social-auth-storage-sqlalchemy
     #   sphinxcontrib-httpdomain
-    #   sqlalchemy-utils
     #   update-dotdee
 smart-open==6.0.0
     # via gensim
@@ -566,7 +565,7 @@ splinter==0.18.1
     # via
     #   jasmine-splinter-runner
     #   pytest-splinter
-sqlalchemy==1.4.39
+sqlalchemy==1.4.40
     # via
     #   -r requirements.in
     #   alembic
@@ -650,7 +649,7 @@ webob==1.8.7
     #   webtest
 webtest==3.0.0
     # via -r requirements_tests.in
-werkzeug==2.2.1
+werkzeug==2.2.2
     # via
     #   -r requirements.in
     #   pytest-localserver
