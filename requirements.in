@@ -6,7 +6,7 @@
 -e git+https://github.com/maparent/sqlalchemy-utils.git@abstract_generic_1.4#egg=sqlalchemy_utils
 -e git+https://github.com/conversence/sqlalchemy-rdfbridge.git#egg=sqlalchemy-rdfbridge
 -e git+https://github.com/wmorgan6796/fabric@add_python3.10_compat#egg=Fabric3
-# until an official release includes https://github.com/circus-tent/circus/pull/1170
+# until an official release includes https://github.com/circus-tent/circus/issues/1190
 -e git+https://github.com/circus-tent/circus#egg=circus
 aenum==3.1.11
 alembic==1.8.1
@@ -25,7 +25,7 @@ feedparser==6.0.10
 flower==1.2.0
 future==0.18.2
 gensim==4.2.0
-google-api-python-client==2.55.0
+google-api-python-client==2.57.0
 hashfs==0.7.2
 hiredis==2.0.0
 IMAPClient==2.3.1
@@ -44,7 +44,7 @@ pip-tools==6.8.0
 polib==1.1.1
 premailer==3.10.0
 psycopg2-binary==2.9.3
-pygraphviz==1.9
+pygraphviz==1.10
 pyIsEmail==1.4.0
 PyJWT==2.4.0
 pylibmc==1.6.2
@@ -59,9 +59,9 @@ python-json-logger==2.0.4
 python-Levenshtein==0.12.2
 # this and lxml gated by https://github.com/python-social-auth/social-core/issues/659
 python3-saml==1.14.0
-pytz==2022.1
+pytz==2022.2.1
 PyYAML==6.0
-pyzmq==23.2.0
+pyzmq==23.2.1
 rdflib==6.2.0
 redis==4.3.4
 reg==0.12
@@ -70,7 +70,7 @@ requests==2.28.1
 rotate-backups==8.1
 scikit-learn==1.1.2
 semantic-version==2.10.0
-sentry-sdk==1.9.2
+sentry-sdk==1.9.5
 simplejson==3.17.6
 six==1.16.0
 social-auth-core[all]==4.3.0
