@@ -3,12 +3,12 @@
 cchardet==2.1.7
 aiocache==0.11.1
 aiocontextvars==0.2.2 ; python_version < '3.7'
-aiohttp==3.8.1
+aiohttp==3.8.3
 # aiohttp-cors==0.7.0
 
 # Those chrouter reqs repeat requirements in requirements.in, keep in sync.
-PyJWT==2.4.0
+PyJWT==2.5.0
 pytz==2022.2.1
-pyzmq==23.2.1
-sentry-sdk==1.9.5
+pyzmq==24.0.1
+sentry-sdk==1.9.8
 simplejson==3.17.6

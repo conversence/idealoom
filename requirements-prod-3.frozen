@@ -32,7 +32,7 @@ aenum==3.1.11
     # via -r requirements.in
 aiocache==0.11.1
     # via -r requirements_chrouter.in
-aiohttp==3.8.1
+aiohttp==3.8.3
     # via
     #   -r requirements_chrouter.in
     #   pyoembed
@@ -51,7 +51,7 @@ attrs==22.1.0
     # via aiohttp
 babel==2.10.3
     # via -r requirements.in
-bcrypt==3.2.2
+bcrypt==4.0.0
     # via paramiko
 beautifulsoup4==4.11.1
     # via
@@ -71,13 +71,12 @@ celery==5.2.7
     # via
     #   -r requirements.in
     #   flower
-certifi==2022.6.15
+certifi==2022.9.14
     # via
     #   requests
     #   sentry-sdk
 cffi==1.15.1
     # via
-    #   bcrypt
     #   cryptography
     #   pynacl
 charset-normalizer==2.1.1
@@ -114,7 +113,7 @@ contextlib2==21.6.0
     # via -r requirements.in
 cornice==6.0.1
     # via -r requirements.in
-cryptography==37.0.4
+cryptography==38.0.1
     # via
     #   -r requirements.in
     #   paramiko
@@ -148,7 +147,7 @@ executor==23.2
     #   update-dotdee
 facebook-sdk==3.1.0
     # via -r requirements.in
-fasteners==0.17.3
+fasteners==0.18
     # via executor
 feedparser==6.0.10
     # via -r requirements.in
@@ -162,11 +161,11 @@ future==0.18.2
     # via -r requirements.in
 gensim==4.2.0
     # via -r requirements.in
-google-api-core==2.8.2
+google-api-core==2.10.1
     # via google-api-python-client
-google-api-python-client==2.57.0
+google-api-python-client==2.62.0
     # via -r requirements.in
-google-auth==2.11.0
+google-auth==2.11.1
     # via
     #   google-api-core
     #   google-api-python-client
@@ -190,11 +189,11 @@ humanfriendly==10.0
     #   property-manager
     #   rotate-backups
     #   update-dotdee
-humanize==4.3.0
+humanize==4.4.0
     # via flower
 hupper==1.10.3
     # via pyramid
-idna==3.3
+idna==3.4
     # via
     #   requests
     #   yarl
@@ -215,7 +214,7 @@ jinja2==3.1.2
     # via
     #   -r requirements.in
     #   pyramid-jinja2
-joblib==1.1.0
+joblib==1.2.0
     # via scikit-learn
 jsonpath-ng==1.5.3
     # via -r requirements.in
@@ -231,7 +230,7 @@ lxml==4.6.5
     #   python3-saml
     #   social-auth-core
     #   xmlsec
-mako==1.2.1
+mako==1.2.2
     # via alembic
 markupsafe==2.1.1
     # via
@@ -251,12 +250,12 @@ ndg-httpsclient==0.5.1
     # via -r requirements.in
 nodeenv==1.7.0
     # via -r requirements.in
-numpy==1.23.2
+numpy==1.23.3
     # via
     #   gensim
     #   scikit-learn
     #   scipy
-oauthlib==3.2.0
+oauthlib==3.2.1
     # via
     #   requests-oauthlib
     #   social-auth-core
@@ -292,18 +291,18 @@ premailer==3.10.0
     # via -r requirements.in
 prometheus-client==0.14.1
     # via flower
-prompt-toolkit==3.0.30
+prompt-toolkit==3.0.31
     # via click-repl
 property-manager==3.0
     # via
     #   executor
     #   rotate-backups
     #   update-dotdee
-protobuf==4.21.5
+protobuf==4.21.6
     # via
     #   google-api-core
     #   googleapis-common-protos
-psutil==5.9.1
+psutil==5.9.2
     # via circus
 psycopg2-binary==2.9.3
     # via -r requirements.in
@@ -323,12 +322,12 @@ pygraphviz==1.10
     # via -r requirements.in
 pyisemail==1.4.0
     # via -r requirements.in
-pyjwt==2.4.0
+pyjwt==2.5.0
     # via
     #   -r requirements.in
     #   -r requirements_chrouter.in
     #   social-auth-core
-pylibmc==1.6.2
+pylibmc==1.6.3
     # via -r requirements.in
 pynacl==1.5.0
     # via paramiko
@@ -385,7 +384,7 @@ pytz==2022.2.1
     #   flower
 pyyaml==6.0
     # via -r requirements.in
-pyzmq==23.2.1
+pyzmq==24.0.1
     # via
     #   -r requirements.in
     #   -r requirements_chrouter.in
@@ -422,13 +421,13 @@ rsa==4.9
     #   python-jose
 scikit-learn==1.1.2
     # via -r requirements.in
-scipy==1.9.0
+scipy==1.9.1
     # via
     #   gensim
     #   scikit-learn
 semantic-version==2.10.0
     # via -r requirements.in
-sentry-sdk==1.9.5
+sentry-sdk==1.9.8
     # via
     #   -r requirements.in
     #   -r requirements_chrouter.in
@@ -459,7 +458,7 @@ six==1.16.0
     #   social-auth-app-pyramid
     #   social-auth-storage-sqlalchemy
     #   update-dotdee
-smart-open==6.1.0
+smart-open==6.2.0
     # via gensim
 social-auth-app-pyramid==1.0.0
     # via -r requirements.in
@@ -476,7 +475,7 @@ soupsieve==2.3.2.post1
     # via beautifulsoup4
 sparqlwrapper==2.0.0
     # via -r requirements.in
-sqlalchemy==1.4.40
+sqlalchemy==1.4.41
     # via
     #   -r requirements.in
     #   alembic
@@ -558,7 +557,7 @@ zope-deprecation==4.4.0
     #   pyramid-jinja2
 zope-event==4.5.0
     # via zope-component
-zope-hookable==5.1.0
+zope-hookable==5.2
     # via zope-component
 zope-interface==5.4.0
     # via
