@@ -7,8 +7,8 @@ aiohttp==3.8.3
 # aiohttp-cors==0.7.0
 
 # Those chrouter reqs repeat requirements in requirements.in, keep in sync.
-PyJWT==2.5.0
-pytz==2022.2.1
+PyJWT==2.6.0
+pytz==2022.7
 pyzmq==24.0.1
-sentry-sdk==1.9.8
-simplejson==3.17.6
+sentry-sdk==1.12.1
+simplejson==3.18.0
