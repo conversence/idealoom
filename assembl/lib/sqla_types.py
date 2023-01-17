@@ -20,6 +20,7 @@ class URLString(TypeDecorator):
     """Safely coerce URLs to Strings."""
 
     impl = String
+    cache_ok = True
 
     @property
     def python_type(self):
@@ -42,6 +43,7 @@ class URIRefString(TypeDecorator):
     """Safely coerce URIRefs to Strings."""
 
     impl = CoerceUnicode
+    cache_ok = True
 
     @property
     def python_type(self):
@@ -61,6 +63,7 @@ class URIRefString(TypeDecorator):
 
 class EmailString(TypeDecorator):
     impl = String
+    cache_ok = True
 
     @property
     def python_type(self):
@@ -137,6 +140,7 @@ class UUID(TypeDecorator):
     http://stackoverflow.com/questions/183042/how-can-i-use-uuids-in-sqlalchemy
     """
     impl = postgresql.UUID
+    cache_ok = True
 
     def process_bind_param(self, value, dialect=None):
         if value and isinstance(value, uuid.UUID):
