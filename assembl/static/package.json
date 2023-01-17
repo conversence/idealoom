@@ -46,7 +46,7 @@
     "chokidar": "~3.5",
     "ckeditor4": "~4.20",
     "classlist-polyfill": "~1.2",
-    "core-js": "~3.26",
+    "core-js": "~3.27",
     "d3": "~7.8",
     "d3-array": "~3.2",
     "d3-axis": "~3.0",
@@ -79,7 +79,7 @@
     "util": "~0.12"
   },
   "devDependencies": {
-    "@babel/core": "^7.19",
+    "@babel/core": "^7.20",
     "@babel/eslint-parser": "^7.19",
     "@babel/plugin-proposal-async-generator-functions": "^7.20",
     "@babel/plugin-proposal-class-properties": "^7.18",
@@ -102,7 +102,7 @@
     "eslint": "~8",
     "eslint-config-prettier": "~8",
     "eslint-plugin-babel": "~5.3",
-    "eslint-plugin-import": "~2.26",
+    "eslint-plugin-import": "~2.27",
     "eslint-webpack-plugin": "~3.2",
     "file-loader": "~6.2",
     "fixtures": "0.0.2",
