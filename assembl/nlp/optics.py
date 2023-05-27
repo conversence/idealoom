@@ -180,7 +180,7 @@ class Optics(object):
             CD[i] = tempD[self.min_points]  # **2
 
         self.order = order = []
-        seeds = N.arange(m, dtype=N.int)
+        seeds = N.arange(m, dtype=int)
 
         ind = 0
         while len(seeds) != 1:
@@ -433,7 +433,7 @@ class Optics(object):
             RD[cluster.start], RD[cluster.end+1]))
 
     def as_labels(self, clusters):
-        labels = N.zeros(len(self.RD), dtype=N.int)
+        labels = N.zeros(len(self.RD), dtype=int)
         for n in range(len(clusters), 0, -1):
             cluster = clusters[n-1]
             for pos in range(cluster.start, cluster.end):

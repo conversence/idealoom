@@ -774,7 +774,7 @@ class SKLearnClusteringSemanticAnalysis(SemanticAnalysisData):
         if not eps:
             # This is silly, but approximate eps with optics
             o = Optics(self.min_samples, metric)
-            o.calculate_distances(model_matrix.todense())
+            o.calculate_distances(np.asarray(model_matrix.todense()))
             RD = o.RD
             log.debug("optics result: " + str(RD))
             a, b = min(RD[1:]), max(RD)
