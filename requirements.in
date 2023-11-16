@@ -5,8 +5,6 @@
 -e git+https://github.com/conversence/pyramid_dogpile_cache#egg=pyramid-dogpile-cache
 -e git+https://github.com/maparent/sqlalchemy-utils.git@abstract_generic_1.4#egg=sqlalchemy_utils
 -e git+https://github.com/conversence/sqlalchemy-rdfbridge.git#egg=sqlalchemy-rdfbridge
---no-binary lxml
---use-feature=no-binary-enable-wheel-cache
 aenum==3.1.15
 alembic==1.9.2
 Babel==2.13.1
