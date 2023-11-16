@@ -1,12 +1,12 @@
 -e git+https://github.com/conversence/jasmine-splinter-runner.git#egg=jasmine-splinter-runner
 codecov==2.1.12
 flaky==3.7.0
-mock==5.0.1
-pytest-cov==4.0.0
-pytest-localserver==0.7.0
-pytest-mock==3.10.0
+mock==5.1.0
+pytest-cov==4.1.0
+pytest-localserver==0.8.1
+pytest-mock==3.12.0
 pytest-splinter==3.3.2
-pytest==7.2.1
+pytest==7.4.3
 WebTest==3.0.0
 # Do I still need this?
 # cov-core==1.15.0

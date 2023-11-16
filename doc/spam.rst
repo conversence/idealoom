@@ -3,6 +3,8 @@ How to not be marked as spam
 
 There's a number of things to do so the subscription and notification emails don't go in the client's spam folder. The following assumes the application server handles mail.
 
+Check the mail-tester.com score.
+
 In most cases, the mail domain name and the application domain name will be identical; but we will distinguish them below.
 
 Important: The reverse DNS of the server (both IPv4 and IPv6) must point back to the mail domain name.
@@ -14,7 +16,7 @@ DNS records
 
 You should set ``MX``, ``SPF`` and ``DMARC``:
 
-    MX mail_domain_name  10  mail_domain_name 
+    MX mail_domain_name  10  mail_domain_name
     TXT mail_domain_name v=spf1 mx -all
     SPF mail_domain_name v=spf1 mx -all
     TXT _dmarc.mail_domain_name v=DMARC1;p=reject;rua=mailto:postmaster@mail_domain_name
@@ -42,7 +44,7 @@ https://help.ubuntu.com/community/Postfix/DKIM
     cd !$
     sudo -u opendkim opendkim-genkey -t -s mail -d mail_domain_name
     # They should be in -rw------- mode.
-    
+
     sudo cat mail.txt
 
 You'll see something like::
