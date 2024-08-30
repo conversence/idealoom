@@ -88,7 +88,7 @@ def language_sdk_existance(lang, default_locale_dict):
         return False
 
     def _get_rand_country(lang, source):
-        return random.sample(source[lang], 1)[0]
+        return random.sample(sorted(source[lang]), 1)[0]
 
     # for example: default_locale_dict is a {'fr': set(['CA', 'FR'])}
     from ..lib.locale import use_underscore, get_country, get_language
