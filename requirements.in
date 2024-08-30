@@ -36,6 +36,7 @@ jsonpath-ng==1.6.1
 Levenshtein==0.25.1
 lingua==4.15.0
 lxml==5.3.0
+lxml_html_clean==0.2.2
 nodeenv==1.9.1
 ndg_httpsclient==0.5.1
 openpyxl==3.1.5
