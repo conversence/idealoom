@@ -23,7 +23,7 @@ from os import getenv
 from getpass import getuser
 from platform import system
 from time import sleep, strftime, time
-from configparser import ConfigParser, SafeConfigParser
+from configparser import ConfigParser, RawConfigParser
 from io import StringIO
 import sys
 # Importing the "safe" os.path commands
@@ -686,9 +686,9 @@ def build_virtualenv():
         bcfile = "/usr/local/Frameworks/Python.framework/Versions/3.6/lib/python3.6/distutils/distutils.cfg"
         vefile = env.venvpath + "/lib/python3.6/distutils/distutils.cfg"
         if exists(bcfile):
-            brew_config = SafeConfigParser()
+            brew_config = ConfigParser()
             brew_config.read(bcfile)
-            venv_config = SafeConfigParser()
+            venv_config = ConfigParser()
             if exists(vefile):
                 venv_config.read(vefile)
             sec = "build_ext"
@@ -1889,7 +1889,7 @@ def flushmemcache():
 
 
 def as_rc(ini_filename):
-    cp = SafeConfigParser()
+    cp = ConfigParser()
     cp.read(ini_filename)
     r = {}
     for section in cp.sections():
