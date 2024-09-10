@@ -113,7 +113,7 @@ class CeleryWithConfig(Celery):
             raise RuntimeError("Missing settings file")
         _settings = settings = get_appsettings(settings_file, 'idealoom')
         configure_zmq(settings['changes_socket'], False)
-        config = configparser.SafeConfigParser()
+        config = configparser.ConfigParser()
         config.read(settings_file)
         registry = getGlobalSiteManager()
         registry.settings = settings
