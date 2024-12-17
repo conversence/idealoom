@@ -176,7 +176,8 @@ def discussion_admin(request):
 
     if request.method == 'POST':
         context['errors'] = errors = []
-        context.update(request.POST)
+        fpost = {k: v for (k, v) in request.POST.items() if v}
+        context.update(fpost)
         ml_address = context['mailing_list_address']
 
         if not slug:
