@@ -29,7 +29,7 @@ class CreateVMMMailboxAtDiscussionCreation(object):
             password = mailbox.password
             email = mailbox.username
             with TemporaryFile() as stderr:
-                rcode = call(['sudo', '/usr/sbin/vmm', 'ua', email, password],
+                rcode = call(['sudo', '/usr/sbin/vmm', 'ua', '-p', password, email],
                              stderr=stderr)
                 if rcode != 0:
                     stderr.seek(0)

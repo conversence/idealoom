@@ -12,7 +12,7 @@ will mostly follow the installation and configuration instructions steps
 in http://vmm.localdomain.org/install.html We are installing Dovecot
 2.x, so choose sections appropriately.
 
-The instructions mention ``/path/to/vmm-0.6.2/pgsql``, those files are
+The instructions mention ``/path/to/vmm-0.7/pgsql``, those files are
 put in ``/usr/share/doc/vmm/examples/pgsql`` by ``apt-get``. Here are further
 instructions for specific steps.
 
@@ -108,7 +108,7 @@ and add the following:
     smtp_tls_loglevel = 1
     smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
     smtp_tls_security_level = may
-    
+
     smtpd_relay_restrictions = permit_mynetworks permit_sasl_authenticated defer_unauth_destination
     smtpd_tls_security_level = may
     smtpd_tls_mandatory_ciphers = medium
