@@ -5,4 +5,4 @@ cornice_sphinx==0.4
 Sphinx==3.5.4
 sphinxcontrib-httpdomain==1.8.1
 sphinxcontrib-zopeext==0.3.2
-sqlalchemy-schemadisplay==1.3
+sqlalchemy-schemadisplay==1.4
