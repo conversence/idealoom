@@ -9,10 +9,10 @@ import Promise from "bluebird";
 import Agent from "../models/agents.js";
 import CollectionManager from "../common/collectionManager.js";
 import mockServer from "./mock_server.js";
-import chai from "chai";
+import {use} from "chai";
 import chaiAsPromised from "chai-as-promised";
 
-const expect = chai.use(chaiAsPromised).expect;
+const expect = use(chaiAsPromised).expect;
 const collectionManager = new CollectionManager();
 
 describe("Models Specs", function () {

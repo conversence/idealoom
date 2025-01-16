@@ -59,7 +59,7 @@ module.exports = {
 //       'moment',
 //       'raven-js',
 //       'sockjs-client',
-// 
+//
 //       // Those choke because they expect jquery in namespace.
 //       'jquery.dotdotdot',
 //       // 'annotator/annotator-full.js',
@@ -101,7 +101,8 @@ module.exports = {
       path.join(__dirname, 'js/bower'),
       path.join(__dirname, 'js/app'),
       path.join(__dirname, 'js/lib'),
-    ],
+      ],
+    preferRelative: true,
     descriptionFiles: ['package.json', '../../bower.json'],
     alias: {
       sinon: path.resolve(path.dirname(require.resolve('sinon')), '../pkg/sinon'),
@@ -111,7 +112,8 @@ module.exports = {
       'moment$': 'moment/moment',
     },
     fallback: {
-      stream: require.resolve('stream-browserify')
+        stream: require.resolve('stream-browserify'),
+        'process/browser': require.resolve('process/browser'),
     },
   },
   module: {
@@ -217,8 +219,12 @@ module.exports = {
   plugins: [
     // keep at position 0, so dev can reuse it.
     new webpack.ProvidePlugin({
-      process: 'process/browser',
-      Buffer: ['buffer', 'Buffer'],
+        process: 'process/browser',
+    }),
+    new webpack.ProvidePlugin({
+        Buffer: ['buffer', 'Buffer'],
+    }),
+    new webpack.ProvidePlugin({
       util: 'util'
     }),
 		new CopyPlugin( {
