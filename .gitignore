@@ -111,3 +111,5 @@ htmlcov/
 doc/autodoc
 doc/jsdoc
 /.gtm/
+
+.codegpt
