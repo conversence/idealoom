@@ -71,11 +71,11 @@ cffi==1.17.1
     #   pynacl
 characteristic==14.3.0
     # via montague
-charset-normalizer==3.4.0
+charset-normalizer==3.4.1
     # via requests
 circus==0.18.0
     # via -r requirements.in
-click==8.1.7
+click==8.1.8
     # via
     #   celery
     #   click-didyoumean
@@ -111,7 +111,7 @@ cornice==6.1.0
     #   cornice-sphinx
 cornice-sphinx==0.4
     # via -r requirements_doc.in
-coverage[toml]==7.6.9
+coverage[toml]==7.6.10
     # via
     #   codecov
     #   pytest-cov
@@ -163,7 +163,7 @@ gensim==4.3.3
     # via -r requirements.in
 google-api-core==2.24.0
     # via google-api-python-client
-google-api-python-client==2.155.0
+google-api-python-client==2.159.0
     # via -r requirements.in
 google-auth==2.37.0
     # via
@@ -213,11 +213,11 @@ iso639==0.1.4
     # via -r requirements.in
 iso8601==2.1.0
     # via colander
-isodate==0.6.1
+isodate==0.7.2
     # via
     #   -r requirements.in
     #   python3-saml
-jinja2==3.1.4
+jinja2==3.1.5
     # via
     #   -r requirements.in
     #   pyramid-jinja2
@@ -239,7 +239,7 @@ lxml==5.3.0
     #   premailer
     #   python3-saml
     #   xmlsec
-lxml-html-clean==0.2.2
+lxml-html-clean==0.4.1
     # via -r requirements.in
 mako==1.3.8
     # via alembic
@@ -253,7 +253,7 @@ mock==5.1.0
     # via -r requirements_tests.in
 montague==0.2.1
     # via pyramid-autodoc
-more-itertools==10.5.0
+more-itertools==10.6.0
     # via cssutils
 naturalsort==1.5.1
     # via
@@ -317,12 +317,12 @@ property-manager==3.0
     #   update-dotdee
 proto-plus==1.25.0
     # via google-api-core
-protobuf==5.29.2
+protobuf==5.29.3
     # via
     #   google-api-core
     #   googleapis-common-protos
     #   proto-plus
-psutil==6.1.0
+psutil==6.1.1
     # via circus
 psycopg2-binary==2.9.10
     # via -r requirements.in
@@ -335,9 +335,9 @@ pyasn1-modules==0.4.1
     # via google-auth
 pycparser==2.22
     # via cffi
-pydot==3.0.3
+pydot==3.0.4
     # via sqlalchemy-schemadisplay
-pygments==2.18.0
+pygments==2.19.1
     # via sphinx
 pygraphviz==1.14
     # via -r requirements.in
@@ -351,9 +351,9 @@ pylibmc==1.6.3
     # via -r requirements.in
 pynacl==1.5.0
     # via paramiko
-pyopenssl==24.3.0
+pyopenssl==25.0.0
     # via ndg-httpsclient
-pyparsing==3.2.0
+pyparsing==3.2.1
     # via
     #   httplib2
     #   pydot
@@ -385,15 +385,15 @@ pysocks==1.7.1
     # via urllib3
 pystemmer==2.2.0.3
     # via -r requirements.in
-pytest==8.3.2
+pytest==8.3.4
     # via
     #   -r requirements_tests.in
     #   pytest-cov
     #   pytest-mock
     #   pytest-splinter
-pytest-cov==5.0.0
+pytest-cov==6.0.0
     # via -r requirements_tests.in
-pytest-localserver==0.9.0
+pytest-localserver==0.9.0.post0
     # via -r requirements_tests.in
 pytest-mock==3.14.0
     # via -r requirements_tests.in
@@ -422,7 +422,7 @@ pyzmq==26.2.0
     #   circus
 rapidfuzz==3.11.0
     # via levenshtein
-rdflib==7.1.1
+rdflib==7.1.2
     # via
     #   -r requirements.in
     #   sparqlwrapper
@@ -462,7 +462,7 @@ selenium==4.27.1
     # via pytest-splinter
 semantic-version==2.10.0
     # via -r requirements.in
-sentry-sdk==2.19.2
+sentry-sdk==2.20.0
     # via -r requirements.in
 sgmllib3k==1.0.0
     # via feedparser
@@ -475,7 +475,6 @@ six==1.17.0
     #   -r requirements.in
     #   executor
     #   fabric
-    #   isodate
     #   langdetect
     #   montague
     #   paramiko
@@ -549,7 +548,7 @@ sqlalchemy-schemadisplay==1.4
     # via -r requirements_doc.in
 stevedore==5.4.0
     # via dogpile-cache
-structlog==24.4.0
+structlog==25.1.0
     # via -r requirements.in
 termcolor==1.1.0
     # via jasmine-splinter-runner
@@ -571,7 +570,7 @@ translationstring==1.4
     #   -r requirements.in
     #   colander
     #   pyramid
-trio==0.27.0
+trio==0.28.0
     # via
     #   selenium
     #   trio-websocket
@@ -580,6 +579,7 @@ trio-websocket==0.11.1
 typing-extensions==4.12.2
     # via
     #   alembic
+    #   pyopenssl
     #   selenium
 tzdata==2024.2
     # via
@@ -591,7 +591,7 @@ update-dotdee==6.0
     # via rotate-backups
 uritemplate==4.1.1
     # via google-api-python-client
-urllib3[socks]==2.2.3
+urllib3[socks]==2.3.0
     # via
     #   pytest-splinter
     #   requests
@@ -620,7 +620,7 @@ webob==1.8.9
     #   webtest
 websocket-client==1.8.0
     # via selenium
-webtest==3.0.1
+webtest==3.0.2
     # via -r requirements_tests.in
 werkzeug==2.3.8
     # via
@@ -628,7 +628,7 @@ werkzeug==2.3.8
     #   pytest-localserver
 wheel==0.45.1
     # via pip-tools
-wrapt==1.17.0
+wrapt==1.17.2
     # via smart-open
 wsproto==1.2.0
     # via trio-websocket
@@ -638,7 +638,7 @@ zipp==3.21.0
     # via importlib-metadata
 zope-component==6.0
     # via -r requirements.in
-zope-deprecation==5.0
+zope-deprecation==5.1
     # via
     #   pyramid
     #   pyramid-jinja2

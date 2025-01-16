@@ -2,11 +2,11 @@
 codecov==2.1.13
 flaky==3.8.1
 mock==5.1.0
-pytest-cov==5.0.0
-pytest-localserver==0.9.0
+pytest-cov==6.0.0
+pytest-localserver==0.9.0.post0
 pytest-mock==3.14.0
 pytest-splinter==3.3.2
-pytest==8.3.2
-WebTest==3.0.1
+pytest==8.3.4
+WebTest==3.0.2
 # Do I still need this?
 # cov-core==1.15.0
