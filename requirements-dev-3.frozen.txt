@@ -533,7 +533,7 @@ rotate-backups==8.1
     # via -r requirements.in
 rsa==4.9
     # via google-auth
-scikit-learn==1.5.1
+scikit-learn==1.6.1
     # via -r requirements.in
 scipy==1.13.1
     # via
@@ -714,7 +714,7 @@ webob==1.8.9
     #   webtest
 websocket-client==1.8.0
     # via selenium
-webtest==3.0.2
+webtest==3.0.3
     # via -r requirements_tests.in
 werkzeug==2.3.8
     # via
